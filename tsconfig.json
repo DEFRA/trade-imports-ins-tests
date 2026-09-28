@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "strict": false,
+    "target": "ESNext",
+    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "esModuleInterop": true,
+    "ignoreDeprecations": "6.0",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@adapters/*": ["adapters/*"],
+      "@config/*": ["config/*"],
+      "@domain/*": ["domain/*"],
+      "@page-objects": ["page-objects"],
+      "@page-objects/*": ["page-objects/*"],
+      "@flows/*": ["flows/*"],
+      "@fixtures": ["fixtures"],
+      "@fixtures/*": ["fixtures/*"],
+      "@resources/*": ["resources/*"],
+      "@utils/*": ["utils/*"]
+    }
+  }
+}

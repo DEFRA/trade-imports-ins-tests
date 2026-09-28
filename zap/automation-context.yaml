@@ -1,0 +1,94 @@
+# ZAP Automation Framework plan — context registration only, no scanning.
+#
+# Structural Modifiers (dataDrivenNodes) and excludePaths only apply to
+# site-tree nodes as they're *added* — they don't retroactively reshape
+# nodes that already exist. automation-active.yaml / -passive.yaml only
+# create their contexts when run-and-gate.ts runs, which is *after* the
+# Playwright journeys have already driven traffic through the proxy — too
+# late for journeyId/addressId to be recognised as data rather than
+# structure. This plan runs first (via _zap_prime_context, before the
+# Playwright run) purely to get the contexts — and their structure rules —
+# registered on the daemon before any traffic exists. The real plans
+# re-declare the same contexts harmlessly afterwards and do the actual
+# scanning + reporting.
+#
+# Keep this env block's contexts in sync with automation-active.yaml /
+# automation-passive.yaml (same duplication pattern already used
+# between those two).
+#
+# Job/parameter reference: https://www.zaproxy.org/docs/desktop/addons/automation-framework/
+env:
+  contexts:
+    - name: frontend
+      urls:
+        - ${ZAP_TRADE_IMPORTS_ANIMALS_FRONTEND_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/public/.*'
+        - '.*/favicon\.ico$'
+      structure:
+        dataDrivenNodes:
+          - name: journeyId
+            regex: '(.*/notifications/)([^/]+)'
+          - name: uploadId
+            regex: '(.*/accompanying-documents/)([^/]+)'
+    - name: admin
+      urls:
+        - ${ZAP_TRADE_IMPORTS_ANIMALS_ADMIN_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/public/.*'
+        - '.*/favicon\.ico$'
+    - name: ins
+      urls:
+        - ${ZAP_TRADE_IMPORTS_INS_FRONTEND_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/public/.*'
+        - '.*/favicon\.ico$'
+      structure:
+        dataDrivenNodes:
+          - name: addressId
+            regex: '(.*/address-book/)([^/]+)'
+    - name: backend
+      urls:
+        - ${ZAP_TRADE_IMPORTS_ANIMALS_BACKEND_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/info$'
+        - '.*/metrics$'
+        - '.*/cache$'
+        - '.*/env$'
+      structure:
+        dataDrivenNodes:
+          - name: referenceNumber
+            regex: '(.*/notifications/)([^/]+)'
+          - name: uploadId
+            regex: '(.*/document-uploads/)([^/]+)'
+    # Same actuator surface as backend (confirmed in address-book's own
+    # application.yml: base-path "/", health/info/metrics/cache/env).
+    - name: address-book
+      urls:
+        - ${ZAP_TRADE_IMPORTS_ADDRESS_BOOK_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/info$'
+        - '.*/metrics$'
+        - '.*/cache$'
+        - '.*/env$'
+      structure:
+        dataDrivenNodes:
+          - name: orgId
+            regex: '(.*/organisation/)([^/]+)'
+          - name: operatorId
+            regex: '(.*/addresses/)([^/]+)'
+  parameters:
+    failOnError: false
+    progressToStdout: true
+
+jobs:
+  # No traffic exists yet at this point in the run, so there's nothing to
+  # wait for — this job only exists because a plan needs at least one job.
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 0

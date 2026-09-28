@@ -1,0 +1,16 @@
+# ZAP alert gating rules — OWASP's own convention (from zap-baseline.py/
+# zap-full-scan.py), reused here for run-and-gate.ts's gate.
+#
+# Format: <ruleId>\t<IGNORE|WARN|FAIL>\t(comment)
+# - ruleId is ZAP's numeric plugin ID (https://www.zaproxy.org/docs/alerts/)
+# - IGNORE: triaged as a known false positive — stays visible in the report
+#   (same as WARN) and does not fail the build; the difference from WARN is
+#   documentation only, marking that someone has already looked at it
+# - WARN: visible in the report, does not fail the build, not yet triaged
+# - FAIL: fails the build
+# Unlisted rules default to: FAIL if High risk, WARN otherwise — see
+# run-and-gate.ts.
+#
+# Examples:
+# 10015	WARN	(Incomplete or No Cache-control and Pragma HTTP Header Set — flagged 2026-08-19, not yet triaged)
+# 10096	IGNORE	(Timestamp Disclosure - Unix — triaged 2026-08-19, false positive: matches the numeric suffix of a notification reference number, not an actual timestamp)

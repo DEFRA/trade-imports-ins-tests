@@ -12,7 +12,8 @@ permissions:
 
 env:
   AWS_REGION: eu-west-2
-  AWS_ACCOUNT_ID: "094954420758"
+  AWS_ACCOUNT_ID: '094954420758'
+  IMAGE_NAME: trade-imports-ins-tests
 
 jobs:
   build:
@@ -21,9 +22,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Build the test suite
-        uses: DEFRA/cdp-build-action/build-test@main
+      - name: Login to Docker Hub
+        uses: DEFRA/cdp-build-action/docker-login@main
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          mask-password: 'true'
+
+      - name: Compute next version (dry run)
+        id: version
+        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: false
+          DRY_RUN: true
+
+      - name: Build and publish to ECR + Dockerhub
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          provenance: false
+          sbom: false
+          no-cache: true
+          tags: |
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.new_tag }}
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:latest
+            defradigital/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.new_tag }}
+            defradigital/${{ env.IMAGE_NAME }}:latest
+          labels: |
+            defra.cdp.git.repo.url=${{ github.server_url }}/${{ github.repository }}
+            defra.cdp.git.repo.name=${{ github.repository }}
+            defra.cdp.testsuite.name=${{ env.IMAGE_NAME }}
+            defra.cdp.build.run_id=${{ github.run_id }}
+            defra.cdp.run_mode=job
+            git.hash=${{ github.sha }}
+
+      - name: Commit version tag
+        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: false

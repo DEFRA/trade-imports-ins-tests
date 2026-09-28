@@ -1,0 +1,21 @@
+{
+  "eventId": "b1f0e4a2-1c3d-4e5f-8a90-000000000001",
+  "aggregateId": "Imports.Notification.GBN-AG.GBN-AG-26-001",
+  "aggregateType": "Notification",
+  "subType": "GBN-AG",
+  "aggregateVersion": 1,
+  "eventType": "NotificationSubmitted",
+  "timestamp": "2026-07-17T09:00:00Z",
+  "data": {
+    "referenceNumber": "GBN-AG-26-001",
+    "status": "SUBMITTED",
+    "pointOfEntry": "GBLHR",
+    "commodities": [{ "speciesName": "Bos taurus", "numberOfAnimals": 12 }]
+  },
+  "metadata": {
+    "correlationId": "b1f0e4a2-1c3d-4e5f-8a90-000000000001",
+    "schemaVersion": "1.0.0",
+    "schemaUrl": "https://schemas.defra.gov.uk/trade-imports-animals/notification-submitted/1.0.0"
+  },
+  "publishedAt": "2026-07-17T09:00:01Z"
+}

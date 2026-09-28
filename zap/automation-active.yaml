@@ -1,0 +1,207 @@
+# ZAP Automation Framework plan — passive + active scan, scan execution and
+# report generation only. Gating is deliberately not done here; see
+# run-and-gate.ts and rules.tsv. See automation-passive.yaml for the
+# passive-only plan (no activeScan jobs) used where active scan's risk
+# isn't acceptable to run routinely.
+#
+# Job/parameter reference: https://www.zaproxy.org/docs/desktop/addons/automation-framework/
+env:
+  contexts:
+    # Every wizard page is /notifications/{journeyId}/{slug} — journeyId is a
+    # fresh id per notification, so without this each run's pages show up as
+    # brand-new site-tree branches instead of the same page reused, and
+    # activeScan never fuzzes the id itself (it only attacks recognised
+    # parameters, not path structure). dataDrivenNodes tells ZAP the segment
+    # is data, not structure: one folded node, and the id becomes an
+    # injection point (IDOR-style access-by-id checks included).
+    - name: frontend
+      urls:
+        - ${ZAP_TRADE_IMPORTS_ANIMALS_FRONTEND_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/public/.*'
+        - '.*/favicon\.ico$'
+      structure:
+        dataDrivenNodes:
+          - name: journeyId
+            regex: '(.*/notifications/)([^/]+)'
+          # /notifications/{journeyId}/accompanying-documents/{uploadId}/file
+          # — a second, nested id (documents/controller.js). Not currently
+          # hit by the security specs (no upload step in their traffic), but
+          # real app surface with the same structural problem waiting to
+          # happen the day a spec does exercise it.
+          - name: uploadId
+            regex: '(.*/accompanying-documents/)([^/]+)'
+    - name: admin
+      urls:
+        - ${ZAP_TRADE_IMPORTS_ANIMALS_ADMIN_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/public/.*'
+        - '.*/favicon\.ico$'
+    # Same reasoning as frontend's journeyId above — address-book pages are
+    # /address-book/{addressId}[/edit|/delete].
+    - name: ins
+      urls:
+        - ${ZAP_TRADE_IMPORTS_INS_FRONTEND_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/public/.*'
+        - '.*/favicon\.ico$'
+      structure:
+        dataDrivenNodes:
+          - name: addressId
+            regex: '(.*/address-book/)([^/]+)'
+    # Actuator is mounted at base-path "/" (application.yml), so these sit
+    # directly on the API's own root namespace, not under /actuator.
+    # Diagnostic endpoints, not app surface — excluded for the same reason
+    # as /health above on the Node apps.
+    #
+    # dataDrivenNodes: NotificationController exposes /notifications/
+    # {referenceNumber}[/copy|/submit|/amend|/cancel-amend|/fulfilments|
+    # /outbox-events|/replay|/soft-delete] and DocumentController exposes
+    # /document-uploads/{upload-id}[/scan-results|/file] (plus
+    # /notifications/{ref}/document-uploads). Confirmed live in this run's
+    # own site tree before this fix: two separate GBN-AG-26-* branches under
+    # /notifications, same fragmentation frontend/journeyId had — this is
+    # the DB-backed API doing real lookups by reference number, so it's the
+    # highest-value place for this id to actually be fuzzed.
+    - name: backend
+      urls:
+        - ${ZAP_TRADE_IMPORTS_ANIMALS_BACKEND_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/info$'
+        - '.*/metrics$'
+        - '.*/cache$'
+        - '.*/env$'
+      structure:
+        dataDrivenNodes:
+          - name: referenceNumber
+            regex: '(.*/notifications/)([^/]+)'
+          - name: uploadId
+            regex: '(.*/document-uploads/)([^/]+)'
+    # Same actuator surface as backend (confirmed in address-book's own
+    # application.yml: base-path "/", health/info/metrics/cache/env).
+    # OperatorController: /organisation/{orgId}/addresses[/{operator-id}] —
+    # both ids folded so activeScan fuzzes them (IDOR-style) instead of
+    # treating each org/address as a new site-tree branch.
+    - name: address-book
+      urls:
+        - ${ZAP_TRADE_IMPORTS_ADDRESS_BOOK_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/info$'
+        - '.*/metrics$'
+        - '.*/cache$'
+        - '.*/env$'
+      structure:
+        dataDrivenNodes:
+          - name: orgId
+            regex: '(.*/organisation/)([^/]+)'
+          - name: operatorId
+            regex: '(.*/addresses/)([^/]+)'
+  parameters:
+    failOnError: false
+    progressToStdout: true
+
+jobs:
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  # ZAP's site-tree bookkeeping lags slightly behind the last spec to finish
+  # navigating — without this, the activeScan jobs below can start before
+  # the last site is registered ("invalid site" from ZAP).
+  - type: delay
+    parameters:
+      time: '5'
+
+  - type: activeScan
+    parameters:
+      context: frontend
+      # A runaway guard, not a budget. Measured: frontend 13m27s, admin 4m39s,
+      # ins 1m25s, backend 1m17s, address-book 21s — 21m total, frontend 64% of
+      # it. 60 is ~4.5x the slowest, leaving room for CI (2 vCPU, ~2-3x local)
+      # and for the corpus to roughly double.
+      #
+      # Change this, the four below, and ACTIVE_SCAN_CAP_MINS in
+      # utils/zap/run-and-gate.ts together — they must match exactly.
+      maxScanDurationInMins: 60
+    # DOM XSS needs a real browser via Selenium, which the plain ZAP image
+    # doesn't ship — it fails to launch every time (harmless but noisy) and
+    # is also ~2 orders of magnitude slower than other rules. Reflected/
+    # stored XSS rules are unaffected and still run. Also a poor fit for
+    # this app regardless: GOV.UK Design System + Nunjucks server-rendered
+    # pages, GDS progressive enhancement keeps client-side DOM handling to a
+    # minimum, so DOM-based XSS is a small slice of the real risk surface.
+    policyDefinition:
+      rules:
+        - id: 40026
+          name: Cross Site Scripting (DOM Based)
+          threshold: Off
+
+  - type: activeScan
+    parameters:
+      context: admin
+      # See the frontend activeScan job above for the cap's reasoning.
+      maxScanDurationInMins: 60
+    # DOM XSS disabled — see the frontend activeScan job above for why.
+    policyDefinition:
+      rules:
+        - id: 40026
+          name: Cross Site Scripting (DOM Based)
+          threshold: Off
+
+  - type: activeScan
+    parameters:
+      context: ins
+      # See the frontend activeScan job above for the cap's reasoning.
+      maxScanDurationInMins: 60
+    # DOM XSS disabled — see the frontend activeScan job above for why.
+    policyDefinition:
+      rules:
+        - id: 40026
+          name: Cross Site Scripting (DOM Based)
+          threshold: Off
+
+  - type: activeScan
+    parameters:
+      context: backend
+      # See the frontend activeScan job above for the cap's reasoning.
+      maxScanDurationInMins: 60
+    # DOM XSS disabled — see the frontend activeScan job above for why.
+    policyDefinition:
+      rules:
+        - id: 40026
+          name: Cross Site Scripting (DOM Based)
+          threshold: Off
+
+  - type: activeScan
+    parameters:
+      context: address-book
+      # See the frontend activeScan job above for the cap's reasoning.
+      maxScanDurationInMins: 60
+    # DOM XSS disabled — see the frontend activeScan job above for why.
+    policyDefinition:
+      rules:
+        - id: 40026
+          name: Cross Site Scripting (DOM Based)
+          threshold: Off
+
+  # No sites: filter — covers every site ZAP touched this session.
+  # traditional-json/traditional-html (not the -plus "with requests and
+  # responses" variants, which write multiple files per alert and need a
+  # directory, not a single reportFile path).
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /zap/wrk/zap-report
+      reportFile: security-scan
+      reportTitle: 'trade-imports-animals — security scan'
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk/zap-report
+      reportFile: security-scan
+      reportTitle: 'trade-imports-animals — security scan'

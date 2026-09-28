@@ -1,96 +1,415 @@
-trade-imports-ins-tests
+# trade-imports-ins-tests
 
-The template to create a service that runs WDIO tests against an environment.
+End-to-end, accessibility and security tests for the trade imports services — the animals frontend and its admin portal, the high-risk plants frontend, and the Import Notification Service front door (including the address book). Tests are split by domain so each service's deploy can run only its own suite.
 
-- [Local](#local)
-  - [Requirements](#requirements)
-    - [Node.js](#nodejs)
-  - [Setup](#setup)
-  - [Running local tests](#running-local-tests)
-  - [Debugging local tests](#debugging-local-tests)
-- [Production](#production)
-  - [Debugging tests](#debugging-tests)
+## Contents
+
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Editor Setup](#editor-setup)
+- [Running Tests](#running-tests)
+- [Local Testing](#local-testing)
+- [Visual Regression Tests](#visual-regression-tests)
+- [Security Testing](#security-testing)
+- [Running Tests on GitHub](#running-tests-on-github)
+- [Running Tests via CDP Portal](#running-tests-via-cdp-portal)
+- [Developer Workflow](#developer-workflow)
+- [Troubleshooting](#troubleshooting)
+- [Resources](#resources)
 - [Licence](#licence)
-  - [About the licence](#about-the-licence)
 
-## Local Development
+## Prerequisites
 
-### Requirements
+- Node.js v24
+- npm package manager
 
-#### Node.js
+## Installation
 
-Please install [Node.js](http://nodejs.org/) `>= v20` and [npm](https://nodejs.org/) `>= v9`. You will find it
-easier to use the Node Version Manager [nvm](https://github.com/creationix/nvm)
+1. Clone the repository:
 
-To use the correct version of Node.js for this application, via nvm:
+   ```bash
+   git clone <repository-url>
+   cd trade-imports-ins-tests
+   ```
 
-```bash
-nvm use
+2. Use the correct version of Node.js:
+
+   ```bash
+   nvm use
+   ```
+
+3. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+4. Install Playwright browsers:
+
+   ```bash
+   npx playwright install
+   ```
+
+   Or install only Chromium (for faster setup):
+
+   ```bash
+   npx playwright install chromium
+   ```
+
+## Editor Setup
+
+### TypeScript version (VS Code and Cursor)
+
+To keep TypeScript checks and editor behaviour consistent with this repository and CI, use the workspace TypeScript version in your editor:
+
+1. Open any `.ts` or `.tsx` file.
+2. Open Command Palette (`Cmd+Shift+P` on macOS).
+3. Run `TypeScript: Select TypeScript Version`.
+4. Select `Use Workspace Version`.
+
+## Running Tests
+
+This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
+
+| Command                                       | Test scope                                            | Target               | Config                                | Generates Report |
+| --------------------------------------------- | ----------------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
+| `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`           | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                    | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites        | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+
+### Running one domain
+
+The scripts above run every domain. Against the docker-compose stack, each
+domain also has its own scripts, named `test:docker-compose:<domain>[:<suite>]`
+to match the [CDP domain profiles](#running-tests-via-cdp-portal). They run
+the same suite as the all-domain script, limited to that domain's project.
+
+| Domain          | e2e                                 | a11y                                     | security (ZAP passive scan)                  |
+| --------------- | ----------------------------------- | ---------------------------------------- | -------------------------------------------- |
+| `animals`       | `test:docker-compose:animals`       | `test:docker-compose:animals:a11y`       | `test:docker-compose:animals:security`       |
+| `animals-admin` | `test:docker-compose:animals-admin` | `test:docker-compose:animals-admin:a11y` | `test:docker-compose:animals-admin:security` |
+| `ins`           | `test:docker-compose:ins`           | —                                        | `test:docker-compose:ins:security`           |
+| `plants`        | `test:docker-compose:plants`        | —                                        | —                                            |
+
+A dash means the domain has no specs for that suite yet.
+
+There is no per-domain `security:active` script. The active scan's gate fails
+any ZAP context that received no traffic, and the contexts cover every
+service, so the active scan only runs across all domains with
+`npm run test:docker-compose:security:active`.
+
+Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
+
+| Playwright Parameters      | Action                                     |
+| -------------------------- | ------------------------------------------ |
+| `-- --headed`              | Run tests in headed mode (see the browser) |
+| `-- tests/example.spec.ts` | Run a specific test file                   |
+| `-- --grep "@smoke"`       | Run tests with a specific tag              |
+| `-- --debug`               | Run tests in debug mode                    |
+| `-- --ui`                  | Run tests with UI mode                     |
+| `-- --project=animals`     | Run tests in a specific project            |
+
+### Test Reports
+
+| Command                      | Report                 | Generates Report |
+| ---------------------------- | ---------------------- | ---------------- |
+| `npx playwright show-report` | Open HTML report       | n/a              |
+| `npm run report`             | Generate Allure report | ✓                |
+
+After tests run, Playwright results and report are generated automatically, and Allure results are also generated automatically. Run `npm run report` to generate the Allure report.
+
+### Test Configuration
+
+Shared settings (projects, reporters, `retries: 1`, `trace: on-first-retry`)
+live in `utils/playwright/shared-config.ts`. The target-specific configs extend
+those settings:
+
+| File                                  | Target               |
+| ------------------------------------- | -------------------- |
+| `playwright.config.ts`                | CDP services         |
+| `playwright.docker-compose.config.ts` | docker-compose stack |
+
+`@a11y` tests use the same configs; per-test timeout is longer in
+`fixtures/a11y.ts`.
+
+The CDP config sets a 60s test timeout and a 15s expect timeout, against
+Playwright's 30s and 5s defaults that the docker-compose config keeps. Each CDP
+page load is a real network hop, so CDP needs a longer budget than the local
+stack. The suite once also timed out in bursts: a
+leaked address book on dev (grown to 4,882 records) made every
+`contact-address` page load fan out dozens of concurrent reads through the
+CDP SSL sidecar, which returned 502/504s for a few minutes at a time. Session
+reuse, the address-book teardown and a one-off purge (see below) removed the
+leak and the outage; three clean CDP runs then kept every test under
+three-quarters of its new budget (45s, or 135s for tests marked
+`test.slow()`), so the timeout came down from 90s to 60s.
+
+`documents-limits`' fifteen-document test sets its own 120s timeout: its real
+uploads and virus scans take 57–60s on the local stack and about 67s on CDP,
+which left too thin a margin under the 90s a slow test gets on compose.
+Re-check it if the base timeouts change.
+
+The flow helpers wait for each page's heading with `pageLoadWait`
+(`config/timeouts.ts`, 30s) rather than the test timeout, so a transient 502
+fails the step that hit it within 30s and names the page it was waiting for.
+Sign-in waits for either the landing page or the "Sorry, we are unable to sign
+you in." page before deciding whether to try again.
+
+### Address-book records made by a test
+
+Every address a test creates through the `addressBookApi` fixture is
+soft-deleted when the test ends, pass, fail or timeout, so specs do not clean
+up in `finally`. The fixture deletes after the test body and before Playwright
+disposes the test's `request` context, which a `finally` block cannot promise
+once a test has timed out. Deleting is idempotent, so a spec may still delete a
+record itself as part of what it tests. The shared journey addresses seeded in
+`globalSetup` are never deleted. A spec that adds a record through the UI
+instead of `createAddress` calls `addressBookApi.trackByName(name)` right
+after the save is confirmed, so the fixture's teardown sweeps it too.
+
+### Purging leaked address-book records on CDP
+
+`npm run address-book:purge` clears out records specs left behind on CDP
+before this fixture teardown existed. Dry run is the default: it lists the
+organisation's whole book, paged, and prints what it would delete (matched
+against every `createAddress` name pattern in the specs, file:line cited) and
+what it keeps and why — including the shared `globalSetup` journey addresses,
+which it never touches. Pass `--apply` to actually delete; deletes run one at
+a time, and a 404 is treated as already gone. Needs the same `.env` as a
+laptop-to-CDP run: `PLAYWRIGHT_ENVIRONMENT` (or `ENVIRONMENT`), `CDP_LOCAL`
+and `DEVELOPER_API_KEY`.
+
+### Authenticated session reuse
+
+Each worker signs in once per project and its tests restore that session
+instead of driving the identity provider every time (`fixtures/auth-state.ts`).
+Saved state lives under `playwright/.auth/` (gitignored, removed by `_clean`),
+holds only the `sid` auth cookie, and is never written unless a fresh context
+has proved it restores to a signed-in landing page. A spec that must start
+unauthenticated opts out with `test.use({ storageState: COLD_START })`.
+
+`E2E_SESSION_REUSE=off` is the kill switch: every test signs in for itself
+again. The CDP config caps workers at 4 when reuse is off; against the
+docker-compose stack re-cap them yourself (e.g. `-- --workers=4`).
+Reuse is on by default against both the docker-compose stack and CDP.
+`ENVIRONMENT=dev npm run probe:cdp-session-reuse` passed against dev on
+2026-09-15 for animals-frontend, admin and ins-frontend — it signs in once per
+service and proves load-balanced replicas honour a session minted against
+another. Re-run it before relying on reuse against a different CDP
+environment.
+
+The `docker-compose` config targets `localhost:3000` / `localhost:3001` /
+`localhost:3002` / `localhost:3003`, so start the workspace stack first. CI
+runs `npm run test:docker-compose:ci` against that stack via the workspace
+reusable workflow.
+
+### Test Projects
+
+Both configs split tests across the same four Playwright projects, one per
+deployable app. Each project runs every spec under its own `tests/<project>/`
+folder:
+
+| Project         | Service                          | Folder                 |
+| --------------- | -------------------------------- | ---------------------- |
+| `animals`       | `trade-imports-animals-frontend` | `tests/animals/`       |
+| `animals-admin` | `trade-imports-animals-admin`    | `tests/animals-admin/` |
+| `ins`           | `trade-imports-ins-frontend`     | `tests/ins/`           |
+| `plants`        | `trade-imports-plants-frontend`  | `tests/plants/`        |
+
+Within a project folder, specs are grouped by test type, then by feature:
+
+```text
+tests/<project>/
+  a11y/
+  e2e/
+    features/
+      address-book/   (animals and ins)
+    pages/
+    journeys/
+    visual/
+  security/
 ```
 
-### Setup
+Folders only organise specs: tags (`@a11y`, `@active`, `@compose`, `@visual`)
+select the suite, and the project selects the domain.
 
-Install application dependencies:
+## Local Testing
+
+### Local workspace stack
+
+1. From the [workspace root](https://github.com/DEFRA/trade-imports-workspace),
+   start the locally built stack:
+
+   ```bash
+   ./scripts/stack/run-stack.sh -d
+   ```
+
+2. Run every project with `npm run test:docker-compose`, or one domain with
+   its own script, e.g. `npm run test:docker-compose:plants` (see
+   [Running one domain](#running-one-domain)).
+
+`npm run test:docker-compose` targets the stack animals frontend on :3000, the
+admin service on :3001, the ins frontend on :3002 and the high-risk plants
+frontend on :3003.
+
+To debug, append Playwright flags, e.g.
+`npm run test:docker-compose -- --headed --workers=1`.
+
+The suite does not wipe the database before it runs, and does not need to.
+Every spec creates the state it asserts on through the front door (the
+backend API), scoped to that run, so the specs pass against a database that
+already holds the records of earlier runs.
+
+For the security (OWASP ZAP) profiles against this stack, see
+[Security Testing](#security-testing) below.
+
+#### Workspace stack commands (run from the workspace root)
+
+| Command                             | Purpose                                                |
+| ----------------------------------- | ------------------------------------------------------ |
+| `./scripts/stack/run-stack.sh`      | Start the full stack from published images             |
+| `./scripts/stack/run-stack.sh -d`   | Start the stack built from local source under `repos/` |
+| `./scripts/stack/stop-stack.sh`     | Stop the stack and wipe volumes                        |
+| `./scripts/stack/bounce-backend.sh` | Recreate the backend container (picks up Java changes) |
+
+See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
+
+### Target CDP environments (from local machine)
+
+To run tests against a CDP environment from your local machine:
+
+1. Set `PLAYWRIGHT_ENVIRONMENT` to one of `dev`, `test`, or `perf-test` in your `.env`.
+2. Run tests with `npm test`.
+
+Use `.env.example` as a template.
+When running via the CDP Portal, `ENVIRONMENT` is provided by the portal; use `PLAYWRIGHT_ENVIRONMENT` and avoid setting `ENVIRONMENT` locally.
+
+## Visual Regression Tests
+
+Visual regression tests (tagged `@visual`) guard rendered composition — layout, spacing, colour, and typography as the user sees the page. They compare screenshots against committed baseline images and fail if any pixels differ outside the masked regions.
+
+Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. Each platform requires its own baseline — update both when visual changes are intentional.
+
+Regenerate the E2E baseline against the stack frontend with
+`npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
+`npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
+used by CI. Both commands run the `animals` project's `@visual` spec and write the
+updated snapshot into the working tree for commit.
+
+## Security Testing
+
+Two profiles run a DAST scan with [OWASP ZAP](https://www.zaproxy.org/) as a proxy, driven by real Playwright journeys rather than a crawler:
+
+- `security` — passive scan across the e2e suite, cheap enough to run broadly
+- `security:active` — passive plus a scoped active scan against the `@active` suite; docker-compose only, because that suite is destructive
+
+See [`docs/security.md`](docs/security.md) for how to run it, what is scanned and why, and how the run is gated.
+
+## Running Tests on GitHub
+
+E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `run-stack.sh --branch <branch>` and runs this repo's published test image against it, with reports published to GitHub Pages.
+
+### GitHub Actions workflow
+
+The `/.github/workflows/workspace-e2e-tests.yml` workflow triggers after `Publish Branch Image` completes and calls `DEFRA/trade-imports-workspace/.github/workflows/e2e-tests.yml@main` with the branch name, then reports the result back to the PR.
+
+### Scheduled security scan
+
+`.github/workflows/scheduled-security-scan.yml` calls the workspace's `security-active-scan.yml`. Manual dispatch only for now — see [`docs/security.md`](docs/security.md).
+
+## Running Tests via CDP Portal
+
+Test Suite URL: https://portal.cdp-int.defra.cloud/test-suites/trade-imports-ins-tests (requires CCoE AWS OpenVPN).
+
+In the CDP Portal, provide a `PROFILE` value to choose which test suite the container runs via `entrypoint.sh`.
+If `PROFILE` is not set, the `default` profile is used.
+
+| PROFILE           | Test suite                                                                                     | NPM script              |
+| ----------------- | ---------------------------------------------------------------------------------------------- | ----------------------- |
+| `default`         | e2e test suite                                                                                 | `npm test`              |
+| `a11y`            | accessibility test suite                                                                       | `npm run test:a11y`     |
+| `security`        | security test suite (ZAP passive scan)                                                         | `npm run test:security` |
+| `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                       |
+
+The profiles above run every domain. To run one domain's suite only, prefix the
+suite with its project name as `<domain>:<suite>`:
+
+| PROFILE                    | Test suite                                                 |
+| -------------------------- | ---------------------------------------------------------- |
+| `<domain>:e2e`             | that domain's e2e suite (`npm test -- --project=<domain>`) |
+| `<domain>:a11y`            | that domain's accessibility suite                          |
+| `<domain>:security`        | that domain's security suite (ZAP passive scan)            |
+| `<domain>:security:active` | **not supported on CDP**, as `security:active`             |
+
+`<domain>` is one of `animals`, `animals-admin`, `ins` or `plants`, e.g.
+`animals:a11y` or `plants:e2e`. A domain with no specs for a suite (for example
+`plants:a11y` today) fails with Playwright's "No tests found".
+
+Tests are run from the CDP Portal under the Test Suites section. See the requirements below for how the portal run executes and publishes results.
+
+### CDP Portal requirements
+
+- The CDP Portal run depends on the image being built/published by `/.github/workflows/publish.yml` (from this repo's `Dockerfile`).
+- The container entrypoint (`entrypoint.sh`) must exit `0` on success and a non-zero code on failure.
+- Reports are published to S3 by `npm run report:publish` (which runs `./bin/publish-tests.sh` and uses `RESULTS_OUTPUT_S3_PATH`).
+
+## Developer Workflow
+
+### Linting
+
+This project uses **ESLint** and **Prettier** for code quality and formatting.
+
+| Action                   | Command                | Tool       |
+| ------------------------ | ---------------------- | ---------- |
+| Check for linting issues | `npm run lint`         | ESLint     |
+| Auto-fix linting         | `npm run lint:fix`     | ESLint     |
+| Format code              | `npm run format`       | Prettier   |
+| Check code formatting    | `npm run format:check` | Prettier   |
+| Type check TypeScript    | `npm run typecheck`    | TypeScript |
+
+### Commit Checklist
+
+Before committing changes:
+
+- Run `npm run lint:fix` to auto-fix linting issues
+- Run `npm run format` to format code
+- Run `npm run typecheck` to check types (recommended)
+
+### Pre-commit Hooks
+
+This project uses **Husky** and **lint-staged** to automatically validate code quality before commits. The pre-commit hook checks linting (ESLint) and formatting (Prettier) on staged files only. If checks fail, the commit is blocked.
+
+## Troubleshooting
+
+### Tests fail with browser not found
+
+Run `npx playwright install` to install required browsers.
+
+### TypeScript errors
+
+Ensure TypeScript is properly installed and `tsconfig.json` is configured correctly.
+
+### Tests timeout
+
+Increase timeout in `playwright.config.ts` or in individual tests using `test.setTimeout()`.
+
+### Apple Silicon Docker build fails
+
+Build with `--platform=linux/amd64` due to the AWS CLI v2 dependency:
 
 ```bash
-npm install
+docker build --platform=linux/amd64 .
 ```
 
-### Running local tests
+## Resources
 
-Start application you are testing on the url specified in `baseUrl` [wdio.local.conf.js](wdio.local.conf.js)
-
-```bash
-npm run test:local
-```
-
-### Debugging local tests
-
-```bash
-npm run test:local:debug
-```
-
-## Production
-
-### Running the tests
-
-Tests are run from the CDP-Portal under the Test Suites section. Before any changes can be run, a new docker image must be built, this will happen automatically when a pull request is merged into the `main` branch.
-You can check the progress of the build under the actions section of this repository. Builds typically take around 1-2 minutes.
-
-The results of the test run are made available in the portal.
-
-## Requirements of CDP Environment Tests
-
-1. Your service builds as a docker container using the `.github/workflows/publish.yml`
-   The workflow tags the docker images allowing the CDP Portal to identify how the container should be run on the platform.
-   It also ensures its published to the correct docker repository.
-
-2. The Dockerfile's entrypoint script should return exit code of 0 if the test suite passes or 1/>0 if it fails
-
-3. Test reports should be published to S3 using the script in `./bin/publish-tests.sh`
-
-## Running on GitHub
-
-Alternatively you can run the test suite as a GitHub workflow.
-Test runs on GitHub are not able to connect to the CDP Test environments. Instead, they run the tests agains a version of the services running in docker.
-A docker compose `compose.yml` is included as a starting point, which includes the databases (mongodb, redis) and infrastructure (localstack) pre-setup.
-
-Steps:
-
-1. Edit the compose.yml to include your services.
-2. Modify the scripts in docker/scripts to pre-populate the database, if required and create any localstack resources.
-3. Test the setup locally with `docker compose up` and `npm run test:github`
-4. Set up the workflow trigger in `.github/workflows/journey-tests`.
-
-By default, the provided workflow will run when triggered manually from GitHub or when triggered by another workflow.
-
-If you want to use the repository exclusively for running docker composed based test suites consider displaying the publish.yml workflow.
-
-## BrowserStack
-
-Two wdio configuration files are provided to help run the tests using BrowserStack in both a GitHub workflow (`wdio.github.browserstack.conf.js`) and from the CDP Portal (`wdio.browserstack.conf.js`).
-They can be run from npm using the `npm run test:browserstack` (for running via portal) and `npm run test:github:browserstack` (from GitHib runner).
-See the CDP Documentation for more details.
+- [Playwright Documentation](https://playwright.dev/)
+- [Playwright TypeScript Guide](https://playwright.dev/docs/intro)
+- [Playwright Best Practices](https://playwright.dev/docs/best-practices)
 
 ## Licence
 

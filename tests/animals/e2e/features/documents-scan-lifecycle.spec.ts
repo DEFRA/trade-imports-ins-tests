@@ -1,0 +1,53 @@
+import path from 'node:path';
+import { test, expect } from '@fixtures';
+import { fileUploadPaths } from '@resources/file-upload/paths';
+import { fileUploadTimeouts } from '@config/file-upload-timeouts';
+import { writeEicarPdfFile } from '@utils/eicar-file-writer';
+import { firstScanStatus } from '@utils/scan-status';
+
+const issueDate = '03/01/2026';
+
+test.describe('Documents scan lifecycle', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toAccompanyingDocuments();
+  });
+
+  test('infected upload: accepted while scanning, then Virus found with error summary and no view link', async ({
+    pages,
+    animalsPages,
+  }, testInfo) => {
+    test.slow();
+    const eicar = await writeEicarPdfFile(path.join(testInfo.outputDir, 'file-upload'));
+
+    const reference = `PWVIRUS${Date.now()}`;
+    await animalsPages.accompanyingDocuments.fillDocument(reference, issueDate, eicar.filePath);
+    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
+
+    const row = animalsPages.accompanyingDocuments.documentRow(reference);
+    await firstScanStatus(row, 'Virus found');
+
+    await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
+    await expect(
+      pages.page.getByText(`${eicar.fileName} contains a virus. Remove it and try again with a different file.`).first(),
+    ).toBeVisible();
+    await expect(animalsPages.accompanyingDocuments.viewFile(1)).toHaveCount(0);
+  });
+
+  test('clean upload: shows Scanning for virus with no view link, then Check completed with a view link', async ({ animalsPages }) => {
+    test.slow();
+    const reference = `PWSCAN${Date.now()}`;
+    await animalsPages.accompanyingDocuments.fillDocument(reference, issueDate, fileUploadPaths.safeFile1kbPdf);
+    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
+
+    const row = animalsPages.accompanyingDocuments.documentRow(reference);
+    const { pending, text } = await firstScanStatus(row, 'Check completed');
+    if (pending) {
+      expect(text).not.toContain('View file');
+    }
+    await expect(animalsPages.accompanyingDocuments.removeDocument(1)).toBeVisible();
+
+    await expect(row).toContainText('Check completed', { timeout: fileUploadTimeouts.virusScanComplete });
+    await expect(animalsPages.accompanyingDocuments.viewFile(1)).toBeVisible();
+  });
+});

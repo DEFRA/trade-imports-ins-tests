@@ -1,0 +1,12 @@
+name: Scheduled Security Scan
+
+on:
+  schedule:
+    # 01:00 UTC, weekdays only.
+    - cron: '0 1 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    uses: DEFRA/trade-imports-workspace/.github/workflows/security-active-scan.yml@main
+    secrets: inherit
