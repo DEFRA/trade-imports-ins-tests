@@ -1,4 +1,4 @@
-import { SET_BASES } from '@page-objects/base/sets';
+import { SET_BASES } from '@page-objects/shared/sets';
 
 import { test, expect } from '@fixtures';
 
@@ -17,13 +17,13 @@ test.describe('Notification delete', { tag: ['@integration', '@duplicated-in-fro
   test(
     'deletes the notification and removes it from the dashboard',
     { tag: '@smoke' },
-    async ({ pages, seededJourney, notificationActions }) => {
+    async ({ animalsPages, seededJourney, notificationActions }) => {
       const referenceNumber = await seededJourney.createSubmittedNotification();
 
       await notificationActions.deleteNotification(referenceNumber);
-      await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(referenceNumber);
-      await expect(pages.notificationDashboard.notificationCards).toHaveCount(0);
+      await animalsPages.dashboard.open();
+      await animalsPages.dashboard.searchForReference(referenceNumber);
+      await expect(animalsPages.dashboard.notificationCards).toHaveCount(0);
     },
   );
 });

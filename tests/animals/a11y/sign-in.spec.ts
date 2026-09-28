@@ -9,8 +9,13 @@ test.use({ storageState: COLD_START });
 const stubErrorSummaryList = '.govuk-error-summary__list';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test('the sign-in page has no accessibility violations on initial load and with an error', async ({ journey, pages, runA11yScan }) => {
-    await journey.toSignIn((attemptSignIn) => pages.notificationDashboard.open(attemptSignIn));
+  test('the sign-in page has no accessibility violations on initial load and with an error', async ({
+    journey,
+    pages,
+    animalsPages,
+    runA11yScan,
+  }) => {
+    await journey.toSignIn((attemptSignIn) => animalsPages.dashboard.open(attemptSignIn));
 
     await test.step('Sign in', async () => {
       await runA11yScan();

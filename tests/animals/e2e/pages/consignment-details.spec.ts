@@ -5,21 +5,21 @@ test.describe('Commodity details page', { tag: ['@integration', '@duplicated-in-
     await journey.toConsignmentDetails();
   });
 
-  test('renders the page controls', async ({ pages }) => {
-    await expect(pages.consignmentDetails.heading).toBeVisible();
-    await expect(pages.consignmentDetails.numberOfAnimals).toBeVisible();
-    await expect(pages.consignmentDetails.numberOfPackages).toBeVisible();
-    await expect(pages.consignmentDetails.saveAndContinue).toBeVisible();
+  test('renders the page controls', async ({ animalsPages }) => {
+    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
+    await expect(animalsPages.consignmentDetails.numberOfAnimals).toBeVisible();
+    await expect(animalsPages.consignmentDetails.numberOfPackages).toBeVisible();
+    await expect(animalsPages.consignmentDetails.saveAndContinue).toBeVisible();
   });
 
-  test('leaves the number of animals empty on load', async ({ pages }) => {
-    await expect(pages.consignmentDetails.numberOfAnimals).toHaveValue('');
+  test('leaves the number of animals empty on load', async ({ animalsPages }) => {
+    await expect(animalsPages.consignmentDetails.numberOfAnimals).toHaveValue('');
   });
 
-  test('accepts valid consignment details', async ({ pages }) => {
-    await pages.consignmentDetails.numberOfAnimals.fill('1');
-    await pages.consignmentDetails.numberOfPackages.fill('5');
-    await pages.consignmentDetails.saveAndContinue.click();
+  test('accepts valid consignment details', async ({ pages, animalsPages }) => {
+    await animalsPages.consignmentDetails.numberOfAnimals.fill('1');
+    await animalsPages.consignmentDetails.numberOfPackages.fill('5');
+    await animalsPages.consignmentDetails.saveAndContinue.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });

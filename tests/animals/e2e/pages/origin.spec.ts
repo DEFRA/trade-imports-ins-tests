@@ -7,21 +7,21 @@ test.describe('Origin of the import page', { tag: ['@integration', '@duplicated-
     await journey.toOriginOfImport();
   });
 
-  test('renders the page controls', async ({ pages }) => {
-    await expect(pages.originOfImport.heading).toBeVisible();
-    await expect(pages.originOfImport.countryOfOrigin).toBeVisible();
-    await expect(pages.originOfImport.radioRequiresOriginCode('No')).toBeVisible();
-    await expect(pages.originOfImport.saveAndContinue).toBeVisible();
+  test('renders the page controls', async ({ animalsPages }) => {
+    await expect(animalsPages.originOfImport.heading).toBeVisible();
+    await expect(animalsPages.originOfImport.countryOfOrigin).toBeVisible();
+    await expect(animalsPages.originOfImport.radioRequiresOriginCode('No')).toBeVisible();
+    await expect(animalsPages.originOfImport.saveAndContinue).toBeVisible();
   });
 
-  test('shows the country selector on load', async ({ pages }) => {
-    await expect(pages.originOfImport.countryOfOrigin).toBeVisible();
+  test('shows the country selector on load', async ({ animalsPages }) => {
+    await expect(animalsPages.originOfImport.countryOfOrigin).toBeVisible();
   });
 
-  test('accepts valid origin details', async ({ pages }) => {
-    await pages.originOfImport.selectCountry('France');
-    await pages.originOfImport.radioRequiresOriginCode('No').check();
-    await pages.originOfImport.saveAndContinue.click();
+  test('accepts valid origin details', async ({ pages, animalsPages }) => {
+    await animalsPages.originOfImport.selectCountry('France');
+    await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
+    await animalsPages.originOfImport.saveAndContinue.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
@@ -34,27 +34,27 @@ test.describe('Origin of the import page', { tag: ['@integration', '@duplicated-
    * there is no next page to offer and the user is set down on the overview.
    * The gap is held at the overview task row and again at the check page.
    */
-  test('saves what the user has when submitted without a country', async ({ pages }) => {
-    const journeyId = pages.originOfImport.journeyIdFromUrl();
+  test('saves what the user has when submitted without a country', async ({ animalsPages }) => {
+    const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
 
-    await pages.originOfImport.radioRequiresOriginCode('No').check();
-    await pages.originOfImport.internalReference.fill(INTERNAL_REFERENCE);
-    await pages.originOfImport.saveAndContinue.click();
+    await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
+    await animalsPages.originOfImport.internalReference.fill(INTERNAL_REFERENCE);
+    await animalsPages.originOfImport.saveAndContinue.click();
 
-    await expect(pages.originOfImport.errorSummary).toHaveCount(0);
-    await expect(pages.overview.heading).toBeVisible();
+    await expect(animalsPages.originOfImport.errorSummary).toHaveCount(0);
+    await expect(animalsPages.overview.heading).toBeVisible();
 
-    await pages.originOfImport.open(journeyId);
-    await expect(pages.originOfImport.countrySelect).toHaveValue('');
-    await expect(pages.originOfImport.radioRequiresOriginCode('No')).toBeChecked();
-    await expect(pages.originOfImport.internalReference).toHaveValue(INTERNAL_REFERENCE);
+    await animalsPages.originOfImport.open(journeyId);
+    await expect(animalsPages.originOfImport.countrySelect).toHaveValue('');
+    await expect(animalsPages.originOfImport.radioRequiresOriginCode('No')).toBeChecked();
+    await expect(animalsPages.originOfImport.internalReference).toHaveValue(INTERNAL_REFERENCE);
   });
 
-  test('shows an error summary when a region of origin code is claimed but not given', async ({ pages }) => {
-    await pages.originOfImport.selectCountry('France');
-    await pages.originOfImport.radioRequiresOriginCode('Yes').check();
-    await pages.originOfImport.saveAndContinue.click();
+  test('shows an error summary when a region of origin code is claimed but not given', async ({ animalsPages }) => {
+    await animalsPages.originOfImport.selectCountry('France');
+    await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
+    await animalsPages.originOfImport.saveAndContinue.click();
 
-    await expect(pages.originOfImport.errorSummary).toBeVisible();
+    await expect(animalsPages.originOfImport.errorSummary).toBeVisible();
   });
 });

@@ -1,26 +1,29 @@
 import { pageLoadWait, timeouts } from '@config/timeouts';
-import type { PageObjects } from '@page-objects';
+import type { AnimalsPages, SharedPages } from '@page-objects';
 
 export class NotificationActions {
-  constructor(private readonly pages: PageObjects) {}
+  constructor(
+    private readonly animalsPages: AnimalsPages,
+    private readonly pages: SharedPages,
+  ) {}
 
   async toNotificationView(journeyId: string): Promise<void> {
-    await this.pages.notificationView.open(journeyId);
+    await this.animalsPages.notificationView.open(journeyId);
   }
 
   async amendNotification(journeyId: string): Promise<void> {
-    await this.pages.notificationDashboard.open();
-    await this.pages.notificationDashboard.searchForReference(journeyId);
-    await this.pages.notificationDashboard.amend(journeyId).click();
-    await this.pages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.dashboard.open();
+    await this.animalsPages.dashboard.searchForReference(journeyId);
+    await this.animalsPages.dashboard.amend(journeyId).click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
   /** Copies a notification from its dashboard card, landing on the copy's overview. */
   async copyNotification(journeyId: string): Promise<void> {
-    await this.pages.notificationDashboard.open();
-    await this.pages.notificationDashboard.searchForReference(journeyId);
-    await this.pages.notificationDashboard.copyAsNew(journeyId).click();
-    await this.pages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.dashboard.open();
+    await this.animalsPages.dashboard.searchForReference(journeyId);
+    await this.animalsPages.dashboard.copyAsNew(journeyId).click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
   /**
@@ -29,16 +32,16 @@ export class NotificationActions {
    */
   async cancelAmend(journeyId: string): Promise<void> {
     await this.toNotificationView(journeyId);
-    await this.pages.notificationView.cancelAmendment.click();
-    await this.pages.notificationCancelAmend.heading.waitFor(pageLoadWait);
-    await this.pages.notificationCancelAmend.confirm.click();
+    await this.animalsPages.notificationView.cancelAmendment.click();
+    await this.animalsPages.notificationCancelAmend.heading.waitFor(pageLoadWait);
+    await this.animalsPages.notificationCancelAmend.confirm.click();
     await this.pages.page.waitForURL(/\/notification-view\?cancelled=1$/, { timeout: timeouts.medium });
   }
 
   async deleteNotification(journeyId: string): Promise<void> {
-    await this.pages.notificationDashboard.open();
-    await this.pages.notificationDashboard.searchFor(journeyId);
-    await this.pages.notificationDashboard.delete(journeyId).click();
+    await this.animalsPages.dashboard.open();
+    await this.animalsPages.dashboard.searchFor(journeyId);
+    await this.animalsPages.dashboard.delete(journeyId).click();
     await this.pages.page.getByRole('heading', { name: 'Delete this notification?' }).waitFor(pageLoadWait);
     await this.pages.page.getByRole('button', { name: 'Yes, delete notification' }).click();
     await this.pages.page.getByText('The notification has been deleted.').waitFor(pageLoadWait);

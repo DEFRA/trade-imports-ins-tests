@@ -55,7 +55,12 @@ test.use({ storageState: COLD_START });
 
 test.describe('High-risk plants full happy-path journeys', { tag: '@integration' }, () => {
   for (const scenario of scenarios) {
-    test(`${scenario.name}: sign in, submit and view the saved notification`, async ({ pages, plantsJourney, addressBookApi }) => {
+    test(`${scenario.name}: sign in, submit and view the saved notification`, async ({
+      pages,
+      plantsPages,
+      plantsJourney,
+      addressBookApi,
+    }) => {
       const address = await addressBookApi.createAddress({
         name: `Journey Nursery ${randomUUID()}`,
         addressLine1: '4 Nursery Lane',
@@ -76,73 +81,73 @@ test.describe('High-risk plants full happy-path journeys', { tag: '@integration'
       await plantsJourney.toOrigin();
       if (scenario.type === POTATOES) {
         await plantsJourney.toArrivalDetails(scenario.country);
-        await pages.plantsArrivalDetails.arrivalTime.fill('14:30');
-        await pages.plantsArrivalDetails.selectPlaceOfLanding('Aberdeen Harbour (GB ABD)');
+        await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
+        await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour (GB ABD)');
       } else {
         await plantsJourney.toArrivalStatus(scenario.country);
         await plantsJourney.answerArrivalStatus('No, it has not arrived yet');
       }
-      await pages.plantsArrivalDetails.arrivalDate.fill(arrivalDate);
-      await pages.plantsArrivalDetails.btnSaveAndContinue.click();
-      await pages.plantsPlaceOfDestination.searchFor(address.name);
-      await pages.plantsPlaceOfDestination.address(address.name).check();
-      await pages.plantsPlaceOfDestination.btnSaveAndContinue.click();
+      await plantsPages.arrivalDetails.arrivalDate.fill(arrivalDate);
+      await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+      await plantsPages.placeOfDestination.searchFor(address.name);
+      await plantsPages.placeOfDestination.address(address.name).check();
+      await plantsPages.placeOfDestination.btnSaveAndContinue.click();
       if (scenario.type !== POTATOES) {
-        await pages.plantsConsignorSelect.searchFor(address.name);
-        await pages.plantsConsignorSelect.address(address.name).check();
-        await pages.plantsConsignorSelect.btnSaveAndContinue.click();
+        await plantsPages.consignorSelect.searchFor(address.name);
+        await plantsPages.consignorSelect.address(address.name).check();
+        await plantsPages.consignorSelect.btnSaveAndContinue.click();
       }
       if (scenario.type === POTATOES) {
-        await pages.plantsIdentificationNumbers.producer.fill('P123');
-        await pages.plantsIdentificationNumbers.crop.fill('C123');
+        await plantsPages.identificationNumbers.producer.fill('P123');
+        await plantsPages.identificationNumbers.crop.fill('C123');
       } else if (scenario.type === PLANTS) {
-        await pages.plantsIdentificationNumbers.supplier.fill('DE-12345');
+        await plantsPages.identificationNumbers.supplier.fill('DE-12345');
       }
-      await pages.plantsIdentificationNumbers.consignment.fill('JOURNEY_123');
-      await pages.plantsIdentificationNumbers.btnSaveAndContinue.click();
-      await pages.plantsConsignmentContactSelect.searchFor(address.name);
-      await pages.plantsConsignmentContactSelect.address(address.name).check();
-      await pages.plantsConsignmentContactSelect.btnSaveAndContinue.click();
-      await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
-      await pages.plantsOverview.taskRowLink('Check and submit').click();
-      await expect(pages.plantsNotificationView.heading).toBeVisible();
-      await pages.plantsNotificationView.btnContinue.click();
-      await expect(pages.page).toHaveURL(pages.plantsDeclaration.expectedUrl(reference));
-      await pages.plantsDeclaration.checkbox.check();
-      await pages.plantsDeclaration.btnContinue.click();
+      await plantsPages.identificationNumbers.consignment.fill('JOURNEY_123');
+      await plantsPages.identificationNumbers.btnSaveAndContinue.click();
+      await plantsPages.consignmentContactSelect.searchFor(address.name);
+      await plantsPages.consignmentContactSelect.address(address.name).check();
+      await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
+      await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+      await plantsPages.overview.taskRowLink('Check and submit').click();
+      await expect(plantsPages.notificationView.heading).toBeVisible();
+      await plantsPages.notificationView.btnContinue.click();
+      await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrl(reference));
+      await plantsPages.declaration.checkbox.check();
+      await plantsPages.declaration.btnContinue.click();
 
-      await expect(pages.page).toHaveURL(pages.plantsConfirmation.expectedUrl(reference));
-      await expect(pages.plantsConfirmation.heading).toBeVisible();
-      await expect(pages.plantsConfirmation.panel).toContainText(reference);
-      await expect(pages.plantsConfirmation.lateBanner).toHaveCount(scenario.late ? 1 : 0);
-      await pages.plantsConfirmation.viewNotification.click();
+      await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrl(reference));
+      await expect(plantsPages.confirmation.heading).toBeVisible();
+      await expect(plantsPages.confirmation.panel).toContainText(reference);
+      await expect(plantsPages.confirmation.lateBanner).toHaveCount(scenario.late ? 1 : 0);
+      await plantsPages.confirmation.viewNotification.click();
       // Reload proves the submitted answers survive a fresh read.
       await pages.page.reload();
-      await expect(pages.page).toHaveURL(pages.plantsNotificationView.expectedUrl(reference));
-      await expect(pages.plantsNotificationView.heading).toBeVisible();
-      await expect(pages.plantsOverview.reference).toHaveText(reference);
-      await expect(pages.plantsOverview.statusTag).toHaveText('Submitted');
-      await expect(pages.plantsNotificationView.changeLinks).toHaveCount(0);
-      await expect(pages.plantsNotificationView.btnContinue).toHaveCount(0);
-      await expect(pages.plantsNotificationView.lateBanner).toHaveCount(scenario.late ? 1 : 0);
-      await expect(pages.plantsNotificationView.card('Import details')).toContainText(scenario.country);
-      const commodity = pages.plantsNotificationView.card('Commodity 1');
+      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+      await expect(plantsPages.notificationView.heading).toBeVisible();
+      await expect(plantsPages.overview.reference).toHaveText(reference);
+      await expect(plantsPages.overview.statusTag).toHaveText('Submitted');
+      await expect(plantsPages.notificationView.changeLinks).toHaveCount(0);
+      await expect(plantsPages.notificationView.btnContinue).toHaveCount(0);
+      await expect(plantsPages.notificationView.lateBanner).toHaveCount(scenario.late ? 1 : 0);
+      await expect(plantsPages.notificationView.card('Import details')).toContainText(scenario.country);
+      const commodity = plantsPages.notificationView.card('Commodity 1');
       await expect(commodity).toContainText(scenario.category);
       for (const value of Object.values(scenario.line)) {
         await expect(commodity).toContainText(value);
       }
-      await expect(pages.plantsNotificationView.card('Arrival details')).toContainText(arrivalDate);
-      await expect(pages.plantsNotificationView.card('Place of destination')).toContainText(address.name);
-      await expect(pages.plantsNotificationView.card('Identification numbers')).toContainText('JOURNEY_123');
-      await expect(pages.plantsNotificationView.card('Contact')).toContainText(address.name);
-      await expect(pages.plantsNotificationView.card('Contact')).toContainText(address.email);
+      await expect(plantsPages.notificationView.card('Arrival details')).toContainText(arrivalDate);
+      await expect(plantsPages.notificationView.card('Place of destination')).toContainText(address.name);
+      await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('JOURNEY_123');
+      await expect(plantsPages.notificationView.card('Contact')).toContainText(address.name);
+      await expect(plantsPages.notificationView.card('Contact')).toContainText(address.email);
       if (scenario.type !== POTATOES) {
-        await expect(pages.plantsNotificationView.card('Consignor or exporter')).toContainText(address.name);
+        await expect(plantsPages.notificationView.card('Consignor or exporter')).toContainText(address.name);
       }
-      await pages.plantsDashboard.open();
-      await pages.plantsDashboard.searchForReference(reference);
-      await expect(pages.plantsDashboard.notificationCard(reference)).toBeVisible();
-      await expect(pages.plantsDashboard.statusTag(reference)).toHaveText('Submitted');
+      await plantsPages.dashboard.open();
+      await plantsPages.dashboard.searchForReference(reference);
+      await expect(plantsPages.dashboard.notificationCard(reference)).toBeVisible();
+      await expect(plantsPages.dashboard.statusTag(reference)).toHaveText('Submitted');
     });
   }
 });

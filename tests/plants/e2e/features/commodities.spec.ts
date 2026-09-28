@@ -20,9 +20,9 @@ const potatoLine = (variety: string, quantity: string) => ({
 });
 
 test.describe('High-risk plants commodity section', { tag: '@integration' }, () => {
-  test('each commodity type offers only the categories that belong to it', async ({ pages, plantsJourney }) => {
+  test('each commodity type offers only the categories that belong to it', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
-    const details = pages.plantsCommodityDetails;
+    const details = plantsPages.commodityDetails;
 
     await plantsJourney.chooseCommodityType(POTATOES);
     await expect(pages.page).toHaveURL(details.expectedUrl(reference));
@@ -44,20 +44,20 @@ test.describe('High-risk plants commodity section', { tag: '@integration' }, () 
     await expect(details.categoryRadios).toHaveCount(5);
   });
 
-  test('a potato line is asked for its variety, quantity and intended use', async ({ pages, plantsJourney }) => {
+  test('a potato line is asked for its variety, quantity and intended use', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.chooseCommodityType(POTATOES);
 
     await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine(MARIS_PIPER, '250'));
 
-    await expect(pages.page).toHaveURL(pages.plantsCommodities.expectedUrl(reference));
-    await expect(pages.plantsCommodities.lineRows).toHaveCount(1);
-    await expect(pages.plantsCommodities.lineRows.first()).toContainText(SEED_POTATOES);
-    await expect(pages.plantsCommodities.lineRows.first()).toContainText(MARIS_PIPER);
-    await expect(pages.plantsCommodities.lineRows.first()).toContainText('250');
+    await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrl(reference));
+    await expect(plantsPages.commodities.lineRows).toHaveCount(1);
+    await expect(plantsPages.commodities.lineRows.first()).toContainText(SEED_POTATOES);
+    await expect(plantsPages.commodities.lineRows.first()).toContainText(MARIS_PIPER);
+    await expect(plantsPages.commodities.lineRows.first()).toContainText('250');
   });
 
-  test('a plants-for-planting line names its genus, species and codes', async ({ pages, plantsJourney }) => {
+  test('a plants-for-planting line names its genus, species and codes', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.chooseCommodityType(PLANTS_FOR_PLANTING);
 
@@ -69,102 +69,102 @@ test.describe('High-risk plants commodity section', { tag: '@integration' }, () 
       'EPPO code': 'QUERO',
     });
 
-    await expect(pages.page).toHaveURL(pages.plantsCommodities.expectedUrl(reference));
-    await expect(pages.plantsCommodities.lineRows.first()).toContainText(PLANTS_FOR_PLANTING);
-    await expect(pages.plantsCommodities.lineRows.first()).toContainText(OAK);
-    await expect(pages.plantsCommodities.lineRows.first()).toContainText('120');
+    await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrl(reference));
+    await expect(plantsPages.commodities.lineRows.first()).toContainText(PLANTS_FOR_PLANTING);
+    await expect(plantsPages.commodities.lineRows.first()).toContainText(OAK);
+    await expect(plantsPages.commodities.lineRows.first()).toContainText('120');
   });
 
-  test('a wood line is asked for its treatments, and a cut-tree line for their size', async ({ pages, plantsJourney }) => {
+  test('a wood line is asked for its treatments, and a cut-tree line for their size', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.chooseCommodityType(WOOD_AND_CUT_TREES);
 
-    await pages.plantsCommodityDetails.category(CUT_CONIFEROUS_TREES).check();
-    await pages.plantsCommodityDetails.btnContinue.click();
-    await expect(pages.page).toHaveURL(pages.plantsCommodityDetails.editUrl(reference, 0));
+    await plantsPages.commodityDetails.category(CUT_CONIFEROUS_TREES).check();
+    await plantsPages.commodityDetails.btnContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.commodityDetails.editUrl(reference, 0));
 
     // Wood is identified by its commodity code, not a genus, and only cut trees
     // are asked how tall they are.
-    await expect(pages.plantsCommodityDetails.field('Phytosanitary treatments applied')).toBeVisible();
-    await expect(pages.plantsCommodityDetails.field('Size of the trees')).toBeVisible();
-    await expect(pages.plantsCommodityDetails.field('Genus')).toHaveCount(0);
+    await expect(plantsPages.commodityDetails.field('Phytosanitary treatments applied')).toBeVisible();
+    await expect(plantsPages.commodityDetails.field('Size of the trees')).toBeVisible();
+    await expect(plantsPages.commodityDetails.field('Genus')).toHaveCount(0);
 
-    await pages.plantsCommodityDetails.field('Commodity code').fill('4403 25 10');
-    await pages.plantsCommodityDetails.field('Quantity').fill('40');
-    await pages.plantsCommodityDetails.field('Size of the trees').fill('4.5');
-    await pages.plantsCommodityDetails.field('Phytosanitary treatments applied').fill('Kiln dried (KD)');
-    await pages.plantsCommodityDetails.btnSaveAndContinue.click();
+    await plantsPages.commodityDetails.field('Commodity code').fill('4403 25 10');
+    await plantsPages.commodityDetails.field('Quantity').fill('40');
+    await plantsPages.commodityDetails.field('Size of the trees').fill('4.5');
+    await plantsPages.commodityDetails.field('Phytosanitary treatments applied').fill('Kiln dried (KD)');
+    await plantsPages.commodityDetails.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(pages.plantsCommodities.expectedUrl(reference));
-    await expect(pages.plantsCommodities.lineRows.first()).toContainText(CUT_CONIFEROUS_TREES);
-    await expect(pages.plantsCommodities.lineRows.first()).toContainText('40');
+    await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrl(reference));
+    await expect(plantsPages.commodities.lineRows.first()).toContainText(CUT_CONIFEROUS_TREES);
+    await expect(plantsPages.commodities.lineRows.first()).toContainText('40');
   });
 
-  test('Change reopens a saved line and Remove drops it', async ({ pages, plantsJourney }) => {
+  test('Change reopens a saved line and Remove drops it', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.chooseCommodityType(POTATOES);
     await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine(MARIS_PIPER, '250'));
     await plantsJourney.addAnotherCommodityLine(WARE_POTATOES, potatoLine(KING_EDWARD, '80'));
 
-    await expect(pages.plantsCommodities.lineRows).toHaveCount(2);
+    await expect(plantsPages.commodities.lineRows).toHaveCount(2);
 
-    await pages.plantsCommodities.linkChange(1).click();
+    await plantsPages.commodities.linkChange(1).click();
 
-    await expect(pages.page).toHaveURL(pages.plantsCommodityDetails.editUrl(reference, 0));
-    await expect(pages.plantsCommodityDetails.field('Variety')).toHaveValue(MARIS_PIPER);
+    await expect(pages.page).toHaveURL(plantsPages.commodityDetails.editUrl(reference, 0));
+    await expect(plantsPages.commodityDetails.field('Variety')).toHaveValue(MARIS_PIPER);
 
-    await pages.plantsCommodityDetails.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.plantsCommodities.expectedUrl(reference));
+    await plantsPages.commodityDetails.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrl(reference));
 
-    await pages.plantsCommodities.btnRemove(1).click();
+    await plantsPages.commodities.btnRemove(1).click();
 
-    await expect(pages.plantsCommodities.lineRows).toHaveCount(1);
-    await expect(pages.plantsCommodities.table).not.toContainText(MARIS_PIPER);
-    await expect(pages.plantsCommodities.table).toContainText(KING_EDWARD);
+    await expect(plantsPages.commodities.lineRows).toHaveCount(1);
+    await expect(plantsPages.commodities.table).not.toContainText(MARIS_PIPER);
+    await expect(plantsPages.commodities.table).toContainText(KING_EDWARD);
   });
 
-  test('changing the commodity type removes the lines the new type cannot hold', async ({ pages, plantsJourney }) => {
+  test('changing the commodity type removes the lines the new type cannot hold', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.chooseCommodityType(POTATOES);
     await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine(MARIS_PIPER, '250'));
 
-    await pages.plantsCommodityType.open(reference);
-    await expect(pages.plantsCommodityType.linesWarning).toBeVisible();
+    await plantsPages.commodityType.open(reference);
+    await expect(plantsPages.commodityType.linesWarning).toBeVisible();
 
-    await pages.plantsCommodityType.commodityType(WOOD_AND_CUT_TREES).check();
-    await pages.plantsCommodityType.btnSaveAndContinue.click();
+    await plantsPages.commodityType.commodityType(WOOD_AND_CUT_TREES).check();
+    await plantsPages.commodityType.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(pages.plantsCommodities.removedUrl(reference, 1));
-    await expect(pages.plantsCommodities.removedBanner).toContainText(`We removed 1 commodity that is not ${WOOD_AND_CUT_TREES}`);
-    await expect(pages.plantsCommodities.emptyState).toBeVisible();
-    await expect(pages.plantsCommodities.table).toHaveCount(0);
+    await expect(pages.page).toHaveURL(plantsPages.commodities.removedUrl(reference, 1));
+    await expect(plantsPages.commodities.removedBanner).toContainText(`We removed 1 commodity that is not ${WOOD_AND_CUT_TREES}`);
+    await expect(plantsPages.commodities.emptyState).toBeVisible();
+    await expect(plantsPages.commodities.table).toHaveCount(0);
   });
 
-  test('an emptied consignment is held at the at-least-one error', async ({ pages, plantsJourney }) => {
+  test('an emptied consignment is held at the at-least-one error', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.chooseCommodityType(POTATOES);
     await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine(MARIS_PIPER, '250'));
     await plantsJourney.changeCommodityType(reference, WOOD_AND_CUT_TREES);
 
-    await expect(pages.page).toHaveURL(pages.plantsCommodities.removedUrl(reference, 1));
+    await expect(pages.page).toHaveURL(plantsPages.commodities.removedUrl(reference, 1));
 
-    await pages.plantsCommodities.btnSaveAndContinue.click();
+    await plantsPages.commodities.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(pages.plantsCommodities.removedUrl(reference, 1));
-    await expect(pages.plantsCommodities.errorSummary).toContainText('Add at least one commodity');
+    await expect(pages.page).toHaveURL(plantsPages.commodities.removedUrl(reference, 1));
+    await expect(plantsPages.commodities.errorSummary).toContainText('Add at least one commodity');
   });
 
-  test('the commodities task row reads Completed once the section is answered', async ({ pages, plantsJourney }) => {
+  test('the commodities task row reads Completed once the section is answered', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.chooseCommodityType(POTATOES);
     await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine(MARIS_PIPER, '250'));
 
-    await pages.plantsCommodities.btnSaveAndContinue.click();
+    await plantsPages.commodities.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(pages.plantsOrigin.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
 
-    await pages.plantsOverview.open(reference);
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
-    await expect(pages.plantsOverview.taskRow('What are you importing?')).toContainText('Completed');
+    await plantsPages.overview.open(reference);
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(plantsPages.overview.taskRow('What are you importing?')).toContainText('Completed');
   });
 });

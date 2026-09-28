@@ -1,9 +1,9 @@
 import { test, WCAG_STANDARD, scanViewports, waitForViewportSettle } from '@fixtures/a11y';
 
 test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test.beforeEach(async ({ adminNavigation, pages }) => {
+  test.beforeEach(async ({ adminNavigation, animalsAdminPages }) => {
     await adminNavigation.toAdminDashboard();
-    await pages.adminDashboard.heading.waitFor();
+    await animalsAdminPages.dashboard.heading.waitFor();
   });
 
   test('the admin dashboard has no accessibility violations across viewports', async ({ page, runA11yScan }) => {

@@ -20,7 +20,7 @@ test.describe('Accompanying document persistence round-trip', { tag: ['@integrat
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
   });
 
-  test('uploads a document that persists to Mongo and reloads', async ({ journey, journeyContext, pages }) => {
+  test('uploads a document that persists to Mongo and reloads', async ({ journey, journeyContext, animalsPages }) => {
     test.slow();
     await journey.toAccompanyingDocuments();
     const referenceNumber = journeyContext.journeyId;
@@ -28,10 +28,10 @@ test.describe('Accompanying document persistence round-trip', { tag: ['@integrat
     const issueDate = '03/01/2026';
     const persistedIssueDate = { day: '3', month: '1', year: '2026' };
 
-    await pages.accompanyingDocuments.fillDocument(documentReference, issueDate, fileUploadPaths.safeFile1kbPdf);
-    await pages.accompanyingDocuments.saveAndAddAnother.click();
+    await animalsPages.accompanyingDocuments.fillDocument(documentReference, issueDate, fileUploadPaths.safeFile1kbPdf);
+    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
-    const row = pages.accompanyingDocuments.documentRow(documentReference);
+    const row = animalsPages.accompanyingDocuments.documentRow(documentReference);
     await expect(row).toBeVisible({ timeout: fileUploadTimeouts.documentsListVisible });
     await expect(row).toContainText('Check completed', { timeout: fileUploadTimeouts.virusScanComplete });
 
@@ -66,7 +66,7 @@ test.describe('Accompanying document persistence round-trip', { tag: ['@integrat
       await client.close();
     }
 
-    await pages.accompanyingDocuments.open(referenceNumber);
-    await expect(pages.accompanyingDocuments.documentRow(documentReference)).toBeVisible();
+    await animalsPages.accompanyingDocuments.open(referenceNumber);
+    await expect(animalsPages.accompanyingDocuments.documentRow(documentReference)).toBeVisible();
   });
 });

@@ -6,27 +6,27 @@ test.describe('Contact address page', { tag: ['@integration', '@duplicated-in-fr
     await journey.toContactAddress();
   });
 
-  test('renders the page controls', async ({ pages }) => {
-    await expect(pages.contactAddress.heading).toBeVisible();
-    await expect(pages.contactAddress.address('Animal and Plant Health Agency')).toBeVisible();
-    await expect(pages.contactAddress.saveAndContinue).toBeVisible();
+  test('renders the page controls', async ({ animalsPages }) => {
+    await expect(animalsPages.contactAddress.heading).toBeVisible();
+    await expect(animalsPages.contactAddress.address('Animal and Plant Health Agency')).toBeVisible();
+    await expect(animalsPages.contactAddress.saveAndContinue).toBeVisible();
   });
 
-  test('leaves the contact address unchecked on load', async ({ pages }) => {
-    await expect(pages.contactAddress.address('Animal and Plant Health Agency')).not.toBeChecked();
+  test('leaves the contact address unchecked on load', async ({ animalsPages }) => {
+    await expect(animalsPages.contactAddress.address('Animal and Plant Health Agency')).not.toBeChecked();
   });
 
-  test('accepts a valid contact address', async ({ pages }) => {
-    await pages.contactAddress.address('Animal and Plant Health Agency').check();
-    await pages.contactAddress.saveAndContinue.click();
+  test('accepts a valid contact address', async ({ pages, animalsPages }) => {
+    await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
+    await animalsPages.contactAddress.saveAndContinue.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
 
-  test('saving with no contact address selected is allowed and exits to the hub', async ({ pages }) => {
-    await pages.contactAddress.saveAndContinue.click();
+  test('saving with no contact address selected is allowed and exits to the hub', async ({ pages, animalsPages }) => {
+    await animalsPages.contactAddress.saveAndContinue.click();
 
-    await expect(pages.overview.heading).toBeVisible();
+    await expect(animalsPages.overview.heading).toBeVisible();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
 

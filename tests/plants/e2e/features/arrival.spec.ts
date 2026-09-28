@@ -89,74 +89,83 @@ const toArrivalStatus = async (plantsJourney: PlantsJourney): Promise<string> =>
 };
 
 test.describe('High-risk plants arrival section', { tag: '@integration' }, () => {
-  test('the arrival-status question offers both branches, and the post-arrival one quotes the window', async ({ pages, plantsJourney }) => {
+  test('the arrival-status question offers both branches, and the post-arrival one quotes the window', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
     const reference = await toArrivalStatus(plantsJourney);
 
-    await expect(pages.page).toHaveURL(pages.plantsArrivalStatus.expectedUrl(reference));
-    await expect(pages.plantsArrivalStatus.heading).toBeVisible();
-    await expect(pages.plantsArrivalStatus.arrivalStatus(ALREADY_ARRIVED)).not.toBeChecked();
-    await expect(pages.plantsArrivalStatus.arrivalStatus(NOT_YET_ARRIVED)).not.toBeChecked();
-    await expect(pages.plantsArrivalStatus.arrivalStatusHint(ALREADY_ARRIVED)).toHaveText(POST_ARRIVAL_HINT);
-    await expect(pages.plantsArrivalStatus.arrivalStatusHint(NOT_YET_ARRIVED)).toHaveText(PRE_ARRIVAL_HINT);
+    await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
+    await expect(plantsPages.arrivalStatus.heading).toBeVisible();
+    await expect(plantsPages.arrivalStatus.arrivalStatus(ALREADY_ARRIVED)).not.toBeChecked();
+    await expect(plantsPages.arrivalStatus.arrivalStatus(NOT_YET_ARRIVED)).not.toBeChecked();
+    await expect(plantsPages.arrivalStatus.arrivalStatusHint(ALREADY_ARRIVED)).toHaveText(POST_ARRIVAL_HINT);
+    await expect(plantsPages.arrivalStatus.arrivalStatusHint(NOT_YET_ARRIVED)).toHaveText(PRE_ARRIVAL_HINT);
   });
 
-  test('the question must be answered before the notification moves on', async ({ pages, plantsJourney }) => {
+  test('the question must be answered before the notification moves on', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await toArrivalStatus(plantsJourney);
 
-    await pages.plantsArrivalStatus.btnSaveAndContinue.click();
+    await plantsPages.arrivalStatus.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(pages.plantsArrivalStatus.expectedUrl(reference));
-    await expect(pages.plantsArrivalStatus.errorSummary).toContainText(ARRIVAL_STATUS_ERROR);
+    await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
+    await expect(plantsPages.arrivalStatus.errorSummary).toContainText(ARRIVAL_STATUS_ERROR);
   });
 
-  test('the answer is saved, shown again on return, and carries on to the arrival details', async ({ pages, plantsJourney }) => {
+  test('the answer is saved, shown again on return, and carries on to the arrival details', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
     const reference = await toArrivalStatus(plantsJourney);
 
-    await pages.plantsArrivalStatus.arrivalStatus(ALREADY_ARRIVED).check();
-    await pages.plantsArrivalStatus.btnSaveAndContinue.click();
+    await plantsPages.arrivalStatus.arrivalStatus(ALREADY_ARRIVED).check();
+    await plantsPages.arrivalStatus.btnSaveAndContinue.click();
 
     // Arrival-details follows the question in the same section, so Continue
     // goes on to it rather than back to the Overview.
-    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
 
-    await pages.plantsArrivalStatus.open(reference);
-    await expect(pages.plantsArrivalStatus.arrivalStatus(ALREADY_ARRIVED)).toBeChecked();
+    await plantsPages.arrivalStatus.open(reference);
+    await expect(plantsPages.arrivalStatus.arrivalStatus(ALREADY_ARRIVED)).toBeChecked();
   });
 
-  test('the arrival date is asked under the sentence the arrival status chose', async ({ pages, plantsJourney }) => {
+  test('the arrival date is asked under the sentence the arrival status chose', async ({ plantsPages, plantsJourney }) => {
     await toArrivalStatus(plantsJourney);
     await plantsJourney.answerArrivalStatus(NOT_YET_ARRIVED);
 
     // The one date field means three different things, and the label is the
     // only place a trader reads which of them is being asked for.
-    await expect(pages.plantsArrivalDetails.dateQuestionLabelled(PRE_ARRIVAL_DATE_LABEL)).toBeVisible();
+    await expect(plantsPages.arrivalDetails.dateQuestionLabelled(PRE_ARRIVAL_DATE_LABEL)).toBeVisible();
 
     // Plants and wood are asked for a date alone: reg 24A(2)(a) and (aa) give
     // the time and the place of landing to potatoes only.
-    await expect(pages.plantsArrivalDetails.arrivalTime).toHaveCount(0);
-    await expect(pages.plantsArrivalDetails.proposedPlaceOfLanding).toHaveCount(0);
+    await expect(plantsPages.arrivalDetails.arrivalTime).toHaveCount(0);
+    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveCount(0);
   });
 
-  test('the arrival date must be given before the notification moves on', async ({ pages, plantsJourney }) => {
+  test('the arrival date must be given before the notification moves on', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await toArrivalStatus(plantsJourney);
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
 
-    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
-    await expect(pages.plantsArrivalDetails.errorSummary).toContainText(ARRIVAL_DATE_ERROR);
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(plantsPages.arrivalDetails.errorSummary).toContainText(ARRIVAL_DATE_ERROR);
   });
 
   test('a date long past the four-day window is saved, shown again on return, and completes the arrival task row', async ({
     pages,
+    plantsPages,
     plantsJourney,
   }) => {
     const reference = await toArrivalStatus(plantsJourney);
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
 
-    await expect(pages.plantsArrivalDetails.dateQuestionLabelled(POST_ARRIVAL_DATE_LABEL)).toBeVisible();
-    await pages.plantsArrivalDetails.arrivalDate.fill(ARRIVED_ON);
-    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
+    await expect(plantsPages.arrivalDetails.dateQuestionLabelled(POST_ARRIVAL_DATE_LABEL)).toBeVisible();
+    await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVED_ON);
+    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
 
     // Reg 26(1) gives the notifier four days, but a notification made after
     // them is late rather than void: nothing lower-bounds the date, so the
@@ -164,102 +173,114 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     // Arrival-details is followed by the destination section, so Continue asks
     // the next question — and this notification has already arrived, so it is
     // asked where the consignment is being kept now.
-    await expect(pages.page).toHaveURL(pages.plantsPlaceOfDestination.expectedUrl(reference));
-    await expect(pages.plantsPlaceOfDestination.headingNamed(POST_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
+    await expect(plantsPages.placeOfDestination.headingNamed(POST_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
 
-    await pages.plantsOverview.open(reference);
-    await expect(pages.plantsOverview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Completed');
+    await plantsPages.overview.open(reference);
+    await expect(plantsPages.overview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Completed');
 
-    await pages.plantsArrivalDetails.open(reference);
-    await expect(pages.plantsArrivalDetails.arrivalDate).toHaveValue(ARRIVED_ON);
+    await plantsPages.arrivalDetails.open(reference);
+    await expect(plantsPages.arrivalDetails.arrivalDate).toHaveValue(ARRIVED_ON);
   });
 
-  test('changing the answer from arrived to not arrived re-labels the question and keeps the date', async ({ pages, plantsJourney }) => {
+  test('changing the answer from arrived to not arrived re-labels the question and keeps the date', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
     const reference = await toArrivalStatus(plantsJourney);
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
-    await pages.plantsArrivalDetails.arrivalDate.fill(ARRIVED_ON);
-    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.plantsPlaceOfDestination.expectedUrl(reference));
+    await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVED_ON);
+    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
 
-    await pages.plantsArrivalStatus.open(reference);
-    await pages.plantsArrivalStatus.arrivalStatus(NOT_YET_ARRIVED).check();
-    await pages.plantsArrivalStatus.btnSaveAndContinue.click();
+    await plantsPages.arrivalStatus.open(reference);
+    await plantsPages.arrivalStatus.arrivalStatus(NOT_YET_ARRIVED).check();
+    await plantsPages.arrivalStatus.btnSaveAndContinue.click();
 
     // Every notification owes a date and both branches of the question ask for
     // one, so `arrivalDate` is ungated: the new answer changes the sentence it
     // is asked under and leaves the answer itself alone. Nothing takes it out
     // of scope, so the engine has nothing to purge.
-    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
-    await expect(pages.plantsArrivalDetails.dateQuestionLabelled(PRE_ARRIVAL_DATE_LABEL)).toBeVisible();
-    await expect(pages.plantsArrivalDetails.arrivalDate).toHaveValue(ARRIVED_ON);
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(plantsPages.arrivalDetails.dateQuestionLabelled(PRE_ARRIVAL_DATE_LABEL)).toBeVisible();
+    await expect(plantsPages.arrivalDetails.arrivalDate).toHaveValue(ARRIVED_ON);
   });
 
-  test('a date that names no day on the calendar is refused', async ({ pages, plantsJourney }) => {
+  test('a date that names no day on the calendar is refused', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await toArrivalStatus(plantsJourney);
     await plantsJourney.answerArrivalStatus(NOT_YET_ARRIVED);
 
-    await pages.plantsArrivalDetails.arrivalDate.fill(NOT_A_REAL_DATE);
-    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.arrivalDate.fill(NOT_A_REAL_DATE);
+    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
 
     // A missing date and an impossible one are different mistakes, so the page
     // says which one was made rather than repeating the required message.
-    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
-    await expect(pages.plantsArrivalDetails.errorSummary).toContainText(REAL_ARRIVAL_DATE_ERROR);
-    await expect(pages.plantsArrivalDetails.errorSummary).not.toContainText(ARRIVAL_DATE_ERROR);
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(plantsPages.arrivalDetails.errorSummary).toContainText(REAL_ARRIVAL_DATE_ERROR);
+    await expect(plantsPages.arrivalDetails.errorSummary).not.toContainText(ARRIVAL_DATE_ERROR);
   });
 
-  test('a potato notification is never asked the question and opens the arrival row on the details', async ({ pages, plantsJourney }) => {
+  test('a potato notification is never asked the question and opens the arrival row on the details', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.chooseCommodityType(POTATOES);
     await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine);
     await plantsJourney.toOrigin();
 
-    await pages.plantsOrigin.selectCountry(FRANCE);
-    await pages.plantsOrigin.btnSaveAndContinue.click();
+    await plantsPages.origin.selectCountry(FRANCE);
+    await plantsPages.origin.btnSaveAndContinue.click();
 
     // Reg 24A gives the potato notification no post-arrival branch, so
     // `arrivalStatus` is out of scope: the opening run passes the step over and
     // lands on the details, the page every commodity type answers.
-    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
-    await expect(pages.plantsArrivalDetails.dateQuestionLabelled(POTATO_DATE_LABEL)).toBeVisible();
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(plantsPages.arrivalDetails.dateQuestionLabelled(POTATO_DATE_LABEL)).toBeVisible();
 
-    await pages.plantsOverview.open(reference);
-    await expect(pages.plantsOverview.taskRowLink(ARRIVAL_TASK_ROW)).toHaveAttribute(
+    await plantsPages.overview.open(reference);
+    await expect(plantsPages.overview.taskRowLink(ARRIVAL_TASK_ROW)).toHaveAttribute(
       'href',
-      pages.plantsArrivalDetails.expectedUrl(reference),
+      plantsPages.arrivalDetails.expectedUrl(reference),
     );
   });
 
-  test('a potato notification is asked the time and the place of landing as well as the date', async ({ pages, plantsJourney }) => {
+  test('a potato notification is asked the time and the place of landing as well as the date', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.chooseCommodityType(POTATOES);
     await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine);
     await plantsJourney.toOrigin();
     await plantsJourney.toArrivalDetails(FRANCE);
 
-    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
 
     // All three are mandatory for potatoes, so an empty page names all three.
-    await expect(pages.plantsArrivalDetails.errorSummary).toContainText(ARRIVAL_DATE_ERROR);
-    await expect(pages.plantsArrivalDetails.errorSummary).toContainText(ARRIVAL_TIME_ERROR);
-    await expect(pages.plantsArrivalDetails.errorSummary).toContainText(PLACE_OF_LANDING_ERROR);
+    await expect(plantsPages.arrivalDetails.errorSummary).toContainText(ARRIVAL_DATE_ERROR);
+    await expect(plantsPages.arrivalDetails.errorSummary).toContainText(ARRIVAL_TIME_ERROR);
+    await expect(plantsPages.arrivalDetails.errorSummary).toContainText(PLACE_OF_LANDING_ERROR);
 
-    await pages.plantsArrivalDetails.arrivalDate.fill(ARRIVING_ON);
-    await pages.plantsArrivalDetails.arrivalTime.fill(ARRIVING_AT);
-    await pages.plantsArrivalDetails.selectPlaceOfLanding(ABERDEEN_HARBOUR);
-    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVING_ON);
+    await plantsPages.arrivalDetails.arrivalTime.fill(ARRIVING_AT);
+    await plantsPages.arrivalDetails.selectPlaceOfLanding(ABERDEEN_HARBOUR);
+    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
 
     // Reg 24A gives potatoes no post-arrival branch, so the destination
     // question is asked in its own state: the pre-arrival question.
-    await expect(pages.page).toHaveURL(pages.plantsPlaceOfDestination.expectedUrl(reference));
-    await expect(pages.plantsPlaceOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
+    await expect(plantsPages.placeOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
 
-    await pages.plantsOverview.open(reference);
-    await expect(pages.plantsOverview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Completed');
+    await plantsPages.overview.open(reference);
+    await expect(plantsPages.overview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Completed');
 
-    await pages.plantsArrivalDetails.open(reference);
-    await expect(pages.plantsArrivalDetails.arrivalDate).toHaveValue(ARRIVING_ON);
-    await expect(pages.plantsArrivalDetails.arrivalTime).toHaveValue(ARRIVING_AT);
-    await expect(pages.plantsArrivalDetails.proposedPlaceOfLanding).toHaveValue(ABERDEEN_HARBOUR);
+    await plantsPages.arrivalDetails.open(reference);
+    await expect(plantsPages.arrivalDetails.arrivalDate).toHaveValue(ARRIVING_ON);
+    await expect(plantsPages.arrivalDetails.arrivalTime).toHaveValue(ARRIVING_AT);
+    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue(ABERDEEN_HARBOUR);
   });
 });

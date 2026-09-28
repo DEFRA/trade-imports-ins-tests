@@ -12,6 +12,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('each notification journey page with validation has no accessibility violations when errors are shown', async ({
     journey,
     pages,
+    animalsPages,
     runA11yScan,
   }) => {
     const errorSummaryHeading = pages.page.getByRole('heading', { name: 'There is a problem' });
@@ -23,16 +24,16 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     test.fail(true, 'EUDPA-636');
 
     await test.step('Origin of import with validation errors', async () => {
-      await pages.overview.task('Where is this consignment coming from?').click();
-      await pages.originOfImport.heading.waitFor();
-      await expect(pages.originOfImport.countryOfOrigin).toHaveValue('');
-      await pages.originOfImport.radioRequiresOriginCode('Yes').check();
-      await pages.originOfImport.saveAndContinue.click();
+      await animalsPages.overview.task('Where is this consignment coming from?').click();
+      await animalsPages.originOfImport.heading.waitFor();
+      await expect(animalsPages.originOfImport.countryOfOrigin).toHaveValue('');
+      await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
+      await animalsPages.originOfImport.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan({ exclude: conditionalRadioInput });
       await journey.fillOriginOfImport();
       await journey.saveOriginOfImport();
-      await pages.overview.heading.waitFor();
+      await animalsPages.overview.heading.waitFor();
     });
 
     await test.step('Continue to CPH number', async () => {
@@ -41,41 +42,41 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('CPH number with validation errors', async () => {
-      await pages.cphNumber.saveAndContinue.click();
+      await animalsPages.cphNumber.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
-      await pages.cphNumber.fillCphNumber();
-      await pages.cphNumber.saveAndContinue.click();
-      await pages.overview.heading.waitFor();
+      await animalsPages.cphNumber.fillCphNumber();
+      await animalsPages.cphNumber.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
     });
 
     await test.step('Arrival details with validation errors', async () => {
-      await pages.overview.task('Arrival details').click();
-      await pages.arrivalDetails.heading.waitFor();
-      await pages.arrivalDetails.saveAndContinue.click();
+      await animalsPages.overview.task('Arrival details').click();
+      await animalsPages.arrivalDetails.heading.waitFor();
+      await animalsPages.arrivalDetails.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
       await journey.fillArrivalDetails();
-      await pages.arrivalDetails.saveAndContinue.click();
+      await animalsPages.arrivalDetails.saveAndContinue.click();
     });
 
     await test.step('Transited countries with validation errors', async () => {
-      await pages.transitedCountries.heading.waitFor();
-      await pages.transitedCountries.addCountryButton.click();
+      await animalsPages.transitedCountries.heading.waitFor();
+      await animalsPages.transitedCountries.addCountryButton.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
-      await pages.transitedCountries.addCountry('France');
-      await pages.transitedCountries.saveAndContinue.click();
+      await animalsPages.transitedCountries.addCountry('France');
+      await animalsPages.transitedCountries.saveAndContinue.click();
     });
 
     await test.step('Continue to declaration', async () => {
-      await pages.transporter.heading.waitFor();
-      await pages.transporter.addTransporter.click();
-      await pages.transporterAdd.heading.waitFor();
-      await pages.transporterAdd.transporterType('Commercial').check();
-      await pages.transporterAdd.saveAndContinue.click();
-      await pages.commercialTransporter.heading.waitFor();
-      await pages.commercialTransporter.fill({
+      await animalsPages.transporter.heading.waitFor();
+      await animalsPages.transporter.addTransporter.click();
+      await animalsPages.transporterAdd.heading.waitFor();
+      await animalsPages.transporterAdd.transporterType('Commercial').check();
+      await animalsPages.transporterAdd.saveAndContinue.click();
+      await animalsPages.commercialTransporter.heading.waitFor();
+      await animalsPages.commercialTransporter.fill({
         approvalNumber: 'NI/TA/2026/0041',
         name: 'Lough Neagh Livestock Haulage Ltd',
         addressLine1: '4 Shore Road',
@@ -84,21 +85,21 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
         emailAddress: 'ops@loughneagh.example',
         telephoneNumber: '+44 28 9446 1200',
       });
-      await pages.commercialTransporter.saveAndContinue.click();
-      await pages.overview.heading.waitFor();
+      await animalsPages.commercialTransporter.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
       await journey.answerAnimalIdentification();
       await journey.answerReasonAndAdditionalDetails();
       await journey.answerContact();
-      await pages.overview.reviewAndSubmitButton.click();
-      await pages.notificationView.heading.waitFor();
-      await pages.notificationView.continueButton.click();
+      await animalsPages.overview.reviewAndSubmitButton.click();
+      await animalsPages.notificationView.heading.waitFor();
+      await animalsPages.notificationView.continueButton.click();
       // Bounded rather than the full 300s a11y timeout — EUDPA-636 means this
       // never resolves right now, so fail fast instead of hanging.
-      await pages.declaration.heading.waitFor({ timeout: 10_000 });
+      await animalsPages.declaration.heading.waitFor({ timeout: 10_000 });
     });
 
     await test.step('Declaration with validation errors', async () => {
-      await pages.declaration.continueButton.click();
+      await animalsPages.declaration.continueButton.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
     });

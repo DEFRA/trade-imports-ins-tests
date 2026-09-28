@@ -1,5 +1,16 @@
 import { test as base, expect, type APIRequestContext } from '@playwright/test';
-import { createPageObjects, type PageObjects } from '@page-objects';
+import {
+  createAnimalsAdminPages,
+  createAnimalsPages,
+  createInsPages,
+  createPlantsPages,
+  createSharedPages,
+  type AnimalsAdminPages,
+  type AnimalsPages,
+  type InsPages,
+  type PlantsPages,
+  type SharedPages,
+} from '@page-objects';
 import { Journey, type JourneyContext } from '@flows/journey';
 import { PlantsJourney } from '@flows/plants-journey';
 import { AdminNavigation } from '@flows/admin-navigation';
@@ -21,7 +32,11 @@ export interface AuthWorkerFixtures {
 }
 
 export interface PageFixtures {
-  pages: PageObjects;
+  pages: SharedPages;
+  animalsPages: AnimalsPages;
+  animalsAdminPages: AnimalsAdminPages;
+  insPages: InsPages;
+  plantsPages: PlantsPages;
   journeyContext: JourneyContext;
   journey: Journey;
   plantsJourney: PlantsJourney;
@@ -56,23 +71,35 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
     await use(workerAuthState);
   },
   pages: async ({ page }, use) => {
-    await use(createPageObjects(page));
+    await use(createSharedPages(page));
+  },
+  animalsPages: async ({ page }, use) => {
+    await use(createAnimalsPages(page));
+  },
+  animalsAdminPages: async ({ page }, use) => {
+    await use(createAnimalsAdminPages(page));
+  },
+  insPages: async ({ page }, use) => {
+    await use(createInsPages(page));
+  },
+  plantsPages: async ({ page }, use) => {
+    await use(createPlantsPages(page));
   },
   // eslint-disable-next-line no-empty-pattern
   journeyContext: async ({}, use) => {
     await use({});
   },
-  journey: async ({ pages, journeyContext }, use) => {
-    await use(new Journey(pages, journeyContext));
+  journey: async ({ animalsPages, pages, journeyContext }, use) => {
+    await use(new Journey(animalsPages, pages, journeyContext));
   },
-  plantsJourney: async ({ pages, journeyContext }, use) => {
-    await use(new PlantsJourney(pages, journeyContext));
+  plantsJourney: async ({ plantsPages, journeyContext }, use) => {
+    await use(new PlantsJourney(plantsPages, journeyContext));
   },
-  adminNavigation: async ({ pages }, use) => {
-    await use(new AdminNavigation(pages));
+  adminNavigation: async ({ animalsAdminPages }, use) => {
+    await use(new AdminNavigation(animalsAdminPages));
   },
-  notificationActions: async ({ pages }, use) => {
-    await use(new NotificationActions(pages));
+  notificationActions: async ({ animalsPages, pages }, use) => {
+    await use(new NotificationActions(animalsPages, pages));
   },
   notificationApi: async ({ request }, use) => {
     await use(new NotificationApiClient(request));

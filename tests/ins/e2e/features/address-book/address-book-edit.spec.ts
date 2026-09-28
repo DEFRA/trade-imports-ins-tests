@@ -12,19 +12,19 @@ const baseAddress = {
 };
 
 test.describe('Address book edit', { tag: '@integration' }, () => {
-  test('an edit replaces the whole record, clearing the optional fields left blank', async ({ pages, addressBookApi }) => {
+  test('an edit replaces the whole record, clearing the optional fields left blank', async ({ pages, insPages, addressBookApi }) => {
     const originalName = `Edit Test Farm ${Date.now()}`;
     const created = await addressBookApi.createAddress({ name: originalName, ...baseAddress });
 
     const renamed = `${originalName} Renamed`;
-    await pages.insAddressBookEdit.open(created.id);
-    await expect(pages.insAddressBookEdit.heading).toBeVisible();
-    await expect(pages.insAddressBookEdit.inputCounty).toHaveValue(baseAddress.county);
+    await insPages.addressBookEdit.open(created.id);
+    await expect(insPages.addressBookEdit.heading).toBeVisible();
+    await expect(insPages.addressBookEdit.inputCounty).toHaveValue(baseAddress.county);
 
     // Address line 2 and county are omitted, so the form posts them empty. The
     // API replaces the record in full, which is what clears them — a merge
     // would leave the stored values in place.
-    await pages.insAddressBookEdit.fill({
+    await insPages.addressBookEdit.fill({
       name: renamed,
       addressLine1: baseAddress.addressLine1,
       townOrCity: baseAddress.townOrCity,
@@ -33,10 +33,10 @@ test.describe('Address book edit', { tag: '@integration' }, () => {
       phone: baseAddress.phone,
       email: baseAddress.email,
     });
-    await pages.insAddressBookEdit.save();
+    await insPages.addressBookEdit.save();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${pages.insAddressBookList.expectedUrl}$`));
-    await expect(pages.insAddressBookList.successBanner).toBeVisible();
+    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await expect(insPages.addressBookList.successBanner).toBeVisible();
 
     const stored = await addressBookApi.getAddress(created.id);
     expect(stored.name).toBe(renamed);
@@ -46,7 +46,7 @@ test.describe('Address book edit', { tag: '@integration' }, () => {
     expect(stored.deleted).toBe(false);
   });
 
-  test('the edited address replaces the old one in the address book', async ({ pages, addressBookApi }) => {
+  test('the edited address replaces the old one in the address book', async ({ insPages, addressBookApi }) => {
     // The row locator matches on a regex, so the new name must not contain the
     // old one - otherwise the "gone" assertion matches the renamed row.
     const stamp = Date.now();
@@ -54,11 +54,11 @@ test.describe('Address book edit', { tag: '@integration' }, () => {
     const created = await addressBookApi.createAddress({ name: originalName, ...baseAddress });
 
     const renamed = `Relisted Holding ${stamp}`;
-    await pages.insAddressBookEdit.open(created.id);
-    await pages.insAddressBookEdit.inputName.fill(renamed);
-    await pages.insAddressBookEdit.save();
+    await insPages.addressBookEdit.open(created.id);
+    await insPages.addressBookEdit.inputName.fill(renamed);
+    await insPages.addressBookEdit.save();
 
-    await expect(pages.insAddressBookList.row(renamed)).toBeVisible();
-    await expect(pages.insAddressBookList.row(originalName)).toHaveCount(0);
+    await expect(insPages.addressBookList.row(renamed)).toBeVisible();
+    await expect(insPages.addressBookList.row(originalName)).toHaveCount(0);
   });
 });

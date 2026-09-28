@@ -18,6 +18,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
     journey,
     journeyContext,
     pages,
+    animalsPages,
   }) => {
     test.slow();
 
@@ -72,8 +73,8 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
       const draftVersion = draftDoc.aggregateVersion;
 
       // When — notification is submitted
-      await pages.declaration.confirmation.check();
-      await pages.declaration.continueButton.click();
+      await animalsPages.declaration.confirmation.check();
+      await animalsPages.declaration.continueButton.click();
       await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
 
       // Then — same document is updated to SUBMITTED (no duplicate created)

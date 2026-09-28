@@ -15,22 +15,22 @@ test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-i
     await journey.toCommoditySelection();
   });
 
-  test('offers a search box and lists nothing until it is used', async ({ pages }) => {
-    await expect(pages.commoditySelection.heading).toBeVisible();
-    await expect(pages.commoditySelection.searchBox).toBeVisible();
+  test('offers a search box and lists nothing until it is used', async ({ pages, animalsPages }) => {
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+    await expect(animalsPages.commoditySelection.searchBox).toBeVisible();
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
-    await expect(pages.commoditySelection.selectionPanel).toHaveCount(0);
-    await expect(pages.commoditySelection.saveAndContinue).toBeVisible();
+    await expect(animalsPages.commoditySelection.selectionPanel).toHaveCount(0);
+    await expect(animalsPages.commoditySelection.saveAndContinue).toBeVisible();
   });
 
-  test('lists nothing for a query shorter than three characters', async ({ pages }) => {
-    await pages.commoditySelection.search('Bo');
+  test('lists nothing for a query shorter than three characters', async ({ pages, animalsPages }) => {
+    await animalsPages.commoditySelection.search('Bo');
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
   });
 
-  test('groups the matching species under their commodity heading', async ({ pages }) => {
+  test('groups the matching species under their commodity heading', async ({ pages, animalsPages }) => {
     for (const [legend, query, species] of expectedGroups) {
-      await pages.commoditySelection.search(query);
+      await animalsPages.commoditySelection.search(query);
       const group = pages.page.getByRole('group', { name: legend });
       await expect(group).toBeVisible();
       for (const name of species) {
@@ -39,51 +39,51 @@ test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-i
     }
   });
 
-  test('says so when nothing matches', async ({ pages }) => {
-    await pages.commoditySelection.search('zzz');
+  test('says so when nothing matches', async ({ pages, animalsPages }) => {
+    await animalsPages.commoditySelection.search('zzz');
     await expect(pages.page.getByText('No results found')).toBeVisible();
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
   });
 
-  test('accepts and persists multiple commodity-species pairs found under different queries', async ({ pages }) => {
+  test('accepts and persists multiple commodity-species pairs found under different queries', async ({ pages, animalsPages }) => {
     test.slow();
 
-    await pages.commoditySelection.selectSpecies(['Bos taurus', 'Felis catus']);
-    await pages.commoditySelection.saveAndContinue.click();
+    await animalsPages.commoditySelection.selectSpecies(['Bos taurus', 'Felis catus']);
+    await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
     // Commodity details is a hub task of its own, so its back link returns to
     // the overview. Reopen the selection from the row that owns it.
-    await pages.consignmentDetails.linkBack.click();
-    await expect(pages.overview.heading).toBeVisible();
-    await pages.overview.task('What are you importing?').click();
+    await animalsPages.consignmentDetails.linkBack.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('What are you importing?').click();
 
     // Back on the page, both pairs are listed under the running count without
     // any query — a choice made under an earlier query is never lost.
-    await expect(pages.commoditySelection.selectionPanel).toContainText('2 selected');
-    await expect(pages.commoditySelection.selectionPanel).toContainText('Bos taurus');
-    await expect(pages.commoditySelection.selectionPanel).toContainText('Felis catus');
+    await expect(animalsPages.commoditySelection.selectionPanel).toContainText('2 selected');
+    await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Bos taurus');
+    await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Felis catus');
 
     // And each is ticked again when its own query brings it back on screen.
-    await pages.commoditySelection.search('Bos taurus');
-    await expect(pages.commoditySelection.species('Bos taurus')).toBeChecked();
-    await pages.commoditySelection.search('Felis catus');
-    await expect(pages.commoditySelection.species('Felis catus')).toBeChecked();
+    await animalsPages.commoditySelection.search('Bos taurus');
+    await expect(animalsPages.commoditySelection.species('Bos taurus')).toBeChecked();
+    await animalsPages.commoditySelection.search('Felis catus');
+    await expect(animalsPages.commoditySelection.species('Felis catus')).toBeChecked();
   });
 
-  test('counts what has been chosen and clears it on request', async ({ pages }) => {
-    await pages.commoditySelection.selectSpecies(['Bos taurus']);
+  test('counts what has been chosen and clears it on request', async ({ animalsPages }) => {
+    await animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
     // The panel is written on the server, so it appears on the next render.
-    await pages.commoditySelection.search('Salmo');
-    await expect(pages.commoditySelection.selectionPanel).toContainText('1 selected');
-    await expect(pages.commoditySelection.selectionPanel).toContainText('Bos taurus');
+    await animalsPages.commoditySelection.search('Salmo');
+    await expect(animalsPages.commoditySelection.selectionPanel).toContainText('1 selected');
+    await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Bos taurus');
 
-    await pages.commoditySelection.clearAll.click();
-    await expect(pages.commoditySelection.selectionPanel).toHaveCount(0);
+    await animalsPages.commoditySelection.clearAll.click();
+    await expect(animalsPages.commoditySelection.selectionPanel).toHaveCount(0);
   });
 
-  test('shows an error summary when submitted empty', async ({ pages }) => {
-    await pages.commoditySelection.saveAndContinue.click();
+  test('shows an error summary when submitted empty', async ({ pages, animalsPages }) => {
+    await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(pages.page.getByRole('link', { name: 'Select a commodity' })).toBeVisible();
   });

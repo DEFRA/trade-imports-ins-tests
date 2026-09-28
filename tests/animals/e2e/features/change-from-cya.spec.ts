@@ -4,10 +4,11 @@ test.describe('Change from check your answers', { tag: ['@integration', '@duplic
   test('a Change link opens the answering page with change context and the save returns to check your answers with the new value', async ({
     seededJourney,
     pages,
+    animalsPages,
   }) => {
     test.slow();
     const referenceNumber = await seededJourney.createDraftNotification('readyToSubmit');
-    await seededJourney.resumeInUi(referenceNumber, pages.notificationView);
+    await seededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
 
     // Design release 1 puts one Change link in each card's heading and none on
     // a row, so the link is named for the card and reaches every answer in it.
@@ -15,12 +16,12 @@ test.describe('Change from check your answers', { tag: ['@integration', '@duplic
     // the save exits back to check your answers instead of the flow target.
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
     await expect(countryRow).toContainText('France');
-    await pages.notificationView.changeLink('Change import details').click();
-    await expect(pages.originOfImport.heading).toBeVisible();
+    await animalsPages.notificationView.changeLink('Change import details').click();
+    await expect(animalsPages.originOfImport.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
-    await pages.originOfImport.selectCountry('Belgium');
-    await pages.originOfImport.saveAndContinue.click();
-    await expect(pages.notificationView.heading).toBeVisible();
+    await animalsPages.originOfImport.selectCountry('Belgium');
+    await animalsPages.originOfImport.saveAndContinue.click();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(countryRow).toContainText('Belgium');
 
@@ -29,12 +30,12 @@ test.describe('Change from check your answers', { tag: ['@integration', '@duplic
     // the summary.
     const certifiedForRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Certified for' });
     await expect(certifiedForRow).toContainText('Slaughter');
-    await pages.notificationView.changeLink('Change additional animal details').click();
-    await expect(pages.additionalDetails.heading).toBeVisible();
+    await animalsPages.notificationView.changeLink('Change additional animal details').click();
+    await expect(animalsPages.additionalDetails.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/additional-details\?change=1$/);
-    await pages.additionalDetails.certifiedFor('Exhibition').check();
-    await pages.additionalDetails.saveAndContinue.click();
-    await expect(pages.notificationView.heading).toBeVisible();
+    await animalsPages.additionalDetails.certifiedFor('Exhibition').check();
+    await animalsPages.additionalDetails.saveAndContinue.click();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(certifiedForRow).toContainText('Exhibition');
   });

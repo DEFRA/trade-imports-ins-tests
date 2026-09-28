@@ -39,7 +39,7 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
   test('submitted notification persists the journey answers and reloads read-only', async ({
     journey,
     journeyContext,
-    pages,
+    animalsPages,
     addressBookApi,
   }) => {
     // Resolve linked ids from the once-seeded journey fixtures (API globalSetup),
@@ -128,8 +128,8 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       await client.close();
     }
 
-    await pages.notificationView.open(referenceNumber);
-    await expect(pages.notificationView.heading).toBeVisible();
-    await expect(pages.notificationView.journeyStrip).toContainText('Submitted');
+    await animalsPages.notificationView.open(referenceNumber);
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
   });
 });

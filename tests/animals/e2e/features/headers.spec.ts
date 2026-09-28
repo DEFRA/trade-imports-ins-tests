@@ -1,4 +1,4 @@
-import { SET_BASES } from '@page-objects/base/sets';
+import { SET_BASES } from '@page-objects/shared/sets';
 
 import { test, expect } from '@fixtures';
 

@@ -4,12 +4,12 @@ test.describe('All operator addresses', { tag: ['@integration', '@duplicated-in-
   // The api seed unlocks only origin + commodity, so the review page is reached
   // through the full journey walk — the addresses leg of that walk picks the
   // canned parties whose names and countries are asserted here.
-  test('check your answers lists all six operators with the picked name and country', async ({ journey, pages }) => {
+  test('check your answers lists all six operators with the picked name and country', async ({ journey, pages, animalsPages }) => {
     test.slow();
 
     await journey.toReview();
 
-    const card = pages.notificationView.summaryCard('Roles and addresses');
+    const card = animalsPages.notificationView.summaryCard('Roles and addresses');
     const operator = (key: string) =>
       card
         .locator('.govuk-summary-list__row')

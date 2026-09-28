@@ -10,35 +10,35 @@ const address = {
 };
 
 test.describe('Security scan (ins)', { tag: '@active' }, () => {
-  test('routes the address book through the ZAP proxy', async ({ pages, addressBookApi }) => {
+  test('routes the address book through the ZAP proxy', async ({ pages, insPages, addressBookApi }) => {
     test.slow();
-    await pages.insAddressBookList.open();
+    await insPages.addressBookList.open();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${pages.insAddressBookList.expectedUrl}$`));
-    await expect(pages.insAddressBookList.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await expect(insPages.addressBookList.heading).toBeVisible();
 
     // The whole record lifecycle, not just the list: add, edit and delete are
     // the write surface, and each is an /address-book/{addressId} route — the
     // addressId dataDrivenNode has nothing to fold without them.
     const name = `Security Scan Farm ${Date.now()}`;
-    await pages.insAddressBookAdd.open();
-    await pages.insAddressBookAdd.fill({ name, ...address });
-    await pages.insAddressBookAdd.save();
-    await expect(pages.insAddressBookList.row(name)).toBeVisible();
+    await insPages.addressBookAdd.open();
+    await insPages.addressBookAdd.fill({ name, ...address });
+    await insPages.addressBookAdd.save();
+    await expect(insPages.addressBookList.row(name)).toBeVisible();
 
     const { id } = await addressBookApi.findByName(name);
 
-    await pages.insAddressBookView.open(id);
-    await expect(pages.insAddressBookView.heading(name)).toBeVisible();
+    await insPages.addressBookView.open(id);
+    await expect(insPages.addressBookView.heading(name)).toBeVisible();
 
-    await pages.insAddressBookEdit.open(id);
-    await pages.insAddressBookEdit.fill({ name, ...address, townOrCity: 'Penrith' });
-    await pages.insAddressBookEdit.save();
-    await expect(pages.insAddressBookList.row(name)).toBeVisible();
+    await insPages.addressBookEdit.open(id);
+    await insPages.addressBookEdit.fill({ name, ...address, townOrCity: 'Penrith' });
+    await insPages.addressBookEdit.save();
+    await expect(insPages.addressBookList.row(name)).toBeVisible();
 
-    await pages.insAddressBookDelete.open(id);
-    await pages.insAddressBookDelete.confirm();
-    await expect(pages.insAddressBookList.row(name)).toHaveCount(0);
+    await insPages.addressBookDelete.open(id);
+    await insPages.addressBookDelete.confirm();
+    await expect(insPages.addressBookList.row(name)).toHaveCount(0);
 
     await pages.page.goto('/');
 

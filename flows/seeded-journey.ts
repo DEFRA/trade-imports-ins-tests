@@ -4,7 +4,7 @@ import type { FrontendFormClient } from '@adapters/http/frontend-form-client';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { PARTY_NAMES, declarationStep, seedSteps, type PartyIds, type PartyRole, type SeedDepth } from '@domain/fixtures/seeded-journey';
 import type { JourneyContext } from '@flows/journey';
-import { SET_BASES } from '@page-objects/base/sets';
+import { SET_BASES } from '@page-objects/shared/sets';
 
 export const CREATE_PATH = `${SET_BASES.liveAnimals}/notifications`;
 const CREATED_AT_ORIGIN = new RegExp(`^${CREATE_PATH}/(?<journeyId>[^/]+)/origin$`);

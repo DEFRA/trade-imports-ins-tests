@@ -1,5 +1,5 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test';
-import { SET_BASES } from '@page-objects/base/sets';
+import { SET_BASES } from '@page-objects/shared/sets';
 
 /** A page's form fields. An array posts the key repeatedly, the way a checkbox group does. */
 export type FormFields = Record<string, string | string[]>;

@@ -4,6 +4,7 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
   test('renaming the book after submit does not change the submitted view, then shows live on amend', async ({
     seededJourney,
     pages,
+    animalsPages,
     addressBookApi,
     notificationActions,
   }) => {
@@ -23,23 +24,23 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
     });
 
     const referenceNumber = await seededJourney.createDraftNotification('readyToSubmit');
-    await seededJourney.resumeInUi(referenceNumber, pages.notificationView);
-    await pages.notificationView.changeLink('Change roles and addresses').click();
-    await expect(pages.addresses.heading).toBeVisible();
-    await pages.addresses.changeParty('Place of origin').click();
-    await pages.placeOfOriginSelection.select(originalName);
-    await pages.placeOfOriginSelection.saveAndContinue.click();
-    await expect(pages.addresses.heading).toBeVisible();
-    await pages.addresses.continueButton.click();
-    await expect(pages.notificationView.heading).toBeVisible();
+    await seededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    await animalsPages.notificationView.changeLink('Change roles and addresses').click();
+    await expect(animalsPages.addresses.heading).toBeVisible();
+    await animalsPages.addresses.changeParty('Place of origin').click();
+    await animalsPages.placeOfOriginSelection.select(originalName);
+    await animalsPages.placeOfOriginSelection.saveAndContinue.click();
+    await expect(animalsPages.addresses.heading).toBeVisible();
+    await animalsPages.addresses.continueButton.click();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
 
-    const originRow = pages.notificationView.partyRow('Roles and addresses', 'Place of origin');
+    const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
     await expect(originRow).toContainText(originalName);
 
-    await pages.notificationView.continueButton.click();
-    await expect(pages.declaration.heading).toBeVisible();
-    await pages.declaration.confirmation.check();
-    await pages.declaration.continueButton.click();
+    await animalsPages.notificationView.continueButton.click();
+    await expect(animalsPages.declaration.heading).toBeVisible();
+    await animalsPages.declaration.confirmation.check();
+    await animalsPages.declaration.continueButton.click();
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
 
     await addressBookApi.updateAddress(address.id, {
@@ -53,24 +54,24 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
     });
 
     await notificationActions.toNotificationView(referenceNumber);
-    await expect(pages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');
     await expect(originRow).not.toContainText(renamed);
     await expect(originRow).not.toContainText('Penrith');
 
     await notificationActions.amendNotification(referenceNumber);
-    await pages.overview.reviewAndSubmitButton.click();
-    await expect(pages.notificationView.heading).toBeVisible();
-    await expect(pages.notificationView.journeyStrip).toContainText('Amending');
+    await animalsPages.overview.reviewAndSubmitButton.click();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.journeyStrip).toContainText('Amending');
     await expect(originRow).toContainText(renamed);
     await expect(originRow).toContainText('Penrith');
     await expect(originRow).not.toContainText(originalName);
 
-    await pages.notificationView.cancelAmendment.click();
-    await pages.notificationCancelAmend.confirm.click();
+    await animalsPages.notificationView.cancelAmendment.click();
+    await animalsPages.notificationCancelAmend.confirm.click();
     await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
-    await expect(pages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).not.toContainText(renamed);
   });
@@ -78,6 +79,7 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
   test('deleting the book record after submit does not change the submitted view or error', async ({
     seededJourney,
     pages,
+    animalsPages,
     addressBookApi,
     notificationActions,
   }) => {
@@ -96,25 +98,25 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
     });
 
     const referenceNumber = await seededJourney.createDraftNotification('readyToSubmit');
-    await seededJourney.resumeInUi(referenceNumber, pages.notificationView);
-    await pages.notificationView.changeLink('Change roles and addresses').click();
-    await pages.addresses.changeParty('Place of origin').click();
-    await pages.placeOfOriginSelection.select(originalName);
-    await pages.placeOfOriginSelection.saveAndContinue.click();
-    await pages.addresses.continueButton.click();
+    await seededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    await animalsPages.notificationView.changeLink('Change roles and addresses').click();
+    await animalsPages.addresses.changeParty('Place of origin').click();
+    await animalsPages.placeOfOriginSelection.select(originalName);
+    await animalsPages.placeOfOriginSelection.saveAndContinue.click();
+    await animalsPages.addresses.continueButton.click();
 
-    const originRow = pages.notificationView.partyRow('Roles and addresses', 'Place of origin');
+    const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
     await expect(originRow).toContainText(originalName);
 
-    await pages.notificationView.continueButton.click();
-    await pages.declaration.confirmation.check();
-    await pages.declaration.continueButton.click();
+    await animalsPages.notificationView.continueButton.click();
+    await animalsPages.declaration.confirmation.check();
+    await animalsPages.declaration.continueButton.click();
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
 
     await addressBookApi.deleteAddress(address.id);
 
     await notificationActions.toNotificationView(referenceNumber);
-    await expect(pages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');
     await expect(pages.page.locator('.govuk-error-summary')).toHaveCount(0);

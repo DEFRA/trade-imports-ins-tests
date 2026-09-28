@@ -1,4 +1,4 @@
-import type { PageObjects } from '@page-objects';
+import type { PlantsPages } from '@page-objects';
 import type { JourneyContext } from '@flows/journey';
 
 /**
@@ -14,13 +14,13 @@ const GENUS = 'Genus';
 
 export class PlantsJourney {
   constructor(
-    private readonly pages: PageObjects,
+    private readonly plantsPages: PlantsPages,
     private readonly context: JourneyContext,
   ) {}
 
   async toDashboard(): Promise<void> {
-    await this.pages.plantsDashboard.open();
-    await this.pages.plantsDashboard.heading.waitFor();
+    await this.plantsPages.dashboard.open();
+    await this.plantsPages.dashboard.heading.waitFor();
   }
 
   /**
@@ -32,9 +32,9 @@ export class PlantsJourney {
    */
   async startNotification(): Promise<string> {
     await this.toDashboard();
-    await this.pages.plantsDashboard.btnStartNewNotification.click();
-    await this.pages.plantsCommodityType.heading.waitFor();
-    const journeyId = this.pages.plantsCommodityType.journeyIdFromUrl();
+    await this.plantsPages.dashboard.btnStartNewNotification.click();
+    await this.plantsPages.commodityType.heading.waitFor();
+    const journeyId = this.plantsPages.commodityType.journeyIdFromUrl();
     this.context.journeyId = journeyId;
     this.context.referenceNumber = journeyId;
     return journeyId;
@@ -46,8 +46,8 @@ export class PlantsJourney {
    * exactly as the create POST left it.
    */
   async toOverview(): Promise<void> {
-    await this.pages.plantsCommodityType.linkCancel.click();
-    await this.pages.plantsOverview.heading.waitFor();
+    await this.plantsPages.commodityType.linkCancel.click();
+    await this.plantsPages.overview.heading.waitFor();
   }
 
   /**
@@ -56,9 +56,9 @@ export class PlantsJourney {
    * this lands on the commodity-details page, not on the list.
    */
   async chooseCommodityType(label: string): Promise<void> {
-    await this.pages.plantsCommodityType.commodityType(label).check();
-    await this.pages.plantsCommodityType.btnSaveAndContinue.click();
-    await this.pages.plantsCommodityDetails.heading.waitFor();
+    await this.plantsPages.commodityType.commodityType(label).check();
+    await this.plantsPages.commodityType.btnSaveAndContinue.click();
+    await this.plantsPages.commodityDetails.heading.waitFor();
   }
 
   /**
@@ -67,9 +67,9 @@ export class PlantsJourney {
    * entry page, because the trader has to see what went.
    */
   async changeCommodityType(reference: string, label: string): Promise<void> {
-    await this.pages.plantsCommodityType.open(reference);
-    await this.pages.plantsCommodityType.commodityType(label).check();
-    await this.pages.plantsCommodityType.btnSaveAndContinue.click();
+    await this.plantsPages.commodityType.open(reference);
+    await this.plantsPages.commodityType.commodityType(label).check();
+    await this.plantsPages.commodityType.btnSaveAndContinue.click();
   }
 
   /**
@@ -78,18 +78,18 @@ export class PlantsJourney {
    * fields that category asks for, so the two steps cannot be collapsed.
    */
   async addCommodityLine(category: string, values: CommodityLine): Promise<void> {
-    await this.pages.plantsCommodityDetails.category(category).check();
-    await this.pages.plantsCommodityDetails.btnContinue.click();
-    await this.pages.plantsCommodityDetails.btnSaveAndContinue.waitFor();
+    await this.plantsPages.commodityDetails.category(category).check();
+    await this.plantsPages.commodityDetails.btnContinue.click();
+    await this.plantsPages.commodityDetails.btnSaveAndContinue.waitFor();
     await this.fillCommodityLine(values);
-    await this.pages.plantsCommodityDetails.btnSaveAndContinue.click();
-    await this.pages.plantsCommodities.heading.waitFor();
+    await this.plantsPages.commodityDetails.btnSaveAndContinue.click();
+    await this.plantsPages.commodities.heading.waitFor();
   }
 
   /** Adds a further line from the list page the last one returned to. */
   async addAnotherCommodityLine(category: string, values: CommodityLine): Promise<void> {
-    await this.pages.plantsCommodities.btnAddAnother.click();
-    await this.pages.plantsCommodityDetails.heading.waitFor();
+    await this.plantsPages.commodities.btnAddAnother.click();
+    await this.plantsPages.commodityDetails.heading.waitFor();
     await this.addCommodityLine(category, values);
   }
 
@@ -98,11 +98,11 @@ export class PlantsJourney {
    * only while the opening run is still open. Once the run has ended,
    * commodities is the last page of its section and Continue returns to the
    * Overview instead — so a notification past its opening run reaches origin
-   * with `pages.plantsOrigin.open(reference)`, not with this helper.
+   * with `plantsPages.origin.open(reference)`, not with this helper.
    */
   async toOrigin(): Promise<void> {
-    await this.pages.plantsCommodities.btnSaveAndContinue.click();
-    await this.pages.plantsOrigin.heading.waitFor();
+    await this.plantsPages.commodities.btnSaveAndContinue.click();
+    await this.plantsPages.origin.heading.waitFor();
   }
 
   /**
@@ -112,9 +112,9 @@ export class PlantsJourney {
    * details instead, so it reaches the section through `toArrivalDetails`.
    */
   async toArrivalStatus(country: string): Promise<void> {
-    await this.pages.plantsOrigin.selectCountry(country);
-    await this.pages.plantsOrigin.btnSaveAndContinue.click();
-    await this.pages.plantsArrivalStatus.heading.waitFor();
+    await this.plantsPages.origin.selectCountry(country);
+    await this.plantsPages.origin.btnSaveAndContinue.click();
+    await this.plantsPages.arrivalStatus.heading.waitFor();
   }
 
   /**
@@ -123,9 +123,9 @@ export class PlantsJourney {
    * opening run skips that step rather than stopping at it.
    */
   async toArrivalDetails(country: string): Promise<void> {
-    await this.pages.plantsOrigin.selectCountry(country);
-    await this.pages.plantsOrigin.btnSaveAndContinue.click();
-    await this.pages.plantsArrivalDetails.heading.waitFor();
+    await this.plantsPages.origin.selectCountry(country);
+    await this.plantsPages.origin.btnSaveAndContinue.click();
+    await this.plantsPages.arrivalDetails.heading.waitFor();
   }
 
   /**
@@ -133,24 +133,24 @@ export class PlantsJourney {
    * details — the next page of the same section, not the Overview.
    */
   async answerArrivalStatus(label: string): Promise<void> {
-    await this.pages.plantsArrivalStatus.arrivalStatus(label).check();
-    await this.pages.plantsArrivalStatus.btnSaveAndContinue.click();
-    await this.pages.plantsArrivalDetails.heading.waitFor();
+    await this.plantsPages.arrivalStatus.arrivalStatus(label).check();
+    await this.plantsPages.arrivalStatus.btnSaveAndContinue.click();
+    await this.plantsPages.arrivalDetails.heading.waitFor();
   }
 
   private async fillCommodityLine(values: CommodityLine): Promise<void> {
     for (const [label, value] of Object.entries(values)) {
       if (label === GENUS) {
-        await this.pages.plantsCommodityDetails.selectGenus(value);
+        await this.plantsPages.commodityDetails.selectGenus(value);
         continue;
       }
-      await this.pages.plantsCommodityDetails.field(label).fill(value);
+      await this.plantsPages.commodityDetails.field(label).fill(value);
     }
   }
 
   async returnToDashboard(): Promise<void> {
-    await this.pages.plantsOverview.btnReturnToDashboard.click();
-    await this.pages.plantsDashboard.heading.waitFor();
+    await this.plantsPages.overview.btnReturnToDashboard.click();
+    await this.plantsPages.dashboard.heading.waitFor();
   }
 
   /**
@@ -159,8 +159,8 @@ export class PlantsJourney {
    * is reached by searching for the reference rather than by paging to find it.
    */
   async deleteFromDashboard(reference: string): Promise<void> {
-    await this.pages.plantsDashboard.searchForReference(reference);
-    await this.pages.plantsDashboard.delete(reference).click();
-    await this.pages.plantsDeleteNotification.heading.waitFor();
+    await this.plantsPages.dashboard.searchForReference(reference);
+    await this.plantsPages.dashboard.delete(reference).click();
+    await this.plantsPages.deleteNotification.heading.waitFor();
   }
 }

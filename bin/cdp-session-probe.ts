@@ -1,5 +1,5 @@
 import { chromium, type Browser, type BrowserContext, type Page } from '@playwright/test';
-import { SignInPage } from '@page-objects/auth/sign-in-page';
+import { SignInPage } from '@page-objects/shared/auth/sign-in-page';
 import { AUTH_COOKIE_NAME, AUTH_TARGETS, LANDING_TIMEOUT_MS, stripToAuthCookie, type AuthTarget } from '@fixtures/auth-state';
 import { getEnvironment, throwIfProdEnvironment } from '@utils/playwright/environment';
 

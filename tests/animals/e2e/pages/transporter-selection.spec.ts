@@ -9,19 +9,19 @@ test.describe('Transporter selection page', { tag: ['@integration', '@duplicated
     await journey.toTransporterSelection();
   });
 
-  test('renders the page controls', async ({ pages }) => {
-    await expect(pages.transporterSelection.heading).toBeVisible();
-    await expect(pages.transporterSelection.transporter('García Livestock Transport SL')).toBeVisible();
-    await expect(pages.transporterSelection.saveAndContinue).toBeVisible();
+  test('renders the page controls', async ({ animalsPages }) => {
+    await expect(animalsPages.transporterSelection.heading).toBeVisible();
+    await expect(animalsPages.transporterSelection.transporter('García Livestock Transport SL')).toBeVisible();
+    await expect(animalsPages.transporterSelection.saveAndContinue).toBeVisible();
   });
 
-  test('leaves the transporter unchecked on load', async ({ pages }) => {
-    await expect(pages.transporterSelection.transporter('García Livestock Transport SL')).not.toBeChecked();
+  test('leaves the transporter unchecked on load', async ({ animalsPages }) => {
+    await expect(animalsPages.transporterSelection.transporter('García Livestock Transport SL')).not.toBeChecked();
   });
 
-  test('accepts a valid transporter', async ({ pages }) => {
-    await pages.transporterSelection.transporter('García Livestock Transport SL').check();
-    await pages.transporterSelection.saveAndContinue.click();
+  test('accepts a valid transporter', async ({ pages, animalsPages }) => {
+    await animalsPages.transporterSelection.transporter('García Livestock Transport SL').check();
+    await animalsPages.transporterSelection.saveAndContinue.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });

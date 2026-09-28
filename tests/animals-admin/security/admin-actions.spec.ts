@@ -16,24 +16,24 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
     sqs.destroy();
   });
 
-  test('routes the admin write actions through the ZAP proxy', async ({ seededJourney, adminNavigation, pages }) => {
+  test('routes the admin write actions through the ZAP proxy', async ({ seededJourney, adminNavigation, pages, animalsAdminPages }) => {
     test.slow();
     const referenceNumber = await seededJourney.createAmendNotification();
 
     await adminNavigation.toOutboxEvents(referenceNumber);
-    await expect.poll(() => pages.adminOutboxEvents.tableRows.count(), { timeout: timeouts.short }).toBeGreaterThan(0);
-    await pages.adminOutboxEvents.btnReplay.click();
-    await expect(pages.adminOutboxEvents.bannerSuccess).toBeVisible();
+    await expect.poll(() => animalsAdminPages.outboxEvents.tableRows.count(), { timeout: timeouts.short }).toBeGreaterThan(0);
+    await animalsAdminPages.outboxEvents.btnReplay.click();
+    await expect(animalsAdminPages.outboxEvents.bannerSuccess).toBeVisible();
 
-    await pages.adminNotifications.open();
-    await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
-    await pages.adminNotifications.deleteByReferenceNumber();
-    await pages.adminNotifications.btnConfirm.click();
-    await expect(pages.adminNotifications.alertSuccess).toBeVisible();
+    await animalsAdminPages.notifications.open();
+    await animalsAdminPages.notifications.inputReferenceNumber.fill(referenceNumber);
+    await animalsAdminPages.notifications.deleteByReferenceNumber();
+    await animalsAdminPages.notifications.btnConfirm.click();
+    await expect(animalsAdminPages.notifications.alertSuccess).toBeVisible();
 
     const eventId = await seedDlqMessage(sqs);
     await adminNavigation.toDlqEvents();
-    const seededDlqRow = pages.adminDlqEvents.rowById(eventId);
+    const seededDlqRow = animalsAdminPages.dlqEvents.rowById(eventId);
     await expect(async () => {
       if (!(await seededDlqRow.isVisible())) {
         await pages.page.reload();
@@ -41,9 +41,9 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
       await expect(seededDlqRow).toBeVisible({ timeout: timeouts.short });
     }).toPass({ timeout: timeouts.medium });
 
-    await pages.adminDlqEvents.btnDeleteAll.click();
-    await pages.adminDlqEvents.btnConfirmDeleteAll.click();
-    await expect(pages.adminDlqEvents.bannerSuccess).toBeVisible();
+    await animalsAdminPages.dlqEvents.btnDeleteAll.click();
+    await animalsAdminPages.dlqEvents.btnConfirmDeleteAll.click();
+    await expect(animalsAdminPages.dlqEvents.bannerSuccess).toBeVisible();
 
     // No assertion: this goto exists only to put the static /about page through the ZAP proxy.
     await pages.page.goto('/about');

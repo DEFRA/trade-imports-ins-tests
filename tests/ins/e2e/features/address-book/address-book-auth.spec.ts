@@ -5,8 +5,8 @@ import { COLD_START } from '@fixtures/auth-state';
 test.use({ storageState: COLD_START });
 
 test.describe('Authentication (ins)', { tag: '@auth' }, () => {
-  test.beforeEach(async ({ journey, pages }) => {
-    await journey.toSignIn((attemptSignIn) => pages.insAddressBookAdd.open(attemptSignIn));
+  test.beforeEach(async ({ journey, insPages }) => {
+    await journey.toSignIn((attemptSignIn) => insPages.addressBookAdd.open(attemptSignIn));
   });
 
   test('lands on the sign in page when opening a page past the address book landing page', async ({ pages }) => {
@@ -14,9 +14,9 @@ test.describe('Authentication (ins)', { tag: '@auth' }, () => {
     await expect(pages.signIn.heading).toBeVisible();
   });
 
-  test('allows signing into a page past the address book landing page', async ({ pages }) => {
+  test('allows signing into a page past the address book landing page', async ({ pages, insPages }) => {
     await pages.signIn.signIn();
-    await expect(pages.page).toHaveURL(new RegExp(`${pages.insAddressBookAdd.expectedUrl}$`));
-    await expect(pages.insAddressBookAdd.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookAdd.expectedUrl}$`));
+    await expect(insPages.addressBookAdd.heading).toBeVisible();
   });
 });

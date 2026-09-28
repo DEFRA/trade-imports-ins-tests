@@ -56,17 +56,18 @@ test.describe('Notification lifecycle', { tag: ['@compose', '@integration'] }, (
     journey,
     journeyContext,
     pages,
+    animalsPages,
     notificationActions,
   }) => {
     await journey.submitNotification();
     await notificationActions.toNotificationView(journeyContext.journeyId);
 
-    await expect(pages.notificationView.heading).toBeVisible();
-    await expect(pages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
 
     await notificationActions.amendNotification(journeyContext.journeyId);
-    await expect(pages.overview.heading).toBeVisible();
-    await expect(pages.overview.journeyStrip).toContainText('Amending');
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.overview.journeyStrip).toContainText('Amending');
   });
 });

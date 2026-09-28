@@ -77,17 +77,19 @@ test.describe('Notification created outbox event', { tag: ['@integration', '@mon
   test('writes a NotificationCreated event with consignor name when a submitted notification is copied', async ({
     seededJourney,
     notificationActions,
-    pages,
+    animalsPages,
     journeyContext,
   }) => {
     test.slow();
     await seededJourney.createSubmittedNotification();
     const sourceReferenceNumber = journeyContext.journeyId;
     await notificationActions.toNotificationView(sourceReferenceNumber);
-    await pages.notificationView.btnCopyAsNew.click();
-    await pages.overview.heading.waitFor();
+    await animalsPages.notificationView.btnCopyAsNew.click();
+    await animalsPages.overview.heading.waitFor();
 
-    const copiedReferenceNumber = (await pages.notificationView.referenceNumberCaption.textContent())?.match(REFERENCE_NUMBER_PATTERN)?.[0];
+    const copiedReferenceNumber = (await animalsPages.notificationView.referenceNumberCaption.textContent())?.match(
+      REFERENCE_NUMBER_PATTERN,
+    )?.[0];
     expect(copiedReferenceNumber).toBeDefined();
     expect(copiedReferenceNumber).not.toEqual(sourceReferenceNumber);
 

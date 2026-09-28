@@ -7,7 +7,7 @@ test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, (
     seededJourney,
     journeyContext,
     adminNavigation,
-    pages,
+    animalsAdminPages,
     runA11yScan,
   }) => {
     await seededJourney.createSubmittedNotification();
@@ -15,14 +15,14 @@ test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, (
 
     await test.step('Admin notifications', async () => {
       await adminNavigation.toNotifications();
-      await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
-      await pages.adminNotifications.checkBoxSelectAll.check();
+      await animalsAdminPages.notifications.inputReferenceNumber.fill(referenceNumber);
+      await animalsAdminPages.notifications.checkBoxSelectAll.check();
       await runA11yScan();
     });
 
     await test.step('Admin notifications delete confirmation', async () => {
-      await pages.adminNotifications.checkBoxSelectAll.uncheck();
-      await pages.adminNotifications.deleteByReferenceNumber();
+      await animalsAdminPages.notifications.checkBoxSelectAll.uncheck();
+      await animalsAdminPages.notifications.deleteByReferenceNumber();
       await runA11yScan();
     });
 
@@ -30,7 +30,7 @@ test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, (
 
     await test.step('Admin outbox events with no results', async () => {
       await adminNavigation.toOutboxEvents(REFERENCE_NUMBER_WITH_NO_EVENTS);
-      await pages.adminOutboxEvents.emptyStateMessage.waitFor();
+      await animalsAdminPages.outboxEvents.emptyStateMessage.waitFor();
       await runA11yScan();
     });
   });

@@ -17,44 +17,48 @@ const PRIVATE_TRANSPORTER = {
 const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test('the reason-gated and private transporter pages have no accessibility violations', async ({ journey, pages, runA11yScan }) => {
+  test('the reason-gated and private transporter pages have no accessibility violations', async ({
+    journey,
+    animalsPages,
+    runA11yScan,
+  }) => {
     test.slow();
     await journey.startNotification();
     await journey.unlockSections();
 
     await test.step('Import reason: Transit', async () => {
-      await pages.overview.task('Main reason for import').click();
-      await pages.importReason.reason('Transit').check();
-      await pages.importReason.transitPortOfExit.selectOption({ index: 2 });
-      await pages.importReason.transitDestinationCountry.selectOption('FR');
+      await animalsPages.overview.task('Main reason for import').click();
+      await animalsPages.importReason.reason('Transit').check();
+      await animalsPages.importReason.transitPortOfExit.selectOption({ index: 2 });
+      await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
       await runA11yScan({ exclude: conditionalReasonRadios });
-      await pages.importReason.saveAndContinue.click();
-      await pages.additionalDetails.heading.waitFor();
-      await pages.additionalDetails.saveAndContinue.click();
-      await pages.overview.heading.waitFor();
+      await animalsPages.importReason.saveAndContinue.click();
+      await animalsPages.additionalDetails.heading.waitFor();
+      await animalsPages.additionalDetails.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
     });
 
     await test.step('Import reason: Temporary admission of horses', async () => {
-      await pages.overview.task('Main reason for import').click();
-      await pages.importReason.reason('Temporary admission horses').check();
-      await pages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
-      await pages.importReason.temporaryAdmissionPortOfExit.selectOption({ index: 2 });
+      await animalsPages.overview.task('Main reason for import').click();
+      await animalsPages.importReason.reason('Temporary admission horses').check();
+      await animalsPages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
+      await animalsPages.importReason.temporaryAdmissionPortOfExit.selectOption({ index: 2 });
       await runA11yScan({ exclude: conditionalReasonRadios });
-      await pages.importReason.saveAndContinue.click();
-      await pages.additionalDetails.heading.waitFor();
-      await pages.additionalDetails.saveAndContinue.click();
-      await pages.overview.heading.waitFor();
+      await animalsPages.importReason.saveAndContinue.click();
+      await animalsPages.additionalDetails.heading.waitFor();
+      await animalsPages.additionalDetails.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
     });
 
     await test.step('Private transporter', async () => {
       await journey.reachTransporterFromHub();
-      await pages.transporter.addTransporter.click();
-      await pages.transporterAdd.heading.waitFor();
-      await pages.transporterAdd.transporterType('Private').check();
+      await animalsPages.transporter.addTransporter.click();
+      await animalsPages.transporterAdd.heading.waitFor();
+      await animalsPages.transporterAdd.transporterType('Private').check();
       await runA11yScan();
-      await pages.transporterAdd.saveAndContinue.click();
-      await pages.privateTransporter.heading.waitFor();
-      await pages.privateTransporter.fill(PRIVATE_TRANSPORTER);
+      await animalsPages.transporterAdd.saveAndContinue.click();
+      await animalsPages.privateTransporter.heading.waitFor();
+      await animalsPages.privateTransporter.fill(PRIVATE_TRANSPORTER);
       await runA11yScan();
     });
   });

@@ -5,54 +5,54 @@ const WHOLE_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
 const DISPLAYED_DATE_PATTERN = /\d{1,2} \w+ \d{4}/;
 
 test.describe('Import notification service dashboard', { tag: '@integration' }, () => {
-  test('starts a journey at the origin page and lists the draft', async ({ journey, pages }) => {
+  test('starts a journey at the origin page and lists the draft', async ({ journey, pages, animalsPages }) => {
     const journeyId = await journey.startNotification();
 
-    await expect(pages.page).toHaveURL(pages.overview.expectedUrl(journeyId));
-    await expect(pages.overview.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(animalsPages.overview.expectedUrl(journeyId));
+    await expect(animalsPages.overview.heading).toBeVisible();
 
-    const card = pages.notificationDashboard.notificationCard(journeyId);
+    const card = animalsPages.dashboard.notificationCard(journeyId);
     await expect(async () => {
-      await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(journeyId);
+      await animalsPages.dashboard.open();
+      await animalsPages.dashboard.searchForReference(journeyId);
       await expect(card).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 15_000 });
     await expect(card.getByText('Draft', { exact: true })).toBeVisible();
-    await expect(pages.notificationDashboard.resume(journeyId)).toBeVisible();
-    await expect(pages.notificationDashboard.copyAsNew(journeyId)).toBeVisible();
-    await expect(pages.notificationDashboard.delete(journeyId)).toBeVisible();
+    await expect(animalsPages.dashboard.resume(journeyId)).toBeVisible();
+    await expect(animalsPages.dashboard.copyAsNew(journeyId)).toBeVisible();
+    await expect(animalsPages.dashboard.delete(journeyId)).toBeVisible();
   });
 
   test.describe('dashboard basics', () => {
-    test('lands on the notification dashboard', { tag: '@smoke' }, async ({ journey, pages }) => {
+    test('lands on the notification dashboard', { tag: '@smoke' }, async ({ journey, pages, animalsPages }) => {
       await journey.toNotificationDashboard();
-      await expect(pages.page).toHaveURL(pages.notificationDashboard.expectedUrl);
-      await expect(pages.notificationDashboard.heading).toBeVisible();
+      await expect(pages.page).toHaveURL(animalsPages.dashboard.expectedUrl);
+      await expect(animalsPages.dashboard.heading).toBeVisible();
     });
 
-    test('allows creating a new notification, landing on the journey entry page', async ({ journey, pages }) => {
+    test('allows creating a new notification, landing on the journey entry page', async ({ journey, animalsPages }) => {
       await journey.toNotificationDashboard();
-      await pages.notificationDashboard.btnCreateNewNotification.click();
-      await expect(pages.originOfImport.heading).toBeVisible();
+      await animalsPages.dashboard.btnCreateNewNotification.click();
+      await expect(animalsPages.originOfImport.heading).toBeVisible();
     });
 
-    test('displays the notification list and result count', async ({ seededJourney, pages }) => {
+    test('displays the notification list and result count', async ({ seededJourney, animalsPages }) => {
       const referenceNumber = await seededJourney.createDraftNotification('unlocked');
-      await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await animalsPages.dashboard.open();
+      await animalsPages.dashboard.searchForReference(referenceNumber);
 
-      await expect(pages.notificationDashboard.heading).toBeVisible();
-      await expect(pages.notificationDashboard.totalResults).toBeVisible();
-      await expect(pages.notificationDashboard.notificationCards).toHaveCount(1);
+      await expect(animalsPages.dashboard.heading).toBeVisible();
+      await expect(animalsPages.dashboard.totalResults).toBeVisible();
+      await expect(animalsPages.dashboard.notificationCards).toHaveCount(1);
     });
 
-    test('displays details on a notification card', async ({ seededJourney, pages }) => {
+    test('displays details on a notification card', async ({ seededJourney, animalsPages }) => {
       test.slow();
       const referenceNumber = await seededJourney.createSubmittedNotification();
-      await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await animalsPages.dashboard.open();
+      await animalsPages.dashboard.searchForReference(referenceNumber);
 
-      const details = pages.notificationDashboard.notificationCardDetails(0);
+      const details = animalsPages.dashboard.notificationCardDetails(0);
       await expect(details.heading).toContainText(referenceNumber);
       await expect(details.commodity).toBeVisible();
       await expect(details.origin).toBeVisible();
@@ -63,43 +63,43 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
   });
 
   test.describe('notification card actions by status', () => {
-    test('shows resume, copy and delete actions for a draft notification', async ({ pages, seededJourney }) => {
+    test('shows resume, copy and delete actions for a draft notification', async ({ animalsPages, seededJourney }) => {
       const referenceNumber = await seededJourney.createDraftNotification('unlocked');
 
-      await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(referenceNumber);
-      await expect(pages.notificationDashboard.notificationCardDetails(0).status).toContainText('Draft');
-      await expect(pages.notificationDashboard.resume(referenceNumber)).toBeVisible();
-      await expect(pages.notificationDashboard.copyAsNew(referenceNumber)).toBeVisible();
-      await expect(pages.notificationDashboard.delete(referenceNumber)).toBeVisible();
-      await expect(pages.notificationDashboard.amend(referenceNumber)).not.toBeVisible();
+      await animalsPages.dashboard.open();
+      await animalsPages.dashboard.searchForReference(referenceNumber);
+      await expect(animalsPages.dashboard.notificationCardDetails(0).status).toContainText('Draft');
+      await expect(animalsPages.dashboard.resume(referenceNumber)).toBeVisible();
+      await expect(animalsPages.dashboard.copyAsNew(referenceNumber)).toBeVisible();
+      await expect(animalsPages.dashboard.delete(referenceNumber)).toBeVisible();
+      await expect(animalsPages.dashboard.amend(referenceNumber)).not.toBeVisible();
     });
 
-    test('shows view, copy and amend actions for a submitted notification', async ({ pages, seededJourney }) => {
+    test('shows view, copy and amend actions for a submitted notification', async ({ animalsPages, seededJourney }) => {
       const referenceNumber = await seededJourney.createSubmittedNotification();
 
-      await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(referenceNumber);
-      await expect(pages.notificationDashboard.notificationCardDetails(0).status).toContainText('Submitted');
-      await expect(pages.notificationDashboard.view(referenceNumber)).toBeVisible();
-      await expect(pages.notificationDashboard.copyAsNew(referenceNumber)).toBeVisible();
-      await expect(pages.notificationDashboard.amend(referenceNumber)).toBeVisible();
+      await animalsPages.dashboard.open();
+      await animalsPages.dashboard.searchForReference(referenceNumber);
+      await expect(animalsPages.dashboard.notificationCardDetails(0).status).toContainText('Submitted');
+      await expect(animalsPages.dashboard.view(referenceNumber)).toBeVisible();
+      await expect(animalsPages.dashboard.copyAsNew(referenceNumber)).toBeVisible();
+      await expect(animalsPages.dashboard.amend(referenceNumber)).toBeVisible();
     });
 
     test(
       'copies a submitted notification from its searched dashboard card',
       { tag: '@smoke' },
-      async ({ pages, journey, journeyContext }) => {
+      async ({ animalsPages, journey, journeyContext }) => {
         test.slow();
         await journey.submitNotification();
         const originalReferenceNumber = journeyContext.journeyId;
 
-        await pages.notificationDashboard.open();
-        await pages.notificationDashboard.searchForReference(originalReferenceNumber);
-        await pages.notificationDashboard.copyAsNew(originalReferenceNumber).click();
+        await animalsPages.dashboard.open();
+        await animalsPages.dashboard.searchForReference(originalReferenceNumber);
+        await animalsPages.dashboard.copyAsNew(originalReferenceNumber).click();
 
-        await pages.overview.heading.waitFor();
-        const copiedReferenceNumber = (await pages.notificationView.referenceNumberCaption.textContent())?.match(
+        await animalsPages.overview.heading.waitFor();
+        const copiedReferenceNumber = (await animalsPages.notificationView.referenceNumberCaption.textContent())?.match(
           REFERENCE_NUMBER_PATTERN,
         )?.[0];
         expect(copiedReferenceNumber).toMatch(WHOLE_REFERENCE_NUMBER_PATTERN);

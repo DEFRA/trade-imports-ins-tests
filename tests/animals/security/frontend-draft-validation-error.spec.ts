@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Security scan (frontend, draft)', { tag: '@active' }, () => {
-  test('routes a draft validation error through the ZAP proxy', async ({ journey, pages }) => {
+  test('routes a draft validation error through the ZAP proxy', async ({ journey, animalsPages }) => {
     await journey.toOriginOfImport();
 
     // Fresh, unsubmitted draft — a region code claimed but not given is real
@@ -9,10 +9,10 @@ test.describe('Security scan (frontend, draft)', { tag: '@active' }, () => {
     // spec's submit-only happy path never generates. (Country of origin alone
     // no longer blocks the save — see origin/controller.js's oneOf swap for
     // parity-dr1 — so this is the field still enforced on submit.)
-    await pages.originOfImport.selectCountry('France');
-    await pages.originOfImport.radioRequiresOriginCode('Yes').check();
-    await pages.originOfImport.saveAndContinue.click();
-    await expect(pages.originOfImport.errorSummary).toBeVisible();
+    await animalsPages.originOfImport.selectCountry('France');
+    await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
+    await animalsPages.originOfImport.saveAndContinue.click();
+    await expect(animalsPages.originOfImport.errorSummary).toBeVisible();
 
     await journey.fillOriginOfImport();
     await journey.saveOriginOfImport();
@@ -21,6 +21,6 @@ test.describe('Security scan (frontend, draft)', { tag: '@active' }, () => {
     // (see journey.ts's answerOrigin(), which enters Origin via the overview
     // task list instead) — a valid save here advances straight to the next
     // step rather than returning to Overview.
-    await pages.commoditySelection.heading.waitFor();
+    await animalsPages.commoditySelection.heading.waitFor();
   });
 });

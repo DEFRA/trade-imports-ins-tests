@@ -4,19 +4,19 @@ import { fileUploadPaths } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 test.describe('Promoted accompanying documents integration', { tag: ['@compose', '@integration'] }, () => {
-  test('uploads, scans, downloads and removes a document through the real uploader', async ({ journey, pages }) => {
+  test('uploads, scans, downloads and removes a document through the real uploader', async ({ journey, pages, animalsPages }) => {
     test.slow();
     await journey.toAccompanyingDocuments();
     const reference = `PW${Date.now()}`;
 
-    await pages.accompanyingDocuments.fillDocument(reference, '03/01/2026', fileUploadPaths.safeFile1kbPdf);
-    await pages.accompanyingDocuments.saveAndAddAnother.click();
+    await animalsPages.accompanyingDocuments.fillDocument(reference, '03/01/2026', fileUploadPaths.safeFile1kbPdf);
+    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
-    const row = pages.accompanyingDocuments.documentRow(reference);
+    const row = animalsPages.accompanyingDocuments.documentRow(reference);
     await expect(row).toBeVisible();
     await expect(row).toContainText('Check completed', { timeout: fileUploadTimeouts.virusScanComplete });
 
-    const viewLink = pages.accompanyingDocuments.viewFile(1);
+    const viewLink = animalsPages.accompanyingDocuments.viewFile(1);
     const href = await viewLink.getAttribute('href');
     expect(href).toBeTruthy();
     if (!href) {
@@ -29,17 +29,17 @@ test.describe('Promoted accompanying documents integration', { tag: ['@compose',
     const downloaded = await response.body();
     const uploaded = await readFile(fileUploadPaths.safeFile1kbPdf);
 
-    await pages.accompanyingDocuments.removeDocument(1).click();
+    await animalsPages.accompanyingDocuments.removeDocument(1).click();
     await expect(row).toHaveCount(0);
     await expect(pages.page.getByText('You have not added any documents yet.')).toBeVisible();
 
     expect(downloaded).toEqual(uploaded);
   });
 
-  test('rejects an unsupported file type without adding a document', async ({ journey, pages }) => {
+  test('rejects an unsupported file type without adding a document', async ({ journey, pages, animalsPages }) => {
     await journey.toAccompanyingDocuments();
-    await pages.accompanyingDocuments.fillDocument(`PW-TXT-${Date.now()}`, '03/01/2026', fileUploadPaths.restrictedFile10bTxt);
-    await pages.accompanyingDocuments.saveAndAddAnother.click();
+    await animalsPages.accompanyingDocuments.fillDocument(`PW-TXT-${Date.now()}`, '03/01/2026', fileUploadPaths.restrictedFile10bTxt);
+    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(pages.page.getByText('You have not added any documents yet.')).toBeVisible();

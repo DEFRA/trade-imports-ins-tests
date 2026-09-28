@@ -14,10 +14,10 @@ test.describe('Origin of import (visual regression)', { tag: '@visual' }, () => 
   // the reference alone keeps the masked box a fixed size — the strip is a
   // full-width block, the reference is not. The strip's own content is covered
   // by tests/animals/e2e/features/reference-strip.spec.ts.
-  test('shows expected page appearance on first load', async ({ page, pages }) => {
+  test('shows expected page appearance on first load', async ({ page, animalsPages }) => {
     await expect(page).toHaveScreenshot('origin-of-import.png', {
       fullPage: true,
-      mask: [pages.originOfImport.journeyStrip],
+      mask: [animalsPages.originOfImport.journeyStrip],
     });
   });
 });

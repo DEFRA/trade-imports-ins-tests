@@ -9,11 +9,11 @@ import {
   type Page,
   type WorkerInfo,
 } from '@playwright/test';
-import { SignInPage } from '@page-objects/auth/sign-in-page';
-import { NotificationDashboardPage } from '@page-objects/notification/notification-dashboard-page';
-import { AdminDashboardPage } from '@page-objects/admin/admin-dashboard-page';
-import { InsAddressBookListPage } from '@page-objects/ins/ins-address-book-list-page';
-import { PlantsDashboardPage } from '@page-objects/plants/plants-dashboard-page';
+import { SignInPage } from '@page-objects/shared/auth/sign-in-page';
+import { AnimalsDashboardPage } from '@page-objects/animals/dashboard-page';
+import { AnimalsAdminDashboardPage } from '@page-objects/animals-admin/dashboard-page';
+import { InsAddressBookListPage } from '@page-objects/ins/address-book/list-page';
+import { PlantsDashboardPage } from '@page-objects/plants/dashboard-page';
 
 const AUTH_STATE_DIR = resolve(process.cwd(), 'playwright/.auth');
 
@@ -57,8 +57,8 @@ export type AuthTarget = {
 // The sign-in failure page also has an h1, so each target asserts its own landing
 // heading — a bare level-1 check would save an unauthenticated state file.
 export const AUTH_TARGETS: Record<string, AuthTarget> = {
-  animals: { landingPath: '/', landingHeading: (page) => new NotificationDashboardPage(page).heading },
-  'animals-admin': { landingPath: '/', landingHeading: (page) => new AdminDashboardPage(page).heading },
+  animals: { landingPath: '/', landingHeading: (page) => new AnimalsDashboardPage(page).heading },
+  'animals-admin': { landingPath: '/', landingHeading: (page) => new AnimalsAdminDashboardPage(page).heading },
   ins: {
     landingPath: '/address-book',
     landingHeading: (page) => new InsAddressBookListPage(page).heading,

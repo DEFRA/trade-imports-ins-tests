@@ -3,14 +3,14 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type AddressDocument } from '@domain/models/db/address-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
-import { type NewAddressDetails } from '@page-objects/ins/ins-address-book-add-page';
+import { type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
 
 test.describe('Address book persistence round-trip', { tag: ['@integration', '@mongodb'] }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
   });
 
-  test('a created address persists with its full Standard Address Block', async ({ pages }) => {
+  test('a created address persists with its full Standard Address Block', async ({ pages, insPages }) => {
     const createdName = `Persistence Test Farm ${Date.now()}`;
     const details: NewAddressDetails = {
       name: createdName,
@@ -24,10 +24,10 @@ test.describe('Address book persistence round-trip', { tag: ['@integration', '@m
       email: 'farm@example.co.uk',
     };
 
-    await pages.insAddressBookAdd.open();
-    await pages.insAddressBookAdd.fill(details);
-    await pages.insAddressBookAdd.save();
-    await expect(pages.page).toHaveURL(new RegExp(`${pages.insAddressBookList.expectedUrl}$`));
+    await insPages.addressBookAdd.open();
+    await insPages.addressBookAdd.fill(details);
+    await insPages.addressBookAdd.save();
+    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
 
     const client = new MongoDbClient();
     try {

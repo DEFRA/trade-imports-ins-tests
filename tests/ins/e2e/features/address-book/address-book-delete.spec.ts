@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { COLD_START } from '@fixtures/auth-state';
-import { createPageObjects } from '@page-objects';
+import { createInsPages } from '@page-objects';
 import { users } from '@config/users';
 
 const baseAddress = {
@@ -13,16 +13,16 @@ const baseAddress = {
 };
 
 test.describe('Address book delete', { tag: '@integration' }, () => {
-  test('deleting through the UI tombstones the record rather than removing it', async ({ pages, addressBookApi }) => {
+  test('deleting through the UI tombstones the record rather than removing it', async ({ pages, insPages, addressBookApi }) => {
     const name = `Delete Test Farm ${Date.now()}`;
     const created = await addressBookApi.createAddress({ name, ...baseAddress });
 
-    await pages.insAddressBookDelete.open(created.id);
-    await expect(pages.insAddressBookDelete.heading).toBeVisible();
-    await pages.insAddressBookDelete.confirm();
+    await insPages.addressBookDelete.open(created.id);
+    await expect(insPages.addressBookDelete.heading).toBeVisible();
+    await insPages.addressBookDelete.confirm();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${pages.insAddressBookList.expectedUrl}$`));
-    await expect(pages.insAddressBookList.row(name)).toHaveCount(0);
+    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await expect(insPages.addressBookList.row(name)).toHaveCount(0);
 
     // The record is still there, flagged — the by-id endpoint is the only way
     // to see it, because list and search both omit tombstones. A hard delete
@@ -32,26 +32,31 @@ test.describe('Address book delete', { tag: '@integration' }, () => {
     expect(tombstone.name).toBe(name);
   });
 
-  test('an address deleted by one user is gone for another in the same organisation', async ({ browser, pages, addressBookApi }) => {
+  test('an address deleted by one user is gone for another in the same organisation', async ({
+    browser,
+    pages,
+    insPages,
+    addressBookApi,
+  }) => {
     const name = `Delete Cross User Farm ${Date.now()}`;
     const created = await addressBookApi.createAddress({ name, ...baseAddress });
 
-    await pages.insAddressBookDelete.open(created.id, true, { userId: users.andrew.crn });
-    await pages.insAddressBookDelete.confirm();
-    await expect(pages.page).toHaveURL(new RegExp(`${pages.insAddressBookList.expectedUrl}$`));
-    await expect(pages.insAddressBookList.row(name)).toHaveCount(0);
+    await insPages.addressBookDelete.open(created.id, true, { userId: users.andrew.crn });
+    await insPages.addressBookDelete.confirm();
+    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await expect(insPages.addressBookList.row(name)).toHaveCount(0);
 
     // browser.newContext() inherits the test's storageState; Sarah must start cold.
     const contextB = await browser.newContext({ storageState: COLD_START });
     try {
-      const pagesB = createPageObjects(await contextB.newPage());
+      const insPagesB = createInsPages(await contextB.newPage());
 
-      await pagesB.insAddressBookList.open(true, {
+      await insPagesB.addressBookList.open(true, {
         userId: users.sarah.crn,
         organisationSbi: users.sarah.organisations.gatwickAirport,
       });
 
-      await expect(pagesB.insAddressBookList.row(name)).toHaveCount(0);
+      await expect(insPagesB.addressBookList.row(name)).toHaveCount(0);
     } finally {
       await contextB.close();
     }

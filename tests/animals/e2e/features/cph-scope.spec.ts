@@ -1,7 +1,11 @@
 import { test, expect } from '@fixtures';
 
 test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('the CPH page and addresses-hub row show only when a CPH-triggering commodity line exists', async ({ journey, pages }) => {
+  test('the CPH page and addresses-hub row show only when a CPH-triggering commodity line exists', async ({
+    journey,
+    pages,
+    animalsPages,
+  }) => {
     test.slow();
 
     const journeyId = await journey.startNotification();
@@ -16,20 +20,20 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
     // page is showing — the lines added on earlier passes included — is filled
     // before the page will hand back to the hub.
     const addCommodity = async (species: string): Promise<void> => {
-      await pages.overview.open(journeyId);
-      await pages.overview.task('What are you importing?').click();
-      await pages.commoditySelection.selectSpecies([species]);
-      await pages.commoditySelection.saveAndContinue.click();
-      await expect(pages.consignmentDetails.heading).toBeVisible();
-      await pages.consignmentDetails.fillEveryAnimalCount('1');
-      await pages.consignmentDetails.saveAndContinue.click();
-      await expect(pages.overview.heading).toBeVisible();
+      await animalsPages.overview.open(journeyId);
+      await animalsPages.overview.task('What are you importing?').click();
+      await animalsPages.commoditySelection.selectSpecies([species]);
+      await animalsPages.commoditySelection.saveAndContinue.click();
+      await expect(animalsPages.consignmentDetails.heading).toBeVisible();
+      await animalsPages.consignmentDetails.fillEveryAnimalCount('1');
+      await animalsPages.consignmentDetails.saveAndContinue.click();
+      await expect(animalsPages.overview.heading).toBeVisible();
     };
 
     const openAddresses = async (): Promise<void> => {
-      await pages.overview.open(journeyId);
-      await pages.overview.task('Roles and addresses').click();
-      await expect(pages.addresses.heading).toBeVisible();
+      await animalsPages.overview.open(journeyId);
+      await animalsPages.overview.task('Roles and addresses').click();
+      await expect(animalsPages.addresses.heading).toBeVisible();
     };
 
     // A non-triggering commodity (cats): CPH is out of scope, so the addresses
@@ -38,9 +42,9 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
     await addCommodity('Felis catus');
     await openAddresses();
     await expect(cphRow).toBeHidden();
-    await pages.addresses.continueButton.click();
-    await expect(pages.overview.heading).toBeVisible();
-    await expect(pages.cphNumber.heading).toBeHidden();
+    await animalsPages.addresses.continueButton.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.cphNumber.heading).toBeHidden();
 
     // Adding a triggering commodity (cattle) brings CPH into scope across the
     // commodity lines (frame:"anyItem") — the row appears in its empty state.
@@ -53,24 +57,24 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
     // the addresses hub (not the sequential exit), the row showing the stored
     // slash-stripped value.
     await cphRow.getByRole('link', { name: 'Add' }).click();
-    await expect(pages.cphNumber.heading).toBeVisible();
-    await pages.cphNumber.fillCphNumber();
-    await pages.cphNumber.saveAndContinue.click();
-    await expect(pages.addresses.heading).toBeVisible();
+    await expect(animalsPages.cphNumber.heading).toBeVisible();
+    await animalsPages.cphNumber.fillCphNumber();
+    await animalsPages.cphNumber.saveAndContinue.click();
+    await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(cphRow).toContainText('123456789');
 
     // Filled state: the row's action reads Change, the page shows the stored
     // value, and the back link returns to the addresses hub.
     await cphRow.getByRole('link', { name: 'Change' }).click();
-    await expect(pages.cphNumber.county).toHaveValue('12');
-    await expect(pages.cphNumber.parish).toHaveValue('345');
-    await expect(pages.cphNumber.holding).toHaveValue('6789');
-    await pages.cphNumber.linkBack.click();
-    await expect(pages.addresses.heading).toBeVisible();
+    await expect(animalsPages.cphNumber.county).toHaveValue('12');
+    await expect(animalsPages.cphNumber.parish).toHaveValue('345');
+    await expect(animalsPages.cphNumber.holding).toHaveValue('6789');
+    await animalsPages.cphNumber.linkBack.click();
+    await expect(animalsPages.addresses.heading).toBeVisible();
 
     // The sequential fallback stays: Continue from the addresses landing still
     // walks to the CPH tail page.
-    await pages.addresses.continueButton.click();
-    await expect(pages.cphNumber.heading).toBeVisible();
+    await animalsPages.addresses.continueButton.click();
+    await expect(animalsPages.cphNumber.heading).toBeVisible();
   });
 });
