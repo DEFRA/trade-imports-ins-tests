@@ -1,6 +1,6 @@
 # trade-imports-ins-tests
 
-This test suite provides a robust foundation for writing, executing, and maintaining automated tests that validate trade-imports-animals application functionality from a user perspective, ensuring quality and reliability across the application lifecycle.
+End-to-end, accessibility and security tests for the trade imports services — the animals frontend and its admin portal, the high-risk plants frontend, and the Import Notification Service front door (including the address book). Tests are split by domain so each service's deploy can run only its own suite.
 
 ## Contents
 
@@ -90,7 +90,7 @@ Optional: append these Playwright parameters to the command you're running (e.g.
 | `-- --grep "@smoke"`       | Run tests with a specific tag              |
 | `-- --debug`               | Run tests in debug mode                    |
 | `-- --ui`                  | Run tests with UI mode                     |
-| `-- --project=e2e`         | Run tests in a specific project            |
+| `-- --project=animals`     | Run tests in a specific project            |
 
 ### Test Reports
 
@@ -188,14 +188,33 @@ reusable workflow.
 
 ### Test Projects
 
-Both configs split tests across the same four Playwright projects:
+Both configs split tests across the same four Playwright projects, one per
+deployable app. Each project runs every spec under its own `tests/<project>/`
+folder:
 
-| Project  | Test scope                                  |
-| -------- | ------------------------------------------- |
-| `e2e`    | All tests excluding admin, ins and plants   |
-| `admin`  | Admin portal only                           |
-| `ins`    | Import notification service front door only |
-| `plants` | High-risk plants frontend only              |
+| Project         | Service                          | Folder                 |
+| --------------- | -------------------------------- | ---------------------- |
+| `animals`       | `trade-imports-animals-frontend` | `tests/animals/`       |
+| `animals-admin` | `trade-imports-animals-admin`    | `tests/animals-admin/` |
+| `ins`           | `trade-imports-ins-frontend`     | `tests/ins/`           |
+| `plants`        | `trade-imports-plants-frontend`  | `tests/plants/`        |
+
+Within a project folder, specs are grouped by test type, then by feature:
+
+```text
+tests/<project>/
+  a11y/
+  e2e/
+    features/
+      address-book/   (animals and ins)
+    pages/
+    journeys/
+    visual/
+  security/
+```
+
+Folders only organise specs: tags (`@a11y`, `@active`, `@compose`, `@visual`)
+select the suite, and the project selects the domain.
 
 ## Local Testing
 
@@ -256,7 +275,7 @@ Baselines are stored alongside their spec files in `*-snapshots/` directories an
 Regenerate the E2E baseline against the stack frontend with
 `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
 `npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
-used by CI. Both commands run the `e2e` project's `@visual` spec and write the
+used by CI. Both commands run the `animals` project's `@visual` spec and write the
 updated snapshot into the working tree for commit.
 
 ## Security Testing
@@ -293,6 +312,20 @@ If `PROFILE` is not set, the `default` profile is used.
 | `a11y`            | accessibility test suite                                                                       | `npm run test:a11y`     |
 | `security`        | security test suite (ZAP passive scan)                                                         | `npm run test:security` |
 | `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                       |
+
+The profiles above run every domain. To run one domain's suite only, prefix the
+suite with its project name as `<domain>:<suite>`:
+
+| PROFILE                    | Test suite                                                 |
+| -------------------------- | ---------------------------------------------------------- |
+| `<domain>:e2e`             | that domain's e2e suite (`npm test -- --project=<domain>`) |
+| `<domain>:a11y`            | that domain's accessibility suite                          |
+| `<domain>:security`        | that domain's security suite (ZAP passive scan)            |
+| `<domain>:security:active` | **not supported on CDP**, as `security:active`             |
+
+`<domain>` is one of `animals`, `animals-admin`, `ins` or `plants`, e.g.
+`animals:a11y` or `plants:e2e`. A domain with no specs for a suite (for example
+`plants:a11y` today) fails with Playwright's "No tests found".
 
 Tests are run from the CDP Portal under the Test Suites section. See the requirements below for how the portal run executes and publishes results.
 

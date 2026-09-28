@@ -1,15 +1,39 @@
 #!/bin/sh
 #
 # PROFILE selects the test suite to run (case-sensitive, defaults to 'default').
-# Allowed values:
+# Allowed values, each running every domain:
 #   default (or unset)  — standard run via npm test
 #   a11y                — accessibility suite via npm run test:a11y
 #   browserstack        — not implemented (exits 1)
 #   security            — ZAP passive scan (broad e2e suite) via npm run test:security, safe to run routinely
 #   security:active     — refused; the @active suite is destructive, so it only
 #                         runs against the disposable docker-compose stack
+#
+# Or scoped to one domain's Playwright project, as <domain>:<suite>:
+#   domain — animals, animals-admin, ins, plants
+#   suite  — e2e, a11y, security, security:active (same behaviour as above)
+# e.g. animals:a11y, ins:security, plants:e2e
+
+DOMAINS="animals animals-admin ins plants"
 
 echo "run_id: $RUN_ID"
+
+PROFILE="${PROFILE:-default}"
+requested_profile="$PROFILE"
+domain="${PROFILE%%:*}"
+PROJECT_ARG=""
+case " $DOMAINS " in
+  *" $domain "*)
+    PROJECT_ARG="--project=$domain"
+    # config/zap.ts keys off the bare suite (security / security:active), so
+    # the domain prefix must not reach the Node side.
+    case "${PROFILE#*:}" in
+      e2e) export PROFILE=default ;;
+      a11y | security | security:active) export PROFILE="${PROFILE#*:}" ;;
+      *) export PROFILE=invalid ;;
+    esac
+    ;;
+esac
 
 # automation-*.yaml reference these via ${ENV_VAR} substitution (ZAP's
 # own Automation Framework mechanism) instead of hardcoding localhost — ZAP
@@ -119,9 +143,9 @@ run_security_profile() {
     # its own.
     if [ "$PROFILE" = "security:active" ]; then
       # Unreachable on CDP — refused at the top of this function.
-      npm run test:security:active && npm run _zap_run_and_gate
+      npm run test:security:active ${PROJECT_ARG:+-- "$PROJECT_ARG"} && npm run _zap_run_and_gate
     else
-      npm run test:security && npm run _zap_run_and_gate
+      npm run test:security ${PROJECT_ARG:+-- "$PROJECT_ARG"} && npm run _zap_run_and_gate
     fi
     security_exit_code=$?
     if [ $security_exit_code -ne 0 ]; then
@@ -182,14 +206,14 @@ run_security_profile() {
   rm -f "$REPORT_DIR/security-scan.json"
 }
 
-case "${PROFILE:-default}" in
+case "$PROFILE" in
   default)
     # Record a non-zero npm test exit in the FAILED marker: a run that dies
     # before Playwright starts must not report a pass.
-    npm test || echo "npm test exited $? before completing" >> FAILED
+    npm test ${PROJECT_ARG:+-- "$PROJECT_ARG"} || echo "npm test exited $? before completing" >> FAILED
     ;;
   a11y)
-    npm run test:a11y || echo "npm run test:a11y exited $? before completing" >> FAILED
+    npm run test:a11y ${PROJECT_ARG:+-- "$PROJECT_ARG"} || echo "npm run test:a11y exited $? before completing" >> FAILED
     ;;
   browserstack)
     echo "browserstack profile runs are not implemented yet."
@@ -199,7 +223,7 @@ case "${PROFILE:-default}" in
     run_security_profile
     ;;
   *)
-    echo "unknown PROFILE: '${PROFILE}'. Allowed values: default, a11y, browserstack, security, security:active (unset defaults to default)."
+    echo "unknown PROFILE: '${requested_profile}'. Allowed values: default, a11y, browserstack, security, security:active (unset defaults to default), or <domain>:e2e|a11y|security|security:active for domain in: ${DOMAINS}."
     exit 1
     ;;
 esac
