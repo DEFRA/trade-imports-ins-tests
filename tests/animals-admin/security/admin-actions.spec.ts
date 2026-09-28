@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { SqsClient } from '@adapters/queue/sqs-client';
-import { seedDlqMessage } from '@domain/fixtures/dlq-event';
+import { seedDlqMessage } from '@domain/animals/fixtures/dlq-event';
 import { timeouts } from '@config/timeouts';
 
 test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () => {

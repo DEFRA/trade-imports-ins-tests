@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { type NotificationDocument } from '@domain/models/db/notification-document';
+import { type NotificationDocument } from '@domain/animals/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
@@ -32,7 +32,7 @@ test.describe('Seeded and browser-driven notifications match', { tag: ['@integra
       const seededDoc = await readStoredNotification(seededReference);
 
       expect(seededDoc.status).toBe(browserDoc.status);
-      // Keep ARRIVAL_DATE (flows/animals/journey.ts) and MONTHS_AHEAD_INSIDE_ARRIVAL_WINDOW (domain/fixtures/seeded-journey.ts) on the same offset.
+      // Keep ARRIVAL_DATE (flows/animals/journey.ts) and MONTHS_AHEAD_INSIDE_ARRIVAL_WINDOW (domain/animals/fixtures/seeded-journey.ts) on the same offset.
       expect(seededDoc.notification).toEqual(browserDoc.notification);
       expect(seededDoc.fulfilments).toEqual(browserDoc.fulfilments);
     } finally {

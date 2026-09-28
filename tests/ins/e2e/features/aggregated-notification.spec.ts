@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { defaultJourneyOptions } from '@domain/constants/journey-options';
-import { commodityCodes } from '@domain/constants/commodity-codes';
-import { type AggregatedNotificationDocument } from '@domain/models/db/aggregated-notification-document';
+import { defaultJourneyOptions } from '@domain/animals/constants/journey-options';
+import { commodityCodes } from '@domain/animals/constants/commodity-codes';
+import { type AggregatedNotificationDocument } from '@domain/ins/models/db/aggregated-notification-document';
 import { timeouts } from '@config/timeouts';
 import { getMongoDbUri } from '@config/service-base-urls';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';

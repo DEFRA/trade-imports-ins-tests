@@ -1,5 +1,5 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
-import { sortByValues } from '@domain/constants/sort-by-values';
+import { sortByValues } from '@domain/animals/constants/sort-by-values';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {

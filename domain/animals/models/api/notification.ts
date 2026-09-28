@@ -1,4 +1,4 @@
-import type { PersistedFulfilmentEntry } from '@domain/models/api/notification-fulfilments';
+import type { PersistedFulfilmentEntry } from '@domain/animals/models/api/notification-fulfilments';
 
 export const notificationStatuses = {
   draft: 'DRAFT',

@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import type { AnimalsAdminPages, SharedPages } from '@page-objects';
 import { SqsClient } from '@adapters/queue/sqs-client';
-import { seedDlqMessage } from '@domain/fixtures/dlq-event';
+import { seedDlqMessage } from '@domain/animals/fixtures/dlq-event';
 import { timeouts } from '@config/timeouts';
 
 /** The list is server-rendered on page load, so a message that arrived after the render needs a fresh page. */

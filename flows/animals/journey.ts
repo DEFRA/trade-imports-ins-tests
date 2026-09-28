@@ -1,6 +1,6 @@
 import { pageLoadWait } from '@config/timeouts';
 import type { AnimalsPages, SharedPages } from '@page-objects';
-import type { JourneyOptions } from '@domain/constants/journey-options';
+import type { JourneyOptions } from '@domain/animals/constants/journey-options';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 

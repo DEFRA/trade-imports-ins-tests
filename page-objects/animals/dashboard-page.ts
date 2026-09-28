@@ -1,5 +1,5 @@
 import { type Locator } from '@playwright/test';
-import type { SortByValue } from '@domain/constants/sort-by-values';
+import type { SortByValue } from '@domain/animals/constants/sort-by-values';
 import { BasePage } from '@page-objects/shared/base-page';
 import { SET_BASES } from '@page-objects/shared/sets';
 

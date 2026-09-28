@@ -1,7 +1,7 @@
 import { SET_BASES } from '@page-objects/shared/sets';
 
 import { test, expect } from '@fixtures';
-import { sortByValues } from '@domain/constants/sort-by-values';
+import { sortByValues } from '@domain/animals/constants/sort-by-values';
 
 const NO_MATCH_REFERENCE_NUMBER = 'GBN-AG-26-ZZZZZZ';
 

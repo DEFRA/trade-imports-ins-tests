@@ -1,6 +1,6 @@
 import { request } from '@playwright/test';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
-import { ensureE2eAddressBook } from '@domain/fixtures/e2e-address-book';
+import { ensureE2eAddressBook } from '@domain/shared/fixtures/e2e-address-book';
 
 /**
  * Seeds the shared journey address-book fixtures once via the address-book API,

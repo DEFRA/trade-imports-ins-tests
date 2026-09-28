@@ -1,6 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
-import type { YesNoValue } from '@domain/constants/yes-no-values';
+import type { YesNoValue } from '@domain/shared/constants/yes-no-values';
 
 export class AnimalsOriginOfImportPage extends NotificationPage {
   constructor(page: Page) {

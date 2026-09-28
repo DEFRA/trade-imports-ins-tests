@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { sortByValues } from '@domain/constants/sort-by-values';
+import { sortByValues } from '@domain/animals/constants/sort-by-values';
 
 test.describe('Notification dashboard sort', () => {
   test.beforeEach(async ({ animalsJourney }) => {

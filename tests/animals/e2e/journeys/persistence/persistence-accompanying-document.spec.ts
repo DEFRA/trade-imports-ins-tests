@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { type AccompanyingDocumentModel } from '@domain/models/db/accompanying-document';
+import { type AccompanyingDocumentModel } from '@domain/animals/models/db/accompanying-document';
 import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { timeouts } from '@config/timeouts';

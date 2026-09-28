@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { request } from '@playwright/test';
 import { RestClient, RestClientError, RestClientTransportError } from '@adapters/http/rest-client';
 import { AddressBookApiClient, E2E_ORGANISATION_ID, type AddressBookRecord } from '@adapters/http/address-book-api-client';
-import { E2E_ADDRESS_BOOK_FIXTURES } from '@domain/fixtures/e2e-address-book';
+import { E2E_ADDRESS_BOOK_FIXTURES } from '@domain/shared/fixtures/e2e-address-book';
 import { getEnvironment, throwIfProdEnvironment } from '@utils/playwright/environment';
 import { cdpServiceUrl } from '@utils/playwright/cdp-service-url';
 import { getDeveloperApiKey } from '@config/service-base-urls';
@@ -29,7 +29,7 @@ const UUID = String.raw`[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]
 
 /**
  * One rule per createAddress/equivalent call in tests/, fixtures/, flows/, domain/, excluding
- * domain/fixtures/e2e-address-book.ts (the protected global book — see GLOBAL_NAMES below). A
+ * domain/shared/fixtures/e2e-address-book.ts (the protected global book — see GLOBAL_NAMES below). A
  * rename target is listed against the create it belongs to, since a leaked record may carry
  * either name depending on how far its test got.
  */

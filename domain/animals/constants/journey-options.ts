@@ -1,14 +1,14 @@
-import { type CommodityCode, commodityCodes } from '@domain/constants/commodity-codes';
-import { commoditySpecies, type CommoditySpecies } from '@domain/constants/commodity-species';
-import { type CommodityType, commodityTypes } from '@domain/constants/commodity-types';
-import { type CountryCode, countryCodes } from '@domain/constants/country-codes';
-import { type ImportReason, importReasons } from '@domain/constants/import-reasons';
-import { type CertificationPurpose, certificationPurposes } from '@domain/constants/certification-purposes';
-import type { YesNoValue } from '@domain/constants/yes-no-values';
-import { pointOfEntries, type PointOfEntry } from '@domain/constants/point-of-entries';
-import { meansOfTransport, type MeansOfTransport } from '@domain/constants/means-of-transport';
-import type { AccompanyingDocument } from '@domain/types/accompanying-document';
-import type { DateInput } from '@domain/types/date-time-input';
+import { type CommodityCode, commodityCodes } from '@domain/animals/constants/commodity-codes';
+import { commoditySpecies, type CommoditySpecies } from '@domain/animals/constants/commodity-species';
+import { type CommodityType, commodityTypes } from '@domain/animals/constants/commodity-types';
+import { type CountryCode, countryCodes } from '@domain/animals/constants/country-codes';
+import { type ImportReason, importReasons } from '@domain/animals/constants/import-reasons';
+import { type CertificationPurpose, certificationPurposes } from '@domain/animals/constants/certification-purposes';
+import type { YesNoValue } from '@domain/shared/constants/yes-no-values';
+import { pointOfEntries, type PointOfEntry } from '@domain/animals/constants/point-of-entries';
+import { meansOfTransport, type MeansOfTransport } from '@domain/animals/constants/means-of-transport';
+import type { AccompanyingDocument } from '@domain/animals/types/accompanying-document';
+import type { DateInput } from '@domain/shared/types/date-time-input';
 import { getRelativeDateInput } from '@utils/date-utils';
 
 /**

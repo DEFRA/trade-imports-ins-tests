@@ -1,8 +1,8 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient, RestClientError } from '@adapters/http/rest-client';
 import { getBackendBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
-import type { NotificationFulfilments } from '@domain/models/api/notification-fulfilments';
-import type { Notification } from '@domain/models/api/notification';
+import type { NotificationFulfilments } from '@domain/animals/models/api/notification-fulfilments';
+import type { Notification } from '@domain/animals/models/api/notification';
 
 // Per-aggregate outbox lock (NotificationService.writeWithOutbox via ShedLock) fails a
 // second submit/amend that lands inside the first's lock window with a 500. Human clicks

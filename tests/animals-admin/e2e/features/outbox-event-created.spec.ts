@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { type OutboxEventActor, type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
-import { CONSIGNOR_NAME } from '@domain/constants/journey-options';
+import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
+import { CONSIGNOR_NAME } from '@domain/animals/constants/journey-options';
 import { timeouts } from '@config/timeouts';
 import { users } from '@config/users';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';

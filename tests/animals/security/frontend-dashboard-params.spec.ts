@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { sortByValues } from '@domain/constants/sort-by-values';
+import { sortByValues } from '@domain/animals/constants/sort-by-values';
 
 test.describe('Security scan (frontend, dashboard parameters)', { tag: '@active' }, () => {
   test('routes the dashboard query parameters through the ZAP proxy', async ({ animalsJourney, animalsPages }) => {
