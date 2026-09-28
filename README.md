@@ -81,6 +81,27 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 | `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
+### Running one domain
+
+The scripts above run every domain. Against the docker-compose stack, each
+domain also has its own scripts, named `test:docker-compose:<domain>[:<suite>]`
+to match the [CDP domain profiles](#running-tests-via-cdp-portal). They run
+the same suite as the all-domain script, limited to that domain's project.
+
+| Domain          | e2e                                 | a11y                                     | security (ZAP passive scan)                  |
+| --------------- | ----------------------------------- | ---------------------------------------- | -------------------------------------------- |
+| `animals`       | `test:docker-compose:animals`       | `test:docker-compose:animals:a11y`       | `test:docker-compose:animals:security`       |
+| `animals-admin` | `test:docker-compose:animals-admin` | `test:docker-compose:animals-admin:a11y` | `test:docker-compose:animals-admin:security` |
+| `ins`           | `test:docker-compose:ins`           | —                                        | `test:docker-compose:ins:security`           |
+| `plants`        | `test:docker-compose:plants`        | —                                        | —                                            |
+
+A dash means the domain has no specs for that suite yet.
+
+There is no per-domain `security:active` script. The active scan's gate fails
+any ZAP context that received no traffic, and the contexts cover every
+service, so the active scan only runs across all domains with
+`npm run test:docker-compose:security:active`.
+
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
 | Playwright Parameters      | Action                                     |
@@ -227,8 +248,9 @@ select the suite, and the project selects the domain.
    ./scripts/stack/run-stack.sh -d
    ```
 
-2. Run the projects with `npm run test:docker-compose`, narrowing to one with
-   `-- --project=<name>`.
+2. Run every project with `npm run test:docker-compose`, or one domain with
+   its own script, e.g. `npm run test:docker-compose:plants` (see
+   [Running one domain](#running-one-domain)).
 
 `npm run test:docker-compose` targets the stack animals frontend on :3000, the
 admin service on :3001, the ins frontend on :3002 and the high-risk plants

@@ -17,11 +17,11 @@ Coverage is therefore **traffic-driven**: a route no spec drives is invisible to
 
 Three lanes, and they do not all use the same config or target:
 
-| Lane              | Triggered by                                                                           | Playwright config                     | Target                    | Profiles                               |
-| ----------------- | -------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------- | -------------------------------------- |
-| **Local**         | `npm run test:docker-compose:security[:active]`                                        | `playwright.docker-compose.config.ts` | localhost stack           | both                                   |
-| **GitHub Action** | `.github/workflows/scheduled-security-scan.yml` → workspace `security-active-scan.yml` | `playwright.docker-compose.config.ts` | stack on the runner       | `security:active`                      |
-| **CDP portal**    | `PROFILE` env var → `entrypoint.sh`                                                    | `playwright.config.ts`                | deployed `${ENVIRONMENT}` | `security` or `<domain>:security` only |
+| Lane              | Triggered by                                                                                     | Playwright config                     | Target                    | Profiles                               |
+| ----------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------- | ------------------------- | -------------------------------------- |
+| **Local**         | `npm run test:docker-compose[:<domain>]:security`, `npm run test:docker-compose:security:active` | `playwright.docker-compose.config.ts` | localhost stack           | both; `security` also per domain       |
+| **GitHub Action** | `.github/workflows/scheduled-security-scan.yml` → workspace `security-active-scan.yml`           | `playwright.docker-compose.config.ts` | stack on the runner       | `security:active`                      |
+| **CDP portal**    | `PROFILE` env var → `entrypoint.sh`                                                              | `playwright.config.ts`                | deployed `${ENVIRONMENT}` | `security` or `<domain>:security` only |
 
 **`security:active` is refused on CDP.** The `@active` suite deletes notifications, documents and DLQ messages, and the active scan re-fires each with fuzzed payloads — fine against a disposable stack, destructive against a shared one. `entrypoint.sh` writes to `FAILED` rather than running it. The `throwIfProdEnvironment` guard is no help here: it stops `prod` alone, so `dev`, `test` and `perf-test` would all have run.
 
@@ -32,7 +32,11 @@ The GitHub Action is manual dispatch only; the nightly schedule stays disabled p
 1. From the [workspace root](https://github.com/DEFRA/trade-imports-workspace), start the app stack: `tim docker up`
 2. Bring up ZAP too — additive, and waits for healthchecks so it returns only once ZAP is accepting requests: `tim docker up --profile security`
 3. Run a profile: `npm run test:docker-compose:security` or `npm run test:docker-compose:security:active`
+   - To scan one domain passively, use its script: `test:docker-compose:animals:security`, `test:docker-compose:animals-admin:security` or `test:docker-compose:ins:security`. Plants has no security specs yet.
+   - There is no per-domain active scan. The gate fails any context with no traffic (see [Gating](#gating)), and one domain's specs do not reach every context.
 4. Leave ZAP running between runs, or `docker stop trade-imports-zap-1`
+
+Each run clears `zap-report/` first, so running two domains back to back keeps only the second domain's report.
 
 To watch ZAP's own log live: `docker logs -f trade-imports-zap-1`.
 
