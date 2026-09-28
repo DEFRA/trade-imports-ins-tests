@@ -10,8 +10,8 @@ import { sessionReuseEnabled } from './utils/playwright/session-reuse';
 const environment = getEnvironment();
 
 const projectBaseUrls: Record<string, string> = {
-  e2e: `https://trade-imports-animals-frontend.${environment}.cdp-int.defra.cloud`,
-  admin: `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`,
+  animals: `https://trade-imports-animals-frontend.${environment}.cdp-int.defra.cloud`,
+  'animals-admin': `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`,
   ins: `https://trade-imports-ins-frontend.${environment}.cdp-int.defra.cloud`,
   plants: `https://trade-imports-plants-frontend.${environment}.cdp-int.defra.cloud`,
 };

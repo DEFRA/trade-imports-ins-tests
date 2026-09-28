@@ -2,7 +2,7 @@ import { request, type APIRequestContext, type Browser, type WorkerInfo } from '
 import { createAuthState } from '@fixtures/auth-state';
 import { getAnimalsFrontendBaseUrl } from '@config/service-base-urls';
 
-const FRONTEND_AUTH_TARGET = 'e2e';
+const FRONTEND_AUTH_TARGET = 'animals';
 
 export const createFrontendSeedContext = async (
   browser: Browser,

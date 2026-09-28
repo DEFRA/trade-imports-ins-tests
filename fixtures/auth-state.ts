@@ -57,8 +57,8 @@ export type AuthTarget = {
 // The sign-in failure page also has an h1, so each target asserts its own landing
 // heading — a bare level-1 check would save an unauthenticated state file.
 export const AUTH_TARGETS: Record<string, AuthTarget> = {
-  e2e: { landingPath: '/', landingHeading: (page) => new NotificationDashboardPage(page).heading },
-  admin: { landingPath: '/', landingHeading: (page) => new AdminDashboardPage(page).heading },
+  animals: { landingPath: '/', landingHeading: (page) => new NotificationDashboardPage(page).heading },
+  'animals-admin': { landingPath: '/', landingHeading: (page) => new AdminDashboardPage(page).heading },
   ins: {
     landingPath: '/address-book',
     landingHeading: (page) => new InsAddressBookListPage(page).heading,

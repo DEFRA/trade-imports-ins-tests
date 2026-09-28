@@ -1,8 +1,8 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 const PROJECT_ENV_VARS: Record<string, string> = {
-  e2e: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL',
-  admin: 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL',
+  animals: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL',
+  'animals-admin': 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL',
   ins: 'TRADE_IMPORTS_INS_FRONTEND_BASE_URL',
   plants: 'TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL',
 };
