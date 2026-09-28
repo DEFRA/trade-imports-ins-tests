@@ -32,13 +32,13 @@ test.describe('Notification amendment outbox event', { tag: ['@integration', '@m
   });
 
   test('records the authenticated actor and cumulative status changes on amendment', async ({
-    journey,
+    animalsJourney,
     journeyContext,
-    notificationActions,
+    animalsNotificationActions,
   }) => {
     test.slow();
-    await journey.submitNotification();
-    await notificationActions.amendNotification(journeyContext.journeyId);
+    await animalsJourney.submitNotification();
+    await animalsNotificationActions.amendNotification(journeyContext.journeyId);
 
     const aggregateId = aggregateIdFor(journeyContext.journeyId);
     const client = new MongoDbClient();

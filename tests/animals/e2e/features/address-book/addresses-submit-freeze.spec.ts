@@ -2,11 +2,11 @@ import { test, expect } from '@fixtures';
 
 test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () => {
   test('renaming the book after submit does not change the submitted view, then shows live on amend', async ({
-    seededJourney,
+    animalsSeededJourney,
     pages,
     animalsPages,
     addressBookApi,
-    notificationActions,
+    animalsNotificationActions,
   }) => {
     test.slow();
 
@@ -23,8 +23,8 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
       email: 'freeze@example.co.uk',
     });
 
-    const referenceNumber = await seededJourney.createDraftNotification('readyToSubmit');
-    await seededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
     await animalsPages.notificationView.changeLink('Change roles and addresses').click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await animalsPages.addresses.changeParty('Place of origin').click();
@@ -53,14 +53,14 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
       email: 'freeze@example.co.uk',
     });
 
-    await notificationActions.toNotificationView(referenceNumber);
+    await animalsNotificationActions.toNotificationView(referenceNumber);
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');
     await expect(originRow).not.toContainText(renamed);
     await expect(originRow).not.toContainText('Penrith');
 
-    await notificationActions.amendNotification(referenceNumber);
+    await animalsNotificationActions.amendNotification(referenceNumber);
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Amending');
@@ -77,11 +77,11 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
   });
 
   test('deleting the book record after submit does not change the submitted view or error', async ({
-    seededJourney,
+    animalsSeededJourney,
     pages,
     animalsPages,
     addressBookApi,
-    notificationActions,
+    animalsNotificationActions,
   }) => {
     test.slow();
 
@@ -97,8 +97,8 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
       email: 'delete-freeze@example.co.uk',
     });
 
-    const referenceNumber = await seededJourney.createDraftNotification('readyToSubmit');
-    await seededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
     await animalsPages.notificationView.changeLink('Change roles and addresses').click();
     await animalsPages.addresses.changeParty('Place of origin').click();
     await animalsPages.placeOfOriginSelection.select(originalName);
@@ -115,7 +115,7 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
 
     await addressBookApi.deleteAddress(address.id);
 
-    await notificationActions.toNotificationView(referenceNumber);
+    await animalsNotificationActions.toNotificationView(referenceNumber);
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');

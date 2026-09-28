@@ -7,8 +7,8 @@ const GENERIC_INVALID_CREDENTIALS = 'Enter a valid 10-digit customer reference n
 test.use({ storageState: COLD_START });
 
 test.describe('Authentication (plants)', { tag: ['@auth', '@integration'] }, () => {
-  test.beforeEach(async ({ journey, plantsPages }) => {
-    await journey.toSignIn((attemptSignIn) => plantsPages.dashboard.open(attemptSignIn));
+  test.beforeEach(async ({ plantsPages }) => {
+    await plantsPages.dashboard.open(false);
   });
 
   test('displays an error message when signing in with invalid user id', async ({ pages }) => {

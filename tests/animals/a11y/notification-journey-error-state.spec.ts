@@ -5,12 +5,12 @@ import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 const conditionalRadioInput = '#regionOfOriginCodeRequirement';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.startNotificationAtOrigin();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.startNotificationAtOrigin();
   });
 
   test('each notification journey page with validation has no accessibility violations when errors are shown', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
     runA11yScan,
@@ -31,14 +31,14 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.originOfImport.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan({ exclude: conditionalRadioInput });
-      await journey.fillOriginOfImport();
-      await journey.saveOriginOfImport();
+      await animalsJourney.fillOriginOfImport();
+      await animalsJourney.saveOriginOfImport();
       await animalsPages.overview.heading.waitFor();
     });
 
     await test.step('Continue to CPH number', async () => {
-      await journey.answerCommodity();
-      await journey.fillAddressesToCph();
+      await animalsJourney.answerCommodity();
+      await animalsJourney.fillAddressesToCph();
     });
 
     await test.step('CPH number with validation errors', async () => {
@@ -56,7 +56,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.arrivalDetails.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
-      await journey.fillArrivalDetails();
+      await animalsJourney.fillArrivalDetails();
       await animalsPages.arrivalDetails.saveAndContinue.click();
     });
 
@@ -87,9 +87,9 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       });
       await animalsPages.commercialTransporter.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
-      await journey.answerAnimalIdentification();
-      await journey.answerReasonAndAdditionalDetails();
-      await journey.answerContact();
+      await animalsJourney.answerAnimalIdentification();
+      await animalsJourney.answerReasonAndAdditionalDetails();
+      await animalsJourney.answerContact();
       await animalsPages.overview.reviewAndSubmitButton.click();
       await animalsPages.notificationView.heading.waitFor();
       await animalsPages.notificationView.continueButton.click();

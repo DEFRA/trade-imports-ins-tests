@@ -5,7 +5,7 @@ import { timeouts } from '@config/timeouts';
 
 test.describe('INS dashboard notification navigation', { tag: ['@integration'] }, () => {
   test('viewing a submitted notification from the INS dashboard opens it in the owning journey frontend', async ({
-    journey,
+    animalsJourney,
     journeyContext,
     pages,
     animalsPages,
@@ -14,7 +14,7 @@ test.describe('INS dashboard notification navigation', { tag: ['@integration'] }
     test.slow();
 
     // Given — a notification has been submitted in the animals journey
-    await journey.toDeclaration();
+    await animalsJourney.toDeclaration();
     const referenceNumber = journeyContext.journeyId;
     await animalsPages.declaration.confirmation.check();
     await animalsPages.declaration.continueButton.click();

@@ -7,8 +7,8 @@ import { COLD_START } from '@fixtures/auth-state';
 test.use({ storageState: COLD_START });
 
 test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
-  test.beforeEach(async ({ journey, animalsPages }) => {
-    await journey.toSignIn((attemptSignIn) => animalsPages.dashboard.open(attemptSignIn));
+  test.beforeEach(async ({ animalsJourney, animalsPages }) => {
+    await animalsJourney.toSignIn((attemptSignIn) => animalsPages.dashboard.open(attemptSignIn));
   });
 
   test('lands on the sign in page when opening the notification dashboard', async ({ pages }) => {

@@ -2,7 +2,7 @@ import type { AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import type { PlantsPages } from '@page-objects';
-import type { PlantsJourney } from '@flows/plants-journey';
+import type { PlantsJourney } from '@flows/plants/journey';
 
 const CONTACT = 'Contact address for consignment';
 

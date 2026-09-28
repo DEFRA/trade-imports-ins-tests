@@ -1,11 +1,11 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Security scan (frontend, change context)', { tag: '@active' }, () => {
-  test('routes the change-context query parameter through the ZAP proxy', async ({ journey, pages, animalsPages }) => {
+  test('routes the change-context query parameter through the ZAP proxy', async ({ animalsJourney, pages, animalsPages }) => {
     test.slow();
     // ?change=1 is how Check Your Answers reaches pages already scanned
     // elsewhere in this suite — no other spec sends this parameter.
-    await journey.toReview();
+    await animalsJourney.toReview();
 
     await animalsPages.notificationView.changeLink('Change import details').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();

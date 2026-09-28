@@ -17,12 +17,12 @@ const eventTypesOn = async (outboxEvents: AnimalsAdminOutboxEventsPage): Promise
   (await outboxEvents.eventTypeCells.allTextContents()).map((eventType) => eventType.trim());
 
 test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () => {
-  test.beforeEach(async ({ seededJourney }) => {
-    await seededJourney.createAmendNotification();
+  test.beforeEach(async ({ animalsSeededJourney }) => {
+    await animalsSeededJourney.createAmendNotification();
   });
 
-  test('replays outbox events and shows success banner', async ({ adminNavigation, animalsAdminPages, journeyContext }) => {
-    await adminNavigation.toOutboxEvents(journeyContext.referenceNumber);
+  test('replays outbox events and shows success banner', async ({ animalsAdminNavigation, animalsAdminPages, journeyContext }) => {
+    await animalsAdminNavigation.toOutboxEvents(journeyContext.referenceNumber);
 
     await test.step('lists the notification lifecycle before replay', async () => {
       await expect
@@ -48,10 +48,10 @@ test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () =
   test(
     'writes a REPLAY_EVENTS audit record covering every replayed event',
     { tag: '@mongodb' },
-    async ({ adminNavigation, animalsAdminPages, journeyContext }) => {
+    async ({ animalsAdminNavigation, animalsAdminPages, journeyContext }) => {
       const { referenceNumber } = journeyContext;
 
-      await adminNavigation.toOutboxEvents(referenceNumber);
+      await animalsAdminNavigation.toOutboxEvents(referenceNumber);
       await expect.poll(() => animalsAdminPages.outboxEvents.tableRows.count(), { timeout: timeouts.short }).toBeGreaterThan(0);
       const replayedEventCount = await animalsAdminPages.outboxEvents.tableRows.count();
 

@@ -1,9 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Declaration page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ seededJourney, animalsPages }) => {
-    const referenceNumber = await seededJourney.createDraftNotification('readyToSubmit');
-    await seededJourney.resumeInUi(referenceNumber, animalsPages.declaration);
+  test.beforeEach(async ({ animalsSeededJourney, animalsPages }) => {
+    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.declaration);
   });
 
   test('renders the page controls', async ({ animalsPages }) => {

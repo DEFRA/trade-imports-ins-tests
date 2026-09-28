@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import type { PlantsJourney } from '@flows/plants-journey';
+import type { PlantsJourney } from '@flows/plants/journey';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
 const POTATOES = 'Potatoes (seed or ware)';

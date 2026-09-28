@@ -2,14 +2,14 @@ import { test, WCAG_STANDARD } from '@fixtures/a11y';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('the cancel-amendment and delete confirmation pages have no accessibility violations', async ({
-    journey,
+    animalsJourney,
     journeyContext,
     pages,
     animalsPages,
     runA11yScan,
   }) => {
     test.slow();
-    await journey.submitNotification();
+    await animalsJourney.submitNotification();
     const { journeyId } = journeyContext;
 
     await test.step('Cancel this amendment?', async () => {

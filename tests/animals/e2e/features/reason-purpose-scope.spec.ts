@@ -1,9 +1,13 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('purpose is owed only for the internal market and is wiped when the reason changes', async ({ journey, pages, animalsPages }) => {
-    await journey.startNotification();
-    await journey.unlockSections();
+  test('purpose is owed only for the internal market and is wiped when the reason changes', async ({
+    animalsJourney,
+    pages,
+    animalsPages,
+  }) => {
+    await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
 
     const reasonRow = pages.page.locator('.govuk-task-list__item', { hasText: 'Main reason for import' });
 

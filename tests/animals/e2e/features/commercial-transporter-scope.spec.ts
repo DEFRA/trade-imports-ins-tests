@@ -14,14 +14,14 @@ const transporter = {
 
 test.describe('Commercial transporter scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('commercial transporter is owed only for the commercial type and is wiped when the type changes', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
   }) => {
-    await journey.startNotification();
-    await journey.unlockSections();
+    await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
 
-    const openTransporters = () => journey.reachTransporterFromHub();
+    const openTransporters = () => animalsJourney.reachTransporterFromHub();
 
     // The type question sits behind "Add a transporter" now, so every branch is
     // reached through the add route rather than off the list itself.

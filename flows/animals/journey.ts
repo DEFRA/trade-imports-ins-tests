@@ -2,12 +2,7 @@ import { pageLoadWait } from '@config/timeouts';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { JourneyOptions } from '@domain/constants/journey-options';
 import { getRelativeAppDateText } from '@utils/date-utils';
-
-export type JourneyContext = {
-  journeyId?: string;
-  referenceNumber?: string;
-  declarationDate?: string;
-};
+import type { JourneyContext } from '@flows/shared/journey-context';
 
 const COUNTRY = 'France';
 const PORT = 'Aberdeen Harbour (GB ABD)';
@@ -17,7 +12,7 @@ const PORT = 'Aberdeen Harbour (GB ABD)';
 // happens to echo back.
 export const ARRIVAL_DATE = getRelativeAppDateText({ monthOffset: 1 });
 
-export class Journey {
+export class AnimalsJourney {
   constructor(
     private readonly animalsPages: AnimalsPages,
     private readonly pages: SharedPages,

@@ -3,8 +3,8 @@ import { test, expect } from '@fixtures';
 // The type question is asked only of a trader who could not find their
 // transporter on the list, so it is reached through "Add a transporter".
 test.describe('Transporter type page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey, animalsPages }) => {
-    await journey.toTransporter();
+  test.beforeEach(async ({ animalsJourney, animalsPages }) => {
+    await animalsJourney.toTransporter();
     await animalsPages.transporter.addTransporter.click();
     await animalsPages.transporterAdd.heading.waitFor();
   });

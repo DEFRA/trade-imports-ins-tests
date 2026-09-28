@@ -10,11 +10,15 @@ const conditionalRadioInput = '#regionOfOriginCodeRequirement';
 const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toNotificationDashboard();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toNotificationDashboard();
   });
 
-  test('each notification journey page has no accessibility violations on initial load', async ({ journey, animalsPages, runA11yScan }) => {
+  test('each notification journey page has no accessibility violations on initial load', async ({
+    animalsJourney,
+    animalsPages,
+    runA11yScan,
+  }) => {
     // EUDPA-636 — commercial-transporter-details.controller.js never calls
     // rememberTransporter(), so the "Add commercial transporter" step below
     // leaves the journey unable to reach Declaration. Remove this annotation
@@ -35,8 +39,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     // overview is only reachable once origin has been saved.
     await test.step('Overview', async () => {
       const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
-      await journey.fillOriginOfImport();
-      await journey.saveOriginOfImport();
+      await animalsJourney.fillOriginOfImport();
+      await animalsJourney.saveOriginOfImport();
       await animalsPages.overview.open(journeyId);
       await animalsPages.overview.heading.waitFor();
       await runA11yScan();
@@ -141,7 +145,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.overview.task('Arrival details').click();
       await animalsPages.arrivalDetails.heading.waitFor();
       await runA11yScan();
-      await journey.fillArrivalDetails();
+      await animalsJourney.fillArrivalDetails();
       await animalsPages.arrivalDetails.saveAndContinue.click();
     });
 

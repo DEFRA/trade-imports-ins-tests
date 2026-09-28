@@ -5,8 +5,8 @@ import { COLD_START } from '@fixtures/auth-state';
 test.use({ storageState: COLD_START });
 
 test.describe('Authentication (admin)', { tag: '@auth' }, () => {
-  test.beforeEach(async ({ journey, animalsAdminPages }) => {
-    await journey.toSignIn((attemptSignIn) => animalsAdminPages.dashboard.open(attemptSignIn));
+  test.beforeEach(async ({ animalsJourney, animalsAdminPages }) => {
+    await animalsJourney.toSignIn((attemptSignIn) => animalsAdminPages.dashboard.open(attemptSignIn));
   });
 
   test('lands on the sign in page when opening the admin dashboard', async ({ pages }) => {
@@ -53,8 +53,8 @@ test.describe('Authentication (admin)', { tag: '@auth' }, () => {
   });
 
   test.describe('Notifications (admin) (unauthenticated entry)', () => {
-    test.beforeEach(async ({ journey, animalsAdminPages }) => {
-      await journey.toSignIn((attemptSignIn) => animalsAdminPages.notifications.open(attemptSignIn));
+    test.beforeEach(async ({ animalsJourney, animalsAdminPages }) => {
+      await animalsJourney.toSignIn((attemptSignIn) => animalsAdminPages.notifications.open(attemptSignIn));
     });
 
     test('lands on the sign in page when opening a page further in the journey', async ({ pages }) => {

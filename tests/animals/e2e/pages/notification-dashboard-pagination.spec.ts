@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Dashboard pagination', { tag: '@integration' }, () => {
-  test('uses GOV.UK pagination and reports the result range', async ({ journey, pages, animalsPages }) => {
-    await journey.toNotificationDashboard();
+  test('uses GOV.UK pagination and reports the result range', async ({ animalsJourney, pages, animalsPages }) => {
+    await animalsJourney.toNotificationDashboard();
     for (let index = 0; index < 26; index += 1) {
       await animalsPages.dashboard.btnCreateNewNotification.click();
       await animalsPages.originOfImport.heading.waitFor();

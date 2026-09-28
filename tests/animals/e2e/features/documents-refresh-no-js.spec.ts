@@ -8,9 +8,9 @@ const issueDate = '03/01/2026';
 test.describe('Documents scan refresh without JavaScript', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.use({ javaScriptEnabled: false });
 
-  test('the refresh fallback reflects scan progress without client JavaScript', async ({ journey, pages, animalsPages }) => {
+  test('the refresh fallback reflects scan progress without client JavaScript', async ({ animalsJourney, pages, animalsPages }) => {
     test.slow();
-    await journey.startNotification();
+    await animalsJourney.startNotification();
 
     await animalsPages.overview.task('Where is this consignment coming from?').click();
     await pages.page.getByLabel('Country of origin').selectOption('FR');
@@ -18,7 +18,7 @@ test.describe('Documents scan refresh without JavaScript', { tag: ['@integration
     await pages.page.getByRole('button', { name: 'Save and continue' }).click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    await journey.answerCommodity();
+    await animalsJourney.answerCommodity();
     await animalsPages.overview.task('Upload documents').click();
     await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
 

@@ -18,13 +18,13 @@ const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('the reason-gated and private transporter pages have no accessibility violations', async ({
-    journey,
+    animalsJourney,
     animalsPages,
     runA11yScan,
   }) => {
     test.slow();
-    await journey.startNotification();
-    await journey.unlockSections();
+    await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
 
     await test.step('Import reason: Transit', async () => {
       await animalsPages.overview.task('Main reason for import').click();
@@ -51,7 +51,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Private transporter', async () => {
-      await journey.reachTransporterFromHub();
+      await animalsJourney.reachTransporterFromHub();
       await animalsPages.transporter.addTransporter.click();
       await animalsPages.transporterAdd.heading.waitFor();
       await animalsPages.transporterAdd.transporterType('Private').check();
@@ -63,11 +63,11 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
   });
 
-  test('the approved commercial transporter register has no accessibility violations', async ({ journey, runA11yScan }) => {
+  test('the approved commercial transporter register has no accessibility violations', async ({ animalsJourney, runA11yScan }) => {
     test.slow();
     // Nothing links here now that the add route's commercial arm is the
     // add-commercial form (see journey.ts), so no other page reaches it.
-    await journey.toTransporterSelection();
+    await animalsJourney.toTransporterSelection();
     await runA11yScan();
   });
 });

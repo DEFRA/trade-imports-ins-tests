@@ -12,10 +12,10 @@ test.describe('Notification amendment cancelled outbox event', { tag: ['@integra
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });
 
-  test('writes a NotificationAmendmentCancelled event when an amendment is cancelled', async ({ seededJourney }) => {
+  test('writes a NotificationAmendmentCancelled event when an amendment is cancelled', async ({ animalsSeededJourney }) => {
     test.slow();
-    const referenceNumber = await seededJourney.createAmendNotification();
-    await seededJourney.cancelAmend(referenceNumber);
+    const referenceNumber = await animalsSeededJourney.createAmendNotification();
+    await animalsSeededJourney.cancelAmend(referenceNumber);
 
     const aggregateId = aggregateIdFor(referenceNumber);
     const amendmentCancelledFilter = { aggregateId, eventType: NOTIFICATION_AMENDMENT_CANCELLED };

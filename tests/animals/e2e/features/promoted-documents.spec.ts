@@ -4,9 +4,9 @@ import { fileUploadPaths } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 test.describe('Promoted accompanying documents integration', { tag: ['@compose', '@integration'] }, () => {
-  test('uploads, scans, downloads and removes a document through the real uploader', async ({ journey, pages, animalsPages }) => {
+  test('uploads, scans, downloads and removes a document through the real uploader', async ({ animalsJourney, pages, animalsPages }) => {
     test.slow();
-    await journey.toAccompanyingDocuments();
+    await animalsJourney.toAccompanyingDocuments();
     const reference = `PW${Date.now()}`;
 
     await animalsPages.accompanyingDocuments.fillDocument(reference, '03/01/2026', fileUploadPaths.safeFile1kbPdf);
@@ -36,8 +36,8 @@ test.describe('Promoted accompanying documents integration', { tag: ['@compose',
     expect(downloaded).toEqual(uploaded);
   });
 
-  test('rejects an unsupported file type without adding a document', async ({ journey, pages, animalsPages }) => {
-    await journey.toAccompanyingDocuments();
+  test('rejects an unsupported file type without adding a document', async ({ animalsJourney, pages, animalsPages }) => {
+    await animalsJourney.toAccompanyingDocuments();
     await animalsPages.accompanyingDocuments.fillDocument(`PW-TXT-${Date.now()}`, '03/01/2026', fileUploadPaths.restrictedFile10bTxt);
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 

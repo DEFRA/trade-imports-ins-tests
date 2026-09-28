@@ -2,8 +2,8 @@ import { test, WCAG_STANDARD } from '@fixtures/a11y';
 import { sortByValues } from '@domain/constants/sort-by-values';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toNotificationDashboard();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toNotificationDashboard();
   });
 
   test('the notification dashboard has no accessibility violations in its default and sorted views', async ({
@@ -24,14 +24,14 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('the notification dashboard has no accessibility violations when searched', async ({
     animalsPages,
     runA11yScan,
-    seededJourney,
-    journey,
+    animalsSeededJourney,
+    animalsJourney,
   }) => {
     const noMatchReferenceNumber = 'GBN-AG-26-ZZZZZZ';
 
     await test.step('Notification dashboard (search match)', async () => {
-      const referenceNumber = await seededJourney.createSubmittedNotification();
-      await journey.toNotificationDashboard();
+      const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
+      await animalsJourney.toNotificationDashboard();
       await animalsPages.dashboard.searchForReference(referenceNumber);
       await animalsPages.dashboard.heading.waitFor();
       await runA11yScan();

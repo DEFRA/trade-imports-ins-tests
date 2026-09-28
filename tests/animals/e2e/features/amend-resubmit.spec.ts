@@ -12,17 +12,17 @@ import { test, expect } from '@fixtures';
  */
 test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
   test('resubmits an amended notification: Submitted → Amending → Submitted with the edited answer kept', async ({
-    journey,
+    animalsJourney,
     journeyContext,
     pages,
     animalsPages,
-    notificationActions,
+    animalsNotificationActions,
   }) => {
     test.slow();
-    await journey.submitNotification();
+    await animalsJourney.submitNotification();
 
     // Enter amend from the dashboard (SUBMITTED → AMEND) — re-enters at the hub.
-    await notificationActions.amendNotification(journeyContext.journeyId);
+    await animalsNotificationActions.amendNotification(journeyContext.journeyId);
     await expect(animalsPages.overview.journeyStrip).toContainText('Amending');
 
     // Change the country of origin through the amending check your answers page.
@@ -48,7 +48,7 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
 
     // Back in Submitted: the view is read-only again and keeps the edited value.
-    await notificationActions.toNotificationView(journeyContext.journeyId);
+    await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(countryRow).toContainText('Belgium');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);

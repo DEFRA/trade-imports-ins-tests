@@ -37,9 +37,9 @@ test.describe('Notification created outbox event', { tag: ['@integration', '@mon
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });
 
-  test('writes a NotificationCreated event immediately on draft creation', async ({ journey, journeyContext }) => {
+  test('writes a NotificationCreated event immediately on draft creation', async ({ animalsJourney, journeyContext }) => {
     test.slow();
-    await journey.startNotification();
+    await animalsJourney.startNotification();
     const referenceNumber = journeyContext.journeyId;
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();
@@ -75,15 +75,15 @@ test.describe('Notification created outbox event', { tag: ['@integration', '@mon
   });
 
   test('writes a NotificationCreated event with consignor name when a submitted notification is copied', async ({
-    seededJourney,
-    notificationActions,
+    animalsSeededJourney,
+    animalsNotificationActions,
     animalsPages,
     journeyContext,
   }) => {
     test.slow();
-    await seededJourney.createSubmittedNotification();
+    await animalsSeededJourney.createSubmittedNotification();
     const sourceReferenceNumber = journeyContext.journeyId;
-    await notificationActions.toNotificationView(sourceReferenceNumber);
+    await animalsNotificationActions.toNotificationView(sourceReferenceNumber);
     await animalsPages.notificationView.btnCopyAsNew.click();
     await animalsPages.overview.heading.waitFor();
 

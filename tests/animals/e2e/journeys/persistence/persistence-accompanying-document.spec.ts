@@ -20,9 +20,9 @@ test.describe('Accompanying document persistence round-trip', { tag: ['@integrat
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
   });
 
-  test('uploads a document that persists to Mongo and reloads', async ({ journey, journeyContext, animalsPages }) => {
+  test('uploads a document that persists to Mongo and reloads', async ({ animalsJourney, journeyContext, animalsPages }) => {
     test.slow();
-    await journey.toAccompanyingDocuments();
+    await animalsJourney.toAccompanyingDocuments();
     const referenceNumber = journeyContext.journeyId;
     const documentReference = `PW${Date.now()}`;
     const issueDate = '03/01/2026';

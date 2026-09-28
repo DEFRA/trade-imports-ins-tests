@@ -11,11 +11,12 @@ import {
   type PlantsPages,
   type SharedPages,
 } from '@page-objects';
-import { Journey, type JourneyContext } from '@flows/journey';
-import { PlantsJourney } from '@flows/plants-journey';
-import { AdminNavigation } from '@flows/admin-navigation';
-import { NotificationActions } from '@flows/notification-actions';
-import { SeededJourney } from '@flows/seeded-journey';
+import type { JourneyContext } from '@flows/shared/journey-context';
+import { AnimalsJourney } from '@flows/animals/journey';
+import { AnimalsNotificationActions } from '@flows/animals/notification-actions';
+import { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
+import { AnimalsAdminNavigation } from '@flows/animals-admin/navigation';
+import { PlantsJourney } from '@flows/plants/journey';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { FrontendFormClient } from '@adapters/http/frontend-form-client';
@@ -38,14 +39,14 @@ export interface PageFixtures {
   insPages: InsPages;
   plantsPages: PlantsPages;
   journeyContext: JourneyContext;
-  journey: Journey;
+  animalsJourney: AnimalsJourney;
+  animalsSeededJourney: AnimalsSeededJourney;
+  animalsNotificationActions: AnimalsNotificationActions;
+  animalsAdminNavigation: AnimalsAdminNavigation;
   plantsJourney: PlantsJourney;
-  adminNavigation: AdminNavigation;
-  notificationActions: NotificationActions;
   notificationApi: NotificationApiClient;
   addressBookApi: AddressBookApiClient;
   frontendForms: FrontendFormClient;
-  seededJourney: SeededJourney;
 }
 
 export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
@@ -89,17 +90,17 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   journeyContext: async ({}, use) => {
     await use({});
   },
-  journey: async ({ animalsPages, pages, journeyContext }, use) => {
-    await use(new Journey(animalsPages, pages, journeyContext));
+  animalsJourney: async ({ animalsPages, pages, journeyContext }, use) => {
+    await use(new AnimalsJourney(animalsPages, pages, journeyContext));
+  },
+  animalsNotificationActions: async ({ animalsPages, pages }, use) => {
+    await use(new AnimalsNotificationActions(animalsPages, pages));
+  },
+  animalsAdminNavigation: async ({ animalsAdminPages }, use) => {
+    await use(new AnimalsAdminNavigation(animalsAdminPages));
   },
   plantsJourney: async ({ plantsPages, journeyContext }, use) => {
     await use(new PlantsJourney(plantsPages, journeyContext));
-  },
-  adminNavigation: async ({ animalsAdminPages }, use) => {
-    await use(new AdminNavigation(animalsAdminPages));
-  },
-  notificationActions: async ({ animalsPages, pages }, use) => {
-    await use(new NotificationActions(animalsPages, pages));
   },
   notificationApi: async ({ request }, use) => {
     await use(new NotificationApiClient(request));
@@ -112,8 +113,8 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   frontendForms: async ({ frontendSeedContext }, use) => {
     await use(new FrontendFormClient(frontendSeedContext));
   },
-  seededJourney: async ({ frontendForms, addressBookApi, journeyContext }, use) => {
-    await use(new SeededJourney(frontendForms, addressBookApi, journeyContext));
+  animalsSeededJourney: async ({ frontendForms, addressBookApi, journeyContext }, use) => {
+    await use(new AnimalsSeededJourney(frontendForms, addressBookApi, journeyContext));
   },
 });
 

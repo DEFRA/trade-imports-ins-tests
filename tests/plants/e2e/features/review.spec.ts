@@ -2,7 +2,7 @@ import { SET_BASES } from '@page-objects/shared/sets';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import type { PlantsPages, SharedPages } from '@page-objects';
-import type { PlantsJourney } from '@flows/plants-journey';
+import type { PlantsJourney } from '@flows/plants/journey';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { getRelativeServiceDisplayDate } from '@utils/date-utils';
 

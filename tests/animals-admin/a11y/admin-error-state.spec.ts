@@ -3,12 +3,12 @@ import { ObjectId } from 'mongodb';
 
 test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('each admin page has no accessibility violations when validation errors are shown', async ({
-    adminNavigation,
+    animalsAdminNavigation,
     animalsAdminPages,
     runA11yScan,
   }) => {
     await test.step('Admin notifications delete with an unknown reference', async () => {
-      await adminNavigation.toNotifications();
+      await animalsAdminNavigation.toNotifications();
       const invalidReference = `EXIST.NON.2026.${new ObjectId().toString()}`;
       await animalsAdminPages.notifications.inputReferenceNumber.fill(invalidReference);
       await animalsAdminPages.notifications.deleteByReferenceNumber();

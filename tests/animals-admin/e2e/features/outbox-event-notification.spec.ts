@@ -33,9 +33,9 @@ test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });
 
-  test('records a NotificationSubmitted outbox event on UI submission', async ({ journey, journeyContext }) => {
+  test('records a NotificationSubmitted outbox event on UI submission', async ({ animalsJourney, journeyContext }) => {
     test.slow();
-    await journey.submitNotification();
+    await animalsJourney.submitNotification();
     const referenceNumber = journeyContext.journeyId;
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();

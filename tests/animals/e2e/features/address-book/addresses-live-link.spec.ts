@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 
 test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () => {
   test('editing a linked address in the address book changes what the draft notification shows', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
     addressBookApi,
@@ -24,8 +24,8 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
       email: 'linked@example.co.uk',
     });
 
-    await journey.startNotification();
-    await journey.unlockSections();
+    await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
 
     await animalsPages.overview.task('Roles and addresses').click();
     const consignorRow = animalsPages.addresses.partyRow('Consignor or exporter');
@@ -77,7 +77,7 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
   });
 
   test('editing a linked place of origin in the address book changes what the draft notification shows', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
     addressBookApi,
@@ -95,8 +95,8 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
       email: 'origin-link@example.co.uk',
     });
 
-    await journey.startNotification();
-    await journey.unlockSections();
+    await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
 
     await animalsPages.overview.task('Roles and addresses').click();
     const originRow = animalsPages.addresses.partyRow('Place of origin');
@@ -134,7 +134,7 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
   });
 
   test('deleting a linked address treats it as never entered and hides it from the picker', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
     addressBookApi,
@@ -153,8 +153,8 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
       email: 'doomed@example.co.uk',
     });
 
-    await journey.startNotification();
-    await journey.unlockSections();
+    await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
 
     await animalsPages.overview.task('Roles and addresses').click();
     const consignorRow = animalsPages.addresses.partyRow('Consignor or exporter');
@@ -187,7 +187,7 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
   });
 
   test('the review page names a deleted address, walks the trader to a replacement and lets the submit through once it is replaced', async ({
-    seededJourney,
+    animalsSeededJourney,
     pages,
     animalsPages,
     addressBookApi,
@@ -209,8 +209,8 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
     // A complete notification, then swap the consignor for our own record —
     // the shared fixtures cannot be deleted without breaking every spec
     // running alongside this one.
-    const referenceNumber = await seededJourney.createDraftNotification('readyToSubmit');
-    await seededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
     await animalsPages.notificationView.changeLink('Change roles and addresses').click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await animalsPages.addresses.changeParty('Consignor or exporter').click();

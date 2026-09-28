@@ -1,7 +1,7 @@
 import type { FormFields } from '@adapters/http/frontend-form-client';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
-// Answers must stay in step with `flows/journey.ts`; `api-seed-parity.spec.ts` compares the two.
+// Answers must stay in step with `flows/animals/journey.ts`; `api-seed-parity.spec.ts` compares the two.
 
 /** Names must match the records seeded by `e2e-address-book.ts`. */
 export const PARTY_NAMES = {

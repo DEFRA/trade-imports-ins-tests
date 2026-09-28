@@ -12,14 +12,14 @@ const PRIVATE_TRANSPORTER = {
 };
 
 test.describe('Security scan (frontend, conditional pages)', { tag: '@active' }, () => {
-  test('routes the reason-gated and transporter-gated pages through the ZAP proxy', async ({ journey, animalsPages }) => {
+  test('routes the reason-gated and transporter-gated pages through the ZAP proxy', async ({ animalsJourney, animalsPages }) => {
     test.slow();
     // Two reveal payloads the submission journey never sends, because its
     // answers put them out of scope. Two reasons are needed, not one: transit
     // reveals the port of exit and the destination country, and the temporary
     // admission of horses reveals the exit date and the port of exit.
-    await journey.startNotification();
-    await journey.unlockSections();
+    await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
 
     await animalsPages.overview.task('Main reason for import').click();
     await animalsPages.importReason.reason('Transit').check();
@@ -41,7 +41,7 @@ test.describe('Security scan (frontend, conditional pages)', { tag: '@active' },
 
     // The private branch of the add route; the submission journey only ever
     // takes the commercial one.
-    await journey.reachTransporterFromHub();
+    await animalsJourney.reachTransporterFromHub();
     await animalsPages.transporter.addTransporter.click();
     await animalsPages.transporterAdd.heading.waitFor();
     await animalsPages.transporterAdd.transporterType('Private').check();

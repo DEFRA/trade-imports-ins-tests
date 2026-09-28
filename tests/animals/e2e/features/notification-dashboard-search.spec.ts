@@ -12,8 +12,8 @@ const wholeReferenceNumberParamPattern = (reference: string) => new RegExp(`[?&]
 const referenceNumberAnywhereInUrlPattern = (reference: string) => new RegExp(`referenceNumber=${escapeHyphens(reference)}`);
 
 test.describe('Notification dashboard search', () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toNotificationDashboard();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toNotificationDashboard();
   });
 
   test('displays the filter notifications search form', async ({ animalsPages }) => {
@@ -26,11 +26,11 @@ test.describe('Notification dashboard search', () => {
   test('returns matching notification when searching by complete reference number', async ({
     pages,
     animalsPages,
-    seededJourney,
-    journey,
+    animalsSeededJourney,
+    animalsJourney,
   }) => {
-    const referenceNumber = await seededJourney.createSubmittedNotification();
-    await journey.toNotificationDashboard();
+    const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
+    await animalsJourney.toNotificationDashboard();
 
     await animalsPages.dashboard.searchForReference(referenceNumber);
 
@@ -43,11 +43,11 @@ test.describe('Notification dashboard search', () => {
   test('opens notification view when clicking View after searching by reference number', async ({
     pages,
     animalsPages,
-    seededJourney,
-    journey,
+    animalsSeededJourney,
+    animalsJourney,
   }) => {
-    const referenceNumber = await seededJourney.createSubmittedNotification();
-    await journey.toNotificationDashboard();
+    const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
+    await animalsJourney.toNotificationDashboard();
 
     await animalsPages.dashboard.searchForReference(referenceNumber);
     await expect(animalsPages.dashboard.notificationCards).toHaveCount(1);
@@ -76,9 +76,14 @@ test.describe('Notification dashboard search', () => {
     await expect(animalsPages.dashboard.errorSummary).not.toBeVisible();
   });
 
-  test('preserves referenceNumber when updating sort after search', async ({ pages, animalsPages, seededJourney, journey }) => {
-    const referenceNumber = await seededJourney.createSubmittedNotification();
-    await journey.toNotificationDashboard();
+  test('preserves referenceNumber when updating sort after search', async ({
+    pages,
+    animalsPages,
+    animalsSeededJourney,
+    animalsJourney,
+  }) => {
+    const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
+    await animalsJourney.toNotificationDashboard();
 
     await animalsPages.dashboard.searchForReference(referenceNumber);
     await animalsPages.dashboard.sortBy(sortByValues.dateCreatedNewestToOldest);

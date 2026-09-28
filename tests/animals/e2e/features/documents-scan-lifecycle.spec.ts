@@ -8,8 +8,8 @@ import { firstScanStatus } from '@utils/scan-status';
 const issueDate = '03/01/2026';
 
 test.describe('Documents scan lifecycle', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toAccompanyingDocuments();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toAccompanyingDocuments();
   });
 
   test('infected upload: accepted while scanning, then Virus found with error summary and no view link', async ({

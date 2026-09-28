@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Country of origin type-ahead', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('filters as you type, submits the country code and persists it', async ({ journey, animalsPages }) => {
-    await journey.startNotification();
+  test('filters as you type, submits the country code and persists it', async ({ animalsJourney, animalsPages }) => {
+    await animalsJourney.startNotification();
     await animalsPages.overview.task('Where is this consignment coming from?').click();
 
     const field = animalsPages.originOfImport.countryOfOrigin;

@@ -53,20 +53,20 @@ test.describe('Notification lifecycle', { tag: ['@compose', '@integration'] }, (
   });
 
   test('renders a submitted notification read-only and re-enters an amendment at Overview', async ({
-    journey,
+    animalsJourney,
     journeyContext,
     pages,
     animalsPages,
-    notificationActions,
+    animalsNotificationActions,
   }) => {
-    await journey.submitNotification();
-    await notificationActions.toNotificationView(journeyContext.journeyId);
+    await animalsJourney.submitNotification();
+    await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
 
-    await notificationActions.amendNotification(journeyContext.journeyId);
+    await animalsNotificationActions.amendNotification(journeyContext.journeyId);
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.journeyStrip).toContainText('Amending');
   });

@@ -2,12 +2,12 @@ import { test, expect } from '@fixtures';
 
 test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('the N-of-M counter caps records at the declared count, remove frees a slot, and a count drop is blocked with an error naming the species', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
   }) => {
     test.slow();
-    await journey.startNotification();
+    await animalsJourney.startNotification();
 
     // A cattle line with a declared count of 2 (M = 2).
     await animalsPages.overview.task('What are you importing?').click();

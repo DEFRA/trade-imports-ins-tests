@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Transited countries page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toTransitedCountries();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toTransitedCountries();
   });
 
   test('renders the country search and an empty list', async ({ animalsPages }) => {

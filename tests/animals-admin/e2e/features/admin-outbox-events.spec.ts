@@ -12,11 +12,11 @@ test.describe('Outbox events (admin)', { tag: ['@integration', '@mongodb'] }, ()
   test(
     'shows the outbox event for a submitted notification',
     { tag: '@smoke' },
-    async ({ seededJourney, adminNavigation, animalsAdminPages }) => {
+    async ({ animalsSeededJourney, animalsAdminNavigation, animalsAdminPages }) => {
       test.slow();
-      const referenceNumber = await seededJourney.createSubmittedNotification();
+      const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
 
-      await adminNavigation.toOutboxEvents(referenceNumber);
+      await animalsAdminNavigation.toOutboxEvents(referenceNumber);
       const submittedRow = animalsAdminPages.outboxEvents.tableRows.filter({ hasText: 'NotificationSubmitted' });
 
       await expect
@@ -40,9 +40,9 @@ test.describe('Outbox events (admin)', { tag: ['@integration', '@mongodb'] }, ()
     },
   );
 
-  test('shows the empty state for an unknown reference number', async ({ adminNavigation, animalsAdminPages }) => {
+  test('shows the empty state for an unknown reference number', async ({ animalsAdminNavigation, animalsAdminPages }) => {
     const unknownRef = 'GBN-AG-00-000000';
-    await adminNavigation.toOutboxEvents(unknownRef);
+    await animalsAdminNavigation.toOutboxEvents(unknownRef);
     await expect(animalsAdminPages.outboxEvents.emptyStateMessage).toBeVisible();
     await expect(animalsAdminPages.outboxEvents.emptyStateMessage).toContainText(unknownRef);
   });

@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Admin service', () => {
-  test.beforeEach(async ({ adminNavigation }) => {
-    await adminNavigation.toAdminDashboard();
+  test.beforeEach(async ({ animalsAdminNavigation }) => {
+    await animalsAdminNavigation.toAdminDashboard();
   });
 
   test('lands on the admin dashboard', { tag: '@smoke' }, async ({ pages, animalsAdminPages }) => {

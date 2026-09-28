@@ -15,11 +15,11 @@ test.describe('Seeded notification transitions', { tag: ['@integration', '@mongo
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });
 
-  test('carries an actor and a populated event through submit, amend and cancel', async ({ seededJourney }) => {
+  test('carries an actor and a populated event through submit, amend and cancel', async ({ animalsSeededJourney }) => {
     test.slow();
-    const referenceNumber = await seededJourney.createSubmittedNotification();
-    await seededJourney.amend(referenceNumber);
-    await seededJourney.cancelAmend(referenceNumber);
+    const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
+    await animalsSeededJourney.amend(referenceNumber);
+    await animalsSeededJourney.cancelAmend(referenceNumber);
 
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();
@@ -52,10 +52,10 @@ test.describe('Seeded notification transitions', { tag: ['@integration', '@mongo
     }
   });
 
-  test('soft-deletes a submitted notification through the frontend', async ({ seededJourney }) => {
+  test('soft-deletes a submitted notification through the frontend', async ({ animalsSeededJourney }) => {
     test.slow();
-    const referenceNumber = await seededJourney.createSubmittedNotification();
-    await seededJourney.softDelete(referenceNumber);
+    const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
+    await animalsSeededJourney.softDelete(referenceNumber);
 
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();

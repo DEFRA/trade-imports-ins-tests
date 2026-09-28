@@ -2,11 +2,11 @@ import { test, expect } from '@fixtures';
 
 test.describe('Animal identifiers — conditional identifier surface', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('a unit form shows only the identifier types the commodity requires, plus the permanent address for cats and dogs', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
   }) => {
-    await journey.startNotification();
+    await animalsJourney.startNotification();
 
     // Batch-create a Cats commodity line. The animal count is save-blocking,
     // and a count of 2 keeps the identifier form open after the first record
@@ -65,11 +65,11 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
   });
 
   test('a commodity with no identifier type of its own gets no panel, while the lines that have one keep theirs', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
   }) => {
-    await journey.startNotification();
+    await animalsJourney.startNotification();
 
     // Cow carries an ear tag; Fish is on none of the identifier allowlists, so
     // it has nothing to be asked. One consignment holding both separates the
@@ -97,11 +97,11 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
   });
 
   test('a consignment where no commodity has an identifier type never reaches the identification page', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
   }) => {
-    await journey.startNotification();
+    await animalsJourney.startNotification();
 
     await animalsPages.overview.task('What are you importing?').click();
     await animalsPages.commoditySelection.selectSpecies(['Salmo salar']);

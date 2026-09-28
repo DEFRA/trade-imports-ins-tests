@@ -11,7 +11,7 @@ test.describe('Add an address from the journey via INS', { tag: ['@integration']
   });
 
   test('saving a new address in INS returns to the picker with it selected and committed', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
     insPages,
@@ -28,8 +28,8 @@ test.describe('Add an address from the journey via INS', { tag: ['@integration']
       email: `handshake-${stamp}@example.co.uk`,
     };
 
-    const journeyId = await journey.startNotification();
-    await journey.unlockSections();
+    const journeyId = await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
 
     await animalsPages.overview.task('Roles and addresses').click();
     await animalsPages.addresses.addParty('Consignor or exporter').click();
@@ -55,9 +55,9 @@ test.describe('Add an address from the journey via INS', { tag: ['@integration']
     await expect(animalsPages.addresses.partyRow('Consignor or exporter')).toContainText(farmName);
   });
 
-  test('cancelling INS add returns to the picker without saving an address', async ({ journey, pages, animalsPages, insPages }) => {
-    const journeyId = await journey.startNotification();
-    await journey.unlockSections();
+  test('cancelling INS add returns to the picker without saving an address', async ({ animalsJourney, pages, animalsPages, insPages }) => {
+    const journeyId = await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
 
     await animalsPages.overview.task('Roles and addresses').click();
     await animalsPages.addresses.addParty('Consignor or exporter').click();

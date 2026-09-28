@@ -3,8 +3,8 @@ import { test, expect } from '@fixtures';
 const INTERNAL_REFERENCE = 'Imports456GB';
 
 test.describe('Origin of the import page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toOriginOfImport();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toOriginOfImport();
   });
 
   test('renders the page controls', async ({ animalsPages }) => {

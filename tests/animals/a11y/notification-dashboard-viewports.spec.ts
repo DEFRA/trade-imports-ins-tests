@@ -1,8 +1,8 @@
 import { test, WCAG_STANDARD, scanViewports, waitForViewportSettle } from '@fixtures/a11y';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toNotificationDashboard();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toNotificationDashboard();
   });
 
   test('the notification dashboard has no accessibility violations across viewports', async ({ page, runA11yScan }) => {

@@ -2,13 +2,13 @@ import { test, expect } from '@fixtures';
 
 test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('the CPH page and addresses-hub row show only when a CPH-triggering commodity line exists', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
   }) => {
     test.slow();
 
-    const journeyId = await journey.startNotification();
+    const journeyId = await animalsJourney.startNotification();
 
     const page = pages.page;
     const cphRow = page.locator('.govuk-summary-list__row', {

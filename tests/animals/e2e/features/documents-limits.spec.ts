@@ -19,12 +19,12 @@ const paddedPdf = async (destination: string, bytes: number): Promise<string> =>
 
 test.describe('Documents limits', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('accepts a fifteenth document and rejects a sixteenth with the maximum-documents error', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
   }) => {
     test.setTimeout(120_000);
-    await journey.toAccompanyingDocuments();
+    await animalsJourney.toAccompanyingDocuments();
 
     for (let index = 1; index <= maximumDocuments; index += 1) {
       const reference = `PWCAP${Date.now()}${index}`;
@@ -50,11 +50,11 @@ test.describe('Documents limits', { tag: ['@integration', '@duplicated-in-fronte
     await expect(animalsPages.accompanyingDocuments.documentRow(sixteenthReference)).toHaveCount(0);
   });
 
-  test('accepts a 10MB PDF and rejects the same real file at one byte over', async ({ journey, pages, animalsPages }, testInfo) => {
+  test('accepts a 10MB PDF and rejects the same real file at one byte over', async ({ animalsJourney, pages, animalsPages }, testInfo) => {
     test.slow();
     const exact = await paddedPdf(testInfo.outputPath('boundary-exact.pdf'), MAX_FILE_SIZE_BYTES);
     const over = await paddedPdf(testInfo.outputPath('boundary-over.pdf'), MAX_FILE_SIZE_BYTES + 1);
-    await journey.toAccompanyingDocuments();
+    await animalsJourney.toAccompanyingDocuments();
 
     const exactReference = `PWEXACT${Date.now()}`;
     await animalsPages.accompanyingDocuments.fillDocument(exactReference, issueDate, exact);

@@ -4,8 +4,8 @@ import { test, expect } from '@fixtures';
 test.use({ headless: true });
 
 test.describe('Origin of import (visual regression)', { tag: '@visual' }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toOriginOfImport();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toOriginOfImport();
   });
 
   // Mask the status strip: it now renders from the first request, and the

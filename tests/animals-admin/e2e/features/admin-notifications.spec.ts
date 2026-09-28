@@ -19,11 +19,11 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
   test(
     'finds and deletes a submitted notification by reference number',
     { tag: '@smoke' },
-    async ({ seededJourney, adminNavigation, animalsAdminPages }) => {
+    async ({ animalsSeededJourney, animalsAdminNavigation, animalsAdminPages }) => {
       test.slow();
-      const referenceNumber = await seededJourney.createSubmittedNotification();
+      const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
 
-      await adminNavigation.toNotifications();
+      await animalsAdminNavigation.toNotifications();
       await animalsAdminPages.notifications.findRowByReference(referenceNumber);
       await expect(animalsAdminPages.notifications.tableRowByReference(referenceNumber)).toBeVisible();
 
@@ -40,11 +40,15 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
     },
   );
 
-  test('cancelling checkbox deletion keeps the notification visible', async ({ seededJourney, adminNavigation, animalsAdminPages }) => {
+  test('cancelling checkbox deletion keeps the notification visible', async ({
+    animalsSeededJourney,
+    animalsAdminNavigation,
+    animalsAdminPages,
+  }) => {
     test.slow();
-    const referenceNumber = await seededJourney.createSubmittedNotification();
+    const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
 
-    await adminNavigation.toNotifications();
+    await animalsAdminNavigation.toNotifications();
     await animalsAdminPages.notifications.findRowByReference(referenceNumber);
     await animalsAdminPages.notifications.checkboxNotificationByReference(referenceNumber).check();
     await animalsAdminPages.notifications.btnDelete.click();
@@ -52,11 +56,11 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
     await expect(animalsAdminPages.notifications.tableRowByReference(referenceNumber)).toBeVisible();
   });
 
-  test('deletes a notification by checkbox', async ({ seededJourney, adminNavigation, animalsAdminPages }) => {
+  test('deletes a notification by checkbox', async ({ animalsSeededJourney, animalsAdminNavigation, animalsAdminPages }) => {
     test.slow();
-    const referenceNumber = await seededJourney.createSubmittedNotification();
+    const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
 
-    await adminNavigation.toNotifications();
+    await animalsAdminNavigation.toNotifications();
 
     await test.step('delete notification by checkbox', async () => {
       await animalsAdminPages.notifications.findRowByReference(referenceNumber);
@@ -100,16 +104,16 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
   test.skip(
     'deletes all current-page notifications by select all',
     { tag: '@compose' },
-    async ({ seededJourney, adminNavigation, animalsAdminPages }) => {
+    async ({ animalsSeededJourney, animalsAdminNavigation, animalsAdminPages }) => {
       skipIfCdpEnvironment('Compose/local only: destructive (deletes the current page of notifications).');
       test.slow();
 
-      await seededJourney.createDraftNotification('unlocked');
-      await seededJourney.createDraftNotification('unlocked');
-      await seededJourney.createDraftNotification('unlocked');
-      await seededJourney.createDraftNotification('unlocked');
+      await animalsSeededJourney.createDraftNotification('unlocked');
+      await animalsSeededJourney.createDraftNotification('unlocked');
+      await animalsSeededJourney.createDraftNotification('unlocked');
+      await animalsSeededJourney.createDraftNotification('unlocked');
 
-      await adminNavigation.toNotifications();
+      await animalsAdminNavigation.toNotifications();
       await expect(animalsAdminPages.notifications.heading).toBeVisible();
 
       const currentPageReferences = await animalsAdminPages.notifications.currentPageReferences();
@@ -151,12 +155,12 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
     },
   );
 
-  test('does not allow deleting a notification by invalid reference number', async ({ adminNavigation, animalsAdminPages }) => {
+  test('does not allow deleting a notification by invalid reference number', async ({ animalsAdminNavigation, animalsAdminPages }) => {
     test.slow();
     const randomId = new ObjectId().toString();
     const invalidReference = `EXIST.NON.2026.${randomId}`;
 
-    await adminNavigation.toNotifications();
+    await animalsAdminNavigation.toNotifications();
 
     await test.step('attempt delete by invalid reference number shows an error', async () => {
       await animalsAdminPages.notifications.inputReferenceNumber.fill(invalidReference);

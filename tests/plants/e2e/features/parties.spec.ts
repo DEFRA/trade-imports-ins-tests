@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import type { PlantsPages } from '@page-objects';
-import type { PlantsJourney } from '@flows/plants-journey';
+import type { PlantsJourney } from '@flows/plants/journey';
 
 const PLANTS = 'Plants for planting';
 const POTATOES = 'Potatoes (seed or ware)';

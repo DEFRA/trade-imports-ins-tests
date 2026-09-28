@@ -15,14 +15,14 @@ const transporter = {
 
 test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('keyed-in details are owed only for the private type; a partial fill blocks the save; changing the type wipes them', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
   }) => {
-    await journey.startNotification();
-    await journey.unlockSections();
+    await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
 
-    const openTransporters = () => journey.reachTransporterFromHub();
+    const openTransporters = () => animalsJourney.reachTransporterFromHub();
 
     // The type question sits behind "Add a transporter" now, so every branch is
     // reached through the add route rather than off the list itself.

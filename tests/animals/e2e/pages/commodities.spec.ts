@@ -11,8 +11,8 @@ const expectedGroups = [
 ] as const;
 
 test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toCommoditySelection();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toCommoditySelection();
   });
 
   test('offers a search box and lists nothing until it is used', async ({ pages, animalsPages }) => {

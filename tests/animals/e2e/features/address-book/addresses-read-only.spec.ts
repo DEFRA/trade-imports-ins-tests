@@ -26,9 +26,9 @@ test.describe('Addresses are read-only in the journey', { tag: ['@integration'] 
   test.describe('party picker add link', () => {
     for (const { hubRole, picker } of PARTY_ADD_LINK_CASES) {
       test.describe(hubRole, () => {
-        test.beforeEach(async ({ journey, animalsPages }) => {
-          await journey.startNotification();
-          await journey.unlockSections();
+        test.beforeEach(async ({ animalsJourney, animalsPages }) => {
+          await animalsJourney.startNotification();
+          await animalsJourney.unlockSections();
 
           await animalsPages.overview.task('Roles and addresses').click();
           await animalsPages.addresses.addParty(hubRole).click();
@@ -51,8 +51,8 @@ test.describe('Addresses are read-only in the journey', { tag: ['@integration'] 
     }
   });
 
-  test('the create-address page is no longer served', async ({ journey, journeyContext, pages }) => {
-    await journey.startNotification();
+  test('the create-address page is no longer served', async ({ animalsJourney, journeyContext, pages }) => {
+    await animalsJourney.startNotification();
     const journeyId = journeyContext.journeyId;
 
     const response = await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${journeyId}/addresses/create?for=consignor`);

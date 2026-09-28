@@ -12,7 +12,11 @@ const transporter = {
 };
 
 test.describe('Commercial transporter journeys', { tag: '@integration' }, () => {
-  test('a trader can submit a notification using a hand-added commercial transporter', async ({ seededJourney, pages, animalsPages }) => {
+  test('a trader can submit a notification using a hand-added commercial transporter', async ({
+    animalsSeededJourney,
+    pages,
+    animalsPages,
+  }) => {
     // EUDPA-636 — commercial-transporter-details.controller.js never calls
     // rememberTransporter(), so a hand-added commercial transporter can never
     // pass the register check the task list and review page re-run. Remove
@@ -21,8 +25,8 @@ test.describe('Commercial transporter journeys', { tag: '@integration' }, () => 
 
     // Everything up to transport is seeded through the API — only the
     // scenario under test (transit countries onward) is driven through the UI.
-    const journeyId = await seededJourney.createDraftNotification('draft');
-    await seededJourney.resumeInUi(journeyId, animalsPages.transitedCountries);
+    const journeyId = await animalsSeededJourney.createDraftNotification('draft');
+    await animalsSeededJourney.resumeInUi(journeyId, animalsPages.transitedCountries);
 
     await animalsPages.transitedCountries.addCountry('France');
     await animalsPages.transitedCountries.addCountry('Belgium');

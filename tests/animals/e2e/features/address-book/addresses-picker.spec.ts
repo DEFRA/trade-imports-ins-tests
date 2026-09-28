@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 
 test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('the picker searches and pages the address book, and the row selected on a later page is the one that saves', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
     addressBookApi,
@@ -49,8 +49,8 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
       });
     }
 
-    await journey.startNotification();
-    await journey.unlockSections();
+    await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
 
     await animalsPages.overview.task('Roles and addresses').click();
     const consignorRow = animalsPages.addresses.partyRow('Consignor or exporter');

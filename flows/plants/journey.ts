@@ -1,5 +1,5 @@
 import type { PlantsPages } from '@page-objects';
-import type { JourneyContext } from '@flows/journey';
+import type { JourneyContext } from '@flows/shared/journey-context';
 
 /**
  * One commodity line's answers, keyed by the label the trader reads. Which

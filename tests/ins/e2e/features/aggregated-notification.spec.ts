@@ -15,7 +15,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
   });
 
   test('creates and updates aggregated notification document through the submission lifecycle', async ({
-    journey,
+    animalsJourney,
     journeyContext,
     pages,
     animalsPages,
@@ -23,7 +23,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
     test.slow();
 
     // Given — complete the journey up to the declaration page (notification is in DRAFT)
-    await journey.toDeclaration();
+    await animalsJourney.toDeclaration();
     const referenceNumber = journeyContext.journeyId;
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient(getMongoDbUri());
@@ -61,7 +61,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
       expect(draftDoc.referenceNumber).toBe(referenceNumber);
       expect(draftDoc.status).toBe('DRAFT');
       expect(draftDoc.originCountry).toBe(defaultJourneyOptions.countryCode.value);
-      // journey.answerCommodity() always selects the 'Bos taurus' species, which the frontend
+      // animalsJourney.answerCommodity() always selects the 'Bos taurus' species, which the frontend
       // resolves to commodity.name 'Cow' (see persistence-notification.spec.ts:75) — not
       // defaultJourneyOptions.commodityCode, which answerCommodity() doesn't consume.
       expect(draftDoc.commodity).toBe(commodityCodes.cow);

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { COLD_START } from '@fixtures/auth-state';
-import type { CommodityLine } from '@flows/plants-journey';
+import type { CommodityLine } from '@flows/plants/journey';
 
 const POTATOES = 'Potatoes (seed or ware)';
 const PLANTS = 'Plants for planting';

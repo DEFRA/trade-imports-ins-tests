@@ -2,9 +2,9 @@ import { test, expect } from '@fixtures';
 
 test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () => {
   test.describe('from an amending notification', () => {
-    test.beforeEach(async ({ seededJourney, notificationActions }) => {
-      const referenceNumber = await seededJourney.createAmendNotification();
-      await notificationActions.toNotificationView(referenceNumber);
+    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions }) => {
+      const referenceNumber = await animalsSeededJourney.createAmendNotification();
+      await animalsNotificationActions.toNotificationView(referenceNumber);
     });
 
     test('shows the Cancel amendment link while the notification is amending', async ({ animalsPages }) => {
@@ -40,9 +40,9 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
   test(
     'Yes cancels the amendment and restores the submitted answers',
     { tag: '@smoke' },
-    async ({ pages, animalsPages, seededJourney, notificationActions }) => {
-      const referenceNumber = await seededJourney.createAmendNotification();
-      await notificationActions.toNotificationView(referenceNumber);
+    async ({ pages, animalsPages, animalsSeededJourney, animalsNotificationActions }) => {
+      const referenceNumber = await animalsSeededJourney.createAmendNotification();
+      await animalsNotificationActions.toNotificationView(referenceNumber);
 
       const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
       await expect(countryRow).toContainText('France');

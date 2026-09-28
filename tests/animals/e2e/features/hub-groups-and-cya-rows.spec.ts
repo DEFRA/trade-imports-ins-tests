@@ -1,10 +1,10 @@
 import type { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
-import { ARRIVAL_DATE } from '@flows/journey';
+import { ARRIVAL_DATE } from '@flows/animals/journey';
 
 test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({ journey, pages }) => {
-    await journey.startNotification();
+  test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({ animalsJourney, pages }) => {
+    await animalsJourney.startNotification();
 
     // Design release 1 sits the whole list under its own heading, so the
     // section captions dropped from h2 to h3.
@@ -49,9 +49,13 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expectListedTasks(taskLists.nth(5), ['Contact address for this consignment']);
   });
 
-  test('after completing every section the check-your-answers page renders the answered rows', async ({ journey, pages, animalsPages }) => {
+  test('after completing every section the check-your-answers page renders the answered rows', async ({
+    animalsJourney,
+    pages,
+    animalsPages,
+  }) => {
     test.slow();
-    await journey.toReview();
+    await animalsJourney.toReview();
 
     const value = (card: Locator, key: string) =>
       card.locator('.govuk-summary-list__row', { has: pages.page.getByText(key, { exact: true }) }).locator('.govuk-summary-list__value');

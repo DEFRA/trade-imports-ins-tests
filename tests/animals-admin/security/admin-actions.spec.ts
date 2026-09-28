@@ -16,11 +16,16 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
     sqs.destroy();
   });
 
-  test('routes the admin write actions through the ZAP proxy', async ({ seededJourney, adminNavigation, pages, animalsAdminPages }) => {
+  test('routes the admin write actions through the ZAP proxy', async ({
+    animalsSeededJourney,
+    animalsAdminNavigation,
+    pages,
+    animalsAdminPages,
+  }) => {
     test.slow();
-    const referenceNumber = await seededJourney.createAmendNotification();
+    const referenceNumber = await animalsSeededJourney.createAmendNotification();
 
-    await adminNavigation.toOutboxEvents(referenceNumber);
+    await animalsAdminNavigation.toOutboxEvents(referenceNumber);
     await expect.poll(() => animalsAdminPages.outboxEvents.tableRows.count(), { timeout: timeouts.short }).toBeGreaterThan(0);
     await animalsAdminPages.outboxEvents.btnReplay.click();
     await expect(animalsAdminPages.outboxEvents.bannerSuccess).toBeVisible();
@@ -32,7 +37,7 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
     await expect(animalsAdminPages.notifications.alertSuccess).toBeVisible();
 
     const eventId = await seedDlqMessage(sqs);
-    await adminNavigation.toDlqEvents();
+    await animalsAdminNavigation.toDlqEvents();
     const seededDlqRow = animalsAdminPages.dlqEvents.rowById(eventId);
     await expect(async () => {
       if (!(await seededDlqRow.isVisible())) {

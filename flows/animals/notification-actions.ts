@@ -1,7 +1,7 @@
 import { pageLoadWait, timeouts } from '@config/timeouts';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 
-export class NotificationActions {
+export class AnimalsNotificationActions {
   constructor(
     private readonly animalsPages: AnimalsPages,
     private readonly pages: SharedPages,

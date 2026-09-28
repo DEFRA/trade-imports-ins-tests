@@ -1,6 +1,6 @@
 import type { AnimalsAdminPages } from '@page-objects';
 
-export class AdminNavigation {
+export class AnimalsAdminNavigation {
   constructor(private readonly animalsAdminPages: AnimalsAdminPages) {}
 
   async toAdminDashboard(): Promise<void> {

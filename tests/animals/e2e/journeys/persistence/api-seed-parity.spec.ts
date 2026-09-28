@@ -10,13 +10,13 @@ test.describe('Seeded and browser-driven notifications match', { tag: ['@integra
   });
 
   test('a seeded notification stores what the same journey stores through the browser', async ({
-    journey,
+    animalsJourney,
     journeyContext,
-    seededJourney,
+    animalsSeededJourney,
   }) => {
-    await journey.submitNotification();
+    await animalsJourney.submitNotification();
     const browserReference = journeyContext.journeyId;
-    const seededReference = await seededJourney.createSubmittedNotification();
+    const seededReference = await animalsSeededJourney.createSubmittedNotification();
 
     const client = new MongoDbClient();
     try {
@@ -32,7 +32,7 @@ test.describe('Seeded and browser-driven notifications match', { tag: ['@integra
       const seededDoc = await readStoredNotification(seededReference);
 
       expect(seededDoc.status).toBe(browserDoc.status);
-      // Keep ARRIVAL_DATE (flows/journey.ts) and MONTHS_AHEAD_INSIDE_ARRIVAL_WINDOW (domain/fixtures/seeded-journey.ts) on the same offset.
+      // Keep ARRIVAL_DATE (flows/animals/journey.ts) and MONTHS_AHEAD_INSIDE_ARRIVAL_WINDOW (domain/fixtures/seeded-journey.ts) on the same offset.
       expect(seededDoc.notification).toEqual(browserDoc.notification);
       expect(seededDoc.fulfilments).toEqual(browserDoc.fulfilments);
     } finally {

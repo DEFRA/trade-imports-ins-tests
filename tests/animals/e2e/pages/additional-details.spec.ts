@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Additional details page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toAdditionalDetails();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toAdditionalDetails();
   });
 
   test('renders the page controls', async ({ animalsPages }) => {

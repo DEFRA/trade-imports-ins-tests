@@ -3,9 +3,9 @@ import { fileUploadPaths } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 test.describe('Security scan (frontend, documents)', { tag: '@active' }, () => {
-  test('routes a document upload through the ZAP proxy', async ({ journey, animalsPages }) => {
+  test('routes a document upload through the ZAP proxy', async ({ animalsJourney, animalsPages }) => {
     test.slow();
-    await journey.toAccompanyingDocuments();
+    await animalsJourney.toAccompanyingDocuments();
 
     // File upload is the richest input surface the wizard has, and the only
     // page whose routes carry a second, nested id — the uploadId dataDrivenNode

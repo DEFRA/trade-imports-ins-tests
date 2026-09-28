@@ -5,8 +5,8 @@ import { test, expect } from '@fixtures';
 // carries the register's rows itself, so the journey helper reaches it by its
 // own URL — through the add route, which is what answers the transporter type.
 test.describe('Transporter selection page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toTransporterSelection();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toTransporterSelection();
   });
 
   test('renders the page controls', async ({ animalsPages }) => {

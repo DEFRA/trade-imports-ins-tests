@@ -13,10 +13,10 @@ test.describe('Notification deleted outbox events', { tag: ['@integration', '@mo
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });
 
-  test('writes a NotificationDeleted event when a draft is soft-deleted', async ({ seededJourney }) => {
+  test('writes a NotificationDeleted event when a draft is soft-deleted', async ({ animalsSeededJourney }) => {
     test.slow();
-    const referenceNumber = await seededJourney.createEmptyNotification();
-    await seededJourney.softDelete(referenceNumber);
+    const referenceNumber = await animalsSeededJourney.createEmptyNotification();
+    await animalsSeededJourney.softDelete(referenceNumber);
 
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();
@@ -46,11 +46,11 @@ test.describe('Notification deleted outbox events', { tag: ['@integration', '@mo
     }
   });
 
-  test('writes a NotificationSubmissionDeleted event when a submitted notification is soft-deleted', async ({ seededJourney }) => {
+  test('writes a NotificationSubmissionDeleted event when a submitted notification is soft-deleted', async ({ animalsSeededJourney }) => {
     test.slow();
-    const referenceNumber = await seededJourney.createSubmittedNotification();
+    const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
     // Not notificationApi.softDeleteNotification: it sends no actor, and a submitted notification's address-book parties need an organisation id.
-    await seededJourney.softDelete(referenceNumber);
+    await animalsSeededJourney.softDelete(referenceNumber);
 
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();

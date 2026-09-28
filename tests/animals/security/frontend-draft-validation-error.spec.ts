@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Security scan (frontend, draft)', { tag: '@active' }, () => {
-  test('routes a draft validation error through the ZAP proxy', async ({ journey, animalsPages }) => {
-    await journey.toOriginOfImport();
+  test('routes a draft validation error through the ZAP proxy', async ({ animalsJourney, animalsPages }) => {
+    await animalsJourney.toOriginOfImport();
 
     // Fresh, unsubmitted draft — a region code claimed but not given is real
     // input-accepting attack surface the sibling frontend-notification-journey
@@ -14,8 +14,8 @@ test.describe('Security scan (frontend, draft)', { tag: '@active' }, () => {
     await animalsPages.originOfImport.saveAndContinue.click();
     await expect(animalsPages.originOfImport.errorSummary).toBeVisible();
 
-    await journey.fillOriginOfImport();
-    await journey.saveOriginOfImport();
+    await animalsJourney.fillOriginOfImport();
+    await animalsJourney.saveOriginOfImport();
 
     // A fresh notification's first section is a linear step, not hub-driven
     // (see journey.ts's answerOrigin(), which enters Origin via the overview

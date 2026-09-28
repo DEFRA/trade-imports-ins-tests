@@ -2,12 +2,12 @@ import { test, expect } from '@fixtures';
 
 test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('the transit-countries page is routed only for rail or road; changing the means wipes saved countries', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
   }) => {
-    await journey.startNotification();
-    await journey.unlockSections();
+    await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
 
     const transitRow = pages.page.locator('.govuk-task-list__item', { hasText: 'Transit countries' });
 
@@ -16,7 +16,7 @@ test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in
     const saveArrivalWithMeans = async (means: string) => {
       await animalsPages.overview.task('Arrival details').click();
       await expect(animalsPages.arrivalDetails.heading).toBeVisible();
-      await journey.fillArrivalDetails(means);
+      await animalsJourney.fillArrivalDetails(means);
       await animalsPages.arrivalDetails.saveAndContinue.click();
     };
     // A blank save on the transporter-type page (submit-enforced) returns to the hub.

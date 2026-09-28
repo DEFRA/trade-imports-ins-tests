@@ -5,9 +5,9 @@ const EXACT_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
 
 test.describe('Notification view states', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.describe('DRAFT', () => {
-    test.beforeEach(async ({ seededJourney, notificationActions, journeyContext }) => {
-      await seededJourney.createDraftNotification('unlocked');
-      await notificationActions.toNotificationView(journeyContext.journeyId);
+    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
+      await animalsSeededJourney.createDraftNotification('unlocked');
+      await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
     });
 
     test('renders the recorded answers in the numbered design sections', async ({ pages, animalsPages }) => {
@@ -52,9 +52,9 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
   });
 
   test.describe('DRAFT ready to submit', () => {
-    test.beforeEach(async ({ seededJourney, notificationActions, journeyContext }) => {
-      await seededJourney.createDraftNotification('readyToSubmit');
-      await notificationActions.toNotificationView(journeyContext.journeyId);
+    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
+      await animalsSeededJourney.createDraftNotification('readyToSubmit');
+      await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
     });
 
     test('shows no error summary once every section is answered', async ({ animalsPages }) => {
@@ -70,9 +70,9 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
   });
 
   test.describe('SUBMITTED', () => {
-    test.beforeEach(async ({ seededJourney, notificationActions, journeyContext }) => {
-      await seededJourney.createSubmittedNotification();
-      await notificationActions.toNotificationView(journeyContext.journeyId);
+    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
+      await animalsSeededJourney.createSubmittedNotification();
+      await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
     });
 
     test('lands on the view page with the Submitted strip and reference', async ({ pages, animalsPages, journeyContext }) => {

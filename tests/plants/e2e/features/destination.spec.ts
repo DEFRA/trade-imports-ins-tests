@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import type { PlantsPages } from '@page-objects';
-import type { PlantsJourney } from '@flows/plants-journey';
+import type { PlantsJourney } from '@flows/plants/journey';
 
 const POTATOES = 'Potatoes (seed or ware)';
 const PLANTS_FOR_PLANTING = 'Plants for planting';

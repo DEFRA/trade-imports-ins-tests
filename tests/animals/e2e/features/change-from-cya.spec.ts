@@ -2,13 +2,13 @@ import { test, expect } from '@fixtures';
 
 test.describe('Change from check your answers', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('a Change link opens the answering page with change context and the save returns to check your answers with the new value', async ({
-    seededJourney,
+    animalsSeededJourney,
     pages,
     animalsPages,
   }) => {
     test.slow();
-    const referenceNumber = await seededJourney.createDraftNotification('readyToSubmit');
-    await seededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
 
     // Design release 1 puts one Change link in each card's heading and none on
     // a row, so the link is named for the card and reaches every answer in it.

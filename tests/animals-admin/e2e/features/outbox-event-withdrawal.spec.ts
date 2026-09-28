@@ -12,10 +12,14 @@ test.describe('Notification withdrawal outbox event', { tag: ['@integration', '@
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });
 
-  test('does not write a withdrawn event when a draft is deleted', async ({ journey, journeyContext, notificationActions }) => {
+  test('does not write a withdrawn event when a draft is deleted', async ({
+    animalsJourney,
+    journeyContext,
+    animalsNotificationActions,
+  }) => {
     test.slow();
-    await journey.startNotification();
-    await notificationActions.deleteNotification(journeyContext.journeyId);
+    await animalsJourney.startNotification();
+    await animalsNotificationActions.deleteNotification(journeyContext.journeyId);
 
     const aggregateId = aggregateIdFor(journeyContext.journeyId);
     const client = new MongoDbClient();

@@ -11,12 +11,12 @@ const conditionalRadioInput = '#regionOfOriginCodeRequirement';
 const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.startNotification();
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.startNotification();
   });
 
   test('each notification journey page has no accessibility violations after user input', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
     runA11yScan,
@@ -29,9 +29,9 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     await test.step('Origin of import', async () => {
       await animalsPages.overview.task('Where is this consignment coming from?').click();
-      await journey.fillOriginOfImport({ requiresRegionCode: 'Yes', internalReference: 'Imports456GB' });
+      await animalsJourney.fillOriginOfImport({ requiresRegionCode: 'Yes', internalReference: 'Imports456GB' });
       await runA11yScan({ exclude: conditionalRadioInput });
-      await journey.saveOriginOfImport();
+      await animalsJourney.saveOriginOfImport();
       await animalsPages.overview.heading.waitFor();
     });
 
@@ -130,7 +130,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Arrival details', async () => {
       await animalsPages.overview.task('Arrival details').click();
       await animalsPages.arrivalDetails.heading.waitFor();
-      await journey.fillArrivalDetails();
+      await animalsJourney.fillArrivalDetails();
       await runA11yScan();
       await animalsPages.arrivalDetails.saveAndContinue.click();
     });

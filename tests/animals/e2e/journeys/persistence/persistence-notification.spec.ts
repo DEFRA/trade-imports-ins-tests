@@ -3,7 +3,7 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
-import { ARRIVAL_DATE } from '@flows/journey';
+import { ARRIVAL_DATE } from '@flows/animals/journey';
 import { toUtcDate } from '@utils/date-utils';
 
 /**
@@ -18,8 +18,8 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
   });
 
-  test('draft notification persists as DRAFT up to declaration', async ({ journey, journeyContext }) => {
-    await journey.toDeclaration();
+  test('draft notification persists as DRAFT up to declaration', async ({ animalsJourney, journeyContext }) => {
+    await animalsJourney.toDeclaration();
     const referenceNumber = journeyContext.journeyId;
     const client = new MongoDbClient();
 
@@ -37,7 +37,7 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
   });
 
   test('submitted notification persists the journey answers and reloads read-only', async ({
-    journey,
+    animalsJourney,
     journeyContext,
     animalsPages,
     addressBookApi,
@@ -52,7 +52,7 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
     const importer = await addressBookApi.findByName('Import Co UK');
     const contact = await addressBookApi.findByName('Animal and Plant Health Agency');
 
-    await journey.submitNotification();
+    await animalsJourney.submitNotification();
     const referenceNumber = journeyContext.journeyId;
     const client = new MongoDbClient();
 

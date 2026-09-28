@@ -3,9 +3,9 @@ import { SET_BASES } from '@page-objects/shared/sets';
 import { test, expect } from '@fixtures';
 
 test.describe('Notification delete', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('deletes a draft notification', async ({ journey, journeyContext, pages }) => {
+  test('deletes a draft notification', async ({ animalsJourney, journeyContext, pages }) => {
     test.slow();
-    await journey.startNotification();
+    await animalsJourney.startNotification();
     const { journeyId } = journeyContext;
 
     await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${journeyId}/delete`);
@@ -17,10 +17,10 @@ test.describe('Notification delete', { tag: ['@integration', '@duplicated-in-fro
   test(
     'deletes the notification and removes it from the dashboard',
     { tag: '@smoke' },
-    async ({ animalsPages, seededJourney, notificationActions }) => {
-      const referenceNumber = await seededJourney.createSubmittedNotification();
+    async ({ animalsPages, animalsSeededJourney, animalsNotificationActions }) => {
+      const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
 
-      await notificationActions.deleteNotification(referenceNumber);
+      await animalsNotificationActions.deleteNotification(referenceNumber);
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
       await expect(animalsPages.dashboard.notificationCards).toHaveCount(0);

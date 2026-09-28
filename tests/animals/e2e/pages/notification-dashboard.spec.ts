@@ -5,8 +5,8 @@ const WHOLE_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
 const DISPLAYED_DATE_PATTERN = /\d{1,2} \w+ \d{4}/;
 
 test.describe('Import notification service dashboard', { tag: '@integration' }, () => {
-  test('starts a journey at the origin page and lists the draft', async ({ journey, pages, animalsPages }) => {
-    const journeyId = await journey.startNotification();
+  test('starts a journey at the origin page and lists the draft', async ({ animalsJourney, pages, animalsPages }) => {
+    const journeyId = await animalsJourney.startNotification();
 
     await expect(pages.page).toHaveURL(animalsPages.overview.expectedUrl(journeyId));
     await expect(animalsPages.overview.heading).toBeVisible();
@@ -24,20 +24,20 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
   });
 
   test.describe('dashboard basics', () => {
-    test('lands on the notification dashboard', { tag: '@smoke' }, async ({ journey, pages, animalsPages }) => {
-      await journey.toNotificationDashboard();
+    test('lands on the notification dashboard', { tag: '@smoke' }, async ({ animalsJourney, pages, animalsPages }) => {
+      await animalsJourney.toNotificationDashboard();
       await expect(pages.page).toHaveURL(animalsPages.dashboard.expectedUrl);
       await expect(animalsPages.dashboard.heading).toBeVisible();
     });
 
-    test('allows creating a new notification, landing on the journey entry page', async ({ journey, animalsPages }) => {
-      await journey.toNotificationDashboard();
+    test('allows creating a new notification, landing on the journey entry page', async ({ animalsJourney, animalsPages }) => {
+      await animalsJourney.toNotificationDashboard();
       await animalsPages.dashboard.btnCreateNewNotification.click();
       await expect(animalsPages.originOfImport.heading).toBeVisible();
     });
 
-    test('displays the notification list and result count', async ({ seededJourney, animalsPages }) => {
-      const referenceNumber = await seededJourney.createDraftNotification('unlocked');
+    test('displays the notification list and result count', async ({ animalsSeededJourney, animalsPages }) => {
+      const referenceNumber = await animalsSeededJourney.createDraftNotification('unlocked');
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
 
@@ -46,9 +46,9 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       await expect(animalsPages.dashboard.notificationCards).toHaveCount(1);
     });
 
-    test('displays details on a notification card', async ({ seededJourney, animalsPages }) => {
+    test('displays details on a notification card', async ({ animalsSeededJourney, animalsPages }) => {
       test.slow();
-      const referenceNumber = await seededJourney.createSubmittedNotification();
+      const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
 
@@ -63,8 +63,8 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
   });
 
   test.describe('notification card actions by status', () => {
-    test('shows resume, copy and delete actions for a draft notification', async ({ animalsPages, seededJourney }) => {
-      const referenceNumber = await seededJourney.createDraftNotification('unlocked');
+    test('shows resume, copy and delete actions for a draft notification', async ({ animalsPages, animalsSeededJourney }) => {
+      const referenceNumber = await animalsSeededJourney.createDraftNotification('unlocked');
 
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
@@ -75,8 +75,8 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       await expect(animalsPages.dashboard.amend(referenceNumber)).not.toBeVisible();
     });
 
-    test('shows view, copy and amend actions for a submitted notification', async ({ animalsPages, seededJourney }) => {
-      const referenceNumber = await seededJourney.createSubmittedNotification();
+    test('shows view, copy and amend actions for a submitted notification', async ({ animalsPages, animalsSeededJourney }) => {
+      const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
 
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
@@ -89,9 +89,9 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
     test(
       'copies a submitted notification from its searched dashboard card',
       { tag: '@smoke' },
-      async ({ animalsPages, journey, journeyContext }) => {
+      async ({ animalsPages, animalsJourney, journeyContext }) => {
         test.slow();
-        await journey.submitNotification();
+        await animalsJourney.submitNotification();
         const originalReferenceNumber = journeyContext.journeyId;
 
         await animalsPages.dashboard.open();

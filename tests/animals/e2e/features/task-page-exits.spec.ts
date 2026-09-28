@@ -2,13 +2,13 @@ import { test, expect } from '@fixtures';
 
 test.describe('Task-page exits', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('Cancel and return to overview discards typed input; Save and return to overview commits and lands on the hub', async ({
-    journey,
+    animalsJourney,
     pages,
     animalsPages,
   }) => {
     // Origin is the journey entry, so it is already answered by the time the
     // hub is reachable; the internal reference is the field left untouched.
-    await journey.startNotification();
+    await animalsJourney.startNotification();
 
     // Cancel leg: type an internal reference, cancel — nothing is written.
     await animalsPages.overview.task('Where is this consignment coming from?').click();
