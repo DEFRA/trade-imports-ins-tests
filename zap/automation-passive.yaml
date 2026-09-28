@@ -1,0 +1,111 @@
+# ZAP Automation Framework plan — passive scan only, no activeScan jobs.
+# Safe to run against a real deployed environment on demand, no destructive
+# risk. Gating is deliberately not done here; see run-and-gate.ts and
+# rules.tsv. See automation-active.yaml for the passive + active plan.
+#
+# Job/parameter reference: https://www.zaproxy.org/docs/desktop/addons/automation-framework/
+env:
+  contexts:
+    # No activeScan job in this plan, so dataDrivenNodes here only benefits
+    # site-tree/report tidiness (folding journeyId variants into one node),
+    # not attack coverage — see automation-active.yaml for the full
+    # rationale, kept in sync here for a consistent site tree either way.
+    - name: frontend
+      urls:
+        - ${ZAP_TRADE_IMPORTS_ANIMALS_FRONTEND_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/public/.*'
+        - '.*/favicon\.ico$'
+      structure:
+        dataDrivenNodes:
+          - name: journeyId
+            regex: '(.*/notifications/)([^/]+)'
+          - name: uploadId
+            regex: '(.*/accompanying-documents/)([^/]+)'
+    - name: admin
+      urls:
+        - ${ZAP_TRADE_IMPORTS_ANIMALS_ADMIN_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/public/.*'
+        - '.*/favicon\.ico$'
+    - name: ins
+      urls:
+        - ${ZAP_TRADE_IMPORTS_INS_FRONTEND_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/public/.*'
+        - '.*/favicon\.ico$'
+      structure:
+        dataDrivenNodes:
+          - name: addressId
+            regex: '(.*/address-book/)([^/]+)'
+    # Actuator is mounted at base-path "/" (application.yml), so these sit
+    # directly on the API's own root namespace, not under /actuator.
+    # Diagnostic endpoints, not app surface — excluded for the same reason
+    # as /health above on the Node apps.
+    - name: backend
+      urls:
+        - ${ZAP_TRADE_IMPORTS_ANIMALS_BACKEND_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/info$'
+        - '.*/metrics$'
+        - '.*/cache$'
+        - '.*/env$'
+      structure:
+        dataDrivenNodes:
+          - name: referenceNumber
+            regex: '(.*/notifications/)([^/]+)'
+          - name: uploadId
+            regex: '(.*/document-uploads/)([^/]+)'
+    # Same actuator surface as backend (confirmed in address-book's own
+    # application.yml: base-path "/", health/info/metrics/cache/env).
+    - name: address-book
+      urls:
+        - ${ZAP_TRADE_IMPORTS_ADDRESS_BOOK_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/info$'
+        - '.*/metrics$'
+        - '.*/cache$'
+        - '.*/env$'
+      structure:
+        dataDrivenNodes:
+          - name: orgId
+            regex: '(.*/organisation/)([^/]+)'
+          - name: operatorId
+            regex: '(.*/addresses/)([^/]+)'
+  parameters:
+    failOnError: false
+    progressToStdout: true
+
+jobs:
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  # ZAP's site-tree bookkeeping lags slightly behind the last spec to finish
+  # navigating — without this, the report job below can run before the last
+  # site is registered ("invalid site" from ZAP).
+  - type: delay
+    parameters:
+      time: '5'
+
+  # No sites: filter — covers every site ZAP touched this session.
+  # traditional-json/traditional-html (not the -plus "with requests and
+  # responses" variants, which write multiple files per alert and need a
+  # directory, not a single reportFile path).
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /zap/wrk/zap-report
+      reportFile: security-scan
+      reportTitle: 'trade-imports-animals — security scan'
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk/zap-report
+      reportFile: security-scan
+      reportTitle: 'trade-imports-animals — security scan'
