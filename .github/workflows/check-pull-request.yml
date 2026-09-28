@@ -27,6 +27,7 @@ jobs:
       - run: npm ci
       - run: npm run format:check
       - run: npm run lint
+      - run: npm run typecheck
 
 # Uncomment this to run the tests in your test suite
 #  tests:
