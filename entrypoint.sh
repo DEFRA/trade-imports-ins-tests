@@ -158,10 +158,19 @@ run_security_profile() {
     # just give the published report a landing page and the Playwright
     # report instead of a bare zap-log.html.
     if [ ! -f "$REPORT_DIR/index.html" ]; then
-      [ -d playwright-report ] && cp -r playwright-report "$REPORT_DIR/playwright-report"
+      # Only link to playwright-report/ when it actually got copied in —
+      # a pre-test failure (ZAP context priming, Playwright's own
+      # globalSetup) aborts before Playwright's reporters ever run, so
+      # there's nothing at that path and the link would otherwise 404.
+      if [ -d playwright-report ]; then
+        cp -r playwright-report "$REPORT_DIR/playwright-report"
+        playwright_report_note="See <a href=\"playwright-report/index.html\">the Playwright report</a> for the failing spec(s), and <a href=\"zap-log.html\">zap.log</a> for ZAP's own diagnostics."
+      else
+        playwright_report_note="No Playwright report was generated — the run failed before any spec executed. See <a href=\"zap-log.html\">zap.log</a> for ZAP's own diagnostics, and the run's own logs for the setup error."
+      fi
       write_fallback_report_html "Security scan — specs failed" \
         "The Playwright specs failed before the ZAP gate could run, so no ZAP scan took place." \
-        "See <a href=\"playwright-report/index.html\">the Playwright report</a> for the failing spec(s), and <a href=\"zap-log.html\">zap.log</a> for ZAP's own diagnostics."
+        "$playwright_report_note"
     fi
   else
     # Still fall through to kill/cp below — ZAP did start (just never became
