@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { planContexts } from '@utils/zap/check-context-sync';
 import { createZapClient, runAutomationPlan, type ZapClient } from '@utils/zap/client';
-import { zapAutomationPlan, zapProfile } from '@config/zap';
+import { resolveZapScope, zapAutomationPlan, zapProfile, type ZapScope } from '@config/zap';
 
 const pathFromHere = (relativePath: string): string => fileURLToPath(new URL(relativePath, import.meta.url));
 
@@ -149,10 +149,11 @@ async function getMessageCount(client: ZapClient, siteName: string): Promise<num
  * Reads the plan rather than the report: a context with no traffic is absent
  * from the report entirely, so the report cannot be asked what is missing.
  */
-async function findContextsWithNoTraffic(client: ZapClient): Promise<string[]> {
+async function findContextsWithNoTraffic(client: ZapClient, scopedContextNames?: readonly string[]): Promise<string[]> {
   const contexts = await planContexts();
+  const inScope = scopedContextNames ? contexts.filter((context) => scopedContextNames.includes(context.name)) : contexts;
   const empty: string[] = [];
-  for (const { name, urls } of contexts) {
+  for (const { name, urls } of inScope) {
     const counts = await Promise.all(urls.map((url) => getMessageCount(client, url)));
     if (counts.every((count) => count === 0)) {
       empty.push(`${name} (${urls.join(', ')})`);
@@ -196,6 +197,7 @@ async function writeIndexHtml(
   started: string,
   finished: string,
   specsOutcome: string | undefined,
+  scope: ZapScope | undefined,
 ): Promise<void> {
   const rows = summaries
     .map(
@@ -225,7 +227,7 @@ async function writeIndexHtml(
 
   const truncationSection =
     truncatedScans.length > 0
-      ? `<div class="callout"><h2 class="fail">Truncated scans</h2><ul>${truncatedScans.map((w) => `<li>${w}</li>`).join('')}</ul></div>`
+      ? `<div class="callout fail"><h2 class="fail">Truncated scans</h2><ul>${truncatedScans.map((w) => `<li>${w}</li>`).join('')}</ul></div>`
       : '';
 
   // Undefined outside the GitHub Action (local, CDP): those lanes either
@@ -234,8 +236,14 @@ async function writeIndexHtml(
   // that means every @active spec actually ran.
   const partialRunSection =
     specsOutcome && specsOutcome !== 'success'
-      ? `<div class="callout"><h2 class="fail">Partial run</h2><p>The traffic-generation specs did not all succeed (outcome: ${specsOutcome}) — the findings below reflect whatever traffic ran before that, not full corpus coverage.</p></div>`
+      ? `<div class="callout fail"><h2 class="fail">Partial run</h2><p>The traffic-generation specs did not all succeed (outcome: ${specsOutcome}) — the findings below reflect whatever traffic ran before that, not full corpus coverage.</p></div>`
       : '';
+
+  // Per-domain active scripts set ZAP_SCOPE — warn callout (not fail) so a
+  // green scoped report is never mistaken for a full-corpus active scan.
+  const scopedSection = scope
+    ? `<div class="callout warn"><h2 class="warn">Scoped scan</h2><p>Active scan limited to Playwright project <code>${scope.project}</code> (ZAP contexts: ${scope.contexts.join(', ')}). Other declared contexts were not driven and were not gated for traffic — not a full-corpus active scan.</p></div>`
+    : '';
 
   await wrapAsHtml('zap.log', ZAP_LOG_ARTEFACT);
   await wrapAsHtml(`${REPORT_NAME}.json`, JSON_REPORT_ARTEFACT);
@@ -251,6 +259,8 @@ async function writeIndexHtml(
     console.error(`could not copy Playwright's own report from ${PLAYWRIGHT_REPORT_DIR}`);
   }
 
+  const profileLabel = scope ? `${zapProfile} (scoped: ${scope.project})` : zapProfile;
+
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -265,6 +275,8 @@ async function writeIndexHtml(
   --th-bg: #f0f0f0;
   --fail: #b30000;
   --fail-bg: #fdecea;
+  --warn: #9a6700;
+  --warn-bg: #fff8e5;
   --pass: #007a3d;
 }
 @media (prefers-color-scheme: dark) {
@@ -275,6 +287,8 @@ async function writeIndexHtml(
     --th-bg: #2a2a2a;
     --fail: #ff6b6b;
     --fail-bg: #3a1f1f;
+    --warn: #f0c14b;
+    --warn-bg: #3a3018;
     --pass: #4caf80;
   }
 }
@@ -290,19 +304,22 @@ th, td { border: 1px solid var(--border); padding: 0.5rem; text-align: left; }
 th { background: var(--th-bg); }
 tfoot td { font-weight: bold; border-top: 2px solid var(--border); }
 .fail { color: var(--fail); }
+.warn { color: var(--warn); }
 .pass { color: var(--pass); }
-.callout { border: 1px solid var(--fail); background: var(--fail-bg); border-radius: 4px; padding: 0.75rem 1rem; margin: 1rem 0; }
+.callout { border: 1px solid var(--fail); background: var(--fail-bg); border-radius: 4px; padding: 0.75rem 1rem; margin: 1rem 0; color: var(--text); }
+.callout.warn { border-color: var(--warn); background: var(--warn-bg); }
 .callout h2 { margin: 0 0 0.5rem; }
 .callout p, .callout ul { margin: 0; }
 </style>
 </head>
 <body>
 <h1>ZAP security scan — <span class="${failed ? 'fail' : 'pass'}">${failed ? 'FAILED' : 'passed'}</span></h1>
-<p>profile: ${zapProfile}</p>
+<p>profile: ${profileLabel}</p>
 <p>started: ${started}</p>
 <p>finished: ${finished}</p>
 ${truncationSection}
 ${partialRunSection}
+${scopedSection}
 <h2>Sites</h2>
 <table>
 <thead>
@@ -377,6 +394,7 @@ function findTruncatedActiveScans(info: string[]): string[] {
 
 async function main(): Promise<void> {
   const client = createZapClient();
+  const scope = resolveZapScope();
   const progress = await runAutomationPlan(client, zapAutomationPlan);
 
   const failures: string[] = [];
@@ -388,7 +406,7 @@ async function main(): Promise<void> {
     );
   }
 
-  const contextsWithNoTraffic = zapProfile === 'active' ? await findContextsWithNoTraffic(client) : [];
+  const contextsWithNoTraffic = zapProfile === 'active' ? await findContextsWithNoTraffic(client, scope?.contexts) : [];
   if (contextsWithNoTraffic.length > 0) {
     failures.push(
       `No traffic reached ${contextsWithNoTraffic.length} declared context(s), so their activeScan jobs scanned nothing and reported clean — drive them from a spec, or drop them from the plans: ${contextsWithNoTraffic.join('; ')}`,
@@ -412,7 +430,15 @@ async function main(): Promise<void> {
   // when someone most needs the report, and entrypoint.sh's publish step
   // runs regardless of this script's exit code, so the index has to exist
   // on disk either way.
-  await writeIndexHtml(summaries, truncatedScans, failures.length > 0, progress.started, progress.finished, process.env.PLAYWRIGHT_OUTCOME);
+  await writeIndexHtml(
+    summaries,
+    truncatedScans,
+    failures.length > 0,
+    progress.started,
+    progress.finished,
+    process.env.PLAYWRIGHT_OUTCOME,
+    scope,
+  );
 
   if (failures.length > 0) {
     throw new Error(`ZAP security scan found ${failures.length} failure(s):\n${failures.join('\n')}`);
