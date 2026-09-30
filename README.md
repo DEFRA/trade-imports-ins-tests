@@ -88,19 +88,18 @@ domain also has its own scripts, named `test:docker-compose:<domain>[:<suite>]`
 to match the [CDP domain profiles](#running-tests-via-cdp-portal). They run
 the same suite as the all-domain script, limited to that domain's project.
 
-| Domain          | e2e                                 | a11y                                     | security (ZAP passive scan)                  |
-| --------------- | ----------------------------------- | ---------------------------------------- | -------------------------------------------- |
-| `animals`       | `test:docker-compose:animals`       | `test:docker-compose:animals:a11y`       | `test:docker-compose:animals:security`       |
-| `animals-admin` | `test:docker-compose:animals-admin` | `test:docker-compose:animals-admin:a11y` | `test:docker-compose:animals-admin:security` |
-| `ins`           | `test:docker-compose:ins`           | —                                        | `test:docker-compose:ins:security`           |
-| `plants`        | `test:docker-compose:plants`        | —                                        | —                                            |
+| Domain          | e2e                                 | a11y                                     | security (ZAP passive)                       | security:active (ZAP active, scoped)                |
+| --------------- | ----------------------------------- | ---------------------------------------- | -------------------------------------------- | --------------------------------------------------- |
+| `animals`       | `test:docker-compose:animals`       | `test:docker-compose:animals:a11y`       | `test:docker-compose:animals:security`       | `test:docker-compose:animals:security:active`       |
+| `animals-admin` | `test:docker-compose:animals-admin` | `test:docker-compose:animals-admin:a11y` | `test:docker-compose:animals-admin:security` | `test:docker-compose:animals-admin:security:active` |
+| `ins`           | `test:docker-compose:ins`           | —                                        | `test:docker-compose:ins:security`           | `test:docker-compose:ins:security:active`           |
+| `plants`        | `test:docker-compose:plants`        | —                                        | —                                            | —                                                   |
 
 A dash means the domain has no specs for that suite yet.
 
-There is no per-domain `security:active` script. The active scan's gate fails
-any ZAP context that received no traffic, and the contexts cover every
-service, so the active scan only runs across all domains with
-`npm run test:docker-compose:security:active`.
+Per-domain `security:active` sets `ZAP_SCOPE` so the no-traffic gate only covers
+that project's ZAP contexts; the report is labelled scoped. Full-corpus active
+remains `npm run test:docker-compose:security:active`.
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 

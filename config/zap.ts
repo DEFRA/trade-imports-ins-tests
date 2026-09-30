@@ -32,6 +32,27 @@ const isActiveProfile = process.env.PROFILE === 'security:active';
 
 export const zapProfile: 'active' | 'passive' = isActiveProfile ? 'active' : 'passive';
 
+// Optional Playwright project scope for local per-domain active scans —
+// set by test:docker-compose:<domain>:security:active. Full
+// security:active leaves this unset so every declared context is gated.
+const ZAP_SCOPE_CONTEXTS: Record<string, readonly string[]> = {
+  animals: ['frontend', 'backend'],
+  'animals-admin': ['admin'],
+  ins: ['ins', 'address-book'],
+};
+
+export type ZapScope = { project: string; contexts: readonly string[] };
+
+export function resolveZapScope(): ZapScope | undefined {
+  const project = process.env.ZAP_SCOPE;
+  if (!project) return undefined;
+  const contexts = ZAP_SCOPE_CONTEXTS[project];
+  if (!contexts) {
+    throw new Error(`Unknown ZAP_SCOPE '${project}'. Expected one of: ${Object.keys(ZAP_SCOPE_CONTEXTS).join(', ')}`);
+  }
+  return { project, contexts };
+}
+
 function zapAutomationPlanFile(): string {
   return isActiveProfile ? 'automation-active.yaml' : 'automation-passive.yaml';
 }
