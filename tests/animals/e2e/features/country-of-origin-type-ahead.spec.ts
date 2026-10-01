@@ -13,11 +13,11 @@ test.describe('Country of origin type-ahead', { tag: ['@integration', '@duplicat
     // The type-ahead enhances a native select. The select stays in the DOM as the
     // no-JavaScript fallback and is what carries the code the form submits, so the
     // full option list is asserted there: the placeholder plus the 31 SPS origin
-    // countries. The scroll-only divider rule is gone — a searchable list has no
-    // use for it.
+    // countries and nine journey subdivisions. The scroll-only divider rule is gone
+    // — a searchable list has no use for it.
     const fallback = animalsPages.originOfImport.countrySelect;
     await expect(fallback.locator('option').first()).toHaveText('Select a country');
-    await expect(fallback.locator('option')).toHaveCount(32);
+    await expect(fallback.locator('option')).toHaveCount(41);
 
     await field.click();
     await field.fill('Belg');
