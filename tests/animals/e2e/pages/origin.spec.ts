@@ -59,28 +59,27 @@ test.describe('Origin of the import page', { tag: ['@integration', '@duplicated-
   });
 
   test('persists a region of origin code selection', async ({ animalsPages }) => {
+    const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
+
     await animalsPages.originOfImport.selectCountry('France');
     await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
     await animalsPages.originOfImport.regionCode.fill('75');
     await animalsPages.originOfImport.saveAndContinue.click();
 
-    await expect(animalsPages.overview.heading).toBeVisible();
-
-    const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
+    // With a country chosen the opening run carries on to commodities, not the overview.
     await animalsPages.originOfImport.open(journeyId);
     await expect(animalsPages.originOfImport.radioRequiresOriginCode('Yes')).toBeChecked();
     await expect(animalsPages.originOfImport.regionCode).toHaveValue('75');
   });
 
   test('persists a country subdivision selection', async ({ animalsPages }) => {
+    const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
+
     await animalsPages.originOfImport.selectCountry('Canary Islands');
     await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
     await animalsPages.originOfImport.internalReference.fill(INTERNAL_REFERENCE);
     await animalsPages.originOfImport.saveAndContinue.click();
 
-    await expect(animalsPages.overview.heading).toBeVisible();
-
-    const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
     await animalsPages.originOfImport.open(journeyId);
     await expect(animalsPages.originOfImport.countrySelect).toHaveValue('ES-CN');
     await expect(animalsPages.originOfImport.countryOfOrigin).toHaveValue('Canary Islands');
