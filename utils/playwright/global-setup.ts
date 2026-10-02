@@ -7,7 +7,7 @@ import { ensureE2eAddressBook } from '@domain/shared/fixtures/e2e-address-book';
  * before any worker starts — so parallel workers never race-create the same name.
  *
  * Address-feature specs that do not rely on those names still inject their own
- * unique records in-test (see addresses-live-link / addresses-picker).
+ * unique records in-test (see addresses-copied / addresses-picker).
  */
 async function globalSetup(): Promise<void> {
   const apiRequest = await request.newContext();

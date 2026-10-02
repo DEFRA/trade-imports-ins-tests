@@ -42,9 +42,9 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
     animalsPages,
     addressBookApi,
   }) => {
-    // Resolve linked ids from the once-seeded journey fixtures (API globalSetup),
-    // not hard-coded Mongo ObjectIds — a role mix-up or the same id on every party
-    // would otherwise pass if we only asserted "some string" (EUDPA-294 AC3).
+    // Read each role's record from the once-seeded journey fixtures (API globalSetup),
+    // so every party is checked against the details of the record picked for it —
+    // a role mix-up would otherwise pass if we only asserted "some string".
     const consignor = await addressBookApi.findByName('Astra Rosales');
     const destination = await addressBookApi.findByName('Tech Imports Ltd');
     const placeOfOrigin = await addressBookApi.findByName('Origin Farm');
@@ -88,10 +88,11 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(notification.purposeInInternalMarket).toBe('breeding');
       expect(notification.additionalDetails.certifiedFor).toBe('slaughter');
       expect(notification.additionalDetails.unweanedAnimals).toBe('no');
-      // Every party carries inline details after submit — the freeze lives on the
-      // top-level notification fields, not a separate amend-scoped snapshot.
+      // Every party is a copy of the record picked for it, with no link back to
+      // the address book — on the top-level notification fields, not a separate
+      // amend-scoped snapshot.
+      expect(notification.consignor).not.toHaveProperty('addressId');
       expect(notification.consignor).toMatchObject({
-        addressId: consignor.id,
         name: consignor.name,
         email: consignor.email,
         phone: consignor.phone,
@@ -102,11 +103,11 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
           countryCode: consignor.countryCode,
         },
       });
-      expect(notification.destination).toMatchObject({ addressId: destination.id, name: destination.name });
-      expect(notification.consignee).toMatchObject({ addressId: consignee.id, name: consignee.name });
-      expect(notification.importer).toMatchObject({ addressId: importer.id, name: importer.name });
-      expect(notification.placeOfOrigin).toMatchObject({ addressId: placeOfOrigin.id, name: placeOfOrigin.name });
-      expect(notification.consignment).toMatchObject({ addressId: contact.id, name: contact.name });
+      expect(notification.destination).toMatchObject({ name: destination.name, address: { postcode: destination.postcode } });
+      expect(notification.consignee).toMatchObject({ name: consignee.name, address: { postcode: consignee.postcode } });
+      expect(notification.importer).toMatchObject({ name: importer.name, address: { postcode: importer.postcode } });
+      expect(notification.placeOfOrigin).toMatchObject({ name: placeOfOrigin.name, address: { postcode: placeOfOrigin.postcode } });
+      expect(notification.consignment).toMatchObject({ name: contact.name, address: { postcode: contact.postcode } });
       expect(doc.preAmendNotification).toBeUndefined();
       expect(notification.cphNumber).toBe('123456789');
       expect(notification.transport.portOfEntry).toBe('GB ABD');

@@ -16,6 +16,7 @@ import { AnimalsNotificationCancelAmendPage } from '@page-objects/animals/notifi
 import { AnimalsNotificationViewPage } from '@page-objects/animals/notification-view-page';
 import { AnimalsOriginOfImportPage } from '@page-objects/animals/origin-of-import-page';
 import { AnimalsOverviewPage } from '@page-objects/animals/overview-page';
+import { AnimalsPartyEditPage } from '@page-objects/animals/party-edit-page';
 import { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
 import { AnimalsPrivateTransporterPage } from '@page-objects/animals/private-transporter-page';
 import { AnimalsTransitedCountriesPage } from '@page-objects/animals/transited-countries-page';
@@ -40,6 +41,11 @@ export function createAnimalsPages(page: Page) {
     placeOfOriginSelection: new AnimalsPartyPickerPage(page, 'place-of-origin/select', 'Place of origin'),
     consigneeSelection: new AnimalsPartyPickerPage(page, 'consignees/select', 'Consignee'),
     importerSelection: new AnimalsPartyPickerPage(page, 'importers/select', 'Importer'),
+    consignorEdit: new AnimalsPartyEditPage(page, 'consignors/edit', 'Consignor or exporter'),
+    destinationEdit: new AnimalsPartyEditPage(page, 'destinations/edit', 'Place of destination'),
+    placeOfOriginEdit: new AnimalsPartyEditPage(page, 'place-of-origin/edit', 'Place of origin'),
+    consigneeEdit: new AnimalsPartyEditPage(page, 'consignees/edit', 'Consignee'),
+    importerEdit: new AnimalsPartyEditPage(page, 'importers/edit', 'Importer'),
     cphNumber: new AnimalsCphNumberPage(page),
     arrivalDetails: new AnimalsArrivalDetailsPage(page),
     transitedCountries: new AnimalsTransitedCountriesPage(page),
@@ -49,6 +55,7 @@ export function createAnimalsPages(page: Page) {
     commercialTransporter: new AnimalsCommercialTransporterPage(page),
     privateTransporter: new AnimalsPrivateTransporterPage(page),
     contactAddress: new AnimalsContactAddressPage(page),
+    contactAddressEdit: new AnimalsPartyEditPage(page, 'consignment/contact/edit', 'Contact address for consignment'),
     notificationView: new AnimalsNotificationViewPage(page),
     declaration: new AnimalsDeclarationPage(page),
     notificationCancelAmend: new AnimalsNotificationCancelAmendPage(page),

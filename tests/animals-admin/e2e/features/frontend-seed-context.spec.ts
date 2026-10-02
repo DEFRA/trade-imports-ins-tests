@@ -89,8 +89,10 @@ test.describe('Frontend seed context', { tag: ['@integration', '@mongodb'] }, ()
       expect(complement.totalNoOfAnimals).toBe(1);
       expect(notification.reasonForImport).toBe('internalMarket');
       expect(notification.additionalDetails.unweanedAnimals).toBe('no');
-      expect(notification.consignor?.addressId).toBe(consignor.id);
-      expect(notification.placeOfOrigin?.addressId).toBe(placeOfOrigin.id);
+      // Each party is a copy of the record picked, with no link back to the book.
+      expect(notification.consignor).not.toHaveProperty('addressId');
+      expect(notification.consignor?.name).toBe(consignor.name);
+      expect(notification.placeOfOrigin?.name).toBe(placeOfOrigin.name);
       expect(notification.placeOfOrigin?.address?.postcode).toBe(placeOfOrigin.postcode);
       expect(notification.cphNumber).toBe('123456789');
       expect(notification.transport.portOfEntry).toBe('GB ABD');

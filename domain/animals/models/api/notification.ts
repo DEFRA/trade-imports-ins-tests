@@ -24,12 +24,11 @@ export type PartyAddress = {
 };
 
 /**
- * A party on a notification — linked via `addressId` and/or held inline.
- * Backend `NotificationResponse` returns `ConsignmentParty` with this shape
- * (resolved from the address book on read when `addressId` is set).
+ * A party on a notification — a copy of the address-book record picked for the
+ * role, with no link back to it. Backend `NotificationResponse` returns
+ * `ConsignmentParty` with this shape.
  */
 export type ConsignmentParty = {
-  addressId?: string;
   name?: string;
   email?: string;
   phone?: string;
@@ -37,8 +36,8 @@ export type ConsignmentParty = {
 };
 
 /**
- * Transporter stays inline: approval number and type are not address-book
- * fields, so it never carries an `addressId`.
+ * Transporter is not an address-book party: it carries an approval number and
+ * type the book does not hold.
  */
 export type Transporter = {
   name: string;

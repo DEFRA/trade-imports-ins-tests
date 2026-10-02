@@ -23,6 +23,28 @@ test.describe('Contact address page', { tag: ['@integration', '@duplicated-in-fr
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
 
+  test('a chosen contact address is shown as the current contact on return, with no option chosen, and saving again keeps it', async ({
+    pages,
+    animalsPages,
+  }) => {
+    const contact = 'Animal and Plant Health Agency';
+    await animalsPages.contactAddress.address(contact).check();
+    await animalsPages.contactAddress.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+
+    await animalsPages.overview.task('Contact address for this consignment').click();
+    await expect(animalsPages.contactAddress.currentContact).toContainText(contact);
+    await expect(animalsPages.contactAddress.editCurrentContact).toBeVisible();
+    await expect(animalsPages.contactAddress.chosenAddress).toHaveCount(0);
+
+    // Saving without choosing another keeps the copy already on the notification.
+    await animalsPages.contactAddress.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('Contact address for this consignment').click();
+    await expect(animalsPages.contactAddress.currentContact).toContainText(contact);
+  });
+
   test('saving with no contact address selected is allowed and exits to the hub', async ({ pages, animalsPages }) => {
     await animalsPages.contactAddress.saveAndContinue.click();
 

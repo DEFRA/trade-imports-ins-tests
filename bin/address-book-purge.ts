@@ -34,18 +34,18 @@ const UUID = String.raw`[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]
  * either name depending on how far its test got.
  */
 const DELETE_RULES: DeleteRule[] = [
-  { pattern: new RegExp(`^Linked Farm ${STAMP}$`), source: 'tests/animals/e2e/features/address-book/addresses-live-link.spec.ts:16' },
+  { pattern: new RegExp(`^Copied Farm ${STAMP}$`), source: 'tests/animals/e2e/features/address-book/addresses-copied.spec.ts:15' },
   {
     pattern: new RegExp(`^Renamed Holding ${STAMP}$`),
-    source: 'tests/animals/e2e/features/address-book/addresses-live-link.spec.ts:16 (renamed :46)',
+    source: 'tests/animals/e2e/features/address-book/addresses-copied.spec.ts:15 (renamed :40)',
   },
-  { pattern: new RegExp(`^Linked Origin ${STAMP}$`), source: 'tests/animals/e2e/features/address-book/addresses-live-link.spec.ts:86' },
+  { pattern: new RegExp(`^Doomed Farm ${STAMP}$`), source: 'tests/animals/e2e/features/address-book/addresses-copied.spec.ts:76' },
   {
-    pattern: new RegExp(`^Renamed Origin ${STAMP}$`),
-    source: 'tests/animals/e2e/features/address-book/addresses-live-link.spec.ts:86 (renamed :110)',
+    pattern: new RegExp(`^Unlisted Country Farm ${STAMP}$`),
+    source: 'tests/animals/e2e/features/address-book/addresses-copied.spec.ts:139',
   },
-  { pattern: new RegExp(`^Doomed Farm ${STAMP}$`), source: 'tests/animals/e2e/features/address-book/addresses-live-link.spec.ts:139' },
-  { pattern: new RegExp(`^Replaceable Farm ${STAMP}$`), source: 'tests/animals/e2e/features/address-book/addresses-live-link.spec.ts:191' },
+  { pattern: new RegExp(`^Editable Farm ${STAMP}$`), source: 'tests/animals/e2e/features/address-book/addresses-edit.spec.ts:38' },
+  { pattern: new RegExp(`^Prefilled Farm ${STAMP}$`), source: 'tests/animals/e2e/features/address-book/addresses-edit.spec.ts:78' },
   {
     pattern: new RegExp(`^Danish Meat Export Kolding${STAMP}$`),
     source: 'tests/animals/e2e/features/address-book/addresses-picker.spec.ts:16',
@@ -58,12 +58,12 @@ const DELETE_RULES: DeleteRule[] = [
   },
   { pattern: new RegExp(`^Frozen Origin ${STAMP}$`), source: 'tests/animals/e2e/features/address-book/addresses-submit-freeze.spec.ts:16' },
   {
-    pattern: new RegExp(`^Live Origin ${STAMP}$`),
-    source: 'tests/animals/e2e/features/address-book/addresses-submit-freeze.spec.ts:16 (renamed :244)',
+    pattern: new RegExp(`^Renamed Origin ${STAMP}$`),
+    source: 'tests/animals/e2e/features/address-book/addresses-submit-freeze.spec.ts:14 (renamed :46)',
   },
   {
     pattern: new RegExp(`^Frozen Then Deleted ${STAMP}$`),
-    source: 'tests/animals/e2e/features/address-book/addresses-submit-freeze.spec.ts:93',
+    source: 'tests/animals/e2e/features/address-book/addresses-submit-freeze.spec.ts:91',
   },
   { pattern: new RegExp(`^Delete Test Farm ${STAMP}$`), source: 'tests/ins/e2e/features/address-book/address-book-delete.spec.ts:18' },
   {

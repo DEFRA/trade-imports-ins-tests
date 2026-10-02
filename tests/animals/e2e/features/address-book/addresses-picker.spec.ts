@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('the picker searches and pages the address book, and the row selected on a later page is the one that saves', async ({
+  test('the picker searches and pages the address book, the row selected on a later page is the one that saves, and reopening starts with nothing chosen but keeps the copy on save', async ({
     animalsJourney,
     pages,
     animalsPages,
@@ -33,7 +33,7 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
       addressLine1: '1 Later Page Lane',
       townOrCity: 'Carlisle',
       postcode: 'CA1 1AA',
-      countryCode: 'United Kingdom',
+      countryCode: 'GB',
       phone: '01228 555 0199',
       email: 'paged@example.co.uk',
     });
@@ -43,7 +43,7 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
         addressLine1: `${i} Front Row`,
         townOrCity: 'Carlisle',
         postcode: 'CA1 1BB',
-        countryCode: 'United Kingdom',
+        countryCode: 'GB',
         phone: '01228 555 0198',
         email: 'newer@example.co.uk',
       });
@@ -106,12 +106,13 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
     await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(consignorRow).toContainText(targetName);
 
-    // Re-entering opens on page one, where the chosen record is not rendered —
-    // the picker still knows it (carried, not re-ticked), and a save from this
-    // page keeps it. That is the no-JS selection-across-pagination guarantee.
-    await consignorRow.getByRole('link', { name: 'Change' }).click();
-    await expect(page.getByText(`Selected address: ${targetName}`)).toBeVisible();
-    await expect(animalsPages.consignorSelection.party(targetName)).toHaveCount(0);
+    // The notification holds a copy with no link to the record, so reopening the
+    // list starts afresh: nothing chosen and nothing named as selected. Saving
+    // without choosing keeps the copy rather than demanding a fresh pick.
+    await animalsPages.addresses.changeParty('Consignor or exporter').click();
+    await expect(animalsPages.consignorSelection.heading).toBeVisible();
+    await expect(animalsPages.consignorSelection.chosenParty).toHaveCount(0);
+    await expect(animalsPages.consignorSelection.selectedAddress).toHaveCount(0);
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(consignorRow).toContainText(targetName);

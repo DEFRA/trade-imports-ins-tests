@@ -10,11 +10,10 @@ type StoredAddress = {
 };
 
 /**
- * Held either as an `addressId` reference resolved on read, or with the details
- * inline and no `addressId`, so every field is optional.
+ * A copy of the address-book record picked for the role, with no link back to
+ * it. An unanswered role has none of these fields, so every field is optional.
  */
 type StoredParty = {
-  addressId?: string;
   name?: string;
   email?: string;
   phone?: string;

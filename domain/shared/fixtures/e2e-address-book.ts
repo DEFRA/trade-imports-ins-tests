@@ -49,7 +49,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     addressLine1: 'Woodham Lane',
     townOrCity: 'Addlestone',
     postcode: 'KT15 3NB',
-    countryCode: 'United Kingdom',
+    countryCode: 'GB',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
   },
@@ -105,7 +105,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     addressLine1: '18 Dockside Road',
     townOrCity: 'London',
     postcode: 'E14 9GE',
-    countryCode: 'United Kingdom',
+    countryCode: 'GB',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
   },
@@ -123,7 +123,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     addressLine1: '10 Market Street',
     townOrCity: 'Leeds',
     postcode: 'LS1 6HB',
-    countryCode: 'United Kingdom',
+    countryCode: 'GB',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
   },
@@ -132,15 +132,21 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     addressLine1: '20 Trade Road',
     townOrCity: 'London',
     postcode: 'EC1A 1BB',
-    countryCode: 'United Kingdom',
+    countryCode: 'GB',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
   },
 ];
 
+const differsFrom = (live: AddressBookRecord, wanted: AddressBookCreate): boolean =>
+  (Object.keys(wanted) as Array<keyof AddressBookCreate>).some((field) => live[field] !== wanted[field]);
+
 /**
- * Ensures exactly one live record per journey fixture name.
- * Creates when missing; soft-deletes extras left over from an earlier race.
+ * Ensures exactly one live record per journey fixture name, holding the fixture's details.
+ * Creates when missing; soft-deletes extras left over from an earlier race; rewrites a
+ * record whose details have drifted — a notification copies what it picks, so a stale
+ * record (such as one holding a country name rather than its ISO code) would be copied
+ * onto every notification and refused at review.
  */
 export async function ensureE2eAddressBook(api: AddressBookApiClient): Promise<void> {
   for (const record of E2E_ADDRESS_BOOK_FIXTURES) {
@@ -149,7 +155,11 @@ export async function ensureE2eAddressBook(api: AddressBookApiClient): Promise<v
       await api.createAddress(record);
       continue;
     }
-    for (const extra of matches.slice(1)) {
+    const [keeper, ...extras] = matches;
+    if (differsFrom(keeper, record)) {
+      await api.updateAddress(keeper.id, record);
+    }
+    for (const extra of extras) {
       await api.deleteAddress(extra.id);
     }
   }
