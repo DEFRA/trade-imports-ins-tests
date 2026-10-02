@@ -54,6 +54,7 @@ export type GbnAgExchangedDocument = {
   notificationStatusCode?: string;
   versionId?: number;
   issueDateTime?: string;
+  referenceDocument?: GbnAgReferencedDocument[];
 };
 
 export type GbnAgTradeParty = {
@@ -84,7 +85,9 @@ export type GbnAgLogisticsLocation = {
 
 export type GbnAgReferencedDocument = {
   typeCode?: string;
+  urlId?: string;
   identifier?: string;
+  issueDateTime?: string;
 };
 
 export type GbnAgLogisticsTransportMovement = {

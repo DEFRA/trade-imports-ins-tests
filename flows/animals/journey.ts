@@ -1,8 +1,18 @@
 import { pageLoadWait } from '@config/timeouts';
+import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { JourneyOptions } from '@domain/animals/constants/journey-options';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
+
+export type AccompanyingDocumentAnswer = {
+  reference: string;
+  /** As typed into the date field, d/m/yyyy. */
+  issueDate: string;
+  filePath: string;
+  /** The document-type code the select submits, e.g. VETERINARY_HEALTH_CERTIFICATE. */
+  type: string;
+};
 
 const COUNTRY = 'France';
 const PORT = 'Aberdeen Harbour (GB ABD)';
@@ -317,14 +327,41 @@ export class AnimalsJourney {
   async toDeclaration(): Promise<void> {
     await this.startNotification();
     await this.completeAnswerSections();
+    await this.fromOverviewToDeclaration();
+  }
+
+  async submitNotification(): Promise<void> {
+    await this.toDeclaration();
+    await this.confirmDeclaration();
+  }
+
+  // The same full journey with one accompanying document added, waiting for its
+  // virus scan so the submission carries it.
+  async submitNotificationWithDocument(document: AccompanyingDocumentAnswer): Promise<void> {
+    await this.startNotification();
+    await this.completeAnswerSections();
+    await this.animalsPages.overview.task('Upload documents').click();
+    await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
+    await this.animalsPages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
+    await this.animalsPages.accompanyingDocuments.saveAndAddAnother.click();
+    await this.animalsPages.accompanyingDocuments
+      .documentRow(document.reference)
+      .filter({ hasText: 'Check completed' })
+      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
+    await this.animalsPages.overview.open(this.animalsPages.accompanyingDocuments.journeyIdFromUrl());
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.fromOverviewToDeclaration();
+    await this.confirmDeclaration();
+  }
+
+  private async fromOverviewToDeclaration(): Promise<void> {
     await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
     await this.animalsPages.notificationView.continueButton.click();
     await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
   }
 
-  async submitNotification(): Promise<void> {
-    await this.toDeclaration();
+  private async confirmDeclaration(): Promise<void> {
     await this.animalsPages.declaration.confirmation.check();
     await this.animalsPages.declaration.continueButton.click();
     await this.pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor(pageLoadWait);

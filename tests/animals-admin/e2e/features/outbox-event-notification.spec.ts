@@ -3,6 +3,7 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { defaultJourneyOptions, CONSIGNOR_NAME, CPH_NUMBER } from '@domain/animals/constants/journey-options';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
+import { fileUploadPaths } from '@resources/file-upload/paths';
 import { users } from '@config/users';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
@@ -64,6 +65,8 @@ test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }
       expect(data.$type).toBe('gbn-ag');
       expect(data.exchangedDocument.identifier).toBe(referenceNumber);
       expect(data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED');
+      // The journey uploads no document, so the event carries no document references at all.
+      expect(data.exchangedDocument).not.toHaveProperty('referenceDocument');
       expect(data.specifiedConsignment.consignorParty?.name).toBe(CONSIGNOR_NAME);
       expect(data.specifiedConsignment.originCountry?.code?.value).toBe(defaultJourneyOptions.countryCode.value);
       expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(POINT_OF_ENTRY);
@@ -103,6 +106,42 @@ test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }
       expect(statusChanges[1].status).toBe('SUBMITTED');
       expect(statusChanges[1].dateChanged).toEqual(expect.any(Date));
       expect(actorWithNullableFields(statusChanges[1].actor)).toEqual(EXPECTED_ACTOR);
+    } finally {
+      await client.close();
+    }
+  });
+
+  test('references a scanned accompanying document on the NotificationSubmitted event, coded from the document-type codelist', async ({
+    animalsJourney,
+    journeyContext,
+  }) => {
+    test.slow();
+    const documentReference = `PWREF${Date.now()}`;
+    await animalsJourney.submitNotificationWithDocument({
+      reference: documentReference,
+      issueDate: '03/01/2026', // the same input the persistence round-trip proves lands as 3 January
+      filePath: fileUploadPaths.safeFile1kbPdf,
+      type: 'VETERINARY_HEALTH_CERTIFICATE',
+    });
+    const aggregateId = aggregateIdFor(journeyContext.journeyId);
+    const client = new MongoDbClient();
+
+    try {
+      await client.connect();
+      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
+      await expect
+        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_SUBMITTED }), { timeout: timeouts.long })
+        .toBe(1);
+
+      const doc = await collection.findOne({ aggregateId, eventType: NOTIFICATION_SUBMITTED });
+      expect(doc?.data.exchangedDocument.referenceDocument).toEqual([
+        {
+          typeCode: '853', // veterinary certificate, UNTDID 1001
+          urlId: 'https://vocabulary.uncefact.org/DocumentCodeList',
+          identifier: documentReference,
+          issueDateTime: '2026-01-03',
+        },
+      ]);
     } finally {
       await client.close();
     }
