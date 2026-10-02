@@ -32,10 +32,20 @@ test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-fr
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
 
-  test('shows an error summary when submitted empty', async ({ pages, animalsPages }) => {
+  // A draft may be saved with a blank arrival date, so the page itself raises nothing on an empty
+  // submit — the arrival fields are validated for shape, not for presence. Presence is a
+  // completeness rule, enforced when the trader continues the notification: see
+  // notification-view-states.spec.ts, which asserts the 'Complete arrival details' link in the
+  // error summary there.
+  //
+  // This test used to expect an error summary here. It passed only because the frontend sent a
+  // malformed instant for a blank date, which the API rejected — the summary was a 400, not page
+  // validation. EUDPA-565 stopped the frontend sending it.
+  test('saves a draft and moves on when submitted empty', async ({ pages, animalsPages }) => {
     await animalsPages.arrivalDetails.saveAndContinue.click();
 
-    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+    await expect(animalsPages.transporter.heading).toBeVisible();
   });
 
   test('restricts the date picker to one week back and six months ahead', async ({ animalsPages }) => {
