@@ -143,8 +143,8 @@ stack. The suite once also timed out in bursts: a
 leaked address book on dev (grown to 4,882 records) made every
 `contact-address` page load fan out dozens of concurrent reads through the
 CDP SSL sidecar, which returned 502/504s for a few minutes at a time. Session
-reuse, the address-book teardown and a one-off purge (see below) removed the
-leak and the outage; three clean CDP runs then kept every test under
+reuse, a per-test address-book teardown and a one-off purge removed the leak
+and the outage; three clean CDP runs then kept every test under
 three-quarters of its new budget (45s, or 135s for tests marked
 `test.slow()`), so the timeout came down from 90s to 60s.
 
@@ -161,27 +161,13 @@ you in." page before deciding whether to try again.
 
 ### Address-book records made by a test
 
-Every address a test creates through the `addressBookApi` fixture is
-soft-deleted when the test ends, pass, fail or timeout, so specs do not clean
-up in `finally`. The fixture deletes after the test body and before Playwright
-disposes the test's `request` context, which a `finally` block cannot promise
-once a test has timed out. Deleting is idempotent, so a spec may still delete a
-record itself as part of what it tests. The shared journey addresses seeded in
-`globalSetup` are never deleted. A spec that adds a record through the UI
-instead of `createAddress` calls `addressBookApi.trackByName(name)` right
-after the save is confirmed, so the fixture's teardown sweeps it too.
-
-### Purging leaked address-book records on CDP
-
-`npm run address-book:purge` clears out records specs left behind on CDP
-before this fixture teardown existed. Dry run is the default: it lists the
-organisation's whole book, paged, and prints what it would delete (matched
-against every `createAddress` name pattern in the specs, file:line cited) and
-what it keeps and why — including the shared `globalSetup` journey addresses,
-which it never touches. Pass `--apply` to actually delete; deletes run one at
-a time, and a 404 is treated as already gone. Needs the same `.env` as a
-laptop-to-CDP run: `PLAYWRIGHT_ENVIRONMENT` (or `ENVIRONMENT`), `CDP_LOCAL`
-and `DEVELOPER_API_KEY`.
+Specs do not clean up the addresses they create. Outside prod the address book
+removes every address about 7 days after it was created
+(`ADDRESS_TTL_DAYS`), so test records age out on their own. Make each name
+unique (a timestamp or UUID suffix) so a search finds only this run's record.
+A spec deletes an address only when the deletion is what it tests. The shared
+journey addresses seeded in `globalSetup` expire too; the next run's
+`ensureE2eAddressBook` creates them again.
 
 ### Authenticated session reuse
 
