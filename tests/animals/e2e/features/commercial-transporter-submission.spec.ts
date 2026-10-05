@@ -17,12 +17,6 @@ test.describe('Commercial transporter journeys', { tag: '@integration' }, () => 
     pages,
     animalsPages,
   }) => {
-    // EUDPA-636 — commercial-transporter-details.controller.js never calls
-    // rememberTransporter(), so a hand-added commercial transporter can never
-    // pass the register check the task list and review page re-run. Remove
-    // this annotation once the fix lands.
-    test.fail(true, 'EUDPA-636');
-
     // Everything up to transport is seeded through the API — only the
     // scenario under test (transit countries onward) is driven through the UI.
     const journeyId = await animalsSeededJourney.createDraftNotification('draft');
@@ -50,9 +44,7 @@ test.describe('Commercial transporter journeys', { tag: '@integration' }, () => 
     await animalsPages.overview.reviewAndSubmitButton.click();
     await animalsPages.notificationView.heading.waitFor();
     await animalsPages.notificationView.continueButton.click();
-    // Bounded rather than the default page-load wait — EUDPA-636 means this
-    // never resolves right now, so fail fast instead of hanging.
-    await animalsPages.declaration.heading.waitFor({ timeout: 10_000 });
+    await animalsPages.declaration.heading.waitFor();
     await animalsPages.declaration.confirmation.check();
     await animalsPages.declaration.continueButton.click();
 

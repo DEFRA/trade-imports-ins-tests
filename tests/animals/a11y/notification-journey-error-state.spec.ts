@@ -17,12 +17,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   }) => {
     const errorSummaryHeading = pages.page.getByRole('heading', { name: 'There is a problem' });
 
-    // EUDPA-636 — commercial-transporter-details.controller.js never calls
-    // rememberTransporter(), so the "Add commercial transporter" step below
-    // leaves the journey unable to reach Declaration. Remove this annotation
-    // once the fix lands.
-    test.fail(true, 'EUDPA-636');
-
     await test.step('Origin of import with validation errors', async () => {
       await animalsPages.overview.task('Where is this consignment coming from?').click();
       await animalsPages.originOfImport.heading.waitFor();
@@ -93,9 +87,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.overview.reviewAndSubmitButton.click();
       await animalsPages.notificationView.heading.waitFor();
       await animalsPages.notificationView.continueButton.click();
-      // Bounded rather than the full 300s a11y timeout — EUDPA-636 means this
-      // never resolves right now, so fail fast instead of hanging.
-      await animalsPages.declaration.heading.waitFor({ timeout: 10_000 });
+      await animalsPages.declaration.heading.waitFor();
     });
 
     await test.step('Declaration with validation errors', async () => {
