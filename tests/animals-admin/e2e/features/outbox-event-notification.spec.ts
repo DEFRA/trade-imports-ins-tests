@@ -136,8 +136,8 @@ test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }
       const doc = await collection.findOne({ aggregateId, eventType: NOTIFICATION_SUBMITTED });
       expect(doc?.data.exchangedDocument.referenceDocument).toEqual([
         {
-          typeCode: '853', // veterinary certificate, UNTDID 1001
-          urlId: 'https://vocabulary.uncefact.org/DocumentCodeList',
+          typeCode: '853', // veterinary certificate, copied into the GBN-AG list from UNTDID 1001
+          urlId: 'https://refdata.tbc.defra.gov.uk/gbn-ag-document-types',
           identifier: documentReference,
           issueDateTime: '2026-01-03',
         },
