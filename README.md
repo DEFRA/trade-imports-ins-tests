@@ -161,12 +161,15 @@ you in." page before deciding whether to try again.
 
 ### Address-book records made by a test
 
-Specs do not clean up the addresses they create. Outside prod the address book
-removes every address about 7 days after it was created
-(`ADDRESS_TTL_DAYS`), so test records age out on their own. Make each name
-unique (a timestamp or UUID suffix) so a search finds only this run's record.
-A spec deletes an address only when the deletion is what it tests. The shared
-journey addresses seeded in `globalSetup` expire too; the next run's
+Specs do not clean up the addresses they create. In CDP dev, test, perf-test
+and ext-test the address book removes every address about 7 days after it was
+created, so test records age out on their own there. That needs both
+`ADDRESS_TTL_DAYS` and `ADDRESS_TTL_EXPIRY_ENABLED` set; the local
+docker-compose stack sets neither, so addresses a local run creates never age
+out. Make each name unique (a timestamp or UUID
+suffix) so a search finds only this run's record. A spec deletes an address
+only when the deletion is what it tests. Where expiry is on, the shared journey
+addresses seeded in `globalSetup` expire too; the next run's
 `ensureE2eAddressBook` creates them again.
 
 ### Authenticated session reuse
