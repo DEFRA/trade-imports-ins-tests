@@ -56,7 +56,8 @@
     "test:visual:update:macos": "npm run _clean && npm run _test_docker_compose -- --grep '@visual' --update-snapshots",
     "test:visual:update:linux": "./bin/update-visual-baselines-linux.sh",
     "report": "allure generate allure-results --single-file --clean",
-    "report:publish": "npm run report; ./bin/publish-tests.sh"
+    "report:publish": "npm run report; ./bin/publish-tests.sh",
+    "security-audit": "audit-ci --config audit-ci.jsonc"
   },
   "devDependencies": {
     "@aws-sdk/client-sqs": "3.1090.0",
@@ -67,6 +68,7 @@
     "@types/node": "26.0.1",
     "allure-commandline": "2.43.0",
     "allure-playwright": "3.10.1",
+    "audit-ci": "7.1.0",
     "dotenv": "17.4.2",
     "eslint": "10.5.0",
     "husky": "9.1.7",
