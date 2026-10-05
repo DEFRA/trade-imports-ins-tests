@@ -77,6 +77,7 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 | `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                    | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites        | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
@@ -88,19 +89,18 @@ domain also has its own scripts, named `test:docker-compose:<domain>[:<suite>]`
 to match the [CDP domain profiles](#running-tests-via-cdp-portal). They run
 the same suite as the all-domain script, limited to that domain's project.
 
-| Domain          | e2e                                 | a11y                                     | security (ZAP passive scan)                  |
-| --------------- | ----------------------------------- | ---------------------------------------- | -------------------------------------------- |
-| `animals`       | `test:docker-compose:animals`       | `test:docker-compose:animals:a11y`       | `test:docker-compose:animals:security`       |
-| `animals-admin` | `test:docker-compose:animals-admin` | `test:docker-compose:animals-admin:a11y` | `test:docker-compose:animals-admin:security` |
-| `ins`           | `test:docker-compose:ins`           | —                                        | `test:docker-compose:ins:security`           |
-| `plants`        | `test:docker-compose:plants`        | —                                        | —                                            |
+| Domain          | e2e                                 | a11y                                     | visual                               | security (ZAP passive)                       | security:active (ZAP active, scoped)                |
+| --------------- | ----------------------------------- | ---------------------------------------- | ------------------------------------ | -------------------------------------------- | --------------------------------------------------- |
+| `animals`       | `test:docker-compose:animals`       | `test:docker-compose:animals:a11y`       | `test:docker-compose:animals:visual` | `test:docker-compose:animals:security`       | `test:docker-compose:animals:security:active`       |
+| `animals-admin` | `test:docker-compose:animals-admin` | `test:docker-compose:animals-admin:a11y` | —                                    | `test:docker-compose:animals-admin:security` | `test:docker-compose:animals-admin:security:active` |
+| `ins`           | `test:docker-compose:ins`           | —                                        | —                                    | `test:docker-compose:ins:security`           | `test:docker-compose:ins:security:active`           |
+| `plants`        | `test:docker-compose:plants`        | —                                        | —                                    | —                                            | —                                                   |
 
 A dash means the domain has no specs for that suite yet.
 
-There is no per-domain `security:active` script. The active scan's gate fails
-any ZAP context that received no traffic, and the contexts cover every
-service, so the active scan only runs across all domains with
-`npm run test:docker-compose:security:active`.
+Per-domain `security:active` sets `ZAP_SCOPE` so the no-traffic gate only covers
+that project's ZAP contexts; the report is labelled scoped. Full-corpus active
+remains `npm run test:docker-compose:security:active`.
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
@@ -288,17 +288,31 @@ To run tests against a CDP environment from your local machine:
 Use `.env.example` as a template.
 When running via the CDP Portal, `ENVIRONMENT` is provided by the portal; use `PLAYWRIGHT_ENVIRONMENT` and avoid setting `ENVIRONMENT` locally.
 
+### Capping parallel browsers (`PLAYWRIGHT_WORKERS`)
+
+Set `PLAYWRIGHT_WORKERS` to limit how many browsers Playwright runs at once, because the device is usually the bottleneck. Use a whole number or a percentage, for example `PLAYWRIGHT_WORKERS=2` on a 16 GB machine running the full Docker stack.
+If it is not set, Playwright's default applies (50% of cores on CI).
+
 ## Visual Regression Tests
 
 Visual regression tests (tagged `@visual`) guard rendered composition — layout, spacing, colour, and typography as the user sees the page. They compare screenshots against committed baseline images and fail if any pixels differ outside the masked regions.
 
 Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. Each platform requires its own baseline — update both when visual changes are intentional.
 
+Run against the stack with `npm run test:docker-compose:visual` (or
+`test:docker-compose:animals:visual` — only `animals` has `@visual` specs today).
+
 Regenerate the E2E baseline against the stack frontend with
 `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
 `npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
-used by CI. Both commands run the `animals` project's `@visual` spec and write the
-updated snapshot into the working tree for commit.
+used by CI. Both commands run the `animals` project's `@visual` suite and write the
+updated snapshot into the working tree for commit. Narrow to one spec (or title via
+`--grep`) by passing Playwright args after the command:
+
+```bash
+npm run test:visual:update:macos -- tests/animals/e2e/visual/origin-of-import.visual.spec.ts
+./bin/update-visual-baselines-linux.sh tests/animals/e2e/visual/origin-of-import.visual.spec.ts
+```
 
 ## Security Testing
 
