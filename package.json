@@ -63,7 +63,7 @@
     "@aws-sdk/client-sqs": "3.1146.0",
     "@axe-core/playwright": "4.12.1",
     "@eslint/js": "10.0.1",
-    "@playwright/cli": "0.1.21",
+    "@playwright/cli": "0.1.22",
     "@playwright/test": "1.63.0",
     "@types/node": "26.0.1",
     "allure-commandline": "2.43.0",
