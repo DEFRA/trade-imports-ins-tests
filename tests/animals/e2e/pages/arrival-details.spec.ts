@@ -4,6 +4,8 @@ import { getRelativeAppDateText, getRelativeDatePickerValue } from '@utils/date-
 const EARLIEST_ALLOWED = getRelativeAppDateText({ dayOffset: -7 });
 const LATEST_ALLOWED = getRelativeAppDateText({ monthOffset: 6 });
 const OUT_OF_RANGE_MESSAGE = `Arrival date at port of entry must be between ${EARLIEST_ALLOWED} and ${LATEST_ALLOWED}`;
+const ARRIVAL_DATE_REQUIRED_MESSAGE = 'Enter the arrival date at the port of entry';
+const PORT_REQUIRED_MESSAGE = 'Select a port of entry';
 
 test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -32,20 +34,15 @@ test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-fr
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
 
-  // A draft may be saved with a blank arrival date, so the page itself raises nothing on an empty
-  // submit — the arrival fields are validated for shape, not for presence. Presence is a
-  // completeness rule, enforced when the trader continues the notification: see
-  // notification-view-states.spec.ts, which asserts the 'Complete arrival details' link in the
-  // error summary there.
-  //
-  // This test used to expect an error summary here. It passed only because the frontend sent a
-  // malformed instant for a blank date, which the API rejected — the summary was a 400, not page
-  // validation. EUDPA-565 stopped the frontend sending it.
-  test('saves a draft and moves on when submitted empty', async ({ pages, animalsPages }) => {
+  // REQ-ARRIVAL-006: a page submitted with nothing answered is refused. Each question still saves
+  // on its own, so a partly answered page moves on.
+  test('shows an error summary when submitted empty', async ({ pages, animalsPages }) => {
     await animalsPages.arrivalDetails.saveAndContinue.click();
 
-    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
-    await expect(animalsPages.transporter.heading).toBeVisible();
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
+    await expect(pages.page.getByRole('link', { name: ARRIVAL_DATE_REQUIRED_MESSAGE })).toBeVisible();
+    await expect(pages.page.getByRole('link', { name: PORT_REQUIRED_MESSAGE })).toBeVisible();
+    await expect(animalsPages.arrivalDetails.heading).toBeVisible();
   });
 
   test('restricts the date picker to one week back and six months ahead', async ({ animalsPages }) => {
