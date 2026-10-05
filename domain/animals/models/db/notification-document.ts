@@ -72,7 +72,8 @@ type NotificationContent = {
   cphNumber?: string;
   transport: {
     portOfEntry?: string;
-    arrivalDate?: Date;
+    /** A calendar date, stored as a `YYYY-MM-DD` string. */
+    arrivalDate?: string;
     meansOfTransport: string;
     transportIdentification?: string;
     transportDocumentReference?: string;
@@ -88,7 +89,8 @@ type NotificationContent = {
   purposeInInternalMarket?: string;
   destinationCountry?: string;
   portOfExit?: string;
-  exitDate?: Date;
+  /** A calendar date, stored as a `YYYY-MM-DD` string. */
+  exitDate?: string;
 };
 
 export type NotificationDocument = {

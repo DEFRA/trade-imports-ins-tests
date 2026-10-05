@@ -164,16 +164,14 @@ export function getRelativeServiceDisplayDate(dayOffset = 0): string {
 }
 
 /**
- * Converts a DateInput or DateTimeInput into a UTC Date.
- * Missing time parts default to 00:00.
+ * Converts a DateInput into the `YYYY-MM-DD` string the animals backend stores
+ * for a date-only field. Built from the parts, never through a `Date`, so the
+ * machine's timezone cannot move the day.
  */
-export function toUtcDate(input: DateInput | DateTimeInput): Date {
-  const year = Number(input.year);
-  // JS months are zero-indexed (0 = Jan).
-  const month = Number(input.month) - 1;
-  const day = Number(input.day);
-  const hour = 'hour' in input ? Number(input.hour) : 0;
-  const minute = 'minute' in input ? Number(input.minute) : 0;
+export function toIsoDate(input: DateInput): string {
+  const year = String(input.year).padStart(4, '0');
+  const month = String(input.month).padStart(2, '0');
+  const day = String(input.day).padStart(2, '0');
 
-  return new Date(Date.UTC(year, month, day, hour, minute, 0, 0));
+  return `${year}-${month}-${day}`;
 }
