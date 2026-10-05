@@ -65,7 +65,7 @@
     "@eslint/js": "10.0.1",
     "@playwright/cli": "0.1.22",
     "@playwright/test": "1.63.0",
-    "@types/node": "26.0.1",
+    "@types/node": "26.6.4",
     "allure-commandline": "2.43.0",
     "allure-playwright": "3.10.1",
     "audit-ci": "7.1.0",
