@@ -64,6 +64,49 @@ test.describe('Addresses are copied, not linked', { tag: ['@integration'] }, () 
     await expect(consignorCyaRow).not.toContainText('CA11 7AA');
   });
 
+  test('picking a record for a role with no address shows every field of that record on the review page', async ({
+    animalsJourney,
+    animalsPages,
+    addressBookApi,
+  }) => {
+    // Every field set, each value distinct, so each assert proves its own field was copied.
+    const stamp = Date.now();
+    const record = {
+      name: `Full Detail Farm ${stamp}`,
+      addressLine1: '12 Primary Row',
+      addressLine2: 'Secondary Wing',
+      townOrCity: 'Kendal',
+      county: 'Westmorland',
+      postcode: 'LA9 4QQ',
+      countryCode: 'GB',
+      phone: '01539 555 0105',
+      email: 'full.detail@example.co.uk',
+    };
+    await addressBookApi.createAddress(record);
+
+    await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
+
+    await animalsPages.overview.task('Roles and addresses').click();
+    await animalsPages.addresses.addParty('Consignor or exporter').click();
+    await animalsPages.consignorSelection.select(record.name);
+    await animalsPages.consignorSelection.saveAndContinue.click();
+    await expect(animalsPages.addresses.heading).toBeVisible();
+
+    const journeyId = animalsPages.addresses.journeyIdFromUrl();
+    await animalsPages.notificationView.open(journeyId);
+    const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+    await expect(consignorCyaRow).toContainText(record.name);
+    await expect(consignorCyaRow).toContainText(record.addressLine1);
+    await expect(consignorCyaRow).toContainText(record.addressLine2);
+    await expect(consignorCyaRow).toContainText(record.townOrCity);
+    await expect(consignorCyaRow).toContainText(record.county);
+    await expect(consignorCyaRow).toContainText(record.postcode);
+    await expect(consignorCyaRow).toContainText('United Kingdom');
+    await expect(consignorCyaRow).toContainText(record.phone);
+    await expect(consignorCyaRow).toContainText(record.email);
+  });
+
   test('deleting the record in the address book leaves the copy on a draft notification unchanged, with no error, and drops it from the picker', async ({
     animalsSeededJourney,
     pages,
