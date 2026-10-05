@@ -21,13 +21,7 @@ export class AnimalsContactAddressPage extends NotificationPage {
 
   /** The contact already copied onto this notification, shown apart from the list. */
   get currentContact(): Locator {
-    // The card has no role, so take the innermost div holding both its title and its
-    // edit link; ancestors come first in document order, hence last().
-    return this.page
-      .locator('div')
-      .filter({ has: this.page.getByRole('heading', { name: 'Current contact address' }) })
-      .filter({ has: this.page.getByRole('link', { name: 'Edit details' }) })
-      .last();
+    return this.page.getByRole('region', { name: 'Current contact address' });
   }
 
   get editCurrentContact(): Locator {
