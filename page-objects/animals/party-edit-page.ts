@@ -83,7 +83,7 @@ export class AnimalsPartyEditPage extends NotificationPage {
   }
 
   get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
+    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) });
   }
 
   /** The error message govukInput/govukSelect renders inside the field's own form group. */
