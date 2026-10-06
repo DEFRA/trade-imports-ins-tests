@@ -5,21 +5,20 @@
     "module": "esnext",
     "moduleResolution": "Bundler",
     "esModuleInterop": true,
-    "ignoreDeprecations": "6.0",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": ".",
+    "types": ["node"],
     "paths": {
-      "@adapters/*": ["adapters/*"],
-      "@config/*": ["config/*"],
-      "@domain/*": ["domain/*"],
-      "@page-objects": ["page-objects"],
-      "@page-objects/*": ["page-objects/*"],
-      "@flows/*": ["flows/*"],
-      "@fixtures": ["fixtures"],
-      "@fixtures/*": ["fixtures/*"],
-      "@resources/*": ["resources/*"],
-      "@utils/*": ["utils/*"]
+      "@adapters/*": ["./adapters/*"],
+      "@config/*": ["./config/*"],
+      "@domain/*": ["./domain/*"],
+      "@page-objects": ["./page-objects"],
+      "@page-objects/*": ["./page-objects/*"],
+      "@flows/*": ["./flows/*"],
+      "@fixtures": ["./fixtures"],
+      "@fixtures/*": ["./fixtures/*"],
+      "@resources/*": ["./resources/*"],
+      "@utils/*": ["./utils/*"]
     }
   }
 }
