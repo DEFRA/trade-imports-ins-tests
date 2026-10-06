@@ -8,7 +8,8 @@ export type AccompanyingDocumentModel = {
   correlationId: string;
   documentType: string;
   documentReference: string;
-  dateOfIssue: Date;
+  /** A calendar date, stored as a `YYYY-MM-DD` string. */
+  dateOfIssue: string;
   scanStatus: string;
   files: Array<{
     filename: string;
