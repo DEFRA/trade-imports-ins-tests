@@ -157,9 +157,10 @@ test.describe('Addresses are copied, not linked', { tag: ['@integration'] }, () 
     await animalsPages.notificationView.continueButton.click();
     await expect(animalsPages.declaration.heading).toBeVisible();
 
-    // The picker no longer offers the deleted record.
+    // The picker neither pre-selects nor offers the deleted record.
     await animalsPages.addresses.open(journeyId);
     await animalsPages.addresses.changeParty('Consignor or exporter').click();
+    await expect(animalsPages.consignorSelection.selectedAddress).toHaveCount(0);
     await animalsPages.consignorSelection.search.fill(name);
     await animalsPages.consignorSelection.searchButton.click();
     await expect(animalsPages.consignorSelection.party(name)).toHaveCount(0);
