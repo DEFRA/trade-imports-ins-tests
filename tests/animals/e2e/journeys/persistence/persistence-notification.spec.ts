@@ -4,7 +4,7 @@ import { type NotificationDocument } from '@domain/animals/models/db/notificatio
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { ARRIVAL_DATE } from '@flows/animals/journey';
-import { toUtcDate } from '@utils/date-utils';
+import { toIsoDate } from '@utils/date-utils';
 
 /**
  * Integration seam: real UI-create -> backend/Mongo persistence -> reload.
@@ -118,13 +118,13 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(notification.transport.transitedCountries).toEqual(['FR', 'BE']);
       expect(notification.transport.transporter?.name).toBe('García Livestock Transport SL');
       expect(notification.transport.transporter?.type).toBe('Commercial');
-      // EUDPA-282: the stored instant must be UTC start-of-day for the chosen calendar
-      // date, whatever timezone the backend JVM runs in. Asserting on the raw BSON Date
-      // is what catches the drift — reading back through the API decodes with the same
-      // zone that encoded it, so the bug cancels itself out and passes either way.
-      // Fails by exactly 3,600,000 ms on a non-UTC backend during BST.
+      // EUDPA-282: the stored value must be the chosen calendar date, whatever timezone
+      // the backend JVM runs in. It is stored as a `YYYY-MM-DD` string, which has no zone
+      // to drift in. Asserting on the raw document is what proves that — reading back
+      // through the API decodes with the same zone that encoded it, so a BSON date that
+      // had drifted would cancel itself out and pass either way.
       const [day, month, year] = ARRIVAL_DATE.split('/');
-      expect(notification.transport.arrivalDate.getTime()).toBe(toUtcDate({ day, month, year }).getTime());
+      expect(notification.transport.arrivalDate).toBe(toIsoDate({ day, month, year }));
     } finally {
       await client.close();
     }

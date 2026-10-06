@@ -5,7 +5,7 @@ import { type AccompanyingDocumentModel } from '@domain/animals/models/db/accomp
 import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { timeouts } from '@config/timeouts';
-import { toUtcDate } from '@utils/date-utils';
+import { toIsoDate } from '@utils/date-utils';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 /**
@@ -52,7 +52,7 @@ test.describe('Accompanying document persistence round-trip', { tag: ['@integrat
       expect(doc.notificationReferenceNumber).toBe(referenceNumber);
       expect(doc.documentReference).toBe(documentReference);
       expect(doc.uploadId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-      expect(doc.dateOfIssue.getTime()).toBe(toUtcDate(persistedIssueDate).getTime());
+      expect(doc.dateOfIssue).toBe(toIsoDate(persistedIssueDate));
       await expect.poll(() => collection.findOne({ uploadId: doc.uploadId }).then((d) => d?.scanStatus)).toBe('COMPLETE');
       expect(doc.documentType).toBe('ITAHC');
 

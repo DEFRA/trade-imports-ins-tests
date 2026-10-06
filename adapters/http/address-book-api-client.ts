@@ -1,5 +1,5 @@
 import type { APIRequestContext } from '@playwright/test';
-import { RestClient, RestClientError } from '@adapters/http/rest-client';
+import { RestClient } from '@adapters/http/rest-client';
 import { getAddressBookBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
 
 /**
@@ -40,7 +40,6 @@ interface AddressBookPage {
  */
 export class AddressBookApiClient {
   private readonly rest: RestClient;
-  private readonly createdIds = new Set<string>();
 
   constructor(
     request: APIRequestContext,
@@ -69,9 +68,7 @@ export class AddressBookApiClient {
 
   /** Saves a new address to the organisation's book. */
   async createAddress(record: Omit<AddressBookRecord, 'id' | 'deleted'>): Promise<AddressBookRecord> {
-    const created = await this.rest.post<AddressBookRecord>(this.path(), record, this.headers);
-    this.createdIds.add(created.id);
-    return created;
+    return this.rest.post<AddressBookRecord>(this.path(), record, this.headers);
   }
 
   /** The one live address with this name. Throws when there is not exactly one. */
@@ -81,13 +78,6 @@ export class AddressBookApiClient {
       throw new Error(`Expected exactly one address named "${name}", found ${matches.length}`);
     }
     return matches[0];
-  }
-
-  /** Marks a record made elsewhere, such as through the UI, for the fixture's cleanup. */
-  async trackByName(name: string): Promise<AddressBookRecord> {
-    const record = await this.findByName(name);
-    this.createdIds.add(record.id);
-    return record;
   }
 
   /**
@@ -112,26 +102,5 @@ export class AddressBookApiClient {
    */
   async deleteAddress(addressId: string): Promise<void> {
     await this.rest.delete(this.path(addressId), this.headers);
-    this.createdIds.delete(addressId);
-  }
-
-  /**
-   * Soft-deletes every address this client created and has not deleted since.
-   * Tries them all and rethrows the first failure; a 404 counts as already gone.
-   */
-  async deleteCreatedAddresses(): Promise<void> {
-    let firstError: unknown;
-    for (const addressId of [...this.createdIds]) {
-      try {
-        await this.deleteAddress(addressId);
-      } catch (error) {
-        if (!(error instanceof RestClientError && error.status === 404)) {
-          firstError ??= error;
-        }
-      }
-    }
-    if (firstError !== undefined) {
-      throw firstError;
-    }
   }
 }
