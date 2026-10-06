@@ -31,7 +31,6 @@
     "test:security": "npm run _zap_clean && npm run _zap_prime_context && npm run _clean_and_test -- --grep-invert '@compose|@a11y|@visual|@active' --timeout=60000",
     "test:security:active": "npm run _zap_clean && npm run _zap_prime_context && npm run _clean_and_test -- --grep '@active' --timeout=60000",
     "probe:cdp-session-reuse": "tsx bin/cdp-session-probe.ts",
-    "address-book:purge": "tsx bin/address-book-purge.ts",
     "seed:notification": "tsx bin/seed-notification.ts",
     "test:browserstack": "echo 'BrowserStack Playwright tests not implemented yet'",
     "test:docker-compose": "npm run _clean_and_test_docker_compose -- --grep-invert '@a11y|@active'",
