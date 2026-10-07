@@ -277,6 +277,12 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(destination).toContainText('PH1 5EX');
     await submit(plantsPages);
     await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrl(reference));
+
+    // The submitted notification keeps the copy even though its record is gone.
+    await plantsPages.confirmation.viewNotification.click();
+    await assertReadOnly(plantsPages);
+    await expect(destination).toContainText(address.name);
+    await expect(destination).toContainText('PH1 5EX');
   });
 
   test('editing the record in the address book does not change what the notification shows', async ({
