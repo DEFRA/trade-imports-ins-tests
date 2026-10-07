@@ -3,6 +3,7 @@ export const timeouts = {
   short: 5_000,
   medium: 10_000,
   long: 30_000,
+  veryLong: 60_000,
 } as const;
 
 /** Bound for waiting on the next page's heading or form after a navigation. */
