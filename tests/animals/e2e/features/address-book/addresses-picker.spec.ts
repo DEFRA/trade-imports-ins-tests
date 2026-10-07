@@ -33,7 +33,7 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
       addressLine1: '1 Later Page Lane',
       townOrCity: 'Carlisle',
       postcode: 'CA1 1AA',
-      countryCode: 'United Kingdom',
+      countryCode: 'GB',
       phone: '01228 555 0199',
       email: 'paged@example.co.uk',
     });
@@ -43,7 +43,7 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
         addressLine1: `${i} Front Row`,
         townOrCity: 'Carlisle',
         postcode: 'CA1 1BB',
-        countryCode: 'United Kingdom',
+        countryCode: 'GB',
         phone: '01228 555 0198',
         email: 'newer@example.co.uk',
       });
@@ -109,8 +109,8 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
     // Re-entering opens on page one, where the chosen record is not rendered —
     // the picker still knows it (carried, not re-ticked), and a save from this
     // page keeps it. That is the no-JS selection-across-pagination guarantee.
-    await consignorRow.getByRole('link', { name: 'Change' }).click();
-    await expect(page.getByText(`Selected address: ${targetName}`)).toBeVisible();
+    await animalsPages.addresses.changeParty('Consignor or exporter').click();
+    await expect(animalsPages.consignorSelection.selectedAddress).toHaveText(`Selected address: ${targetName}`);
     await expect(animalsPages.consignorSelection.party(targetName)).toHaveCount(0);
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();

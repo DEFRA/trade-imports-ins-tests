@@ -18,6 +18,11 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
   }
 
+  /** The "Selected address: …" line the picker shows for a choice carried across pages. */
+  get selectedAddress(): Locator {
+    return this.page.getByText('Selected address:');
+  }
+
   get search(): Locator {
     return this.page.getByLabel('Search');
   }

@@ -26,6 +26,11 @@ export class AnimalsAddressesPage extends NotificationPage {
     return this.partyRow(role).getByRole('link', { name: 'Change' });
   }
 
+  /** Edits the copy held on this notification, as opposed to Change, which re-picks from the book. */
+  editPartyDetails(role: PartyRole): Locator {
+    return this.partyRow(role).getByRole('link', { name: 'Edit details' });
+  }
+
   get continueButton(): Locator {
     return this.page.getByRole('button', { name: 'Continue' });
   }

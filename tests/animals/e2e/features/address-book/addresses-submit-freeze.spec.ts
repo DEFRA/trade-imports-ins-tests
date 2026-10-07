@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () => {
-  test('renaming the book after submit does not change the submitted view, then shows live on amend', async ({
+test.describe('Submitted addresses keep their copy', { tag: ['@integration'] }, () => {
+  test('renaming the book after submit changes neither the submitted view nor the amendment, and cancelling the amendment keeps the copy', async ({
     animalsSeededJourney,
     pages,
     animalsPages,
@@ -12,13 +12,13 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
 
     const stamp = Date.now();
     const originalName = `Frozen Origin ${stamp}`;
-    const renamed = `Live Origin ${stamp}`;
+    const renamed = `Renamed Origin ${stamp}`;
     const address = await addressBookApi.createAddress({
       name: originalName,
       addressLine1: '8 Freeze Street',
       townOrCity: 'Carlisle',
       postcode: 'CA1 4DD',
-      countryCode: 'United Kingdom',
+      countryCode: 'GB',
       phone: '01228 555 0106',
       email: 'freeze@example.co.uk',
     });
@@ -48,7 +48,7 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
       addressLine1: '8 Freeze Street',
       townOrCity: 'Penrith',
       postcode: 'CA11 8DD',
-      countryCode: 'United Kingdom',
+      countryCode: 'GB',
       phone: '01228 555 0106',
       email: 'freeze@example.co.uk',
     });
@@ -64,19 +64,21 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Amending');
-    await expect(originRow).toContainText(renamed);
-    await expect(originRow).toContainText('Penrith');
-    await expect(originRow).not.toContainText(originalName);
+    await expect(originRow).toContainText(originalName);
+    await expect(originRow).toContainText('Carlisle');
+    await expect(originRow).not.toContainText(renamed);
+    await expect(originRow).not.toContainText('Penrith');
 
     await animalsPages.notificationView.cancelAmendment.click();
     await animalsPages.notificationCancelAmend.confirm.click();
     await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(originRow).toContainText(originalName);
+    await expect(originRow).toContainText('Carlisle');
     await expect(originRow).not.toContainText(renamed);
   });
 
-  test('deleting the book record after submit does not change the submitted view or error', async ({
+  test('deleting the book record after submit changes neither the submitted view nor the amendment, and shows no error', async ({
     animalsSeededJourney,
     pages,
     animalsPages,
@@ -92,7 +94,7 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
       addressLine1: '9 Delete Street',
       townOrCity: 'Carlisle',
       postcode: 'CA1 4DE',
-      countryCode: 'United Kingdom',
+      countryCode: 'GB',
       phone: '01228 555 0107',
       email: 'delete-freeze@example.co.uk',
     });
@@ -119,6 +121,13 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');
-    await expect(pages.page.locator('.govuk-error-summary')).toHaveCount(0);
+    await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
+
+    await animalsNotificationActions.amendNotification(referenceNumber);
+    await animalsPages.overview.reviewAndSubmitButton.click();
+    await expect(animalsPages.notificationView.journeyStrip).toContainText('Amending');
+    await expect(originRow).toContainText(originalName);
+    await expect(originRow).toContainText('Carlisle');
+    await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
   });
 });

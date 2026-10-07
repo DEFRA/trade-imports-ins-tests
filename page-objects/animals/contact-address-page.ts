@@ -14,6 +14,20 @@ export class AnimalsContactAddressPage extends NotificationPage {
     return this.page.getByRole('radio', { name });
   }
 
+  /** Any option in the list shown as chosen. */
+  get chosenAddress(): Locator {
+    return this.page.getByRole('radio', { checked: true });
+  }
+
+  /** The contact already copied onto this notification, shown apart from the list. */
+  get currentContact(): Locator {
+    return this.page.getByRole('region', { name: 'Current contact address' });
+  }
+
+  get editCurrentContact(): Locator {
+    return this.currentContact.getByRole('link', { name: 'Edit details' });
+  }
+
   get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }

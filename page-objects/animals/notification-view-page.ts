@@ -55,6 +55,12 @@ export class AnimalsNotificationViewPage extends NotificationPage {
       .filter({ has: this.page.getByRole('term').and(this.page.getByText(role, { exact: true })) });
   }
 
+  /** The row's own link to edit the address copied onto this notification —
+   * the card keeps the one Change link that re-picks from the book. */
+  editPartyDetails(card: string, role: string): Locator {
+    return this.partyRow(card, role).getByRole('link', { name: 'Edit details' });
+  }
+
   /** A summary list has no error state of its own, so an outstanding role
    * carries its message in the row's value cell — the first definition of the
    * row, ahead of the actions cell. */

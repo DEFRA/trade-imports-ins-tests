@@ -32,8 +32,8 @@ interface AddressBookPage {
 
 /**
  * Direct HTTP access to the address book, so a spec can change an address
- * behind the journey's back — the only way to show that a notification holds a
- * link to a record rather than a copy of it.
+ * behind the journey's back — the only way to show whether a notification holds
+ * a link to a record or a copy of it.
  *
  * The address book runs no authentication of its own: it trusts the
  * organisation header and requires it to match the organisation in the path.
