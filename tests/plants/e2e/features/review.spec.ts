@@ -506,9 +506,9 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await expect(form.errorSummary).toContainText('Enter a name');
     await expect(form.errorSummary).toContainText('Postcode must be 12 characters or fewer');
     await expect(form.errorSummary).toContainText('Enter an email address in the correct format');
-    await expect(form.fieldError(form.name)).toContainText('Enter a name');
-    await expect(form.fieldError(form.postcode)).toContainText('Postcode must be 12 characters or fewer');
-    await expect(form.fieldError(form.email)).toContainText('Enter an email address in the correct format');
+    await expect(form.name).toHaveAccessibleDescription(/Enter a name/);
+    await expect(form.postcode).toHaveAccessibleDescription(/Postcode must be 12 characters or fewer/);
+    await expect(form.email).toHaveAccessibleDescription(/Enter an email address in the correct format/);
 
     await plantsPages.notificationView.open(reference);
     const destination = plantsPages.notificationView.card('Place of destination');

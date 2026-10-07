@@ -90,11 +90,6 @@ export function withPartyEditForm(Base: NotificationPageClass) {
       return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) });
     }
 
-    /** The error message govukInput/govukSelect renders inside the field's own form group. */
-    fieldError(field: Locator): Locator {
-      return this.page.locator('.govuk-form-group--error', { has: field }).locator('.govuk-error-message');
-    }
-
     async fill(fields: Partial<PartyEditFields>): Promise<void> {
       for (const [key, value] of Object.entries(fields) as Array<[keyof PartyEditFields, string]>) {
         await this[key].fill(value);
