@@ -20,7 +20,7 @@ export class AnimalsPartyPickerPage extends NotificationPage {
 
   /** The "Selected address: …" line the picker shows for a choice carried across pages. */
   get selectedAddress(): Locator {
-    return this.page.getByText(/^Selected address:/);
+    return this.page.getByText('Selected address:');
   }
 
   get search(): Locator {
