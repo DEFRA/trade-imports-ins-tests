@@ -257,4 +257,39 @@ test.describe('High-risk plants destination section', { tag: '@integration' }, (
     await expect(plantsPages.placeOfDestination.currentAddress).toContainText(name);
     await expect(plantsPages.placeOfDestination.currentAddress).toContainText('PH1 5EX');
   });
+
+  test('Edit details on the picker changes the copy on this notification, not the address book record', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const token = `Forfar${Date.now()}`;
+    const name = `Copied Nursery ${token}`;
+    const editedName = `Edited Nursery ${token}`;
+    const record = await addressBookApi.createAddress(addressNamed(name));
+
+    const reference = await plantsToDestination(plantsPages, plantsJourney, NOT_YET_ARRIVED);
+    await chooseAddress(plantsPages, token, name);
+
+    await plantsPages.placeOfDestination.open(reference);
+    await plantsPages.placeOfDestination.editCurrentAddress.click();
+
+    const form = plantsPages.placeOfDestinationEdit;
+    await expect(pages.page).toHaveURL((url) => url.pathname === form.expectedUrl(reference));
+    await expect(form.heading).toBeVisible();
+    await expect(form.roleCaption).toBeVisible();
+    await expect(form.name).toHaveValue(name);
+    await expect(form.postcode).toHaveValue('PH1 5EX');
+
+    await form.fill({ name: editedName, townOrCity: 'Dundee' });
+    await form.saveChanges.click();
+
+    // Saving returns to the picker it was opened from, showing the edited copy.
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
+    await expect(plantsPages.placeOfDestination.currentAddress).toContainText(editedName);
+    await expect(plantsPages.placeOfDestination.currentAddress).toContainText('Dundee');
+
+    expect(await addressBookApi.getAddress(record.id)).toMatchObject({ name, townOrCity: 'Perth' });
+  });
 });
