@@ -228,14 +228,14 @@ test.describe('High-risk plants destination section', { tag: '@integration' }, (
     await expect(plantsPages.placeOfDestination.address(target)).toHaveCount(0);
   });
 
-  test('deleting the chosen address takes the answer off the notification', async ({
+  test('deleting the chosen address from the address book leaves its copy on the notification', async ({
     pages,
     plantsPages,
     plantsJourney,
     addressBookApi,
   }) => {
     const token = `Montrose${Date.now()}`;
-    const name = `Doomed Nursery ${token}`;
+    const name = `Deleted Nursery ${token}`;
     const record = await addressBookApi.createAddress(addressNamed(name));
 
     const reference = await plantsToDestination(plantsPages, plantsJourney, NOT_YET_ARRIVED);
@@ -243,24 +243,18 @@ test.describe('High-risk plants destination section', { tag: '@integration' }, (
 
     await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrl(reference));
 
-    await plantsPages.overview.open(reference);
-    await expect(plantsPages.overview.taskRow(DESTINATION_TASK_ROW)).toContainText('Completed');
-
-    // The notification holds the address-book id and nothing else, so the
-    // organisation deleting the record leaves a reference that no longer
-    // resolves. A deleted address counts as never entered: the answer drops out
-    // of the read, and the hub and the page agree it is gone rather than one of
-    // them showing an address the trader can no longer see. The Check your
-    // answers half of this — a deleted record rendering "Not provided" — is
-    // carried to the review-section spec (inc-055): the plants frontend has no
-    // check-answers feature yet.
+    // The notification holds a copy of the address taken when it was picked, so
+    // the record leaving the address book does not take the answer with it.
     await addressBookApi.deleteAddress(record.id);
 
     await plantsPages.overview.open(reference);
-    await expect(plantsPages.overview.taskRow(DESTINATION_TASK_ROW)).toContainText('Not yet started');
+    await expect(plantsPages.overview.taskRow(DESTINATION_TASK_ROW)).toContainText('Completed');
 
+    // The list can no longer tick the deleted record, but the copy is still shown.
     await plantsPages.placeOfDestination.open(reference);
     await expect(plantsPages.placeOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
     await expect(plantsPages.placeOfDestination.selectedAddressInset).toHaveCount(0);
+    await expect(plantsPages.placeOfDestination.currentAddress).toContainText(name);
+    await expect(plantsPages.placeOfDestination.currentAddress).toContainText('PH1 5EX');
   });
 });

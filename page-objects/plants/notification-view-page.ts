@@ -27,4 +27,8 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
   change(name: string): Locator {
     return this.page.getByRole('link', { name, exact: true });
   }
+  /** Edits the copy this notification holds; the card's Change picks another address. */
+  editDetails(cardTitle: string): Locator {
+    return this.card(cardTitle).getByRole('link', { name: /^Edit details/ });
+  }
 }
