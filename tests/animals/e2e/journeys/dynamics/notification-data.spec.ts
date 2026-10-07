@@ -26,10 +26,10 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
   test('a submitted notification is stored in PIMS Dynamics with the data it was submitted with', async ({
     animalsJourney,
     journeyContext,
-    request,
+    externalRequest,
   }) => {
     // Built first: a missing ANIMALS_DYNAMICS_URL / DATAVERSE_* secret fails here, before the journey.
-    const dynamics = new AnimalsDynamicsClient(request);
+    const dynamics = new AnimalsDynamicsClient(externalRequest);
     await animalsJourney.submitNotification();
     const referenceNumber = journeyContext.journeyId;
 

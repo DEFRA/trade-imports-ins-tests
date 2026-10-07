@@ -370,7 +370,9 @@ app-config and secrets on CDP, `.env` locally; see `.env.example`):
 - `DATAVERSE_CLIENT_SECRET` — its secret
 
 A missing setting fails the test at once, naming the variable, before any journey
-runs. The tests skip on the docker-compose stack, which has no PIMS Dynamics.
+runs. The tests skip on the docker-compose stack, which has no PIMS Dynamics. On CDP their
+Dataverse calls go through the CDP proxy (`localhost:3128`), which must allow
+`login.microsoftonline.com` and the Dynamics host for this test suite.
 
 **The suite is for CDP.** Run `npm run test:dynamics` from a laptop only to debug it or
 write a new test: use the laptop-to-CDP `.env` (`CDP_LOCAL=true`, `PLAYWRIGHT_ENVIRONMENT`)

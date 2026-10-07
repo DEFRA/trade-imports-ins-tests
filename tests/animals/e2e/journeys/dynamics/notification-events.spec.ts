@@ -30,9 +30,9 @@ test.describe('PIMS Dynamics notification events', { tag: '@dynamics' }, () => {
     test.setTimeout(test.info().timeout + ANIMALS_DYNAMICS_ARRIVAL_TIMEOUT_MS);
   });
 
-  test('a submitted notification is created in PIMS Dynamics', async ({ animalsJourney, journeyContext, request }) => {
+  test('a submitted notification is created in PIMS Dynamics', async ({ animalsJourney, journeyContext, externalRequest }) => {
     // Built first: a missing ANIMALS_DYNAMICS_URL / DATAVERSE_* secret fails here, before the journey.
-    const dynamics = new AnimalsDynamicsClient(request);
+    const dynamics = new AnimalsDynamicsClient(externalRequest);
     await animalsJourney.submitNotification();
     const submittedAt = Date.now();
     const referenceNumber = journeyContext.journeyId;
