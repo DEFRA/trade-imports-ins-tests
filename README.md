@@ -75,6 +75,7 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 | --------------------------------------------- | ----------------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
 | `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`           | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                    | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:dynamics`                       | Dynamics integration (`@dynamics`) test suite         | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites        | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
@@ -223,7 +224,7 @@ tests/<project>/
   security/
 ```
 
-Folders only organise specs: tags (`@a11y`, `@active`, `@compose`, `@visual`)
+Folders only organise specs: tags (`@a11y`, `@active`, `@compose`, `@dynamics`, `@visual`)
 select the suite, and the project selects the domain.
 
 ## Local Testing
@@ -335,6 +336,7 @@ If `PROFILE` is not set, the `default` profile is used.
 | ----------------- | ---------------------------------------------------------------------------------------------- | ----------------------- |
 | `default`         | e2e test suite                                                                                 | `npm test`              |
 | `a11y`            | accessibility test suite                                                                       | `npm run test:a11y`     |
+| `dynamics`        | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics` |
 | `security`        | security test suite (ZAP passive scan)                                                         | `npm run test:security` |
 | `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                       |
 
@@ -345,12 +347,36 @@ suite with its project name as `<domain>:<suite>`:
 | -------------------------- | ---------------------------------------------------------- |
 | `<domain>:e2e`             | that domain's e2e suite (`npm test -- --project=<domain>`) |
 | `<domain>:a11y`            | that domain's accessibility suite                          |
+| `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)                |
 | `<domain>:security`        | that domain's security suite (ZAP passive scan)            |
 | `<domain>:security:active` | **not supported on CDP**, as `security:active`             |
 
 `<domain>` is one of `animals`, `animals-admin`, `ins` or `plants`, e.g.
 `animals:a11y` or `plants:e2e`. A domain with no specs for a suite (for example
 `plants:a11y` today) fails with Playwright's "No tests found".
+
+### Dynamics checks
+
+`@dynamics` tests prove a submitted notification reaches a domain's Dynamics
+instance (animals: PIMS Dynamics). They run only through `PROFILE=dynamics` or
+`<domain>:dynamics`, and are excluded from the e2e, a11y, security and
+docker-compose runs.
+
+They query the Dataverse Web API, so they need these settings (from the test suite's
+app-config and secrets on CDP, `.env` locally; see `.env.example`):
+
+- `ANIMALS_DYNAMICS_URL` — the PIMS Dynamics environment
+- `DATAVERSE_TENANT_ID`, `DATAVERSE_CLIENT_ID` — the app registration
+- `DATAVERSE_CLIENT_SECRET` — its secret
+
+A missing setting fails the test at once, naming the variable, before any journey
+runs. The tests skip on the docker-compose stack, which has no PIMS Dynamics. On CDP their
+Dataverse calls go through the CDP proxy (`localhost:3128`), which must allow
+`login.microsoftonline.com` and the Dynamics host for this test suite.
+
+**The suite is for CDP.** Run `npm run test:dynamics` from a laptop only to debug it or
+write a new test: use the laptop-to-CDP `.env` (`CDP_LOCAL=true`, `PLAYWRIGHT_ENVIRONMENT`)
+plus the settings above.
 
 Tests are run from the CDP Portal under the Test Suites section. See the requirements below for how the portal run executes and publishes results.
 

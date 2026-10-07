@@ -22,6 +22,7 @@ import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { FrontendFormClient } from '@adapters/http/frontend-form-client';
 import { createWorkerAuthState } from '@fixtures/auth-state';
 import { createFrontendSeedContext } from '@fixtures/seed-context';
+import { getCdpProxy } from '@config/cdp-proxy';
 import { sessionReuseEnabled } from '@utils/playwright/session-reuse';
 
 // frontendSeedContext mints its own session when session reuse is off or the project's baseURL is not the frontend, so both worker fixtures need their own budget rather than the test timeout.
@@ -47,6 +48,7 @@ export interface PageFixtures {
   notificationApi: NotificationApiClient;
   addressBookApi: AddressBookApiClient;
   frontendForms: FrontendFormClient;
+  externalRequest: APIRequestContext;
 }
 
 export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
@@ -110,6 +112,12 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   },
   frontendForms: async ({ frontendSeedContext }, use) => {
     await use(new FrontendFormClient(frontendSeedContext));
+  },
+  // Calls that leave CDP for the internet go through its proxy; the journey and service calls stay direct.
+  externalRequest: async ({ playwright }, use) => {
+    const context = await playwright.request.newContext({ proxy: getCdpProxy() });
+    await use(context);
+    await context.dispose();
   },
   animalsSeededJourney: async ({ frontendForms, addressBookApi, journeyContext }, use) => {
     await use(new AnimalsSeededJourney(frontendForms, addressBookApi, journeyContext));
