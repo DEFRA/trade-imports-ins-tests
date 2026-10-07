@@ -464,6 +464,30 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await expect(plantsPages.consignmentContactSelect.currentAddress).not.toContainText('Never Saved Ltd');
   });
 
+  test('the consignor picker shows the copied address and its Edit details opens the consignor edit form', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, {
+      type: PLANTS,
+      days: -1,
+    });
+
+    await plantsPages.consignorSelect.open(reference);
+    await expect(plantsPages.consignorSelect.currentAddress).toContainText(address.name);
+    await expect(plantsPages.consignorSelect.currentAddress).toContainText('PH1 5EX');
+    await plantsPages.consignorSelect.editCurrentAddress.click();
+
+    const form = plantsPages.consignorEdit;
+    await expect(pages.page).toHaveURL((url) => url.pathname === form.expectedUrl(reference));
+    await expect(form.heading).toBeVisible();
+    await expect(form.roleCaption).toBeVisible();
+    await expect(form.name).toHaveValue(address.name);
+    await expect(form.postcode).toHaveValue('PH1 5EX');
+  });
+
   test('an edit that breaks the address book rules is refused with its messages, and nothing is saved', async ({
     pages,
     plantsPages,
