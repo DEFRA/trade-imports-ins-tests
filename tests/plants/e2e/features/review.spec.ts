@@ -553,7 +553,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await expect(plantsPages.notificationView.errorSummary).toContainText(error);
     await expect(plantsPages.notificationView.errorSummary).toContainText(contactError);
     // The card says which field to correct, against the row that holds it.
-    await expect(plantsPages.notificationView.row('Place of destination', 'Address')).toContainText('Enter a country');
+    await expect(plantsPages.notificationView.row('Place of destination', 'Address')).toContainText('Enter a valid country');
     await expect(plantsPages.notificationView.row('Place of destination', 'Name')).not.toContainText('Enter');
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
