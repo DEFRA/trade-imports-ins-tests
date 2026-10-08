@@ -23,6 +23,8 @@ type NotificationOptions = {
   contact?: boolean;
   /** The country the minted record carries. The address book API accepts any non-blank value; the journey does not. */
   countryCode?: string;
+  /** The minted record's name. Must stay unique: the book is shared and never wiped. */
+  name?: string;
   /** A record to pick instead of minting one, so two notifications can copy the same address. */
   existing?: AddressBookRecord;
 };
@@ -32,12 +34,19 @@ async function completeNotification(
   plantsPages: PlantsPages,
   journey: PlantsJourney,
   api: AddressBookApiClient,
-  { type = POTATOES, days = 7, contact = true, countryCode = 'GB', existing }: NotificationOptions = {},
+  {
+    type = POTATOES,
+    days = 7,
+    contact = true,
+    countryCode = 'GB',
+    name = `Review Nursery ${randomUUID()}`,
+    existing,
+  }: NotificationOptions = {},
 ) {
   const address =
     existing ??
     (await api.createAddress({
-      name: `Review Nursery ${randomUUID()}`,
+      name,
       addressLine1: '4 Nursery Lane',
       townOrCity: 'Perth',
       county: 'Perthshire',
@@ -530,9 +539,11 @@ test.describe('High-risk plants copied addresses are edited on the notification'
   }) => {
     test.slow();
     // The address book API takes any non-blank country, so a record can hold a
-    // country name where the journey expects a code.
+    // country name where the journey expects a code. Named for what it is, since
+    // it stays in the shared book for anyone picking addresses by hand.
     const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, {
       countryCode: 'United Kingdom',
+      name: `Invalid address (country "United Kingdom" is not a code) ${randomUUID()}`,
     });
     // The same record was picked for the destination and the contact, so both copies break the rules.
     const error = 'Correct the address details for the place of destination';
@@ -541,6 +552,9 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await openReview(plantsPages);
     await expect(plantsPages.notificationView.errorSummary).toContainText(error);
     await expect(plantsPages.notificationView.errorSummary).toContainText(contactError);
+    // The card says which field to correct, against the row that holds it.
+    await expect(plantsPages.notificationView.row('Place of destination', 'Address')).toContainText('Enter a country');
+    await expect(plantsPages.notificationView.row('Place of destination', 'Name')).not.toContainText('Enter');
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
     await expect(plantsPages.notificationView.errorSummary).toContainText(error);
