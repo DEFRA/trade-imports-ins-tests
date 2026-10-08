@@ -23,6 +23,15 @@ export class PlantsConsignorSelectPage extends PlantsNotificationPage {
     await this.page.getByRole('button', { name: 'Search', exact: true }).click();
   }
 
+  /** The copy this notification holds, which may differ from any record in the list. */
+  get currentAddress(): Locator {
+    return this.page.getByRole('region', { name: 'Current consignor or exporter' });
+  }
+
+  get editCurrentAddress(): Locator {
+    return this.currentAddress.getByRole('link', { name: /^Edit details/ });
+  }
+
   get btnSaveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue', exact: true });
   }
