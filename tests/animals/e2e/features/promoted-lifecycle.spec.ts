@@ -19,7 +19,7 @@ test.describe('Notification lifecycle', { tag: ['@compose', '@integration'] }, (
     expect(initial.fulfilments).toEqual([]);
 
     // Submit.
-    const submitted = await notificationApi.submitNotification(id);
+    const submitted = await notificationApi.submitNotification(id, notification.concurrencyToken);
     expect(submitted.status).toBe(notificationStatuses.submitted);
     const submittedFulfilments = await notificationApi.getNotificationFulfilments(id);
     expect(submittedFulfilments.status).toBe(notificationFulfilmentsStatuses.submitted);
