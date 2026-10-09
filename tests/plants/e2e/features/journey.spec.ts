@@ -108,8 +108,7 @@ test.describe('High-risk plants full happy-path journeys', { tag: '@integration'
       await plantsPages.consignmentContactSelect.searchFor(address.name);
       await plantsPages.consignmentContactSelect.address(address.name).check();
       await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
-      await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
-      await plantsPages.overview.taskRowLink('Check and submit').click();
+      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
       await expect(plantsPages.notificationView.heading).toBeVisible();
       await plantsPages.notificationView.btnContinue.click();
       await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrl(reference));

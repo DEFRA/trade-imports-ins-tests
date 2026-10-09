@@ -124,7 +124,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importerSelection.select('Import Co UK');
       await animalsPages.importerSelection.saveAndContinue.click();
       await animalsPages.addresses.heading.waitFor();
-      await animalsPages.addresses.continueButton.click();
+      await animalsPages.addresses.addCph.click();
     });
 
     await test.step('CPH number', async () => {
@@ -132,6 +132,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsPages.cphNumber.fillCphNumber();
       await animalsPages.cphNumber.saveAndContinue.click();
+      await animalsPages.addresses.heading.waitFor();
+      await animalsPages.addresses.continueButton.click();
       await animalsPages.overview.heading.waitFor();
     });
 

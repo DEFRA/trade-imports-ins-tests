@@ -143,8 +143,7 @@ export class AnimalsJourney {
     await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
   }
 
-  async fillAddressesToCph(): Promise<void> {
-    await this.animalsPages.overview.task('Roles and addresses').click();
+  private async addFiveParties(): Promise<void> {
     const parties = [
       ['Consignor or exporter', 'Astra Rosales', 'consignorSelection'],
       ['Place of destination', 'Tech Imports Ltd', 'destinationSelection'],
@@ -158,14 +157,21 @@ export class AnimalsJourney {
       await this.animalsPages[picker].saveAndContinue.click();
       await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     }
-    await this.animalsPages.addresses.continueButton.click();
+  }
+
+  async fillAddressesAndOpenCph(): Promise<void> {
+    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.addFiveParties();
+    await this.animalsPages.addresses.addCph.click();
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
   }
 
   async answerAddresses(): Promise<void> {
-    await this.fillAddressesToCph();
+    await this.fillAddressesAndOpenCph();
     await this.animalsPages.cphNumber.fillCphNumber();
     await this.animalsPages.cphNumber.saveAndContinue.click();
+    await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
+    await this.animalsPages.addresses.continueButton.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -264,7 +270,7 @@ export class AnimalsJourney {
   async toCphNumber(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.fillAddressesToCph();
+    await this.fillAddressesAndOpenCph();
   }
 
   async toArrivalDetails(): Promise<void> {
@@ -351,6 +357,124 @@ export class AnimalsJourney {
     await this.animalsPages.overview.open(this.animalsPages.accompanyingDocuments.journeyIdFromUrl());
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.fromOverviewToDeclaration();
+    await this.confirmDeclaration();
+  }
+
+  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+    const pages = this.animalsPages;
+    const journeyId = await this.createNotificationAtOrigin();
+
+    await this.fillOriginOfImport();
+    await this.saveOriginOfImport();
+
+    await pages.commoditySelection.heading.waitFor(pageLoadWait);
+    await pages.commoditySelection.selectSpecies(['Bos taurus']);
+    await pages.commoditySelection.saveAndContinue.click();
+
+    await pages.importReason.heading.waitFor(pageLoadWait);
+    await pages.importReason.saveAndContinue.click();
+
+    await pages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await pages.consignmentDetails.numberOfAnimals.fill('1');
+    await pages.consignmentDetails.saveAndContinue.click();
+
+    await pages.animalIdentification.heading.waitFor(pageLoadWait);
+    await pages.animalIdentification.saveAndContinue.click();
+
+    await pages.additionalDetails.heading.waitFor(pageLoadWait);
+    await pages.additionalDetails.saveAndContinue.click();
+
+    await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await pages.arrivalDetails.saveAndContinue.click();
+
+    await pages.transporter.heading.waitFor(pageLoadWait);
+    await pages.transporter.saveAndContinue.click();
+
+    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
+    await pages.accompanyingDocuments.continueButton.click();
+
+    await pages.addresses.heading.waitFor(pageLoadWait);
+    return journeyId;
+  }
+
+  async walkOpeningRunCattleByAir(document: AccompanyingDocumentAnswer): Promise<string> {
+    const pages = this.animalsPages;
+    const journeyId = await this.createNotificationAtOrigin();
+
+    await this.fillOriginOfImport({ requiresRegionCode: 'Yes', internalReference: 'CATTLE-2026-01' });
+    await this.saveOriginOfImport();
+
+    await pages.commoditySelection.heading.waitFor(pageLoadWait);
+    await pages.commoditySelection.selectSpecies(['Bos taurus']);
+    await pages.commoditySelection.saveAndContinue.click();
+
+    await pages.importReason.heading.waitFor(pageLoadWait);
+    await pages.importReason.reason('Internal market').check();
+    await pages.importReason.purpose('Breeding').check();
+    await pages.importReason.saveAndContinue.click();
+
+    await pages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await pages.consignmentDetails.numberOfAnimals.fill('2');
+    await pages.consignmentDetails.numberOfPackages.fill('1');
+    await pages.consignmentDetails.saveAndContinue.click();
+
+    await pages.animalIdentification.heading.waitFor(pageLoadWait);
+    await pages.animalIdentification.earTag.fill('UK000000000001');
+    await pages.animalIdentification.passportNumber.fill('PASSPORT-0001');
+    await pages.animalIdentification.saveAndAddAnother.click();
+    await pages.animalIdentification.savedAnimalRow('Bos taurus', 1).waitFor(pageLoadWait);
+    await pages.animalIdentification.earTag.fill('UK000000000002');
+    await pages.animalIdentification.passportNumber.fill('PASSPORT-0002');
+    await pages.animalIdentification.saveAndFinish.click();
+    await pages.animalIdentification.savedAnimalRow('Bos taurus', 2).waitFor(pageLoadWait);
+    await pages.animalIdentification.saveAndContinue.click();
+
+    await pages.additionalDetails.heading.waitFor(pageLoadWait);
+    await pages.additionalDetails.certifiedFor('Further keeping').check();
+    await pages.additionalDetails.containsUnweanedAnimals('No').check();
+    await pages.additionalDetails.saveAndContinue.click();
+
+    await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
+    await pages.arrivalDetails.selectPort('Heathrow Airport (GB LHR)');
+    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Airplane' });
+    await pages.arrivalDetails.transportIdentification.fill('BA0117');
+    await pages.arrivalDetails.transportDocumentReference.fill('AWB-2026-0001');
+    await pages.arrivalDetails.saveAndContinue.click();
+
+    await pages.transporter.heading.waitFor(pageLoadWait);
+    await pages.transporter.transporter('García Livestock Transport SL').check();
+    await pages.transporter.saveAndContinue.click();
+
+    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
+    await pages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
+    await pages.accompanyingDocuments.saveAndAddAnother.click();
+    await pages.accompanyingDocuments
+      .documentRow(document.reference)
+      .filter({ hasText: 'Check completed' })
+      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
+    await pages.accompanyingDocuments.continueButton.click();
+
+    await pages.addresses.heading.waitFor(pageLoadWait);
+    await this.addFiveParties();
+    await pages.addresses.addCph.click();
+    await pages.cphNumber.heading.waitFor(pageLoadWait);
+    await pages.cphNumber.fillCphNumber();
+    await pages.cphNumber.saveAndContinue.click();
+    await pages.addresses.heading.waitFor(pageLoadWait);
+    await pages.addresses.continueButton.click();
+
+    await pages.contactAddress.heading.waitFor(pageLoadWait);
+    await pages.contactAddress.address('Animal and Plant Health Agency').check();
+    await pages.contactAddress.saveAndContinue.click();
+
+    await pages.notificationView.heading.waitFor(pageLoadWait);
+    return journeyId;
+  }
+
+  async submitFromReview(): Promise<void> {
+    await this.animalsPages.notificationView.continueButton.click();
+    await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
     await this.confirmDeclaration();
   }
 

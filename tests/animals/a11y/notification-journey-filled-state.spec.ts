@@ -110,7 +110,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     await test.step('Consignment addresses with all parties added', async () => {
       await runA11yScan();
-      await animalsPages.addresses.continueButton.click();
+      await animalsPages.addresses.addCph.click();
     });
 
     await test.step('CPH number', async () => {
@@ -118,6 +118,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.cphNumber.fillCphNumber();
       await runA11yScan();
       await animalsPages.cphNumber.saveAndContinue.click();
+      await animalsPages.addresses.heading.waitFor();
+      await animalsPages.addresses.continueButton.click();
       await animalsPages.overview.heading.waitFor();
     });
 

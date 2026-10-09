@@ -43,6 +43,12 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.locator('.govuk-summary-card', { hasText: name });
   }
 
+  summaryValue(card: Locator, key: string): Locator {
+    return card
+      .locator('.govuk-summary-list__row', { has: this.page.getByText(key, { exact: true }) })
+      .locator('.govuk-summary-list__value');
+  }
+
   get errorSummary(): Locator {
     return this.page.locator('.govuk-error-summary');
   }

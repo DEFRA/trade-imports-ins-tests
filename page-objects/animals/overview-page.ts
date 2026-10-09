@@ -26,4 +26,11 @@ export class AnimalsOverviewPage extends NotificationPage {
   task(name: string): Locator {
     return this.page.getByRole('link', { name, exact: true });
   }
+
+  taskStatus(name: string): Locator {
+    return this.page
+      .locator('.govuk-task-list__item')
+      .filter({ has: this.page.getByRole('link', { name, exact: true }) })
+      .locator('.govuk-task-list__status');
+  }
 }

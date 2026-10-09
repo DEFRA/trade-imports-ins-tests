@@ -31,6 +31,17 @@ export class AnimalsAddressesPage extends NotificationPage {
     return this.partyRow(role).getByRole('link', { name: 'Edit details' });
   }
 
+  /** The CPH number row. The CPH page is reached only from this row. */
+  get cphRow(): Locator {
+    return this.page.locator('.govuk-summary-list__row', {
+      has: this.page.getByText('County parish holding (CPH) number', { exact: true }),
+    });
+  }
+
+  get addCph(): Locator {
+    return this.cphRow.getByRole('link', { name: 'Add' });
+  }
+
   get continueButton(): Locator {
     return this.page.getByRole('button', { name: 'Continue' });
   }

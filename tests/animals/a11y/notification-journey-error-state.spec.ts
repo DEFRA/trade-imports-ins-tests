@@ -33,7 +33,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     await test.step('Continue to CPH number', async () => {
       await animalsJourney.answerCommodity();
-      await animalsJourney.fillAddressesToCph();
+      await animalsJourney.fillAddressesAndOpenCph();
     });
 
     await test.step('CPH number with validation errors', async () => {
@@ -42,6 +42,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsPages.cphNumber.fillCphNumber();
       await animalsPages.cphNumber.saveAndContinue.click();
+      await animalsPages.addresses.heading.waitFor();
+      await animalsPages.addresses.continueButton.click();
       await animalsPages.overview.heading.waitFor();
     });
 

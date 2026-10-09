@@ -75,12 +75,11 @@ async function completeNotification(
     await plantsPages.consignmentContactSelect.address(address.name).check();
   }
   await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
-  await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+  await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
   return { reference, address };
 }
 
-async function openReview(plantsPages: PlantsPages) {
-  await plantsPages.overview.taskRowLink('Check and submit').click();
+async function expectReview(plantsPages: PlantsPages) {
   await expect(plantsPages.notificationView.heading).toBeVisible();
 }
 
@@ -112,6 +111,11 @@ async function amend(pages: SharedPages, plantsPages: PlantsPages, reference: st
 test.describe('High-risk plants check and submit section', { tag: '@integration' }, () => {
   test('review stays blocked until the final required row is complete', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
     const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { contact: false });
+    await expect(plantsPages.notificationView.errorSummary).toContainText('Complete contact address for consignment');
+    await plantsPages.notificationView.btnContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(plantsPages.notificationView.errorSummary).toContainText('Complete contact address for consignment');
+    await plantsPages.overview.open(reference);
     const review = plantsPages.overview.taskRowByTitle('Check and submit');
     await expect(review).toContainText('Cannot start yet');
     await expect(review.getByRole('link')).toHaveCount(0);
@@ -119,7 +123,9 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await plantsPages.consignmentContactSelect.searchFor(address.name);
     await plantsPages.consignmentContactSelect.address(address.name).check();
     await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
-    await openReview(plantsPages);
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await plantsPages.overview.taskRowLink('Check and submit').click();
+    await expectReview(plantsPages);
   });
 
   test('CYA renders numbered sections, scoped cards and contact details, and Change returns to saved answers', async ({
@@ -129,7 +135,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     addressBookApi,
   }) => {
     const { address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    await openReview(plantsPages);
+    await expectReview(plantsPages);
     await expect(pages.page.getByRole('heading', { level: 2, name: /^[1-3]\. / })).toHaveText([
       '1. About the consignment',
       '2. Arrival and destination',
@@ -163,7 +169,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     addressBookApi,
   }) => {
     const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    await openReview(plantsPages);
+    await expectReview(plantsPages);
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrl(reference));
     await plantsPages.declaration.btnContinue.click();
@@ -198,7 +204,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
   ]) {
     test(`${type}: late notifications are accepted and highlighted`, async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
       const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { type, days });
-      await openReview(plantsPages);
+      await expectReview(plantsPages);
       // govukWarningText always prepends a visually-hidden "Warning" fallback inside
       // the same <strong>, so an exact match can never pass here — pin the message
       // as a substring instead (unpassable-assertion exception: the accessible-tree
@@ -256,7 +262,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     addressBookApi,
   }) => {
     const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    await openReview(plantsPages);
+    await expectReview(plantsPages);
     await addressBookApi.deleteAddress(address.id);
     await pages.page.reload();
     const destination = plantsPages.notificationView.card('Place of destination');
@@ -319,7 +325,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
       addressBookApi,
     }) => {
       const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-      await openReview(plantsPages);
+      await expectReview(plantsPages);
       await submit(plantsPages);
       await amend(pages, plantsPages, reference);
       await plantsPages.identificationNumbers.open(reference);
@@ -353,7 +359,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
 
   test('a submitted notification can be deleted from CYA', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
     const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    await openReview(plantsPages);
+    await expectReview(plantsPages);
     await submit(plantsPages);
     await plantsPages.confirmation.viewNotification.click();
     await pages.page.getByRole('button', { name: 'Delete notification', exact: true }).click();
@@ -373,7 +379,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
       addressBookApi,
     }) => {
       const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { days: initiallyLate ? 0 : 7 });
-      await openReview(plantsPages);
+      await expectReview(plantsPages);
       await submit(plantsPages);
       await plantsPages.confirmation.viewNotification.click();
       await expect(plantsPages.notificationView.lateBanner).toHaveCount(initiallyLate ? 1 : 0);
