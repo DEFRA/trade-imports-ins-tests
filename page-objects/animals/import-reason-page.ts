@@ -58,10 +58,7 @@ export class AnimalsImportReasonPage extends NotificationPage {
   // Ports and countries on this page are accessible-autocomplete fields with a
   // native <select> fallback. With JavaScript the enhancement takes the id onto
   // the combobox input and renames the select "{id}-select".
-  private async chooseEnhancedSelect(
-    fieldId: string,
-    choice: { index: number } | { value: string },
-  ): Promise<void> {
+  private async chooseEnhancedSelect(fieldId: string, choice: { index: number } | { value: string }): Promise<void> {
     await this.page.waitForLoadState('domcontentloaded');
     const field = this.page.locator(`#${fieldId}`);
     const hidden = this.hiddenSelect(fieldId);
