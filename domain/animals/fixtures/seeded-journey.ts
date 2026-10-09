@@ -103,4 +103,14 @@ export const seedSteps = async (resolveParties: () => Promise<PartyIds>, depth: 
   return depth === 'draft' ? throughArrival : [...throughArrival, ...transportSteps, contactStep(parties)];
 };
 
-export const declarationStep: SeedStep = { slug: 'declaration', form: { declaration: 'confirmed' } };
+/**
+ * Submitting is two posts to the declaration, each carrying the token check your answers was
+ * rendered with: `review` (its Continue) renders the declaration, then `declare` submits. The
+ * frontend refuses both unless this session has rendered check your answers at that token.
+ */
+export const declarationStep: { reviewSlug: string; slug: string; review: FormFields; declare: FormFields } = {
+  reviewSlug: 'notification-view',
+  slug: 'declaration',
+  review: { step: 'review' },
+  declare: { step: 'declare', declaration: 'confirmed' },
+};
