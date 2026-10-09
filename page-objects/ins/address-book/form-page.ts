@@ -48,6 +48,11 @@ export abstract class InsAddressBookFormPage extends BasePage {
     return this.page.getByLabel('Country');
   }
 
+  // Every country offered, skipping the empty placeholder option.
+  get countryOptions(): Locator {
+    return this.selectCountry.locator('option:not([value=""])');
+  }
+
   get inputEmail(): Locator {
     return this.page.getByLabel('Email address');
   }
