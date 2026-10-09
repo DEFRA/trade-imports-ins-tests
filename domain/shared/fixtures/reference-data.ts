@@ -33,6 +33,13 @@ export function originPageCountryNames(): string[] {
     .sort((first, second) => first.localeCompare(second));
 }
 
+/** A destination country select lists each origin country and each territory named "<territory> (<country>)", sorted by name. */
+export function destinationCountryNames(): string[] {
+  return countriesOrigin
+    .flatMap((country) => [country.name, ...country.subDivisions.map((subDivision) => `${subDivision.name} (${country.name})`)])
+    .sort((first, second) => first.localeCompare(second));
+}
+
 export function portLabel(port: CapturedPort): string {
   return `${port.name} (${port.code})`;
 }

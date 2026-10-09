@@ -39,6 +39,21 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.page.locator('#transhipmentDestinationCountry');
   }
 
+  // Every country offered, skipping the empty placeholder and divider.
+  get transhipmentDestinationCountryOptions(): Locator {
+    return this.transhipmentDestinationCountry.locator('option:not([value=""])');
+  }
+
+  // Every country offered, skipping the empty placeholder and divider.
+  get transitDestinationCountryOptions(): Locator {
+    return this.transitDestinationCountry.locator('option:not([value=""])');
+  }
+
+  // A territory is coded by ISO 3166-2, the parent country code and a hyphen; a country's alpha-2 code has none.
+  get transhipmentTerritoryOptions(): Locator {
+    return this.transhipmentDestinationCountry.locator('option[value*="-"]');
+  }
+
   get temporaryAdmissionPortOfExit(): Locator {
     return this.page.locator('#temporaryAdmissionPortOfExit');
   }
