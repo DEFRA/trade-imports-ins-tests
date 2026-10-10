@@ -12,6 +12,7 @@ import { AnimalsCphNumberPage } from '@page-objects/animals/cph-number-page';
 import { AnimalsDashboardPage } from '@page-objects/animals/dashboard-page';
 import { AnimalsDeclarationPage } from '@page-objects/animals/declaration-page';
 import { AnimalsImportReasonPage } from '@page-objects/animals/import-reason-page';
+import { AnimalsManageTemplatesPage } from '@page-objects/animals/manage-templates-page';
 import { AnimalsNotificationCancelAmendPage } from '@page-objects/animals/notification-cancel-amend-page';
 import { AnimalsNotificationViewPage } from '@page-objects/animals/notification-view-page';
 import { AnimalsOriginOfImportPage } from '@page-objects/animals/origin-of-import-page';
@@ -27,6 +28,7 @@ import { AnimalsTransporterSelectionPage } from '@page-objects/animals/transport
 export function createAnimalsPages(page: Page) {
   return {
     dashboard: new AnimalsDashboardPage(page),
+    manageTemplates: new AnimalsManageTemplatesPage(page),
     overview: new AnimalsOverviewPage(page),
     originOfImport: new AnimalsOriginOfImportPage(page),
     commoditySelection: new AnimalsCommoditySelectionPage(page),
