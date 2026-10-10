@@ -29,7 +29,7 @@ test.describe('INS type question: What are you importing?', { tag: ['@integratio
     const animalsRequests = requestsTo(pages.page, 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
     const plantsRequests = requestsTo(pages.page, 'TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL');
 
-    await insPages.dashboard.btnStartNewNotification.click();
+    await insPages.dashboard.btnCreateNew.click();
 
     await expect(insPages.notificationType.heading).toBeVisible();
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.notificationType.expectedUrl}$`));
@@ -43,12 +43,42 @@ test.describe('INS type question: What are you importing?', { tag: ['@integratio
     expect(plantsRequests).toEqual([]);
   });
 
+  test('the INS home offers Create new rather than Start a new notification, before and after a search that matches nothing, and it opens the unselected type question', async ({
+    pages,
+    insPages,
+  }) => {
+    await insPages.dashboard.open();
+    await expect(insPages.dashboard.btnCreateNew).toBeVisible();
+    await expect(pages.page.getByRole('button', { name: 'Start a new notification' })).toHaveCount(0);
+
+    await insPages.dashboard.searchForReference('GBN-AG-26-999999');
+    await expect(insPages.dashboard.noSearchResults).toBeVisible();
+    await expect(insPages.dashboard.btnCreateNew).toBeVisible();
+    await expect(pages.page.getByRole('button', { name: 'Start a new notification' })).toHaveCount(0);
+
+    await insPages.dashboard.btnCreateNew.click();
+
+    const type = insPages.notificationType;
+    await expect(type.heading).toBeVisible();
+    await expect(type.options.nth(1)).toHaveAccessibleName('Germinal products (semen, ova, embryos)');
+    await expect(type.options).toHaveCount(5);
+    for (const label of [
+      'Live animals',
+      'Germinal products (semen, ova, embryos)',
+      'Plants for planting',
+      'Potatoes (seed and ware)',
+      'Wood products',
+    ]) {
+      await expect(type.option(label)).not.toBeChecked();
+    }
+  });
+
   test('the type question offers five unselected options, a single Continue button, the alpha banner and no draft strip', async ({
     pages,
     insPages,
   }) => {
     await insPages.dashboard.open();
-    await insPages.dashboard.btnStartNewNotification.click();
+    await insPages.dashboard.btnCreateNew.click();
     const type = insPages.notificationType;
 
     await expect(pages.page).toHaveTitle('What are you importing? - Import notification service - GOV.UK');
@@ -86,7 +116,7 @@ test.describe('INS type question: What are you importing?', { tag: ['@integratio
 
   test('continuing with nothing chosen shows the error summary, the inline error and an Error: title', async ({ pages, insPages }) => {
     await insPages.dashboard.open();
-    await insPages.dashboard.btnStartNewNotification.click();
+    await insPages.dashboard.btnCreateNew.click();
     const type = insPages.notificationType;
 
     await type.btnContinue.click();
@@ -99,7 +129,7 @@ test.describe('INS type question: What are you importing?', { tag: ['@integratio
 
   test('choosing Live animals creates a live-animals draft on its Origin of the import page', async ({ pages, insPages, animalsPages }) => {
     await insPages.dashboard.open();
-    await insPages.dashboard.btnStartNewNotification.click();
+    await insPages.dashboard.btnCreateNew.click();
 
     await insPages.notificationType.option('Live animals').check();
     await insPages.notificationType.continueToService();
@@ -118,7 +148,7 @@ test.describe('INS type question: What are you importing?', { tag: ['@integratio
     insPages,
   }) => {
     await insPages.dashboard.open();
-    await insPages.dashboard.btnStartNewNotification.click();
+    await insPages.dashboard.btnCreateNew.click();
     const animalsRequests = requestsTo(pages.page, 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
 
     await insPages.notificationType.option('Germinal products (semen, ova, embryos)').check();
@@ -134,7 +164,7 @@ test.describe('INS type question: What are you importing?', { tag: ['@integratio
   for (const label of ['Plants for planting', 'Potatoes (seed and ware)', 'Wood products']) {
     test(`choosing ${label} creates a plants draft on the plants service's first page`, async ({ pages, insPages, plantsPages }) => {
       await insPages.dashboard.open();
-      await insPages.dashboard.btnStartNewNotification.click();
+      await insPages.dashboard.btnCreateNew.click();
       const animalsRequests = requestsTo(pages.page, 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
 
       await insPages.notificationType.option(label).check();

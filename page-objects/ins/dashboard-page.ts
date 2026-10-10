@@ -9,8 +9,8 @@ export class InsDashboardPage extends BasePage {
   }
 
   /** govukButton with an `href` renders an `<a role="button">`, so it is addressed by the button role. */
-  get btnStartNewNotification(): Locator {
-    return this.page.getByRole('button', { name: 'Start a new notification', exact: true });
+  get btnCreateNew(): Locator {
+    return this.page.getByRole('button', { name: 'Create new', exact: true });
   }
 
   get inputReferenceSearch(): Locator {
