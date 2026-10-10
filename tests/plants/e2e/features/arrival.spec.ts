@@ -346,4 +346,37 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     await expect(plantsPages.arrivalDetails.arrivalTime).toHaveValue(ARRIVING_AT);
     await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue(ABERDEEN_HARBOUR);
   });
+
+  test("a potato notification's arrival questions are set in the medium label size, and the place of landing is hinted as the port of entry is", async ({
+    plantsPages,
+    plantsJourney,
+  }) => {
+    await toPotatoArrivalDetails(plantsJourney);
+
+    for (const id of ['arrivalDate', 'arrivalTime', 'proposedPlaceOfLanding']) {
+      await expect(plantsPages.arrivalDetails.questionLabel(id)).toHaveClass(/govuk-label--m/);
+    }
+    await expect(plantsPages.arrivalDetails.placeOfLandingHint).toHaveText(
+      'Select where the potatoes will enter Great Britain. Start typing to search by port or airport name or code.',
+    );
+  });
+
+  test("a plants notification's date question is set in the medium label size, before and after arrival", async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
+    const reference = await toArrivalStatus(plantsJourney);
+    await plantsJourney.answerArrivalStatus(NOT_YET_ARRIVED);
+    await expect(plantsPages.arrivalDetails.dateQuestionLabelled(PRE_ARRIVAL_DATE_LABEL)).toBeVisible();
+    await expect(plantsPages.arrivalDetails.questionLabel('arrivalDate')).toHaveClass(/govuk-label--m/);
+
+    await plantsPages.arrivalStatus.open(reference);
+    await plantsPages.arrivalStatus.arrivalStatus(ALREADY_ARRIVED).check();
+    await plantsPages.arrivalStatus.btnSaveAndContinue.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(plantsPages.arrivalDetails.dateQuestionLabelled(POST_ARRIVAL_DATE_LABEL)).toBeVisible();
+    await expect(plantsPages.arrivalDetails.questionLabel('arrivalDate')).toHaveClass(/govuk-label--m/);
+  });
 });

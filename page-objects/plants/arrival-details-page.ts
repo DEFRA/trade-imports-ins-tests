@@ -48,6 +48,15 @@ export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
     return this.page.locator('#proposedPlaceOfLanding');
   }
 
+  get placeOfLandingHint(): Locator {
+    return this.page.locator('#proposedPlaceOfLanding-hint');
+  }
+
+  // The label of one question, addressed by the field id it labels.
+  questionLabel(fieldId: string): Locator {
+    return this.page.locator(`label[for="${fieldId}"]`);
+  }
+
   // Every place of landing offered, skipping the empty placeholder option.
   get placeOfLandingOptions(): Locator {
     return this.page.locator('select[name="proposedPlaceOfLanding"] option:not([value=""])');

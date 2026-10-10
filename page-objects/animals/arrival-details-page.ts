@@ -22,6 +22,24 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.page.locator('select#portOfEntry-select');
   }
 
+  get portOfEntryHint(): Locator {
+    return this.page.locator('#portOfEntry-hint');
+  }
+
+  // The native select's empty option, which carries the placeholder text.
+  get portOfEntryPlaceholderOption(): Locator {
+    return this.portOfEntryValue.locator('option[value=""]');
+  }
+
+  // The label of one question, addressed by the field id it labels.
+  questionLabel(fieldId: string): Locator {
+    return this.page.locator(`label[for="${fieldId}"]`);
+  }
+
+  get transportIdentificationHintLead(): Locator {
+    return this.page.locator('#transportIdentification-hint p');
+  }
+
   // Every port offered, skipping the empty placeholder option.
   get portOptions(): Locator {
     return this.portOfEntryValue.locator('option:not([value=""])');

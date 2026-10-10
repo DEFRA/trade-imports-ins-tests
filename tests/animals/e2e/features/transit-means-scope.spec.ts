@@ -21,14 +21,17 @@ test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in
       await expect(animalsPages.overview.heading).toBeVisible();
     };
 
-    // A means outside the overland set (Airplane) leaves the Transit countries
+    // A means outside the overland set (Air) leaves the Transit countries
     // row off the hub.
-    await saveArrivalWithMeans('Airplane');
+    await saveArrivalWithMeans('Air');
     await expect(transitRow).toHaveCount(0);
 
-    // A road vehicle puts the Transit countries row on the hub; save two
-    // countries from it and the row reads Complete.
-    await saveArrivalWithMeans('Road Vehicle');
+    // Rail puts the Transit countries row on the hub.
+    await saveArrivalWithMeans('Rail');
+    await expect(transitRow).toHaveCount(1);
+
+    // So does Road; save two countries from it and the row reads Complete.
+    await saveArrivalWithMeans('Road');
     await animalsPages.overview.task('Transit countries').click();
     await expect(animalsPages.transitedCountries.heading).toBeVisible();
     await animalsPages.transitedCountries.addCountry('France');
@@ -39,12 +42,12 @@ test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in
 
     // Changing to a non-overland means takes the countries out of scope — the
     // hub row drops.
-    await saveArrivalWithMeans('Vessel');
+    await saveArrivalWithMeans('Sea');
     await expect(transitRow).toHaveCount(0);
 
-    // Back to a road vehicle: leaving scope wiped the saved countries — the page
+    // Back to Road: leaving scope wiped the saved countries — the page
     // returns with an empty list.
-    await saveArrivalWithMeans('Road Vehicle');
+    await saveArrivalWithMeans('Road');
     await animalsPages.overview.task('Transit countries').click();
     await expect(animalsPages.transitedCountries.heading).toBeVisible();
     await expect(animalsPages.transitedCountries.row('France')).toHaveCount(0);

@@ -19,6 +19,28 @@ test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-fr
     await expect(animalsPages.arrivalDetails.saveAndContinue).toBeVisible();
   });
 
+  test('sets every arrival question in the medium label size', async ({ animalsPages }) => {
+    for (const id of ['arrivalDateAtPort', 'portOfEntry', 'meansOfTransport', 'transportIdentification', 'transportDocumentReference']) {
+      await expect(animalsPages.arrivalDetails.questionLabel(id)).toHaveClass(/govuk-label--m/);
+    }
+  });
+
+  test('hints the port search and shows its placeholder', async ({ animalsPages }) => {
+    await expect(animalsPages.arrivalDetails.portOfEntryHint).toHaveText(
+      'Select where the transporter will enter with the consignment. Start typing to search by port or airport name or code.',
+    );
+    await expect(animalsPages.arrivalDetails.portOfEntry).toHaveAttribute('placeholder', 'Select a port');
+    await expect(animalsPages.arrivalDetails.portOfEntryPlaceholderOption).toHaveText('Select a port');
+  });
+
+  test('offers Air, Rail, Road and Sea as the means of transport, in that order', async ({ animalsPages }) => {
+    await expect(animalsPages.arrivalDetails.meansOfTransport.locator('option')).toHaveText(['Select one', 'Air', 'Rail', 'Road', 'Sea']);
+  });
+
+  test('leads the transport identification hint with "Enter one of the following:"', async ({ animalsPages }) => {
+    await expect(animalsPages.arrivalDetails.transportIdentificationHintLead).toHaveText('Enter one of the following:');
+  });
+
   test('leaves the arrival details unanswered on load', async ({ animalsPages }) => {
     await expect(animalsPages.arrivalDetails.portOfEntry).toBeVisible();
     await expect(animalsPages.arrivalDetails.meansOfTransport).toBeVisible();
