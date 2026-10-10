@@ -173,6 +173,14 @@ export class NotificationPage extends BasePage {
     return SET_BASES.liveAnimals;
   }
 
+  get saveAndReturn(): Locator {
+    return this.page.getByRole('button', { name: 'Save and return', exact: true });
+  }
+
+  get cancelAndReturnToOverview(): Locator {
+    return this.page.getByRole('link', { name: 'Cancel and return to overview', exact: true });
+  }
+
   get saveAndReturnToOverview(): Locator {
     return this.page.getByRole('button', { name: 'Save and return to overview', exact: true });
   }

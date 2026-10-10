@@ -36,7 +36,7 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
     await animalsPages.notificationView.changeLink('Change import details').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await animalsPages.originOfImport.selectCountry('Belgium');
-    await animalsPages.originOfImport.saveAndContinue.click();
+    await animalsPages.originOfImport.saveAndReturn.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(countryRow).toContainText('Belgium');
 
