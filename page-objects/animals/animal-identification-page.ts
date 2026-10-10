@@ -18,6 +18,14 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
     return this.page.getByLabel('Passport', { exact: true });
   }
 
+  get microchip(): Locator {
+    return this.page.getByLabel('Microchip number', { exact: true });
+  }
+
+  get horseName(): Locator {
+    return this.page.getByLabel('Horse name', { exact: true });
+  }
+
   // A saved animal is one row of the card's table, keyed by its species and
   // number — "Bos taurus 1".
   savedAnimalRow(species: string, number: number): Locator {

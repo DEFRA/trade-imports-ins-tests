@@ -4,6 +4,7 @@ import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { JourneyOptions } from '@domain/animals/constants/journey-options';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
+import { countryCodes } from '@domain/animals/constants/country-codes';
 
 export type AccompanyingDocumentAnswer = {
   reference: string;
@@ -21,6 +22,10 @@ const PORT = 'Aberdeen Harbour (GB ABD)';
 // so a CYA assertion compares against the app's shape, not the typed string it
 // happens to echo back.
 export const ARRIVAL_DATE = getRelativeAppDateText({ monthOffset: 1 });
+// After the arrival date, in the app's own d/m/yyyy.
+export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffset: 2 });
+export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
+export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
 
 export class AnimalsJourney {
   constructor(
@@ -78,7 +83,7 @@ export class AnimalsJourney {
   }
 
   async fillOriginOfImport(options: JourneyOptions = {}): Promise<void> {
-    await this.animalsPages.originOfImport.selectCountry(COUNTRY);
+    await this.animalsPages.originOfImport.selectCountry(options.countryCode?.display ?? COUNTRY);
     const requiresRegionCode = options.requiresRegionCode ?? 'No';
     await this.animalsPages.originOfImport.radioRequiresOriginCode(requiresRegionCode).check();
     if (requiresRegionCode === 'Yes') {
@@ -482,6 +487,71 @@ export class AnimalsJourney {
     await pages.cphNumber.fillCphNumber();
     await pages.cphNumber.saveAndContinue.click();
     await pages.addresses.heading.waitFor(pageLoadWait);
+    await pages.addresses.continueButton.click();
+
+    await pages.contactAddress.heading.waitFor(pageLoadWait);
+    await pages.contactAddress.address('Animal and Plant Health Agency').check();
+    await pages.contactAddress.saveAndContinue.click();
+
+    await pages.notificationView.heading.waitFor(pageLoadWait);
+    return journeyId;
+  }
+
+  async walkOpeningRunHorseBySea(document: AccompanyingDocumentAnswer): Promise<string> {
+    const pages = this.animalsPages;
+    const journeyId = await this.createNotificationAtOrigin();
+
+    await this.fillOriginOfImport({ countryCode: countryCodes.eu.ireland });
+    await this.saveOriginOfImport();
+
+    await pages.commoditySelection.heading.waitFor(pageLoadWait);
+    await pages.commoditySelection.selectSpecies(['Equus caballus']);
+    await pages.commoditySelection.saveAndContinue.click();
+
+    await pages.importReason.heading.waitFor(pageLoadWait);
+    await pages.importReason.reason('Temporary admission horses').check();
+    await pages.importReason.temporaryAdmissionExitDate.fill(TEMPORARY_ADMISSION_EXIT_DATE);
+    await pages.importReason.temporaryAdmissionPortOfExit.selectOption('GB HLY');
+    await pages.importReason.saveAndContinue.click();
+
+    await pages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await pages.consignmentDetails.numberOfAnimals.fill('1');
+    await pages.consignmentDetails.numberOfPackages.fill('1');
+    await pages.consignmentDetails.saveAndContinue.click();
+
+    await pages.animalIdentification.heading.waitFor(pageLoadWait);
+    await pages.animalIdentification.microchip.fill('900123456789012');
+    await pages.animalIdentification.passportNumber.fill('IE-EQ-2026-0001');
+    await pages.animalIdentification.horseName.fill('Dublin Bay');
+    await pages.animalIdentification.saveAndContinue.click();
+
+    await pages.additionalDetails.heading.waitFor(pageLoadWait);
+    await pages.additionalDetails.certifiedFor('Registered equine animal').check();
+    await pages.additionalDetails.saveAndContinue.click();
+
+    await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
+    await pages.arrivalDetails.selectPort('Holyhead Port (GB HLY)');
+    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Vessel' });
+    await pages.arrivalDetails.transportIdentification.fill(HORSE_TRANSPORT_ID);
+    await pages.arrivalDetails.transportDocumentReference.fill('BOL-2026-0001');
+    await pages.arrivalDetails.saveAndContinue.click();
+
+    await pages.transporter.heading.waitFor(pageLoadWait);
+    await pages.transporter.transporter(HORSE_TRANSPORTER).check();
+    await pages.transporter.saveAndContinue.click();
+
+    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
+    await pages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
+    await pages.accompanyingDocuments.saveAndAddAnother.click();
+    await pages.accompanyingDocuments
+      .documentRow(document.reference)
+      .filter({ hasText: 'Check completed' })
+      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
+    await pages.accompanyingDocuments.continueButton.click();
+
+    await pages.addresses.heading.waitFor(pageLoadWait);
+    await this.addFiveParties();
     await pages.addresses.continueButton.click();
 
     await pages.contactAddress.heading.waitFor(pageLoadWait);
