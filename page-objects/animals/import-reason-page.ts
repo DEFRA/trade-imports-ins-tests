@@ -31,6 +31,11 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.page.locator('#transitPortOfExit');
   }
 
+  // Every port offered, skipping the empty placeholder and divider.
+  get transitPortOfExitOptions(): Locator {
+    return this.transitPortOfExit.locator('option:not([value=""])');
+  }
+
   get transitDestinationCountry(): Locator {
     return this.page.locator('#transitDestinationCountry');
   }
@@ -56,6 +61,11 @@ export class AnimalsImportReasonPage extends NotificationPage {
 
   get temporaryAdmissionPortOfExit(): Locator {
     return this.page.locator('#temporaryAdmissionPortOfExit');
+  }
+
+  // Every port offered, skipping the empty placeholder and divider.
+  get temporaryAdmissionPortOfExitOptions(): Locator {
+    return this.temporaryAdmissionPortOfExit.locator('option:not([value=""])');
   }
 
   get temporaryAdmissionExitDate(): Locator {
