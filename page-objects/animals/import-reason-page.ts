@@ -92,6 +92,19 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.page.locator('#temporaryAdmissionExitDate');
   }
 
+  get temporaryAdmissionExitDateError(): Locator {
+    return this.page.locator('#temporaryAdmissionExitDate-error');
+  }
+
+  // A browser cannot un-choose a radio, so this stands in for a form that reaches the service with nothing chosen.
+  async clearChoices(): Promise<void> {
+    await this.page.locator('form input[type="radio"]').evaluateAll((inputs) => {
+      inputs.forEach((input) => {
+        (input as HTMLInputElement).checked = false;
+      });
+    });
+  }
+
   get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
