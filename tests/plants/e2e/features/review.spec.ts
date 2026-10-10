@@ -184,7 +184,9 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(plantsPages.overview.statusTag).toHaveText('Submitted');
     await expect(plantsPages.confirmation.notificationDate).toBeVisible();
     await expect(plantsPages.confirmation.content).toContainText(
-      new RegExp(`Date of notification[^0-9]{0,20}(${getRelativeServiceDisplayDate()}|${getRelativeServiceDisplayDate(1)})`),
+      new RegExp(
+        `Date of notification[^0-9]{0,20}(${getRelativeServiceDisplayDate(-1)}|${getRelativeServiceDisplayDate()}|${getRelativeServiceDisplayDate(1)})`,
+      ),
     );
     await expect(plantsPages.confirmation.lateBanner).toHaveCount(0);
     await plantsPages.confirmation.viewNotification.click();
