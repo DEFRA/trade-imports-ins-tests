@@ -54,20 +54,52 @@ test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-fr
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
 
-  // A draft may be saved with a blank arrival date, so the page itself raises nothing on an empty
-  // submit — the arrival fields are validated for shape, not for presence. Presence is a
-  // completeness rule, enforced when the trader continues the notification: see
-  // notification-view-states.spec.ts, which asserts the 'Complete arrival details' link in the
-  // error summary there.
-  //
-  // This test used to expect an error summary here. It passed only because the frontend sent a
-  // malformed value for a blank date, which the API rejected — the summary was a 400, not page
-  // validation. The frontend now leaves a blank date out of the request.
-  test('saves a draft and returns to the overview when submitted empty', async ({ pages, animalsPages }) => {
+  test('save and continue: when no means of transport is chosen, refuses the save with an error on the means of transport', async ({
+    pages,
+    animalsPages,
+  }) => {
     await animalsPages.arrivalDetails.saveAndContinue.click();
 
-    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+    await expect(animalsPages.arrivalDetails.errorSummary).toBeVisible();
+    await expect(animalsPages.arrivalDetails.meansOfTransportErrorLink).toBeVisible();
+    await expect(animalsPages.arrivalDetails.meansOfTransportError).toContainText('Select a means of transport to the port of entry');
+    await expect(animalsPages.arrivalDetails.meansOfTransport).toHaveClass(/govuk-select--error/);
+    await expect(pages.page).toHaveTitle(/^Error: /);
+    await expect(animalsPages.arrivalDetails.heading).toBeVisible();
+
+    await animalsPages.arrivalDetails.meansOfTransportErrorLink.click();
+    await expect(animalsPages.arrivalDetails.meansOfTransport).toBeFocused();
+  });
+
+  test('save and continue: when no means of transport is chosen, keeps the other answers and saves nothing', async ({
+    pages,
+    animalsPages,
+  }) => {
+    const arrivalDate = getRelativeDatePickerValue({ monthOffset: 1 });
+    await animalsPages.arrivalDetails.selectPort('Port of Dover - GB DVR');
+    await animalsPages.arrivalDetails.fillArrivalDate(arrivalDate);
+    await animalsPages.arrivalDetails.saveAndContinue.click();
+
+    await expect(animalsPages.arrivalDetails.meansOfTransportError).toBeVisible();
+    await expect(animalsPages.arrivalDetails.portOfEntryValue).toHaveValue('GB DVR');
+    await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue(arrivalDate);
+    const notificationUrl = pages.page.url();
+
+    await pages.page.locator('.govuk-back-link').click();
+    await animalsPages.overview.task('Arrival details').click();
+    await animalsPages.arrivalDetails.heading.waitFor();
+
+    expect(pages.page.url()).toBe(notificationUrl);
+    await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue('');
+    await expect(animalsPages.arrivalDetails.portOfEntryValue).toHaveValue('');
+  });
+
+  test('save and continue: when only the means of transport is chosen, goes on to the next page', async ({ animalsPages }) => {
+    await animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: 'Air' });
+    await animalsPages.arrivalDetails.saveAndContinue.click();
+
     await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.arrivalDetails.errorSummary).toHaveCount(0);
   });
 
   test('restricts the date picker to one week back and six months ahead', async ({ animalsPages }) => {

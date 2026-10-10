@@ -410,6 +410,7 @@ export class AnimalsJourney {
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Air' });
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);

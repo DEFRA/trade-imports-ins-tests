@@ -79,6 +79,14 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.page.locator('#arrivalDateAtPort-error');
   }
 
+  get meansOfTransportError(): Locator {
+    return this.page.locator('#meansOfTransport-error');
+  }
+
+  get meansOfTransportErrorLink(): Locator {
+    return this.page.getByRole('link', { name: 'Select a means of transport to the port of entry' });
+  }
+
   get datePicker(): Locator {
     return this.page.locator('[data-module="moj-date-picker"]');
   }

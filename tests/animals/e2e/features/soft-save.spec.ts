@@ -69,6 +69,41 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
     await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue('');
   });
 
+  test('arrival details: when no means of transport is chosen, saves the other answers and leaves the task not complete', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    // Arrange
+    await animalsJourney.toArrivalDetails();
+    await animalsPages.arrivalDetails.selectPort('Port of Dover - GB DVR');
+
+    // Act
+    await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
+
+    // Assert
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.arrivalDetails.errorSummary).toBeHidden();
+    await expect(animalsPages.overview.taskStatus(ARRIVAL_DETAILS_TASK)).not.toHaveText(COMPLETE);
+    await animalsPages.overview.task(ARRIVAL_DETAILS_TASK).click();
+    await expect(animalsPages.arrivalDetails.portOfEntryValue).toHaveValue('GB DVR');
+  });
+
+  test('transit countries: saves the countries listed and goes to the overview', async ({ animalsJourney, animalsPages }) => {
+    // Arrange
+    await animalsJourney.toTransitedCountries();
+    await animalsPages.transitedCountries.addCountry('France');
+    await animalsPages.transitedCountries.addCountry('Belgium');
+
+    // Act
+    await animalsPages.transitedCountries.saveAndReturnToOverview.click();
+
+    // Assert
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('Transit countries').click();
+    await expect(animalsPages.transitedCountries.row('France')).toBeVisible();
+    await expect(animalsPages.transitedCountries.row('Belgium')).toBeVisible();
+  });
+
   test('commodity details: when the number of animals is blank, keeps its checks and stays on the page', async ({
     animalsJourney,
     animalsPages,
