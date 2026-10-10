@@ -21,6 +21,7 @@ test.describe('Reference strip', { tag: ['@integration', '@duplicated-in-fronten
     await expect(strip.locator('.govuk-tag')).toHaveText('Draft');
     await expect(strip).toContainText(GBN_REFERENCE);
     await expect(strip).toContainText(journeyId);
+    await expect(animalsPages.originOfImport.cancelAmend).toHaveCount(0);
 
     // The strip stays put once the first save has committed answers.
     await animalsPages.originOfImport.selectCountry('France');
@@ -32,6 +33,7 @@ test.describe('Reference strip', { tag: ['@integration', '@duplicated-in-fronten
     await expect(strip).toBeVisible();
     await expect(strip.locator('.govuk-tag')).toHaveText('Draft');
     await expect(strip).toContainText(GBN_REFERENCE);
+    await expect(animalsPages.overview.cancelAmend).toHaveCount(0);
 
     await animalsPages.overview.task('Where is this consignment coming from?').click();
     await expect(strip).toBeVisible();

@@ -105,7 +105,8 @@ async function amend(pages: SharedPages, plantsPages: PlantsPages, reference: st
     .getByRole('button', { name: `Amend notification ${reference}`, exact: true })
     .click();
   await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
-  await expect(plantsPages.overview.statusTag).toHaveText('Amending');
+  await expect(plantsPages.overview.statusTag).toHaveText('Amend');
+  await expect(plantsPages.overview.cancelAmend).toBeVisible();
 }
 
 test.describe('High-risk plants check and submit section', { tag: '@integration' }, () => {
@@ -317,7 +318,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(destination).not.toContainText('PH1 5EX');
   });
 
-  for (const source of ['dashboard', 'CYA']) {
+  for (const source of ['dashboard', 'CYA', 'question page']) {
     test(`cancel amendment from ${source} restores submitted answers and read-only CYA`, async ({
       pages,
       plantsPages,
@@ -333,16 +334,21 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
       await plantsPages.identificationNumbers.btnSaveAndContinue.click();
       await plantsPages.dashboard.open();
       await plantsPages.dashboard.searchForReference(reference);
-      await expect(plantsPages.dashboard.statusTag(reference)).toHaveText('Amending');
+      await expect(plantsPages.dashboard.statusTag(reference)).toHaveText('Amend');
       if (source === 'dashboard') {
         await plantsPages.dashboard
           .notificationCard(reference)
           .getByRole('link', { name: `Cancel amendment (${reference})`, exact: true })
           .click();
-      } else {
+      } else if (source === 'CYA') {
         await plantsPages.notificationView.open(reference);
         await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('DiscardMe99');
-        await pages.page.getByRole('link', { name: 'Cancel amendment', exact: true }).click();
+        await expect(plantsPages.notificationView.statusTag).toHaveText('Amend');
+        await plantsPages.notificationView.cancelAmend.click();
+      } else {
+        await plantsPages.identificationNumbers.open(reference);
+        await expect(plantsPages.identificationNumbers.statusTag).toHaveText('Amend');
+        await plantsPages.identificationNumbers.cancelAmend.click();
       }
       await expect(pages.page.getByRole('heading', { name: 'Cancel this amendment?', level: 1 })).toBeVisible();
       await pages.page.getByRole('button', { name: 'Yes, cancel amendment', exact: true }).click();
@@ -520,6 +526,6 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
     await expect(plantsPages.notificationView.errorSummary).toHaveCount(0);
     await expect(pages.page.locator('.govuk-error-message')).toHaveCount(0);
-    await expect(plantsPages.overview.statusTag).toHaveText('Amending');
+    await expect(plantsPages.overview.statusTag).toHaveText('Amend');
   });
 });

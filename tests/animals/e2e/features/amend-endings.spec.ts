@@ -3,10 +3,10 @@ import { test, expect } from '@fixtures';
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
 const CHANGE_IMPORT_DETAILS = 'Change import details';
 const AMENDED_REFERENCE = 'AMENDED-REF';
-const AMENDING = 'Amending';
+const AMEND = 'Amend';
 
 test.describe('Amendment page endings', { tag: ['@integration'] }, () => {
-  test('a page opened from Overview while amending ends with Save and return, Save and continue and a link-styled Save and return to overview, with no cancel link, and Back goes to Overview', async ({
+  test('a page opened from Overview while amending ends with Save and return, Save and continue and a link-styled Save and return to overview, with no cancel and return link in the page ending, and Back goes to Overview', async ({
     animalsPages,
     animalsSeededJourney,
   }) => {
@@ -21,6 +21,7 @@ test.describe('Amendment page endings', { tag: ['@integration'] }, () => {
     await expect(animalsPages.arrivalDetails.saveAndReturnToOverview).toHaveClass(/govuk-link/);
     await expect(animalsPages.arrivalDetails.saveAndReturnToOverview).toHaveAttribute('value', 'hub');
     await expect(animalsPages.arrivalDetails.cancelAndReturnToOverview).toHaveCount(0);
+    await expect(animalsPages.arrivalDetails.cancelAmend).toBeVisible();
     await expect(animalsPages.arrivalDetails.linkBack).toHaveAttribute('href', animalsPages.overview.expectedUrl(reference));
 
     await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
@@ -128,7 +129,7 @@ test.describe('Amendment page endings', { tag: ['@integration'] }, () => {
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
     await expect(pages.page.locator('.govuk-error-message')).toHaveCount(0);
-    await expect(animalsPages.notificationView.journeyStrip).toContainText(AMENDING);
+    await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
     await expect(animalsPages.declaration.heading).not.toBeVisible();
   });
 });

@@ -173,6 +173,20 @@ export class NotificationPage extends BasePage {
     return SET_BASES.liveAnimals;
   }
 
+  /** The status bar above every notification page's caption and heading. */
+  get journeyStrip(): Locator {
+    return this.page.locator('.app-journey-strip');
+  }
+
+  get statusTag(): Locator {
+    return this.journeyStrip.locator('.govuk-tag');
+  }
+
+  /** Shown in the status bar only while the notification is being amended. */
+  get cancelAmend(): Locator {
+    return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
+  }
+
   get saveAndReturn(): Locator {
     return this.page.getByRole('button', { name: 'Save and return', exact: true });
   }

@@ -11,13 +11,6 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Origin of the import' });
   }
 
-  // The status strip carries the Draft tag and the notification reference, both
-  // drawn from the first request. The reference is minted per notification, so
-  // it is the one thing on this page that changes from run to run.
-  get journeyStrip(): Locator {
-    return this.page.locator('.app-journey-strip');
-  }
-
   // Country of origin is an accessible-autocomplete type-ahead enhancing a
   // native <select>. With JavaScript the enhancement takes the select's id onto
   // the enhanced input and renames the select "countryOfOrigin-select"; without

@@ -11,10 +11,6 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Review your notification' });
   }
 
-  get journeyStrip(): Locator {
-    return this.page.locator('.app-journey-strip');
-  }
-
   get referenceNumberCaption(): Locator {
     return this.journeyStrip;
   }
@@ -29,10 +25,6 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   get continueButton(): Locator {
     return this.page.getByRole('button', { name: 'Continue' });
-  }
-
-  get cancelAmendment(): Locator {
-    return this.page.getByRole('link', { name: 'Cancel amendment' });
   }
 
   changeLink(name: string | RegExp): Locator {
