@@ -18,6 +18,18 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.page.getByLabel('Number of packages (when required)');
   }
 
+  get caption(): Locator {
+    return this.page.getByText('Description of the goods', { exact: true });
+  }
+
+  get selectedCommodities(): Locator {
+    return this.page.getByRole('table', { name: 'Selected commodities' });
+  }
+
+  get errorSummaryLinks(): Locator {
+    return this.page.getByRole('alert').getByRole('link');
+  }
+
   get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }

@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 
 const COMPLETE = 'Complete';
+const TO_DO = 'To do';
 const ORIGIN_TASK = 'Where is this consignment coming from?';
 const IMPORT_REASON_TASK = 'Main reason for import';
 const COMMODITY_SELECTION_TASK = 'What are you importing?';
@@ -122,6 +123,6 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
     // Assert
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.commoditySelection.errorSummary).toBeHidden();
-    await expect(animalsPages.overview.taskStatus(COMMODITY_SELECTION_TASK)).not.toHaveText(COMPLETE);
+    await expect(animalsPages.overview.taskStatus(COMMODITY_SELECTION_TASK)).toHaveText(TO_DO);
   });
 });
