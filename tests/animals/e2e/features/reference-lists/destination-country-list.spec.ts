@@ -37,11 +37,9 @@ test.describe('Destination country answer', { tag: ['@integration'] }, () => {
     await animalsPages.importReason.transhipmentDestinationCountry.selectOption(territory);
     await animalsPages.importReason.saveAndContinue.click();
 
-    await expect(animalsPages.additionalDetails.heading).toBeVisible();
+    await expect(animalsPages.overview.heading).toBeVisible();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
-    await animalsPages.additionalDetails.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Main reason for import').click();
 
     await expect(animalsPages.importReason.transhipmentDestinationCountry).toHaveValue(territory);
@@ -57,8 +55,6 @@ test.describe('Destination country answer', { tag: ['@integration'] }, () => {
     await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
     await animalsPages.importReason.saveAndContinue.click();
 
-    await expect(animalsPages.additionalDetails.heading).toBeVisible();
-    await animalsPages.additionalDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Main reason for import').click();
 
