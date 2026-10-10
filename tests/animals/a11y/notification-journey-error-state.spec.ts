@@ -58,6 +58,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsJourney.fillArrivalDetails();
       await animalsPages.arrivalDetails.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Transit countries').click();
     });
 
     await test.step('Transited countries with validation errors', async () => {
@@ -67,6 +69,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsPages.transitedCountries.addCountry('France');
       await animalsPages.transitedCountries.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Transport details').click();
     });
 
     await test.step('Continue to declaration', async () => {

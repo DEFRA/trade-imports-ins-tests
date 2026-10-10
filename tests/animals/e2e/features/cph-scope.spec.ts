@@ -20,6 +20,8 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
       await animalsPages.overview.task('What are you importing?').click();
       await animalsPages.commoditySelection.selectSpecies([species]);
       await animalsPages.commoditySelection.saveAndContinue.click();
+      await expect(animalsPages.overview.heading).toBeVisible();
+      await animalsPages.overview.task('Commodity details').click();
       await expect(animalsPages.consignmentDetails.heading).toBeVisible();
       await animalsPages.consignmentDetails.fillEveryAnimalCount('1');
       await animalsPages.consignmentDetails.saveAndContinue.click();

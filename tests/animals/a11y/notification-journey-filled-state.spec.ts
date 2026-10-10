@@ -34,6 +34,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
       await runA11yScan();
       await animalsPages.commoditySelection.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Commodity details').click();
     });
 
     await test.step('Commodity details', async () => {
@@ -59,6 +61,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importReason.purpose('Breeding').check();
       await runA11yScan({ exclude: conditionalReasonRadios });
       await animalsPages.importReason.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Additional details').click();
     });
 
     await test.step('Additional details', async () => {
@@ -129,6 +133,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsJourney.fillArrivalDetails();
       await runA11yScan();
       await animalsPages.arrivalDetails.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Transit countries').click();
     });
 
     await test.step('Transited countries with a country added', async () => {
@@ -136,6 +142,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.transitedCountries.addCountry('France');
       await runA11yScan();
       await animalsPages.transitedCountries.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Transport details').click();
     });
 
     await test.step('Transporter list', async () => {

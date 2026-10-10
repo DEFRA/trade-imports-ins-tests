@@ -119,6 +119,33 @@ test.describe('High-risk plants consignment parties section', { tag: '@integrati
     });
   }
 
+  test('consignor opened from the overview returns to the overview on Save and continue, not to identification numbers', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const name = `Overview Nursery ${randomUUID()}`;
+    await addressBookApi.createAddress(addressNamed(name));
+    const reference = await toParties(plantsPages, plantsJourney, PLANTS, name);
+    const consignor = plantsPages.consignorSelect;
+
+    await consignor.searchFor(name);
+    await consignor.address(name).check();
+    await consignor.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrl(reference));
+
+    await plantsPages.overview.open(reference);
+    await plantsPages.overview.taskRowLink(CONSIGNOR).click();
+    await expect(pages.page).toHaveURL(consignor.expectedUrl(reference));
+
+    await consignor.searchFor(name);
+    await consignor.address(name).check();
+    await consignor.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(plantsPages.overview.taskRow(CONSIGNOR)).toContainText('Completed');
+  });
+
   test('potatoes skip consignor and require producer and crop numbers', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
     const name = `Potato Destination ${randomUUID()}`;
     await addressBookApi.createAddress(addressNamed(name));

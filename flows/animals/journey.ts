@@ -104,6 +104,8 @@ export class AnimalsJourney {
     await this.animalsPages.overview.task('What are you importing?').click();
     await this.animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Commodity details').click();
     await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
     await this.animalsPages.consignmentDetails.numberOfAnimals.fill('1');
     await this.animalsPages.consignmentDetails.numberOfPackages.fill('5');
@@ -125,6 +127,8 @@ export class AnimalsJourney {
     // in on the one submit.
     await this.animalsPages.importReason.purpose('Breeding').check();
     await this.animalsPages.importReason.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Additional details').click();
     await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
     await this.animalsPages.additionalDetails.certifiedFor('Slaughter').check();
     await this.animalsPages.additionalDetails.containsUnweanedAnimals('No').check();
@@ -143,7 +147,7 @@ export class AnimalsJourney {
     await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
   }
 
-  private async addFiveParties(): Promise<void> {
+  async addFiveParties(): Promise<void> {
     const parties = [
       ['Consignor or exporter', 'Astra Rosales', 'consignorSelection'],
       ['Place of destination', 'Tech Imports Ltd', 'destinationSelection'],
@@ -192,9 +196,13 @@ export class AnimalsJourney {
     await this.animalsPages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails();
     await this.animalsPages.arrivalDetails.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
     await this.animalsPages.transitedCountries.addCountry('France');
     await this.animalsPages.transitedCountries.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
   }
 
@@ -202,10 +210,14 @@ export class AnimalsJourney {
     await this.animalsPages.overview.task('Arrival details').click();
     await this.fillArrivalDetails();
     await this.animalsPages.arrivalDetails.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
     await this.animalsPages.transitedCountries.addCountry('France');
     await this.animalsPages.transitedCountries.addCountry('Belgium');
     await this.animalsPages.transitedCountries.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
     await this.animalsPages.transporter.transporter('García Livestock Transport SL').check();
     await this.animalsPages.transporter.saveAndContinue.click();
@@ -242,6 +254,8 @@ export class AnimalsJourney {
     await this.toCommoditySelection();
     await this.animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Commodity details').click();
     await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
   }
 
@@ -264,6 +278,8 @@ export class AnimalsJourney {
     await this.animalsPages.importReason.reason('Internal market').check();
     await this.animalsPages.importReason.purpose('Breeding').check();
     await this.animalsPages.importReason.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Additional details').click();
     await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
   }
 
@@ -284,6 +300,8 @@ export class AnimalsJourney {
     await this.toArrivalDetails();
     await this.fillArrivalDetails();
     await this.animalsPages.arrivalDetails.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
   }
 
@@ -291,6 +309,8 @@ export class AnimalsJourney {
     await this.toTransitedCountries();
     await this.animalsPages.transitedCountries.addCountry('France');
     await this.animalsPages.transitedCountries.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
   }
 

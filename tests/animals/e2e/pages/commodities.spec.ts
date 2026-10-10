@@ -52,9 +52,8 @@ test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-i
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
-    // Commodity details is a hub task of its own, so its back link returns to
-    // the overview. Reopen the selection from the row that owns it.
-    await animalsPages.consignmentDetails.linkBack.click();
+    // Saving returns to the overview. Reopen the selection from the row that
+    // owns it.
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('What are you importing?').click();
 
