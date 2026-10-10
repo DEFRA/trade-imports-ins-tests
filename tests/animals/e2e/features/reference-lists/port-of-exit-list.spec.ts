@@ -42,8 +42,6 @@ test.describe('Port of exit answer', { tag: ['@integration'] }, () => {
     await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
     await animalsPages.importReason.saveAndContinue.click();
 
-    await expect(animalsPages.additionalDetails.heading).toBeVisible();
-    await animalsPages.additionalDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Main reason for import').click();
 
