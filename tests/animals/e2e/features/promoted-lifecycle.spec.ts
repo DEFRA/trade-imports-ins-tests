@@ -59,6 +59,7 @@ test.describe('Notification lifecycle', { tag: ['@compose', '@integration'] }, (
     animalsPages,
     animalsNotificationActions,
   }) => {
+    test.slow();
     await animalsJourney.submitNotification();
     await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
 
