@@ -32,7 +32,7 @@ export class AnimalsNotificationActions {
    */
   async cancelAmend(journeyId: string): Promise<void> {
     await this.toNotificationView(journeyId);
-    await this.animalsPages.notificationView.cancelAmendment.click();
+    await this.animalsPages.notificationView.cancelAmend.click();
     await this.animalsPages.notificationCancelAmend.heading.waitFor(pageLoadWait);
     await this.animalsPages.notificationCancelAmend.confirm.click();
     await this.pages.page.waitForURL(/\/notification-view\?cancelled=1$/, { timeout: timeouts.medium });

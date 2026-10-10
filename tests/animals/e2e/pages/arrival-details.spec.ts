@@ -19,6 +19,28 @@ test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-fr
     await expect(animalsPages.arrivalDetails.saveAndContinue).toBeVisible();
   });
 
+  test('sets every arrival question in the medium label size', async ({ animalsPages }) => {
+    for (const id of ['arrivalDateAtPort', 'portOfEntry', 'meansOfTransport', 'transportIdentification', 'transportDocumentReference']) {
+      await expect(animalsPages.arrivalDetails.questionLabel(id)).toHaveClass(/govuk-label--m/);
+    }
+  });
+
+  test('hints the port search and shows its placeholder', async ({ animalsPages }) => {
+    await expect(animalsPages.arrivalDetails.portOfEntryHint).toHaveText(
+      'Select where the transporter will enter with the consignment. Start typing to search by port or airport name or code.',
+    );
+    await expect(animalsPages.arrivalDetails.portOfEntry).toHaveAttribute('placeholder', 'Select a port');
+    await expect(animalsPages.arrivalDetails.portOfEntryPlaceholderOption).toHaveText('Select a port');
+  });
+
+  test('offers Air, Rail, Road and Sea as the means of transport, in that order', async ({ animalsPages }) => {
+    await expect(animalsPages.arrivalDetails.meansOfTransport.locator('option')).toHaveText(['Select one', 'Air', 'Rail', 'Road', 'Sea']);
+  });
+
+  test('leads the transport identification hint with "Enter one of the following:"', async ({ animalsPages }) => {
+    await expect(animalsPages.arrivalDetails.transportIdentificationHintLead).toHaveText('Enter one of the following:');
+  });
+
   test('leaves the arrival details unanswered on load', async ({ animalsPages }) => {
     await expect(animalsPages.arrivalDetails.portOfEntry).toBeVisible();
     await expect(animalsPages.arrivalDetails.meansOfTransport).toBeVisible();
@@ -32,20 +54,52 @@ test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-fr
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
 
-  // A draft may be saved with a blank arrival date, so the page itself raises nothing on an empty
-  // submit — the arrival fields are validated for shape, not for presence. Presence is a
-  // completeness rule, enforced when the trader continues the notification: see
-  // notification-view-states.spec.ts, which asserts the 'Complete arrival details' link in the
-  // error summary there.
-  //
-  // This test used to expect an error summary here. It passed only because the frontend sent a
-  // malformed value for a blank date, which the API rejected — the summary was a 400, not page
-  // validation. The frontend now leaves a blank date out of the request.
-  test('saves a draft and moves on when submitted empty', async ({ pages, animalsPages }) => {
+  test('save and continue: when no means of transport is chosen, refuses the save with an error on the means of transport', async ({
+    pages,
+    animalsPages,
+  }) => {
     await animalsPages.arrivalDetails.saveAndContinue.click();
 
-    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
-    await expect(animalsPages.transporter.heading).toBeVisible();
+    await expect(animalsPages.arrivalDetails.errorSummary).toBeVisible();
+    await expect(animalsPages.arrivalDetails.meansOfTransportErrorLink).toBeVisible();
+    await expect(animalsPages.arrivalDetails.meansOfTransportError).toContainText('Select a means of transport to the port of entry');
+    await expect(animalsPages.arrivalDetails.meansOfTransport).toHaveClass(/govuk-select--error/);
+    await expect(pages.page).toHaveTitle(/^Error: /);
+    await expect(animalsPages.arrivalDetails.heading).toBeVisible();
+
+    await animalsPages.arrivalDetails.meansOfTransportErrorLink.click();
+    await expect(animalsPages.arrivalDetails.meansOfTransport).toBeFocused();
+  });
+
+  test('save and continue: when no means of transport is chosen, keeps the other answers and saves nothing', async ({
+    pages,
+    animalsPages,
+  }) => {
+    const arrivalDate = getRelativeDatePickerValue({ monthOffset: 1 });
+    await animalsPages.arrivalDetails.selectPort('Port of Dover - GB DVR');
+    await animalsPages.arrivalDetails.fillArrivalDate(arrivalDate);
+    await animalsPages.arrivalDetails.saveAndContinue.click();
+
+    await expect(animalsPages.arrivalDetails.meansOfTransportError).toBeVisible();
+    await expect(animalsPages.arrivalDetails.portOfEntryValue).toHaveValue('GB DVR');
+    await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue(arrivalDate);
+    const notificationUrl = pages.page.url();
+
+    await pages.page.locator('.govuk-back-link').click();
+    await animalsPages.overview.task('Arrival details').click();
+    await animalsPages.arrivalDetails.heading.waitFor();
+
+    expect(pages.page.url()).toBe(notificationUrl);
+    await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue('');
+    await expect(animalsPages.arrivalDetails.portOfEntryValue).toHaveValue('');
+  });
+
+  test('save and continue: when only the means of transport is chosen, goes on to the next page', async ({ animalsPages }) => {
+    await animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: 'Air' });
+    await animalsPages.arrivalDetails.saveAndContinue.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.arrivalDetails.errorSummary).toHaveCount(0);
   });
 
   test('restricts the date picker to one week back and six months ahead', async ({ animalsPages }) => {

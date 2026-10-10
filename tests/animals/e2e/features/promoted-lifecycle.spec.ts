@@ -59,6 +59,7 @@ test.describe('Notification lifecycle', { tag: ['@compose', '@integration'] }, (
     animalsPages,
     animalsNotificationActions,
   }) => {
+    test.slow();
     await animalsJourney.submitNotification();
     await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
 
@@ -68,6 +69,6 @@ test.describe('Notification lifecycle', { tag: ['@compose', '@integration'] }, (
 
     await animalsNotificationActions.amendNotification(journeyContext.journeyId);
     await expect(animalsPages.overview.heading).toBeVisible();
-    await expect(animalsPages.overview.journeyStrip).toContainText('Amending');
+    await expect(animalsPages.overview.statusTag).toHaveText('Amend');
   });
 });

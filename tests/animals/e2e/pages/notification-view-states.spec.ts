@@ -38,7 +38,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(animalsPages.notificationView.continueButton).toBeVisible();
       await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toHaveCount(0);
       await expect(pages.page.getByRole('button', { name: 'Delete' })).toHaveCount(0);
-      await expect(animalsPages.notificationView.cancelAmendment).toHaveCount(0);
+      await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
     });
 
     test('Continue: when the notification is unfinished, stays put and names what is left', async ({ pages, animalsPages }) => {
@@ -84,7 +84,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     test('offers Copy as new and Delete on the read-only view', async ({ pages, animalsPages }) => {
       await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toBeVisible();
       await expect(pages.page.getByRole('button', { name: 'Delete' })).toBeVisible();
-      await expect(animalsPages.notificationView.cancelAmendment).toHaveCount(0);
+      await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
     });
 
     test('copies the submitted notification to a new draft', async ({ animalsPages, journeyContext }) => {

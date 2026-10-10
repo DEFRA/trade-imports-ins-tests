@@ -27,19 +27,18 @@ test.describe('Additional details scope', { tag: ['@integration', '@duplicated-i
       await animalsPages.overview.task('What are you importing?').click();
       await animalsPages.commoditySelection.selectSpecies([species]);
       await animalsPages.commoditySelection.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Commodity details').click();
       await animalsPages.consignmentDetails.heading.waitFor();
       await animalsPages.consignmentDetails.fillEveryAnimalCount('1');
       await animalsPages.consignmentDetails.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
     };
 
-    // A blank reason (enforcedAt=submit) walks straight to the tail page,
-    // skipping the internal-market purpose page.
+    // The additional details open from their own task.
     const openAdditionalDetails = async (): Promise<void> => {
       await animalsPages.overview.open(journeyId);
-      await animalsPages.overview.task('Main reason for import').click();
-      await animalsPages.importReason.heading.waitFor();
-      await animalsPages.importReason.saveAndContinue.click();
+      await animalsPages.overview.task('Additional details').click();
       await animalsPages.additionalDetails.heading.waitFor();
     };
 
