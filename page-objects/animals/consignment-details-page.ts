@@ -42,6 +42,22 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.page.getByRole('link', { name: 'Enter the number of animals' });
   }
 
+  get packagesRequiredErrorLink(): Locator {
+    return this.page.getByRole('link', { name: 'Enter the number of packages' });
+  }
+
+  /**
+   * Fills the number of packages on every commodity line that asks for one.
+   * The package count is save-blocking on each of those lines, so a page
+   * carrying more than one will not save until each box holds a number. It
+   * fills nothing on a page whose lines ask for none.
+   */
+  async fillEveryPackageCount(count: string): Promise<void> {
+    for (const box of await this.numberOfPackages.all()) {
+      await box.fill(count);
+    }
+  }
+
   /**
    * Fills the animal count on every commodity line the page is showing. The
    * count is save-blocking per line, so a page carrying more than one line

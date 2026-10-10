@@ -33,6 +33,34 @@ test.describe('Commodity details page', { tag: ['@integration', '@duplicated-in-
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
+
+  test('save and continue: when the number of packages is blank, refuses the save with an error on that line', async ({ animalsPages }) => {
+    await animalsPages.consignmentDetails.numberOfAnimals.fill('1');
+    await animalsPages.consignmentDetails.saveAndContinue.click();
+
+    await expect(animalsPages.consignmentDetails.errorSummary).toBeVisible();
+    await expect(animalsPages.consignmentDetails.packagesRequiredErrorLink).toBeVisible();
+    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
+  });
+});
+
+test.describe('Commodity details page — a commodity not counted in packages', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+  test.beforeEach(async ({ animalsJourney, animalsPages }) => {
+    await animalsJourney.toCommoditySelection();
+    await animalsPages.commoditySelection.selectSpecies(['Salmo salar']);
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await animalsPages.overview.task('Commodity details').click();
+    await animalsPages.consignmentDetails.heading.waitFor();
+  });
+
+  test('save and continue: saves a line that is not asked for a number of packages without one', async ({ pages, animalsPages }) => {
+    await expect(animalsPages.consignmentDetails.numberOfPackages).toHaveCount(0);
+    await animalsPages.consignmentDetails.numberOfAnimals.fill('1');
+    await animalsPages.consignmentDetails.saveAndContinue.click();
+
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+    await expect(animalsPages.overview.heading).toBeVisible();
+  });
 });
 
 test.describe('Commodity details page — two species', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {

@@ -14,6 +14,7 @@ const addCommodity = async (journeyId: string, animalsPages: AnimalsPages, speci
   await animalsPages.overview.task('Commodity details').click();
   await animalsPages.consignmentDetails.heading.waitFor();
   await animalsPages.consignmentDetails.fillEveryAnimalCount('1');
+  await animalsPages.consignmentDetails.fillEveryPackageCount('1');
   await animalsPages.consignmentDetails.saveAndContinue.click();
   await animalsPages.overview.heading.waitFor();
 };

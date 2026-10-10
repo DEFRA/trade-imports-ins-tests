@@ -401,6 +401,7 @@ export class AnimalsJourney {
 
     await pages.consignmentDetails.heading.waitFor(pageLoadWait);
     await pages.consignmentDetails.numberOfAnimals.fill('1');
+    await pages.consignmentDetails.numberOfPackages.fill('1');
     await pages.consignmentDetails.saveAndContinue.click();
 
     await pages.animalIdentification.heading.waitFor(pageLoadWait);
@@ -410,6 +411,7 @@ export class AnimalsJourney {
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Airplane' });
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);
