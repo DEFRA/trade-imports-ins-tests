@@ -22,6 +22,27 @@ export class AnimalsTransitedCountriesPage extends NotificationPage {
     return this.page.locator('#transitedCountry');
   }
 
+  // The native select behind the type-ahead: hidden once enhanced, but still the
+  // element that carries the country code and submits it with the form.
+  get countrySelect(): Locator {
+    return this.page.locator('select[name="transitedCountry"]');
+  }
+
+  // Every place offered, skipping the empty placeholder option.
+  get countryOptions(): Locator {
+    return this.countrySelect.locator('option:not([value=""])');
+  }
+
+  // A territory is coded by ISO 3166-2, the parent country code and a hyphen; a country's alpha-2 code has none.
+  get territoryOptions(): Locator {
+    return this.countrySelect.locator('option[value*="-"]');
+  }
+
+  // The working list travels with the page as hidden inputs, which is what Save and continue submits.
+  get addedCountryCodes(): Locator {
+    return this.page.locator('input[type="hidden"][name="transitedCountries"]');
+  }
+
   get addCountryButton(): Locator {
     return this.page.getByRole('button', { name: 'Add country', exact: true });
   }

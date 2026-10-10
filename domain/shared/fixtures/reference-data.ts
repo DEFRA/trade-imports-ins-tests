@@ -36,7 +36,7 @@ export function originPageCountryNames(): string[] {
     .sort((first, second) => first.localeCompare(second));
 }
 
-/** A destination country select lists each origin country and each territory named "<territory> (<country>)", sorted by name. */
+/** A destination country select, and the transit countries search, list each origin country and each territory named "<territory> (<country>)", sorted by name. */
 export function destinationCountryNames(): string[] {
   return countriesOrigin
     .flatMap((country) => [country.name, ...country.subDivisions.map((subDivision) => `${subDivision.name} (${country.name})`)])

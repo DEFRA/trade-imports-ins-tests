@@ -51,8 +51,14 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
   }
 
   // Drive the type-ahead the way a user does: type to filter, then pick the
-  // matching option by its "{name} - {code}" label.
+  // matching option by its "{name} - {code}" label. Without JavaScript the
+  // field is still the native select, chosen by option label.
   async selectPort(label: string): Promise<void> {
+    await this.page.waitForLoadState('domcontentloaded');
+    if ((await this.portOfEntry.evaluate((el) => el.tagName)) === 'SELECT') {
+      await this.portOfEntry.selectOption({ label });
+      return;
+    }
     await this.portOfEntry.click();
     await this.portOfEntry.fill(label);
     await this.page.getByRole('option', { name: label, exact: true }).click();

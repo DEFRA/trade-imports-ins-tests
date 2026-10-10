@@ -1,4 +1,6 @@
+import type { Page } from '@playwright/test';
 import { SET_BASES } from '@page-objects/shared/sets';
+import type { AnimalsTransitedCountriesPage } from '@page-objects/animals/transited-countries-page';
 import { test, expect } from '@fixtures';
 
 const TRANSIT_BROWSER_TITLE = 'Transit countries - Import notification service - GOV.UK';
@@ -72,6 +74,50 @@ test.describe('Transited countries page', { tag: ['@integration', '@duplicated-i
     await animalsPages.transitedCountries.linkBack.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
+  });
+});
+
+const addTerritoryAndReopen = async (page: Page, transited: AnimalsTransitedCountriesPage) => {
+  const journeyId = transited.journeyIdFromUrl();
+  const territory = transited.territoryOptions.first();
+  const code = await territory.getAttribute('value');
+  const name = (await territory.textContent())?.trim() ?? '';
+  expect(name).toMatch(/^.+ \(.+\)$/);
+
+  await transited.addCountry(name);
+  await expect(transited.addedCountryCodes).toHaveValue(code ?? '');
+  await transited.saveAndContinue.click();
+  await expect(page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+
+  await transited.open(journeyId);
+  await expect(transited.row(name)).toBeVisible();
+};
+
+test.describe('Transited countries page — territories', { tag: ['@integration'] }, () => {
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toTransitedCountries();
+  });
+
+  test('a territory is listed as "<territory> (<country>)", saved by its code, and listed again under that name when the page is reopened', async ({
+    pages,
+    animalsPages,
+  }) => {
+    await addTerritoryAndReopen(pages.page, animalsPages.transitedCountries);
+  });
+});
+
+test.describe('Transited countries page — territories without JavaScript', { tag: ['@integration'] }, () => {
+  test.use({ javaScriptEnabled: false });
+
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toTransitedCountries();
+  });
+
+  test('without JavaScript, a territory is listed as "<territory> (<country>)", saved by its code, and listed again under that name', async ({
+    pages,
+    animalsPages,
+  }) => {
+    await addTerritoryAndReopen(pages.page, animalsPages.transitedCountries);
   });
 });
 
