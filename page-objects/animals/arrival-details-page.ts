@@ -62,4 +62,8 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
   get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
+
+  get errorSummary(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
+  }
 }
