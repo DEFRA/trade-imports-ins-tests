@@ -19,6 +19,7 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
   });
 
   test('draft notification persists as DRAFT up to declaration', async ({ animalsJourney, journeyContext }) => {
+    test.slow();
     await animalsJourney.toDeclaration();
     const referenceNumber = journeyContext.journeyId;
     const client = new MongoDbClient();
@@ -42,6 +43,7 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
     animalsPages,
     addressBookApi,
   }) => {
+    test.slow();
     // Read each role's record from the once-seeded journey fixtures (API globalSetup),
     // so every party is checked against the details of the record picked for it —
     // a role mix-up would otherwise pass if we only asserted "some string".

@@ -28,7 +28,7 @@ test.describe('Port of entry type-ahead', { tag: ['@integration', '@duplicated-i
     await expect(combobox).toHaveValue(PORT_OPTION);
     await animalsPages.arrivalDetails.fillArrivalDate(getRelativeDatePickerValue({ monthOffset: 1 }));
     await animalsPages.arrivalDetails.saveAndContinue.click();
-    await expect(animalsPages.transporter.heading).toBeVisible();
+    await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.arrivalDetails.open(journeyId);
     await expect(animalsPages.arrivalDetails.portOfEntryValue).toHaveValue(PORT_CODE);

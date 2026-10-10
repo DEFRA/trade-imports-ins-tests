@@ -10,14 +10,6 @@ export class PlantsOverviewPage extends PlantsNotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Overview' });
   }
 
-  get journeyStrip(): Locator {
-    return this.page.locator('.app-journey-strip');
-  }
-
-  get statusTag(): Locator {
-    return this.journeyStrip.locator('.govuk-tag');
-  }
-
   get reference(): Locator {
     return this.journeyStrip.locator('span.govuk-body');
   }

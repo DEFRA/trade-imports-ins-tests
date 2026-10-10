@@ -26,6 +26,8 @@ test.describe('Security scan (frontend, conditional pages)', { tag: '@active' },
     await animalsPages.importReason.transitPortOfExit.selectOption({ index: 2 });
     await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
     await animalsPages.importReason.saveAndContinue.click();
+    await animalsPages.overview.heading.waitFor();
+    await animalsPages.overview.task('Additional details').click();
     await animalsPages.additionalDetails.heading.waitFor();
     await animalsPages.additionalDetails.saveAndContinue.click();
     await animalsPages.overview.heading.waitFor();
@@ -35,6 +37,8 @@ test.describe('Security scan (frontend, conditional pages)', { tag: '@active' },
     await animalsPages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
     await animalsPages.importReason.temporaryAdmissionPortOfExit.selectOption({ index: 2 });
     await animalsPages.importReason.saveAndContinue.click();
+    await animalsPages.overview.heading.waitFor();
+    await animalsPages.overview.task('Additional details').click();
     await animalsPages.additionalDetails.heading.waitFor();
     await animalsPages.additionalDetails.saveAndContinue.click();
     await animalsPages.overview.heading.waitFor();
