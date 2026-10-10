@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 import { getRelativeDatePickerValue } from '@utils/date-utils';
 
-const PORT_OPTION = 'Aberdeen Harbour (GB ABD)';
-const PORT_CODE = 'GB ABD';
+const PORT_OPTION = 'Port of Dover - GB DVR';
+const PORT_CODE = 'GB DVR';
 
 test.describe('Port of entry type-ahead', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('enhances the select, filters by name or code, submits and persists the code', async ({ animalsJourney, pages, animalsPages }) => {
@@ -19,8 +19,11 @@ test.describe('Port of entry type-ahead', { tag: ['@integration', '@duplicated-i
     await expect(pages.page.getByRole('option', { name: PORT_OPTION, exact: true })).toBeVisible();
 
     // Filtering by the port code works because the code is part of the label.
-    await combobox.fill('gb abd');
+    await combobox.fill('gb dvr');
     await expect(pages.page.getByRole('option', { name: PORT_OPTION, exact: true })).toBeVisible();
+
+    // The native option a user without JavaScript picks reads the same.
+    await expect(animalsPages.arrivalDetails.portOption(PORT_CODE)).toHaveText(PORT_OPTION);
 
     // Selecting the option puts the label in the field and the code in the
     // native select that submits.

@@ -40,13 +40,18 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.page.locator('#transportIdentification-hint p');
   }
 
+  // One port in the native select, addressed by the code it submits.
+  portOption(code: string): Locator {
+    return this.portOfEntryValue.locator(`option[value="${code}"]`);
+  }
+
   // Every port offered, skipping the empty placeholder option.
   get portOptions(): Locator {
     return this.portOfEntryValue.locator('option:not([value=""])');
   }
 
   // Drive the type-ahead the way a user does: type to filter, then pick the
-  // matching option by its "{name} ({code})" label.
+  // matching option by its "{name} - {code}" label.
   async selectPort(label: string): Promise<void> {
     await this.portOfEntry.click();
     await this.portOfEntry.fill(label);

@@ -82,7 +82,7 @@ test.describe('High-risk plants full happy-path journeys', { tag: '@integration'
       if (scenario.type === POTATOES) {
         await plantsJourney.toArrivalDetails(scenario.country);
         await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-        await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour (GB ABD)');
+        await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour - GB ABD');
       } else {
         await plantsJourney.toArrivalStatus(scenario.country);
         await plantsJourney.answerArrivalStatus('No, it has not arrived yet');

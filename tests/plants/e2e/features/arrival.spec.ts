@@ -56,8 +56,10 @@ const ARRIVED_ON = getRelativeAppDateText({ dayOffset: -DAYS_LATE });
 const ARRIVING_ON = '27/3/2027';
 const ARRIVING_AT = '14:30';
 
-// A port the reference data has held throughout, offered as "{name} ({code})".
-const ABERDEEN_HARBOUR = 'Aberdeen Harbour (GB ABD)';
+// A port the reference data has held throughout, offered as "{name} - {code}".
+const ABERDEEN_HARBOUR = 'Aberdeen Harbour - GB ABD';
+const PORT_OF_DOVER = 'Port of Dover - GB DVR';
+const PORT_OF_DOVER_CODE = 'GB DVR';
 
 // The window is four days (reg 26(1)), and the hint is the only place a trader
 // reads it — so it is matched in full rather than on the number alone.
@@ -345,6 +347,27 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     await expect(plantsPages.arrivalDetails.arrivalDate).toHaveValue(ARRIVING_ON);
     await expect(plantsPages.arrivalDetails.arrivalTime).toHaveValue(ARRIVING_AT);
     await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue(ABERDEEN_HARBOUR);
+  });
+
+  test("a potato notification's place of landing reads its port name and code, shows the chosen port that way and keeps its code", async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
+    const reference = await toPotatoArrivalDetails(plantsJourney);
+
+    await expect(plantsPages.arrivalDetails.placeOfLandingNativeOption(PORT_OF_DOVER_CODE)).toHaveText(PORT_OF_DOVER);
+
+    await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVING_ON);
+    await plantsPages.arrivalDetails.arrivalTime.fill(ARRIVING_AT);
+    await plantsPages.arrivalDetails.selectPlaceOfLanding(PORT_OF_DOVER);
+    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue(PORT_OF_DOVER);
+    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
+
+    await plantsPages.arrivalDetails.open(reference);
+    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue(PORT_OF_DOVER);
+    await expect(plantsPages.arrivalDetails.placeOfLandingValue).toHaveValue(PORT_OF_DOVER_CODE);
   });
 
   test("a potato notification's arrival questions are set in the medium label size, and the place of landing is hinted as the port of entry is", async ({

@@ -43,12 +43,8 @@ export function destinationCountryNames(): string[] {
     .sort((first, second) => first.localeCompare(second));
 }
 
+/** A port option reads '<name> - <code>' — port of entry, port of exit and place of landing alike. */
 export function portLabel(port: CapturedPort): string {
-  return `${port.name} (${port.code})`;
-}
-
-/** A port of exit option reads '<name> - <code>'. */
-export function portOfExitLabel(port: CapturedPort): string {
   return `${port.name} - ${port.code}`;
 }
 

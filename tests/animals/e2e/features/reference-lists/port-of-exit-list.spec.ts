@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { portOfExitLabel, portsInListOrder } from '@domain/shared/fixtures/reference-data';
+import { portLabel, portsInListOrder } from '@domain/shared/fixtures/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Port of exit list', { tag: ['@integration'] }, () => {
@@ -15,7 +15,7 @@ test.describe('Port of exit list', { tag: ['@integration'] }, () => {
     await animalsPages.importReason.reason('Transit').check();
 
     await expect(animalsPages.importReason.transitPortOfExit.locator('option').first()).toHaveText('Select port of exit');
-    await expect(animalsPages.importReason.transitPortOfExitOptions).toHaveText(portsInListOrder().map(portOfExitLabel));
+    await expect(animalsPages.importReason.transitPortOfExitOptions).toHaveText(portsInListOrder().map(portLabel));
   });
 
   test('the temporary admission port of exit list offers the same ports, labelled and ordered the same way', async ({
@@ -26,7 +26,7 @@ test.describe('Port of exit list', { tag: ['@integration'] }, () => {
     await animalsPages.importReason.reason('Temporary admission horses').check();
 
     await expect(animalsPages.importReason.temporaryAdmissionPortOfExit.locator('option').first()).toHaveText('Select port of exit');
-    await expect(animalsPages.importReason.temporaryAdmissionPortOfExitOptions).toHaveText(portsInListOrder().map(portOfExitLabel));
+    await expect(animalsPages.importReason.temporaryAdmissionPortOfExitOptions).toHaveText(portsInListOrder().map(portLabel));
   });
 });
 

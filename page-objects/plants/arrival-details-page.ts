@@ -57,16 +57,25 @@ export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
     return this.page.locator(`label[for="${fieldId}"]`);
   }
 
+  // The native select behind the enhancement; it submits the chosen port's code.
+  get placeOfLandingValue(): Locator {
+    return this.page.locator('select[name="proposedPlaceOfLanding"]');
+  }
+
+  placeOfLandingNativeOption(code: string): Locator {
+    return this.placeOfLandingValue.locator(`option[value="${code}"]`);
+  }
+
   // Every place of landing offered, skipping the empty placeholder option.
   get placeOfLandingOptions(): Locator {
-    return this.page.locator('select[name="proposedPlaceOfLanding"] option:not([value=""])');
+    return this.placeOfLandingValue.locator('option:not([value=""])');
   }
 
   placeOfLandingOption(name: string): Locator {
     return this.page.getByRole('option', { name, exact: true });
   }
 
-  /** Ports are offered as "{name} ({code})", the one label both sides share. */
+  /** Ports are offered as "{name} - {code}", the one label both sides share. */
   async selectPlaceOfLanding(name: string): Promise<void> {
     // The enhancement is a module script, so it has run by DOMContentLoaded.
     // Waiting for that settles which element the id resolves to before the

@@ -45,7 +45,7 @@ async function toParties(plantsPages: PlantsPages, journey: PlantsJourney, type:
   if (type === POTATOES) {
     await journey.toArrivalDetails('France');
     await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-    await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour (GB ABD)');
+    await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour - GB ABD');
   } else {
     await journey.toArrivalStatus('Germany');
     await journey.answerArrivalStatus('No, it has not arrived yet');

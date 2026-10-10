@@ -16,7 +16,7 @@ export type AccompanyingDocumentAnswer = {
 };
 
 const COUNTRY = 'France';
-const PORT = 'Aberdeen Harbour (GB ABD)';
+const PORT = 'Aberdeen Harbour - GB ABD';
 // Inside the arrival-date window (1 week back to 6 months ahead) wherever the
 // wall clock happens to be, in the unpadded d/m/yyyy the app itself renders —
 // so a CYA assertion compares against the app's shape, not the typed string it
@@ -461,7 +461,7 @@ export class AnimalsJourney {
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
-    await pages.arrivalDetails.selectPort('Heathrow Airport (GB LHR)');
+    await pages.arrivalDetails.selectPort('Heathrow Airport - GB LHR');
     await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Air' });
     await pages.arrivalDetails.transportIdentification.fill('BA0117');
     await pages.arrivalDetails.transportDocumentReference.fill('AWB-2026-0001');
@@ -531,7 +531,7 @@ export class AnimalsJourney {
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
-    await pages.arrivalDetails.selectPort('Holyhead Port (GB HLY)');
+    await pages.arrivalDetails.selectPort('Holyhead Port - GB HLY');
     await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Sea' });
     await pages.arrivalDetails.transportIdentification.fill(HORSE_TRANSPORT_ID);
     await pages.arrivalDetails.transportDocumentReference.fill('BOL-2026-0001');
