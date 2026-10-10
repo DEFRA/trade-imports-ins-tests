@@ -34,17 +34,18 @@ test.describe('Port of exit answer', { tag: ['@integration'] }, () => {
   test('a port of exit chosen under transit saves its code and is shown selected when the page is reopened', async ({
     animalsJourney,
     animalsPages,
+    pages,
   }) => {
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transit').check();
     const port = await animalsPages.importReason.transitPortOfExitOptions.first().getAttribute('value');
     await animalsPages.importReason.transitPortOfExit.selectOption(port);
     await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
+    const journeyId = animalsPages.importReason.journeyIdFromUrl();
     await animalsPages.importReason.saveAndContinue.click();
 
-    await expect(animalsPages.additionalDetails.heading).toBeVisible();
-    await animalsPages.additionalDetails.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(pages.page).toHaveURL((url) => url.pathname !== animalsPages.importReason.expectedUrl(journeyId));
+    await animalsPages.overview.open(journeyId);
     await animalsPages.overview.task('Main reason for import').click();
 
     await expect(animalsPages.importReason.transitPortOfExit).toHaveValue(port);
