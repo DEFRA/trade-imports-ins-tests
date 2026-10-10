@@ -385,7 +385,7 @@ export class AnimalsJourney {
     await this.confirmDeclaration();
   }
 
-  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+  async walkOpeningRunToArrivalDetails(): Promise<string> {
     const pages = this.animalsPages;
     const journeyId = await this.createNotificationAtOrigin();
 
@@ -410,6 +410,13 @@ export class AnimalsJourney {
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    return journeyId;
+  }
+
+  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+    const pages = this.animalsPages;
+    const journeyId = await this.walkOpeningRunToArrivalDetails();
+
     await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Air' });
     await pages.arrivalDetails.saveAndContinue.click();
 

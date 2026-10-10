@@ -1,4 +1,7 @@
+import { SET_BASES } from '@page-objects/shared/sets';
 import { test, expect } from '@fixtures';
+
+const TRANSIT_BROWSER_TITLE = 'Transit countries - Import notification service - GOV.UK';
 
 test.describe('Transited countries page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -10,6 +13,8 @@ test.describe('Transited countries page', { tag: ['@integration', '@duplicated-i
     await expect(animalsPages.transitedCountries.countryField).toBeVisible();
     await expect(animalsPages.transitedCountries.addCountryButton).toBeVisible();
     await expect(animalsPages.transitedCountries.saveAndContinue).toBeVisible();
+    await expect(animalsPages.transitedCountries.addedCountriesTable).toHaveCount(0);
+    await expect(animalsPages.transitedCountries.emptyListSentence).toHaveCount(0);
   });
 
   test('accepts and persists multiple transited countries', async ({ pages, animalsPages }) => {
@@ -40,7 +45,7 @@ test.describe('Transited countries page', { tag: ['@integration', '@duplicated-i
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
     await animalsPages.transitedCountries.open(journeyId);
-    await expect(pages.page.getByText('You have not added any countries yet.')).toBeVisible();
+    await expect(animalsPages.transitedCountries.emptyListSentence).toHaveCount(0);
     await expect(animalsPages.transitedCountries.addedCountries).toHaveCount(0);
   });
 
@@ -50,5 +55,67 @@ test.describe('Transited countries page', { tag: ['@integration', '@duplicated-i
     // The message is on the page twice — the summary link and the field's own
     // error — so the summary link is what this asserts, by role.
     await expect(pages.page.getByRole('link', { name: 'Enter a country to add' })).toBeVisible();
+  });
+
+  test('titles the browser tab Transit countries, with Error: in front when the page shows an error', async ({ pages, animalsPages }) => {
+    await expect(pages.page).toHaveTitle(TRANSIT_BROWSER_TITLE);
+
+    await animalsPages.transitedCountries.addCountryButton.click();
+
+    await expect(pages.page).toHaveTitle(`Error: ${TRANSIT_BROWSER_TITLE}`);
+  });
+
+  test('back link goes to the overview when the page was opened from its task', async ({ animalsPages }) => {
+    const journeyId = animalsPages.transitedCountries.journeyIdFromUrl();
+    await expect(animalsPages.transitedCountries.linkBack).toHaveAttribute('href', new RegExp(`/notifications/${journeyId}$`));
+
+    await animalsPages.transitedCountries.linkBack.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+  });
+});
+
+test.describe('Transited countries page — how it is reached', { tag: ['@integration'] }, () => {
+  test('back link goes to arrival details when the page was reached by Save and continue on arrival details', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    const journeyId = await animalsJourney.walkOpeningRunToArrivalDetails();
+    await animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: 'Road' });
+
+    await animalsPages.arrivalDetails.saveAndContinue.click();
+
+    await expect(animalsPages.transitedCountries.heading).toBeVisible();
+    await expect(animalsPages.transitedCountries.linkBack).toHaveAttribute(
+      'href',
+      new RegExp(`/notifications/${journeyId}/port-of-entry$`),
+    );
+    await animalsPages.transitedCountries.linkBack.click();
+    await expect(animalsPages.arrivalDetails.heading).toBeVisible();
+  });
+
+  test('opening the page by its address goes to the overview when the means of transport is not saved, Air or Sea', async ({
+    pages,
+    animalsJourney,
+    animalsPages,
+  }) => {
+    const journeyId = await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
+    const overviewUrl = new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}$`);
+
+    await animalsPages.transitedCountries.open(journeyId);
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(overviewUrl);
+
+    for (const label of ['Air', 'Sea']) {
+      await animalsPages.overview.task('Arrival details').click();
+      await animalsPages.arrivalDetails.meansOfTransport.selectOption({ label });
+      await animalsPages.arrivalDetails.saveAndContinue.click();
+      await expect(animalsPages.overview.heading).toBeVisible();
+
+      await animalsPages.transitedCountries.open(journeyId);
+      await expect(animalsPages.overview.heading).toBeVisible();
+      await expect(pages.page).toHaveURL(overviewUrl);
+    }
   });
 });

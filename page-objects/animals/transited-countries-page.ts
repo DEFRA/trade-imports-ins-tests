@@ -60,6 +60,14 @@ export class AnimalsTransitedCountriesPage extends NotificationPage {
     return this.page.getByRole('row').filter({ has: this.page.getByRole('button', { name: /^Remove / }) });
   }
 
+  get addedCountriesTable(): Locator {
+    return this.page.getByRole('table');
+  }
+
+  get emptyListSentence(): Locator {
+    return this.page.getByText('You have not added any countries yet.', { exact: true });
+  }
+
   get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
