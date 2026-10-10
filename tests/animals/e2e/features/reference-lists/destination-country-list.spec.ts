@@ -35,11 +35,13 @@ test.describe('Destination country answer', { tag: ['@integration'] }, () => {
     await animalsPages.importReason.reason('Transhipment or onward travel').check();
     const territory = await animalsPages.importReason.transhipmentTerritoryOptions.first().getAttribute('value');
     await animalsPages.importReason.transhipmentDestinationCountry.selectOption(territory);
+    const journeyId = animalsPages.importReason.journeyIdFromUrl();
     await animalsPages.importReason.saveAndContinue.click();
 
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(pages.page).toHaveURL((url) => url.pathname !== animalsPages.importReason.expectedUrl(journeyId));
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
+    await animalsPages.overview.open(journeyId);
     await animalsPages.overview.task('Main reason for import').click();
 
     await expect(animalsPages.importReason.transhipmentDestinationCountry).toHaveValue(territory);
@@ -48,14 +50,17 @@ test.describe('Destination country answer', { tag: ['@integration'] }, () => {
   test('a destination country from the country list is still shown selected when the page is reopened', async ({
     animalsJourney,
     animalsPages,
+    pages,
   }) => {
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transit').check();
     await animalsPages.importReason.transitPortOfExit.selectOption({ index: 2 });
     await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
+    const journeyId = animalsPages.importReason.journeyIdFromUrl();
     await animalsPages.importReason.saveAndContinue.click();
 
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(pages.page).toHaveURL((url) => url.pathname !== animalsPages.importReason.expectedUrl(journeyId));
+    await animalsPages.overview.open(journeyId);
     await animalsPages.overview.task('Main reason for import').click();
 
     await expect(animalsPages.importReason.transitDestinationCountry).toHaveValue('FR');
