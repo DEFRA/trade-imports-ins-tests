@@ -11,6 +11,10 @@ export class AnimalsAdditionalDetailsPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Additional details' });
   }
 
+  get certifiedForGroup(): Locator {
+    return this.page.getByRole('group', { name: 'What are the animals certified for?' });
+  }
+
   certifiedFor(name: string): Locator {
     return this.page.getByRole('radio', { name, exact: true });
   }

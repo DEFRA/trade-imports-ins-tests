@@ -30,7 +30,7 @@ test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-i
     // reason, so the walk answers them on the same submit.
     await animalsPages.overview.task('Main reason for import').click();
     await animalsPages.importReason.reason('Transit').check();
-    await animalsPages.importReason.transitPortOfExit.selectOption({ index: 2 });
+    await animalsPages.importReason.transitPortOfExit.selectOption({ index: 1 });
     await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
     await animalsPages.importReason.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();

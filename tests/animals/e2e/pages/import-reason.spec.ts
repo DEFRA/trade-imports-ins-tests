@@ -15,6 +15,12 @@ test.describe('Import reason page', { tag: ['@integration', '@duplicated-in-fron
     await expect(animalsPages.importReason.saveAndContinue).toBeVisible();
   });
 
+  test('is headed and titled Main import reason, and no longer says Main reason for import', async ({ pages, animalsPages }) => {
+    await expect(animalsPages.importReason.heading).toBeVisible();
+    await expect(pages.page).toHaveTitle('Main import reason - Import notification service - GOV.UK');
+    await expect(pages.page.getByText(/Main reason for import/)).toHaveCount(0);
+  });
+
   test('leaves the import reason unchecked on load', async ({ animalsPages }) => {
     await expect(animalsPages.importReason.reason('Internal market')).not.toBeChecked();
   });

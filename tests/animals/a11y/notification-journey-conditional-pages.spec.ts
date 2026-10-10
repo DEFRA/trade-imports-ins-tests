@@ -29,7 +29,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Import reason: Transit', async () => {
       await animalsPages.overview.task('Main reason for import').click();
       await animalsPages.importReason.reason('Transit').check();
-      await animalsPages.importReason.transitPortOfExit.selectOption({ index: 2 });
+      await animalsPages.importReason.transitPortOfExit.selectOption({ index: 1 });
       await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
       await runA11yScan({ exclude: conditionalReasonRadios });
       await animalsPages.importReason.saveAndContinue.click();
@@ -44,7 +44,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.overview.task('Main reason for import').click();
       await animalsPages.importReason.reason('Temporary admission horses').check();
       await animalsPages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
-      await animalsPages.importReason.temporaryAdmissionPortOfExit.selectOption({ index: 2 });
+      await animalsPages.importReason.temporaryAdmissionPortOfExit.selectOption({ index: 1 });
       await runA11yScan({ exclude: conditionalReasonRadios });
       await animalsPages.importReason.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
