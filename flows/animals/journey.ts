@@ -4,6 +4,7 @@ import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { JourneyOptions } from '@domain/animals/constants/journey-options';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
+import { countryCodes } from '@domain/animals/constants/country-codes';
 
 export type AccompanyingDocumentAnswer = {
   reference: string;
@@ -21,6 +22,10 @@ const PORT = 'Aberdeen Harbour (GB ABD)';
 // so a CYA assertion compares against the app's shape, not the typed string it
 // happens to echo back.
 export const ARRIVAL_DATE = getRelativeAppDateText({ monthOffset: 1 });
+// After the arrival date, in the app's own d/m/yyyy.
+export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffset: 2 });
+export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
+export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
 
 export class AnimalsJourney {
   constructor(
@@ -78,7 +83,7 @@ export class AnimalsJourney {
   }
 
   async fillOriginOfImport(options: JourneyOptions = {}): Promise<void> {
-    await this.animalsPages.originOfImport.selectCountry(COUNTRY);
+    await this.animalsPages.originOfImport.selectCountry(options.countryCode?.display ?? COUNTRY);
     const requiresRegionCode = options.requiresRegionCode ?? 'No';
     await this.animalsPages.originOfImport.radioRequiresOriginCode(requiresRegionCode).check();
     if (requiresRegionCode === 'Yes') {
@@ -104,6 +109,8 @@ export class AnimalsJourney {
     await this.animalsPages.overview.task('What are you importing?').click();
     await this.animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Commodity details').click();
     await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
     await this.animalsPages.consignmentDetails.numberOfAnimals.fill('1');
     await this.animalsPages.consignmentDetails.numberOfPackages.fill('5');
@@ -125,6 +132,8 @@ export class AnimalsJourney {
     // in on the one submit.
     await this.animalsPages.importReason.purpose('Breeding').check();
     await this.animalsPages.importReason.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Additional details').click();
     await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
     await this.animalsPages.additionalDetails.certifiedFor('Slaughter').check();
     await this.animalsPages.additionalDetails.containsUnweanedAnimals('No').check();
@@ -143,8 +152,7 @@ export class AnimalsJourney {
     await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
   }
 
-  async fillAddressesToCph(): Promise<void> {
-    await this.animalsPages.overview.task('Roles and addresses').click();
+  async addFiveParties(): Promise<void> {
     const parties = [
       ['Consignor or exporter', 'Astra Rosales', 'consignorSelection'],
       ['Place of destination', 'Tech Imports Ltd', 'destinationSelection'],
@@ -158,14 +166,21 @@ export class AnimalsJourney {
       await this.animalsPages[picker].saveAndContinue.click();
       await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     }
-    await this.animalsPages.addresses.continueButton.click();
+  }
+
+  async fillAddressesAndOpenCph(): Promise<void> {
+    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.addFiveParties();
+    await this.animalsPages.addresses.addCph.click();
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
   }
 
   async answerAddresses(): Promise<void> {
-    await this.fillAddressesToCph();
+    await this.fillAddressesAndOpenCph();
     await this.animalsPages.cphNumber.fillCphNumber();
     await this.animalsPages.cphNumber.saveAndContinue.click();
+    await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
+    await this.animalsPages.addresses.continueButton.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -186,9 +201,13 @@ export class AnimalsJourney {
     await this.animalsPages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails();
     await this.animalsPages.arrivalDetails.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
     await this.animalsPages.transitedCountries.addCountry('France');
     await this.animalsPages.transitedCountries.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
   }
 
@@ -196,10 +215,14 @@ export class AnimalsJourney {
     await this.animalsPages.overview.task('Arrival details').click();
     await this.fillArrivalDetails();
     await this.animalsPages.arrivalDetails.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
     await this.animalsPages.transitedCountries.addCountry('France');
     await this.animalsPages.transitedCountries.addCountry('Belgium');
     await this.animalsPages.transitedCountries.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
     await this.animalsPages.transporter.transporter('García Livestock Transport SL').check();
     await this.animalsPages.transporter.saveAndContinue.click();
@@ -236,6 +259,8 @@ export class AnimalsJourney {
     await this.toCommoditySelection();
     await this.animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Commodity details').click();
     await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
   }
 
@@ -258,13 +283,15 @@ export class AnimalsJourney {
     await this.animalsPages.importReason.reason('Internal market').check();
     await this.animalsPages.importReason.purpose('Breeding').check();
     await this.animalsPages.importReason.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Additional details').click();
     await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
   }
 
   async toCphNumber(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.fillAddressesToCph();
+    await this.fillAddressesAndOpenCph();
   }
 
   async toArrivalDetails(): Promise<void> {
@@ -278,6 +305,8 @@ export class AnimalsJourney {
     await this.toArrivalDetails();
     await this.fillArrivalDetails();
     await this.animalsPages.arrivalDetails.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
   }
 
@@ -285,6 +314,8 @@ export class AnimalsJourney {
     await this.toTransitedCountries();
     await this.animalsPages.transitedCountries.addCountry('France');
     await this.animalsPages.transitedCountries.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
   }
 
@@ -351,6 +382,191 @@ export class AnimalsJourney {
     await this.animalsPages.overview.open(this.animalsPages.accompanyingDocuments.journeyIdFromUrl());
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.fromOverviewToDeclaration();
+    await this.confirmDeclaration();
+  }
+
+  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+    const pages = this.animalsPages;
+    const journeyId = await this.createNotificationAtOrigin();
+
+    await this.fillOriginOfImport();
+    await this.saveOriginOfImport();
+
+    await pages.commoditySelection.heading.waitFor(pageLoadWait);
+    await pages.commoditySelection.selectSpecies(['Bos taurus']);
+    await pages.commoditySelection.saveAndContinue.click();
+
+    await pages.importReason.heading.waitFor(pageLoadWait);
+    await pages.importReason.saveAndContinue.click();
+
+    await pages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await pages.consignmentDetails.numberOfAnimals.fill('1');
+    await pages.consignmentDetails.numberOfPackages.fill('1');
+    await pages.consignmentDetails.saveAndContinue.click();
+
+    await pages.animalIdentification.heading.waitFor(pageLoadWait);
+    await pages.animalIdentification.saveAndContinue.click();
+
+    await pages.additionalDetails.heading.waitFor(pageLoadWait);
+    await pages.additionalDetails.saveAndContinue.click();
+
+    await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Airplane' });
+    await pages.arrivalDetails.saveAndContinue.click();
+
+    await pages.transporter.heading.waitFor(pageLoadWait);
+    await pages.transporter.saveAndContinue.click();
+
+    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
+    await pages.accompanyingDocuments.continueButton.click();
+
+    await pages.addresses.heading.waitFor(pageLoadWait);
+    return journeyId;
+  }
+
+  async walkOpeningRunCattleByAir(document: AccompanyingDocumentAnswer): Promise<string> {
+    const pages = this.animalsPages;
+    const journeyId = await this.createNotificationAtOrigin();
+
+    await this.fillOriginOfImport({ requiresRegionCode: 'Yes', internalReference: 'CATTLE-2026-01' });
+    await this.saveOriginOfImport();
+
+    await pages.commoditySelection.heading.waitFor(pageLoadWait);
+    await pages.commoditySelection.selectSpecies(['Bos taurus']);
+    await pages.commoditySelection.saveAndContinue.click();
+
+    await pages.importReason.heading.waitFor(pageLoadWait);
+    await pages.importReason.reason('Internal market').check();
+    await pages.importReason.purpose('Breeding').check();
+    await pages.importReason.saveAndContinue.click();
+
+    await pages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await pages.consignmentDetails.numberOfAnimals.fill('2');
+    await pages.consignmentDetails.numberOfPackages.fill('1');
+    await pages.consignmentDetails.saveAndContinue.click();
+
+    await pages.animalIdentification.heading.waitFor(pageLoadWait);
+    await pages.animalIdentification.earTag.fill('UK000000000001');
+    await pages.animalIdentification.passportNumber.fill('PASSPORT-0001');
+    await pages.animalIdentification.saveAndAddAnother.click();
+    await pages.animalIdentification.savedAnimalRow('Bos taurus', 1).waitFor(pageLoadWait);
+    await pages.animalIdentification.earTag.fill('UK000000000002');
+    await pages.animalIdentification.passportNumber.fill('PASSPORT-0002');
+    await pages.animalIdentification.saveAndFinish.click();
+    await pages.animalIdentification.savedAnimalRow('Bos taurus', 2).waitFor(pageLoadWait);
+    await pages.animalIdentification.saveAndContinue.click();
+
+    await pages.additionalDetails.heading.waitFor(pageLoadWait);
+    await pages.additionalDetails.certifiedFor('Further keeping').check();
+    await pages.additionalDetails.containsUnweanedAnimals('No').check();
+    await pages.additionalDetails.saveAndContinue.click();
+
+    await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
+    await pages.arrivalDetails.selectPort('Heathrow Airport (GB LHR)');
+    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Airplane' });
+    await pages.arrivalDetails.transportIdentification.fill('BA0117');
+    await pages.arrivalDetails.transportDocumentReference.fill('AWB-2026-0001');
+    await pages.arrivalDetails.saveAndContinue.click();
+
+    await pages.transporter.heading.waitFor(pageLoadWait);
+    await pages.transporter.transporter('García Livestock Transport SL').check();
+    await pages.transporter.saveAndContinue.click();
+
+    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
+    await pages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
+    await pages.accompanyingDocuments.saveAndAddAnother.click();
+    await pages.accompanyingDocuments
+      .documentRow(document.reference)
+      .filter({ hasText: 'Check completed' })
+      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
+    await pages.accompanyingDocuments.continueButton.click();
+
+    await pages.addresses.heading.waitFor(pageLoadWait);
+    await this.addFiveParties();
+    await pages.addresses.addCph.click();
+    await pages.cphNumber.heading.waitFor(pageLoadWait);
+    await pages.cphNumber.fillCphNumber();
+    await pages.cphNumber.saveAndContinue.click();
+    await pages.addresses.heading.waitFor(pageLoadWait);
+    await pages.addresses.continueButton.click();
+
+    await pages.contactAddress.heading.waitFor(pageLoadWait);
+    await pages.contactAddress.address('Animal and Plant Health Agency').check();
+    await pages.contactAddress.saveAndContinue.click();
+
+    await pages.notificationView.heading.waitFor(pageLoadWait);
+    return journeyId;
+  }
+
+  async walkOpeningRunHorseBySea(document: AccompanyingDocumentAnswer): Promise<string> {
+    const pages = this.animalsPages;
+    const journeyId = await this.createNotificationAtOrigin();
+
+    await this.fillOriginOfImport({ countryCode: countryCodes.eu.ireland });
+    await this.saveOriginOfImport();
+
+    await pages.commoditySelection.heading.waitFor(pageLoadWait);
+    await pages.commoditySelection.selectSpecies(['Equus caballus']);
+    await pages.commoditySelection.saveAndContinue.click();
+
+    await pages.importReason.heading.waitFor(pageLoadWait);
+    await pages.importReason.reason('Temporary admission horses').check();
+    await pages.importReason.temporaryAdmissionExitDate.fill(TEMPORARY_ADMISSION_EXIT_DATE);
+    await pages.importReason.temporaryAdmissionPortOfExit.selectOption('GB HLY');
+    await pages.importReason.saveAndContinue.click();
+
+    await pages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await pages.consignmentDetails.numberOfAnimals.fill('1');
+    await pages.consignmentDetails.numberOfPackages.fill('1');
+    await pages.consignmentDetails.saveAndContinue.click();
+
+    await pages.animalIdentification.heading.waitFor(pageLoadWait);
+    await pages.animalIdentification.microchip.fill('900123456789012');
+    await pages.animalIdentification.passportNumber.fill('IE-EQ-2026-0001');
+    await pages.animalIdentification.horseName.fill('Dublin Bay');
+    await pages.animalIdentification.saveAndContinue.click();
+
+    await pages.additionalDetails.heading.waitFor(pageLoadWait);
+    await pages.additionalDetails.certifiedFor('Registered equine animal').check();
+    await pages.additionalDetails.saveAndContinue.click();
+
+    await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
+    await pages.arrivalDetails.selectPort('Holyhead Port (GB HLY)');
+    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Vessel' });
+    await pages.arrivalDetails.transportIdentification.fill(HORSE_TRANSPORT_ID);
+    await pages.arrivalDetails.transportDocumentReference.fill('BOL-2026-0001');
+    await pages.arrivalDetails.saveAndContinue.click();
+
+    await pages.transporter.heading.waitFor(pageLoadWait);
+    await pages.transporter.transporter(HORSE_TRANSPORTER).check();
+    await pages.transporter.saveAndContinue.click();
+
+    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
+    await pages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
+    await pages.accompanyingDocuments.saveAndAddAnother.click();
+    await pages.accompanyingDocuments
+      .documentRow(document.reference)
+      .filter({ hasText: 'Check completed' })
+      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
+    await pages.accompanyingDocuments.continueButton.click();
+
+    await pages.addresses.heading.waitFor(pageLoadWait);
+    await this.addFiveParties();
+    await pages.addresses.continueButton.click();
+
+    await pages.contactAddress.heading.waitFor(pageLoadWait);
+    await pages.contactAddress.address('Animal and Plant Health Agency').check();
+    await pages.contactAddress.saveAndContinue.click();
+
+    await pages.notificationView.heading.waitFor(pageLoadWait);
+    return journeyId;
+  }
+
+  async submitFromReview(): Promise<void> {
+    await this.animalsPages.notificationView.continueButton.click();
+    await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
     await this.confirmDeclaration();
   }
 

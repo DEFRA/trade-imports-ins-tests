@@ -33,7 +33,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     await test.step('Continue to CPH number', async () => {
       await animalsJourney.answerCommodity();
-      await animalsJourney.fillAddressesToCph();
+      await animalsJourney.fillAddressesAndOpenCph();
     });
 
     await test.step('CPH number with validation errors', async () => {
@@ -42,20 +42,24 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsPages.cphNumber.fillCphNumber();
       await animalsPages.cphNumber.saveAndContinue.click();
+      await animalsPages.addresses.heading.waitFor();
+      await animalsPages.addresses.continueButton.click();
       await animalsPages.overview.heading.waitFor();
     });
 
     await test.step('Arrival details with validation errors', async () => {
       await animalsPages.overview.task('Arrival details').click();
       await animalsPages.arrivalDetails.heading.waitFor();
-      // Every field is optional on a draft, so an empty save goes through; an arrival
-      // date outside the allowed window is what raises the error summary.
+      // Saving without a means of transport raises the error summary, and an arrival
+      // date outside the allowed window adds a second error.
       await animalsPages.arrivalDetails.fillArrivalDate(getRelativeDatePickerValue({ yearOffset: -1 }));
       await animalsPages.arrivalDetails.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
       await animalsJourney.fillArrivalDetails();
       await animalsPages.arrivalDetails.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Transit countries').click();
     });
 
     await test.step('Transited countries with validation errors', async () => {
@@ -65,6 +69,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsPages.transitedCountries.addCountry('France');
       await animalsPages.transitedCountries.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Transport details').click();
     });
 
     await test.step('Continue to declaration', async () => {

@@ -46,6 +46,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
       await animalsPages.commoditySelection.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Commodity details').click();
     });
 
     await test.step('Commodity details', async () => {
@@ -73,6 +75,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importReason.reason('Internal market').check();
       await animalsPages.importReason.purpose('Breeding').check();
       await animalsPages.importReason.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Additional details').click();
     });
 
     await test.step('Additional details', async () => {
@@ -124,7 +128,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importerSelection.select('Import Co UK');
       await animalsPages.importerSelection.saveAndContinue.click();
       await animalsPages.addresses.heading.waitFor();
-      await animalsPages.addresses.continueButton.click();
+      await animalsPages.addresses.addCph.click();
     });
 
     await test.step('CPH number', async () => {
@@ -132,6 +136,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsPages.cphNumber.fillCphNumber();
       await animalsPages.cphNumber.saveAndContinue.click();
+      await animalsPages.addresses.heading.waitFor();
+      await animalsPages.addresses.continueButton.click();
       await animalsPages.overview.heading.waitFor();
     });
 
@@ -141,6 +147,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsJourney.fillArrivalDetails();
       await animalsPages.arrivalDetails.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Transit countries').click();
     });
 
     await test.step('Transited countries', async () => {
@@ -148,6 +156,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsPages.transitedCountries.addCountry('France');
       await animalsPages.transitedCountries.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Transport details').click();
     });
 
     await test.step('Transporter list', async () => {

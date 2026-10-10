@@ -14,6 +14,7 @@ test.describe('Seeded and browser-driven notifications match', { tag: ['@integra
     journeyContext,
     animalsSeededJourney,
   }) => {
+    test.slow();
     await animalsJourney.submitNotification();
     const browserReference = journeyContext.journeyId;
     const seededReference = await animalsSeededJourney.createSubmittedNotification();

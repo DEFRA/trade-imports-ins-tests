@@ -12,7 +12,7 @@ test.describe('Security scan (frontend, lifecycle)', { tag: '@active' }, () => {
     const { journeyId } = journeyContext;
 
     await animalsNotificationActions.amendNotification(journeyId);
-    await expect(animalsPages.overview.journeyStrip).toContainText('Amending');
+    await expect(animalsPages.overview.statusTag).toHaveText('Amend');
 
     await animalsNotificationActions.copyNotification(journeyId);
     await expect(animalsPages.overview.heading).toBeVisible();

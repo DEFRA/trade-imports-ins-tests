@@ -13,8 +13,11 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
     await animalsPages.overview.task('What are you importing?').click();
     await animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
     await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('Commodity details').click();
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
     await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
+    await animalsPages.consignmentDetails.numberOfPackages.fill('1');
     await animalsPages.consignmentDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
@@ -52,8 +55,7 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
     // silently trimmed.
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.saveAndContinue.click();
+    await animalsPages.overview.task('Commodity details').click();
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
     await animalsPages.consignmentDetails.numberOfAnimals.fill('1');
     await animalsPages.consignmentDetails.saveAndContinue.click();
@@ -73,8 +75,7 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
     // With one record left the drop no longer applies — a count of 1 saves.
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.saveAndContinue.click();
+    await animalsPages.overview.task('Commodity details').click();
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
     await animalsPages.consignmentDetails.numberOfAnimals.fill('1');
     await animalsPages.consignmentDetails.saveAndContinue.click();

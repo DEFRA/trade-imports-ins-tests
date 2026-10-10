@@ -11,7 +11,7 @@ import { test, expect } from '@fixtures';
  * the API seed answers only the origin and commodity sections.
  */
 test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
-  test('resubmits an amended notification: Submitted → Amending → Submitted with the edited answer kept', async ({
+  test('resubmits an amended notification: Submitted → Amend → Submitted with the edited answer kept', async ({
     animalsJourney,
     journeyContext,
     pages,
@@ -23,7 +23,7 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
 
     // Enter amend from the dashboard (SUBMITTED → AMEND) — re-enters at the hub.
     await animalsNotificationActions.amendNotification(journeyContext.journeyId);
-    await expect(animalsPages.overview.journeyStrip).toContainText('Amending');
+    await expect(animalsPages.overview.statusTag).toHaveText('Amend');
 
     // Change the country of origin through the amending check your answers page.
     await animalsPages.overview.reviewAndSubmitButton.click();
@@ -36,7 +36,7 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
     await animalsPages.notificationView.changeLink('Change import details').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await animalsPages.originOfImport.selectCountry('Belgium');
-    await animalsPages.originOfImport.saveAndContinue.click();
+    await animalsPages.originOfImport.saveAndReturn.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(countryRow).toContainText('Belgium');
 
@@ -52,7 +52,7 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(countryRow).toContainText('Belgium');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
-    await expect(animalsPages.notificationView.cancelAmendment).not.toBeVisible();
+    await expect(animalsPages.notificationView.cancelAmend).not.toBeVisible();
 
     // And the dashboard offers Amend again for the resubmitted notification.
     await animalsPages.dashboard.open();

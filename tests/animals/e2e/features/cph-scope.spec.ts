@@ -3,29 +3,29 @@ import { test, expect } from '@fixtures';
 test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('the CPH page and addresses-hub row show only when a CPH-triggering commodity line exists', async ({
     animalsJourney,
-    pages,
     animalsPages,
   }) => {
     test.slow();
 
     const journeyId = await animalsJourney.startNotification();
 
-    const page = pages.page;
-    const cphRow = page.locator('.govuk-summary-list__row', {
-      has: page.getByText('County parish holding (CPH) number', { exact: true }),
-    });
+    const { cphRow } = animalsPages.addresses;
 
     // Add one commodity line for the given species, taking the fewest steps.
-    // The animal count is save-blocking on every line, so each box the details
-    // page is showing — the lines added on earlier passes included — is filled
+    // The animal count is save-blocking on every line, and the number of
+    // packages on every line that asks for one, so each box the details page
+    // is showing — the lines added on earlier passes included — is filled
     // before the page will hand back to the hub.
     const addCommodity = async (species: string): Promise<void> => {
       await animalsPages.overview.open(journeyId);
       await animalsPages.overview.task('What are you importing?').click();
       await animalsPages.commoditySelection.selectSpecies([species]);
       await animalsPages.commoditySelection.saveAndContinue.click();
+      await expect(animalsPages.overview.heading).toBeVisible();
+      await animalsPages.overview.task('Commodity details').click();
       await expect(animalsPages.consignmentDetails.heading).toBeVisible();
       await animalsPages.consignmentDetails.fillEveryAnimalCount('1');
+      await animalsPages.consignmentDetails.fillEveryPackageCount('1');
       await animalsPages.consignmentDetails.saveAndContinue.click();
       await expect(animalsPages.overview.heading).toBeVisible();
     };
@@ -53,10 +53,10 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
     await expect(cphRow).toBeVisible();
     await expect(cphRow).toContainText('Not added yet');
 
-    // Hub-row add flow: the Add link opens the CPH page and saving returns to
-    // the addresses hub (not the sequential exit), the row showing the stored
+    // Hub-row add flow: the Add link opens the CPH page (reached only from this
+    // row) and saving returns to the addresses hub, the row showing the stored
     // slash-stripped value.
-    await cphRow.getByRole('link', { name: 'Add' }).click();
+    await animalsPages.addresses.addCph.click();
     await expect(animalsPages.cphNumber.heading).toBeVisible();
     await animalsPages.cphNumber.fillCphNumber();
     await animalsPages.cphNumber.saveAndContinue.click();
@@ -72,9 +72,10 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
     await animalsPages.cphNumber.linkBack.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
 
-    // The sequential fallback stays: Continue from the addresses landing still
-    // walks to the CPH tail page.
+    // The CPH page is reached only from its row: Continue from the addresses
+    // landing returns to Overview.
     await animalsPages.addresses.continueButton.click();
-    await expect(animalsPages.cphNumber.heading).toBeVisible();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.cphNumber.heading).toBeHidden();
   });
 });

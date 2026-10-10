@@ -8,16 +8,19 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
   }) => {
     await animalsJourney.startNotification();
 
-    // Batch-create a Cats commodity line. The animal count is save-blocking,
-    // and a count of 2 keeps the identifier form open after the first record
+    // Batch-create a Cats commodity line. The animal count and the number of
+    // packages are both save-blocking, and a count of 2 keeps the identifier form open after the first record
     // is committed — at the declared count the maximum-reached state replaces
     // it, which is the cap spec's subject, not this one's.
     await animalsPages.overview.task('What are you importing?').click();
     await animalsPages.commoditySelection.selectSpecies(['Felis catus']);
     await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('Commodity details').click();
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
 
     await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
+    await animalsPages.consignmentDetails.numberOfPackages.fill('1');
     await animalsPages.consignmentDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Identification details').click();
@@ -78,10 +81,14 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await animalsPages.overview.task('What are you importing?').click();
     await animalsPages.commoditySelection.selectSpecies(['Bos taurus', 'Salmo salar']);
     await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('Commodity details').click();
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
 
-    // The count is save-blocking on every line the page shows, so both are filled.
+    // The animal count is save-blocking on every line the page shows, and the
+    // number of packages on every line that asks for one, so both are filled.
     await animalsPages.consignmentDetails.fillEveryAnimalCount('1');
+    await animalsPages.consignmentDetails.fillEveryPackageCount('1');
     await animalsPages.consignmentDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Identification details').click();
@@ -106,6 +113,8 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await animalsPages.overview.task('What are you importing?').click();
     await animalsPages.commoditySelection.selectSpecies(['Salmo salar']);
     await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('Commodity details').click();
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
 
     await animalsPages.consignmentDetails.numberOfAnimals.fill('2');

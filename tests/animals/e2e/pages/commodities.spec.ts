@@ -18,9 +18,18 @@ test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-i
   test('offers a search box and lists nothing until it is used', async ({ pages, animalsPages }) => {
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await expect(animalsPages.commoditySelection.searchBox).toBeVisible();
+    await expect(animalsPages.commoditySelection.inset).toBeVisible();
+    await expect(animalsPages.commoditySelection.searchHint).toBeVisible();
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
     await expect(animalsPages.commoditySelection.selectionPanel).toHaveCount(0);
     await expect(animalsPages.commoditySelection.saveAndContinue).toBeVisible();
+  });
+
+  test('explains commodity codes and links out to the Trade Tariff tool', async ({ animalsPages }) => {
+    await animalsPages.commoditySelection.commodityCodeHelp.click();
+    await expect(animalsPages.commoditySelection.tradeTariffLink).toBeVisible();
+    await expect(animalsPages.commoditySelection.tradeTariffLink).toHaveAttribute('href', 'https://www.gov.uk/trade-tariff');
+    await expect(animalsPages.commoditySelection.tradeTariffLink).toHaveAttribute('target', '_blank');
   });
 
   test('lists nothing for a query shorter than three characters', async ({ pages, animalsPages }) => {
@@ -52,9 +61,8 @@ test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-i
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
-    // Commodity details is a hub task of its own, so its back link returns to
-    // the overview. Reopen the selection from the row that owns it.
-    await animalsPages.consignmentDetails.linkBack.click();
+    // Saving returns to the overview. Reopen the selection from the row that
+    // owns it.
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('What are you importing?').click();
 
@@ -85,6 +93,35 @@ test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-i
   test('shows an error summary when submitted empty', async ({ pages, animalsPages }) => {
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
-    await expect(pages.page.getByRole('link', { name: 'Select a commodity' })).toBeVisible();
+    await expect(animalsPages.commoditySelection.selectCommodityErrorLink).toBeVisible();
+    await expect(animalsPages.commoditySelection.searchBox).toHaveAccessibleDescription(/Select a commodity/);
+    await animalsPages.commoditySelection.selectCommodityErrorLink.click();
+    await expect(animalsPages.commoditySelection.searchBox).toBeFocused();
+  });
+
+  test('with results listed, keeps the "Select a commodity" error on the search box', async ({ animalsPages }) => {
+    await animalsPages.commoditySelection.search('Bos');
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.commoditySelection.errorSummary).toBeVisible();
+    await expect(animalsPages.commoditySelection.searchBox).toHaveAccessibleDescription(/Select a commodity/);
+    await expect(animalsPages.commoditySelection.group('Cow (0102)')).toBeVisible();
+    await expect(animalsPages.commoditySelection.group('Cow (0102)')).not.toContainText('Select a commodity');
+    await animalsPages.commoditySelection.selectCommodityErrorLink.click();
+    await expect(animalsPages.commoditySelection.searchBox).toBeFocused();
+  });
+
+  test('save and return to overview: empties a cleared selection and shows the task as To do', async ({ animalsPages }) => {
+    await animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('What are you importing?').click();
+    await animalsPages.commoditySelection.clearAll.click();
+    await animalsPages.commoditySelection.saveAndReturnToOverview.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.commoditySelection.errorSummary).toBeHidden();
+    await expect(animalsPages.overview.taskStatus('What are you importing?')).toHaveText('To do');
+    await animalsPages.overview.task('What are you importing?').click();
+    await expect(animalsPages.commoditySelection.selectionPanel).toHaveCount(0);
   });
 });
