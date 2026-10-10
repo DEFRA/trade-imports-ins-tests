@@ -26,6 +26,11 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
     return this.page.locator('select[name="countryOfOrigin"]');
   }
 
+  // The GOV.UK hint under the country question, by the id govukSelect gives it.
+  get countryHint(): Locator {
+    return this.page.locator('#countryOfOrigin-hint');
+  }
+
   // Every country offered, skipping the empty placeholder option.
   get countryOptions(): Locator {
     return this.countrySelect.locator('option:not([value=""])');
