@@ -54,6 +54,21 @@ export class NotificationApiClient {
     });
   }
 
+  /**
+   * Overwrites one stored answer on a draft, keeping the others: set-up for a page that reads an
+   * answer it would itself refuse. Sends the fulfilments alone, so the notification-shape fields stay
+   * empty until the frontend's next save rebuilds them; the frontend reads its answers from the
+   * fulfilments only.
+   */
+  async overwriteStoredAnswer(id: string, obligationId: string, value: unknown): Promise<Notification> {
+    const { concurrencyToken, fulfilments } = await this.getNotificationFulfilments(id);
+    if (!fulfilments.some((entry) => entry.obligationId === obligationId)) {
+      throw new Error(`Notification ${id} has no stored answer for obligation ${obligationId} to overwrite.`);
+    }
+    const overwritten = fulfilments.map((entry) => (entry.obligationId === obligationId ? { obligationId, value } : entry));
+    return this.saveNotification(id, concurrencyToken, { fulfilments: overwritten });
+  }
+
   async submitNotification(id: string): Promise<Notification> {
     return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/submit`));
   }

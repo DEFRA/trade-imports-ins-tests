@@ -16,6 +16,7 @@ export type PersistedFulfilmentEntry =
 
 export type NotificationFulfilments = {
   referenceNumber: string;
+  concurrencyToken: number;
   fulfilments: PersistedFulfilmentEntry[];
   submittedFulfilments?: PersistedFulfilmentEntry[] | null;
   status: NotificationFulfilmentsStatus;

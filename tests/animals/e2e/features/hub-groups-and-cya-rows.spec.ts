@@ -178,6 +178,10 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
 
     const contactAddress = animalsPages.notificationView.summaryCard('Contact address');
     await expect(value(contactAddress, 'Contact address')).toContainText('Animal and Plant Health Agency');
+
+    await arrivalDetails.getByRole('link', { name: 'Change countries that the consignment will travel through' }).click();
+    await expect(animalsPages.transitedCountries.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/\/transit-countries\?change=1$/);
   });
 
   test('a transit reads its exit border control post and then its destination country, with no port of exit row', async ({

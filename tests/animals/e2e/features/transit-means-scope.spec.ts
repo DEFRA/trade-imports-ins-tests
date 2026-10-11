@@ -29,9 +29,10 @@ test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in
     await saveArrivalWithMeans(animalsPages, 'Air');
     await expect(transitRow).toHaveCount(0);
 
-    // Rail puts the Transit countries row on the hub.
+    // Rail puts the Transit countries row on the hub, To do while no country is saved.
     await saveArrivalWithMeans(animalsPages, 'Rail');
     await expect(transitRow).toHaveCount(1);
+    await expect(animalsPages.overview.taskStatus('Transit countries')).toHaveText('To do');
 
     // So does Road; save two countries from it and the row reads Complete.
     await saveArrivalWithMeans(animalsPages, 'Road');
