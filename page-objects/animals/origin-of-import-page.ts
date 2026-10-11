@@ -11,13 +11,6 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Origin of the import' });
   }
 
-  // The status strip carries the Draft tag and the notification reference, both
-  // drawn from the first request. The reference is minted per notification, so
-  // it is the one thing on this page that changes from run to run.
-  get journeyStrip(): Locator {
-    return this.page.locator('.app-journey-strip');
-  }
-
   // Country of origin is an accessible-autocomplete type-ahead enhancing a
   // native <select>. With JavaScript the enhancement takes the select's id onto
   // the enhanced input and renames the select "countryOfOrigin-select"; without
@@ -31,6 +24,16 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
   // element that carries the country code and submits it with the form.
   get countrySelect(): Locator {
     return this.page.locator('select[name="countryOfOrigin"]');
+  }
+
+  // The GOV.UK hint under the country question, by the id govukSelect gives it.
+  get countryHint(): Locator {
+    return this.page.locator('#countryOfOrigin-hint');
+  }
+
+  // Every country offered, skipping the empty placeholder option.
+  get countryOptions(): Locator {
+    return this.countrySelect.locator('option:not([value=""])');
   }
 
   countryOption(name: string): Locator {
@@ -56,8 +59,23 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
     return this.page.getByRole('radio', { name: value, exact: true });
   }
 
+  get regionRequirementGroup(): Locator {
+    return this.page.getByRole('group', { name: 'Does the consignment have a region of origin code?' });
+  }
+
   get regionCode(): Locator {
     return this.page.getByLabel('Enter the region of origin code', { exact: true });
+  }
+
+  // The fixed country code shown in front of the region code box.
+  get regionCodePrefix(): Locator {
+    return this.page.locator('.govuk-input__prefix');
+  }
+
+  // The box caps typing at five characters; removing the cap submits a longer
+  // code the way an uncapped client would, so the server's own rule is reached.
+  async removeRegionCodeMaxLength(): Promise<void> {
+    await this.regionCode.evaluate((input) => input.removeAttribute('maxlength'));
   }
 
   get internalReference(): Locator {
@@ -70,5 +88,13 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
 
   get errorSummary(): Locator {
     return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
+  }
+
+  errorLinkNamed(message: string): Locator {
+    return this.page.getByRole('link', { name: message });
+  }
+
+  get regionCodeMaxLengthErrorLink(): Locator {
+    return this.page.getByRole('link', { name: 'Region of origin code must be 5 characters or less' });
   }
 }

@@ -10,10 +10,6 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Overview' });
   }
 
-  get journeyStrip(): Locator {
-    return this.page.locator('.app-journey-strip');
-  }
-
   /**
    * Design release 1 reaches the review from a primary button under the task
    * list rather than from a task row, and offers it whatever the notification
@@ -25,5 +21,17 @@ export class AnimalsOverviewPage extends NotificationPage {
 
   task(name: string): Locator {
     return this.page.getByRole('link', { name, exact: true });
+  }
+
+  // Every task row's status tag, so a spec can count the rows the overview draws.
+  get taskStatuses(): Locator {
+    return this.page.locator('.govuk-task-list__status');
+  }
+
+  taskStatus(name: string): Locator {
+    return this.page
+      .locator('.govuk-task-list__item')
+      .filter({ has: this.page.getByRole('link', { name, exact: true }) })
+      .locator('.govuk-task-list__status');
   }
 }

@@ -33,6 +33,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
       await runA11yScan({ exclude: conditionalReasonRadios });
       await animalsPages.importReason.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Additional details').click();
       await animalsPages.additionalDetails.heading.waitFor();
       await animalsPages.additionalDetails.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
@@ -45,6 +47,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importReason.temporaryAdmissionPortOfExit.selectOption({ index: 2 });
       await runA11yScan({ exclude: conditionalReasonRadios });
       await animalsPages.importReason.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Additional details').click();
       await animalsPages.additionalDetails.heading.waitFor();
       await animalsPages.additionalDetails.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();

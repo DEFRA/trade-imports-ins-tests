@@ -41,11 +41,11 @@ test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-fr
   // This test used to expect an error summary here. It passed only because the frontend sent a
   // malformed value for a blank date, which the API rejected — the summary was a 400, not page
   // validation. The frontend now leaves a blank date out of the request.
-  test('saves a draft and moves on when submitted empty', async ({ pages, animalsPages }) => {
+  test('saves a draft and returns to the overview when submitted empty', async ({ pages, animalsPages }) => {
     await animalsPages.arrivalDetails.saveAndContinue.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
-    await expect(animalsPages.transporter.heading).toBeVisible();
+    await expect(animalsPages.overview.heading).toBeVisible();
   });
 
   test('restricts the date picker to one week back and six months ahead', async ({ animalsPages }) => {

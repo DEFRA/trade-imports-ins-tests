@@ -31,6 +31,11 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.page.locator('#transitPortOfExit');
   }
 
+  // Every port offered, skipping the empty placeholder and divider.
+  get transitPortOfExitOptions(): Locator {
+    return this.transitPortOfExit.locator('option:not([value=""])');
+  }
+
   get transitDestinationCountry(): Locator {
     return this.page.locator('#transitDestinationCountry');
   }
@@ -39,8 +44,28 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.page.locator('#transhipmentDestinationCountry');
   }
 
+  // Every country offered, skipping the empty placeholder and divider.
+  get transhipmentDestinationCountryOptions(): Locator {
+    return this.transhipmentDestinationCountry.locator('option:not([value=""])');
+  }
+
+  // Every country offered, skipping the empty placeholder and divider.
+  get transitDestinationCountryOptions(): Locator {
+    return this.transitDestinationCountry.locator('option:not([value=""])');
+  }
+
+  // A territory is coded by ISO 3166-2, the parent country code and a hyphen; a country's alpha-2 code has none.
+  get transhipmentTerritoryOptions(): Locator {
+    return this.transhipmentDestinationCountry.locator('option[value*="-"]');
+  }
+
   get temporaryAdmissionPortOfExit(): Locator {
     return this.page.locator('#temporaryAdmissionPortOfExit');
+  }
+
+  // Every port offered, skipping the empty placeholder and divider.
+  get temporaryAdmissionPortOfExitOptions(): Locator {
+    return this.temporaryAdmissionPortOfExit.locator('option:not([value=""])');
   }
 
   get temporaryAdmissionExitDate(): Locator {
@@ -49,5 +74,9 @@ export class AnimalsImportReasonPage extends NotificationPage {
 
   get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
+  }
+
+  get errorSummary(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
   }
 }

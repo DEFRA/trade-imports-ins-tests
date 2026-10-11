@@ -51,6 +51,27 @@ const plantsLine = {
   'EPPO code': 'QUERO',
 };
 
+test.describe('High-risk plants origin without JavaScript', { tag: '@integration' }, () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('shows no hint, begins with Select a country, and saves the chosen country', async ({ pages, plantsPages, plantsJourney }) => {
+    const reference = await plantsJourney.startNotification();
+    await plantsJourney.chooseCommodityType(POTATOES);
+    await plantsPages.origin.open(reference);
+
+    await expect(plantsPages.origin.countryOfOrigin).toHaveAccessibleName('Country of origin');
+    await expect(plantsPages.origin.countryHint).toHaveCount(0);
+    await expect(plantsPages.origin.countrySelect.locator('option').first()).toHaveText('Select a country');
+
+    await plantsPages.origin.selectCountry(FRANCE);
+    await plantsPages.origin.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+
+    await plantsPages.origin.open(reference);
+    await expect(plantsPages.origin.countrySelect).toHaveValue('FR');
+  });
+});
+
 test.describe('High-risk plants origin section', { tag: '@integration' }, () => {
   test('a country picked from the type-ahead is saved and shown again on return', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
@@ -59,6 +80,9 @@ test.describe('High-risk plants origin section', { tag: '@integration' }, () => 
     await plantsJourney.toOrigin();
 
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
+
+    await expect(plantsPages.origin.countryOfOrigin).toHaveAttribute('placeholder', 'Search for a country');
+    await expect(plantsPages.origin.countryHint).toHaveCount(0);
 
     await plantsPages.origin.selectCountry(FRANCE);
     await plantsPages.origin.btnSaveAndContinue.click();

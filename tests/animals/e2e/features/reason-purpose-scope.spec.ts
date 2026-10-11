@@ -12,11 +12,14 @@ test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-i
     const reasonRow = pages.page.locator('.govuk-task-list__item', { hasText: 'Main reason for import' });
 
     // Internal market: the purpose reveals under the reason, so reason + purpose
-    // go in on one submit and the tail page completes the row.
+    // go in on one submit and the additional details, opened from their own
+    // task, complete the row.
     await animalsPages.overview.task('Main reason for import').click();
     await animalsPages.importReason.reason('Internal market').check();
     await animalsPages.importReason.purpose('Breeding').check();
     await animalsPages.importReason.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('Additional details').click();
     await expect(animalsPages.additionalDetails.heading).toBeVisible();
     await animalsPages.additionalDetails.certifiedFor('Slaughter').check();
     await animalsPages.additionalDetails.saveAndContinue.click();
@@ -30,6 +33,8 @@ test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-i
     await animalsPages.importReason.transitPortOfExit.selectOption({ index: 2 });
     await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
     await animalsPages.importReason.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('Additional details').click();
     await expect(animalsPages.additionalDetails.heading).toBeVisible();
     await animalsPages.additionalDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
@@ -53,6 +58,8 @@ test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-i
     await animalsPages.importReason.reason('Internal market').check();
     await animalsPages.importReason.purpose('Breeding').check();
     await animalsPages.importReason.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('Additional details').click();
     await expect(animalsPages.additionalDetails.heading).toBeVisible();
     await animalsPages.additionalDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();

@@ -48,6 +48,11 @@ export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
     return this.page.locator('#proposedPlaceOfLanding');
   }
 
+  // Every place of landing offered, skipping the empty placeholder option.
+  get placeOfLandingOptions(): Locator {
+    return this.page.locator('select[name="proposedPlaceOfLanding"] option:not([value=""])');
+  }
+
   placeOfLandingOption(name: string): Locator {
     return this.page.getByRole('option', { name, exact: true });
   }

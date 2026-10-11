@@ -15,6 +15,8 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await animalsPages.overview.task('What are you importing?').click();
     await animalsPages.commoditySelection.selectSpecies(['Felis catus']);
     await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('Commodity details').click();
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
 
     await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
@@ -78,6 +80,8 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await animalsPages.overview.task('What are you importing?').click();
     await animalsPages.commoditySelection.selectSpecies(['Bos taurus', 'Salmo salar']);
     await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('Commodity details').click();
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
 
     // The count is save-blocking on every line the page shows, so both are filled.
@@ -106,6 +110,8 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await animalsPages.overview.task('What are you importing?').click();
     await animalsPages.commoditySelection.selectSpecies(['Salmo salar']);
     await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('Commodity details').click();
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
 
     await animalsPages.consignmentDetails.numberOfAnimals.fill('2');

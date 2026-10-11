@@ -37,6 +37,16 @@ export class PlantsOriginPage extends PlantsNotificationPage {
     return this.page.locator('select[name="countryOfOrigin"]');
   }
 
+  /** The GOV.UK hint under the country question, by the id govukSelect gives it. */
+  get countryHint(): Locator {
+    return this.page.locator('#countryOfOrigin-hint');
+  }
+
+  // Every country offered, skipping the empty placeholder option.
+  get countryOptions(): Locator {
+    return this.countrySelect.locator('option:not([value=""])');
+  }
+
   countryOption(name: string): Locator {
     return this.page.getByRole('option', { name, exact: true });
   }
