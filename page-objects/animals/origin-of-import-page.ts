@@ -1,5 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import { SET_BASES } from '@page-objects/shared/sets';
 import type { YesNoValue } from '@domain/shared/constants/yes-no-values';
 
 export class AnimalsOriginOfImportPage extends NotificationPage {
@@ -9,6 +10,15 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Origin of the import' });
+  }
+
+  /** The id of the template this page is open for, read from its `/templates/<id>/origin` URL. */
+  templateIdFromUrl(): string {
+    const match = new URL(this.page.url()).pathname.match(new RegExp(`^${SET_BASES.liveAnimals}/templates/([^/]+)/origin`));
+    if (!match) {
+      throw new Error(`No template id in origin URL: ${this.page.url()}`);
+    }
+    return match[1];
   }
 
   // The status strip carries the Draft tag and the notification reference, both
@@ -70,5 +80,40 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
 
   get errorSummary(): Locator {
     return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
+  }
+
+  /** The tag in the status strip: Draft on a notification, Template in template mode. */
+  get statusTag(): Locator {
+    return this.journeyStrip.locator('.govuk-tag');
+  }
+
+  /** The Draft tag, which only a notification's strip carries. */
+  get draftTag(): Locator {
+    return this.journeyStrip.getByText('Draft');
+  }
+
+  /** The reference minted for a notification (GBN-AG-yy-XXXXXX); a template has none. */
+  get notificationReference(): Locator {
+    return this.page.getByText(/GBN-AG-\d{2}-[0-9A-HJKMNP-TV-Z]{6}/);
+  }
+
+  get caption(): Locator {
+    return this.page.getByText('About the consignment', { exact: true });
+  }
+
+  get btnSaveAndReturn(): Locator {
+    return this.page.getByRole('button', { name: 'Save and return to overview' });
+  }
+
+  get linkCancel(): Locator {
+    return this.page.getByRole('link', { name: 'Cancel' });
+  }
+
+  get alert(): Locator {
+    return this.page.getByRole('alert');
+  }
+
+  get errorSummaryLinks(): Locator {
+    return this.page.locator('.govuk-error-summary').getByRole('link');
   }
 }

@@ -4,6 +4,9 @@ import { BasePage, requireBaseUrl } from '@page-objects/shared/base-page';
 export class InsNotificationTypePage extends BasePage {
   readonly expectedUrl = '/notification-type';
 
+  /** The same question while creating a template: fewer options, Back to Manage templates. */
+  readonly templateModeUrl = '/notification-type/template';
+
   /** The fieldset legend is the page heading, with the caption inside it. */
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: /What are you importing\?/ });

@@ -20,6 +20,7 @@ import { AnimalsOverviewPage } from '@page-objects/animals/overview-page';
 import { AnimalsPartyEditPage } from '@page-objects/animals/party-edit-page';
 import { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
 import { AnimalsPrivateTransporterPage } from '@page-objects/animals/private-transporter-page';
+import { AnimalsTemplateNamePage } from '@page-objects/animals/template-name-page';
 import { AnimalsTransitedCountriesPage } from '@page-objects/animals/transited-countries-page';
 import { AnimalsTransporterAddPage } from '@page-objects/animals/transporter-add-page';
 import { AnimalsTransporterPage } from '@page-objects/animals/transporter-page';
@@ -29,6 +30,7 @@ export function createAnimalsPages(page: Page) {
   return {
     dashboard: new AnimalsDashboardPage(page),
     manageTemplates: new AnimalsManageTemplatesPage(page),
+    templateName: new AnimalsTemplateNamePage(page),
     overview: new AnimalsOverviewPage(page),
     originOfImport: new AnimalsOriginOfImportPage(page),
     commoditySelection: new AnimalsCommoditySelectionPage(page),

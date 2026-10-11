@@ -13,6 +13,11 @@ export class AnimalsManageTemplatesPage extends BasePage {
     return this.page.getByText('Select, manage or create new notification templates');
   }
 
+  /** A link styled as a button, so it carries the button role. */
+  get btnCreateNewTemplate(): Locator {
+    return this.page.getByRole('button', { name: 'Create new template', exact: true });
+  }
+
   get myTemplatesHeading(): Locator {
     return this.page.getByRole('heading', { level: 2, name: 'My templates' });
   }
