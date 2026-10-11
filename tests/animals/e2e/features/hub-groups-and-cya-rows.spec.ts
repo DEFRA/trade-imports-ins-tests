@@ -95,12 +95,18 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expect(pages.page.getByRole('heading', { level: 2, name: '1. About the consignment' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '2. Description of the goods' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '3. Transport and arrival' })).toBeVisible();
-    // Documents are optional, so the Uploaded documents section stands even with nothing uploaded.
+    // Documents are optional, so section 4 stands with a single Document 1 card even with nothing uploaded.
     await expect(pages.page.getByRole('heading', { level: 2, name: '4. Uploaded documents' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '5. Consignment addresses' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '6. Contact address' })).toBeVisible();
-    await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
-    await expect(animalsPages.notificationView.changeLink('Change uploaded documents')).toBeVisible();
+    const documentCard = animalsPages.notificationView.summaryCard('Document 1');
+    await expect(documentCard.getByRole('term')).toHaveText(['Document reference']);
+    await expect(value(documentCard, 'Document reference')).toHaveText('Not applicable');
+    await expect(pages.page.getByText('You have not added any documents yet.')).toHaveCount(0);
+    await expect(animalsPages.notificationView.changeLink('Change document 1')).toHaveAttribute(
+      'href',
+      /\/accompanying-documents\?change=1$/,
+    );
 
     for (const title of [
       'Origin of import',
@@ -122,7 +128,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     ]) {
       await expect(pages.page.getByRole('heading', { name: subsection })).toHaveCount(0);
     }
-    // The level-4 headings are the Bos Taurus species block in the Cow card and "Transit countries" inside Arrival details, because this journey uploads no documents.
+    // The level-4 headings are the Bos Taurus species block in the Cow card and "Transit countries" inside Arrival details, and no document card adds one.
     await expect(pages.page.getByRole('heading', { level: 4 })).toHaveText(['Bos Taurus', 'Transit countries']);
     await expect(pages.page.getByRole('heading', { level: 5 })).toHaveText(['Identification details']);
 
