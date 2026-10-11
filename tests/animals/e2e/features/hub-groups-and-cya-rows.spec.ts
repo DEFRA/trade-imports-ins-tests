@@ -115,13 +115,12 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     ]) {
       await expect(pages.page.getByRole('heading', { name: subsection })).toHaveCount(0);
     }
-    // The only level-4 heading is "Animal details" in the Cow card, because this journey uploads no documents.
-    await expect(pages.page.getByRole('heading', { level: 4, name: 'Animal details' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 4 })).toHaveCount(1);
+    // The level-4 headings are "Animal details" in the Cow card and "Transit countries" inside Arrival details, because this journey uploads no documents.
+    await expect(pages.page.getByRole('heading', { level: 4 })).toHaveText(['Animal details', 'Transit countries']);
 
     const importDetails = animalsPages.notificationView.summaryCard('Origin of import');
     await expect(value(importDetails, 'Country of origin')).toHaveText('France');
-    await expect(value(importDetails, 'Region of origin code required')).toHaveText('Yes');
+    await expect(importDetails.getByText('Region of origin code required', { exact: true })).toHaveCount(0);
     await expect(value(importDetails, 'Region of origin code')).toHaveText('FR-75');
     await expect(value(importDetails, 'Internal reference number')).toHaveText('Imports456GB');
 
@@ -146,17 +145,26 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
 
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(value(arrivalDetails, 'Port of entry')).toHaveText('Aberdeen Harbour (GB ABD)');
-    await expect(value(arrivalDetails, 'Arrival date at port of entry')).toHaveText(ARRIVAL_DATE);
+    await expect(value(arrivalDetails, 'Arrival date at destination')).toHaveText(ARRIVAL_DATE);
     await expect(value(arrivalDetails, 'Means of transport to the port of entry')).toHaveText('Road');
     await expect(value(arrivalDetails, 'Transport identification')).toHaveText('FR-892-LK');
     await expect(value(arrivalDetails, 'Transport document reference')).toHaveText('CMR-2026-884721');
 
-    const transitCountries = animalsPages.notificationView.summaryCard('Transit countries');
+    await expect(arrivalDetails.getByRole('heading', { level: 4, name: 'Transit countries', exact: true })).toBeVisible();
     // Read back in the order they were added, not alphabetically.
-    await expect(value(transitCountries, 'Countries that the consignment will travel through')).toHaveText('France, Belgium');
+    await expect(value(arrivalDetails, 'Countries that the consignment will travel through')).toHaveText('France, Belgium');
+    await expect(arrivalDetails.getByRole('link', { name: 'Change countries that the consignment will travel through' })).toHaveAttribute(
+      'href',
+      /\/transit-countries\?change=1$/,
+    );
+    await expect(pages.page.getByRole('heading', { level: 3, name: 'Transit countries', exact: true })).toHaveCount(0);
 
     const transportDetails = animalsPages.notificationView.summaryCard('Transport details');
+    await expect(transportDetails.getByRole('term')).toHaveText(['Name', 'Address', 'Country', 'Approval number', 'Type']);
     await expect(value(transportDetails, 'Name')).toContainText('García Livestock Transport SL');
+    await expect(value(transportDetails, 'Address')).toContainText('43 East Hague Extension');
+    await expect(value(transportDetails, 'Country')).toHaveText('Switzerland');
+    await expect(value(transportDetails, 'Approval number')).toHaveText('ES-T2-45001294');
     await expect(value(transportDetails, 'Type')).toHaveText('Commercial');
 
     const rolesAndAddresses = animalsPages.notificationView.summaryCard('Addresses');
@@ -170,5 +178,46 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
 
     const contactAddress = animalsPages.notificationView.summaryCard('Contact address');
     await expect(value(contactAddress, 'Contact address')).toContainText('Animal and Plant Health Agency');
+  });
+
+  test('a transit reads its exit border control post and then its destination country, with no port of exit row', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.toImportReason();
+    const journeyId = animalsPages.importReason.journeyIdFromUrl();
+    await animalsPages.importReason.reason('Transit').check();
+    const port = await animalsPages.importReason.transitPortOfExitOptions.first().getAttribute('value');
+    await animalsPages.importReason.transitPortOfExit.selectOption(port);
+    await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
+    await animalsPages.importReason.saveAndContinue.click();
+
+    await animalsPages.notificationView.open(journeyId);
+
+    const reasonCard = animalsPages.notificationView.summaryCard('Main import reason');
+    await expect(reasonCard.getByRole('term')).toHaveText(['Main import reason', 'Exit border control post', 'Destination country']);
+    await expect(animalsPages.notificationView.summaryValue(reasonCard, 'Exit border control post')).toContainText(port);
+    await expect(animalsPages.notificationView.summaryValue(reasonCard, 'Destination country')).toHaveText('France');
+    await expect(reasonCard.getByText('Port of exit', { exact: true })).toHaveCount(0);
+  });
+
+  test('an overland notification with no transit countries reads Not applicable in Arrival details and goes on to the declaration', async ({
+    animalsJourney,
+    animalsPages,
+    pages,
+  }) => {
+    test.slow();
+    await animalsJourney.toReview({ transitCountries: [] });
+
+    const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
+    await expect(
+      animalsPages.notificationView.summaryValue(arrivalDetails, 'Countries that the consignment will travel through'),
+    ).toHaveText('Not applicable');
+    await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
+    await expect(pages.page.getByText('Complete transit countries')).toHaveCount(0);
+
+    await animalsPages.notificationView.continueButton.click();
+
+    await expect(animalsPages.declaration.heading).toBeVisible();
   });
 });

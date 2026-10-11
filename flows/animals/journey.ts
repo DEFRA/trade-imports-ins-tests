@@ -211,17 +211,22 @@ export class AnimalsJourney {
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
   }
 
-  async answerTransport(): Promise<void> {
+  // Transit countries are optional for submission, so an empty list leaves the
+  // task untouched.
+  async answerTransport(transitCountries: string[] = ['France', 'Belgium']): Promise<void> {
     await this.animalsPages.overview.task('Arrival details').click();
     await this.fillArrivalDetails();
     await this.animalsPages.arrivalDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    await this.animalsPages.overview.task('Transit countries').click();
-    await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
-    await this.animalsPages.transitedCountries.addCountry('France');
-    await this.animalsPages.transitedCountries.addCountry('Belgium');
-    await this.animalsPages.transitedCountries.saveAndContinue.click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    if (transitCountries.length > 0) {
+      await this.animalsPages.overview.task('Transit countries').click();
+      await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
+      for (const country of transitCountries) {
+        await this.animalsPages.transitedCountries.addCountry(country);
+      }
+      await this.animalsPages.transitedCountries.saveAndContinue.click();
+      await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    }
     await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
     await this.animalsPages.transporter.transporter('García Livestock Transport SL').check();
@@ -236,13 +241,13 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async completeAnswerSections(): Promise<void> {
+  async completeAnswerSections({ transitCountries }: { transitCountries?: string[] } = {}): Promise<void> {
     await this.answerOrigin({ requiresRegionCode: 'Yes', internalReference: 'Imports456GB' });
     await this.answerCommodity();
     await this.answerAnimalIdentification();
     await this.answerReasonAndAdditionalDetails();
     await this.answerAddresses();
-    await this.answerTransport();
+    await this.answerTransport(transitCountries);
     await this.answerContact();
   }
 
@@ -348,9 +353,9 @@ export class AnimalsJourney {
     await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
   }
 
-  async toReview(): Promise<void> {
+  async toReview(options: { transitCountries?: string[] } = {}): Promise<void> {
     if (!this.context.journeyId) await this.startNotification();
-    await this.completeAnswerSections();
+    await this.completeAnswerSections(options);
     await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
