@@ -95,6 +95,7 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
     await animalsJourney.startNotification();
     await animalsPages.overview.task(ORIGIN_TASK).click();
     await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
+    await animalsPages.originOfImport.removeRegionCodeMaxLength();
     await animalsPages.originOfImport.regionCode.fill('ABCDEF');
 
     // Act

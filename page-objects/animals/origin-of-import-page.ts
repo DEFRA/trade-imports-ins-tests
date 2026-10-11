@@ -59,8 +59,18 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
     return this.page.getByRole('radio', { name: value, exact: true });
   }
 
+  get regionRequirementGroup(): Locator {
+    return this.page.getByRole('group', { name: 'Does the consignment have a region of origin code?' });
+  }
+
   get regionCode(): Locator {
     return this.page.getByLabel('Enter the region of origin code', { exact: true });
+  }
+
+  // The box caps typing at five characters; removing the cap submits a longer
+  // code the way an uncapped client would, so the server's own rule is reached.
+  async removeRegionCodeMaxLength(): Promise<void> {
+    await this.regionCode.evaluate((input) => input.removeAttribute('maxlength'));
   }
 
   get internalReference(): Locator {
@@ -73,6 +83,10 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
 
   get errorSummary(): Locator {
     return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
+  }
+
+  errorLinkNamed(message: string): Locator {
+    return this.page.getByRole('link', { name: message });
   }
 
   get regionCodeMaxLengthErrorLink(): Locator {
