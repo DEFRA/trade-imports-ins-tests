@@ -43,19 +43,21 @@ test.describe('Horse by sea under temporary admission', { tag: ['@integration'] 
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 3, name: 'Main import reason' })).toBeVisible();
 
-    const importDetails = animalsPages.notificationView.summaryCard('Import details');
+    const importDetails = animalsPages.notificationView.summaryCard('Origin of import');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Ireland');
 
     const speciesCard = animalsPages.notificationView.summaryCard('Horse (0101) — Equus caballus');
     await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText('Equus caballus');
     await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('1');
 
-    const reasonForImport = animalsPages.notificationView.summaryCard('Reason for import');
-    await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Reason for import')).toHaveText('Temporary admission horses');
+    const reasonForImport = animalsPages.notificationView.summaryCard('Main import reason');
+    await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Main import reason')).toHaveText(
+      'Temporary admission horses',
+    );
     await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Exit date')).toHaveText(TEMPORARY_ADMISSION_EXIT_DATE);
     await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Port of exit')).toContainText('Holyhead Port');
 
-    const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional animal details');
+    const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional details');
     await expect(animalsPages.notificationView.summaryValue(additionalAnimalDetails, 'Certified for')).toHaveText(
       'Registered equine animal',
     );

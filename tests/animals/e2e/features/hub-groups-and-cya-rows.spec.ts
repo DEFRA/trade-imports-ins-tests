@@ -95,31 +95,42 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expect(pages.page.getByRole('heading', { level: 2, name: '1. About the consignment' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '2. Description of the goods' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '3. Transport and arrival' })).toBeVisible();
-    // Documents are optional, so the section stands even with nothing uploaded.
-    await expect(pages.page.getByRole('heading', { level: 2, name: '4. Documents' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 2, name: '5. Consignment parties' })).toBeVisible();
+    // Documents are optional, so the Uploaded documents section stands even with nothing uploaded.
+    await expect(pages.page.getByRole('heading', { level: 2, name: '4. Uploaded documents' })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { level: 2, name: '5. Consignment addresses' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '6. Contact address' })).toBeVisible();
     await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
     await expect(animalsPages.notificationView.changeLink('Change uploaded documents')).toBeVisible();
 
-    await expect(pages.page.getByRole('heading', { level: 3, name: 'Where is this consignment coming from?' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 3, name: 'Commodity details' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 3, name: 'Additional details' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 3, name: 'Main import reason' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 3, name: 'Main reason for import' })).toHaveCount(0);
+    for (const title of ['Origin of import', 'Main import reason', 'Additional details', 'Addresses', 'Contact address']) {
+      await expect(pages.page.getByRole('heading', { level: 3, name: title, exact: true })).toBeVisible();
+    }
+    for (const subsection of [
+      'Where is this consignment coming from?',
+      'Commodity details',
+      'Upload documents',
+      'Roles and addresses',
+      'Contact address for this consignment',
+      'Main reason for import',
+    ]) {
+      await expect(pages.page.getByRole('heading', { name: subsection })).toHaveCount(0);
+    }
+    // The only level-4 heading is "Animal details" in the Cow card, because this journey uploads no documents.
+    await expect(pages.page.getByRole('heading', { level: 4, name: 'Animal details' })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { level: 4 })).toHaveCount(1);
 
-    const importDetails = animalsPages.notificationView.summaryCard('Import details');
+    const importDetails = animalsPages.notificationView.summaryCard('Origin of import');
     await expect(value(importDetails, 'Country of origin')).toHaveText('France');
     await expect(value(importDetails, 'Region of origin code required')).toHaveText('Yes');
     await expect(value(importDetails, 'Region of origin code')).toHaveText('FR-75');
     await expect(value(importDetails, 'Internal reference number')).toHaveText('Imports456GB');
 
-    const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional animal details');
+    const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional details');
     await expect(value(additionalAnimalDetails, 'Certified for')).toHaveText('Slaughter');
     await expect(value(additionalAnimalDetails, 'Includes unweaned animals')).toHaveText('No');
 
-    const reasonForImport = animalsPages.notificationView.summaryCard('Reason for import');
-    await expect(value(reasonForImport, 'Reason for import')).toHaveText('Internal market');
+    const reasonForImport = animalsPages.notificationView.summaryCard('Main import reason');
+    await expect(value(reasonForImport, 'Main import reason')).toHaveText('Internal market');
     await expect(value(reasonForImport, 'Purpose in the market')).toHaveText('Breeding');
 
     const speciesCard = animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus');
@@ -148,7 +159,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expect(value(transportDetails, 'Name')).toContainText('García Livestock Transport SL');
     await expect(value(transportDetails, 'Type')).toHaveText('Commercial');
 
-    const rolesAndAddresses = animalsPages.notificationView.summaryCard('Roles and addresses');
+    const rolesAndAddresses = animalsPages.notificationView.summaryCard('Addresses');
     await expect(value(rolesAndAddresses, 'Place of origin')).toContainText('Origin Farm');
     await expect(value(rolesAndAddresses, 'Consignor')).toContainText('Astra Rosales');
     await expect(value(rolesAndAddresses, 'Consignee')).toContainText('British Livestock Ltd');
@@ -157,7 +168,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     // The CYA renders the CPH normalised (separators stripped), not as typed.
     await expect(value(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText('123456789');
 
-    const contactAddress = animalsPages.notificationView.summaryCard('Contact address for this consignment');
+    const contactAddress = animalsPages.notificationView.summaryCard('Contact address');
     await expect(value(contactAddress, 'Contact address')).toContainText('Animal and Plant Health Agency');
   });
 });

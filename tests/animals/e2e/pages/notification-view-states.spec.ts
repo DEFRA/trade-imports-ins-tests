@@ -15,12 +15,12 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(pages.page.getByRole('heading', { name: '1. About the consignment' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '2. Description of the goods' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '3. Transport and arrival' })).toBeVisible();
-      await expect(pages.page.getByRole('heading', { name: '4. Documents' })).toBeVisible();
-      await expect(pages.page.getByRole('heading', { name: '5. Consignment parties' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: '4. Uploaded documents' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: '5. Consignment addresses' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '6. Contact address' })).toBeVisible();
       await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toBeVisible();
       await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
-      await expect(animalsPages.notificationView.summaryCard('Import details')).toContainText('France');
+      await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
       await expect(animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus')).toContainText('Number of animals');
     });
 
@@ -30,7 +30,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     });
 
     test('shows Change links for the recorded answers', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
+      await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
       await expect(animalsPages.notificationView.changeLink('Change commodity 1')).toBeVisible();
     });
 
@@ -100,7 +100,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     });
 
     test('still renders the recorded answers after submission', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.summaryCard('Import details')).toContainText('France');
+      await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
       await expect(animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus')).toBeVisible();
     });
   });

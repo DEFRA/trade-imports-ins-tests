@@ -9,7 +9,7 @@ test.describe('All operator addresses', { tag: ['@integration', '@duplicated-in-
 
     await animalsJourney.toReview();
 
-    const card = animalsPages.notificationView.summaryCard('Roles and addresses');
+    const card = animalsPages.notificationView.summaryCard('Addresses');
     const operator = (key: string) =>
       card
         .locator('.govuk-summary-list__row')

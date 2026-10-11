@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
-const CHANGE_IMPORT_DETAILS = 'Change import details';
+const CHANGE_ORIGIN_OF_IMPORT = 'Change origin of import';
 const AMENDED_REFERENCE = 'AMENDED-REF';
 const AMEND = 'Amend';
 
@@ -35,7 +35,7 @@ test.describe('Amendment page endings', { tag: ['@integration'] }, () => {
   }) => {
     const reference = await animalsSeededJourney.createAmendNotification();
     await animalsPages.notificationView.open(reference);
-    await animalsPages.notificationView.changeLink(CHANGE_IMPORT_DETAILS).click();
+    await animalsPages.notificationView.changeLink(CHANGE_ORIGIN_OF_IMPORT).click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
 
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
@@ -58,7 +58,7 @@ test.describe('Amendment page endings', { tag: ['@integration'] }, () => {
   }) => {
     const reference = await animalsSeededJourney.createAmendNotification();
     await animalsPages.notificationView.open(reference);
-    await animalsPages.notificationView.changeLink(CHANGE_IMPORT_DETAILS).click();
+    await animalsPages.notificationView.changeLink(CHANGE_ORIGIN_OF_IMPORT).click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
 
     await animalsPages.originOfImport.saveAndContinue.click();

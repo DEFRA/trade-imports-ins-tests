@@ -55,7 +55,7 @@ test.describe('Addresses are copied, not linked', { tag: ['@integration'] }, () 
     // The full details on check-your-answers are still the ones copied at selection.
     const journeyId = animalsPages.addresses.journeyIdFromUrl();
     await animalsPages.notificationView.open(journeyId);
-    const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+    const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
     await expect(consignorCyaRow).toContainText(originalName);
     await expect(consignorCyaRow).toContainText('Carlisle');
     await expect(consignorCyaRow).toContainText('CA1 1AA');
@@ -95,7 +95,7 @@ test.describe('Addresses are copied, not linked', { tag: ['@integration'] }, () 
 
     const journeyId = animalsPages.addresses.journeyIdFromUrl();
     await animalsPages.notificationView.open(journeyId);
-    const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+    const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
     await expect(consignorCyaRow).toContainText(record.name);
     await expect(consignorCyaRow).toContainText(record.addressLine1);
     await expect(consignorCyaRow).toContainText(record.addressLine2);
@@ -150,7 +150,7 @@ test.describe('Addresses are copied, not linked', { tag: ['@integration'] }, () 
     await expect(animalsPages.addresses.addParty('Consignor or exporter')).toHaveCount(0);
 
     await animalsPages.notificationView.open(journeyId);
-    const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+    const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
     await expect(consignorCyaRow).toContainText(name);
     await expect(consignorCyaRow).toContainText('Carlisle');
     await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
@@ -201,9 +201,9 @@ test.describe('Addresses are copied, not linked', { tag: ['@integration'] }, () 
     // Named at the top of the page and against the role's own row, with the address still shown.
     await animalsPages.notificationView.open(journeyId);
     const message = 'Correct the address details for the consignor';
-    const consignorRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+    const consignorRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
     await expect(animalsPages.notificationView.errorSummary).toContainText(message);
-    await expect(animalsPages.notificationView.partyError('Roles and addresses', 'Consignor')).toContainText(message);
+    await expect(animalsPages.notificationView.partyError('Addresses', 'Consignor')).toContainText(message);
     await expect(consignorRow).toContainText(name);
     await expect(consignorRow).toContainText('Carlisle');
 

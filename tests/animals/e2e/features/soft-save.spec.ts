@@ -12,7 +12,7 @@ const COMMODITY_DETAILS_TASK = 'Commodity details';
 const ADDITIONAL_DETAILS_TASK = 'Additional details';
 const IMPOSSIBLE_EXIT_DATE = '31/2/2026';
 const EXIT_DATE_ERROR = 'Enter a real date';
-const CHANGE_REASON_FOR_IMPORT = 'Change reason for import';
+const CHANGE_REASON_FOR_IMPORT = 'Change main import reason';
 
 test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
   test('main reason for import: when a required answer is missing, saves, leaves the task not complete and keeps the answers', async ({
@@ -141,8 +141,8 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
     // Assert
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    const reasonCard = animalsPages.notificationView.summaryCard('Reason for import');
-    await expect(animalsPages.notificationView.summaryValue(reasonCard, 'Reason for import')).toHaveText('Transit');
+    const reasonCard = animalsPages.notificationView.summaryCard('Main import reason');
+    await expect(animalsPages.notificationView.summaryValue(reasonCard, 'Main import reason')).toHaveText('Transit');
   });
 
   test('additional details: when both questions are unanswered, saves without an error and keeps the earlier answers', async ({

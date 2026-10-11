@@ -28,12 +28,12 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
     // Change the country of origin through the amending check your answers page.
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
+    await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
     await expect(animalsPages.notificationView.changeLink('Change commodity 1')).toBeVisible();
     expect(await pages.page.getByRole('link', { name: /^Change/ }).count()).toBeGreaterThanOrEqual(4);
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
     await expect(countryRow).toContainText('France');
-    await animalsPages.notificationView.changeLink('Change import details').click();
+    await animalsPages.notificationView.changeLink('Change origin of import').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await animalsPages.originOfImport.selectCountry('Belgium');
     await animalsPages.originOfImport.saveAndReturn.click();

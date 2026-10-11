@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Change from check your answers', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('a Change link opens the answering page with change context and the save returns to check your answers with the new value', async ({
+  test('a Change link opens the answering page with change context and the save returns to check your answers with the new value, for origin, additional details, arrival details and contact address, and the Addresses card opens the addresses page', async ({
     animalsSeededJourney,
     pages,
     animalsPages,
@@ -16,7 +16,7 @@ test.describe('Change from check your answers', { tag: ['@integration', '@duplic
     // the save exits back to check your answers instead of the flow target.
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
     await expect(countryRow).toContainText('France');
-    await animalsPages.notificationView.changeLink('Change import details').click();
+    await animalsPages.notificationView.changeLink('Change origin of import').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
     await animalsPages.originOfImport.selectCountry('Belgium');
@@ -25,12 +25,12 @@ test.describe('Change from check your answers', { tag: ['@integration', '@duplic
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(countryRow).toContainText('Belgium');
 
-    // Additional animal details leg: without change context this save would
+    // Additional details leg: without change context this save would
     // continue into the consignment flow; under change context it returns to
     // the summary.
     const certifiedForRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Certified for' });
     await expect(certifiedForRow).toContainText('Slaughter');
-    await animalsPages.notificationView.changeLink('Change additional animal details').click();
+    await animalsPages.notificationView.changeLink('Change additional details').click();
     await expect(animalsPages.additionalDetails.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/additional-details\?change=1$/);
     await animalsPages.additionalDetails.certifiedFor('Exhibition').check();
@@ -50,5 +50,29 @@ test.describe('Change from check your answers', { tag: ['@integration', '@duplic
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(meansRow).toContainText('Sea');
+
+    // Addresses leg: the card's one Change link opens the roles and addresses page.
+    await animalsPages.notificationView.changeLink('Change addresses').click();
+    await expect(animalsPages.addresses.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/\/addresses\?change=1$/);
+    await pages.page.goBack();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+
+    // Contact address leg: the card's Change link opens the contact address page,
+    // and saving a different address returns to the review showing it in place of the seeded one.
+    const seeded = 'Animal and Plant Health Agency';
+    const contact = 'Danish Meat Export ApS';
+    const contactRow = animalsPages.notificationView.partyRow('Contact address', 'Contact address');
+    await expect(contactRow).toContainText(seeded);
+    await expect(contactRow).not.toContainText(contact);
+    await animalsPages.notificationView.changeLink('Change contact address').click();
+    await expect(animalsPages.contactAddress.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/\/consignment\/contact\/select\?change=1$/);
+    await animalsPages.contactAddress.address(contact).check();
+    await animalsPages.contactAddress.saveAndContinue.click();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/\/notification-view$/);
+    await expect(contactRow).toContainText(contact);
+    await expect(contactRow).not.toContainText(seeded);
   });
 });

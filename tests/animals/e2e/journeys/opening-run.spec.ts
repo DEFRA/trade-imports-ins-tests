@@ -38,7 +38,7 @@ test.describe('Opening run', { tag: ['@integration'] }, () => {
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
 
-    const importDetails = animalsPages.notificationView.summaryCard('Import details');
+    const importDetails = animalsPages.notificationView.summaryCard('Origin of import');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Region of origin code')).toHaveText('FR-75');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Internal reference number')).toHaveText('CATTLE-2026-01');
 
@@ -46,17 +46,17 @@ test.describe('Opening run', { tag: ['@integration'] }, () => {
     await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText('Bos taurus');
     await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('2');
 
-    const reasonForImport = animalsPages.notificationView.summaryCard('Reason for import');
-    await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Reason for import')).toHaveText('Internal market');
+    const reasonForImport = animalsPages.notificationView.summaryCard('Main import reason');
+    await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Main import reason')).toHaveText('Internal market');
     await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Purpose in the market')).toHaveText('Breeding');
 
-    const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional animal details');
+    const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional details');
     await expect(animalsPages.notificationView.summaryValue(additionalAnimalDetails, 'Certified for')).toHaveText('Further keeping');
 
     const transportDetails = animalsPages.notificationView.summaryCard('Transport details');
     await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Name')).toContainText('García Livestock Transport SL');
 
-    const rolesAndAddresses = animalsPages.notificationView.summaryCard('Roles and addresses');
+    const rolesAndAddresses = animalsPages.notificationView.summaryCard('Addresses');
     await expect(animalsPages.notificationView.summaryValue(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText(
       '123456789',
     );
@@ -84,7 +84,7 @@ test.describe('Opening run', { tag: ['@integration'] }, () => {
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/notification-view$`));
-    await expect(animalsPages.notificationView.errorSummary).toContainText('Complete reason for import');
+    await expect(animalsPages.notificationView.errorSummary).toContainText('Complete main import reason');
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete roles and addresses');
 
     await animalsPages.notificationView.continueButton.click();

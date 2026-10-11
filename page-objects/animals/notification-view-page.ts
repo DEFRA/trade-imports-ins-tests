@@ -31,8 +31,9 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('link', { name });
   }
 
+  /** The card whose title heading is exactly `name`. */
   summaryCard(name: string): Locator {
-    return this.page.locator('.govuk-summary-card', { hasText: name });
+    return this.page.locator('.govuk-summary-card').filter({ has: this.page.getByRole('heading', { name, exact: true }) });
   }
 
   summaryValue(card: Locator, key: string): Locator {

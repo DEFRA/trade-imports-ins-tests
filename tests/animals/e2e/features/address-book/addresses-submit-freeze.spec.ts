@@ -25,7 +25,7 @@ test.describe('Submitted addresses keep their copy', { tag: ['@integration'] }, 
 
     const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
-    await animalsPages.notificationView.changeLink('Change roles and addresses').click();
+    await animalsPages.notificationView.changeLink('Change addresses').click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await animalsPages.addresses.changeParty('Place of origin').click();
     await animalsPages.placeOfOriginSelection.select(originalName);
@@ -34,7 +34,7 @@ test.describe('Submitted addresses keep their copy', { tag: ['@integration'] }, 
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
 
-    const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
+    const originRow = animalsPages.notificationView.partyRow('Addresses', 'Place of origin');
     await expect(originRow).toContainText(originalName);
 
     await animalsPages.notificationView.continueButton.click();
@@ -101,13 +101,13 @@ test.describe('Submitted addresses keep their copy', { tag: ['@integration'] }, 
 
     const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
-    await animalsPages.notificationView.changeLink('Change roles and addresses').click();
+    await animalsPages.notificationView.changeLink('Change addresses').click();
     await animalsPages.addresses.changeParty('Place of origin').click();
     await animalsPages.placeOfOriginSelection.select(originalName);
     await animalsPages.placeOfOriginSelection.saveAndContinue.click();
     await animalsPages.addresses.continueButton.click();
 
-    const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
+    const originRow = animalsPages.notificationView.partyRow('Addresses', 'Place of origin');
     await expect(originRow).toContainText(originalName);
 
     await animalsPages.notificationView.continueButton.click();

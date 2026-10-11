@@ -8,7 +8,7 @@ const REMOVED_INTERNAL_REFERENCE_LIMIT = 'It can be up to 58 characters.';
 const INTERNAL_REFERENCE_LIMIT_ERROR = 'Internal reference must be 58 characters or less';
 const ORIGIN_TASK = 'Where is this consignment coming from?';
 const COMPLETE = 'Complete';
-const IMPORT_DETAILS = 'Import details';
+const ORIGIN_OF_IMPORT_CARD = 'Origin of import';
 const REGION_CODE_ROW = 'Region of origin code';
 const NOT_APPLICABLE = 'Not applicable';
 const CANARY_ISLANDS = 'Canary Islands (Spain)';
@@ -113,7 +113,7 @@ test.describe('Origin of the import page', { tag: ['@integration', '@duplicated-
 
     await animalsPages.notificationView.open(journeyId);
     await expect(
-      animalsPages.notificationView.summaryValue(animalsPages.notificationView.summaryCard(IMPORT_DETAILS), REGION_CODE_ROW),
+      animalsPages.notificationView.summaryValue(animalsPages.notificationView.summaryCard(ORIGIN_OF_IMPORT_CARD), REGION_CODE_ROW),
     ).toHaveText(NOT_APPLICABLE);
     await animalsPages.originOfImport.open(journeyId);
     await expect(animalsPages.originOfImport.radioRequiresOriginCode('No')).toBeChecked();
@@ -126,7 +126,7 @@ test.describe('Origin of the import page', { tag: ['@integration', '@duplicated-
   }) => {
     const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
     const regionCodeValue = () =>
-      animalsPages.notificationView.summaryValue(animalsPages.notificationView.summaryCard(IMPORT_DETAILS), REGION_CODE_ROW);
+      animalsPages.notificationView.summaryValue(animalsPages.notificationView.summaryCard(ORIGIN_OF_IMPORT_CARD), REGION_CODE_ROW);
     await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
     await animalsPages.originOfImport.regionCode.fill('75');
     await animalsPages.originOfImport.internalReference.fill('A'.repeat(59));

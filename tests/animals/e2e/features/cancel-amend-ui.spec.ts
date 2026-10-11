@@ -67,7 +67,7 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
       await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(journeyContext.referenceNumber)}$`));
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
       await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
-      await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
+      await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
     });
 
     test('Cancel amend on a question page opens the confirmation page and Go back keeps the amendment', async ({
@@ -87,7 +87,7 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
 
       await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(reference)}$`));
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
-      await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
+      await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
     });
   });
 
@@ -101,7 +101,7 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
       const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
       await expect(countryRow).toContainText('France');
 
-      await animalsPages.notificationView.changeLink('Change import details').click();
+      await animalsPages.notificationView.changeLink('Change origin of import').click();
       await expect(animalsPages.originOfImport.heading).toBeVisible();
       await animalsPages.originOfImport.selectCountry('Belgium');
       await animalsPages.originOfImport.saveAndReturn.click();
