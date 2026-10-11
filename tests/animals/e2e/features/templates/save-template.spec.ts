@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 
 import { requireBaseUrl } from '@page-objects/shared/base-page';
+import { SET_BASES } from '@page-objects/shared/sets';
 import { createAnimalsPages, createInsPages, createSharedPages } from '@page-objects';
 import type { AnimalsPages, InsPages } from '@page-objects';
 import { users } from '@config/users';
@@ -173,7 +174,12 @@ test.describe('Saving a template', { tag: '@integration' }, () => {
       }
     });
 
-    test("another user does not see a user's saved template and cannot open it", async ({ browser, pages, insPages, animalsPages }) => {
+    test("another user does not see a user's saved template, and opening its address shows their own Manage templates", async ({
+      browser,
+      pages,
+      insPages,
+      animalsPages,
+    }) => {
       const name = savedName();
       await animalsPages.manageTemplates.open();
       await createNewTemplate(pages.page, insPages, animalsPages);
@@ -192,11 +198,10 @@ test.describe('Saving a template', { tag: '@integration' }, () => {
         });
         await expect(sarahPages.manageTemplates.templateCard(name)).toHaveCount(0);
 
-        const response = await sarahPage.goto(templateAddress);
+        await sarahPage.goto(templateAddress);
 
-        expect(response?.status()).toBe(404);
-        await expect(sarahPage).toHaveTitle('Page not found - Import notification service - GOV.UK');
-
+        await expect(sarahPages.manageTemplates.heading).toBeVisible();
+        await expect(sarahPage).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/templates$`));
         await expect(sarahPage.getByText(name)).toHaveCount(0);
         await expect(sarahPage.getByRole('heading', { name: 'Template tasklist' })).toHaveCount(0);
       } finally {
