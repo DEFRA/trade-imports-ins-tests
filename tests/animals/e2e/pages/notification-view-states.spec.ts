@@ -35,11 +35,19 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(animalsPages.notificationView.changeLink('Change Cow (0102)')).toBeVisible();
     });
 
-    test('offers submission and none of the post-submit actions', async ({ pages, animalsPages }) => {
+    test('ends with Continue and a red Delete, and offers neither Copy as new nor Cancel amend', async ({ pages, animalsPages }) => {
       await expect(animalsPages.notificationView.continueButton).toBeVisible();
+      await expect(animalsPages.notificationView.btnDelete).toBeVisible();
+      await expect(animalsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
       await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toHaveCount(0);
-      await expect(pages.page.getByRole('button', { name: 'Delete' })).toHaveCount(0);
       await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
+    });
+
+    test('Delete opens the delete confirmation', async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.btnDelete.click();
+
+      await expect(pages.page).toHaveURL(/\/delete$/);
+      await expect(pages.page.getByRole('heading', { level: 1, name: 'Delete this notification?' })).toBeVisible();
     });
 
     test('Continue: when the notification is unfinished, stays put and names what is left', async ({ pages, animalsPages }) => {
@@ -67,6 +75,40 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await animalsPages.notificationView.continueButton.click();
       await expect(pages.page).toHaveURL(/\/declaration$/);
       await expect(animalsPages.declaration.heading).toBeVisible();
+    });
+  });
+
+  test.describe('AMEND', () => {
+    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions }) => {
+      const reference = await animalsSeededJourney.createAmendNotification();
+      await animalsNotificationActions.toNotificationView(reference);
+    });
+
+    test('opens headed Review your notification with no error summary, ending with Continue, Cancel amend and Delete', async ({
+      animalsPages,
+    }) => {
+      await expect(animalsPages.notificationView.heading).toBeVisible();
+      await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
+      await expect(animalsPages.notificationView.continueButton).toBeVisible();
+      await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
+      await expect(animalsPages.notificationView.cancelAmend).toHaveClass(/govuk-button--secondary/);
+      await expect(animalsPages.notificationView.btnDelete).toBeVisible();
+      await expect(animalsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
+      await expect(animalsPages.notificationView.statusBarCancelAmend).toHaveCount(0);
+    });
+
+    test('Cancel amend opens the cancel-amendment confirmation', async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.cancelAmend.click();
+
+      await expect(pages.page).toHaveURL(/\/cancel-amend$/);
+      await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
+    });
+
+    test('Delete opens the delete confirmation', async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.btnDelete.click();
+
+      await expect(pages.page).toHaveURL(/\/delete$/);
+      await expect(pages.page.getByRole('heading', { level: 1, name: 'Delete this notification?' })).toBeVisible();
     });
   });
 

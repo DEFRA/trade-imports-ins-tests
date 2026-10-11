@@ -358,6 +358,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
         await plantsPages.notificationView.open(reference);
         await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('DiscardMe99');
         await expect(plantsPages.notificationView.statusTag).toHaveText('Amend');
+        await expect(plantsPages.notificationView.statusBarCancelAmend).toHaveCount(0);
         await plantsPages.notificationView.cancelAmend.click();
       } else {
         await plantsPages.identificationNumbers.open(reference);
@@ -519,7 +520,45 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(plantsPages.consignmentContactSelect.saveAndReturnToOverview).toHaveCount(0);
   });
 
-  test('Continue on an incomplete amendment stays on the review with no error summary or error message', async ({
+  test("a draft's check answers ends with Continue and a red Delete notification that opens the delete page, keeping Save and return and Cancel", async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    await expectReview(plantsPages);
+
+    await expect(plantsPages.notificationView.btnContinue).toBeVisible();
+    await expect(plantsPages.notificationView.btnDelete).toBeVisible();
+    await expect(plantsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
+    await expect(pages.page.getByRole('button', { name: 'Save and return to overview', exact: true })).toBeVisible();
+    await expect(pages.page.getByRole('link', { name: 'Cancel and return to overview', exact: true })).toBeVisible();
+
+    await plantsPages.notificationView.btnDelete.click();
+
+    await expect(plantsPages.deleteNotification.heading).toBeVisible();
+  });
+
+  test("an amendment's check answers offers Cancel amend beside Continue and no delete", async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    await submit(plantsPages);
+    await amend(pages, plantsPages, reference);
+
+    await plantsPages.notificationView.open(reference);
+
+    await expect(plantsPages.notificationView.btnContinue).toBeVisible();
+    await expect(plantsPages.notificationView.cancelAmend).toBeVisible();
+    await expect(plantsPages.notificationView.btnDelete).toHaveCount(0);
+    await expect(plantsPages.notificationView.statusBarCancelAmend).toHaveCount(0);
+  });
+
+  test('Continue on an incomplete amendment is refused and names what is missing', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -538,8 +577,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await plantsPages.notificationView.btnContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
-    await expect(plantsPages.notificationView.errorSummary).toHaveCount(0);
-    await expect(pages.page.locator('.govuk-error-message')).toHaveCount(0);
+    await expect(plantsPages.notificationView.errorSummary).toContainText('Complete arrival details');
     await expect(plantsPages.overview.statusTag).toHaveText('Amend');
   });
 });

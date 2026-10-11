@@ -7,9 +7,10 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
       await animalsNotificationActions.toNotificationView(referenceNumber);
     });
 
-    test('shows the Cancel amend link while the notification is amending', async ({ animalsPages }) => {
+    test('offers Cancel amend as a button on the review and not in its status bar', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
       await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
+      await expect(animalsPages.notificationView.statusBarCancelAmend).toHaveCount(0);
     });
 
     test('shows the Amend status bar with Cancel amend on Overview, a question page and the review', async ({
@@ -32,6 +33,7 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
       await expect(animalsPages.notificationView.journeyStrip).toContainText(reference);
       await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
+      await expect(animalsPages.notificationView.statusBarCancelAmend).toHaveCount(0);
     });
 
     test('Cancel amend on the Overview opens the cancel-amendment confirmation page', async ({ pages, animalsPages, journeyContext }) => {
@@ -105,7 +107,7 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
       await expect(animalsPages.originOfImport.heading).toBeVisible();
       await animalsPages.originOfImport.selectCountry('Belgium');
       await animalsPages.originOfImport.saveAndReturn.click();
-      await expect(animalsPages.notificationView.heading).toBeVisible();
+      await expect(animalsPages.notificationView.resubmitHeading).toBeVisible();
       await expect(countryRow).toContainText('Belgium');
 
       await animalsPages.notificationView.cancelAmend.click();
@@ -135,7 +137,7 @@ test.describe('Cancel amend without JavaScript', { tag: ['@integration', '@dupli
     await animalsPages.originOfImport.open(reference);
     await animalsPages.originOfImport.selectCountry('Belgium');
     await animalsPages.originOfImport.saveAndReturn.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.resubmitHeading).toBeVisible();
     await expect(countryRow).toContainText('Belgium');
 
     await animalsPages.originOfImport.open(reference);

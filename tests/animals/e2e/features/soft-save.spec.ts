@@ -140,7 +140,7 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
 
     // Assert
     await expect(pages.page).toHaveURL(/\/notification-view$/);
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.resubmitHeading).toBeVisible();
     const reasonCard = animalsPages.notificationView.summaryCard('Main import reason');
     await expect(animalsPages.notificationView.summaryValue(reasonCard, 'Main import reason')).toHaveText('Transit');
   });

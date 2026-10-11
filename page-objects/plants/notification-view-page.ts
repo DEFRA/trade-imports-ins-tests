@@ -12,6 +12,16 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
   get btnContinue(): Locator {
     return this.page.getByRole('button', { name: 'Continue', exact: true });
   }
+  /** On the review, Cancel amend is the button beside Continue, not the status bar link. */
+  override get cancelAmend(): Locator {
+    return this.page.getByRole('button', { name: 'Cancel amend', exact: true });
+  }
+  get statusBarCancelAmend(): Locator {
+    return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
+  }
+  get btnDelete(): Locator {
+    return this.page.getByRole('button', { name: 'Delete notification', exact: true });
+  }
   get changeLinks(): Locator {
     return this.page.getByRole('link', { name: /^Change/ });
   }

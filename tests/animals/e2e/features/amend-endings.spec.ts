@@ -110,7 +110,7 @@ test.describe('Amendment page endings', { tag: ['@integration'] }, () => {
     await expect(animalsPages.originOfImport.cancelAndReturnToOverview).toBeVisible();
   });
 
-  test('Continue on an amend review with an answer missing stays on the review with no error summary or error message', async ({
+  test('Continue on an amend review with an answer missing is refused, names what is missing and stays amending', async ({
     pages,
     animalsPages,
     animalsSeededJourney,
@@ -127,8 +127,8 @@ test.describe('Amendment page endings', { tag: ['@integration'] }, () => {
     await animalsPages.notificationView.continueButton.click();
 
     await expect(pages.page).toHaveURL(/\/notification-view$/);
-    await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
-    await expect(pages.page.locator('.govuk-error-message')).toHaveCount(0);
+    await expect(animalsPages.notificationView.errorSummary).toContainText('There is a problem');
+    await expect(animalsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toBeVisible();
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
     await expect(animalsPages.declaration.heading).not.toBeVisible();
   });

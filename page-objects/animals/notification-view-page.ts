@@ -11,6 +11,19 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Review your notification' });
   }
 
+  get resubmitHeading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'Review before re-submitting' });
+  }
+
+  /** On the review, Cancel amend is the button beside Continue, not the status bar link. */
+  override get cancelAmend(): Locator {
+    return this.page.getByRole('button', { name: 'Cancel amend', exact: true });
+  }
+
+  get statusBarCancelAmend(): Locator {
+    return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
+  }
+
   get referenceNumberCaption(): Locator {
     return this.journeyStrip;
   }
@@ -20,7 +33,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   }
 
   get btnDelete(): Locator {
-    return this.page.getByRole('button', { name: 'Delete' });
+    return this.page.getByRole('button', { name: 'Delete', exact: true });
   }
 
   get continueButton(): Locator {
@@ -74,6 +87,10 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   async open(journeyId: string, attemptSignIn: boolean = true): Promise<void> {
     await super.open(journeyId, attemptSignIn);
-    if (attemptSignIn) await this.heading.waitFor(pageLoadWait);
+    if (attemptSignIn) {
+      await this.page
+        .getByRole('heading', { level: 1, name: /^(Review your notification|Review before re-submitting)$/ })
+        .waitFor(pageLoadWait);
+    }
   }
 }

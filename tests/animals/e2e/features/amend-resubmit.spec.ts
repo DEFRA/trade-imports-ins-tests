@@ -37,7 +37,8 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await animalsPages.originOfImport.selectCountry('Belgium');
     await animalsPages.originOfImport.saveAndReturn.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.resubmitHeading).toBeVisible();
+    await expect(pages.page).toHaveTitle(/^Review before re-submitting - /);
     await expect(countryRow).toContainText('Belgium');
 
     // Resubmit through the declaration (AMEND → SUBMITTED).
