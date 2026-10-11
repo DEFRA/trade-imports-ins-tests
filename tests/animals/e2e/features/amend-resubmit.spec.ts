@@ -29,7 +29,7 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
-    await expect(animalsPages.notificationView.changeLink('Change commodity 1')).toBeVisible();
+    await expect(animalsPages.notificationView.changeLink('Change Cow (0102)')).toBeVisible();
     expect(await pages.page.getByRole('link', { name: /^Change/ }).count()).toBeGreaterThanOrEqual(4);
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
     await expect(countryRow).toContainText('France');

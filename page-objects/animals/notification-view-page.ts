@@ -36,6 +36,11 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.locator('.govuk-summary-card').filter({ has: this.page.getByRole('heading', { name, exact: true }) });
   }
 
+  /** A commodity card holds one block per species, headed with the species name. */
+  speciesBlockHeading(card: Locator, species: string): Locator {
+    return card.getByRole('heading', { level: 4, name: species, exact: true });
+  }
+
   summaryValue(card: Locator, key: string): Locator {
     return card
       .locator('.govuk-summary-list__row', { has: this.page.getByText(key, { exact: true }) })

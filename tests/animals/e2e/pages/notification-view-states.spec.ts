@@ -21,7 +21,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toBeVisible();
       await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
       await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
-      await expect(animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus')).toContainText('Number of animals');
+      await expect(animalsPages.notificationView.summaryCard('Cow (0102)')).toContainText('Number of animals');
     });
 
     test('shows the Draft strip with the notification reference', async ({ animalsPages, journeyContext }) => {
@@ -31,7 +31,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
 
     test('shows Change links for the recorded answers', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
-      await expect(animalsPages.notificationView.changeLink('Change commodity 1')).toBeVisible();
+      await expect(animalsPages.notificationView.changeLink('Change Cow (0102)')).toBeVisible();
     });
 
     test('offers submission and none of the post-submit actions', async ({ pages, animalsPages }) => {
@@ -101,7 +101,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
 
     test('still renders the recorded answers after submission', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
-      await expect(animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus')).toBeVisible();
+      await expect(animalsPages.notificationView.summaryCard('Cow (0102)')).toBeVisible();
     });
   });
 });

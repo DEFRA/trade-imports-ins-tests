@@ -46,9 +46,9 @@ test.describe('Horse by sea under temporary admission', { tag: ['@integration'] 
     const importDetails = animalsPages.notificationView.summaryCard('Origin of import');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Ireland');
 
-    const speciesCard = animalsPages.notificationView.summaryCard('Horse (0101) — Equus caballus');
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText('Equus caballus');
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('1');
+    const commodityCard = animalsPages.notificationView.summaryCard('Horse (0101)');
+    await expect(animalsPages.notificationView.speciesBlockHeading(commodityCard, 'Equus Caballus')).toBeVisible();
+    await expect(animalsPages.notificationView.summaryValue(commodityCard, 'Number of animals')).toHaveText('1');
 
     const reasonForImport = animalsPages.notificationView.summaryCard('Main import reason');
     await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Main import reason')).toHaveText(

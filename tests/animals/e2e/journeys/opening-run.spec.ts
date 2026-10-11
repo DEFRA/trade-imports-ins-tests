@@ -42,9 +42,9 @@ test.describe('Opening run', { tag: ['@integration'] }, () => {
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Region of origin code')).toHaveText('FR-75');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Internal reference number')).toHaveText('CATTLE-2026-01');
 
-    const speciesCard = animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus');
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText('Bos taurus');
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('2');
+    const commodityCard = animalsPages.notificationView.summaryCard('Cow (0102)');
+    await expect(animalsPages.notificationView.speciesBlockHeading(commodityCard, 'Bos Taurus')).toBeVisible();
+    await expect(animalsPages.notificationView.summaryValue(commodityCard, 'Number of animals')).toHaveText('2');
 
     const reasonForImport = animalsPages.notificationView.summaryCard('Main import reason');
     await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Main import reason')).toHaveText('Internal market');
