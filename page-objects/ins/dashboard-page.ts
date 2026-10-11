@@ -13,6 +13,11 @@ export class InsDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: 'Create new', exact: true });
   }
 
+  /** A secondary govukButton with an `href`, so an `<a role="button">`; it leads to the animals frontend's Manage templates. */
+  get btnUseTemplate(): Locator {
+    return this.page.getByRole('button', { name: 'Use template', exact: true });
+  }
+
   get inputReferenceSearch(): Locator {
     return this.page.getByLabel('Search by notification reference');
   }
