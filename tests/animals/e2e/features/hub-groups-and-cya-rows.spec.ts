@@ -124,7 +124,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     }
     // The level-4 headings are the Bos Taurus species block in the Cow card and "Transit countries" inside Arrival details, because this journey uploads no documents.
     await expect(pages.page.getByRole('heading', { level: 4 })).toHaveText(['Bos Taurus', 'Transit countries']);
-    await expect(pages.page.getByRole('heading', { level: 5 })).toHaveText(['Animal details']);
+    await expect(pages.page.getByRole('heading', { level: 5 })).toHaveText(['Identification details']);
 
     const importDetails = animalsPages.notificationView.summaryCard('Origin of import');
     await expect(value(importDetails, 'Country of origin')).toHaveText('France');
@@ -163,9 +163,15 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
       'href',
       /\/consignment-details\?change=1$/,
     );
-    await expect(commodityCard.getByRole('heading', { name: 'Animal details' })).toBeVisible();
-    await expect(commodityCard.getByRole('columnheader', { name: 'Ear tag' })).toBeVisible();
-    await expect(commodityCard.getByRole('cell', { name: 'Animal 1' })).toBeVisible();
+    await expect(commodityCard.getByRole('heading', { name: 'Identification details' })).toBeVisible();
+    await expect(commodityCard.getByRole('columnheader', { name: 'Animal', exact: true })).toBeVisible();
+    await expect(commodityCard.getByRole('columnheader', { name: 'Ear tag', exact: true })).toBeVisible();
+    await expect(commodityCard.getByRole('columnheader', { name: 'Passport', exact: true })).toBeVisible();
+    await expect(commodityCard.getByRole('link', { name: 'Change identification details for Bos Taurus' })).toHaveAttribute(
+      'href',
+      /\/commodities\/identification\?change=1$/,
+    );
+    await expect(commodityCard.getByRole('cell', { name: 'Bos taurus 1', exact: true })).toBeVisible();
     await expect(commodityCard.getByRole('cell', { name: 'UK123456789012' })).toBeVisible();
 
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
