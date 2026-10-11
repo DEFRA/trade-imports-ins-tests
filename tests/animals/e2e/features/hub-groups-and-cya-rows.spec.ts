@@ -214,7 +214,10 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expect(value(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText('123456789');
 
     const contactAddress = animalsPages.notificationView.summaryCard('Contact address');
-    await expect(value(contactAddress, 'Contact address')).toContainText('Animal and Plant Health Agency');
+    await expect(value(contactAddress, 'Contact address')).toHaveJSProperty(
+      'innerText',
+      'Animal and Plant Health Agency\nWoodham Lane\nAddlestone\nKT15 3NB\nUnited Kingdom',
+    );
 
     await arrivalDetails.getByRole('link', { name: 'Change countries that the consignment will travel through' }).click();
     await expect(animalsPages.transitedCountries.heading).toBeVisible();

@@ -129,7 +129,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expectReview(plantsPages);
   });
 
-  test('CYA renders numbered sections, scoped cards and contact details, and Change returns to saved answers', async ({
+  test("CYA renders numbered sections, scoped cards and the contact's address line by line, and Change returns to saved answers", async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -145,9 +145,21 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(plantsPages.notificationView.card('Consignor or exporter')).toHaveCount(0);
     const contact = plantsPages.notificationView.card('Contact');
     await expect(contact).toContainText(address.name);
-    await expect(contact).toContainText('4 Nursery Lane, Perth, PH1 5EX');
-    await expect(contact).toContainText('01738 555 0143');
-    await expect(contact).toContainText('review@example.co.uk');
+    await expect(plantsPages.notificationView.rowValue('Contact', 'Address')).toHaveJSProperty(
+      'innerText',
+      '4 Nursery Lane\nPerth\nPH1 5EX\nUnited Kingdom',
+    );
+    await expect(contact).not.toContainText('01738 555 0143');
+    await expect(contact).not.toContainText('review@example.co.uk');
+    await expect(contact.getByRole('term')).toHaveText(['Name', 'Address']);
+    const destination = plantsPages.notificationView.card('Place of destination');
+    await expect(plantsPages.notificationView.rowValue('Place of destination', 'Address')).toHaveJSProperty(
+      'innerText',
+      '4 Nursery Lane\nPerth\nPH1 5EX\nUnited Kingdom',
+    );
+    await expect(destination).not.toContainText('01738 555 0143');
+    await expect(destination).not.toContainText('review@example.co.uk');
+    await expect(destination.getByRole('term')).toHaveText(['Name', 'Address']);
     await plantsPages.notificationView.change('Change country of origin (Import details)').click();
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
     await plantsPages.origin.selectCountry('Germany');
@@ -269,7 +281,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await addressBookApi.deleteAddress(address.id);
     await pages.page.reload();
     const destination = plantsPages.notificationView.card('Place of destination');
-    await expect(destination.getByText('Not provided', { exact: true })).toHaveCount(4);
+    await expect(destination.getByText('Not provided', { exact: true })).toHaveCount(2);
     await expect(destination).not.toContainText(address.name);
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));

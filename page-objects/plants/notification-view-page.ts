@@ -24,6 +24,11 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
   card(title: string): Locator {
     return this.page.locator('.govuk-summary-card').filter({ has: this.page.getByRole('heading', { name: title, exact: true }) });
   }
+  rowValue(title: string, key: string): Locator {
+    return this.card(title)
+      .locator('.govuk-summary-list__row', { has: this.page.getByRole('term').and(this.page.getByText(key, { exact: true })) })
+      .locator('.govuk-summary-list__value');
+  }
   change(name: string): Locator {
     return this.page.getByRole('link', { name, exact: true });
   }
