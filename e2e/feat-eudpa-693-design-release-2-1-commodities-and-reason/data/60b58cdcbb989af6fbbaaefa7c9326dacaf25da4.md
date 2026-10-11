@@ -1,0 +1,298 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: plants/e2e/features/parties.spec.ts >> High-risk plants consignment parties section >> consignor opened from the overview returns to the overview on Save and continue, not to identification numbers
+- Location: tests/plants/e2e/features/parties.spec.ts:122:3
+
+# Error details
+
+```
+Error: expect(page).toHaveURL(expected) failed
+
+Expected: "http://localhost:3003/high-risk-plants/notifications/GBN-HRP-26-MDJ6NN"
+Received: "http://localhost:3003/high-risk-plants/notifications/GBN-HRP-26-MDJ6NN/identification-numbers"
+Timeout:  5000ms
+
+Call log:
+  - Expect "toHaveURL" with timeout 5000ms
+    14 × locator resolved to <html lang="en" class="govuk-template">…</html>
+       - unexpected value "http://localhost:3003/high-risk-plants/notifications/GBN-HRP-26-MDJ6NN/identification-numbers"
+
+```
+
+```yaml
+- link "Skip to main content":
+  - /url: "#main-content"
+- banner:
+  - link "GOV.UK":
+    - /url: https://www.gov.uk/
+    - img "GOV.UK"
+  - region "Service information":
+    - link "Import notification service":
+      - /url: /high-risk-plants
+    - navigation "Menu":
+      - list:
+        - listitem:
+          - link "Dashboard":
+            - /url: /high-risk-plants
+            - strong: Dashboard
+        - listitem:
+          - link "Address book":
+            - /url: http://localhost:3002/address-book
+        - listitem:
+          - link "Manage account":
+            - /url: "#"
+        - listitem:
+          - link "Log out":
+            - /url: /auth/sign-out
+- paragraph:
+  - strong: Alpha
+  - text: This is a new service. Help us improve it and
+  - link "give your feedback by email":
+    - /url: mailto:APHAServiceDesk@apha.gov.uk
+  - text: .
+- link "Back":
+  - /url: /high-risk-plants/notifications/GBN-HRP-26-MDJ6NN
+- main:
+  - strong: Draft
+  - text: GBN-HRP-26-MDJ6NN Consignment parties
+  - heading "Identification numbers" [level=1]
+  - text: Identification number of the supplier of the plants The supplier's plant passport registration number. For example, GB-12345.
+  - textbox "Identification number of the supplier of the plants"
+  - text: Consignment number (optional) Any reference you use to identify this consignment, or leave blank.
+  - textbox "Consignment number (optional)"
+  - button "Save and continue"
+  - button "Save and return to overview"
+  - link "Cancel and return to overview":
+    - /url: /high-risk-plants/notifications/GBN-HRP-26-MDJ6NN
+- contentinfo:
+  - heading "Support links" [level=2]
+  - list:
+    - listitem:
+      - link "Privacy":
+        - /url: https://www.gov.uk/help/privacy-notice
+    - listitem:
+      - link "Cookies":
+        - /url: https://www.gov.uk/help/cookies
+    - listitem:
+      - link "Accessibility statement":
+        - /url: https://www.gov.uk/help/accessibility-statement
+  - text: All content is available under the
+  - link "Open Government Licence v3.0":
+    - /url: https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+  - text: ", except where otherwise stated"
+  - link "© Crown copyright":
+    - /url: https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/
+```
+
+# Test source
+
+```ts
+  45  |   if (type === POTATOES) {
+  46  |     await journey.toArrivalDetails('France');
+  47  |     await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
+  48  |     await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour (GB ABD)');
+  49  |   } else {
+  50  |     await journey.toArrivalStatus('Germany');
+  51  |     await journey.answerArrivalStatus('No, it has not arrived yet');
+  52  |   }
+  53  |   await plantsPages.arrivalDetails.arrivalDate.fill('27/3/2027');
+  54  |   await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+  55  |   await plantsPages.placeOfDestination.searchFor(destination);
+  56  |   await plantsPages.placeOfDestination.address(destination).check();
+  57  |   await plantsPages.placeOfDestination.btnSaveAndContinue.click();
+  58  |   return reference;
+  59  | }
+  60  | 
+  61  | test.describe('High-risk plants consignment parties section', { tag: '@integration' }, () => {
+  62  |   for (const type of [PLANTS, WOOD]) {
+  63  |     test(`${type}: consignor is required, saves, and continues to scoped identification numbers`, async ({
+  64  |       pages,
+  65  |       plantsPages,
+  66  |       plantsJourney,
+  67  |       addressBookApi,
+  68  |     }) => {
+  69  |       const name = `Parties Nursery ${randomUUID()}`;
+  70  |       await addressBookApi.createAddress(addressNamed(name));
+  71  |       const reference = await toParties(plantsPages, plantsJourney, type, name);
+  72  |       const consignor = plantsPages.consignorSelect;
+  73  |       const numbers = plantsPages.identificationNumbers;
+  74  | 
+  75  |       await expect(pages.page).toHaveURL(consignor.expectedUrl(reference));
+  76  |       await expect(consignor.heading).toBeVisible();
+  77  |       await consignor.btnSaveAndContinue.click();
+  78  |       await expect(consignor.errorSummary).toContainText('Select a consignor from the list');
+  79  |       await consignor.searchFor(name);
+  80  |       await consignor.address(name).check();
+  81  |       await consignor.btnSaveAndContinue.click();
+  82  |       await expect(pages.page).toHaveURL(numbers.expectedUrl(reference));
+  83  |       await expect(numbers.heading).toBeVisible();
+  84  |       await expect(numbers.producer).toHaveCount(0);
+  85  |       await expect(numbers.crop).toHaveCount(0);
+  86  |       await expect(numbers.consignment).toBeVisible();
+  87  |       if (type === PLANTS) {
+  88  |         await expect(numbers.supplier).toBeVisible();
+  89  |         await numbers.supplier.fill('GB-12345');
+  90  |       } else {
+  91  |         await expect(numbers.supplier).toHaveCount(0);
+  92  |       }
+  93  |       // The optional reference can be left blank, including on wood's only field.
+  94  |       await numbers.btnSaveAndContinue.click();
+  95  |       await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrl(reference));
+  96  |       await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
+  97  |       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+  98  |       await plantsPages.overview.open(reference);
+  99  |       await expect(plantsPages.overview.taskRow(CONSIGNOR)).toContainText('Completed');
+  100 |       await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText(type === WOOD ? 'Optional' : 'Completed');
+  101 |       await consignor.open(reference);
+  102 |       await expect(consignor.selectedAddress(name)).toBeVisible();
+  103 |       await numbers.open(reference);
+  104 |       if (type === PLANTS) await expect(numbers.supplier).toHaveValue('GB-12345');
+  105 |       await numbers.consignment.fill('SHIP_2027_001');
+  106 |       await numbers.btnSaveAndContinue.click();
+  107 |       await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+  108 |       await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText('Completed');
+  109 |       await numbers.open(reference);
+  110 |       await expect(numbers.consignment).toHaveValue('SHIP_2027_001');
+  111 |       if (type === WOOD) {
+  112 |         await numbers.consignment.clear();
+  113 |         await numbers.btnSaveAndContinue.click();
+  114 |         await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+  115 |         await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText('Optional');
+  116 |         await numbers.open(reference);
+  117 |         await expect(numbers.consignment).toHaveValue('');
+  118 |       }
+  119 |     });
+  120 |   }
+  121 | 
+  122 |   test('consignor opened from the overview returns to the overview on Save and continue, not to identification numbers', async ({
+  123 |     pages,
+  124 |     plantsPages,
+  125 |     plantsJourney,
+  126 |     addressBookApi,
+  127 |   }) => {
+  128 |     const name = `Overview Nursery ${randomUUID()}`;
+  129 |     await addressBookApi.createAddress(addressNamed(name));
+  130 |     const reference = await toParties(plantsPages, plantsJourney, PLANTS, name);
+  131 |     const consignor = plantsPages.consignorSelect;
+  132 | 
+  133 |     await consignor.searchFor(name);
+  134 |     await consignor.address(name).check();
+  135 |     await consignor.btnSaveAndContinue.click();
+  136 |     await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrl(reference));
+  137 | 
+  138 |     await plantsPages.overview.open(reference);
+  139 |     await plantsPages.overview.taskRowLink(CONSIGNOR).click();
+  140 |     await expect(pages.page).toHaveURL(consignor.expectedUrl(reference));
+  141 | 
+  142 |     await consignor.searchFor(name);
+  143 |     await consignor.address(name).check();
+  144 |     await consignor.btnSaveAndContinue.click();
+> 145 |     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+      |                              ^ Error: expect(page).toHaveURL(expected) failed
+  146 |     await expect(plantsPages.overview.taskRow(CONSIGNOR)).toContainText('Completed');
+  147 |   });
+  148 | 
+  149 |   test('potatoes skip consignor and require producer and crop numbers', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
+  150 |     const name = `Potato Destination ${randomUUID()}`;
+  151 |     await addressBookApi.createAddress(addressNamed(name));
+  152 |     const reference = await toParties(plantsPages, plantsJourney, POTATOES, name);
+  153 |     const numbers = plantsPages.identificationNumbers;
+  154 |     await expect(pages.page).toHaveURL(numbers.expectedUrl(reference));
+  155 |     await expect(numbers.heading).toBeVisible();
+  156 |     await expect(numbers.supplier).toHaveCount(0);
+  157 |     await expect(numbers.producer).toBeVisible();
+  158 |     await expect(numbers.crop).toBeVisible();
+  159 |     await expect(numbers.consignment).toBeVisible();
+  160 |     await numbers.btnSaveAndContinue.click();
+  161 |     await expect(numbers.errorSummary).toContainText('Enter the identification number of the producer');
+  162 |     await expect(numbers.errorSummary).toContainText('Enter the crop identification number');
+  163 |     await numbers.producer.fill('P'.repeat(59));
+  164 |     await numbers.crop.fill('C'.repeat(59));
+  165 |     await numbers.btnSaveAndContinue.click();
+  166 |     await expect(numbers.errorSummary).toContainText('Producer identification number must be 58 characters or less');
+  167 |     await expect(numbers.errorSummary).toContainText('Crop identification number must be 58 characters or less');
+  168 |     await numbers.producer.fill('P'.repeat(58));
+  169 |     await numbers.crop.fill('C'.repeat(58));
+  170 |     await numbers.btnSaveAndContinue.click();
+  171 |     await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrl(reference));
+  172 |     await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
+  173 |     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+  174 |     await plantsPages.overview.open(reference);
+  175 |     await expect(plantsPages.overview.taskRowByTitle(CONSIGNOR)).toHaveCount(0);
+  176 |     await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText('Completed');
+  177 |     await numbers.open(reference);
+  178 |     await expect(numbers.producer).toHaveValue('P'.repeat(58));
+  179 |     await expect(numbers.crop).toHaveValue('C'.repeat(58));
+  180 |   });
+  181 | 
+  182 |   test('supplier and consignment numbers enforce length and consignment syntax', async ({
+  183 |     pages,
+  184 |     plantsPages,
+  185 |     plantsJourney,
+  186 |     addressBookApi,
+  187 |   }) => {
+  188 |     const name = `Numbers Nursery ${randomUUID()}`;
+  189 |     await addressBookApi.createAddress(addressNamed(name));
+  190 |     const reference = await toParties(plantsPages, plantsJourney, PLANTS, name);
+  191 |     const consignor = plantsPages.consignorSelect;
+  192 |     const numbers = plantsPages.identificationNumbers;
+  193 |     await consignor.searchFor(name);
+  194 |     await consignor.address(name).check();
+  195 |     await consignor.btnSaveAndContinue.click();
+  196 |     await expect(pages.page).toHaveURL(numbers.expectedUrl(reference));
+  197 |     await numbers.btnSaveAndContinue.click();
+  198 |     await expect(numbers.errorSummary).toContainText('Enter the identification number of the supplier');
+  199 |     await numbers.supplier.fill('S'.repeat(59));
+  200 |     await numbers.consignment.fill('N'.repeat(59));
+  201 |     await numbers.btnSaveAndContinue.click();
+  202 |     await expect(numbers.errorSummary).toContainText('Supplier identification number must be 58 characters or less');
+  203 |     await expect(numbers.errorSummary).toContainText('Consignment number must be 58 characters or less');
+  204 |     await numbers.supplier.fill('S'.repeat(58));
+  205 |     await numbers.consignment.fill('SHIP-2027!');
+  206 |     await numbers.btnSaveAndContinue.click();
+  207 |     await expect(numbers.errorSummary).toContainText('Consignment number must only contain letters, numbers and underscores');
+  208 |     await numbers.consignment.fill('N'.repeat(58));
+  209 |     await numbers.btnSaveAndContinue.click();
+  210 |     await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrl(reference));
+  211 |     await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
+  212 |     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+  213 |     await plantsPages.overview.open(reference);
+  214 |     await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText('Completed');
+  215 |     await numbers.open(reference);
+  216 |     await expect(numbers.supplier).toHaveValue('S'.repeat(58));
+  217 |     await expect(numbers.consignment).toHaveValue('N'.repeat(58));
+  218 |   });
+  219 | 
+  220 |   test('changing type clears parties answers that leave scope and retains the consignment reference', async ({
+  221 |     pages,
+  222 |     plantsPages,
+  223 |     plantsJourney,
+  224 |     addressBookApi,
+  225 |   }) => {
+  226 |     const name = `Scope Nursery ${randomUUID()}`;
+  227 |     await addressBookApi.createAddress(addressNamed(name));
+  228 |     const reference = await toParties(plantsPages, plantsJourney, PLANTS, name);
+  229 |     const consignor = plantsPages.consignorSelect;
+  230 |     const numbers = plantsPages.identificationNumbers;
+  231 |     await consignor.searchFor(name);
+  232 |     await consignor.address(name).check();
+  233 |     await consignor.btnSaveAndContinue.click();
+  234 |     await numbers.supplier.fill('GB-12345');
+  235 |     await numbers.consignment.fill('SHIP_2027');
+  236 |     await numbers.btnSaveAndContinue.click();
+  237 |     await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrl(reference));
+  238 |     await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
+  239 |     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+  240 | 
+  241 |     await plantsJourney.changeCommodityType(reference, POTATOES);
+  242 |     await plantsPages.overview.open(reference);
+  243 |     await expect(plantsPages.overview.taskRowByTitle(CONSIGNOR)).toHaveCount(0);
+  244 |     await numbers.open(reference);
+  245 |     await expect(numbers.supplier).toHaveCount(0);
+```
