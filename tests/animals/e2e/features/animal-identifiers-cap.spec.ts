@@ -17,6 +17,7 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
     await animalsPages.overview.task('Commodity details').click();
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
     await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
+    await animalsPages.consignmentDetails.numberOfPackages.fill('1');
     await animalsPages.consignmentDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 

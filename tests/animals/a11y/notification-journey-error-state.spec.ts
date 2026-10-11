@@ -50,8 +50,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Arrival details with validation errors', async () => {
       await animalsPages.overview.task('Arrival details').click();
       await animalsPages.arrivalDetails.heading.waitFor();
-      // Every field is optional on a draft, so an empty save goes through; an arrival
-      // date outside the allowed window is what raises the error summary.
+      // Saving without a means of transport raises the error summary, and an arrival
+      // date outside the allowed window adds a second error.
       await animalsPages.arrivalDetails.fillArrivalDate(getRelativeDatePickerValue({ yearOffset: -1 }));
       await animalsPages.arrivalDetails.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();

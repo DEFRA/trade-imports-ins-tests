@@ -12,8 +12,9 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
     const { cphRow } = animalsPages.addresses;
 
     // Add one commodity line for the given species, taking the fewest steps.
-    // The animal count is save-blocking on every line, so each box the details
-    // page is showing — the lines added on earlier passes included — is filled
+    // The animal count is save-blocking on every line, and the number of
+    // packages on every line that asks for one, so each box the details page
+    // is showing — the lines added on earlier passes included — is filled
     // before the page will hand back to the hub.
     const addCommodity = async (species: string): Promise<void> => {
       await animalsPages.overview.open(journeyId);
@@ -24,6 +25,7 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
       await animalsPages.overview.task('Commodity details').click();
       await expect(animalsPages.consignmentDetails.heading).toBeVisible();
       await animalsPages.consignmentDetails.fillEveryAnimalCount('1');
+      await animalsPages.consignmentDetails.fillEveryPackageCount('1');
       await animalsPages.consignmentDetails.saveAndContinue.click();
       await expect(animalsPages.overview.heading).toBeVisible();
     };

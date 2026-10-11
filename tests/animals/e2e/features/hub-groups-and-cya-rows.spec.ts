@@ -74,6 +74,8 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expect(pages.page.getByRole('heading', { level: 3, name: 'Where is this consignment coming from?' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 3, name: 'Commodity details' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 3, name: 'Additional details' })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { level: 3, name: 'Main import reason' })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { level: 3, name: 'Main reason for import' })).toHaveCount(0);
 
     const importDetails = animalsPages.notificationView.summaryCard('Import details');
     await expect(value(importDetails, 'Country of origin')).toHaveText('France');

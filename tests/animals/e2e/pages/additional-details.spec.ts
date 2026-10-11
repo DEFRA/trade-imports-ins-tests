@@ -8,6 +8,7 @@ test.describe('Additional details page', { tag: ['@integration', '@duplicated-in
   test('renders the page controls', async ({ animalsPages }) => {
     await expect(animalsPages.additionalDetails.heading).toBeVisible();
     await expect(animalsPages.additionalDetails.certifiedFor('Slaughter')).toBeVisible();
+    await expect(animalsPages.additionalDetails.certifiedForGroup).toContainText('You can find this information on the ITAHC.');
     await expect(animalsPages.additionalDetails.containsUnweanedAnimals('No')).toBeVisible();
     await expect(animalsPages.additionalDetails.saveAndContinue).toBeVisible();
   });

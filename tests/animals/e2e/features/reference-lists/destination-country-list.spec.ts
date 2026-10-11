@@ -14,6 +14,11 @@ test.describe('Destination country list', { tag: ['@integration'] }, () => {
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transhipment or onward travel').check();
 
+    await expect(animalsPages.importReason.transhipmentDestinationCountry).toHaveValue('');
+    await expect(animalsPages.importReason.transhipmentDestinationCountryAllOptions).toHaveText([
+      'Select one',
+      ...destinationCountryNames(),
+    ]);
     await expect(animalsPages.importReason.transhipmentDestinationCountryOptions).toHaveText(destinationCountryNames());
   });
 
@@ -21,6 +26,8 @@ test.describe('Destination country list', { tag: ['@integration'] }, () => {
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transit').check();
 
+    await expect(animalsPages.importReason.transitDestinationCountry).toHaveValue('');
+    await expect(animalsPages.importReason.transitDestinationCountryAllOptions).toHaveText(['Select one', ...destinationCountryNames()]);
     await expect(animalsPages.importReason.transitDestinationCountryOptions).toHaveText(destinationCountryNames());
   });
 });
@@ -54,7 +61,7 @@ test.describe('Destination country answer', { tag: ['@integration'] }, () => {
   }) => {
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transit').check();
-    await animalsPages.importReason.transitPortOfExit.selectOption({ index: 2 });
+    await animalsPages.importReason.transitPortOfExit.selectOption({ index: 1 });
     await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
     const journeyId = animalsPages.importReason.journeyIdFromUrl();
     await animalsPages.importReason.saveAndContinue.click();

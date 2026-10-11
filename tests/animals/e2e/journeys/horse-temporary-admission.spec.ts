@@ -41,6 +41,7 @@ test.describe('Horse by sea under temporary admission', { tag: ['@integration'] 
     await expect(animalsPages.overview.taskStatuses).toHaveCount(HORSE_BY_SEA_TASKS.length);
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(pages.page.getByRole('heading', { level: 3, name: 'Main import reason' })).toBeVisible();
 
     const importDetails = animalsPages.notificationView.summaryCard('Import details');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Ireland');

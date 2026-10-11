@@ -32,16 +32,24 @@ test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-fr
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
 
-  // A draft may be saved with a blank arrival date, so the page itself raises nothing on an empty
-  // submit — the arrival fields are validated for shape, not for presence. Presence is a
-  // completeness rule, enforced when the trader continues the notification: see
+  // The means of transport decides whether transit countries apply, so it is the one answer the
+  // page needs before it goes on. The arrival date, port, identification and document reference
+  // are completeness rules, enforced when the trader continues the notification: see
   // notification-view-states.spec.ts, which asserts the 'Complete arrival details' link in the
   // error summary there.
-  //
-  // This test used to expect an error summary here. It passed only because the frontend sent a
-  // malformed value for a blank date, which the API rejected — the summary was a 400, not page
-  // validation. The frontend now leaves a blank date out of the request.
-  test('saves a draft and returns to the overview when submitted empty', async ({ pages, animalsPages }) => {
+  test('save and continue: when no means of transport is chosen, refuses the save with an error on the means of transport', async ({
+    animalsPages,
+  }) => {
+    await animalsPages.arrivalDetails.saveAndContinue.click();
+
+    await expect(animalsPages.arrivalDetails.errorSummary).toBeVisible();
+    await expect(animalsPages.arrivalDetails.meansOfTransportRequiredErrorLink).toBeVisible();
+    await expect(animalsPages.arrivalDetails.meansOfTransportError).toContainText('Select the means of transport to the port of entry');
+    await expect(animalsPages.arrivalDetails.heading).toBeVisible();
+  });
+
+  test('save and continue: when only the means of transport is chosen, goes on to the next page', async ({ pages, animalsPages }) => {
+    await animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: 'Airplane' });
     await animalsPages.arrivalDetails.saveAndContinue.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);

@@ -11,12 +11,12 @@ test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in
 
     const transitRow = pages.page.locator('.govuk-task-list__item', { hasText: 'Transit countries' });
 
-    // Arrival details is enforced-at-continue, so the whole page is filled; the
-    // means routes the section from that one save.
+    // The means of transport is the one answer Arrival details needs to
+    // continue, and that one save routes the section.
     const saveArrivalWithMeans = async (means: string) => {
       await animalsPages.overview.task('Arrival details').click();
       await expect(animalsPages.arrivalDetails.heading).toBeVisible();
-      await animalsJourney.fillArrivalDetails(means);
+      await animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: means });
       await animalsPages.arrivalDetails.saveAndContinue.click();
       await expect(animalsPages.overview.heading).toBeVisible();
     };
