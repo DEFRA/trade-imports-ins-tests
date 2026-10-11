@@ -26,4 +26,55 @@ export class AnimalsOverviewPage extends NotificationPage {
   task(name: string): Locator {
     return this.page.getByRole('link', { name, exact: true });
   }
+
+  /** The tag in the status strip: the draft status on a notification, Template in template mode. */
+  get statusTag(): Locator {
+    return this.journeyStrip.locator('.govuk-tag');
+  }
+
+  taskListHeading(name: string): Locator {
+    return this.page.getByRole('heading', { level: 2, name, exact: true });
+  }
+
+  /** The commodity-total labels are h3s too, so the section headings are read off their own class. */
+  get sectionHeadings(): Locator {
+    return this.page.locator('h3.govuk-heading-m');
+  }
+
+  get taskLists(): Locator {
+    return this.page.locator('ul.app-task-list');
+  }
+
+  get actionButtons(): Locator {
+    return this.page.locator('.govuk-button-group .govuk-button');
+  }
+
+  get btnReviewTemplate(): Locator {
+    return this.page.getByRole('button', { name: 'Review template', exact: true });
+  }
+
+  get btnReturnToManageTemplates(): Locator {
+    return this.page.getByRole('button', { name: 'Return to manage templates', exact: true });
+  }
+
+  get btnSaveTemplate(): Locator {
+    return this.page.getByRole('button', { name: 'Save template', exact: true });
+  }
+
+  get commodityTotalValues(): Locator {
+    return this.page.locator('.app-commodity-total__value');
+  }
+
+  /** The status tag beside a task, found through the list item holding the task's link. */
+  taskStatus(name: string): Locator {
+    return this.page
+      .getByRole('listitem')
+      .filter({ has: this.task(name) })
+      .locator('.govuk-task-list__status');
+  }
+
+  /** Every link in the page body whose address contains the fragment. */
+  linksTo(fragment: string): Locator {
+    return this.page.locator(`main a[href*="${fragment}"]`);
+  }
 }
