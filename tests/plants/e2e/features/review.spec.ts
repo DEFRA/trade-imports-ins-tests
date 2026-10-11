@@ -90,9 +90,10 @@ async function submit(plantsPages: PlantsPages) {
   await expect(plantsPages.confirmation.heading).toBeVisible();
 }
 
-async function assertReadOnly(plantsPages: PlantsPages) {
-  await expect(plantsPages.notificationView.heading).toBeVisible();
-  await expect(plantsPages.overview.statusTag).toHaveText('Submitted');
+async function assertReadOnly(plantsPages: PlantsPages, reference: string) {
+  await expect(plantsPages.notificationView.viewHeading(reference)).toBeVisible();
+  await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');
+  await expect(plantsPages.notificationView.journeyStrip).toHaveCount(0);
   await expect(plantsPages.notificationView.changeLinks).toHaveCount(0);
   await expect(plantsPages.notificationView.btnContinue).toHaveCount(0);
 }
@@ -202,7 +203,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     );
     await expect(plantsPages.confirmation.lateBanner).toHaveCount(0);
     await plantsPages.confirmation.viewNotification.click();
-    await assertReadOnly(plantsPages);
+    await assertReadOnly(plantsPages, reference);
     await expect(plantsPages.notificationView.lateBanner).toHaveCount(0);
     await plantsPages.dashboard.open();
     await plantsPages.dashboard.searchForReference(reference);
@@ -233,7 +234,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
       await expect(plantsPages.confirmation.lateBanner).toBeVisible();
       await expect(pages.page.getByText(rule, { exact: false })).toBeVisible();
       await plantsPages.confirmation.viewNotification.click();
-      await assertReadOnly(plantsPages);
+      await assertReadOnly(plantsPages, reference);
       await expect(plantsPages.notificationView.lateBanner).toBeVisible();
       await plantsPages.dashboard.open();
       await plantsPages.dashboard.searchForReference(reference);
@@ -368,12 +369,12 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
       await expect(pages.page.getByRole('heading', { name: 'Cancel this amendment?', level: 1 })).toBeVisible();
       await pages.page.getByRole('button', { name: 'Yes, cancel amendment', exact: true }).click();
       await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
-      await assertReadOnly(plantsPages);
+      await assertReadOnly(plantsPages, reference);
       await expect(pages.page.getByRole('alert')).toContainText(/amendment.*cancelled/i);
       await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('P123');
       await expect(plantsPages.notificationView.card('Identification numbers')).not.toContainText('DiscardMe99');
       await pages.page.reload();
-      await assertReadOnly(plantsPages);
+      await assertReadOnly(plantsPages, reference);
       await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('P123');
     });
   }
@@ -390,6 +391,38 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(plantsPages.dashboard.deletedBanner).toContainText('Notification deleted');
     await plantsPages.dashboard.searchForReference(reference);
     await expect(plantsPages.dashboard.notificationCard(reference)).toHaveCount(0);
+  });
+
+  test("a submitted notification's read-only view is headed by its reference with the date submitted, and Back goes to the plants notification list", async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    await expectReview(plantsPages);
+    await submit(plantsPages);
+    await plantsPages.confirmation.viewNotification.click();
+
+    await expect(plantsPages.notificationView.viewHeading(reference)).toBeVisible();
+    await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');
+    await expect(plantsPages.notificationView.journeyStrip).toHaveCount(0);
+    await expect(pages.page).toHaveTitle(`${reference} - Import notification service - GOV.UK`);
+    await expect(plantsPages.notificationView.dateSubmitted).toHaveText(
+      new RegExp(`^Date submitted: (${getRelativeServiceDisplayDate(-1)}|${getRelativeServiceDisplayDate()})$`),
+    );
+
+    await plantsPages.notificationView.linkBack.click();
+
+    await expect(pages.page).toHaveURL(new RegExp(`${plantsPages.dashboard.expectedUrl}/?$`));
+    await expect(plantsPages.dashboard.heading).toBeVisible();
+  });
+
+  test("an unknown notification's view goes to the plants notification list", async ({ pages, plantsPages }) => {
+    await plantsPages.notificationView.open('GBN-HRP-00-000000');
+
+    await expect(pages.page).toHaveURL(new RegExp(`${plantsPages.dashboard.expectedUrl}/?$`));
+    await expect(plantsPages.dashboard.heading).toBeVisible();
   });
 
   for (const initiallyLate of [true, false]) {
@@ -414,7 +447,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
       await expect(plantsPages.confirmation.lateBanner).toHaveCount(initiallyLate ? 1 : 0);
       await plantsPages.confirmation.viewNotification.click();
       await pages.page.reload();
-      await assertReadOnly(plantsPages);
+      await assertReadOnly(plantsPages, reference);
       // readDate (shared/kit.js) keeps the day/month/year digits verbatim from the
       // single free-text field, so the card echoes the zero-padded string as typed.
       await expect(plantsPages.notificationView.card('Arrival details')).toContainText(amendedDate);

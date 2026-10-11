@@ -37,6 +37,6 @@ test.describe('INS dashboard notification navigation', { tag: ['@integration'] }
 
     // Then — it lands on that notification's read-only view in trade-imports-animals-frontend
     await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeading(referenceNumber)).toBeVisible();
   });
 });

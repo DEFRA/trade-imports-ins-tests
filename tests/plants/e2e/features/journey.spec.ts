@@ -123,9 +123,8 @@ test.describe('High-risk plants full happy-path journeys', { tag: '@integration'
       // Reload proves the submitted answers survive a fresh read.
       await pages.page.reload();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
-      await expect(plantsPages.notificationView.heading).toBeVisible();
-      await expect(plantsPages.overview.reference).toHaveText(reference);
-      await expect(plantsPages.overview.statusTag).toHaveText('Submitted');
+      await expect(plantsPages.notificationView.viewHeading(reference)).toBeVisible();
+      await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');
       await expect(plantsPages.notificationView.changeLinks).toHaveCount(0);
       await expect(plantsPages.notificationView.btnContinue).toHaveCount(0);
       await expect(plantsPages.notificationView.lateBanner).toHaveCount(scenario.late ? 1 : 0);

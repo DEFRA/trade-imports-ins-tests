@@ -9,6 +9,17 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
   get heading(): Locator {
     return this.page.getByRole('heading', { name: 'Check your answers', level: 1 });
   }
+  /** The level-1 heading of a submitted notification's view, named exactly its reference. */
+  viewHeading(reference: string): Locator {
+    return this.page.getByRole('heading', { level: 1, name: reference, exact: true });
+  }
+  get dateSubmitted(): Locator {
+    return this.page.getByText(/^Date submitted: /);
+  }
+  /** The status bar's tag on a draft or amendment, and the header's tag on a submitted view. */
+  override get statusTag(): Locator {
+    return this.page.getByRole('main').locator('.govuk-tag');
+  }
   get btnContinue(): Locator {
     return this.page.getByRole('button', { name: 'Continue', exact: true });
   }

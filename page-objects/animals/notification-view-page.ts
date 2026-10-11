@@ -11,6 +11,20 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Review your notification' });
   }
 
+  /** The level-1 heading of a submitted notification's view, named exactly its reference. */
+  viewHeading(reference: string): Locator {
+    return this.page.getByRole('heading', { level: 1, name: reference, exact: true });
+  }
+
+  get dateSubmitted(): Locator {
+    return this.page.getByText(/^Date submitted: /);
+  }
+
+  /** The status bar's tag on a draft or amendment, and the header's tag on a submitted view. */
+  override get statusTag(): Locator {
+    return this.page.getByRole('main').locator('.govuk-tag');
+  }
+
   get resubmitHeading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Review before re-submitting' });
   }
@@ -85,11 +99,19 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.partyRow(card, role).getByRole('definition').first();
   }
 
+  /** Opens the address without waiting for a review heading, for a view that redirects. */
+  async visit(journeyId: string): Promise<void> {
+    await super.open(journeyId);
+  }
+
   async open(journeyId: string, attemptSignIn: boolean = true): Promise<void> {
     await super.open(journeyId, attemptSignIn);
     if (attemptSignIn) {
       await this.page
-        .getByRole('heading', { level: 1, name: /^(Review your notification|Review before re-submitting)$/ })
+        .getByRole('heading', {
+          level: 1,
+          name: new RegExp(`^(Review your notification|Review before re-submitting|${journeyId})$`),
+        })
         .waitFor(pageLoadWait);
     }
   }

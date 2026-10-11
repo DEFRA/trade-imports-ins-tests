@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { getRelativeServiceDisplayDate } from '@utils/date-utils';
 
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
 const EXACT_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
@@ -12,6 +13,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
 
     test('renders the recorded answers in the numbered design sections', async ({ pages, animalsPages }) => {
       await expect(animalsPages.notificationView.heading).toBeVisible();
+      await expect(pages.page).toHaveTitle('Error: Review your notification - Import notification service - GOV.UK');
       await expect(pages.page.getByRole('heading', { name: '1. About the consignment' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '2. Description of the goods' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '3. Transport and arrival' })).toBeVisible();
@@ -85,9 +87,11 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     });
 
     test('opens headed Review your notification with no error summary, ending with Continue, Cancel amend and Delete', async ({
+      pages,
       animalsPages,
     }) => {
       await expect(animalsPages.notificationView.heading).toBeVisible();
+      await expect(pages.page).toHaveTitle('Review your notification - Import notification service - GOV.UK');
       await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
       await expect(animalsPages.notificationView.continueButton).toBeVisible();
       await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
@@ -118,10 +122,31 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
     });
 
-    test('lands on the view page with the Submitted strip and reference', async ({ pages, animalsPages, journeyContext }) => {
+    test('lands on the view page headed by its reference with a Submitted tag and no status bar', async ({
+      pages,
+      animalsPages,
+      journeyContext,
+    }) => {
       await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(journeyContext.journeyId)}$`));
-      await expect(animalsPages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Submitted');
-      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.journeyId);
+      await expect(animalsPages.notificationView.viewHeading(journeyContext.journeyId)).toBeVisible();
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
+      await expect(animalsPages.notificationView.statusTag).toHaveClass(/govuk-tag--green/);
+      await expect(animalsPages.notificationView.journeyStrip).toHaveCount(0);
+      await expect(animalsPages.notificationView.heading).toHaveCount(0);
+      await expect(pages.page).toHaveTitle(`${journeyContext.journeyId} - Import notification service - GOV.UK`);
+    });
+
+    test('shows the date it was submitted', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.dateSubmitted).toHaveText(
+        new RegExp(`^Date submitted: (${getRelativeServiceDisplayDate(-1)}|${getRelativeServiceDisplayDate()})$`),
+      );
+    });
+
+    test('Back goes to the live-animals notification list', async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.linkBack.click();
+
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.dashboard.expectedUrl}/?$`));
+      await expect(animalsPages.dashboard.heading).toBeVisible();
     });
 
     test('offers Copy as new and Delete on the read-only view', async ({ pages, animalsPages }) => {
@@ -145,6 +170,15 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     test('still renders the recorded answers after submission', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
       await expect(animalsPages.notificationView.summaryCard('Cow (0102)')).toBeVisible();
+    });
+  });
+
+  test.describe('UNKNOWN', () => {
+    test("an unknown notification's view goes to the live-animals notification list", async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.visit('GBN-AG-00-000000');
+
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.dashboard.expectedUrl}/?$`));
+      await expect(animalsPages.dashboard.heading).toBeVisible();
     });
   });
 });

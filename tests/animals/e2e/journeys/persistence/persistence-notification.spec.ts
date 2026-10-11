@@ -132,7 +132,7 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
     }
 
     await animalsPages.notificationView.open(referenceNumber);
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.viewHeading(referenceNumber)).toBeVisible();
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
   });
 });
