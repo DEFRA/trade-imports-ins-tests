@@ -92,7 +92,7 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
     await plantsPages.arrivalDetails.open(reference);
     await plantsPages.arrivalDetails.dateQuestionLabelled('Expected date of arrival').fill('27/3/2027');
     await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-    await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour (GB ABD)');
+    await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour - GB ABD');
     await plantsPages.arrivalDetails.btnSaveAndContinue.click();
     await plantsPages.placeOfDestination.open(reference);
     await plantsPages.placeOfDestination.searchFor(address.name);

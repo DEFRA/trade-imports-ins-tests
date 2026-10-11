@@ -50,7 +50,7 @@ async function completeNotification(
   if (type === POTATOES) {
     await journey.toArrivalDetails('France');
     await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-    await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour (GB ABD)');
+    await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour - GB ABD');
   } else {
     await journey.toArrivalStatus('Germany');
     await journey.answerArrivalStatus('Yes, it has already arrived');

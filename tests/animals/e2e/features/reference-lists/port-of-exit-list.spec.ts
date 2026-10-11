@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { portOfExitLabel, portsInListOrder } from '@domain/shared/fixtures/reference-data';
+import { portLabel, portsInListOrder } from '@domain/shared/fixtures/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Port of exit list', { tag: ['@integration'] }, () => {
@@ -15,11 +15,8 @@ test.describe('Port of exit list', { tag: ['@integration'] }, () => {
     await animalsPages.importReason.reason('Transit').check();
 
     await expect(animalsPages.importReason.transitPortOfExit).toHaveValue('');
-    await expect(animalsPages.importReason.transitPortOfExitAllOptions).toHaveText([
-      'Select one',
-      ...portsInListOrder().map(portOfExitLabel),
-    ]);
-    await expect(animalsPages.importReason.transitPortOfExitOptions).toHaveText(portsInListOrder().map(portOfExitLabel));
+    await expect(animalsPages.importReason.transitPortOfExitAllOptions).toHaveText(['Select one', ...portsInListOrder().map(portLabel)]);
+    await expect(animalsPages.importReason.transitPortOfExitOptions).toHaveText(portsInListOrder().map(portLabel));
   });
 
   test('the temporary admission port of exit list opens on Select one, then offers the same ports, labelled and ordered the same way', async ({
@@ -32,9 +29,9 @@ test.describe('Port of exit list', { tag: ['@integration'] }, () => {
     await expect(animalsPages.importReason.temporaryAdmissionPortOfExit).toHaveValue('');
     await expect(animalsPages.importReason.temporaryAdmissionPortOfExitAllOptions).toHaveText([
       'Select one',
-      ...portsInListOrder().map(portOfExitLabel),
+      ...portsInListOrder().map(portLabel),
     ]);
-    await expect(animalsPages.importReason.temporaryAdmissionPortOfExitOptions).toHaveText(portsInListOrder().map(portOfExitLabel));
+    await expect(animalsPages.importReason.temporaryAdmissionPortOfExitOptions).toHaveText(portsInListOrder().map(portLabel));
   });
 });
 

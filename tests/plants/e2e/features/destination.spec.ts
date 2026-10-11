@@ -32,8 +32,8 @@ const POST_ARRIVAL_DESTINATION_DESCRIPTION =
 const ARRIVING_ON = '27/3/2027';
 const ARRIVING_AT = '14:30';
 
-// A port the reference data has held throughout, offered as "{name} ({code})".
-const ABERDEEN_HARBOUR = 'Aberdeen Harbour (GB ABD)';
+// A port the reference data has held throughout, offered as "{name} - {code}".
+const ABERDEEN_HARBOUR = 'Aberdeen Harbour - GB ABD';
 
 // The picker shows five rows a page (design 05-03..06), whatever page size the
 // address-book API itself serves.

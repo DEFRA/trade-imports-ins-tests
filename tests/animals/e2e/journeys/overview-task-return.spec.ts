@@ -65,7 +65,7 @@ test.describe('Overview task return', { tag: ['@integration'] }, () => {
     await expectComplete('Additional details');
 
     await openTask('Arrival details', 'port-of-entry');
-    await animalsJourney.fillArrivalDetails('Road Vehicle');
+    await animalsJourney.fillArrivalDetails('Road');
     await animalsPages.arrivalDetails.saveAndContinue.click();
     await expectOnOverview();
     await expect(animalsPages.transitedCountries.heading).toBeHidden();

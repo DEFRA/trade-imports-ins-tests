@@ -40,17 +40,13 @@ export function originPageCountryNames(): string[] {
   return countryAndTerritoryNames();
 }
 
-/** A destination country select lists each origin country and each territory named "<territory> (<country>)", sorted by name. */
+/** A destination country select, and the transit countries search, list each origin country and each territory named "<territory> (<country>)", sorted by name. */
 export function destinationCountryNames(): string[] {
   return countryAndTerritoryNames();
 }
 
+/** A port option reads '<name> - <code>' — port of entry, port of exit and place of landing alike. */
 export function portLabel(port: CapturedPort): string {
-  return `${port.name} (${port.code})`;
-}
-
-/** A port of exit option reads '<name> - <code>'. */
-export function portOfExitLabel(port: CapturedPort): string {
   return `${port.name} - ${port.code}`;
 }
 

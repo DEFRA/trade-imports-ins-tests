@@ -16,7 +16,7 @@ export type AccompanyingDocumentAnswer = {
 };
 
 const COUNTRY = 'France';
-const PORT = 'Aberdeen Harbour (GB ABD)';
+const PORT = 'Aberdeen Harbour - GB ABD';
 // Inside the arrival-date window (1 week back to 6 months ahead) wherever the
 // wall clock happens to be, in the unpadded d/m/yyyy the app itself renders —
 // so a CYA assertion compares against the app's shape, not the typed string it
@@ -184,7 +184,7 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async fillArrivalDetails(means: string = 'Road Vehicle'): Promise<void> {
+  async fillArrivalDetails(means: string = 'Road'): Promise<void> {
     await this.animalsPages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
     await this.animalsPages.arrivalDetails.selectPort(PORT);
     await this.animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: means });
@@ -385,7 +385,7 @@ export class AnimalsJourney {
     await this.confirmDeclaration();
   }
 
-  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+  async walkOpeningRunToArrivalDetails(): Promise<string> {
     const pages = this.animalsPages;
     const journeyId = await this.createNotificationAtOrigin();
 
@@ -411,7 +411,14 @@ export class AnimalsJourney {
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
-    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Airplane' });
+    return journeyId;
+  }
+
+  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+    const pages = this.animalsPages;
+    const journeyId = await this.walkOpeningRunToArrivalDetails();
+
+    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Air' });
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);
@@ -463,8 +470,8 @@ export class AnimalsJourney {
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
-    await pages.arrivalDetails.selectPort('Heathrow Airport (GB LHR)');
-    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Airplane' });
+    await pages.arrivalDetails.selectPort('Heathrow Airport - GB LHR');
+    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Air' });
     await pages.arrivalDetails.transportIdentification.fill('BA0117');
     await pages.arrivalDetails.transportDocumentReference.fill('AWB-2026-0001');
     await pages.arrivalDetails.saveAndContinue.click();
@@ -533,8 +540,8 @@ export class AnimalsJourney {
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
-    await pages.arrivalDetails.selectPort('Holyhead Port (GB HLY)');
-    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Vessel' });
+    await pages.arrivalDetails.selectPort('Holyhead Port - GB HLY');
+    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Sea' });
     await pages.arrivalDetails.transportIdentification.fill(HORSE_TRANSPORT_ID);
     await pages.arrivalDetails.transportDocumentReference.fill('BOL-2026-0001');
     await pages.arrivalDetails.saveAndContinue.click();

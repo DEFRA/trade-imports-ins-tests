@@ -22,14 +22,43 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.page.locator('select#portOfEntry-select');
   }
 
+  get portOfEntryHint(): Locator {
+    return this.page.locator('#portOfEntry-hint');
+  }
+
+  // The native select's empty option, which carries the placeholder text.
+  get portOfEntryPlaceholderOption(): Locator {
+    return this.portOfEntryValue.locator('option[value=""]');
+  }
+
+  // The label of one question, addressed by the field id it labels.
+  questionLabel(fieldId: string): Locator {
+    return this.page.locator(`label[for="${fieldId}"]`);
+  }
+
+  get transportIdentificationHintLead(): Locator {
+    return this.page.locator('#transportIdentification-hint p');
+  }
+
+  // One port in the native select, addressed by the code it submits.
+  portOption(code: string): Locator {
+    return this.portOfEntryValue.locator(`option[value="${code}"]`);
+  }
+
   // Every port offered, skipping the empty placeholder option.
   get portOptions(): Locator {
     return this.portOfEntryValue.locator('option:not([value=""])');
   }
 
   // Drive the type-ahead the way a user does: type to filter, then pick the
-  // matching option by its "{name} ({code})" label.
+  // matching option by its "{name} - {code}" label. Without JavaScript the
+  // field is still the native select, chosen by option label.
   async selectPort(label: string): Promise<void> {
+    await this.page.waitForLoadState('domcontentloaded');
+    if ((await this.portOfEntry.evaluate((el) => el.tagName)) === 'SELECT') {
+      await this.portOfEntry.selectOption({ label });
+      return;
+    }
     await this.portOfEntry.click();
     await this.portOfEntry.fill(label);
     await this.page.getByRole('option', { name: label, exact: true }).click();
@@ -60,8 +89,8 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.page.locator('#meansOfTransport-error');
   }
 
-  get meansOfTransportRequiredErrorLink(): Locator {
-    return this.page.getByRole('link', { name: 'Select the means of transport to the port of entry' });
+  get meansOfTransportErrorLink(): Locator {
+    return this.page.getByRole('link', { name: 'Select a means of transport to the port of entry' });
   }
 
   get datePicker(): Locator {

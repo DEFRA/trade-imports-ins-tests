@@ -38,5 +38,17 @@ test.describe('Change from check your answers', { tag: ['@integration', '@duplic
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(certifiedForRow).toContainText('Exhibition');
+
+    // Arrival details leg: the save returns to the summary with the new means of transport.
+    const meansRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Means of transport to the port of entry' });
+    await expect(meansRow).toContainText('Road');
+    await animalsPages.notificationView.changeLink('Change arrival details').click();
+    await expect(animalsPages.arrivalDetails.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/\/port-of-entry\?change=1$/);
+    await animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: 'Sea' });
+    await animalsPages.arrivalDetails.saveAndContinue.click();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/\/notification-view$/);
+    await expect(meansRow).toContainText('Sea');
   });
 });
