@@ -51,7 +51,7 @@ test.describe('Port of exit answer', { tag: ['@integration'] }, () => {
 
     await expect(pages.page).toHaveURL((url) => url.pathname !== animalsPages.importReason.expectedUrl(journeyId));
     await animalsPages.overview.open(journeyId);
-    await animalsPages.overview.task('Main reason for import').click();
+    await animalsPages.overview.task('Main import reason').click();
 
     await expect(animalsPages.importReason.transitPortOfExit).toHaveValue(port);
   });

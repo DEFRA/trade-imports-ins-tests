@@ -21,7 +21,7 @@ test.describe('Security scan (frontend, conditional pages)', { tag: '@active' },
     await animalsJourney.startNotification();
     await animalsJourney.unlockSections();
 
-    await animalsPages.overview.task('Main reason for import').click();
+    await animalsPages.overview.task('Main import reason').click();
     await animalsPages.importReason.reason('Transit').check();
     await animalsPages.importReason.transitPortOfExit.selectOption({ index: 1 });
     await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
@@ -32,7 +32,7 @@ test.describe('Security scan (frontend, conditional pages)', { tag: '@active' },
     await animalsPages.additionalDetails.saveAndContinue.click();
     await animalsPages.overview.heading.waitFor();
 
-    await animalsPages.overview.task('Main reason for import').click();
+    await animalsPages.overview.task('Main import reason').click();
     await animalsPages.importReason.reason('Temporary admission horses').check();
     await animalsPages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
     await animalsPages.importReason.temporaryAdmissionPortOfExit.selectOption({ index: 1 });

@@ -126,7 +126,7 @@ export class AnimalsJourney {
   }
 
   async answerReasonAndAdditionalDetails(): Promise<void> {
-    await this.animalsPages.overview.task('Main reason for import').click();
+    await this.animalsPages.overview.task('Main import reason').click();
     await this.animalsPages.importReason.reason('Internal market').check();
     // The purpose is a conditional reveal under the reason, so both answers go
     // in on the one submit.
@@ -274,7 +274,7 @@ export class AnimalsJourney {
   async toImportReason(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.animalsPages.overview.task('Main reason for import').click();
+    await this.animalsPages.overview.task('Main import reason').click();
     await this.animalsPages.importReason.heading.waitFor(pageLoadWait);
   }
 

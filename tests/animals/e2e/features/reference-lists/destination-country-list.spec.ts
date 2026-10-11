@@ -49,7 +49,7 @@ test.describe('Destination country answer', { tag: ['@integration'] }, () => {
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
     await animalsPages.overview.open(journeyId);
-    await animalsPages.overview.task('Main reason for import').click();
+    await animalsPages.overview.task('Main import reason').click();
 
     await expect(animalsPages.importReason.transhipmentDestinationCountry).toHaveValue(territory);
   });
@@ -68,7 +68,7 @@ test.describe('Destination country answer', { tag: ['@integration'] }, () => {
 
     await expect(pages.page).toHaveURL((url) => url.pathname !== animalsPages.importReason.expectedUrl(journeyId));
     await animalsPages.overview.open(journeyId);
-    await animalsPages.overview.task('Main reason for import').click();
+    await animalsPages.overview.task('Main import reason').click();
 
     await expect(animalsPages.importReason.transitDestinationCountry).toHaveValue('FR');
   });

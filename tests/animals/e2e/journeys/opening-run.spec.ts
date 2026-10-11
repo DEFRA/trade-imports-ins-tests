@@ -23,7 +23,7 @@ test.describe('Opening run', { tag: ['@integration'] }, () => {
     for (const task of [
       'Where is this consignment coming from?',
       'What are you importing?',
-      'Main reason for import',
+      'Main import reason',
       'Commodity details',
       'Identification details',
       'Additional details',
@@ -185,7 +185,7 @@ test.describe('Opening run', { tag: ['@integration'] }, () => {
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
 
     await animalsPages.overview.open(journeyId);
-    await animalsPages.overview.task('Main reason for import').click();
+    await animalsPages.overview.task('Main import reason').click();
     await expect(animalsPages.importReason.linkBack).toHaveAttribute('href', animalsPages.overview.expectedUrl(journeyId));
     await animalsPages.importReason.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();

@@ -3,7 +3,7 @@ import { test, expect } from '@fixtures';
 const COMPLETE = 'Complete';
 const TO_DO = 'To do';
 const ORIGIN_TASK = 'Where is this consignment coming from?';
-const IMPORT_REASON_TASK = 'Main reason for import';
+const IMPORT_REASON_TASK = 'Main import reason';
 const COMMODITY_SELECTION_TASK = 'What are you importing?';
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
 const IMPOSSIBLE_ARRIVAL_DATE = '31/2/2026';

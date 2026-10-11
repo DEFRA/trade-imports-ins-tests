@@ -7,7 +7,7 @@ import { test, expect } from '@fixtures';
 const HORSE_BY_SEA_TASKS = [
   'Where is this consignment coming from?',
   'What are you importing?',
-  'Main reason for import',
+  'Main import reason',
   'Commodity details',
   'Identification details',
   'Additional details',

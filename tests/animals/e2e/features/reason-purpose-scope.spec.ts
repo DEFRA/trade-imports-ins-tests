@@ -3,7 +3,7 @@ import { getRelativeAppDateText } from '@utils/date-utils';
 
 const COMPLETE = 'Complete';
 const TO_DO = 'To do';
-const IMPORT_REASON_TASK = 'Main reason for import';
+const IMPORT_REASON_TASK = 'Main import reason';
 const ADDITIONAL_DETAILS_TASK = 'Additional details';
 
 test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {

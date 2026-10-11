@@ -34,11 +34,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     const expectListedTasks = async (list: Locator, tasks: string[]) => {
       for (const task of tasks) await expect(list).toContainText(task);
     };
-    await expectListedTasks(taskLists.nth(0), [
-      'Where is this consignment coming from?',
-      'What are you importing?',
-      'Main reason for import',
-    ]);
+    await expectListedTasks(taskLists.nth(0), ['Where is this consignment coming from?', 'What are you importing?', 'Main import reason']);
     await expectListedTasks(taskLists.nth(1), ['Additional details']);
     // Identification is only owed once a chosen commodity carries identifiers,
     // and nothing has been chosen yet, so the row is off the hub altogether.
@@ -47,6 +43,41 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expectListedTasks(taskLists.nth(3), ['Upload documents']);
     await expectListedTasks(taskLists.nth(4), ['Roles and addresses']);
     await expectListedTasks(taskLists.nth(5), ['Contact address for this consignment']);
+  });
+
+  test('the hub marks the commodity summary, its two cards, the task list and each numbered section as named regions', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.startNotification();
+
+    const summary = animalsPages.overview.region('Your commodities');
+    await expect(summary.getByRole('region')).toHaveCount(2);
+    await expect(summary.getByRole('region', { name: 'Animals summary', exact: true })).toBeVisible();
+    await expect(summary.getByRole('region', { name: 'Packages summary', exact: true })).toBeVisible();
+
+    const taskList = animalsPages.overview.region('Notification tasklist');
+    await expect(taskList.getByRole('region')).toHaveCount(6);
+    for (const caption of [
+      '1. About the consignment',
+      '2. Description of the goods',
+      '3. Transport and arrival',
+      '4. Documents',
+      '5. Consignment parties',
+      '6. Contact address',
+    ]) {
+      await expect(taskList.getByRole('region', { name: caption, exact: true })).toBeVisible();
+    }
+    await expect(
+      taskList
+        .getByRole('region', { name: '1. About the consignment', exact: true })
+        .getByRole('link', { name: 'Main import reason', exact: true }),
+    ).toBeVisible();
+    await expect(animalsPages.overview.task('Main reason for import')).toHaveCount(0);
+
+    await expect(animalsPages.overview.task('Roles and addresses')).toHaveAccessibleDescription(
+      'Consignor or Exporter, Consignee, Importer and Place of Destination To do',
+    );
   });
 
   test('after completing every section the check-your-answers page renders the answered rows', async ({

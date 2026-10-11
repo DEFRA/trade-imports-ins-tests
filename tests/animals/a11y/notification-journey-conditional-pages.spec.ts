@@ -27,7 +27,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await animalsJourney.unlockSections();
 
     await test.step('Import reason: Transit', async () => {
-      await animalsPages.overview.task('Main reason for import').click();
+      await animalsPages.overview.task('Main import reason').click();
       await animalsPages.importReason.reason('Transit').check();
       await animalsPages.importReason.transitPortOfExit.selectOption({ index: 1 });
       await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
@@ -41,7 +41,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import reason: Temporary admission of horses', async () => {
-      await animalsPages.overview.task('Main reason for import').click();
+      await animalsPages.overview.task('Main import reason').click();
       await animalsPages.importReason.reason('Temporary admission horses').check();
       await animalsPages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
       await animalsPages.importReason.temporaryAdmissionPortOfExit.selectOption({ index: 1 });

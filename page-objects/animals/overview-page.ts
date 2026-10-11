@@ -19,6 +19,11 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Review and submit' });
   }
 
+  /** A named region of the Overview — the commodity summary, its two cards, the task list or a numbered section. */
+  region(name: string): Locator {
+    return this.page.getByRole('region', { name, exact: true });
+  }
+
   task(name: string): Locator {
     return this.page.getByRole('link', { name, exact: true });
   }
