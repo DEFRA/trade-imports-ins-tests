@@ -11,6 +11,7 @@ const COMPLETE = 'Complete';
 const IMPORT_DETAILS = 'Import details';
 const REGION_CODE_ROW = 'Region of origin code';
 const NOT_APPLICABLE = 'Not applicable';
+const CANARY_ISLANDS = 'Canary Islands (Spain)';
 
 test.describe('Origin of the import page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -168,16 +169,21 @@ test.describe('Origin of the import page', { tag: ['@integration', '@duplicated-
     await expect(animalsPages.overview.taskStatus(ORIGIN_TASK)).toHaveText(COMPLETE);
   });
 
-  test('persists a country subdivision selection', async ({ animalsPages }) => {
+  test("persists a territory chosen as the country of origin, named with its country and with its country's code as the region code prefix", async ({
+    animalsPages,
+  }) => {
     const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
 
-    await animalsPages.originOfImport.selectCountry('Canary Islands');
-    await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
+    await animalsPages.originOfImport.selectCountry(CANARY_ISLANDS);
+    await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
+    await animalsPages.originOfImport.regionCode.fill('12');
     await animalsPages.originOfImport.internalReference.fill(INTERNAL_REFERENCE);
     await animalsPages.originOfImport.saveAndContinue.click();
 
     await animalsPages.originOfImport.open(journeyId);
     await expect(animalsPages.originOfImport.countrySelect).toHaveValue('ES-CN');
-    await expect(animalsPages.originOfImport.countryOfOrigin).toHaveValue('Canary Islands');
+    await expect(animalsPages.originOfImport.countryOfOrigin).toHaveValue(CANARY_ISLANDS);
+    await expect(animalsPages.originOfImport.regionCodePrefix).toHaveText('ES');
+    await expect(animalsPages.originOfImport.regionCode).toHaveValue('12');
   });
 });

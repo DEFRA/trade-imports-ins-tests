@@ -67,6 +67,11 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
     return this.page.getByLabel('Enter the region of origin code', { exact: true });
   }
 
+  // The fixed country code shown in front of the region code box.
+  get regionCodePrefix(): Locator {
+    return this.page.locator('.govuk-input__prefix');
+  }
+
   // The box caps typing at five characters; removing the cap submits a longer
   // code the way an uncapped client would, so the server's own rule is reached.
   async removeRegionCodeMaxLength(): Promise<void> {

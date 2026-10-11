@@ -29,18 +29,20 @@ export function countryByCode(code: string): { value: string; display: string } 
   return { value: country.code, display: country.name };
 }
 
-/** The origin page lists each origin country and each of its subdivisions, sorted by name. */
-export function originPageCountryNames(): string[] {
+function countryAndTerritoryNames(): string[] {
   return countriesOrigin
-    .flatMap((country) => [country.name, ...country.subDivisions.map((subDivision) => subDivision.name)])
+    .flatMap((country) => [country.name, ...country.subDivisions.map((subDivision) => `${subDivision.name} (${country.name})`)])
     .sort((first, second) => first.localeCompare(second));
+}
+
+/** The origin page lists each origin country and each territory named "<territory> (<country>)", sorted by name. */
+export function originPageCountryNames(): string[] {
+  return countryAndTerritoryNames();
 }
 
 /** A destination country select lists each origin country and each territory named "<territory> (<country>)", sorted by name. */
 export function destinationCountryNames(): string[] {
-  return countriesOrigin
-    .flatMap((country) => [country.name, ...country.subDivisions.map((subDivision) => `${subDivision.name} (${country.name})`)])
-    .sort((first, second) => first.localeCompare(second));
+  return countryAndTerritoryNames();
 }
 
 export function portLabel(port: CapturedPort): string {
