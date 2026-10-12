@@ -78,8 +78,8 @@ export class FrontendFormClient {
     return response.text();
   }
 
-  /** For a post that renders the next page rather than redirecting to it; returns that page's HTML. */
-  async postFormForPage(path: string, fields: FormFields = {}): Promise<string> {
+  // For a post that renders the next page itself instead of redirecting to it, as postForm expects.
+  async postFormReturningHtml(path: string, fields: FormFields = {}): Promise<string> {
     const response = await this.request.post(path, {
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
       data: encodeFormBody({ ...fields, crumb: await this.crumbToken() }),
