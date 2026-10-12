@@ -68,8 +68,7 @@ export class FrontendFormClient {
     return minted;
   }
 
-  /** Renders a page and returns its HTML. The context keeps any cookie the render sets, so later posts carry it. */
-  async getPage(path: string): Promise<string> {
+  async getPageHtml(path: string): Promise<string> {
     const response = await this.request.get(path, { maxRedirects: 0 });
     if (response.status() !== HTTP_STATUS_OK) {
       throw new Error(

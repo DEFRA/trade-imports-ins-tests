@@ -60,7 +60,7 @@ export class AnimalsSeededJourney {
     const journeyId = await this.createDraftNotification('readyToSubmit');
     const declarationPath = `${CREATE_PATH}/${journeyId}/${declarationStep.slug}`;
     // Rendering check your answers records its token in this session; the declaration accepts only that token.
-    const review = await this.forms.getPage(`${CREATE_PATH}/${journeyId}/${declarationStep.reviewSlug}`);
+    const review = await this.forms.getPageHtml(`${CREATE_PATH}/${journeyId}/${declarationStep.reviewSlug}`);
     const concurrencyToken = concurrencyTokenIn(review, declarationStep.reviewSlug);
     const declaration = await this.forms.postFormForPage(declarationPath, { ...declarationStep.review, concurrencyToken });
     // redirectsTo is the assertion: a refused submission lands back on check-your-answers, not the confirmation.
