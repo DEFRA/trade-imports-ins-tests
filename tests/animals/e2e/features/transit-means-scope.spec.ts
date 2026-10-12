@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () => {
   test('the transit-countries page is routed only for rail or road; changing the means wipes saved countries', async ({
     animalsJourney,
     pages,

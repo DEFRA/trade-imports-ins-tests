@@ -5,7 +5,7 @@ import { type NewAddressDetails } from '@page-objects/ins/address-book/add-page'
 const insBaseUrl = (process.env.TRADE_IMPORTS_INS_FRONTEND_BASE_URL ?? 'http://localhost:3002').replace(/\/$/, '');
 const insAddUrlPattern = new RegExp(`^${insBaseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/address-book/add\\?`);
 
-test.describe('Add an address from the journey via INS', { tag: ['@integration'] }, () => {
+test.describe('Add an address from the journey via INS', () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('the handshake crosses animals-frontend and ins-frontend, which only the compose stack runs together');
   });

@@ -11,7 +11,7 @@ const transporter = {
   telephoneNumber: '+44 28 9446 1200',
 };
 
-test.describe('Commercial transporter journeys', { tag: '@integration' }, () => {
+test.describe('Commercial transporter journeys', () => {
   test('a trader can submit a notification using a hand-added commercial transporter', async ({
     animalsSeededJourney,
     pages,

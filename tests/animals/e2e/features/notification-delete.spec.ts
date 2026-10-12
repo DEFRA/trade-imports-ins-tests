@@ -2,7 +2,7 @@ import { SET_BASES } from '@page-objects/shared/sets';
 
 import { test, expect } from '@fixtures';
 
-test.describe('Notification delete', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Notification delete', { tag: '@duplicated-in-frontend' }, () => {
   test('deletes a draft notification', async ({ animalsJourney, journeyContext, pages }) => {
     test.slow();
     await animalsJourney.startNotification();

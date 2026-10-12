@@ -13,7 +13,7 @@ const transporter = {
   },
 };
 
-test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, () => {
   test('keyed-in details are owed only for the private type; a partial fill blocks the save; changing the type wipes them', async ({
     animalsJourney,
     pages,

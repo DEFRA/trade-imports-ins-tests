@@ -53,7 +53,7 @@ const scenarios: { name: string; type: string; category: string; country: string
 // These full walks include sign-in even when worker session reuse is enabled.
 test.use({ storageState: COLD_START });
 
-test.describe('High-risk plants full happy-path journeys', { tag: '@integration' }, () => {
+test.describe('High-risk plants full happy-path journeys', () => {
   for (const scenario of scenarios) {
     test(`${scenario.name}: sign in, submit and view the saved notification`, async ({
       pages,

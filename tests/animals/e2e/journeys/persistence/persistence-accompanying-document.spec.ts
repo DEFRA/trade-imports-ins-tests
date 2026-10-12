@@ -15,7 +15,7 @@ import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
  * uploads a real file through cdp-uploader, waits for the virus scan, and asserts the persisted
  * accompanying_documents projection + that the uploaded row survives a fresh page load.
  */
-test.describe('Accompanying document persistence round-trip', { tag: ['@integration', '@mongodb'] }, () => {
+test.describe('Accompanying document persistence round-trip', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
   });
