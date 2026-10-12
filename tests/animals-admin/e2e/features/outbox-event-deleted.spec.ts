@@ -8,7 +8,7 @@ const NOTIFICATION_DELETED = 'uk.gov.defra.imports.notification.NotificationDele
 const NOTIFICATION_SUBMISSION_DELETED = 'uk.gov.defra.imports.notification.NotificationSubmissionDeleted';
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
-test.describe('Notification deleted outbox events', { tag: ['@integration', '@mongodb'] }, () => {
+test.describe('Notification deleted outbox events', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });

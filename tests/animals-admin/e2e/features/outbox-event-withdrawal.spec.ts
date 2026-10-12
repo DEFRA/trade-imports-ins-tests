@@ -7,7 +7,7 @@ import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 const NOTIFICATION_WITHDRAWN = 'uk.gov.defra.imports.notification.NotificationWithdrawn';
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
-test.describe('Notification withdrawal outbox event', { tag: ['@integration', '@mongodb'] }, () => {
+test.describe('Notification withdrawal outbox event', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });

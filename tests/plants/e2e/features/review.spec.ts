@@ -131,7 +131,7 @@ async function amend(pages: SharedPages, plantsPages: PlantsPages, reference: st
   await expect(plantsPages.overview.statusTag).toHaveText('Amending');
 }
 
-test.describe('High-risk plants check and submit section', { tag: '@integration' }, () => {
+test.describe('High-risk plants check and submit section', () => {
   test('review stays blocked until the final required row is complete', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
     const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { contact: false });
     const review = plantsPages.overview.taskRowByTitle('Check and submit');
@@ -414,7 +414,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
   }
 });
 
-test.describe('High-risk plants copied addresses are edited on the notification', { tag: '@integration' }, () => {
+test.describe('High-risk plants copied addresses are edited on the notification', () => {
   test('Edit details on CYA changes only this notification, not the address book record or another notification', async ({
     pages,
     plantsPages,

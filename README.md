@@ -240,6 +240,9 @@ tests/<domain>/
 Folders only organise specs: tags (`@a11y`, `@active`, `@compose`, `@dynamics`, `@visual`)
 select the suite, and the directory selects the domain.
 
+`npm run lint` runs `lint:suite-tags` to keep the two in step: a test under `a11y/` must carry
+`@a11y`, one under `security/` must carry `@active`, and one under `e2e/` neither.
+
 ## Local Testing
 
 ### Local workspace stack

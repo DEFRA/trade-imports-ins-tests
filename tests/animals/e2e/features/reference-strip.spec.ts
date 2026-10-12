@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 
 const GBN_REFERENCE = /GBN-AG-\d{2}-[0-9A-HJKMNP-TV-Z]{6}/;
 
-test.describe('Reference strip', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Reference strip', { tag: '@duplicated-in-frontend' }, () => {
   test('the Draft tag and GBN-AG reference show from the entry page onwards, and not on the dashboard', async ({ animalsPages }) => {
     const strip = animalsPages.overview.journeyStrip;
 

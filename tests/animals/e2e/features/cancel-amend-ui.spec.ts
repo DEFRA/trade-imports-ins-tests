@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () => {
+test.describe('Cancel amendment through the UI', () => {
   test.describe('from an amending notification', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions }) => {
       const referenceNumber = await animalsSeededJourney.createAmendNotification();

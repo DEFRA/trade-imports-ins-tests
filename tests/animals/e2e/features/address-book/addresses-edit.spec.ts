@@ -24,7 +24,7 @@ async function draftWithConsignor(animalsSeededJourney: AnimalsSeededJourney, an
   return journeyId;
 }
 
-test.describe('Copied addresses are edited on the notification', { tag: ['@integration'] }, () => {
+test.describe('Copied addresses are edited on the notification', () => {
   test('editing a copied address changes only this notification, not the address book record or another notification', async ({
     animalsSeededJourney,
     animalsPages,

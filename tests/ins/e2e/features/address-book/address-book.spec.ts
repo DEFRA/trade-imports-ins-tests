@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Address book', { tag: '@integration' }, () => {
+test.describe('Address book', () => {
   test('renders the address book after signing in', { tag: '@smoke' }, async ({ pages, insPages }) => {
     await insPages.addressBookList.open();
 

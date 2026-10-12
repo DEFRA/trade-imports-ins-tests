@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Commodity details page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toConsignmentDetails();
   });

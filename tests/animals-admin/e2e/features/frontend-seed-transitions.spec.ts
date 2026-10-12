@@ -10,7 +10,7 @@ const OUTBOX_COLLECTION = 'outbox';
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 const shortType = (eventType: string): string => eventType.split('.').pop() ?? eventType;
 
-test.describe('Seeded notification transitions', { tag: ['@integration', '@mongodb'] }, () => {
+test.describe('Seeded notification transitions', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });

@@ -4,7 +4,7 @@ const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
 const WHOLE_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
 const DISPLAYED_DATE_PATTERN = /\d{1,2} \w+ \d{4}/;
 
-test.describe('Import notification service dashboard', { tag: '@integration' }, () => {
+test.describe('Import notification service dashboard', () => {
   test('starts a journey at the origin page and lists the draft', async ({ animalsJourney, pages, animalsPages }) => {
     const journeyId = await animalsJourney.startNotification();
 

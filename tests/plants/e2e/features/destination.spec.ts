@@ -113,7 +113,7 @@ const chooseAddress = async (plantsPages: PlantsPages, token: string, name: stri
   await plantsPages.placeOfDestination.btnSaveAndContinue.click();
 };
 
-test.describe('High-risk plants destination section', { tag: '@integration' }, () => {
+test.describe('High-risk plants destination section', () => {
   test('the question is asked in the state the arrival answer put the notification in', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsToDestination(plantsPages, plantsJourney, NOT_YET_ARRIVED);
 

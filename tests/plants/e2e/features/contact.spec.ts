@@ -33,7 +33,7 @@ async function openContact(plantsPages: PlantsPages, journey: PlantsJourney): Pr
   return reference;
 }
 
-test.describe('High-risk plants contact', { tag: '@integration' }, () => {
+test.describe('High-risk plants contact', () => {
   test('searches the address book, pages the matches five at a time and persists a row ticked on a later page', async ({
     pages,
     plantsPages,
