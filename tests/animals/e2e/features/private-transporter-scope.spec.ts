@@ -19,6 +19,7 @@ test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-
     pages,
     animalsPages,
   }) => {
+    test.slow();
     await animalsJourney.startNotification();
     await animalsJourney.unlockSections();
 

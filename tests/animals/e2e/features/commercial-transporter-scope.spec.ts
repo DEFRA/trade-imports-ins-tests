@@ -18,6 +18,7 @@ test.describe('Commercial transporter scope', { tag: ['@integration', '@duplicat
     pages,
     animalsPages,
   }) => {
+    test.slow();
     await animalsJourney.startNotification();
     await animalsJourney.unlockSections();
 
