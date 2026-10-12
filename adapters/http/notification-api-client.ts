@@ -54,10 +54,6 @@ export class NotificationApiClient {
     });
   }
 
-  /**
-   * Submits only if the notification is still at concurrencyToken; a 409 means it
-   * changed since the caller read it.
-   */
   async submitNotification(id: string, concurrencyToken: number): Promise<Notification> {
     return this.retryOnTransientOutboxLock(() =>
       this.rest.post<Notification>(`/notifications/${id}/submit?concurrencyToken=${concurrencyToken}`),
