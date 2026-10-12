@@ -1,4 +1,4 @@
-import { test as base, expect, type APIRequestContext } from '@playwright/test';
+import { test as base, expect, type APIRequestContext, type TestInfo } from '@playwright/test';
 import {
   createAnimalsAdminPages,
   createAnimalsPages,
@@ -20,16 +20,19 @@ import { PlantsJourney } from '@flows/plants/journey';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { FrontendFormClient } from '@adapters/http/frontend-form-client';
-import { createWorkerAuthState } from '@fixtures/auth-state';
+import { createWorkerAuthStates, type AuthStateFor } from '@fixtures/auth-state';
 import { createFrontendSeedContext } from '@fixtures/seed-context';
 import { getCdpProxy } from '@config/cdp-proxy';
+import { baseUrlForDomain, domainFromSpecPath } from '@utils/playwright/domain-base-urls';
 import { sessionReuseEnabled } from '@utils/playwright/session-reuse';
 
-// frontendSeedContext mints its own session when session reuse is off or the project's baseURL is not the frontend, so both worker fixtures need their own budget rather than the test timeout.
+// Signing in takes longer than a test's own budget, so the fixtures that mint a session get theirs.
 const SESSION_MINT_TIMEOUT_MS = 120_000;
 
+const domainOf = ({ file, project }: TestInfo) => domainFromSpecPath(file, project.testDir);
+
 export interface AuthWorkerFixtures {
-  workerAuthState: string | undefined;
+  authStateFor: AuthStateFor | undefined;
   frontendSeedContext: APIRequestContext;
 }
 
@@ -52,27 +55,31 @@ export interface PageFixtures {
 }
 
 export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
-  workerAuthState: [
+  authStateFor: [
     async ({ browser }, use, workerInfo) => {
-      if (!sessionReuseEnabled()) {
-        await use(undefined);
-        return;
-      }
-      await use(await createWorkerAuthState(browser, workerInfo));
+      await use(sessionReuseEnabled() ? createWorkerAuthStates(browser, workerInfo) : undefined);
     },
-    { scope: 'worker', timeout: SESSION_MINT_TIMEOUT_MS },
+    { scope: 'worker' },
   ],
   frontendSeedContext: [
-    async ({ browser, workerAuthState }, use, workerInfo) => {
-      const context = await createFrontendSeedContext(browser, workerInfo, workerAuthState);
+    async ({ browser, authStateFor }, use, workerInfo) => {
+      const context = await createFrontendSeedContext(browser, workerInfo, authStateFor);
       await use(context);
       await context.dispose();
     },
     { scope: 'worker', timeout: SESSION_MINT_TIMEOUT_MS },
   ],
-  storageState: async ({ workerAuthState }, use) => {
-    await use(workerAuthState);
+  // The spec's directory picks its domain, so one project can run every domain's specs.
+  // eslint-disable-next-line no-empty-pattern
+  baseURL: async ({}, use, testInfo) => {
+    await use(baseUrlForDomain(domainOf(testInfo)));
   },
+  storageState: [
+    async ({ authStateFor }, use, testInfo) => {
+      await use(authStateFor ? await authStateFor(domainOf(testInfo)) : undefined);
+    },
+    { scope: 'test', timeout: SESSION_MINT_TIMEOUT_MS },
+  ],
   pages: async ({ page }, use) => {
     await use(createSharedPages(page));
   },
