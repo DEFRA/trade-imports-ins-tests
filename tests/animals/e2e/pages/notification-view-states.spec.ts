@@ -11,9 +11,9 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
     });
 
-    test('renders the recorded answers in the numbered design sections', async ({ pages, animalsPages }) => {
-      await expect(animalsPages.notificationView.heading).toBeVisible();
-      await expect(pages.page).toHaveTitle('Error: Review your notification - Import notification service - GOV.UK');
+    test('renders the recorded answers in the numbered design sections', async ({ pages, animalsPages, journeyContext }) => {
+      await expect(animalsPages.notificationView.viewHeading(journeyContext.journeyId)).toBeVisible();
+      await expect(pages.page).toHaveTitle(`Error: ${journeyContext.journeyId} - Import notification service - GOV.UK`);
       await expect(pages.page.getByRole('heading', { name: '1. About the consignment' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '2. Description of the goods' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '3. Transport and arrival' })).toBeVisible();
@@ -27,9 +27,18 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(animalsPages.notificationView.summaryCard('Cow (0102)')).toContainText('Number of animals');
     });
 
-    test('shows the Draft strip with the notification reference', async ({ animalsPages, journeyContext }) => {
-      await expect(animalsPages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Draft');
-      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.journeyId);
+    test('is headed by its reference with a blue Draft tag and the date created, and no status bar', async ({
+      animalsPages,
+      journeyContext,
+    }) => {
+      await expect(animalsPages.notificationView.viewHeading(journeyContext.journeyId)).toBeVisible();
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Draft');
+      await expect(animalsPages.notificationView.statusTag).toHaveClass(/govuk-tag--blue/);
+      await expect(animalsPages.notificationView.journeyStrip).toHaveCount(0);
+      await expect(animalsPages.notificationView.reviewTitleHeading).toHaveCount(0);
+      await expect(animalsPages.notificationView.dateCreated).toHaveText(
+        new RegExp(`^Date created: (${getRelativeServiceDisplayDate(-1)}|${getRelativeServiceDisplayDate()})$`),
+      );
     });
 
     test('shows Change links for the recorded answers', async ({ animalsPages }) => {
@@ -37,14 +46,44 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(animalsPages.notificationView.changeLink('Change Cow (0102)')).toBeVisible();
     });
 
-    test('ends with Continue and a red Delete, and offers neither Copy as new nor Cancel amend', async ({ pages, animalsPages }) => {
-      await expect(animalsPages.notificationView.continueButton).toBeVisible();
-      await expect(animalsPages.notificationView.btnDelete).toBeVisible();
+    test('offers Copy as new and a red Delete in its header, no Amend this notification, and ends with Continue', async ({
+      animalsPages,
+    }) => {
+      await expect(animalsPages.notificationView.headerActions.getByRole('button')).toHaveText(['Copy as new', 'Delete']);
+      await expect(animalsPages.notificationView.btnCopyAsNew).not.toHaveClass(/govuk-button--secondary/);
+      await expect(animalsPages.notificationView.btnDelete).toHaveCount(1);
       await expect(animalsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
-      await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toHaveCount(0);
-      await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
       await expect(animalsPages.notificationView.btnAmend).toHaveCount(0);
-      await expect(animalsPages.notificationView.importReferenceNumbers).toHaveCount(0);
+      await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
+      await expect(animalsPages.notificationView.continueButton).toBeVisible();
+    });
+
+    test('shows the import reference numbers as text, with no Copy button', async ({ animalsPages, journeyContext }) => {
+      await expect(animalsPages.notificationView.importReferenceNumbers).toContainText(
+        'You must use the correct reference and code on the customs declaration or your consignment will be delayed.',
+      );
+      await expect(animalsPages.notificationView.importReference('Notification reference')).toHaveText(journeyContext.journeyId);
+      await expect(animalsPages.notificationView.importReference('Customs document code')).toHaveText('C640');
+      await expect(animalsPages.notificationView.importReferenceNumbers.getByRole('button')).toHaveCount(0);
+    });
+
+    test('Back goes to the live-animals notification list', async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.linkBack.click();
+
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.dashboard.expectedUrl}/?$`));
+      await expect(animalsPages.dashboard.heading).toBeVisible();
+    });
+
+    test('copies the draft to a new draft', async ({ animalsPages, journeyContext }) => {
+      const originalReferenceNumber = journeyContext.journeyId;
+      await animalsPages.notificationView.btnCopyAsNew.click();
+
+      await animalsPages.overview.heading.waitFor();
+      const copiedReferenceNumber = (await animalsPages.notificationView.referenceNumberCaption.textContent())?.match(
+        REFERENCE_NUMBER_PATTERN,
+      )?.[0];
+      expect(copiedReferenceNumber).toMatch(EXACT_REFERENCE_NUMBER_PATTERN);
+      expect(copiedReferenceNumber).not.toEqual(originalReferenceNumber);
     });
 
     test('Delete opens the delete confirmation', async ({ pages, animalsPages }) => {
@@ -92,7 +131,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       pages,
       animalsPages,
     }) => {
-      await expect(animalsPages.notificationView.heading).toBeVisible();
+      await expect(animalsPages.notificationView.reviewTitleHeading).toBeVisible();
       await expect(pages.page).toHaveTitle('Review your notification - Import notification service - GOV.UK');
       await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
       await expect(animalsPages.notificationView.continueButton).toBeVisible();
@@ -135,7 +174,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(animalsPages.notificationView.statusTag).toHaveClass(/govuk-tag--green/);
       await expect(animalsPages.notificationView.actionRequiredWarning).toHaveCount(0);
       await expect(animalsPages.notificationView.journeyStrip).toHaveCount(0);
-      await expect(animalsPages.notificationView.heading).toHaveCount(0);
+      await expect(animalsPages.notificationView.reviewTitleHeading).toHaveCount(0);
       await expect(pages.page).toHaveTitle(`${journeyContext.journeyId} - Import notification service - GOV.UK`);
     });
 

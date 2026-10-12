@@ -266,7 +266,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
     const correction = plantsPages.notificationView.errorSummary.getByRole('link', { name: /Poland/ });
     await expect(correction).toHaveAttribute('href', `${SET_BASES.highRiskPlants}/notifications/${reference}/origin?change=1`);
-    await expect(plantsPages.overview.statusTag).toHaveText('Draft');
+    await expect(plantsPages.notificationView.statusTag).toHaveText('Draft');
     await correction.click();
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
   });
@@ -611,18 +611,36 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(plantsPages.consignmentContactSelect.saveAndReturnToOverview).toHaveCount(0);
   });
 
-  test("a draft's check answers ends with Continue and a red Delete notification that opens the delete page, keeping Save and return and Cancel", async ({
+  test("a draft's check answers is headed by its reference with a Draft tag and the date created, offers Delete notification in its header and no Copy as new, and keeps Continue, Save and return and Cancel", async ({
     pages,
     plantsPages,
     plantsJourney,
     addressBookApi,
   }) => {
-    await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
     await expectReview(plantsPages);
 
-    await expect(plantsPages.notificationView.btnContinue).toBeVisible();
-    await expect(plantsPages.notificationView.btnDelete).toBeVisible();
+    await expect(plantsPages.notificationView.viewHeading(reference)).toBeVisible();
+    await expect(plantsPages.notificationView.statusTag).toHaveText('Draft');
+    await expect(plantsPages.notificationView.statusTag).toHaveClass(/govuk-tag--blue/);
+    await expect(plantsPages.notificationView.journeyStrip).toHaveCount(0);
+    await expect(pages.page).toHaveTitle(`${reference} - Import notification service - GOV.UK`);
+    await expect(plantsPages.notificationView.dateCreated).toHaveText(
+      new RegExp(`^Date created: (${getRelativeServiceDisplayDate(-1)}|${getRelativeServiceDisplayDate()})$`),
+    );
+    await expect(plantsPages.notificationView.importReference('Notification reference')).toHaveText(reference);
+    await expect(plantsPages.notificationView.importReferenceNumbers).toContainText(
+      'You must use the correct reference and code on the customs declaration or your consignment will be delayed.',
+    );
+    await expect(plantsPages.notificationView.importReferenceNumbers.getByText('Customs document code')).toHaveCount(0);
+    await expect(plantsPages.notificationView.importReferenceNumbers.getByRole('button')).toHaveCount(0);
+    await expect(plantsPages.notificationView.headerActions.getByRole('button')).toHaveText(['Delete notification']);
+    await expect(plantsPages.notificationView.btnDelete).toHaveCount(1);
     await expect(plantsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
+    await expect(plantsPages.notificationView.btnCopyAsNew).toHaveCount(0);
+    await expect(plantsPages.notificationView.btnAmend).toHaveCount(0);
+    await expect(plantsPages.notificationView.changeLinks.first()).toBeVisible();
+    await expect(plantsPages.notificationView.btnContinue).toBeVisible();
     await expect(pages.page.getByRole('button', { name: 'Save and return to overview', exact: true })).toBeVisible();
     await expect(pages.page.getByRole('link', { name: 'Cancel and return to overview', exact: true })).toBeVisible();
 

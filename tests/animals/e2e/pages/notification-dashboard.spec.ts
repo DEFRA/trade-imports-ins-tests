@@ -75,6 +75,17 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       await expect(animalsPages.dashboard.amend(referenceNumber)).not.toBeVisible();
     });
 
+    test('Resume on a draft notification opens its Overview, not its review', async ({ pages, animalsPages, animalsSeededJourney }) => {
+      const referenceNumber = await animalsSeededJourney.createDraftNotification('unlocked');
+
+      await animalsPages.dashboard.open();
+      await animalsPages.dashboard.searchForReference(referenceNumber);
+      await animalsPages.dashboard.resume(referenceNumber).click();
+
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.overview.expectedUrl(referenceNumber)}$`));
+      await expect(animalsPages.overview.heading).toBeVisible();
+    });
+
     test('shows view, copy and amend actions for a submitted notification', async ({ animalsPages, animalsSeededJourney }) => {
       const referenceNumber = await animalsSeededJourney.createSubmittedNotificationWithHealthCertificate();
 

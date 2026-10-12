@@ -13,7 +13,7 @@ test.describe('Amendment review heading', { tag: ['@compose', '@integration'] },
     const reference = await animalsSeededJourney.createAmendNotification();
     await animalsPages.notificationView.open(reference);
 
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.reviewTitleHeading).toBeVisible();
     await expect(animalsPages.notificationView.resubmitHeading).toHaveCount(0);
     await expect(pages.page).toHaveTitle(/^Review your notification - /);
 
@@ -43,7 +43,7 @@ test.describe('Amendment review heading', { tag: ['@compose', '@integration'] },
 
     await animalsPages.notificationView.open(reference);
 
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.reviewTitleHeading).toBeVisible();
     await expect(animalsPages.notificationView.resubmitHeading).toHaveCount(0);
   });
 });

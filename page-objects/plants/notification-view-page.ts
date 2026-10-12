@@ -6,17 +6,21 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
     super(page, 'notification-view');
   }
 
+  /** The review's level-1 heading: the reference on a draft's check answers or a submitted view, the review title on an amendment. */
   get heading(): Locator {
-    return this.page.getByRole('heading', { name: 'Check your answers', level: 1 });
+    return this.page.getByRole('heading', { level: 1, name: /^(Check your answers|GBN-HRP-\d{2}-[0-9A-Z]{6})$/ });
   }
-  /** The level-1 heading of a submitted notification's view, named exactly its reference. */
+  /** The level-1 heading of a draft's check answers or a submitted notification's view, named exactly its reference. */
   viewHeading(reference: string): Locator {
     return this.page.getByRole('heading', { level: 1, name: reference, exact: true });
   }
   get dateSubmitted(): Locator {
     return this.page.getByText(/^Date submitted: /);
   }
-  /** The status bar's tag on a draft or amendment, and the header's tag on a submitted view. */
+  get dateCreated(): Locator {
+    return this.page.getByText(/^Date created: /);
+  }
+  /** The status bar's tag on an amendment, and the header's tag on a draft's review or a submitted view. */
   override get statusTag(): Locator {
     return this.page.getByRole('main').locator('.govuk-tag');
   }
@@ -34,9 +38,9 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
   get btnAmend(): Locator {
     return this.page.getByRole('button', { name: 'Amend this notification', exact: true });
   }
-  /** The button group in a submitted view's header, holding Amend and Delete notification. */
+  /** The button group in a view's header, holding Delete notification, with Amend this notification on a submitted view. */
   get headerActions(): Locator {
-    return this.page.locator('.govuk-button-group').filter({ has: this.btnAmend });
+    return this.page.locator('.govuk-button-group').filter({ has: this.btnDelete });
   }
   /** Used only to assert that plants offers no Copy as new. */
   get btnCopyAsNew(): Locator {

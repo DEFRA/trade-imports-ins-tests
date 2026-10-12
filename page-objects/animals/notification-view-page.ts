@@ -7,7 +7,16 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     super(page, 'notification-view');
   }
 
+  /** The review's level-1 heading: the reference on a draft's review or a submitted view, the review title on an amendment. */
   get heading(): Locator {
+    return this.page.getByRole('heading', {
+      level: 1,
+      name: /^(Review your notification|Review before re-submitting|GBN-AG-\d{2}-[0-9A-Z]{6})$/,
+    });
+  }
+
+  /** An amendment's review heading, by its wording. */
+  get reviewTitleHeading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Review your notification' });
   }
 
@@ -30,7 +39,11 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByText(/^Date submitted: /);
   }
 
-  /** The status bar's tag on a draft or amendment, and the header's tag on a submitted view. */
+  get dateCreated(): Locator {
+    return this.page.getByText(/^Date created: /);
+  }
+
+  /** The status bar's tag on an amendment, and the header's tag on a draft's review or a submitted view. */
   override get statusTag(): Locator {
     return this.page.getByRole('main').locator('.govuk-tag');
   }
@@ -56,17 +69,17 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Copy as new' });
   }
 
-  /** The primary "Amend this notification" button in a submitted view's header. */
+  /** The primary "Amend this notification" button in a view's header. */
   get btnAmend(): Locator {
     return this.page.getByRole('button', { name: 'Amend this notification', exact: true });
   }
 
-  /** The button group in a submitted view's header, holding Amend, Copy as new and Delete. */
+  /** The button group in a view's header, holding Copy as new and Delete, with Amend this notification on a submitted view. */
   get headerActions(): Locator {
-    return this.page.locator('.govuk-button-group').filter({ has: this.btnAmend });
+    return this.page.locator('.govuk-button-group').filter({ has: this.btnCopyAsNew });
   }
 
-  /** The "Import reference numbers" section of a submitted view. */
+  /** The "Import reference numbers" section of a view's header. */
   get importReferenceNumbers(): Locator {
     return this.page.getByRole('region', { name: 'Import reference numbers' });
   }
