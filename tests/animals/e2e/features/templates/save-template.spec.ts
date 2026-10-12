@@ -45,7 +45,7 @@ test.describe('Saving a template', { tag: '@integration' }, () => {
     return templateId;
   };
 
-  const savedName = (): string => `Saved cattle ${Date.now()}`;
+  const savedName = (): string => `Saved cattle ${crypto.randomUUID()}`;
 
   test.describe('from a signed-in session', () => {
     let before: number;
@@ -123,8 +123,8 @@ test.describe('Saving a template', { tag: '@integration' }, () => {
 
     test('of two templates saved one after the other, the later is listed first', async ({ pages, insPages, animalsPages }) => {
       const { manageTemplates } = animalsPages;
-      const first = `Saved first ${Date.now()}`;
-      const second = `Saved second ${Date.now()}`;
+      const first = `Saved first ${crypto.randomUUID()}`;
+      const second = `Saved second ${crypto.randomUUID()}`;
 
       await saveTemplate(insPages, animalsPages, first);
       await createNewTemplate(pages.page, insPages, animalsPages);

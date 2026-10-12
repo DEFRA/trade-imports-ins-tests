@@ -217,6 +217,7 @@ test.describe('Create a template', { tag: '@integration' }, () => {
 
     await originOfImport.selectCountry('France');
     await originOfImport.radioRequiresOriginCode('Yes').check();
+    await originOfImport.removeRegionCodeMaxLength();
     await originOfImport.regionCode.fill('ABCDEFG');
     await originOfImport.saveAndContinue.click();
 
