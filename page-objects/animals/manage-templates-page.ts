@@ -43,6 +43,20 @@ export class AnimalsManageTemplatesPage extends BasePage {
     return this.templateCard(title).locator('.govuk-caption-m');
   }
 
+  /** The card's answer rows' terms, in order: Commodity, Origin, Consignee, Consignor. */
+  cardAnswerKeys(title: string): Locator {
+    return this.templateCard(title).getByRole('term');
+  }
+
+  /** The value of the card's answer row whose term is exactly `key`. */
+  cardAnswer(title: string, key: string): Locator {
+    return this.templateCard(title)
+      .locator('.govuk-summary-list__row')
+      .filter({ has: this.page.getByRole('term').and(this.page.getByText(key, { exact: true })) })
+      .getByRole('definition')
+      .first();
+  }
+
   linkViewTemplate(title: string): Locator {
     return this.templateCard(title).getByRole('link', { name: 'View template', exact: true });
   }
