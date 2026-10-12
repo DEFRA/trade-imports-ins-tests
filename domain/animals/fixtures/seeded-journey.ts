@@ -104,3 +104,10 @@ export const seedSteps = async (resolveParties: () => Promise<PartyIds>, depth: 
 };
 
 export const declarationStep: SeedStep = { slug: 'declaration', form: { declaration: 'confirmed' } };
+
+/** The ITAHC a seeded notification carries so its submission records nothing outstanding. */
+export const healthCertificateDocument: FormFields = {
+  accompanyingDocumentReference: 'ITAHCSEED0001',
+  accompanyingDocumentType: 'ITAHC',
+  accompanyingDocumentDateOfIssue: '12/12/2025',
+};

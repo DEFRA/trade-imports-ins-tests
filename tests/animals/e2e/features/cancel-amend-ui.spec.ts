@@ -115,7 +115,7 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
 
       await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
       await expect(pages.page.getByRole('alert')).toContainText('The amendment has been cancelled and the submitted version restored.');
-      await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
       await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
       await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
       await expect(countryRow).toContainText('France');
@@ -145,7 +145,7 @@ test.describe('Cancel amend without JavaScript', { tag: ['@integration', '@dupli
     await animalsPages.notificationCancelAmend.confirm.click();
 
     await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
-    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
     await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
     await expect(countryRow).toContainText('France');
   });

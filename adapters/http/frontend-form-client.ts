@@ -4,6 +4,9 @@ import { SET_BASES } from '@page-objects/shared/sets';
 /** A page's form fields. An array posts the key repeatedly, the way a checkbox group does. */
 export type FormFields = Record<string, string | string[]>;
 
+/** A file posted in a multipart form. */
+export type UploadFile = { name: string; mimeType: string; buffer: Buffer };
+
 /**
  * The page the crumb cookie is minted from. No set is served at the root any
  * more — `/` is a server-wide 302 to the default set — so land on the set's own
@@ -75,7 +78,33 @@ export class FrontendFormClient {
       data: encodeFormBody({ ...fields, crumb: await this.crumbToken() }),
       maxRedirects: 0,
     });
+    return this.expectRedirect(response, path, redirectsTo);
+  }
 
+  /** Posts a page's fields with one file, the way the documents page takes an upload. */
+  async postMultipart(
+    path: string,
+    fields: Record<string, string>,
+    file: UploadFile,
+    { redirectsTo }: { redirectsTo?: RegExp } = {},
+  ): Promise<string> {
+    const response = await this.request.post(path, {
+      multipart: { ...fields, crumb: await this.crumbToken(), file },
+      maxRedirects: 0,
+    });
+    return this.expectRedirect(response, path, redirectsTo);
+  }
+
+  /** Reads a page's JSON route, such as the documents page's scan status. */
+  async getJson<T>(path: string): Promise<T> {
+    const response = await this.request.get(path, { maxRedirects: 0 });
+    if (response.status() !== HTTP_STATUS_OK) {
+      throw new Error(`GET ${path} answered ${response.status()} instead of ${HTTP_STATUS_OK}, so there is no JSON to read.`);
+    }
+    return (await response.json()) as T;
+  }
+
+  private async expectRedirect(response: APIResponse, path: string, redirectsTo: RegExp | undefined): Promise<string> {
     // A page that rejects its payload can re-render 200 with an error summary, so a non-redirect is a failed post.
     if (!isRedirect(response)) {
       throw new FrontendFormError(response.status(), path, (await response.text()).slice(0, BODY_EXCERPT_LENGTH));

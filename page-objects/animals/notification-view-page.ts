@@ -16,6 +16,16 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: reference, exact: true });
   }
 
+  /** The warning in the header of a notification submitted without its health certificate. */
+  get actionRequiredWarning(): Locator {
+    return this.page.locator('.govuk-warning-text').filter({ hasText: 'You need to upload a health certificate' });
+  }
+
+  /** The inline error under "4. Uploaded documents", which follows the section heading. */
+  get documentsSectionError(): Locator {
+    return this.page.locator('#documents-section ~ .govuk-error-message').first();
+  }
+
   get dateSubmitted(): Locator {
     return this.page.getByText(/^Date submitted: /);
   }

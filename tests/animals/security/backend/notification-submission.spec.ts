@@ -5,6 +5,6 @@ test.describe('Security scan (backend)', { tag: '@active' }, () => {
     const draft = await proxiedNotificationApi.createNotification();
     const submitted = await proxiedNotificationApi.submitNotification(draft.referenceNumber);
 
-    expect(submitted.status).toBe('SUBMITTED');
+    expect(submitted.status).toBe('SUBMITTED_ACTION_REQUIRED');
   });
 });

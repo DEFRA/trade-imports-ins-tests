@@ -1,6 +1,8 @@
 import { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
 import { ANIMALS_DYNAMICS_ARRIVAL_TIMEOUT_MS, ANIMALS_DYNAMICS_SUBMISSION_DATE_TOLERANCE_MS } from '@config/animals-dynamics';
 import { timeouts } from '@config/timeouts';
+import { documentTypes } from '@domain/animals/constants/document-types';
+import { fileUploadPaths } from '@resources/file-upload/paths';
 import { animalsDynamicsStatuses } from '@domain/animals/constants/animals-dynamics-statuses';
 import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
 import { test, expect } from '@fixtures';
@@ -33,7 +35,12 @@ test.describe('PIMS Dynamics notification events', { tag: '@dynamics' }, () => {
   test('a submitted notification is created in PIMS Dynamics', async ({ animalsJourney, journeyContext, externalRequest }) => {
     // Built first: a missing ANIMALS_DYNAMICS_URL / DATAVERSE_* secret fails here, before the journey.
     const dynamics = new AnimalsDynamicsClient(externalRequest);
-    await animalsJourney.submitNotification();
+    await animalsJourney.submitNotificationWithDocument({
+      reference: `ITAHC${Date.now()}`,
+      issueDate: '12/12/2025',
+      filePath: fileUploadPaths.safeFile1kbPdf,
+      type: documentTypes.itahc,
+    });
     const submittedAt = Date.now();
     const referenceNumber = journeyContext.journeyId;
 

@@ -1,6 +1,7 @@
 export const notificationFulfilmentsStatuses = {
   draft: 'DRAFT',
   submitted: 'SUBMITTED',
+  submittedActionRequired: 'SUBMITTED_ACTION_REQUIRED',
   amend: 'AMEND',
   deleted: 'DELETED',
 } as const;
@@ -22,4 +23,5 @@ export type NotificationFulfilments = {
   status: NotificationFulfilmentsStatus;
   created: string;
   submittedAt?: string | null;
+  outstandingItems?: string[] | null;
 };

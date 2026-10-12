@@ -120,7 +120,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
 
   test.describe('SUBMITTED', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
-      await animalsSeededJourney.createSubmittedNotification();
+      await animalsSeededJourney.createSubmittedNotificationWithHealthCertificate();
       await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
     });
 
@@ -133,6 +133,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(animalsPages.notificationView.viewHeading(journeyContext.journeyId)).toBeVisible();
       await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
       await expect(animalsPages.notificationView.statusTag).toHaveClass(/govuk-tag--green/);
+      await expect(animalsPages.notificationView.actionRequiredWarning).toHaveCount(0);
       await expect(animalsPages.notificationView.journeyStrip).toHaveCount(0);
       await expect(animalsPages.notificationView.heading).toHaveCount(0);
       await expect(pages.page).toHaveTitle(`${journeyContext.journeyId} - Import notification service - GOV.UK`);
@@ -202,6 +203,57 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     test('still renders the recorded answers after submission', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
       await expect(animalsPages.notificationView.summaryCard('Cow (0102)')).toBeVisible();
+    });
+  });
+
+  test.describe('SUBMITTED ACTION REQUIRED', () => {
+    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
+      await animalsSeededJourney.createSubmittedNotification();
+      await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
+    });
+
+    test('is headed by its reference with an orange Submitted action required tag, read-only, and warns that a health certificate is needed', async ({
+      animalsPages,
+      journeyContext,
+    }) => {
+      await expect(animalsPages.notificationView.viewHeading(journeyContext.journeyId)).toBeVisible();
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
+      await expect(animalsPages.notificationView.statusTag).toHaveClass(/govuk-tag--orange/);
+      await expect(animalsPages.notificationView.actionRequiredWarning).toBeVisible();
+      await expect(animalsPages.notificationView.changeLink('Change origin of import')).toHaveCount(0);
+    });
+
+    test('shows the date it was submitted, and the same date on a later visit', async ({ pages, animalsPages }) => {
+      const submittedToday = new RegExp(`^Date submitted: (${getRelativeServiceDisplayDate(-1)}|${getRelativeServiceDisplayDate()})$`);
+      await expect(animalsPages.notificationView.dateSubmitted).toHaveText(submittedToday);
+      const firstVisit = await animalsPages.notificationView.dateSubmitted.textContent();
+
+      await pages.page.reload();
+
+      await expect(animalsPages.notificationView.dateSubmitted).toHaveText(firstVisit ?? '');
+    });
+
+    test('shows Upload a valid health certificate in place of document cards, with no error summary', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.documentsSectionError).toHaveText(/Upload a valid health certificate/);
+      await expect(animalsPages.notificationView.summaryCard('Document 1')).toHaveCount(0);
+      await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
+    });
+
+    test('offers Amend this notification, a secondary Copy as new and a red Delete in its header', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.headerActions.getByRole('button')).toHaveText([
+        'Amend this notification',
+        'Copy as new',
+        'Delete',
+      ]);
+      await expect(animalsPages.notificationView.btnCopyAsNew).toHaveClass(/govuk-button--secondary/);
+      await expect(animalsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
+    });
+
+    test('Continue starts an amendment and opens Overview', async ({ pages, animalsPages, journeyContext }) => {
+      await animalsPages.notificationView.continueButton.click();
+
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.overview.expectedUrl(journeyContext.journeyId)}$`));
+      await expect(animalsPages.overview.statusTag).toHaveText('Amend');
     });
   });
 

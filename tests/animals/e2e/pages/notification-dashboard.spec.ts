@@ -48,7 +48,7 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
 
     test('displays details on a notification card', async ({ animalsSeededJourney, animalsPages }) => {
       test.slow();
-      const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
+      const referenceNumber = await animalsSeededJourney.createSubmittedNotificationWithHealthCertificate();
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
 
@@ -57,7 +57,7 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       await expect(details.commodity).toBeVisible();
       await expect(details.origin).toBeVisible();
       await expect(details.arrivalAtDestination).toContainText(DISPLAYED_DATE_PATTERN);
-      await expect(details.status).toContainText('Submitted');
+      await expect(details.status).toHaveText('Submitted');
       await expect(details.dateCreated).toHaveText(DISPLAYED_DATE_PATTERN);
     });
   });
@@ -76,11 +76,25 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
     });
 
     test('shows view, copy and amend actions for a submitted notification', async ({ animalsPages, animalsSeededJourney }) => {
+      const referenceNumber = await animalsSeededJourney.createSubmittedNotificationWithHealthCertificate();
+
+      await animalsPages.dashboard.open();
+      await animalsPages.dashboard.searchForReference(referenceNumber);
+      await expect(animalsPages.dashboard.notificationCardDetails(0).status).toHaveText('Submitted');
+      await expect(animalsPages.dashboard.view(referenceNumber)).toBeVisible();
+      await expect(animalsPages.dashboard.copyAsNew(referenceNumber)).toBeVisible();
+      await expect(animalsPages.dashboard.amend(referenceNumber)).toBeVisible();
+    });
+
+    test('shows Submitted action required, with view, copy and amend actions, for a notification submitted without its health certificate', async ({
+      animalsPages,
+      animalsSeededJourney,
+    }) => {
       const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
 
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
-      await expect(animalsPages.dashboard.notificationCardDetails(0).status).toContainText('Submitted');
+      await expect(animalsPages.dashboard.notificationCardDetails(0).status).toHaveText('Submitted action required');
       await expect(animalsPages.dashboard.view(referenceNumber)).toBeVisible();
       await expect(animalsPages.dashboard.copyAsNew(referenceNumber)).toBeVisible();
       await expect(animalsPages.dashboard.amend(referenceNumber)).toBeVisible();

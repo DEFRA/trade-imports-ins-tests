@@ -1,10 +1,14 @@
-import type { Locator } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { expect, type Locator } from '@playwright/test';
+import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { pageLoadWait } from '@config/timeouts';
-import type { FrontendFormClient } from '@adapters/http/frontend-form-client';
+import { fileUploadPaths } from '@resources/file-upload/paths';
+import type { FormFields, FrontendFormClient } from '@adapters/http/frontend-form-client';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import {
   PARTY_NAMES,
   declarationStep,
+  healthCertificateDocument,
   seedSteps,
   type PartyIds,
   type PartyRole,
@@ -47,13 +51,48 @@ export class AnimalsSeededJourney {
     return journeyId;
   }
 
+  /**
+   * Carries no document, so its submission records the health certificate as outstanding and the
+   * notification reads "Submitted action required".
+   */
   async createSubmittedNotification(): Promise<string> {
     const journeyId = await this.createDraftNotification('readyToSubmit');
+    await this.declare(journeyId);
+    return journeyId;
+  }
+
+  /** Uploads the ITAHC first, so the submission records nothing outstanding and the notification reads "Submitted". */
+  async createSubmittedNotificationWithHealthCertificate(): Promise<string> {
+    const journeyId = await this.createDraftNotification('readyToSubmit');
+    await this.uploadDocument(journeyId, healthCertificateDocument);
+    await this.declare(journeyId);
+    return journeyId;
+  }
+
+  async uploadDocument(journeyId: string, document: FormFields): Promise<void> {
+    const documentsPath = `${CREATE_PATH}/${journeyId}/accompanying-documents`;
+    await this.forms.postMultipart(
+      documentsPath,
+      { action: 'add', ...(document as Record<string, string>) },
+      { name: 'itahc-certificate.pdf', mimeType: 'application/pdf', buffer: readFileSync(fileUploadPaths.safeFile1kbPdf) },
+      { redirectsTo: /\/accompanying-documents$/ },
+    );
+    await expect
+      .poll(
+        async () =>
+          (await this.forms.getJson<{ documents: { scanStatus: string }[] }>(`${documentsPath}/status`)).documents.every(
+            (uploaded) => uploaded.scanStatus === 'COMPLETE',
+          ),
+        { timeout: fileUploadTimeouts.virusScanComplete },
+      )
+      .toBe(true);
+  }
+
+  private async declare(journeyId: string): Promise<void> {
     // redirectsTo is the assertion: a refused submission lands back on check-your-answers, not the confirmation.
     await this.forms.postForm(`${CREATE_PATH}/${journeyId}/${declarationStep.slug}`, declarationStep.form, {
       redirectsTo: /\/confirmation$/,
     });
-    return journeyId;
   }
 
   async createAmendNotification(): Promise<string> {
