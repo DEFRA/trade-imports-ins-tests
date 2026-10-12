@@ -39,6 +39,19 @@ export class AnimalsTemplatePage extends BasePage {
     return this.page.getByRole('main').getByRole('button', { name: 'Edit', exact: true });
   }
 
+  /** The success banner confirming a change, shown once after Save and return. */
+  get successBanner(): Locator {
+    return this.page.getByRole('main').locator('.govuk-notification-banner--success');
+  }
+
+  get successBannerTitle(): Locator {
+    return this.successBanner.getByText('Success', { exact: true });
+  }
+
+  successBannerHeading(text: string): Locator {
+    return this.successBanner.getByRole('heading', { name: text, exact: true });
+  }
+
   get sectionHeadings(): Locator {
     return this.page.getByRole('main').getByRole('heading', { level: 2 });
   }

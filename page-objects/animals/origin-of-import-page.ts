@@ -109,6 +109,21 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
     return this.page.getByRole('link', { name: 'Cancel' });
   }
 
+  /** The only submit button when changing a section of a saved template. */
+  get btnSaveAndReturnToTemplate(): Locator {
+    return this.page.getByRole('button', { name: 'Save and return', exact: true });
+  }
+
+  /** The link back to the template's page when changing a section of a saved template. */
+  get linkCancelToTemplate(): Locator {
+    return this.page.getByRole('link', { name: 'Cancel', exact: true });
+  }
+
+  /** Every submit button in the page's form. */
+  get submitButtons(): Locator {
+    return this.page.getByRole('main').locator('form').getByRole('button');
+  }
+
   get alert(): Locator {
     return this.page.getByRole('alert');
   }
