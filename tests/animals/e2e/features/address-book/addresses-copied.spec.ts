@@ -180,7 +180,7 @@ test.describe('Addresses are copied, not linked', { tag: ['@integration'] }, () 
     // notification's rules from the moment it is picked — the one way to reach
     // this state through the services alone.
     const stamp = Date.now();
-    const name = `Unlisted Country Farm ${stamp}`;
+    const name = `Invalid address (country "United Kingdom" is not a code) ${stamp}`;
     await addressBookApi.createAddress({
       name,
       addressLine1: '9 Swap Street',

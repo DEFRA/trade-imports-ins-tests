@@ -115,10 +115,10 @@ test.describe('Copied addresses are edited on the notification', { tag: ['@integ
     await expect(form.errorSummary).toContainText('Postcode must be 12 characters or fewer');
     await expect(form.errorSummary).toContainText('Enter an email address in the correct format');
     await expect(form.errorSummary).toContainText('Enter a country');
-    await expect(form.fieldError(form.name)).toContainText('Enter a name');
-    await expect(form.fieldError(form.postcode)).toContainText('Postcode must be 12 characters or fewer');
-    await expect(form.fieldError(form.email)).toContainText('Enter an email address in the correct format');
-    await expect(form.fieldError(form.country)).toContainText('Enter a country');
+    await expect(form.name).toHaveAccessibleDescription(/Enter a name/);
+    await expect(form.postcode).toHaveAccessibleDescription(/Postcode must be 12 characters or fewer/);
+    await expect(form.email).toHaveAccessibleDescription(/Enter an email address in the correct format/);
+    await expect(form.country).toHaveAccessibleDescription(/Enter a country/);
 
     await animalsPages.notificationView.open(journeyId);
     const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
