@@ -88,7 +88,7 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 The scripts above run every domain. Against the docker-compose stack, each
 domain also has its own scripts, named `test:docker-compose:<domain>[:<suite>]`
 to match the [CDP domain profiles](#running-tests-via-cdp-portal). They run
-the same suite as the all-domain script, limited to that domain's project.
+the same suite as the all-domain script, limited to that domain's `tests/<domain>/` directory.
 
 | Domain          | e2e                                 | a11y                                     | visual                               | security (ZAP passive)                       | security:active (ZAP active, scoped)                |
 | --------------- | ----------------------------------- | ---------------------------------------- | ------------------------------------ | -------------------------------------------- | --------------------------------------------------- |
@@ -100,7 +100,7 @@ the same suite as the all-domain script, limited to that domain's project.
 A dash means the domain has no specs for that suite yet.
 
 Per-domain `security:active` sets `ZAP_SCOPE` so the no-traffic gate only covers
-that project's ZAP contexts; the report is labelled scoped. Full-corpus active
+that domain's ZAP contexts; the report is labelled scoped. Full-corpus active
 remains `npm run test:docker-compose:security:active`.
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
@@ -112,7 +112,7 @@ Optional: append these Playwright parameters to the command you're running (e.g.
 | `-- --grep "@smoke"`       | Run tests with a specific tag              |
 | `-- --debug`               | Run tests in debug mode                    |
 | `-- --ui`                  | Run tests with UI mode                     |
-| `-- --project=animals`     | Run tests in a specific project            |
+| `-- tests/animals/`        | Run one domain or test suite directory     |
 
 ### Test Reports
 
@@ -175,7 +175,7 @@ addresses seeded in `globalSetup` expire too; the next run's
 
 ### Authenticated session reuse
 
-Each worker signs in once per project and its tests restore that session
+Each worker signs in once per domain and its tests restore that session
 instead of driving the identity provider every time (`fixtures/auth-state.ts`).
 Saved state lives under `playwright/.auth/` (gitignored, removed by `_clean`),
 holds only the `sid` auth cookie, and is never written unless a fresh context
@@ -197,23 +197,36 @@ The `docker-compose` config targets `localhost:3000` / `localhost:3001` /
 runs `npm run test:docker-compose:ci` against that stack via the workspace
 reusable workflow.
 
-### Test Projects
+### Domains, test suites and projects
 
-Both configs split tests across the same four Playwright projects, one per
-deployable app. Each project runs every spec under its own `tests/<project>/`
-folder:
+Tests are split into four domains, one per deployable app. A domain's specs
+live under its own `tests/<domain>/` directory, and its base URL is resolved
+from the spec's directory:
 
-| Project         | Service                          | Folder                 |
+| Domain          | Service                          | Directory              |
 | --------------- | -------------------------------- | ---------------------- |
 | `animals`       | `trade-imports-animals-frontend` | `tests/animals/`       |
 | `animals-admin` | `trade-imports-animals-admin`    | `tests/animals-admin/` |
 | `ins`           | `trade-imports-ins-frontend`     | `tests/ins/`           |
 | `plants`        | `trade-imports-plants-frontend`  | `tests/plants/`        |
 
-Within a project folder, specs are grouped by test type, then by feature:
+A test suite is a group of specs you run together: a domain's directory, or a
+suite within it such as `tests/animals/e2e/`. Select one or several by path:
+
+```bash
+npm run test:docker-compose -- tests/animals/ tests/ins/
+```
+
+Always end a directory with `/`. Playwright reads the path as a regex, so
+`tests/animals` would also run `tests/animals-admin/`.
+
+A Playwright project is browser config only. Both configs have one, `chromium`,
+and it runs every domain.
+
+Within a domain directory, specs are grouped by test type, then by feature:
 
 ```text
-tests/<project>/
+tests/<domain>/
   a11y/
   e2e/
     features/
@@ -225,7 +238,7 @@ tests/<project>/
 ```
 
 Folders only organise specs: tags (`@a11y`, `@active`, `@compose`, `@dynamics`, `@visual`)
-select the suite, and the project selects the domain.
+select the suite, and the directory selects the domain.
 
 ## Local Testing
 
@@ -238,7 +251,7 @@ select the suite, and the project selects the domain.
    ./scripts/stack/run-stack.sh -d
    ```
 
-2. Run every project with `npm run test:docker-compose`, or one domain with
+2. Run every domain with `npm run test:docker-compose`, or one domain with
    its own script, e.g. `npm run test:docker-compose:plants` (see
    [Running one domain](#running-one-domain)).
 
@@ -295,7 +308,7 @@ Run against the stack with `npm run test:docker-compose:visual` (or
 Regenerate the E2E baseline against the stack frontend with
 `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
 `npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
-used by CI. Both commands run the `animals` project's `@visual` suite and write the
+used by CI. Both commands run the `animals` domain's `@visual` suite and write the
 updated snapshot into the working tree for commit. Narrow to one spec (or title via
 `--grep`) by passing Playwright args after the command:
 
@@ -341,15 +354,15 @@ If `PROFILE` is not set, the `default` profile is used.
 | `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                       |
 
 The profiles above run every domain. To run one domain's suite only, prefix the
-suite with its project name as `<domain>:<suite>`:
+suite with its domain name as `<domain>:<suite>`:
 
-| PROFILE                    | Test suite                                                 |
-| -------------------------- | ---------------------------------------------------------- |
-| `<domain>:e2e`             | that domain's e2e suite (`npm test -- --project=<domain>`) |
-| `<domain>:a11y`            | that domain's accessibility suite                          |
-| `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)                |
-| `<domain>:security`        | that domain's security suite (ZAP passive scan)            |
-| `<domain>:security:active` | **not supported on CDP**, as `security:active`             |
+| PROFILE                    | Test suite                                              |
+| -------------------------- | ------------------------------------------------------- |
+| `<domain>:e2e`             | that domain's e2e suite (`npm test -- tests/<domain>/`) |
+| `<domain>:a11y`            | that domain's accessibility suite                       |
+| `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)             |
+| `<domain>:security`        | that domain's security suite (ZAP passive scan)         |
+| `<domain>:security:active` | **not supported on CDP**, as `security:active`          |
 
 `<domain>` is one of `animals`, `animals-admin`, `ins` or `plants`, e.g.
 `animals:a11y` or `plants:e2e`. A domain with no specs for a suite (for example

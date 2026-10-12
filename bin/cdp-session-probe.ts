@@ -6,20 +6,20 @@ import { getEnvironment, throwIfProdEnvironment } from '@utils/playwright/enviro
 const NAVIGATIONS = 20;
 
 const CDP_SERVICES: Record<string, string> = {
-  e2e: 'trade-imports-animals-frontend',
-  admin: 'trade-imports-animals-admin',
+  animals: 'trade-imports-animals-frontend',
+  'animals-admin': 'trade-imports-animals-admin',
   ins: 'trade-imports-ins-frontend',
 };
 
 function probeBaseUrls(): Record<string, string> {
   const override = process.env.E2E_PROBE_BASE_URL;
-  if (override) return { e2e: override };
+  if (override) return { animals: override };
   const environment = getEnvironment();
   if (!environment) {
     throw new Error('Set ENVIRONMENT (or PLAYWRIGHT_ENVIRONMENT), or E2E_PROBE_BASE_URL, to pick a probe target.');
   }
   return Object.fromEntries(
-    Object.entries(CDP_SERVICES).map(([project, service]) => [project, `https://${service}.${environment}.cdp-int.defra.cloud`]),
+    Object.entries(CDP_SERVICES).map(([domain, service]) => [domain, `https://${service}.${environment}.cdp-int.defra.cloud`]),
   );
 }
 
@@ -74,8 +74,8 @@ async function main(): Promise<void> {
   const browser = await chromium.launch();
 
   try {
-    for (const [project, baseURL] of Object.entries(baseUrls)) {
-      await probeService(browser, baseURL, AUTH_TARGETS[project]);
+    for (const [domain, baseURL] of Object.entries(baseUrls)) {
+      await probeService(browser, baseURL, AUTH_TARGETS[domain]);
       console.log(
         `PASS: one minted "${AUTH_COOKIE_NAME}" session was honoured across ${NAVIGATIONS} fresh-context navigations against ${baseURL}.`,
       );
