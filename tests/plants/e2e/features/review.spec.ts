@@ -463,6 +463,19 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(plantsPages.notificationView.importReferenceNumbers.getByRole('button')).toHaveCount(0);
   });
 
+  test('opening the confirmation of a notification not yet submitted goes to the declaration', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
+    const reference = await plantsJourney.startNotification();
+
+    await plantsPages.confirmation.open(reference);
+
+    await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrl(reference));
+    await expect(plantsPages.declaration.heading).toBeVisible();
+  });
+
   test("an unknown notification's view goes to the plants notification list", async ({ pages, plantsPages }) => {
     await plantsPages.notificationView.open('GBN-HRP-00-000000');
 

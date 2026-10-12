@@ -111,3 +111,10 @@ export const healthCertificateDocument: FormFields = {
   accompanyingDocumentType: 'ITAHC',
   accompanyingDocumentDateOfIssue: '12/12/2025',
 };
+
+/** A document that is not an ITAHC or health certificate, so the submission still records the health certificate as outstanding. */
+export const commercialInvoiceDocument: FormFields = {
+  accompanyingDocumentReference: 'INVOICESEED0001',
+  accompanyingDocumentType: 'COMMERCIAL_INVOICE',
+  accompanyingDocumentDateOfIssue: '12/12/2025',
+};

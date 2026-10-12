@@ -63,8 +63,13 @@ export class AnimalsSeededJourney {
 
   /** Uploads the ITAHC first, so the submission records nothing outstanding and the notification reads "Submitted". */
   async createSubmittedNotificationWithHealthCertificate(): Promise<string> {
+    return this.createSubmittedNotificationWithDocument(healthCertificateDocument);
+  }
+
+  /** Uploads the given document first; unless it is an ITAHC or health certificate, the submission still records the health certificate as outstanding. */
+  async createSubmittedNotificationWithDocument(document: FormFields): Promise<string> {
     const journeyId = await this.createDraftNotification('readyToSubmit');
-    await this.uploadDocument(journeyId, healthCertificateDocument);
+    await this.uploadDocument(journeyId, document);
     await this.declare(journeyId);
     return journeyId;
   }
