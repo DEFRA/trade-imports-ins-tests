@@ -82,4 +82,12 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
   get errorSummary(): Locator {
     return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
   }
+
+  get btnSaveAndReturn(): Locator {
+    return this.page.getByRole('button', { name: 'Save and return to overview' });
+  }
+
+  get linkCancel(): Locator {
+    return this.page.getByRole('link', { name: 'Cancel and return to overview', exact: true });
+  }
 }

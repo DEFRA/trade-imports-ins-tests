@@ -48,6 +48,19 @@ export class BasePage {
     return this.page.getByRole('link', { name: 'Dashboard', exact: true });
   }
 
+  /** The GOV.UK service navigation; its `nav` is labelled by the menu button text, "Menu", on every frontend. */
+  get serviceNavigation(): Locator {
+    return this.page.getByRole('navigation', { name: 'Menu' });
+  }
+
+  serviceNavigationLink(name: string): Locator {
+    return this.serviceNavigation.getByRole('link', { name, exact: true });
+  }
+
+  get linkTemplates(): Locator {
+    return this.serviceNavigationLink('Templates');
+  }
+
   /**
    * `exact` is load-bearing, not decoration. Playwright matches an accessible
    * name as a case-insensitive SUBSTRING unless you opt out, and the service's

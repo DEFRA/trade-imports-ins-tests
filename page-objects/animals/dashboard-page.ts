@@ -145,6 +145,14 @@ export class AnimalsDashboardPage extends BasePage {
     await this.waitForNotificationList();
   }
 
+  /** Opens the first page of the dashboard and returns the references of the draft notifications it lists. */
+  async draftReferences(): Promise<string[]> {
+    await this.openDashboardPage(1);
+    const drafts = this.notificationCards.filter({ has: this.page.locator('.govuk-tag', { hasText: /^\s*Draft\s*$/ }) });
+    const headings = await drafts.getByRole('heading', { level: 3 }).allTextContents();
+    return headings.map((heading) => heading.trim());
+  }
+
   async goToLastPage(): Promise<number> {
     const totalPages = await this.getPaginationTotalPages();
     await this.openDashboardPage(totalPages);
