@@ -44,6 +44,8 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
     // Resubmit through the declaration (AMEND → SUBMITTED_ACTION_REQUIRED, as no health certificate is uploaded).
     await animalsPages.notificationView.continueButton.click();
     await expect(animalsPages.declaration.heading).toBeVisible();
+    await expect(animalsPages.declaration.journeyStrip).toHaveCount(0);
+    await expect(pages.page.getByText(/Cancel amend/)).toHaveCount(0);
     await animalsPages.declaration.confirmation.check();
     await animalsPages.declaration.continueButton.click();
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();

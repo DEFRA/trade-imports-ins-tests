@@ -636,6 +636,35 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(plantsPages.notificationView.statusBarCancelAmend).toHaveCount(0);
   });
 
+  test('the declaration confirms with a small checkbox under a hidden legend and shows no status bar, at a first submission and an amendment', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    await expectReview(plantsPages);
+    await plantsPages.notificationView.btnContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrl(reference));
+
+    await expect(plantsPages.declaration.confirmationGroup).toBeVisible();
+    await expect(plantsPages.declaration.confirmationLegend).toHaveClass(/govuk-visually-hidden/);
+    await expect(plantsPages.declaration.confirmationCheckboxes).toHaveClass(/govuk-checkboxes--small/);
+    await expect(plantsPages.declaration.journeyStrip).toHaveCount(0);
+
+    await plantsPages.declaration.checkbox.check();
+    await plantsPages.declaration.btnContinue.click();
+    await expect(plantsPages.confirmation.heading).toBeVisible();
+
+    await amend(pages, plantsPages, reference);
+    await plantsPages.notificationView.open(reference);
+    await plantsPages.notificationView.btnContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrl(reference));
+
+    await expect(plantsPages.declaration.journeyStrip).toHaveCount(0);
+    await expect(pages.page.getByText(/Cancel amend/)).toHaveCount(0);
+  });
+
   test('Continue on an incomplete amendment is refused and names what is missing', async ({
     pages,
     plantsPages,

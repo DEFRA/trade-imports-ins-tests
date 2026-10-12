@@ -14,6 +14,18 @@ export class AnimalsDeclarationPage extends NotificationPage {
     return this.page.getByRole('checkbox', { name: /I confirm that I have reviewed/ });
   }
 
+  get confirmationGroup(): Locator {
+    return this.page.getByRole('group', { name: 'Declaration confirmation', exact: true });
+  }
+
+  get confirmationLegend(): Locator {
+    return this.confirmationGroup.locator('legend');
+  }
+
+  get confirmationCheckboxes(): Locator {
+    return this.confirmationGroup.locator('.govuk-checkboxes');
+  }
+
   get continueButton(): Locator {
     return this.page.getByRole('button', { name: 'Continue' });
   }
