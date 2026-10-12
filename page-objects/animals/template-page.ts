@@ -26,6 +26,11 @@ export class AnimalsTemplatePage extends BasePage {
       .filter({ has: this.page.getByRole('button', { name: 'Use template', exact: true }) });
   }
 
+  /** The Use template form's crumb, for a post made straight to the form's address. */
+  get crumb(): Locator {
+    return this.useTemplateForm.locator('input[name="crumb"]');
+  }
+
   /** A link styled as a button, so it carries the button role. */
   get btnDelete(): Locator {
     return this.page.getByRole('main').getByRole('button', { name: 'Delete', exact: true });

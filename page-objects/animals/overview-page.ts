@@ -57,6 +57,15 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Return to manage templates', exact: true });
   }
 
+  /** A link styled as a button, so it carries the button role. */
+  get btnReturnToDashboard(): Locator {
+    return this.page.getByRole('button', { name: 'Return to dashboard', exact: true });
+  }
+
+  get errorSummary(): Locator {
+    return this.page.locator('.govuk-error-summary');
+  }
+
   get btnSaveTemplate(): Locator {
     return this.page.getByRole('button', { name: 'Save template', exact: true });
   }
