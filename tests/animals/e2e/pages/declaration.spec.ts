@@ -3,7 +3,6 @@ import { test, expect } from '@fixtures';
 test.describe('Declaration page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.beforeEach(async ({ animalsSeededJourney, animalsPages }) => {
     const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
-    // The declaration is reached only by posting from check your answers.
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
     await animalsPages.notificationView.continueButton.click();
     await animalsPages.declaration.heading.waitFor();

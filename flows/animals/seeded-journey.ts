@@ -59,7 +59,6 @@ export class AnimalsSeededJourney {
   async createSubmittedNotification(): Promise<string> {
     const journeyId = await this.createDraftNotification('readyToSubmit');
     const declarationPath = `${CREATE_PATH}/${journeyId}/${declarationStep.slug}`;
-    // Rendering check your answers records its token in this session; the declaration accepts only that token.
     const review = await this.forms.getPageHtml(`${CREATE_PATH}/${journeyId}/${declarationStep.reviewSlug}`);
     const concurrencyToken = concurrencyTokenIn(review, declarationStep.reviewSlug);
     const declaration = await this.forms.postFormReturningHtml(declarationPath, { ...declarationStep.review, concurrencyToken });
