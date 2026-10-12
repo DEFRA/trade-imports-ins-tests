@@ -11,8 +11,9 @@
   "scripts": {
     "prepare": "husky",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . && npm run lint:suite-tags",
     "lint:fix": "eslint . --fix",
+    "lint:suite-tags": "tsx bin/lint-suite-tags.ts",
     "format": "prettier --write '**/*.{ts,js,mjs,md,json,yml,yaml}'",
     "format:check": "prettier --check '**/*.{ts,js,mjs,md,json,yml,yaml}'",
     "_clean": "rm -rf test-results playwright-report allure-results allure-report FAILED playwright/.auth",
