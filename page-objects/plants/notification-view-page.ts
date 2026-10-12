@@ -30,6 +30,29 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
   get statusBarCancelAmend(): Locator {
     return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
   }
+  /** The primary "Amend this notification" button in a submitted view's header. */
+  get btnAmend(): Locator {
+    return this.page.getByRole('button', { name: 'Amend this notification', exact: true });
+  }
+  /** The button group in a submitted view's header, holding Amend and Delete notification. */
+  get headerActions(): Locator {
+    return this.page.locator('.govuk-button-group').filter({ has: this.btnAmend });
+  }
+  /** Used only to assert that plants offers no Copy as new. */
+  get btnCopyAsNew(): Locator {
+    return this.page.getByRole('button', { name: 'Copy as new' });
+  }
+  /** The "Import reference numbers" section of a submitted view. */
+  get importReferenceNumbers(): Locator {
+    return this.page.getByRole('region', { name: 'Import reference numbers' });
+  }
+  /** The value of the import reference row named `key`. */
+  importReference(key: string): Locator {
+    return this.importReferenceNumbers
+      .locator('.govuk-summary-list__row')
+      .filter({ has: this.page.getByRole('term').and(this.page.getByText(key, { exact: true })) })
+      .locator('.govuk-summary-list__value');
+  }
   get btnDelete(): Locator {
     return this.page.getByRole('button', { name: 'Delete notification', exact: true });
   }

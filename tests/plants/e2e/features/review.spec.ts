@@ -418,6 +418,51 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(plantsPages.dashboard.heading).toBeVisible();
   });
 
+  test("a submitted notification's view offers Amend this notification and a red Delete notification in its header, and no Copy as new", async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    await submit(plantsPages);
+    await plantsPages.confirmation.viewNotification.click();
+
+    await expect(plantsPages.notificationView.headerActions.getByRole('button')).toHaveText([
+      'Amend this notification',
+      'Delete notification',
+    ]);
+    await expect(plantsPages.notificationView.btnAmend).toHaveClass(/govuk-button/);
+    await expect(plantsPages.notificationView.btnAmend).not.toHaveClass(/govuk-button--(secondary|warning)/);
+    await expect(plantsPages.notificationView.btnDelete).toHaveCount(1);
+    await expect(plantsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
+    await expect(plantsPages.notificationView.btnCopyAsNew).toHaveCount(0);
+
+    await plantsPages.notificationView.btnAmend.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(plantsPages.overview.statusTag).toHaveText('Amend');
+  });
+
+  test("a submitted notification's view shows its notification reference as text, with no customs document code and no Copy button", async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    await submit(plantsPages);
+    await plantsPages.confirmation.viewNotification.click();
+
+    await expect(plantsPages.notificationView.importReferenceNumbers).toBeVisible();
+    await expect(plantsPages.notificationView.importReferenceNumbers).toContainText(
+      'You must use the correct reference and code on the customs declaration or your consignment will be delayed.',
+    );
+    await expect(plantsPages.notificationView.importReference('Notification reference')).toHaveText(reference);
+    await expect(plantsPages.notificationView.importReferenceNumbers.getByText('Customs document code')).toHaveCount(0);
+    await expect(plantsPages.notificationView.importReferenceNumbers.getByRole('button')).toHaveCount(0);
+  });
+
   test("an unknown notification's view goes to the plants notification list", async ({ pages, plantsPages }) => {
     await plantsPages.notificationView.open('GBN-HRP-00-000000');
 

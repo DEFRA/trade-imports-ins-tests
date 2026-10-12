@@ -43,6 +43,8 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(animalsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
       await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toHaveCount(0);
       await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
+      await expect(animalsPages.notificationView.btnAmend).toHaveCount(0);
+      await expect(animalsPages.notificationView.importReferenceNumbers).toHaveCount(0);
     });
 
     test('Delete opens the delete confirmation', async ({ pages, animalsPages }) => {
@@ -149,10 +151,40 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(animalsPages.dashboard.heading).toBeVisible();
     });
 
-    test('offers Copy as new and Delete on the read-only view', async ({ pages, animalsPages }) => {
-      await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toBeVisible();
-      await expect(pages.page.getByRole('button', { name: 'Delete' })).toBeVisible();
+    test('offers Amend this notification, a secondary Copy as new and a red Delete in its header', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.headerActions.getByRole('button')).toHaveText([
+        'Amend this notification',
+        'Copy as new',
+        'Delete',
+      ]);
+      await expect(animalsPages.notificationView.btnAmend).toHaveClass(/govuk-button/);
+      await expect(animalsPages.notificationView.btnAmend).not.toHaveClass(/govuk-button--(secondary|warning)/);
+      await expect(animalsPages.notificationView.btnCopyAsNew).toHaveClass(/govuk-button--secondary/);
+      await expect(animalsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
       await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
+    });
+
+    test('Amend this notification starts the amendment', async ({ pages, animalsPages, journeyContext }) => {
+      await animalsPages.notificationView.btnAmend.click();
+
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.overview.expectedUrl(journeyContext.journeyId)}$`));
+      await expect(animalsPages.overview.statusTag).toHaveText('Amend');
+    });
+
+    test('Delete opens the delete confirmation', async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.btnDelete.click();
+
+      await expect(pages.page).toHaveURL(/\/delete$/);
+      await expect(pages.page.getByRole('heading', { level: 1, name: 'Delete this notification?' })).toBeVisible();
+    });
+
+    test('shows the import reference numbers as text, with no Copy button', async ({ animalsPages, journeyContext }) => {
+      await expect(animalsPages.notificationView.importReferenceNumbers).toContainText(
+        'You must use the correct reference and code on the customs declaration or your consignment will be delayed.',
+      );
+      await expect(animalsPages.notificationView.importReference('Notification reference')).toHaveText(journeyContext.journeyId);
+      await expect(animalsPages.notificationView.importReference('Customs document code')).toHaveText('C640');
+      await expect(animalsPages.notificationView.importReferenceNumbers.getByRole('button')).toHaveCount(0);
     });
 
     test('copies the submitted notification to a new draft', async ({ animalsPages, journeyContext }) => {
