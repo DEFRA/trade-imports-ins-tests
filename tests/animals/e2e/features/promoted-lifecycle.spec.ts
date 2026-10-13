@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { notificationFulfilmentsStatuses } from '@domain/animals/models/api/notification-fulfilments';
 import { notificationStatuses } from '@domain/animals/models/api/notification';
 
-test.describe('Notification lifecycle', { tag: ['@compose', '@integration'] }, () => {
+test.describe('Notification lifecycle', { tag: '@compose' }, () => {
   test('creates, submits, amends, cancels, copies and soft-deletes a notification; fulfilment view reflects each transition; copy no longer dedupes', async ({
     notificationApi,
   }) => {
@@ -19,7 +19,7 @@ test.describe('Notification lifecycle', { tag: ['@compose', '@integration'] }, (
     expect(initial.fulfilments).toEqual([]);
 
     // Submit.
-    const submitted = await notificationApi.submitNotification(id);
+    const submitted = await notificationApi.submitNotification(id, notification.concurrencyToken);
     expect(submitted.status).toBe(notificationStatuses.submittedActionRequired);
     const submittedFulfilments = await notificationApi.getNotificationFulfilments(id);
     expect(submittedFulfilments.status).toBe(notificationFulfilmentsStatuses.submittedActionRequired);

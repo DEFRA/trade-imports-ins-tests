@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Review — species short of a count or an identifier', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Review — species short of a count or an identifier', { tag: '@duplicated-in-frontend' }, () => {
   test('with two identified species and nothing counted, the review names each species short of its number of animals and links to its block', async ({
     animalsJourney,
     pages,

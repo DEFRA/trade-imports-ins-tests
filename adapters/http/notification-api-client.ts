@@ -69,8 +69,10 @@ export class NotificationApiClient {
     return this.saveNotification(id, concurrencyToken, { fulfilments: overwritten });
   }
 
-  async submitNotification(id: string): Promise<Notification> {
-    return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/submit`));
+  async submitNotification(id: string, concurrencyToken: number): Promise<Notification> {
+    return this.retryOnTransientOutboxLock(() =>
+      this.rest.post<Notification>(`/notifications/${id}/submit?concurrencyToken=${concurrencyToken}`),
+    );
   }
 
   async amendNotification(id: string): Promise<Notification> {

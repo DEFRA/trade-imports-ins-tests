@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Import reason page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Import reason page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toImportReason();
   });

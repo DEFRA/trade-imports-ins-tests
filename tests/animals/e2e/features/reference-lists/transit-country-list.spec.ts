@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { destinationCountryNames } from '@domain/shared/fixtures/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
-test.describe('Transit country list', { tag: ['@integration'] }, () => {
+test.describe('Transit country list', () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment("the list is the stub's MDM fixture, which only the compose stack is sure to serve");
   });

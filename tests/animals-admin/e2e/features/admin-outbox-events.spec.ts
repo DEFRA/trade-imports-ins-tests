@@ -8,7 +8,7 @@ import { timeouts } from '@config/timeouts';
  * this asserts the operator can find and inspect it on the admin Outbox events page. The write lags the
  * submit, so the search is re-issued until the row appears.
  */
-test.describe('Outbox events (admin)', { tag: ['@integration', '@mongodb'] }, () => {
+test.describe('Outbox events (admin)', { tag: '@mongodb' }, () => {
   test(
     'shows the outbox event for a submitted notification',
     { tag: '@smoke' },

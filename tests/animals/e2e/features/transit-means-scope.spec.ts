@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 import { test, expect, type PageFixtures } from '@fixtures';
 
-test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () => {
   const transitRowOn = (page: Page) => page.locator('.govuk-task-list__item', { hasText: 'Transit countries' });
 
   // The means of transport is the one answer Arrival details needs to

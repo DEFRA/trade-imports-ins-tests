@@ -4,7 +4,7 @@ import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 const CHANGE_ORIGIN_OF_IMPORT = 'Change origin of import';
 
-test.describe('Amendment review heading', { tag: ['@compose', '@integration'] }, () => {
+test.describe('Amendment review heading', { tag: '@compose' }, () => {
   test("an amendment's review is headed Review your notification until an answer changes, then Review before re-submitting", async ({
     pages,
     animalsPages,

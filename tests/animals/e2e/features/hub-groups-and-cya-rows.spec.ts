@@ -1,8 +1,9 @@
 import type { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
 import { ARRIVAL_DATE } from '@flows/animals/journey';
+import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 
-test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-frontend' }, () => {
   test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({ animalsJourney, pages }) => {
     await animalsJourney.startNotification();
 
@@ -181,7 +182,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expect(commodityCard.getByRole('cell', { name: 'UK123456789012' })).toBeVisible();
 
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
-    await expect(value(arrivalDetails, 'Port of entry')).toHaveText('Aberdeen Harbour (GB ABD)');
+    await expect(value(arrivalDetails, 'Port of entry')).toHaveText(pointOfEntries.aberdeenHarbour.display);
     await expect(value(arrivalDetails, 'Arrival date at destination')).toHaveText(ARRIVAL_DATE);
     await expect(value(arrivalDetails, 'Means of transport to the port of entry')).toHaveText('Road');
     await expect(value(arrivalDetails, 'Transport identification')).toHaveText('FR-892-LK');
@@ -232,8 +233,8 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     const journeyId = animalsPages.importReason.journeyIdFromUrl();
     await animalsPages.importReason.reason('Transit').check();
     const port = await animalsPages.importReason.transitPortOfExitOptions.first().getAttribute('value');
-    await animalsPages.importReason.transitPortOfExit.selectOption(port);
-    await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
+    await animalsPages.importReason.selectTransitPortOfExitByIndex(1);
+    await animalsPages.importReason.selectTransitDestinationCountry('FR');
     await animalsPages.importReason.saveAndContinue.click();
 
     await animalsPages.notificationView.open(journeyId);

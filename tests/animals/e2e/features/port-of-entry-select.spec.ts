@@ -1,10 +1,12 @@
 import { test, expect } from '@fixtures';
 import { getRelativeDatePickerValue } from '@utils/date-utils';
+import { portByCode } from '@domain/shared/fixtures/reference-data';
 
-const PORT_OPTION = 'Port of Dover - GB DVR';
-const PORT_CODE = 'GB DVR';
+const DOVER = portByCode('GB DVR');
+const PORT_OPTION = DOVER.display;
+const PORT_CODE = DOVER.value;
 
-test.describe('Port of entry type-ahead', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Port of entry type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('enhances the select, filters by name or code, submits and persists the code', async ({ animalsJourney, pages, animalsPages }) => {
     await animalsJourney.toArrivalDetails();
     const journeyId = animalsPages.arrivalDetails.journeyIdFromUrl();

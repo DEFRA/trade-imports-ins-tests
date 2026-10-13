@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { commercialInvoiceDocument } from '@domain/animals/fixtures/seeded-journey';
 
-test.describe('Import notification submitted page', { tag: ['@integration'] }, () => {
+test.describe('Import notification submitted page', () => {
   test('a notification not yet submitted goes to its declaration', async ({ pages, animalsSeededJourney, animalsPages }) => {
     const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
 

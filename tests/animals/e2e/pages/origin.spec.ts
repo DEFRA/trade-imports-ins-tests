@@ -13,7 +13,7 @@ const REGION_CODE_ROW = 'Region of origin code';
 const NOT_APPLICABLE = 'Not applicable';
 const CANARY_ISLANDS = 'Canary Islands (Spain)';
 
-test.describe('Origin of the import page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toOriginOfImport();
   });

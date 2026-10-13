@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
+import { portByCode } from '@domain/shared/fixtures/reference-data';
 import { COLD_START } from '@fixtures/auth-state';
 import type { CommodityLine } from '@flows/plants/journey';
 
@@ -53,7 +54,7 @@ const scenarios: { name: string; type: string; category: string; country: string
 // These full walks include sign-in even when worker session reuse is enabled.
 test.use({ storageState: COLD_START });
 
-test.describe('High-risk plants full happy-path journeys', { tag: '@integration' }, () => {
+test.describe('High-risk plants full happy-path journeys', () => {
   for (const scenario of scenarios) {
     test(`${scenario.name}: sign in, submit and view the saved notification`, async ({
       pages,
@@ -82,7 +83,7 @@ test.describe('High-risk plants full happy-path journeys', { tag: '@integration'
       if (scenario.type === POTATOES) {
         await plantsJourney.toArrivalDetails(scenario.country);
         await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-        await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour - GB ABD');
+        await plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
       } else {
         await plantsJourney.toArrivalStatus(scenario.country);
         await plantsJourney.answerArrivalStatus('No, it has not arrived yet');
