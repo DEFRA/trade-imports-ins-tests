@@ -5,7 +5,7 @@ import { test, expect } from '@fixtures';
 
 const TRANSIT_BROWSER_TITLE = 'Transit countries - Import notification service - GOV.UK';
 
-test.describe('Transited countries page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toTransitedCountries();
   });

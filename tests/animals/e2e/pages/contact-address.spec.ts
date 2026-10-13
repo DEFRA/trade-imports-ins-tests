@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { skipIfNonStubStackEnvironment, skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
 
-test.describe('Contact address page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Contact address page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toContactAddress();
   });

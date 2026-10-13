@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Additional details scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, () => {
   test('the unweaned-animals question shows only when a triggering commodity line exists', async ({
     animalsJourney,
     pages,

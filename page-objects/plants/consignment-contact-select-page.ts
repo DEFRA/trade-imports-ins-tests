@@ -70,12 +70,17 @@ export class PlantsConsignmentContactSelectPage extends PlantsNotificationPage {
     return this.page.getByRole('link', { name: `Page ${number}`, exact: true });
   }
 
-  get btnSaveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue', exact: true });
+  /** The copy this notification holds, which may differ from any record in the list. */
+  get currentAddress(): Locator {
+    return this.page.getByRole('region', { name: 'Current contact address' });
   }
 
-  get btnSaveAndReturn(): Locator {
-    return this.page.getByRole('button', { name: 'Save and return to overview', exact: true });
+  get editCurrentAddress(): Locator {
+    return this.currentAddress.getByRole('link', { name: /^Edit details/ });
+  }
+
+  get btnSaveAndContinue(): Locator {
+    return this.page.getByRole('button', { name: 'Save and continue', exact: true });
   }
 
   get errorSummary(): Locator {

@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () => {
   test('the transit-countries page is routed only for rail or road; changing the means wipes saved countries', async ({
     animalsJourney,
     pages,
@@ -16,7 +16,7 @@ test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in
     const saveArrivalWithMeans = async (means: string) => {
       await animalsPages.overview.task('Arrival details').click();
       await expect(animalsPages.arrivalDetails.heading).toBeVisible();
-      await animalsJourney.fillArrivalDetails(means);
+      await animalsJourney.fillArrivalDetails({ means });
       await animalsPages.arrivalDetails.saveAndContinue.click();
       await expect(animalsPages.overview.heading).toBeVisible();
     };

@@ -19,7 +19,7 @@ const potatoLine = (variety: string, quantity: string) => ({
   'Intended use': 'Planting',
 });
 
-test.describe('High-risk plants commodity section', { tag: '@integration' }, () => {
+test.describe('High-risk plants commodity section', () => {
   test('each commodity type offers only the categories that belong to it', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     const details = plantsPages.commodityDetails;

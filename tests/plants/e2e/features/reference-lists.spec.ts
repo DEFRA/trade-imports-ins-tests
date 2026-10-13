@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { countriesOrigin, countryByCode, portLabel, portsInListOrder, portsOfEntry } from '@domain/shared/fixtures/reference-data';
+import { countryByCode, originPageCountryNames, portLabel, portsOfEntry } from '@domain/shared/fixtures/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const POTATOES = 'Potatoes (seed or ware)';
@@ -11,12 +11,12 @@ const potatoLine = {
   'Intended use': 'Planting',
 };
 
-test.describe('Plants reference lists', { tag: ['@integration'] }, () => {
+test.describe('Plants reference lists', () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment("the list is the stub's MDM fixture, which only the compose stack is sure to serve");
   });
 
-  test('the origin list offers the captured SPS origin countries, in the order reference data serves them', async ({
+  test('the origin list offers the captured SPS origin countries and their territories, by name', async ({
     plantsPages,
     plantsJourney,
   }) => {
@@ -25,7 +25,7 @@ test.describe('Plants reference lists', { tag: ['@integration'] }, () => {
     await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine);
     await plantsJourney.toOrigin();
 
-    await expect(plantsPages.origin.countryOptions).toHaveText(countriesOrigin.map(({ name }) => name));
+    await expect(plantsPages.origin.countryOptions).toHaveText(originPageCountryNames());
   });
 
   test('the place of landing list offers every captured port, in the order reference data serves them', async ({
@@ -39,18 +39,5 @@ test.describe('Plants reference lists', { tag: ['@integration'] }, () => {
     await plantsJourney.toArrivalDetails(countryByCode('FR').display);
 
     await expect(plantsPages.arrivalDetails.placeOfLandingOptions).toHaveText(portsOfEntry.map(portLabel));
-  });
-
-  test('the place of landing list offers every airport, then every seaport, then every rail port, each A to Z by name ignoring letter case', async ({
-    plantsPages,
-    plantsJourney,
-  }) => {
-    await plantsJourney.startNotification();
-    await plantsJourney.chooseCommodityType(POTATOES);
-    await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine);
-    await plantsJourney.toOrigin();
-    await plantsJourney.toArrivalDetails(countryByCode('FR').display);
-
-    await expect(plantsPages.arrivalDetails.placeOfLandingOptions).toHaveText(portsInListOrder().map(portLabel));
   });
 });

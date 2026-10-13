@@ -5,7 +5,7 @@ import { firstScanStatus } from '@utils/scan-status';
 
 const issueDate = '03/01/2026';
 
-test.describe('Documents scan refresh without JavaScript', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Documents scan refresh without JavaScript', { tag: '@duplicated-in-frontend' }, () => {
   test.use({ javaScriptEnabled: false });
 
   test('the refresh fallback reflects scan progress without client JavaScript', async ({ animalsJourney, pages, animalsPages }) => {

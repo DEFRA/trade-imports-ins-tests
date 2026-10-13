@@ -1,6 +1,13 @@
 import { test } from '@playwright/test';
+import { baseUrlForDomain, domainFromSpecPath } from './domain-base-urls';
 
 const PROD_ENVIRONMENT = 'prod';
+
+/** The running spec's base URL: the one its domain resolves to (see domain-base-urls). */
+function currentBaseUrl(): string {
+  const { file, project } = test.info();
+  return baseUrlForDomain(domainFromSpecPath(file, project.testDir)).toLowerCase();
+}
 
 export function getEnvironment(): string | undefined {
   return process.env.ENVIRONMENT ?? process.env.PLAYWRIGHT_ENVIRONMENT;
@@ -28,8 +35,7 @@ export function throwIfProdEnvironment(environment = getEnvironment()): void {
  * True when Playwright targets a deployed CDP hostname (dev, test, etc.).
  */
 export function isCdpHostedEnvironment(): boolean {
-  const baseUrl = String(test.info().project.use.baseURL ?? '').toLowerCase();
-  return baseUrl.includes('.cdp-int.defra.cloud');
+  return currentBaseUrl().includes('.cdp-int.defra.cloud');
 }
 
 /**
@@ -66,7 +72,7 @@ export function skipUnlessNonStubStackEnvironment(reason: string): void {
  * with direct Mongo access, so persistence assertions gate on this rather than a tag.
  */
 export function isComposeEnvironment(): boolean {
-  const baseUrl = String(test.info().project.use.baseURL ?? '').toLowerCase();
+  const baseUrl = currentBaseUrl();
   return baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1') || baseUrl.includes('cdp-docker.test');
 }
 

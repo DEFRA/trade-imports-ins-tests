@@ -1,6 +1,7 @@
 import type { AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
+import { portByCode } from '@domain/shared/fixtures/reference-data';
 import type { PlantsPages } from '@page-objects';
 import type { PlantsJourney } from '@flows/plants/journey';
 
@@ -33,7 +34,7 @@ async function openContact(plantsPages: PlantsPages, journey: PlantsJourney): Pr
   return reference;
 }
 
-test.describe('High-risk plants contact', { tag: '@integration' }, () => {
+test.describe('High-risk plants contact', () => {
   test('searches the address book, pages the matches five at a time and persists a row ticked on a later page', async ({
     pages,
     plantsPages,
@@ -92,7 +93,7 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
     await plantsPages.arrivalDetails.open(reference);
     await plantsPages.arrivalDetails.dateQuestionLabelled('Expected date of arrival').fill('27/3/2027');
     await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-    await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour - GB ABD');
+    await plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
     await plantsPages.arrivalDetails.btnSaveAndContinue.click();
     await plantsPages.placeOfDestination.open(reference);
     await plantsPages.placeOfDestination.searchFor(address.name);
@@ -126,7 +127,7 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
     test(`blank contact permits save and ${action} and leaves the row incomplete`, async ({ pages, plantsPages, plantsJourney }) => {
       const reference = await openContact(plantsPages, plantsJourney);
       const contact = plantsPages.consignmentContactSelect;
-      const button = action === 'continue' ? contact.btnSaveAndContinue : contact.btnSaveAndReturn;
+      const button = action === 'continue' ? contact.btnSaveAndContinue : contact.saveAndReturnToOverview;
       await button.click();
       await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
       // The inherited status model has no visited-page state: a blank save remains Not yet started.

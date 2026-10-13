@@ -33,7 +33,7 @@ The GitHub Action is manual dispatch only; the nightly schedule stays disabled p
 2. Bring up ZAP too — additive, and waits for healthchecks so it returns only once ZAP is accepting requests: `tim docker up --profile security`
 3. Run a profile: `npm run test:docker-compose:security` or `npm run test:docker-compose:security:active`
    - Per domain (passive or active): `test:docker-compose:animals:security[:active]`, `…:animals-admin:…`, `…:ins:…`. Plants has no security specs yet.
-   - Full `security:active` is the authoritative clean bill of health. Per-domain active sets `ZAP_SCOPE` so the no-traffic gate only covers that project's contexts; the report is labelled as scoped.
+   - Full `security:active` is the authoritative clean bill of health. Per-domain active sets `ZAP_SCOPE` so the no-traffic gate only covers that domain's contexts; the report is labelled as scoped.
 4. Leave ZAP running between runs, or `docker stop trade-imports-zap-1`
 
 Each run clears `zap-report/` first, so running two domains back to back keeps only the second domain's report.
@@ -74,4 +74,4 @@ Ports are the compose stack's; on CDP each service is a per-service subdomain. D
 
 - **A FAIL-rated alert.** `zap/rules.tsv` maps ZAP plugin ids to `IGNORE`/`WARN`/`FAIL`; anything unlisted defaults to FAIL if High risk and WARN otherwise.
 - **A truncated scan.** Each context is capped at 60 minutes (`maxScanDurationInMins`), and `ACTIVE_SCAN_CAP_MINS` must match that number exactly. A scan that finishes at the ceiling was cut short, and an incomplete scan reporting no findings is a false clean.
-- **A context with no traffic.** Declared but undriven means its activeScan job scanned nothing and reported clean. Active profile only. Per-domain active (`ZAP_SCOPE`) gates only that project's contexts; the report callout marks the run as scoped.
+- **A context with no traffic.** Declared but undriven means its activeScan job scanned nothing and reported clean. Active profile only. Per-domain active (`ZAP_SCOPE`) gates only that domain's contexts; the report callout marks the run as scoped.

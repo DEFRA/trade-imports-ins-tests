@@ -21,7 +21,7 @@ const referenceNumberFrom = (redirectPath: string): string => {
 
 // Auth state is minted per Playwright project, so this proof only holds from the admin
 // project: an e2e-project session is already a frontend session.
-test.describe('Frontend seed context', { tag: ['@integration', '@mongodb'] }, () => {
+test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('the seed proof asserts on Mongo directly, which only the compose stack exposes');
   });

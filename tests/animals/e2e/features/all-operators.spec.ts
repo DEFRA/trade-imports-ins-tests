@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('All operator addresses', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('All operator addresses', { tag: '@duplicated-in-frontend' }, () => {
   // The api seed unlocks only origin + commodity, so the review page is reached
   // through the full journey walk — the addresses leg of that walk picks the
   // canned parties whose names and countries are asserted here.

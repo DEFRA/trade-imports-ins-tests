@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Change from check your answers', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Change from check your answers', { tag: '@duplicated-in-frontend' }, () => {
   test('a Change link opens the answering page with change context and the save returns to check your answers with the new value', async ({
     animalsSeededJourney,
     pages,

@@ -1,15 +1,14 @@
 import { test, expect } from '@fixtures';
 
-test.describe('High-risk plants page titles', { tag: '@integration' }, () => {
+test.describe('High-risk plants page titles', { tag: '@duplicated-in-frontend' }, () => {
   test('a journey page is titled page name, service name and GOV.UK, joined by hyphens', async ({ pages, plantsPages, plantsJourney }) => {
     // Given a started notification
     // When the trader is on the commodity-type page
     await plantsJourney.startNotification();
     await expect(plantsPages.commodityType.heading).toBeVisible();
 
-    // Then the title names the page, then the service, then GOV.UK, with no pipe
+    // Then the title names the page, then the service, then GOV.UK
     await expect(pages.page).toHaveTitle('What are you importing? - Import notification service - GOV.UK');
-    await expect(pages.page).not.toHaveTitle(/\|/);
   });
 
   test('a page showing errors opens its title with Error:', async ({ pages, plantsPages, plantsJourney }) => {

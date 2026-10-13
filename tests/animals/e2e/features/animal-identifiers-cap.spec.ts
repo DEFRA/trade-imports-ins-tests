@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () => {
   test('the N-of-M counter caps records at the declared count, remove frees a slot, and a count drop is blocked with an error naming the species', async ({
     animalsJourney,
     pages,
