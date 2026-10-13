@@ -104,7 +104,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(value(arrivalDetails, 'Port of entry')).toHaveText(pointOfEntries.aberdeenHarbour.display);
     await expect(value(arrivalDetails, 'Arrival date at port of entry')).toHaveText(ARRIVAL_DATE);
-    await expect(value(arrivalDetails, 'Means of transport to the port of entry')).toHaveText('Road Vehicle');
+    await expect(value(arrivalDetails, 'Means of transport to the port of entry')).toHaveText('Road');
     await expect(value(arrivalDetails, 'Transport identification')).toHaveText('FR-892-LK');
     await expect(value(arrivalDetails, 'Transport document reference')).toHaveText('CMR-2026-884721');
 

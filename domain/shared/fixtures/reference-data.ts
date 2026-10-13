@@ -42,7 +42,7 @@ export function originPageCountryNames(): string[] {
   return countryNamesWithSubdivisions((subDivision) => subDivision.name);
 }
 
-/** A destination country select lists each origin country and each territory named "<territory> (<country>)", sorted by name. */
+/** A destination country select, and the transit countries search, list each origin country and each territory named "<territory> (<country>)", sorted by name. */
 export function destinationCountryNames(): string[] {
   return countryNamesWithSubdivisions((subDivision, country) => `${subDivision.name} (${country.name})`);
 }

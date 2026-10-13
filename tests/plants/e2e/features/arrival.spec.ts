@@ -57,8 +57,10 @@ const ARRIVED_ON = getRelativeAppDateText({ dayOffset: -DAYS_LATE });
 const ARRIVING_ON = '27/3/2027';
 const ARRIVING_AT = '14:30';
 
-// A port the reference data has held throughout, offered as "{name} ({code})".
+// A port the reference data has held throughout, offered as "{name} - {code}".
 const ABERDEEN_HARBOUR = portByCode('GB ABD').display;
+const PORT_OF_DOVER = portByCode('GB DVR').display;
+const PORT_OF_DOVER_CODE = portByCode('GB DVR').value;
 
 // The window is four days (reg 26(1)), and the hint is the only place a trader
 // reads it — so it is matched in full rather than on the number alone.
@@ -346,5 +348,59 @@ test.describe('High-risk plants arrival section', () => {
     await expect(plantsPages.arrivalDetails.arrivalDate).toHaveValue(ARRIVING_ON);
     await expect(plantsPages.arrivalDetails.arrivalTime).toHaveValue(ARRIVING_AT);
     await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue(ABERDEEN_HARBOUR);
+  });
+
+  test("a potato notification's place of landing reads its port name and code, shows the chosen port that way and keeps its code", async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
+    const reference = await toPotatoArrivalDetails(plantsJourney);
+
+    await expect(plantsPages.arrivalDetails.placeOfLandingNativeOption(PORT_OF_DOVER_CODE)).toHaveText(PORT_OF_DOVER);
+
+    await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVING_ON);
+    await plantsPages.arrivalDetails.arrivalTime.fill(ARRIVING_AT);
+    await plantsPages.arrivalDetails.selectPlaceOfLanding(PORT_OF_DOVER);
+    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue(PORT_OF_DOVER);
+    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
+
+    await plantsPages.arrivalDetails.open(reference);
+    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue(PORT_OF_DOVER);
+    await expect(plantsPages.arrivalDetails.placeOfLandingValue).toHaveValue(PORT_OF_DOVER_CODE);
+  });
+
+  test("a potato notification's arrival questions are set in the medium label size, and the place of landing is hinted as the port of entry is", async ({
+    plantsPages,
+    plantsJourney,
+  }) => {
+    await toPotatoArrivalDetails(plantsJourney);
+
+    for (const id of ['arrivalDate', 'arrivalTime', 'proposedPlaceOfLanding']) {
+      await expect(plantsPages.arrivalDetails.questionLabel(id)).toHaveClass(/govuk-label--m/);
+    }
+    await expect(plantsPages.arrivalDetails.placeOfLandingHint).toHaveText(
+      'Select where the potatoes will enter Great Britain. Start typing to search by port or airport name or code.',
+    );
+  });
+
+  test("a plants notification's date question is set in the medium label size, before and after arrival", async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
+    const reference = await toArrivalStatus(plantsJourney);
+    await plantsJourney.answerArrivalStatus(NOT_YET_ARRIVED);
+    await expect(plantsPages.arrivalDetails.dateQuestionLabelled(PRE_ARRIVAL_DATE_LABEL)).toBeVisible();
+    await expect(plantsPages.arrivalDetails.questionLabel('arrivalDate')).toHaveClass(/govuk-label--m/);
+
+    await plantsPages.arrivalStatus.open(reference);
+    await plantsPages.arrivalStatus.arrivalStatus(ALREADY_ARRIVED).check();
+    await plantsPages.arrivalStatus.btnSaveAndContinue.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(plantsPages.arrivalDetails.dateQuestionLabelled(POST_ARRIVAL_DATE_LABEL)).toBeVisible();
+    await expect(plantsPages.arrivalDetails.questionLabel('arrivalDate')).toHaveClass(/govuk-label--m/);
   });
 });

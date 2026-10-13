@@ -217,7 +217,7 @@ export class AnimalsJourney {
   }
 
   async fillArrivalDetails({
-    means = 'Road Vehicle',
+    means = 'Road',
     port = PORT,
     transportId = 'FR-892-LK',
     documentReference = 'CMR-2026-884721',
@@ -432,7 +432,7 @@ export class AnimalsJourney {
     await this.confirmDeclaration();
   }
 
-  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+  async walkOpeningRunToArrivalDetails(): Promise<string> {
     const pages = this.animalsPages;
     const journeyId = await this.createNotificationAtOrigin();
 
@@ -457,6 +457,14 @@ export class AnimalsJourney {
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    return journeyId;
+  }
+
+  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+    const pages = this.animalsPages;
+    const journeyId = await this.walkOpeningRunToArrivalDetails();
+
+    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Air' });
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);
@@ -509,7 +517,7 @@ export class AnimalsJourney {
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
       port: pointOfEntries.heathrowAirport.display,
-      means: 'Airplane',
+      means: 'Air',
       transportId: 'BA0117',
       documentReference: 'AWB-2026-0001',
     });
@@ -569,7 +577,7 @@ export class AnimalsJourney {
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
       port: pointOfEntries.holyheadPort.display,
-      means: 'Vessel',
+      means: 'Sea',
       transportId: HORSE_TRANSPORT_ID,
       documentReference: 'BOL-2026-0001',
     });
