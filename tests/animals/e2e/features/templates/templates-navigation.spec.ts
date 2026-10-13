@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 
 const NAVIGATION_ITEMS = ['Dashboard', 'Templates', 'Address book', 'Manage account', 'Log out'];
 
-test.describe('Templates in the service navigation (animals)', { tag: '@integration' }, () => {
+test.describe('Templates in the service navigation (animals)', () => {
   test('offers Dashboard, Templates, Address book, Manage account and Log out, in that order, on the dashboard', async ({
     animalsPages,
   }) => {

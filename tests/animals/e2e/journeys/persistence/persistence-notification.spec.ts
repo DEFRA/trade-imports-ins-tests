@@ -13,12 +13,13 @@ import { toIsoDate } from '@utils/date-utils';
  * round-trip end to end — the journey's answers survive to Mongo and the persisted notification re-renders.
  * Assertions cover a representative field per section rather than every field.
  */
-test.describe('Notification persistence round-trip', { tag: ['@integration', '@mongodb'] }, () => {
+test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
   });
 
   test('draft notification persists as DRAFT up to declaration', async ({ animalsJourney, journeyContext }) => {
+    test.slow();
     await animalsJourney.toDeclaration();
     const referenceNumber = journeyContext.journeyId;
     const client = new MongoDbClient();
@@ -42,6 +43,7 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
     animalsPages,
     addressBookApi,
   }) => {
+    test.slow();
     // Read each role's record from the once-seeded journey fixtures (API globalSetup),
     // so every party is checked against the details of the record picked for it —
     // a role mix-up would otherwise pass if we only asserted "some string".

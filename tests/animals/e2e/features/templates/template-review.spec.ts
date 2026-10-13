@@ -19,7 +19,7 @@ const REASON_FOR_IMPORT = 'Reason for import';
 
 const templateUrl = (templateId: string): RegExp => new RegExp(`${SET_BASES.liveAnimals}/templates/${templateId}$`);
 
-test.describe('A template review', { tag: '@integration' }, () => {
+test.describe('A template review', () => {
   /** Walks Manage templates to a cattle template's task list, then opens its review. Returns the template's id. */
   const openTemplateReview = async (insPages: InsPages, animalsPages: AnimalsPages, name: string): Promise<string> => {
     const { templateName, originOfImport, commoditySelection, overview, notificationView } = animalsPages;

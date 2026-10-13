@@ -52,20 +52,15 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
-  get journeyStrip(): Locator {
-    return this.page.locator('.app-journey-strip');
-  }
-
-  /** The tag in the status strip: the draft status on a notification, Template in template mode. */
-  get statusTag(): Locator {
-    return this.journeyStrip.locator('.govuk-tag');
-  }
-
   get btnSaveAndReturn(): Locator {
     return this.page.getByRole('button', { name: 'Save and return to overview' });
   }
 
   get linkCancel(): Locator {
     return this.page.getByRole('link', { name: 'Cancel and return to overview', exact: true });
+  }
+
+  get errorSummary(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
   }
 }

@@ -1,10 +1,11 @@
 import { test, expect } from '@fixtures';
 import { getRelativeDatePickerValue } from '@utils/date-utils';
+import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 
-const PORT_OPTION = 'Aberdeen Harbour (GB ABD)';
-const PORT_CODE = 'GB ABD';
+const PORT_OPTION = pointOfEntries.aberdeenHarbour.display;
+const PORT_CODE = pointOfEntries.aberdeenHarbour.value;
 
-test.describe('Port of entry type-ahead', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Port of entry type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('enhances the select, filters by name or code, submits and persists the code', async ({ animalsJourney, pages, animalsPages }) => {
     await animalsJourney.toArrivalDetails();
     const journeyId = animalsPages.arrivalDetails.journeyIdFromUrl();
@@ -28,7 +29,7 @@ test.describe('Port of entry type-ahead', { tag: ['@integration', '@duplicated-i
     await expect(combobox).toHaveValue(PORT_OPTION);
     await animalsPages.arrivalDetails.fillArrivalDate(getRelativeDatePickerValue({ monthOffset: 1 }));
     await animalsPages.arrivalDetails.saveAndContinue.click();
-    await expect(animalsPages.transporter.heading).toBeVisible();
+    await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.arrivalDetails.open(journeyId);
     await expect(animalsPages.arrivalDetails.portOfEntryValue).toHaveValue(PORT_CODE);

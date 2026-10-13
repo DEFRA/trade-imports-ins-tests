@@ -11,7 +11,7 @@ const transporter = {
   telephoneNumber: '+44 28 9446 1200',
 };
 
-test.describe('Commercial transporter journeys', { tag: '@integration' }, () => {
+test.describe('Commercial transporter journeys', () => {
   test('a trader can submit a notification using a hand-added commercial transporter', async ({
     animalsSeededJourney,
     pages,
@@ -26,6 +26,8 @@ test.describe('Commercial transporter journeys', { tag: '@integration' }, () => 
     await animalsPages.transitedCountries.addCountry('Belgium');
     await animalsPages.transitedCountries.saveAndContinue.click();
 
+    await animalsPages.overview.heading.waitFor();
+    await animalsPages.overview.task('Transport details').click();
     await animalsPages.transporter.heading.waitFor();
     await animalsPages.transporter.addTransporter.click();
     await animalsPages.transporterAdd.heading.waitFor();

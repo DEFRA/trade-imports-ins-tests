@@ -20,7 +20,7 @@ function requestsTo(page: Page, baseUrlEnv: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE
   return urls;
 }
 
-test.describe('INS type question: What are you importing?', { tag: ['@integration'] }, () => {
+test.describe('INS type question: What are you importing?', () => {
   test('starting a new notification from the INS home asks what you are importing, and Back leaves no notification behind', async ({
     pages,
     insPages,

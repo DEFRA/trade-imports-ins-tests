@@ -14,7 +14,7 @@ const UNTITLED = 'Untitled template';
 
 type SignInOptions = { userId?: string; organisationSbi?: string };
 
-test.describe('Saving a template', { tag: '@integration' }, () => {
+test.describe('Saving a template', () => {
   /** Presses Create new template on Manage templates and signs in again on the INS type question when asked. */
   const createNewTemplate = async (page: Page, insPages: InsPages, animalsPages: AnimalsPages, options?: SignInOptions): Promise<void> => {
     const animalsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')).origin;

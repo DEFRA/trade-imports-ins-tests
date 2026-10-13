@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 
-test.describe('Use template on the INS home', { tag: ['@compose', '@integration'] }, () => {
+test.describe('Use template on the INS home', { tag: '@compose' }, () => {
   test('the INS home offers Use template beside Create new, before and after a search that matches nothing', async ({ insPages }) => {
     await insPages.dashboard.open();
 

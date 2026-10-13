@@ -19,7 +19,7 @@ const SECTION_CAPTIONS = [
 const templateUrl = (templateId: string, slug = ''): RegExp =>
   new RegExp(`${SET_BASES.liveAnimals}/templates/${templateId}${slug ? `/${slug}` : ''}$`);
 
-test.describe("A template's task list", { tag: '@integration' }, () => {
+test.describe("A template's task list", () => {
   /** Walks Manage templates, the type question, the name page and Origin, ending on 'What are you importing?'. */
   const startAtTemplateCommodities = async (pages: { page: Page }, insPages: InsPages, animalsPages: AnimalsPages): Promise<string> => {
     const { templateName, originOfImport, commoditySelection } = animalsPages;

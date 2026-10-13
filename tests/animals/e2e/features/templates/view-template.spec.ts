@@ -20,7 +20,7 @@ const NO_SUCH_TEMPLATE = '000000000000000000000000';
 
 const templateUrl = (templateId: string): RegExp => new RegExp(`${SET_BASES.liveAnimals}/templates/${templateId}$`);
 
-test.describe('A saved template', { tag: '@integration' }, () => {
+test.describe('A saved template', () => {
   /** Presses Create new template on Manage templates and signs in again on the INS type question when asked. */
   const createNewTemplate = async (page: Page, insPages: InsPages, animalsPages: AnimalsPages): Promise<void> => {
     const animalsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')).origin;

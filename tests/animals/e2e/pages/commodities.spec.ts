@@ -10,7 +10,7 @@ const expectedGroups = [
   ['Fish (0301)', '0301', ['Salmo salar']],
 ] as const;
 
-test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toCommoditySelection();
   });
@@ -52,9 +52,8 @@ test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-i
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
-    // Commodity details is a hub task of its own, so its back link returns to
-    // the overview. Reopen the selection from the row that owns it.
-    await animalsPages.consignmentDetails.linkBack.click();
+    // Saving returns to the overview. Reopen the selection from the row that
+    // owns it.
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('What are you importing?').click();
 

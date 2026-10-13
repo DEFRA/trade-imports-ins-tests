@@ -29,7 +29,7 @@ const actorWithNullableFields = (actor?: OutboxEventActor | null): OutboxEventAc
   onBehalfOfOrganisationId: actor?.onBehalfOfOrganisationId ?? null,
 });
 
-test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }, () => {
+test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });

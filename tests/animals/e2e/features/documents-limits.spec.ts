@@ -17,7 +17,7 @@ const paddedPdf = async (destination: string, bytes: number): Promise<string> =>
   return destination;
 };
 
-test.describe('Documents limits', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Documents limits', { tag: '@duplicated-in-frontend' }, () => {
   test('accepts a fifteenth document and rejects a sixteenth with the maximum-documents error', async ({
     animalsJourney,
     pages,

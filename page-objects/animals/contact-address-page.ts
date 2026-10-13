@@ -32,14 +32,6 @@ export class AnimalsContactAddressPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
-  get journeyStrip(): Locator {
-    return this.page.locator('.app-journey-strip');
-  }
-
-  get statusTag(): Locator {
-    return this.journeyStrip.locator('.govuk-tag');
-  }
-
   get btnSaveAndReturn(): Locator {
     return this.page.getByRole('button', { name: 'Save and return to overview' });
   }
@@ -56,5 +48,9 @@ export class AnimalsContactAddressPage extends NotificationPage {
   /** Exists only to pin its absence while a template is being created. */
   get linkCancelBare(): Locator {
     return this.page.getByRole('link', { name: 'Cancel', exact: true });
+  }
+
+  get errorSummary(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
   }
 }

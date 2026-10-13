@@ -21,13 +21,6 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
     return match[1];
   }
 
-  // The status strip carries the Draft tag and the notification reference, both
-  // drawn from the first request. The reference is minted per notification, so
-  // it is the one thing on this page that changes from run to run.
-  get journeyStrip(): Locator {
-    return this.page.locator('.app-journey-strip');
-  }
-
   // Country of origin is an accessible-autocomplete type-ahead enhancing a
   // native <select>. With JavaScript the enhancement takes the select's id onto
   // the enhanced input and renames the select "countryOfOrigin-select"; without
@@ -41,6 +34,11 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
   // element that carries the country code and submits it with the form.
   get countrySelect(): Locator {
     return this.page.locator('select[name="countryOfOrigin"]');
+  }
+
+  // Every country offered, skipping the empty placeholder option.
+  get countryOptions(): Locator {
+    return this.countrySelect.locator('option:not([value=""])');
   }
 
   countryOption(name: string): Locator {
@@ -80,11 +78,6 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
 
   get errorSummary(): Locator {
     return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
-  }
-
-  /** The tag in the status strip: Draft on a notification, Template in template mode. */
-  get statusTag(): Locator {
-    return this.journeyStrip.locator('.govuk-tag');
   }
 
   /** The Draft tag, which only a notification's strip carries. */
@@ -130,5 +123,9 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
 
   get errorSummaryLinks(): Locator {
     return this.page.locator('.govuk-error-summary').getByRole('link');
+  }
+
+  get regionCodeMaxLengthErrorLink(): Locator {
+    return this.page.getByRole('link', { name: 'Region of origin code must be 5 characters or less' });
   }
 }

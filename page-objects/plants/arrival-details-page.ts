@@ -48,6 +48,11 @@ export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
     return this.page.locator('#proposedPlaceOfLanding');
   }
 
+  // Every place of landing offered, skipping the empty placeholder option.
+  get placeOfLandingOptions(): Locator {
+    return this.page.locator('select[name="proposedPlaceOfLanding"] option:not([value=""])');
+  }
+
   placeOfLandingOption(name: string): Locator {
     return this.page.getByRole('option', { name, exact: true });
   }
@@ -70,10 +75,6 @@ export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
 
   get btnSaveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue', exact: true });
-  }
-
-  get btnSaveAndReturnToOverview(): Locator {
-    return this.page.getByRole('button', { name: 'Save and return to overview', exact: true });
   }
 
   /** A plain link, not a govukButton, so it is addressed by the link role. */

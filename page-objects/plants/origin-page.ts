@@ -37,6 +37,11 @@ export class PlantsOriginPage extends PlantsNotificationPage {
     return this.page.locator('select[name="countryOfOrigin"]');
   }
 
+  // Every country offered, skipping the empty placeholder option.
+  get countryOptions(): Locator {
+    return this.countrySelect.locator('option:not([value=""])');
+  }
+
   countryOption(name: string): Locator {
     return this.page.getByRole('option', { name, exact: true });
   }
@@ -67,10 +72,6 @@ export class PlantsOriginPage extends PlantsNotificationPage {
 
   get btnSaveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue', exact: true });
-  }
-
-  get btnSaveAndReturnToOverview(): Locator {
-    return this.page.getByRole('button', { name: 'Save and return to overview', exact: true });
   }
 
   /** A plain link, not a govukButton, so it is addressed by the link role. */

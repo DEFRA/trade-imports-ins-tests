@@ -9,7 +9,7 @@ import { test, expect } from '@fixtures';
  */
 const PLANTS_REFERENCE = /^GBN-HRP-\d{2}-[0-9A-HJ-KM-NP-TV-Z]{6}$/;
 
-test.describe('High-risk plants start section', { tag: '@integration' }, () => {
+test.describe('High-risk plants start section', () => {
   test('the dashboard renders after signing in', { tag: '@smoke' }, async ({ pages, plantsPages }) => {
     await plantsPages.dashboard.open();
 
@@ -48,6 +48,7 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     await expect(plantsPages.overview.journeyStrip).toBeVisible();
     await expect(plantsPages.overview.statusTag).toHaveText('Draft');
     await expect(plantsPages.overview.reference).toHaveText(reference);
+    await expect(plantsPages.overview.cancelAmend).toHaveCount(0);
 
     // All four groups have landed a row, and a group with no rows is not
     // rendered — each section's own spec asserts its row as that page lands.

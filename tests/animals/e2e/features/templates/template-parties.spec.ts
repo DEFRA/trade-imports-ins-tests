@@ -11,7 +11,7 @@ const CONTACT_CARD = 'Contact address for this consignment';
 const CARD_KEYS = ['Commodity', 'Origin', 'Consignee', 'Consignor'];
 const NOT_APPLICABLE = 'Not applicable';
 
-test.describe('Template card answers and parties', { tag: '@integration' }, () => {
+test.describe('Template card answers and parties', () => {
   /** Presses Create new template on Manage templates and signs in again on the INS type question when asked. */
   const createNewTemplate = async (page: Page, insPages: InsPages, animalsPages: AnimalsPages): Promise<void> => {
     const animalsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')).origin;

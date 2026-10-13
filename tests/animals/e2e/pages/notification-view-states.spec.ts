@@ -3,7 +3,7 @@ import { test, expect } from '@fixtures';
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
 const EXACT_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
 
-test.describe('Notification view states', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, () => {
   test.describe('DRAFT', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
       await animalsSeededJourney.createDraftNotification('unlocked');
@@ -38,13 +38,13 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(animalsPages.notificationView.continueButton).toBeVisible();
       await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toHaveCount(0);
       await expect(pages.page.getByRole('button', { name: 'Delete' })).toHaveCount(0);
-      await expect(animalsPages.notificationView.cancelAmendment).toHaveCount(0);
+      await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
     });
 
     test('Continue: when the notification is unfinished, stays put and names what is left', async ({ pages, animalsPages }) => {
       await animalsPages.notificationView.continueButton.click();
 
-      await expect(pages.page).toHaveURL(/\/notification-view$/);
+      await expect(pages.page).toHaveURL(/\/notification-view\?refused=1$/);
       await expect(animalsPages.notificationView.errorSummary).toBeVisible();
       await expect(animalsPages.notificationView.errorSummary).toContainText('There is a problem');
       await expect(animalsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toBeVisible();
@@ -84,7 +84,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     test('offers Copy as new and Delete on the read-only view', async ({ pages, animalsPages }) => {
       await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toBeVisible();
       await expect(pages.page.getByRole('button', { name: 'Delete' })).toBeVisible();
-      await expect(animalsPages.notificationView.cancelAmendment).toHaveCount(0);
+      await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
     });
 
     test('copies the submitted notification to a new draft', async ({ animalsPages, journeyContext }) => {

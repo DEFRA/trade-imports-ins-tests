@@ -14,6 +14,7 @@ import { AnimalsDashboardPage } from '@page-objects/animals/dashboard-page';
 import { AnimalsAdminDashboardPage } from '@page-objects/animals-admin/dashboard-page';
 import { InsAddressBookListPage } from '@page-objects/ins/address-book/list-page';
 import { PlantsDashboardPage } from '@page-objects/plants/dashboard-page';
+import { baseUrlForDomain, type Domain } from '@utils/playwright/domain-base-urls';
 
 const AUTH_STATE_DIR = resolve(process.cwd(), 'playwright/.auth');
 
@@ -123,20 +124,26 @@ export const createAuthState = async (browser: Browser, mint: AuthMint): Promise
   });
 };
 
-export const createWorkerAuthState = async (browser: Browser, workerInfo: WorkerInfo): Promise<string> => {
-  const { name } = workerInfo.project;
-  const { baseURL, proxy, ignoreHTTPSErrors } = workerInfo.project.use;
-  if (!baseURL) {
-    throw new Error(`Project "${name}" has no baseURL, so no session can be minted for it.`);
-  }
+export type AuthStateFor = (domain: Domain) => Promise<string>;
 
-  return createAuthState(browser, {
-    targetName: name,
-    baseURL,
-    workerIndex: workerInfo.workerIndex,
-    proxy,
-    ignoreHTTPSErrors,
-  });
+/** A worker runs specs from every domain, so each domain's session is minted on first use and reused for the rest of the worker. */
+export const createWorkerAuthStates = (browser: Browser, workerInfo: WorkerInfo): AuthStateFor => {
+  const { proxy, ignoreHTTPSErrors } = workerInfo.project.use;
+  const states = new Map<Domain, Promise<string>>();
+
+  return (domain) => {
+    if (!states.has(domain)) {
+      const mint = createAuthState(browser, {
+        targetName: domain,
+        baseURL: baseUrlForDomain(domain),
+        workerIndex: workerInfo.workerIndex,
+        proxy,
+        ignoreHTTPSErrors,
+      });
+      states.set(domain, mint);
+    }
+    return states.get(domain);
+  };
 };
 
 /** The yar `session` cookie carries per-user journey state that would bleed across a worker's tests. */

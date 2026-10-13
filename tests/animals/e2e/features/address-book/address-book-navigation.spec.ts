@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 import { SET_BASES } from '@page-objects/shared/sets';
 
-test.describe('Address book navigation between services', { tag: ['@compose', '@integration'] }, () => {
+test.describe('Address book navigation between services', { tag: '@compose' }, () => {
   test('follows the Address book item from the animals journey to the INS address book and back', async ({
     pages,
     animalsPages,

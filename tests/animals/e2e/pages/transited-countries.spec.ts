@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Transited countries page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toTransitedCountries();
   });
@@ -33,10 +33,10 @@ test.describe('Transited countries page', { tag: ['@integration', '@duplicated-i
     await expect(animalsPages.transitedCountries.row('Belgium')).toBeVisible();
   });
 
-  test('transit countries are optional: continuing with none saves and goes on', async ({ pages, animalsPages }) => {
+  test('transit countries are optional: continuing with none saves and returns to the overview', async ({ pages, animalsPages }) => {
     const journeyId = animalsPages.transitedCountries.journeyIdFromUrl();
     await animalsPages.transitedCountries.saveAndContinue.click();
-    await expect(animalsPages.transporter.heading).toBeVisible();
+    await expect(animalsPages.overview.heading).toBeVisible();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
     await animalsPages.transitedCountries.open(journeyId);

@@ -11,17 +11,9 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Review your notification' });
   }
 
-  get journeyStrip(): Locator {
-    return this.page.locator('.app-journey-strip');
-  }
-
   /** The heading while a template is being created: the same page in template mode. */
   get templateHeading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Review your template' });
-  }
-
-  get statusTag(): Locator {
-    return this.journeyStrip.locator('.govuk-tag');
   }
 
   get btnSaveTemplate(): Locator {
@@ -75,16 +67,18 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Continue' });
   }
 
-  get cancelAmendment(): Locator {
-    return this.page.getByRole('link', { name: 'Cancel amendment' });
-  }
-
   changeLink(name: string | RegExp): Locator {
     return this.page.getByRole('link', { name });
   }
 
   summaryCard(name: string): Locator {
     return this.page.locator('.govuk-summary-card', { hasText: name });
+  }
+
+  summaryValue(card: Locator, key: string): Locator {
+    return card
+      .locator('.govuk-summary-list__row', { has: this.page.getByText(key, { exact: true }) })
+      .locator('.govuk-summary-list__value');
   }
 
   get errorSummary(): Locator {

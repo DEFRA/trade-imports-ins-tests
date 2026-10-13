@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Submitted addresses keep their copy', { tag: ['@integration'] }, () => {
+test.describe('Submitted addresses keep their copy', () => {
   test('renaming the book after submit changes neither the submitted view nor the amendment, and cancelling the amendment keeps the copy', async ({
     animalsSeededJourney,
     pages,
@@ -63,13 +63,13 @@ test.describe('Submitted addresses keep their copy', { tag: ['@integration'] }, 
     await animalsNotificationActions.amendNotification(referenceNumber);
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Amending');
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');
     await expect(originRow).not.toContainText(renamed);
     await expect(originRow).not.toContainText('Penrith');
 
-    await animalsPages.notificationView.cancelAmendment.click();
+    await animalsPages.notificationView.cancelAmend.click();
     await animalsPages.notificationCancelAmend.confirm.click();
     await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
@@ -125,7 +125,7 @@ test.describe('Submitted addresses keep their copy', { tag: ['@integration'] }, 
 
     await animalsNotificationActions.amendNotification(referenceNumber);
     await animalsPages.overview.reviewAndSubmitButton.click();
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Amending');
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');
     await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);

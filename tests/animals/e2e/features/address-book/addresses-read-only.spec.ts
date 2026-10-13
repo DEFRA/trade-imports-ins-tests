@@ -22,7 +22,7 @@ const PARTY_ADD_LINK_CASES: Array<{
  * Adding records is delegated to the INS frontend; these specs prove the journey
  * does not serve its own create page and links out with the handshake query.
  */
-test.describe('Addresses are read-only in the journey', { tag: ['@integration'] }, () => {
+test.describe('Addresses are read-only in the journey', () => {
   test.describe('party picker add link', () => {
     for (const { hubRole, picker } of PARTY_ADD_LINK_CASES) {
       test.describe(hubRole, () => {
