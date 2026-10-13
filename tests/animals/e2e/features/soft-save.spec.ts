@@ -9,7 +9,7 @@ const IMPOSSIBLE_ARRIVAL_DATE = '31/2/2026';
 const ARRIVAL_DATE_ERROR = 'Enter a real arrival date';
 const COMMODITY_DETAILS_TASK = 'Commodity details';
 
-test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
+test.describe('Save and return to overview', () => {
   test('main reason for import: when a required answer is missing, saves, leaves the task not complete and keeps the answers', async ({
     animalsJourney,
     animalsPages,

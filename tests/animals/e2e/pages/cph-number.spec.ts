@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('CPH number page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('CPH number page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toCphNumber();
   });

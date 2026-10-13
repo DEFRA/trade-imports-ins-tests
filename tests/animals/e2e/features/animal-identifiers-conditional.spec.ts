@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Animal identifiers — conditional identifier surface', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Animal identifiers — conditional identifier surface', { tag: '@duplicated-in-frontend' }, () => {
   test('a unit form shows only the identifier types the commodity requires, plus the permanent address for cats and dogs', async ({
     animalsJourney,
     pages,

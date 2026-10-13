@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('High-risk plants page titles', { tag: '@integration' }, () => {
+test.describe('High-risk plants page titles', () => {
   test('a journey page is titled page name, service name and GOV.UK, joined by hyphens', async ({ pages, plantsPages, plantsJourney }) => {
     // Given a started notification
     // When the trader is on the commodity-type page

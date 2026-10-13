@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Reason and purpose scope', { tag: '@duplicated-in-frontend' }, () => {
   test('purpose is owed only for the internal market and is wiped when the reason changes', async ({
     animalsJourney,
     pages,
@@ -30,8 +30,8 @@ test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-i
     // reason, so the walk answers them on the same submit.
     await animalsPages.overview.task('Main reason for import').click();
     await animalsPages.importReason.reason('Transit').check();
-    await animalsPages.importReason.transitPortOfExit.selectOption({ index: 2 });
-    await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
+    await animalsPages.importReason.selectTransitPortOfExitByIndex(2);
+    await animalsPages.importReason.selectTransitDestinationCountry('FR');
     await animalsPages.importReason.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Additional details').click();

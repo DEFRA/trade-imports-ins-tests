@@ -32,7 +32,7 @@ const isActiveProfile = process.env.PROFILE === 'security:active';
 
 export const zapProfile: 'active' | 'passive' = isActiveProfile ? 'active' : 'passive';
 
-// Optional Playwright project scope for local per-domain active scans —
+// Optional domain scope for local per-domain active scans —
 // set by test:docker-compose:<domain>:security:active. Full
 // security:active leaves this unset so every declared context is gated.
 const ZAP_SCOPE_CONTEXTS: Record<string, readonly string[]> = {
@@ -41,16 +41,16 @@ const ZAP_SCOPE_CONTEXTS: Record<string, readonly string[]> = {
   ins: ['ins', 'address-book'],
 };
 
-export type ZapScope = { project: string; contexts: readonly string[] };
+export type ZapScope = { domain: string; contexts: readonly string[] };
 
 export function resolveZapScope(): ZapScope | undefined {
-  const project = process.env.ZAP_SCOPE;
-  if (!project) return undefined;
-  const contexts = ZAP_SCOPE_CONTEXTS[project];
+  const domain = process.env.ZAP_SCOPE;
+  if (!domain) return undefined;
+  const contexts = ZAP_SCOPE_CONTEXTS[domain];
   if (!contexts) {
-    throw new Error(`Unknown ZAP_SCOPE '${project}'. Expected one of: ${Object.keys(ZAP_SCOPE_CONTEXTS).join(', ')}`);
+    throw new Error(`Unknown ZAP_SCOPE '${domain}'. Expected one of: ${Object.keys(ZAP_SCOPE_CONTEXTS).join(', ')}`);
   }
-  return { project, contexts };
+  return { domain, contexts };
 }
 
 function zapAutomationPlanFile(): string {

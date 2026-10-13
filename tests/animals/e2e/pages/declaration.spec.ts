@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Declaration page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Declaration page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsSeededJourney, animalsPages }) => {
     const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.declaration);

@@ -74,6 +74,15 @@ export class PlantsPlaceOfDestinationPage extends PlantsNotificationPage {
     return this.page.locator('.govuk-inset-text');
   }
 
+  /** The copy this notification holds, which may differ from any record in the list. */
+  get currentAddress(): Locator {
+    return this.page.getByRole('region', { name: 'Current place of destination' });
+  }
+
+  get editCurrentAddress(): Locator {
+    return this.currentAddress.getByRole('link', { name: /^Edit details/ });
+  }
+
   /** govukPagination labels each number link `aria-label="Page {number}"`, so that
    * — not the bare number — is the link's accessible name. */
   pageLink(number: number): Locator {

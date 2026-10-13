@@ -13,7 +13,7 @@ import { toIsoDate } from '@utils/date-utils';
  * round-trip end to end — the journey's answers survive to Mongo and the persisted notification re-renders.
  * Assertions cover a representative field per section rather than every field.
  */
-test.describe('Notification persistence round-trip', { tag: ['@integration', '@mongodb'] }, () => {
+test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
   });

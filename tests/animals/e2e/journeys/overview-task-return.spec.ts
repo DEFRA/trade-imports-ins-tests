@@ -4,7 +4,7 @@ import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 import { test, expect } from '@fixtures';
 
-test.describe('Overview task return', { tag: ['@integration'] }, () => {
+test.describe('Overview task return', () => {
   test('each task opened from the overview returns to the overview on Save and continue, at its opening-run address, and reads Complete', async ({
     animalsJourney,
     animalsPages,

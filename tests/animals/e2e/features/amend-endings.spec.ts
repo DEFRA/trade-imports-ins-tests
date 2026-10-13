@@ -5,7 +5,7 @@ const CHANGE_IMPORT_DETAILS = 'Change import details';
 const AMENDED_REFERENCE = 'AMENDED-REF';
 const AMEND = 'Amend';
 
-test.describe('Amendment page endings', { tag: ['@integration'] }, () => {
+test.describe('Amendment page endings', () => {
   test('a page opened from Overview while amending ends with Save and return, Save and continue and a link-styled Save and return to overview, with no cancel and return link in the page ending, and Back goes to Overview', async ({
     animalsPages,
     animalsSeededJourney,

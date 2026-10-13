@@ -4,7 +4,7 @@ import { type NotificationDocument } from '@domain/animals/models/db/notificatio
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
-test.describe('Seeded and browser-driven notifications match', { tag: ['@integration', '@mongodb'] }, () => {
+test.describe('Seeded and browser-driven notifications match', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('the comparison reads both stored documents from Mongo, which only the compose stack exposes');
   });

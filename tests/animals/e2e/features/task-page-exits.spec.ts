@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Task-page exits', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Task-page exits', { tag: '@duplicated-in-frontend' }, () => {
   test('Cancel and return to overview discards typed input; Save and return to overview commits and lands on the hub', async ({
     animalsJourney,
     pages,

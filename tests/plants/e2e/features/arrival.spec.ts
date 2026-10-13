@@ -103,7 +103,7 @@ const toPotatoArrivalDetails = async (plantsJourney: PlantsJourney): Promise<str
   return reference;
 };
 
-test.describe('High-risk plants arrival section', { tag: '@integration' }, () => {
+test.describe('High-risk plants arrival section', () => {
   test('the arrival-status question offers both branches, and the post-arrival one quotes the window', async ({
     pages,
     plantsPages,

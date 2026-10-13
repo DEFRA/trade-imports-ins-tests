@@ -3,7 +3,7 @@ import { fileUploadPaths } from '@resources/file-upload/paths';
 
 import { test, expect } from '@fixtures';
 
-test.describe('Opening run', { tag: ['@integration'] }, () => {
+test.describe('Opening run', () => {
   test('walks a cattle-by-air notification through the opening run in Design Release 2.1 order, from create to submitted', async ({
     animalsJourney,
     animalsPages,

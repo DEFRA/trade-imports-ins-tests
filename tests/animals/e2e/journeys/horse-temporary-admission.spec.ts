@@ -18,7 +18,7 @@ const HORSE_BY_SEA_TASKS = [
   'Contact address for this consignment',
 ];
 
-test.describe('Horse by sea under temporary admission', { tag: ['@integration'] }, () => {
+test.describe('Horse by sea under temporary admission', () => {
   test('walks a horse-by-sea notification under temporary admission from create to submitted, with every task complete', async ({
     animalsJourney,
     animalsPages,

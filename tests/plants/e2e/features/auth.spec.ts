@@ -6,7 +6,7 @@ const GENERIC_INVALID_CREDENTIALS = 'Enter a valid 10-digit customer reference n
 // These tests ARE the plants sign-in journey, so they start unauthenticated.
 test.use({ storageState: COLD_START });
 
-test.describe('Authentication (plants)', { tag: ['@auth', '@integration'] }, () => {
+test.describe('Authentication (plants)', { tag: '@auth' }, () => {
   test.beforeEach(async ({ plantsPages }) => {
     await plantsPages.dashboard.open(false);
   });

@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('INS page titles', { tag: '@integration' }, () => {
+test.describe('INS page titles', () => {
   test('the home is titled Dashboard - Import notification service - GOV.UK', async ({ pages, insPages }) => {
     // Given a signed-in trader
     // When they open the home

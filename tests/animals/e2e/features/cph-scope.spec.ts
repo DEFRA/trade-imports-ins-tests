@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
   test('the CPH page and addresses-hub row show only when a CPH-triggering commodity line exists', async ({
     animalsJourney,
     animalsPages,
