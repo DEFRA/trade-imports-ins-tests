@@ -81,4 +81,138 @@ test.describe('Opening run', () => {
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.notificationView.errorSummary).toBeFocused();
   });
+
+  test('chains the commodity pages around the main reason for import, each Back link naming the page before it, and returns them to the overview once opened from it', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    test.slow();
+
+    await animalsJourney.toOriginOfImport();
+    const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
+    await animalsJourney.fillOriginOfImport();
+    await animalsJourney.saveOriginOfImport();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+
+    await expect(animalsPages.commoditySelection.linkBack).toHaveAttribute('href', animalsPages.originOfImport.expectedUrl(journeyId));
+    await expect(animalsPages.commoditySelection.saveAndContinue).toBeVisible();
+    await expect(animalsPages.commoditySelection.saveAndReturnToOverview).toBeVisible();
+    await expect(animalsPages.commoditySelection.cancelAndReturnToOverview).toBeVisible();
+
+    await animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
+
+    await animalsPages.importReason.reason('Internal market').check();
+    await animalsPages.importReason.purpose('Breeding').check();
+    await animalsPages.importReason.saveAndContinue.click();
+    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
+
+    await expect(animalsPages.consignmentDetails.linkBack).toHaveAttribute('href', animalsPages.commoditySelection.expectedUrl(journeyId));
+    await expect(animalsPages.consignmentDetails.saveAndContinue).toBeVisible();
+    await expect(animalsPages.consignmentDetails.saveAndReturnToOverview).toBeVisible();
+    await expect(animalsPages.consignmentDetails.cancelAndReturnToOverview).toBeVisible();
+
+    await animalsPages.consignmentDetails.linkBack.click();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+    await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Bos taurus');
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
+
+    await animalsPages.importReason.saveAndContinue.click();
+    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
+    await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
+    await animalsPages.consignmentDetails.numberOfPackages.fill('1');
+    await animalsPages.consignmentDetails.saveAndContinue.click();
+    await expect(animalsPages.animalIdentification.heading).toBeVisible();
+
+    await animalsPages.overview.open(journeyId);
+    await animalsPages.overview.task('What are you importing?').click();
+    await expect(animalsPages.commoditySelection.linkBack).toHaveAttribute('href', animalsPages.overview.expectedUrl(journeyId));
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+
+    await animalsPages.overview.task('Commodity details').click();
+    await expect(animalsPages.consignmentDetails.linkBack).toHaveAttribute('href', animalsPages.overview.expectedUrl(journeyId));
+    await animalsPages.consignmentDetails.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+  });
+
+  test('walks a cattle notification from What are you importing to Arrival details in Design Release 2.1 order, the main import reason and Additional details each going Back to the page before them, and returns both to the overview once opened from it', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    test.slow();
+
+    await animalsJourney.toOriginOfImport();
+    const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
+    await animalsJourney.fillOriginOfImport();
+    await animalsJourney.saveOriginOfImport();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+
+    await animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
+    await expect(animalsPages.importReason.linkBack).toHaveAttribute('href', animalsPages.commoditySelection.expectedUrl(journeyId));
+
+    await animalsPages.importReason.reason('Internal market').check();
+    await animalsPages.importReason.purpose('Breeding').check();
+    await animalsPages.importReason.saveAndContinue.click();
+    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
+
+    await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
+    await animalsPages.consignmentDetails.numberOfPackages.fill('1');
+    await animalsPages.consignmentDetails.saveAndContinue.click();
+    await expect(animalsPages.animalIdentification.heading).toBeVisible();
+
+    await animalsPages.animalIdentification.saveAndContinue.click();
+    await expect(animalsPages.additionalDetails.heading).toBeVisible();
+    await expect(animalsPages.additionalDetails.linkBack).toHaveAttribute('href', animalsPages.animalIdentification.expectedUrl(journeyId));
+
+    await animalsPages.additionalDetails.certifiedFor('Slaughter').check();
+    await animalsPages.additionalDetails.containsUnweanedAnimals('No').check();
+    await animalsPages.additionalDetails.saveAndContinue.click();
+    await expect(animalsPages.arrivalDetails.heading).toBeVisible();
+
+    await animalsPages.overview.open(journeyId);
+    await animalsPages.overview.task('Main reason for import').click();
+    await expect(animalsPages.importReason.linkBack).toHaveAttribute('href', animalsPages.overview.expectedUrl(journeyId));
+    await animalsPages.importReason.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+
+    await animalsPages.overview.task('Additional details').click();
+    await expect(animalsPages.additionalDetails.linkBack).toHaveAttribute('href', animalsPages.overview.expectedUrl(journeyId));
+    await animalsPages.additionalDetails.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+  });
+
+  test('carries a consignment with nothing to identify from Commodity details straight to Additional details, whose Back link then returns to Commodity details', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    test.slow();
+
+    await animalsJourney.toOriginOfImport();
+    const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
+    await animalsJourney.fillOriginOfImport();
+    await animalsJourney.saveOriginOfImport();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+
+    await animalsPages.commoditySelection.selectSpecies(['Salmo salar']);
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
+
+    await animalsPages.importReason.reason('Internal market').check();
+    await animalsPages.importReason.purpose('Breeding').check();
+    await animalsPages.importReason.saveAndContinue.click();
+    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
+
+    await animalsPages.consignmentDetails.numberOfAnimals.fill('3');
+    await animalsPages.consignmentDetails.saveAndContinue.click();
+    await expect(animalsPages.additionalDetails.heading).toBeVisible();
+
+    await expect(animalsPages.additionalDetails.linkBack).toHaveAttribute('href', animalsPages.consignmentDetails.expectedUrl(journeyId));
+    await animalsPages.additionalDetails.linkBack.click();
+    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
+  });
 });

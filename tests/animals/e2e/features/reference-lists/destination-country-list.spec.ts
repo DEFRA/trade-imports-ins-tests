@@ -15,6 +15,11 @@ test.describe('Destination country list', () => {
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transhipment or onward travel').check();
 
+    await expect(animalsPages.importReason.transhipmentDestinationCountryValue).toHaveValue('');
+    await expect(animalsPages.importReason.transhipmentDestinationCountryAllOptions).toHaveText([
+      'Select one',
+      ...destinationCountryNames(),
+    ]);
     await expect(animalsPages.importReason.transhipmentDestinationCountryOptions).toHaveText(destinationCountryNames());
   });
 
@@ -22,6 +27,8 @@ test.describe('Destination country list', () => {
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transit').check();
 
+    await expect(animalsPages.importReason.transitDestinationCountryValue).toHaveValue('');
+    await expect(animalsPages.importReason.transitDestinationCountryAllOptions).toHaveText(['Select one', ...destinationCountryNames()]);
     await expect(animalsPages.importReason.transitDestinationCountryOptions).toHaveText(destinationCountryNames());
   });
 });
@@ -36,11 +43,13 @@ test.describe('Destination country answer', () => {
     await animalsPages.importReason.reason('Transhipment or onward travel').check();
     const territory = await animalsPages.importReason.transhipmentTerritoryOptions.first().getAttribute('value');
     await animalsPages.importReason.selectTranshipmentDestinationCountry(territory);
+    const journeyId = animalsPages.importReason.journeyIdFromUrl();
     await animalsPages.importReason.saveAndContinue.click();
 
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(pages.page).toHaveURL((url) => url.pathname !== animalsPages.importReason.expectedUrl(journeyId));
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
+    await animalsPages.overview.open(journeyId);
     await animalsPages.overview.task('Main reason for import').click();
 
     await expect(animalsPages.importReason.transhipmentDestinationCountryValue).toHaveValue(territory);
@@ -49,15 +58,18 @@ test.describe('Destination country answer', () => {
   test('a destination country from the country list is still shown selected when the page is reopened', async ({
     animalsJourney,
     animalsPages,
+    pages,
   }) => {
     const france = countryCodes.eu.france.value;
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transit').check();
     await animalsPages.importReason.selectTransitPortOfExitByIndex(1);
     await animalsPages.importReason.selectTransitDestinationCountry(france);
+    const journeyId = animalsPages.importReason.journeyIdFromUrl();
     await animalsPages.importReason.saveAndContinue.click();
 
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(pages.page).toHaveURL((url) => url.pathname !== animalsPages.importReason.expectedUrl(journeyId));
+    await animalsPages.overview.open(journeyId);
     await animalsPages.overview.task('Main reason for import').click();
 
     await expect(animalsPages.importReason.transitDestinationCountryValue).toHaveValue(france);
