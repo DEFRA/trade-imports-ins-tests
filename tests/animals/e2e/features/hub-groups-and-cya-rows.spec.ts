@@ -35,11 +35,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     const expectListedTasks = async (list: Locator, tasks: string[]) => {
       for (const task of tasks) await expect(list).toContainText(task);
     };
-    await expectListedTasks(taskLists.nth(0), [
-      'Where is this consignment coming from?',
-      'What are you importing?',
-      'Main reason for import',
-    ]);
+    await expectListedTasks(taskLists.nth(0), ['Where is this consignment coming from?', 'What are you importing?', 'Main import reason']);
     await expectListedTasks(taskLists.nth(1), ['Additional details']);
     // Identification is only owed once a chosen commodity carries identifiers,
     // and nothing has been chosen yet, so the row is off the hub altogether.
@@ -48,6 +44,41 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expectListedTasks(taskLists.nth(3), ['Upload documents']);
     await expectListedTasks(taskLists.nth(4), ['Roles and addresses']);
     await expectListedTasks(taskLists.nth(5), ['Contact address for this consignment']);
+  });
+
+  test('the hub marks the commodity summary, its two cards, the task list and each numbered section as named regions', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.startNotification();
+
+    const summary = animalsPages.overview.region('Your commodities');
+    await expect(summary.getByRole('region')).toHaveCount(2);
+    await expect(summary.getByRole('region', { name: 'Animals summary', exact: true })).toBeVisible();
+    await expect(summary.getByRole('region', { name: 'Packages summary', exact: true })).toBeVisible();
+
+    const taskList = animalsPages.overview.region('Notification tasklist');
+    await expect(taskList.getByRole('region')).toHaveCount(6);
+    for (const caption of [
+      '1. About the consignment',
+      '2. Description of the goods',
+      '3. Transport and arrival',
+      '4. Documents',
+      '5. Consignment parties',
+      '6. Contact address',
+    ]) {
+      await expect(taskList.getByRole('region', { name: caption, exact: true })).toBeVisible();
+    }
+    await expect(
+      taskList
+        .getByRole('region', { name: '1. About the consignment', exact: true })
+        .getByRole('link', { name: 'Main import reason', exact: true }),
+    ).toBeVisible();
+    await expect(animalsPages.overview.task('Main reason for import')).toHaveCount(0);
+
+    await expect(animalsPages.overview.task('Roles and addresses')).toHaveAccessibleDescription(
+      'Consignor or Exporter, Consignee, Importer and Place of Destination To do',
+    );
   });
 
   test('after completing every section the check-your-answers page renders the answered rows', async ({
@@ -65,58 +96,116 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(pages.page.getByRole('heading', { level: 2, name: '1. About the consignment' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '2. Description of the goods' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '3. Transport and arrival' })).toBeVisible();
-    // Documents are optional, so the section stands even with nothing uploaded.
-    await expect(pages.page.getByRole('heading', { level: 2, name: '4. Documents' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 2, name: '5. Consignment parties' })).toBeVisible();
+    // Documents are optional, so section 4 stands with a single Document 1 card even with nothing uploaded.
+    await expect(pages.page.getByRole('heading', { level: 2, name: '4. Uploaded documents' })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { level: 2, name: '5. Consignment addresses' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '6. Contact address' })).toBeVisible();
-    await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
-    await expect(animalsPages.notificationView.changeLink('Change uploaded documents')).toBeVisible();
+    const documentCard = animalsPages.notificationView.summaryCard('Document 1');
+    await expect(documentCard.getByRole('term')).toHaveText(['Document reference']);
+    await expect(value(documentCard, 'Document reference')).toHaveText('Not applicable');
+    await expect(pages.page.getByText('You have not added any documents yet.')).toHaveCount(0);
+    await expect(animalsPages.notificationView.changeLink('Change document 1')).toHaveAttribute(
+      'href',
+      /\/accompanying-documents\?change=1$/,
+    );
 
-    await expect(pages.page.getByRole('heading', { level: 3, name: 'Where is this consignment coming from?' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 3, name: 'Commodity details' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 3, name: 'Additional details' })).toBeVisible();
+    for (const title of [
+      'Origin of import',
+      'What are you importing?',
+      'Main import reason',
+      'Additional details',
+      'Addresses',
+      'Contact address',
+    ]) {
+      await expect(pages.page.getByRole('heading', { level: 3, name: title, exact: true })).toBeVisible();
+    }
+    for (const subsection of [
+      'Where is this consignment coming from?',
+      'Commodity details',
+      'Upload documents',
+      'Roles and addresses',
+      'Contact address for this consignment',
+      'Main reason for import',
+    ]) {
+      await expect(pages.page.getByRole('heading', { name: subsection })).toHaveCount(0);
+    }
+    // The level-4 headings are the Bos Taurus species block in the Cow card and "Transit countries" inside Arrival details, and no document card adds one.
+    await expect(pages.page.getByRole('heading', { level: 4 })).toHaveText(['Bos Taurus', 'Transit countries']);
+    await expect(pages.page.getByRole('heading', { level: 5 })).toHaveText(['Identification details']);
 
-    const importDetails = animalsPages.notificationView.summaryCard('Import details');
+    const importDetails = animalsPages.notificationView.summaryCard('Origin of import');
     await expect(value(importDetails, 'Country of origin')).toHaveText('France');
-    await expect(value(importDetails, 'Region of origin code required')).toHaveText('Yes');
+    await expect(importDetails.getByText('Region of origin code required', { exact: true })).toHaveCount(0);
     await expect(value(importDetails, 'Region of origin code')).toHaveText('FR-75');
     await expect(value(importDetails, 'Internal reference number')).toHaveText('Imports456GB');
 
-    const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional animal details');
+    const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional details');
     await expect(value(additionalAnimalDetails, 'Certified for')).toHaveText('Slaughter');
     await expect(value(additionalAnimalDetails, 'Includes unweaned animals')).toHaveText('No');
 
-    const reasonForImport = animalsPages.notificationView.summaryCard('Reason for import');
-    await expect(value(reasonForImport, 'Reason for import')).toHaveText('Internal market');
+    const whatAreYouImporting = animalsPages.notificationView.summaryCard('What are you importing?');
+    await expect(whatAreYouImporting.getByRole('term')).toHaveText(['Commodity code', 'Common name', 'Species']);
+    await expect(value(whatAreYouImporting, 'Commodity code')).toHaveText('0102');
+    await expect(value(whatAreYouImporting, 'Common name')).toHaveText('Cow');
+    await expect(value(whatAreYouImporting, 'Species')).toHaveText('Bos Taurus');
+    await expect(whatAreYouImporting.getByRole('link', { name: 'Change what are you importing' })).toHaveAttribute(
+      'href',
+      /\/commodities\?change=1$/,
+    );
+
+    const reasonForImport = animalsPages.notificationView.summaryCard('Main import reason');
+    await expect(value(reasonForImport, 'Main import reason')).toHaveText('Internal market');
     await expect(value(reasonForImport, 'Purpose in the market')).toHaveText('Breeding');
 
-    const speciesCard = animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus');
-    await expect(value(speciesCard, 'Commodity code')).toHaveText('0102');
-    await expect(value(speciesCard, 'Common name')).toHaveText('Cow');
-    await expect(value(speciesCard, 'Species')).toHaveText('Bos taurus');
-    await expect(value(speciesCard, 'Number of animals')).toHaveText('1');
-    await expect(value(speciesCard, 'Number of packages')).toHaveText('5');
-    await expect(speciesCard.getByRole('heading', { name: 'Animal details' })).toBeVisible();
-    await expect(speciesCard.getByRole('columnheader', { name: 'Ear tag' })).toBeVisible();
-    await expect(speciesCard.getByRole('cell', { name: 'Animal 1' })).toBeVisible();
-    await expect(speciesCard.getByRole('cell', { name: 'UK123456789012' })).toBeVisible();
+    const commodityCard = animalsPages.notificationView.summaryCard('Cow (0102)');
+    await expect(animalsPages.notificationView.speciesBlockHeading(commodityCard, 'Bos Taurus')).toBeVisible();
+    await expect(commodityCard.getByRole('term')).toHaveText(['Number of animals', 'Number of packages (when required)']);
+    await expect(value(commodityCard, 'Number of animals')).toHaveText('1');
+    await expect(value(commodityCard, 'Number of packages (when required)')).toHaveText('5');
+    await expect(commodityCard.getByRole('link', { name: 'Change number of animals for Bos Taurus' })).toHaveAttribute(
+      'href',
+      /\/consignment-details\?change=1$/,
+    );
+    await expect(commodityCard.getByRole('link', { name: 'Change Cow (0102)' })).toHaveAttribute(
+      'href',
+      /\/consignment-details\?change=1$/,
+    );
+    await expect(commodityCard.getByRole('heading', { name: 'Identification details' })).toBeVisible();
+    await expect(commodityCard.getByRole('columnheader', { name: 'Animal', exact: true })).toBeVisible();
+    await expect(commodityCard.getByRole('columnheader', { name: 'Ear tag', exact: true })).toBeVisible();
+    await expect(commodityCard.getByRole('columnheader', { name: 'Passport', exact: true })).toBeVisible();
+    await expect(commodityCard.getByRole('link', { name: 'Change identification details for Bos Taurus' })).toHaveAttribute(
+      'href',
+      /\/commodities\/identification\?change=1$/,
+    );
+    await expect(commodityCard.getByRole('cell', { name: 'Bos taurus 1', exact: true })).toBeVisible();
+    await expect(commodityCard.getByRole('cell', { name: 'UK123456789012' })).toBeVisible();
 
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(value(arrivalDetails, 'Port of entry')).toHaveText(pointOfEntries.aberdeenHarbour.display);
-    await expect(value(arrivalDetails, 'Arrival date at port of entry')).toHaveText(ARRIVAL_DATE);
-    await expect(value(arrivalDetails, 'Means of transport to the port of entry')).toHaveText('Road Vehicle');
+    await expect(value(arrivalDetails, 'Arrival date at destination')).toHaveText(ARRIVAL_DATE);
+    await expect(value(arrivalDetails, 'Means of transport to the port of entry')).toHaveText('Road');
     await expect(value(arrivalDetails, 'Transport identification')).toHaveText('FR-892-LK');
     await expect(value(arrivalDetails, 'Transport document reference')).toHaveText('CMR-2026-884721');
 
-    const transitCountries = animalsPages.notificationView.summaryCard('Transit countries');
+    await expect(arrivalDetails.getByRole('heading', { level: 4, name: 'Transit countries', exact: true })).toBeVisible();
     // Read back in the order they were added, not alphabetically.
-    await expect(value(transitCountries, 'Countries that the consignment will travel through')).toHaveText('France, Belgium');
+    await expect(value(arrivalDetails, 'Countries that the consignment will travel through')).toHaveText('France, Belgium');
+    await expect(arrivalDetails.getByRole('link', { name: 'Change countries that the consignment will travel through' })).toHaveAttribute(
+      'href',
+      /\/transit-countries\?change=1$/,
+    );
+    await expect(pages.page.getByRole('heading', { level: 3, name: 'Transit countries', exact: true })).toHaveCount(0);
 
     const transportDetails = animalsPages.notificationView.summaryCard('Transport details');
+    await expect(transportDetails.getByRole('term')).toHaveText(['Name', 'Address', 'Country', 'Approval number', 'Type']);
     await expect(value(transportDetails, 'Name')).toContainText('García Livestock Transport SL');
+    await expect(value(transportDetails, 'Address')).toContainText('43 East Hague Extension');
+    await expect(value(transportDetails, 'Country')).toHaveText('Switzerland');
+    await expect(value(transportDetails, 'Approval number')).toHaveText('ES-T2-45001294');
     await expect(value(transportDetails, 'Type')).toHaveText('Commercial');
 
-    const rolesAndAddresses = animalsPages.notificationView.summaryCard('Roles and addresses');
+    const rolesAndAddresses = animalsPages.notificationView.summaryCard('Addresses');
     await expect(value(rolesAndAddresses, 'Place of origin')).toContainText('Origin Farm');
     await expect(value(rolesAndAddresses, 'Consignor')).toContainText('Astra Rosales');
     await expect(value(rolesAndAddresses, 'Consignee')).toContainText('British Livestock Ltd');
@@ -125,7 +214,55 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     // The CYA renders the CPH normalised (separators stripped), not as typed.
     await expect(value(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText('123456789');
 
-    const contactAddress = animalsPages.notificationView.summaryCard('Contact address for this consignment');
-    await expect(value(contactAddress, 'Contact address')).toContainText('Animal and Plant Health Agency');
+    const contactAddress = animalsPages.notificationView.summaryCard('Contact address');
+    await expect(value(contactAddress, 'Contact address')).toHaveJSProperty(
+      'innerText',
+      'Animal and Plant Health Agency\nWoodham Lane\nAddlestone\nKT15 3NB\nUnited Kingdom',
+    );
+
+    await arrivalDetails.getByRole('link', { name: 'Change countries that the consignment will travel through' }).click();
+    await expect(animalsPages.transitedCountries.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/\/transit-countries\?change=1$/);
+  });
+
+  test('a transit reads its exit border control post and then its destination country, with no port of exit row', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.toImportReason();
+    const journeyId = animalsPages.importReason.journeyIdFromUrl();
+    await animalsPages.importReason.reason('Transit').check();
+    const port = await animalsPages.importReason.transitPortOfExitOptions.first().getAttribute('value');
+    await animalsPages.importReason.selectTransitPortOfExitByIndex(1);
+    await animalsPages.importReason.selectTransitDestinationCountry('FR');
+    await animalsPages.importReason.saveAndContinue.click();
+
+    await animalsPages.notificationView.open(journeyId);
+
+    const reasonCard = animalsPages.notificationView.summaryCard('Main import reason');
+    await expect(reasonCard.getByRole('term')).toHaveText(['Main import reason', 'Exit border control post', 'Destination country']);
+    await expect(animalsPages.notificationView.summaryValue(reasonCard, 'Exit border control post')).toContainText(port);
+    await expect(animalsPages.notificationView.summaryValue(reasonCard, 'Destination country')).toHaveText('France');
+    await expect(reasonCard.getByText('Port of exit', { exact: true })).toHaveCount(0);
+  });
+
+  test('an overland notification with no transit countries reads Not applicable in Arrival details and goes on to the declaration', async ({
+    animalsJourney,
+    animalsPages,
+    pages,
+  }) => {
+    test.slow();
+    await animalsJourney.toReview({ transitCountries: [] });
+
+    const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
+    await expect(
+      animalsPages.notificationView.summaryValue(arrivalDetails, 'Countries that the consignment will travel through'),
+    ).toHaveText('Not applicable');
+    await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
+    await expect(pages.page.getByText('Complete transit countries')).toHaveCount(0);
+
+    await animalsPages.notificationView.continueButton.click();
+
+    await expect(animalsPages.declaration.heading).toBeVisible();
   });
 });

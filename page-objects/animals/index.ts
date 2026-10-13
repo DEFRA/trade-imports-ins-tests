@@ -6,12 +6,14 @@ import { AnimalsAnimalIdentificationPage } from '@page-objects/animals/animal-id
 import { AnimalsArrivalDetailsPage } from '@page-objects/animals/arrival-details-page';
 import { AnimalsCommercialTransporterPage } from '@page-objects/animals/commercial-transporter-page';
 import { AnimalsCommoditySelectionPage } from '@page-objects/animals/commodity-selection-page';
+import { AnimalsConfirmationPage } from '@page-objects/animals/confirmation-page';
 import { AnimalsConsignmentDetailsPage } from '@page-objects/animals/consignment-details-page';
 import { AnimalsContactAddressPage } from '@page-objects/animals/contact-address-page';
 import { AnimalsCphNumberPage } from '@page-objects/animals/cph-number-page';
 import { AnimalsDashboardPage } from '@page-objects/animals/dashboard-page';
 import { AnimalsDeclarationPage } from '@page-objects/animals/declaration-page';
 import { AnimalsImportReasonPage } from '@page-objects/animals/import-reason-page';
+import { AnimalsManageTemplatesPage } from '@page-objects/animals/manage-templates-page';
 import { AnimalsNotificationCancelAmendPage } from '@page-objects/animals/notification-cancel-amend-page';
 import { AnimalsNotificationViewPage } from '@page-objects/animals/notification-view-page';
 import { AnimalsOriginOfImportPage } from '@page-objects/animals/origin-of-import-page';
@@ -19,6 +21,8 @@ import { AnimalsOverviewPage } from '@page-objects/animals/overview-page';
 import { AnimalsPartyEditPage } from '@page-objects/animals/party-edit-page';
 import { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
 import { AnimalsPrivateTransporterPage } from '@page-objects/animals/private-transporter-page';
+import { AnimalsTemplateNamePage } from '@page-objects/animals/template-name-page';
+import { AnimalsTemplatePage } from '@page-objects/animals/template-page';
 import { AnimalsTransitedCountriesPage } from '@page-objects/animals/transited-countries-page';
 import { AnimalsTransporterAddPage } from '@page-objects/animals/transporter-add-page';
 import { AnimalsTransporterPage } from '@page-objects/animals/transporter-page';
@@ -27,6 +31,9 @@ import { AnimalsTransporterSelectionPage } from '@page-objects/animals/transport
 export function createAnimalsPages(page: Page) {
   return {
     dashboard: new AnimalsDashboardPage(page),
+    manageTemplates: new AnimalsManageTemplatesPage(page),
+    templatePage: new AnimalsTemplatePage(page),
+    templateName: new AnimalsTemplateNamePage(page),
     overview: new AnimalsOverviewPage(page),
     originOfImport: new AnimalsOriginOfImportPage(page),
     commoditySelection: new AnimalsCommoditySelectionPage(page),
@@ -58,6 +65,7 @@ export function createAnimalsPages(page: Page) {
     contactAddressEdit: new AnimalsPartyEditPage(page, 'consignment/contact/edit', 'Contact address for consignment'),
     notificationView: new AnimalsNotificationViewPage(page),
     declaration: new AnimalsDeclarationPage(page),
+    confirmation: new AnimalsConfirmationPage(page),
     notificationCancelAmend: new AnimalsNotificationCancelAmendPage(page),
   };
 }

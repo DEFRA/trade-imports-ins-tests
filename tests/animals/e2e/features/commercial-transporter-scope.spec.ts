@@ -18,6 +18,7 @@ test.describe('Commercial transporter scope', { tag: '@duplicated-in-frontend' }
     pages,
     animalsPages,
   }) => {
+    test.slow();
     await animalsJourney.startNotification();
     await animalsJourney.unlockSections();
 

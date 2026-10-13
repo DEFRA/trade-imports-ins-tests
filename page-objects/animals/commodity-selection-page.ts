@@ -48,8 +48,43 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     }
   }
 
+  get inset(): Locator {
+    return this.page.getByText(
+      'You must submit a separate notification for every single ITAHC. You must also submit a notification for goods that do not need an ITAHC.',
+    );
+  }
+
+  get searchHint(): Locator {
+    return this.page.getByText('You can search by common name (for example, cattle), commodity code (0102), or Latin name (Bos taurus).');
+  }
+
+  get commodityCodeHelp(): Locator {
+    return this.page.getByText('Help with commodity codes', { exact: true });
+  }
+
+  get tradeTariffLink(): Locator {
+    return this.page.getByRole('link', { name: 'Trade Tariff tool (opens in a new tab)' });
+  }
+
+  get selectCommodityErrorLink(): Locator {
+    return this.page.getByRole('link', { name: 'Select a commodity' });
+  }
+
+  /** The tick-box group a commodity's species are listed under, named by its legend. */
+  group(legend: string): Locator {
+    return this.page.getByRole('group', { name: legend });
+  }
+
   get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
+  }
+
+  get btnSaveAndReturn(): Locator {
+    return this.page.getByRole('button', { name: 'Save and return to overview' });
+  }
+
+  get linkCancel(): Locator {
+    return this.page.getByRole('link', { name: 'Cancel and return to overview', exact: true });
   }
 
   get errorSummary(): Locator {

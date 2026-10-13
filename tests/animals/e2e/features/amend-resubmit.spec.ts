@@ -28,28 +28,31 @@ test.describe('Amend resubmission', () => {
     // Change the country of origin through the amending check your answers page.
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
-    await expect(animalsPages.notificationView.changeLink('Change commodity 1')).toBeVisible();
+    await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
+    await expect(animalsPages.notificationView.changeLink('Change Cow (0102)')).toBeVisible();
     expect(await pages.page.getByRole('link', { name: /^Change/ }).count()).toBeGreaterThanOrEqual(4);
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
     await expect(countryRow).toContainText('France');
-    await animalsPages.notificationView.changeLink('Change import details').click();
+    await animalsPages.notificationView.changeLink('Change origin of import').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await animalsPages.originOfImport.selectCountry('Belgium');
     await animalsPages.originOfImport.saveAndReturn.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.resubmitHeading).toBeVisible();
+    await expect(pages.page).toHaveTitle(/^Review before re-submitting - /);
     await expect(countryRow).toContainText('Belgium');
 
-    // Resubmit through the declaration (AMEND → SUBMITTED).
+    // Resubmit through the declaration (AMEND → SUBMITTED_ACTION_REQUIRED, as no health certificate is uploaded).
     await animalsPages.notificationView.continueButton.click();
     await expect(animalsPages.declaration.heading).toBeVisible();
+    await expect(animalsPages.declaration.journeyStrip).toHaveCount(0);
+    await expect(pages.page.getByText(/Cancel amend/)).toHaveCount(0);
     await animalsPages.declaration.confirmation.check();
     await animalsPages.declaration.continueButton.click();
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
 
     // Back in Submitted: the view is read-only again and keeps the edited value.
     await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
     await expect(countryRow).toContainText('Belgium');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
     await expect(animalsPages.notificationView.cancelAmend).not.toBeVisible();

@@ -9,7 +9,7 @@ export class AnimalsImportReasonPage extends NotificationPage {
   // The page is headed with its name; the question it asks stays as the radio
   // group's visually hidden legend, so it is a group name, not a heading.
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Main reason for import', exact: true });
+    return this.page.getByRole('heading', { level: 1, name: 'Main import reason', exact: true });
   }
 
   get questionGroup(): Locator {
@@ -42,12 +42,22 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.transitPortOfExitValue.locator('option:not([value=""])');
   }
 
+  // Every option in the list, the placeholder included, in the order it is offered.
+  get transitPortOfExitAllOptions(): Locator {
+    return this.transitPortOfExitValue.locator('option');
+  }
+
   get transitDestinationCountry(): Locator {
     return this.page.locator('#transitDestinationCountry');
   }
 
   get transitDestinationCountryValue(): Locator {
     return this.hiddenSelect('transitDestinationCountry');
+  }
+
+  // Every option in the list, the placeholder included, in the order it is offered.
+  get transitDestinationCountryAllOptions(): Locator {
+    return this.transitDestinationCountryValue.locator('option');
   }
 
   // Every country offered, skipping the empty placeholder.
@@ -61,6 +71,11 @@ export class AnimalsImportReasonPage extends NotificationPage {
 
   get transhipmentDestinationCountryValue(): Locator {
     return this.hiddenSelect('transhipmentDestinationCountry');
+  }
+
+  // Every option in the list, the placeholder included, in the order it is offered.
+  get transhipmentDestinationCountryAllOptions(): Locator {
+    return this.transhipmentDestinationCountryValue.locator('option');
   }
 
   // Every country offered, skipping the empty placeholder.
@@ -86,8 +101,26 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.temporaryAdmissionPortOfExitValue.locator('option:not([value=""])');
   }
 
+  // Every option in the list, the placeholder included, in the order it is offered.
+  get temporaryAdmissionPortOfExitAllOptions(): Locator {
+    return this.temporaryAdmissionPortOfExitValue.locator('option');
+  }
+
   get temporaryAdmissionExitDate(): Locator {
     return this.page.locator('#temporaryAdmissionExitDate');
+  }
+
+  get temporaryAdmissionExitDateError(): Locator {
+    return this.page.locator('#temporaryAdmissionExitDate-error');
+  }
+
+  // A browser cannot un-choose a radio, so this stands in for a form that reaches the service with nothing chosen.
+  async clearChoices(): Promise<void> {
+    await this.page.locator('form input[type="radio"]').evaluateAll((inputs) => {
+      inputs.forEach((input) => {
+        (input as HTMLInputElement).checked = false;
+      });
+    });
   }
 
   private hiddenSelect(fieldId: string): Locator {

@@ -1,6 +1,7 @@
 export const notificationFulfilmentsStatuses = {
   draft: 'DRAFT',
   submitted: 'SUBMITTED',
+  submittedActionRequired: 'SUBMITTED_ACTION_REQUIRED',
   amend: 'AMEND',
   deleted: 'DELETED',
 } as const;
@@ -16,9 +17,11 @@ export type PersistedFulfilmentEntry =
 
 export type NotificationFulfilments = {
   referenceNumber: string;
+  concurrencyToken: number;
   fulfilments: PersistedFulfilmentEntry[];
   submittedFulfilments?: PersistedFulfilmentEntry[] | null;
   status: NotificationFulfilmentsStatus;
   created: string;
   submittedAt?: string | null;
+  outstandingItems?: string[] | null;
 };

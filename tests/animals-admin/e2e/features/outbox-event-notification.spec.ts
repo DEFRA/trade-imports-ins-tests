@@ -64,7 +64,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       expect(data.$model).toBe('defra/certificate-internal/1');
       expect(data.$type).toBe('gbn-ag');
       expect(data.exchangedDocument.identifier).toBe(referenceNumber);
-      expect(data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED');
+      expect(data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED_ACTION_REQUIRED');
       // The journey uploads no document, so the event carries no document references at all.
       expect(data.exchangedDocument).not.toHaveProperty('referenceDocument');
       expect(data.specifiedConsignment.consignorParty?.name).toBe(CONSIGNOR_NAME);
@@ -103,7 +103,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       expect(statusChanges).toHaveLength(2);
       expect(statusChanges[0].status).toBe('DRAFT');
       expect(statusChanges[0].dateChanged).toEqual(expect.any(Date));
-      expect(statusChanges[1].status).toBe('SUBMITTED');
+      expect(statusChanges[1].status).toBe('SUBMITTED_ACTION_REQUIRED');
       expect(statusChanges[1].dateChanged).toEqual(expect.any(Date));
       expect(actorWithNullableFields(statusChanges[1].actor)).toEqual(EXPECTED_ACTOR);
     } finally {

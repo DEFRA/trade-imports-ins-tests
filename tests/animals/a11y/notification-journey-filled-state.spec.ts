@@ -56,7 +56,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import reason', async () => {
-      await animalsPages.overview.task('Main reason for import').click();
+      await animalsPages.overview.task('Main import reason').click();
       await animalsPages.importReason.reason('Internal market').check();
       await animalsPages.importReason.purpose('Breeding').check();
       await runA11yScan({ exclude: conditionalReasonRadios });

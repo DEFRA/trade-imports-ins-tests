@@ -20,9 +20,9 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
 
     // Submit.
     const submitted = await notificationApi.submitNotification(id, notification.concurrencyToken);
-    expect(submitted.status).toBe(notificationStatuses.submitted);
+    expect(submitted.status).toBe(notificationStatuses.submittedActionRequired);
     const submittedFulfilments = await notificationApi.getNotificationFulfilments(id);
-    expect(submittedFulfilments.status).toBe(notificationFulfilmentsStatuses.submitted);
+    expect(submittedFulfilments.status).toBe(notificationFulfilmentsStatuses.submittedActionRequired);
 
     // Amend.
     const amended = await notificationApi.amendNotification(id);
@@ -32,7 +32,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
 
     // Cancel-amend.
     const cancelled = await notificationApi.cancelAmendNotification(id);
-    expect(cancelled.status).toBe(notificationStatuses.submitted);
+    expect(cancelled.status).toBe(notificationStatuses.submittedActionRequired);
 
     // Copy no longer dedupes — two calls produce two distinct copies.
     // Copy is a WYSIWYG operation post-EUDPA-314, so the caller passes the
@@ -63,8 +63,8 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await animalsJourney.submitNotification();
     await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
 
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.viewHeading(journeyContext.journeyId)).toBeVisible();
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
 
     await animalsNotificationActions.amendNotification(journeyContext.journeyId);

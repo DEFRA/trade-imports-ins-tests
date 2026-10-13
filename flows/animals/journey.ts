@@ -28,7 +28,7 @@ export type ArrivalDetailsAnswer = {
 export const OPENING_RUN_TASKS = [
   'Where is this consignment coming from?',
   'What are you importing?',
-  'Main reason for import',
+  'Main import reason',
   'Commodity details',
   'Identification details',
   'Additional details',
@@ -150,7 +150,7 @@ export class AnimalsJourney {
   }
 
   async answerReasonAndAdditionalDetails(): Promise<void> {
-    await this.animalsPages.overview.task('Main reason for import').click();
+    await this.animalsPages.overview.task('Main import reason').click();
     await this.animalsPages.importReason.reason('Internal market').check();
     // The purpose is a conditional reveal under the reason, so both answers go
     // in on the one submit.
@@ -217,7 +217,7 @@ export class AnimalsJourney {
   }
 
   async fillArrivalDetails({
-    means = 'Road Vehicle',
+    means = 'Road',
     port = PORT,
     transportId = 'FR-892-LK',
     documentReference = 'CMR-2026-884721',
@@ -264,17 +264,22 @@ export class AnimalsJourney {
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
   }
 
-  async answerTransport(): Promise<void> {
+  // Transit countries are optional for submission, so an empty list leaves the
+  // task untouched.
+  async answerTransport(transitCountries: string[] = ['France', 'Belgium']): Promise<void> {
     await this.animalsPages.overview.task('Arrival details').click();
     await this.fillArrivalDetails();
     await this.animalsPages.arrivalDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    await this.animalsPages.overview.task('Transit countries').click();
-    await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
-    await this.animalsPages.transitedCountries.addCountry('France');
-    await this.animalsPages.transitedCountries.addCountry('Belgium');
-    await this.animalsPages.transitedCountries.saveAndContinue.click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    if (transitCountries.length > 0) {
+      await this.animalsPages.overview.task('Transit countries').click();
+      await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
+      for (const country of transitCountries) {
+        await this.animalsPages.transitedCountries.addCountry(country);
+      }
+      await this.animalsPages.transitedCountries.saveAndContinue.click();
+      await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    }
     await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
     await this.animalsPages.transporter.transporter('García Livestock Transport SL').check();
@@ -288,13 +293,13 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async completeAnswerSections(): Promise<void> {
+  async completeAnswerSections({ transitCountries }: { transitCountries?: string[] } = {}): Promise<void> {
     await this.answerOrigin({ requiresRegionCode: 'Yes', internalReference: 'Imports456GB' });
     await this.answerCommodity();
     await this.answerAnimalIdentification();
     await this.answerReasonAndAdditionalDetails();
     await this.answerAddresses();
-    await this.answerTransport();
+    await this.answerTransport(transitCountries);
     await this.answerContact();
   }
 
@@ -326,7 +331,7 @@ export class AnimalsJourney {
   async toImportReason(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.animalsPages.overview.task('Main reason for import').click();
+    await this.animalsPages.overview.task('Main import reason').click();
     await this.animalsPages.importReason.heading.waitFor(pageLoadWait);
   }
 
@@ -400,9 +405,9 @@ export class AnimalsJourney {
     await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
   }
 
-  async toReview(): Promise<void> {
+  async toReview(options: { transitCountries?: string[] } = {}): Promise<void> {
     if (!this.context.journeyId) await this.startNotification();
-    await this.completeAnswerSections();
+    await this.completeAnswerSections(options);
     await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
@@ -432,7 +437,7 @@ export class AnimalsJourney {
     await this.confirmDeclaration();
   }
 
-  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+  async walkOpeningRunToArrivalDetails(): Promise<string> {
     const pages = this.animalsPages;
     const journeyId = await this.createNotificationAtOrigin();
 
@@ -448,6 +453,7 @@ export class AnimalsJourney {
 
     await pages.consignmentDetails.heading.waitFor(pageLoadWait);
     await pages.consignmentDetails.numberOfAnimals.fill('1');
+    await pages.consignmentDetails.numberOfPackages.fill('1');
     await pages.consignmentDetails.saveAndContinue.click();
 
     await pages.animalIdentification.heading.waitFor(pageLoadWait);
@@ -457,6 +463,14 @@ export class AnimalsJourney {
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    return journeyId;
+  }
+
+  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+    const pages = this.animalsPages;
+    const journeyId = await this.walkOpeningRunToArrivalDetails();
+
+    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Air' });
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);
@@ -509,7 +523,7 @@ export class AnimalsJourney {
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
       port: pointOfEntries.heathrowAirport.display,
-      means: 'Airplane',
+      means: 'Air',
       transportId: 'BA0117',
       documentReference: 'AWB-2026-0001',
     });
@@ -569,7 +583,7 @@ export class AnimalsJourney {
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
       port: pointOfEntries.holyheadPort.display,
-      means: 'Vessel',
+      means: 'Sea',
       transportId: HORSE_TRANSPORT_ID,
       documentReference: 'BOL-2026-0001',
     });

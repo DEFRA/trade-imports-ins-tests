@@ -4,7 +4,7 @@ import { test, expect } from '@fixtures';
 import { timeouts } from '@config/timeouts';
 
 test.describe('INS dashboard notification navigation', () => {
-  test('viewing a submitted notification from the INS dashboard opens it in the owning journey frontend', async ({
+  test('viewing a notification submitted without its health certificate from the INS dashboard opens its read-only view in the owning journey frontend', async ({
     animalsJourney,
     journeyContext,
     pages,
@@ -21,7 +21,7 @@ test.describe('INS dashboard notification navigation', () => {
     await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
 
     // When — the notification is found on the INS dashboard once the aggregated store has
-    // caught up to SUBMITTED (its "View" link resolves to the hub, not notification-view,
+    // caught up to SUBMITTED_ACTION_REQUIRED (its "View" link resolves to the hub, not notification-view,
     // until then) and its "View" link is opened
     await insPages.dashboard.open();
     await expect
@@ -33,10 +33,11 @@ test.describe('INS dashboard notification navigation', () => {
         { timeout: timeouts.long },
       )
       .toContain('/notification-view');
+    await expect(insPages.dashboard.row(referenceNumber)).toContainText('SUBMITTED_ACTION_REQUIRED');
     await insPages.dashboard.viewLink(referenceNumber).click();
 
     // Then — it lands on that notification's read-only view in trade-imports-animals-frontend
     await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeading(referenceNumber)).toBeVisible();
   });
 });

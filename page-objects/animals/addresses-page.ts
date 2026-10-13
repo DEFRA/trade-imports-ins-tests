@@ -45,4 +45,8 @@ export class AnimalsAddressesPage extends NotificationPage {
   get continueButton(): Locator {
     return this.page.getByRole('button', { name: 'Continue' });
   }
+
+  get btnSaveAndReturn(): Locator {
+    return this.page.getByRole('button', { name: 'Save and return to overview' });
+  }
 }

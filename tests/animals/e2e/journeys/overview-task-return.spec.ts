@@ -48,13 +48,13 @@ test.describe('Overview task return', () => {
     await expectOnOverview();
     await expectComplete('Identification details');
 
-    await openTask('Main reason for import', 'import-reason');
+    await openTask('Main import reason', 'import-reason');
     await animalsPages.importReason.reason('Internal market').check();
     await animalsPages.importReason.purpose('Breeding').check();
     await animalsPages.importReason.saveAndContinue.click();
     await expectOnOverview();
     await expect(animalsPages.additionalDetails.heading).toBeHidden();
-    await expectComplete('Main reason for import');
+    await expectComplete('Main import reason');
 
     await openTask('Additional details', 'additional-details');
     await animalsPages.additionalDetails.certifiedFor('Slaughter').check();
@@ -64,7 +64,7 @@ test.describe('Overview task return', () => {
     await expectComplete('Additional details');
 
     await openTask('Arrival details', 'port-of-entry');
-    await animalsJourney.fillArrivalDetails({ means: 'Road Vehicle' });
+    await animalsJourney.fillArrivalDetails({ means: 'Road' });
     await animalsPages.arrivalDetails.saveAndContinue.click();
     await expectOnOverview();
     await expect(animalsPages.transitedCountries.heading).toBeHidden();

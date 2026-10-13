@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { getRelativeServiceDisplayDate } from '@utils/date-utils';
 
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
 const EXACT_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
@@ -10,35 +11,86 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
     });
 
-    test('renders the recorded answers in the numbered design sections', async ({ pages, animalsPages }) => {
-      await expect(animalsPages.notificationView.heading).toBeVisible();
+    test('renders the recorded answers in the numbered design sections', async ({ pages, animalsPages, journeyContext }) => {
+      await expect(animalsPages.notificationView.viewHeading(journeyContext.journeyId)).toBeVisible();
+      await expect(pages.page).toHaveTitle(`Error: ${journeyContext.journeyId} - Import notification service - GOV.UK`);
       await expect(pages.page.getByRole('heading', { name: '1. About the consignment' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '2. Description of the goods' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '3. Transport and arrival' })).toBeVisible();
-      await expect(pages.page.getByRole('heading', { name: '4. Documents' })).toBeVisible();
-      await expect(pages.page.getByRole('heading', { name: '5. Consignment parties' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: '4. Uploaded documents' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: '5. Consignment addresses' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '6. Contact address' })).toBeVisible();
-      await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toBeVisible();
-      await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
-      await expect(animalsPages.notificationView.summaryCard('Import details')).toContainText('France');
-      await expect(animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus')).toContainText('Number of animals');
+      const documentCard = animalsPages.notificationView.summaryCard('Document 1');
+      await expect(animalsPages.notificationView.summaryValue(documentCard, 'Document reference')).toHaveText('Not applicable');
+      await expect(pages.page.getByText('You have not added any documents yet.')).toHaveCount(0);
+      await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
+      await expect(animalsPages.notificationView.summaryCard('Cow (0102)')).toContainText('Number of animals');
     });
 
-    test('shows the Draft strip with the notification reference', async ({ animalsPages, journeyContext }) => {
-      await expect(animalsPages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Draft');
-      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.journeyId);
+    test('is headed by its reference with a blue Draft tag and the date created, and no status bar', async ({
+      animalsPages,
+      journeyContext,
+    }) => {
+      await expect(animalsPages.notificationView.viewHeading(journeyContext.journeyId)).toBeVisible();
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Draft');
+      await expect(animalsPages.notificationView.statusTag).toHaveClass(/govuk-tag--blue/);
+      await expect(animalsPages.notificationView.journeyStrip).toHaveCount(0);
+      await expect(animalsPages.notificationView.reviewTitleHeading).toHaveCount(0);
+      await expect(animalsPages.notificationView.dateCreated).toHaveText(
+        new RegExp(`^Date created: (${getRelativeServiceDisplayDate(-1)}|${getRelativeServiceDisplayDate()})$`),
+      );
     });
 
     test('shows Change links for the recorded answers', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
-      await expect(animalsPages.notificationView.changeLink('Change commodity 1')).toBeVisible();
+      await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
+      await expect(animalsPages.notificationView.changeLink('Change Cow (0102)')).toBeVisible();
     });
 
-    test('offers submission and none of the post-submit actions', async ({ pages, animalsPages }) => {
-      await expect(animalsPages.notificationView.continueButton).toBeVisible();
-      await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toHaveCount(0);
-      await expect(pages.page.getByRole('button', { name: 'Delete' })).toHaveCount(0);
+    test('offers Copy as new and a red Delete in its header, no Amend this notification, and ends with Continue', async ({
+      animalsPages,
+    }) => {
+      await expect(animalsPages.notificationView.headerActions.getByRole('button')).toHaveText(['Copy as new', 'Delete']);
+      await expect(animalsPages.notificationView.btnCopyAsNew).not.toHaveClass(/govuk-button--secondary/);
+      await expect(animalsPages.notificationView.btnDelete).toHaveCount(1);
+      await expect(animalsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
+      await expect(animalsPages.notificationView.btnAmend).toHaveCount(0);
       await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
+      await expect(animalsPages.notificationView.continueButton).toBeVisible();
+    });
+
+    test('shows the import reference numbers as text, with no Copy button', async ({ animalsPages, journeyContext }) => {
+      await expect(animalsPages.notificationView.importReferenceNumbers).toContainText(
+        'You must use the correct reference and code on the customs declaration or your consignment will be delayed.',
+      );
+      await expect(animalsPages.notificationView.importReference('Notification reference')).toHaveText(journeyContext.journeyId);
+      await expect(animalsPages.notificationView.importReference('Customs document code')).toHaveText('C640');
+      await expect(animalsPages.notificationView.importReferenceNumbers.getByRole('button')).toHaveCount(0);
+    });
+
+    test('Back goes to the live-animals notification list', async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.linkBack.click();
+
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.dashboard.expectedUrl}/?$`));
+      await expect(animalsPages.dashboard.heading).toBeVisible();
+    });
+
+    test('copies the draft to a new draft', async ({ animalsPages, journeyContext }) => {
+      const originalReferenceNumber = journeyContext.journeyId;
+      await animalsPages.notificationView.btnCopyAsNew.click();
+
+      await animalsPages.overview.heading.waitFor();
+      const copiedReferenceNumber = (await animalsPages.notificationView.referenceNumberCaption.textContent())?.match(
+        REFERENCE_NUMBER_PATTERN,
+      )?.[0];
+      expect(copiedReferenceNumber).toMatch(EXACT_REFERENCE_NUMBER_PATTERN);
+      expect(copiedReferenceNumber).not.toEqual(originalReferenceNumber);
+    });
+
+    test('Delete opens the delete confirmation', async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.btnDelete.click();
+
+      await expect(pages.page).toHaveURL(/\/delete$/);
+      await expect(pages.page.getByRole('heading', { level: 1, name: 'Delete this notification?' })).toBeVisible();
     });
 
     test('Continue: when the notification is unfinished, stays put and names what is left', async ({ pages, animalsPages }) => {
@@ -69,22 +121,110 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
   });
 
+  test.describe('AMEND', () => {
+    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions }) => {
+      const reference = await animalsSeededJourney.createAmendNotification();
+      await animalsNotificationActions.toNotificationView(reference);
+    });
+
+    test('opens headed Review your notification with no error summary, ending with Continue, Cancel amend and Delete', async ({
+      pages,
+      animalsPages,
+    }) => {
+      await expect(animalsPages.notificationView.reviewTitleHeading).toBeVisible();
+      await expect(pages.page).toHaveTitle('Review your notification - Import notification service - GOV.UK');
+      await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
+      await expect(animalsPages.notificationView.continueButton).toBeVisible();
+      await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
+      await expect(animalsPages.notificationView.cancelAmend).toHaveClass(/govuk-button--secondary/);
+      await expect(animalsPages.notificationView.btnDelete).toBeVisible();
+      await expect(animalsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
+      await expect(animalsPages.notificationView.statusBarCancelAmend).toHaveCount(0);
+    });
+
+    test('Cancel amend opens the cancel-amendment confirmation', async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.cancelAmend.click();
+
+      await expect(pages.page).toHaveURL(/\/cancel-amend$/);
+      await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
+    });
+
+    test('Delete opens the delete confirmation', async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.btnDelete.click();
+
+      await expect(pages.page).toHaveURL(/\/delete$/);
+      await expect(pages.page.getByRole('heading', { level: 1, name: 'Delete this notification?' })).toBeVisible();
+    });
+  });
+
   test.describe('SUBMITTED', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
-      await animalsSeededJourney.createSubmittedNotification();
+      await animalsSeededJourney.createSubmittedNotificationWithHealthCertificate();
       await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
     });
 
-    test('lands on the view page with the Submitted strip and reference', async ({ pages, animalsPages, journeyContext }) => {
+    test('lands on the view page headed by its reference with a Submitted tag and no status bar', async ({
+      pages,
+      animalsPages,
+      journeyContext,
+    }) => {
       await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(journeyContext.journeyId)}$`));
-      await expect(animalsPages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Submitted');
-      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.journeyId);
+      await expect(animalsPages.notificationView.viewHeading(journeyContext.journeyId)).toBeVisible();
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
+      await expect(animalsPages.notificationView.statusTag).toHaveClass(/govuk-tag--green/);
+      await expect(animalsPages.notificationView.actionRequiredWarning).toHaveCount(0);
+      await expect(animalsPages.notificationView.journeyStrip).toHaveCount(0);
+      await expect(animalsPages.notificationView.reviewTitleHeading).toHaveCount(0);
+      await expect(pages.page).toHaveTitle(`${journeyContext.journeyId} - Import notification service - GOV.UK`);
     });
 
-    test('offers Copy as new and Delete on the read-only view', async ({ pages, animalsPages }) => {
-      await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toBeVisible();
-      await expect(pages.page.getByRole('button', { name: 'Delete' })).toBeVisible();
+    test('shows the date it was submitted', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.dateSubmitted).toHaveText(
+        new RegExp(`^Date submitted: (${getRelativeServiceDisplayDate(-1)}|${getRelativeServiceDisplayDate()})$`),
+      );
+    });
+
+    test('Back goes to the live-animals notification list', async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.linkBack.click();
+
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.dashboard.expectedUrl}/?$`));
+      await expect(animalsPages.dashboard.heading).toBeVisible();
+    });
+
+    test('offers Amend this notification, a secondary Copy as new and a red Delete in its header', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.headerActions.getByRole('button')).toHaveText([
+        'Amend this notification',
+        'Copy as new',
+        'Delete',
+      ]);
+      await expect(animalsPages.notificationView.btnAmend).toHaveClass(/govuk-button/);
+      await expect(animalsPages.notificationView.btnAmend).not.toHaveClass(/govuk-button--(secondary|warning)/);
+      await expect(animalsPages.notificationView.btnCopyAsNew).toHaveClass(/govuk-button--secondary/);
+      await expect(animalsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
       await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
+    });
+
+    test('Amend this notification starts the amendment', async ({ pages, animalsPages, journeyContext }) => {
+      await animalsPages.notificationView.btnAmend.click();
+
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.overview.expectedUrl(journeyContext.journeyId)}$`));
+      await expect(animalsPages.overview.statusTag).toHaveText('Amend');
+    });
+
+    test('Delete opens the delete confirmation', async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.btnDelete.click();
+
+      await expect(pages.page).toHaveURL(/\/delete$/);
+      await expect(pages.page.getByRole('heading', { level: 1, name: 'Delete this notification?' })).toBeVisible();
+    });
+
+    test('shows the import reference numbers as text, with no Copy button', async ({ animalsPages, journeyContext }) => {
+      await expect(animalsPages.notificationView.importReferenceNumbers).toContainText(
+        'You must use the correct reference and code on the customs declaration or your consignment will be delayed.',
+      );
+      await expect(animalsPages.notificationView.importReference('Notification reference')).toHaveText(journeyContext.journeyId);
+      await expect(animalsPages.notificationView.importReference('Customs document code')).toHaveText('C640');
+      await expect(animalsPages.notificationView.importReferenceNumbers.getByRole('button')).toHaveCount(0);
     });
 
     test('copies the submitted notification to a new draft', async ({ animalsPages, journeyContext }) => {
@@ -100,8 +240,68 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('still renders the recorded answers after submission', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.summaryCard('Import details')).toContainText('France');
-      await expect(animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus')).toBeVisible();
+      await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
+      await expect(animalsPages.notificationView.summaryCard('Cow (0102)')).toBeVisible();
+    });
+  });
+
+  test.describe('SUBMITTED ACTION REQUIRED', () => {
+    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
+      await animalsSeededJourney.createSubmittedNotification();
+      await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
+    });
+
+    test('is headed by its reference with an orange Submitted action required tag, read-only, and warns that a health certificate is needed', async ({
+      animalsPages,
+      journeyContext,
+    }) => {
+      await expect(animalsPages.notificationView.viewHeading(journeyContext.journeyId)).toBeVisible();
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
+      await expect(animalsPages.notificationView.statusTag).toHaveClass(/govuk-tag--orange/);
+      await expect(animalsPages.notificationView.actionRequiredWarning).toBeVisible();
+      await expect(animalsPages.notificationView.changeLink('Change origin of import')).toHaveCount(0);
+    });
+
+    test('shows the date it was submitted, and the same date on a later visit', async ({ pages, animalsPages }) => {
+      const submittedToday = new RegExp(`^Date submitted: (${getRelativeServiceDisplayDate(-1)}|${getRelativeServiceDisplayDate()})$`);
+      await expect(animalsPages.notificationView.dateSubmitted).toHaveText(submittedToday);
+      const firstVisit = await animalsPages.notificationView.dateSubmitted.textContent();
+
+      await pages.page.reload();
+
+      await expect(animalsPages.notificationView.dateSubmitted).toHaveText(firstVisit ?? '');
+    });
+
+    test('shows Upload a valid health certificate in place of document cards, with no error summary', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.documentsSectionError).toHaveText(/Upload a valid health certificate/);
+      await expect(animalsPages.notificationView.summaryCard('Document 1')).toHaveCount(0);
+      await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
+    });
+
+    test('offers Amend this notification, a secondary Copy as new and a red Delete in its header', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.headerActions.getByRole('button')).toHaveText([
+        'Amend this notification',
+        'Copy as new',
+        'Delete',
+      ]);
+      await expect(animalsPages.notificationView.btnCopyAsNew).toHaveClass(/govuk-button--secondary/);
+      await expect(animalsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
+    });
+
+    test('Continue starts an amendment and opens Overview', async ({ pages, animalsPages, journeyContext }) => {
+      await animalsPages.notificationView.continueButton.click();
+
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.overview.expectedUrl(journeyContext.journeyId)}$`));
+      await expect(animalsPages.overview.statusTag).toHaveText('Amend');
+    });
+  });
+
+  test.describe('UNKNOWN', () => {
+    test("an unknown notification's view goes to the live-animals notification list", async ({ pages, animalsPages }) => {
+      await animalsPages.notificationView.visit('GBN-AG-00-000000');
+
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.dashboard.expectedUrl}/?$`));
+      await expect(animalsPages.dashboard.heading).toBeVisible();
     });
   });
 });

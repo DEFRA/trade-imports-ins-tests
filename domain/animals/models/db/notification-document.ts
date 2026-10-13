@@ -100,6 +100,8 @@ export type NotificationDocument = {
   /** Pre-amend snapshot of notification content. Present only during an in-flight amendment. */
   preAmendNotification?: NotificationContent;
   status: string;
+  /** What the latest submission still owes, such as `HEALTH_CERTIFICATE`. */
+  outstandingItems?: string[] | null;
   created: Date;
   updated: Date;
   _class: string;

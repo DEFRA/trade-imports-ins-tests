@@ -109,3 +109,17 @@ export const declarationStep: { reviewSlug: string; slug: string; review: FormFi
   review: { step: 'review' },
   declare: { step: 'declare', declaration: 'confirmed' },
 };
+
+/** The ITAHC a seeded notification carries so its submission records nothing outstanding. */
+export const healthCertificateDocument: FormFields = {
+  accompanyingDocumentReference: 'ITAHCSEED0001',
+  accompanyingDocumentType: 'ITAHC',
+  accompanyingDocumentDateOfIssue: '12/12/2025',
+};
+
+/** A document that is not an ITAHC or health certificate, so the submission still records the health certificate as outstanding. */
+export const commercialInvoiceDocument: FormFields = {
+  accompanyingDocumentReference: 'INVOICESEED0001',
+  accompanyingDocumentType: 'COMMERCIAL_INVOICE',
+  accompanyingDocumentDateOfIssue: '12/12/2025',
+};

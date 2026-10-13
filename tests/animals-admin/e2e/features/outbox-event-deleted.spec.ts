@@ -75,7 +75,7 @@ test.describe('Notification deleted outbox events', { tag: '@mongodb' }, () => {
       expect(doc.data.exchangedDocument.identifier).toBe(referenceNumber);
       expect(doc.data.exchangedDocument.notificationStatusCode).toBe('DELETED');
       expect(doc.data.exchangedDocument.versionId).toBe(1);
-      expect(doc.statusChanges?.map(({ status }) => status)).toEqual(['DRAFT', 'SUBMITTED', 'DELETED']);
+      expect(doc.statusChanges?.map(({ status }) => status)).toEqual(['DRAFT', 'SUBMITTED_ACTION_REQUIRED', 'DELETED']);
     } finally {
       await client.close();
     }

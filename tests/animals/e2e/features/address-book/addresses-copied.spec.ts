@@ -55,7 +55,7 @@ test.describe('Addresses are copied, not linked', () => {
     // The full details on check-your-answers are still the ones copied at selection.
     const journeyId = animalsPages.addresses.journeyIdFromUrl();
     await animalsPages.notificationView.open(journeyId);
-    const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+    const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
     await expect(consignorCyaRow).toContainText(originalName);
     await expect(consignorCyaRow).toContainText('Carlisle');
     await expect(consignorCyaRow).toContainText('CA1 1AA');
@@ -64,7 +64,7 @@ test.describe('Addresses are copied, not linked', () => {
     await expect(consignorCyaRow).not.toContainText('CA11 7AA');
   });
 
-  test('picking a record for a role with no address shows every field of that record on the review page', async ({
+  test('picking a record for a role with no address reads it back on the review page as its name, address lines and country, with no telephone or email', async ({
     animalsJourney,
     animalsPages,
     addressBookApi,
@@ -95,16 +95,17 @@ test.describe('Addresses are copied, not linked', () => {
 
     const journeyId = animalsPages.addresses.journeyIdFromUrl();
     await animalsPages.notificationView.open(journeyId);
-    const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
-    await expect(consignorCyaRow).toContainText(record.name);
-    await expect(consignorCyaRow).toContainText(record.addressLine1);
-    await expect(consignorCyaRow).toContainText(record.addressLine2);
-    await expect(consignorCyaRow).toContainText(record.townOrCity);
-    await expect(consignorCyaRow).toContainText(record.county);
-    await expect(consignorCyaRow).toContainText(record.postcode);
-    await expect(consignorCyaRow).toContainText('United Kingdom');
-    await expect(consignorCyaRow).toContainText(record.phone);
-    await expect(consignorCyaRow).toContainText(record.email);
+    const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
+    await expect(
+      animalsPages.notificationView.summaryValue(animalsPages.notificationView.summaryCard('Addresses'), 'Consignor'),
+    ).toHaveJSProperty(
+      'innerText',
+      [record.name, record.addressLine1, record.addressLine2, record.townOrCity, record.county, record.postcode, 'United Kingdom'].join(
+        '\n',
+      ),
+    );
+    await expect(consignorCyaRow).not.toContainText(record.phone);
+    await expect(consignorCyaRow).not.toContainText(record.email);
   });
 
   test('deleting the record in the address book leaves the copy on a draft notification unchanged, with no error, and drops it from the picker', async ({
@@ -150,7 +151,7 @@ test.describe('Addresses are copied, not linked', () => {
     await expect(animalsPages.addresses.addParty('Consignor or exporter')).toHaveCount(0);
 
     await animalsPages.notificationView.open(journeyId);
-    const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+    const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
     await expect(consignorCyaRow).toContainText(name);
     await expect(consignorCyaRow).toContainText('Carlisle');
     await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
@@ -201,9 +202,9 @@ test.describe('Addresses are copied, not linked', () => {
     // Named at the top of the page and against the role's own row, with the address still shown.
     await animalsPages.notificationView.open(journeyId);
     const message = 'Correct the address details for the consignor';
-    const consignorRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+    const consignorRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
     await expect(animalsPages.notificationView.errorSummary).toContainText(message);
-    await expect(animalsPages.notificationView.partyError('Roles and addresses', 'Consignor')).toContainText(message);
+    await expect(animalsPages.notificationView.partyError('Addresses', 'Consignor')).toContainText(message);
     await expect(consignorRow).toContainText(name);
     await expect(consignorRow).toContainText('Carlisle');
 

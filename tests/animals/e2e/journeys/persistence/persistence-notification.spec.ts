@@ -72,7 +72,8 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
       const [species] = complement.species;
 
       expect(doc.referenceNumber).toBe(referenceNumber);
-      expect(doc.status).toBe('SUBMITTED');
+      expect(doc.status).toBe('SUBMITTED_ACTION_REQUIRED');
+      expect(doc.outstandingItems).toEqual(['HEALTH_CERTIFICATE']);
       expect(notification.origin.countryCode).toBe('FR');
       expect(notification.origin.requiresRegionCode).toBe('yes');
       expect(notification.origin.regionOfOriginCode).toBe('FR-75');
@@ -132,7 +133,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
     }
 
     await animalsPages.notificationView.open(referenceNumber);
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.viewHeading(referenceNumber)).toBeVisible();
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
   });
 });

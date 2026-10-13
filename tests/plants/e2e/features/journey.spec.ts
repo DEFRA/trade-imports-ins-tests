@@ -124,9 +124,8 @@ test.describe('High-risk plants full happy-path journeys', () => {
       // Reload proves the submitted answers survive a fresh read.
       await pages.page.reload();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
-      await expect(plantsPages.notificationView.heading).toBeVisible();
-      await expect(plantsPages.overview.reference).toHaveText(reference);
-      await expect(plantsPages.overview.statusTag).toHaveText('Submitted');
+      await expect(plantsPages.notificationView.viewHeading(reference)).toBeVisible();
+      await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');
       await expect(plantsPages.notificationView.changeLinks).toHaveCount(0);
       await expect(plantsPages.notificationView.btnContinue).toHaveCount(0);
       await expect(plantsPages.notificationView.lateBanner).toHaveCount(scenario.late ? 1 : 0);
@@ -139,10 +138,16 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await expect(plantsPages.notificationView.card('Arrival details')).toContainText(arrivalDate);
       await expect(plantsPages.notificationView.card('Place of destination')).toContainText(address.name);
       await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('JOURNEY_123');
-      await expect(plantsPages.notificationView.card('Contact')).toContainText(address.name);
-      await expect(plantsPages.notificationView.card('Contact')).toContainText(address.email);
+      const contact = plantsPages.notificationView.card('Contact');
+      await expect(contact).toContainText(address.name);
+      await expect(contact).not.toContainText(address.email);
+      await expect(contact).not.toContainText(address.phone);
+      await expect(contact).toContainText('Perth');
       if (scenario.type !== POTATOES) {
-        await expect(plantsPages.notificationView.card('Consignor or exporter')).toContainText(address.name);
+        const consignor = plantsPages.notificationView.card('Consignor or exporter');
+        await expect(consignor).toContainText(address.name);
+        await expect(consignor).not.toContainText(address.email);
+        await expect(consignor).not.toContainText(address.phone);
       }
       await plantsPages.dashboard.open();
       await plantsPages.dashboard.searchForReference(reference);
