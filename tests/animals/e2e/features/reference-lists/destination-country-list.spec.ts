@@ -1,8 +1,9 @@
 import { test, expect } from '@fixtures';
+import { countryCodes } from '@domain/animals/constants/country-codes';
 import { destinationCountryNames } from '@domain/shared/fixtures/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
-test.describe('Destination country list', { tag: ['@integration'] }, () => {
+test.describe('Destination country list', () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment("the list is the stub's MDM fixture, which only the compose stack is sure to serve");
   });
@@ -25,7 +26,7 @@ test.describe('Destination country list', { tag: ['@integration'] }, () => {
   });
 });
 
-test.describe('Destination country answer', { tag: ['@integration'] }, () => {
+test.describe('Destination country answer', () => {
   test('a territory chosen as the destination country saves and is shown selected when the page is reopened', async ({
     animalsJourney,
     animalsPages,
@@ -34,7 +35,7 @@ test.describe('Destination country answer', { tag: ['@integration'] }, () => {
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transhipment or onward travel').check();
     const territory = await animalsPages.importReason.transhipmentTerritoryOptions.first().getAttribute('value');
-    await animalsPages.importReason.transhipmentDestinationCountry.selectOption(territory);
+    await animalsPages.importReason.selectTranshipmentDestinationCountry(territory);
     const journeyId = animalsPages.importReason.journeyIdFromUrl();
     await animalsPages.importReason.saveAndContinue.click();
 
@@ -44,7 +45,7 @@ test.describe('Destination country answer', { tag: ['@integration'] }, () => {
     await animalsPages.overview.open(journeyId);
     await animalsPages.overview.task('Main reason for import').click();
 
-    await expect(animalsPages.importReason.transhipmentDestinationCountry).toHaveValue(territory);
+    await expect(animalsPages.importReason.transhipmentDestinationCountryValue).toHaveValue(territory);
   });
 
   test('a destination country from the country list is still shown selected when the page is reopened', async ({
@@ -52,10 +53,11 @@ test.describe('Destination country answer', { tag: ['@integration'] }, () => {
     animalsPages,
     pages,
   }) => {
+    const france = countryCodes.eu.france.value;
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transit').check();
-    await animalsPages.importReason.transitPortOfExit.selectOption({ index: 2 });
-    await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
+    await animalsPages.importReason.selectTransitPortOfExitByIndex(1);
+    await animalsPages.importReason.selectTransitDestinationCountry(france);
     const journeyId = animalsPages.importReason.journeyIdFromUrl();
     await animalsPages.importReason.saveAndContinue.click();
 
@@ -63,6 +65,6 @@ test.describe('Destination country answer', { tag: ['@integration'] }, () => {
     await animalsPages.overview.open(journeyId);
     await animalsPages.overview.task('Main reason for import').click();
 
-    await expect(animalsPages.importReason.transitDestinationCountry).toHaveValue('FR');
+    await expect(animalsPages.importReason.transitDestinationCountryValue).toHaveValue(france);
   });
 });

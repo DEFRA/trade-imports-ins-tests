@@ -4,7 +4,7 @@ import { test, expect } from '@fixtures';
 
 test(
   'submits a promoted live-animals notification through the hub-owned spine',
-  { tag: ['@compose', '@integration'] },
+  { tag: '@compose' },
   async ({ animalsJourney, pages, journeyContext }) => {
     test.slow();
     await animalsJourney.submitNotification();

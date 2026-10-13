@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
+import { portByCode } from '@domain/shared/fixtures/reference-data';
 import type { PlantsPages } from '@page-objects';
 import type { PlantsJourney } from '@flows/plants/journey';
 
@@ -45,7 +46,7 @@ async function toParties(plantsPages: PlantsPages, journey: PlantsJourney, type:
   if (type === POTATOES) {
     await journey.toArrivalDetails('France');
     await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-    await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour (GB ABD)');
+    await plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
   } else {
     await journey.toArrivalStatus('Germany');
     await journey.answerArrivalStatus('No, it has not arrived yet');
@@ -58,7 +59,7 @@ async function toParties(plantsPages: PlantsPages, journey: PlantsJourney, type:
   return reference;
 }
 
-test.describe('High-risk plants consignment parties section', { tag: '@integration' }, () => {
+test.describe('High-risk plants consignment parties section', () => {
   for (const type of [PLANTS, WOOD]) {
     test(`${type}: consignor is required, saves, and continues to scoped identification numbers`, async ({
       pages,

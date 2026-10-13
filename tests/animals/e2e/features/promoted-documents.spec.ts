@@ -3,7 +3,7 @@ import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
-test.describe('Promoted accompanying documents integration', { tag: ['@compose', '@integration'] }, () => {
+test.describe('Promoted accompanying documents integration', { tag: '@compose' }, () => {
   test('uploads, scans, downloads and removes a document through the real uploader', async ({ animalsJourney, pages, animalsPages }) => {
     test.slow();
     await animalsJourney.toAccompanyingDocuments();

@@ -31,7 +31,7 @@ const toArrivalStatus = async (plantsJourney: PlantsJourney): Promise<string> =>
   return reference;
 };
 
-test.describe('High-risk plants overview task return', { tag: '@integration' }, () => {
+test.describe('High-risk plants overview task return', () => {
   test('arrival details opened from the overview returns to the overview, not the place of destination', async ({
     pages,
     plantsPages,

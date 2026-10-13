@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Animal identification page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Animal identification page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toAnimalIdentification();
   });

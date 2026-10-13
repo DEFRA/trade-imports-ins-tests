@@ -1,18 +1,21 @@
 import { defineConfig } from '@playwright/test';
 import sharedConfig from './utils/playwright/shared-config';
 import { withContainerHostResolver } from './utils/playwright/with-container-host-resolver';
-import { withProjectBaseUrls } from './utils/playwright/with-project-base-urls';
+import { applyDomainBaseUrls } from './utils/playwright/domain-base-urls';
 import { withServiceBaseUrls } from './utils/playwright/with-service-base-urls';
 import { withZapProxy } from './utils/playwright/with-zap-proxy';
 
-const projectBaseUrls: Record<string, string> = {
-  animals: 'http://localhost:3000',
-  'animals-admin': 'http://localhost:3001',
-  ins: 'http://localhost:3002',
-  plants: 'http://localhost:3003',
-};
+applyDomainBaseUrls(
+  {
+    animals: 'http://localhost:3000',
+    'animals-admin': 'http://localhost:3001',
+    ins: 'http://localhost:3002',
+    plants: 'http://localhost:3003',
+  },
+  'docker-compose',
+);
 
-const dockerComposeConfig = withServiceBaseUrls(withProjectBaseUrls(sharedConfig, projectBaseUrls, 'docker-compose'), {
+const dockerComposeConfig = withServiceBaseUrls(sharedConfig, {
   MONGODB_URI: process.env.MONGODB_URI ?? 'mongodb://localhost:27017',
   TRADE_IMPORTS_ANIMALS_BACKEND_URL: process.env.TRADE_IMPORTS_ANIMALS_BACKEND_URL ?? 'http://localhost:8085',
   TRADE_IMPORTS_ADDRESS_BOOK_URL: process.env.TRADE_IMPORTS_ADDRESS_BOOK_URL ?? 'http://localhost:8089',

@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Submitted addresses keep their copy', { tag: ['@integration'] }, () => {
+test.describe('Submitted addresses keep their copy', () => {
   test('renaming the book after submit changes neither the submitted view nor the amendment, and cancelling the amendment keeps the copy', async ({
     animalsSeededJourney,
     pages,

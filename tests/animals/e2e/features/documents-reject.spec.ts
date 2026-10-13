@@ -4,7 +4,7 @@ import { ABOVE_PAYLOAD_CAP_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-
 
 const issueDate = '03/01/2026';
 
-test.describe('Documents reject flows', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Documents reject flows', { tag: '@duplicated-in-frontend' }, () => {
   test('refuses an oversize file pick without adding a document', async ({ animalsJourney, pages, animalsPages }, testInfo) => {
     test.slow();
     await animalsJourney.toAccompanyingDocuments();

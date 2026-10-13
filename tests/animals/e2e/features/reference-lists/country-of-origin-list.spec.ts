@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { originPageCountryNames } from '@domain/shared/fixtures/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
-test.describe('Country of origin list', { tag: ['@integration'] }, () => {
+test.describe('Country of origin list', () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment("the list is the stub's MDM fixture, which only the compose stack is sure to serve");
   });
@@ -18,7 +18,7 @@ test.describe('Country of origin list', { tag: ['@integration'] }, () => {
   });
 });
 
-test.describe('Country of origin list without JavaScript', { tag: ['@integration'] }, () => {
+test.describe('Country of origin list without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
   test.beforeEach(() => {

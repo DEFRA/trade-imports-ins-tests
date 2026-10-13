@@ -7,7 +7,7 @@ import { firstScanStatus } from '@utils/scan-status';
 
 const issueDate = '03/01/2026';
 
-test.describe('Documents scan lifecycle', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toAccompanyingDocuments();
   });

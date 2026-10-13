@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Transited countries page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toTransitedCountries();
   });
