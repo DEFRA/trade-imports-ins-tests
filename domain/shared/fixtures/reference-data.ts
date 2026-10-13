@@ -37,14 +37,21 @@ function countryNamesWithSubdivisions(subdivisionName: (subDivision: CapturedSub
     .sort((first, second) => first.localeCompare(second));
 }
 
-/** The origin page lists each origin country and each of its subdivisions, sorted by name. */
+const withParentCountry = (subDivision: CapturedSubDivision, country: CapturedCountry): string => `${subDivision.name} (${country.name})`;
+
+/** The plants origin page lists each origin country and each of its subdivisions, sorted by name. */
 export function originPageCountryNames(): string[] {
   return countryNamesWithSubdivisions((subDivision) => subDivision.name);
 }
 
+/** The live-animals origin page lists each origin country and each territory named "<territory> (<country>)", sorted by name. */
+export function animalsOriginPageCountryNames(): string[] {
+  return countryNamesWithSubdivisions(withParentCountry);
+}
+
 /** A destination country select lists each origin country and each territory named "<territory> (<country>)", sorted by name. */
 export function destinationCountryNames(): string[] {
-  return countryNamesWithSubdivisions((subDivision, country) => `${subDivision.name} (${country.name})`);
+  return countryNamesWithSubdivisions(withParentCountry);
 }
 
 /** Every port select and review row reads '<name> - <code>'. */
