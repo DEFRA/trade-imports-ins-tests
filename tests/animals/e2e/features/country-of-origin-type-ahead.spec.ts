@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { originPageCountryNames } from '@domain/shared/fixtures/reference-data';
+import { animalsOriginPageCountryNames } from '@domain/shared/fixtures/reference-data';
 
 test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('filters as you type, submits the country code and persists it', async ({ animalsJourney, animalsPages }) => {
@@ -19,7 +19,7 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
     // origin country and territory.
     const fallback = animalsPages.originOfImport.countrySelect;
     await expect(fallback.locator('option').first()).toHaveText('Select a country');
-    await expect(fallback.locator('option')).toHaveCount(originPageCountryNames().length + 1);
+    await expect(fallback.locator('option')).toHaveCount(animalsOriginPageCountryNames().length + 1);
 
     await field.click();
     await field.fill('Belg');

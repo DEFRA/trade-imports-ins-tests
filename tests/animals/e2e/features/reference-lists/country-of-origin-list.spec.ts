@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { originPageCountryNames } from '@domain/shared/fixtures/reference-data';
+import { animalsOriginPageCountryNames } from '@domain/shared/fixtures/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Country of origin list', () => {
@@ -14,7 +14,7 @@ test.describe('Country of origin list', () => {
     await animalsJourney.startNotification();
     await animalsPages.overview.task('Where is this consignment coming from?').click();
 
-    await expect(animalsPages.originOfImport.countryOptions).toHaveText(originPageCountryNames());
+    await expect(animalsPages.originOfImport.countryOptions).toHaveText(animalsOriginPageCountryNames());
   });
 });
 
@@ -32,6 +32,6 @@ test.describe('Country of origin list without JavaScript', () => {
     await animalsJourney.startNotification();
     await animalsPages.overview.task('Where is this consignment coming from?').click();
 
-    await expect(animalsPages.originOfImport.countryOptions).toHaveText(originPageCountryNames());
+    await expect(animalsPages.originOfImport.countryOptions).toHaveText(animalsOriginPageCountryNames());
   });
 });

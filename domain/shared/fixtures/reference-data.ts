@@ -15,6 +15,8 @@ export interface CapturedPort {
   type: PortType | null;
 }
 
+type CapturedSubDivision = CapturedCountry['subDivisions'][number];
+
 const readFixture = <T>(path: string): T => JSON.parse(readFileSync(path, 'utf-8')) as T;
 
 export const countries = readFixture<CapturedCountry[]>(referenceDataPaths.countries);
@@ -29,20 +31,27 @@ export function countryByCode(code: string): { value: string; display: string } 
   return { value: country.code, display: country.name };
 }
 
-function countryAndTerritoryNames(): string[] {
+function countryNamesWithSubdivisions(subdivisionName: (subDivision: CapturedSubDivision, country: CapturedCountry) => string): string[] {
   return countriesOrigin
-    .flatMap((country) => [country.name, ...country.subDivisions.map((subDivision) => `${subDivision.name} (${country.name})`)])
+    .flatMap((country) => [country.name, ...country.subDivisions.map((subDivision) => subdivisionName(subDivision, country))])
     .sort((first, second) => first.localeCompare(second));
 }
 
-/** The origin page lists each origin country and each territory named "<territory> (<country>)", sorted by name. */
+const withParentCountry = (subDivision: CapturedSubDivision, country: CapturedCountry): string => `${subDivision.name} (${country.name})`;
+
+/** The plants origin page lists each origin country and each of its subdivisions, sorted by name. */
 export function originPageCountryNames(): string[] {
-  return countryAndTerritoryNames();
+  return countryNamesWithSubdivisions((subDivision) => subDivision.name);
+}
+
+/** The live-animals origin page lists each origin country and each territory named "<territory> (<country>)", sorted by name. */
+export function animalsOriginPageCountryNames(): string[] {
+  return countryNamesWithSubdivisions(withParentCountry);
 }
 
 /** A destination country select lists each origin country and each territory named "<territory> (<country>)", sorted by name. */
 export function destinationCountryNames(): string[] {
-  return countryAndTerritoryNames();
+  return countryNamesWithSubdivisions(withParentCountry);
 }
 
 /** Every port select and review row reads '<name> - <code>'. */
