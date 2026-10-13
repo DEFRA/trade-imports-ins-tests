@@ -490,7 +490,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
     await expect(plantsPages.arrivalDetails.linkBack).toHaveAttribute('href', plantsPages.overview.expectedUrl(reference));
 
-    await plantsPages.arrivalDetails.btnSaveAndReturnToOverview.click();
+    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
   });
 
@@ -515,7 +515,7 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.placeOfDestination.open(reference);
     await expect(plantsPages.placeOfDestination.saveAndReturn).toBeVisible();
     await expect(plantsPages.placeOfDestination.btnSaveAndContinue).toBeVisible();
-    await expect(plantsPages.placeOfDestination.btnSaveAndReturnToOverview).toHaveCount(0);
+    await expect(plantsPages.placeOfDestination.saveAndReturnToOverview).toHaveCount(0);
 
     await plantsPages.consignmentContactSelect.open(reference);
     await expect(plantsPages.consignmentContactSelect.saveAndReturn).toBeVisible();
@@ -535,7 +535,7 @@ test.describe('High-risk plants check and submit section', () => {
 
     await plantsPages.arrivalDetails.open(reference);
     await plantsPages.arrivalDetails.arrivalDate.fill('');
-    await plantsPages.arrivalDetails.btnSaveAndReturnToOverview.click();
+    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
     await expect(plantsPages.overview.taskRow('Arrival details')).toContainText('In progress');
 

@@ -269,7 +269,7 @@ test.describe('High-risk plants arrival section', () => {
   }) => {
     const reference = await toPotatoArrivalDetails(plantsJourney);
 
-    await plantsPages.arrivalDetails.btnSaveAndReturnToOverview.click();
+    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
     await expect(plantsPages.overview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Not yet started');
@@ -285,7 +285,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVING_ON);
     await plantsPages.arrivalDetails.arrivalTime.fill(NOT_ON_THE_CLOCK);
     await plantsPages.arrivalDetails.selectPlaceOfLanding(ABERDEEN_HARBOUR);
-    await plantsPages.arrivalDetails.btnSaveAndReturnToOverview.click();
+    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
     await expect(plantsPages.arrivalDetails.errorSummary).toContainText(REAL_TIME_ERROR);
@@ -306,7 +306,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
 
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVED_ON);
-    await plantsPages.arrivalDetails.btnSaveAndReturnToOverview.click();
+    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
 

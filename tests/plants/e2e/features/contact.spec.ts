@@ -126,7 +126,7 @@ test.describe('High-risk plants contact', () => {
     test(`blank contact permits save and ${action} and leaves the row incomplete`, async ({ pages, plantsPages, plantsJourney }) => {
       const reference = await openContact(plantsPages, plantsJourney);
       const contact = plantsPages.consignmentContactSelect;
-      const button = action === 'continue' ? contact.btnSaveAndContinue : contact.btnSaveAndReturn;
+      const button = action === 'continue' ? contact.btnSaveAndContinue : contact.saveAndReturnToOverview;
       await button.click();
       await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
       // The inherited status model has no visited-page state: a blank save remains Not yet started.
