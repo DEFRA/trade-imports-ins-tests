@@ -44,7 +44,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     test('Continue: when the notification is unfinished, stays put and names what is left', async ({ pages, animalsPages }) => {
       await animalsPages.notificationView.continueButton.click();
 
-      await expect(pages.page).toHaveURL(/\/notification-view$/);
+      await expect(pages.page).toHaveURL(/\/notification-view\?refused=1$/);
       await expect(animalsPages.notificationView.errorSummary).toBeVisible();
       await expect(animalsPages.notificationView.errorSummary).toContainText('There is a problem');
       await expect(animalsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toBeVisible();
