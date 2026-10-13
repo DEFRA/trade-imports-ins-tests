@@ -511,7 +511,7 @@ export class AnimalsJourney {
     await pages.importReason.heading.waitFor(pageLoadWait);
     await pages.importReason.reason('Temporary admission horses').check();
     await pages.importReason.temporaryAdmissionExitDate.fill(TEMPORARY_ADMISSION_EXIT_DATE);
-    await pages.importReason.temporaryAdmissionPortOfExit.selectOption('GB HLY');
+    await pages.importReason.selectTemporaryAdmissionPortOfExit('GB HLY');
     await pages.importReason.saveAndContinue.click();
 
     await pages.consignmentDetails.heading.waitFor(pageLoadWait);
