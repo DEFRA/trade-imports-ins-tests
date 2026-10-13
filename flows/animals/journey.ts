@@ -508,7 +508,7 @@ export class AnimalsJourney {
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
-      port: 'Heathrow Airport (GB LHR)',
+      port: pointOfEntries.heathrowAirport.display,
       means: 'Airplane',
       transportId: 'BA0117',
       documentReference: 'AWB-2026-0001',
@@ -568,7 +568,7 @@ export class AnimalsJourney {
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
-      port: 'Holyhead Port (GB HLY)',
+      port: pointOfEntries.holyheadPort.display,
       means: 'Vessel',
       transportId: HORSE_TRANSPORT_ID,
       documentReference: 'BOL-2026-0001',

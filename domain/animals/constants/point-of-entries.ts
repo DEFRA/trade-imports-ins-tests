@@ -5,6 +5,8 @@ export const pointOfEntries = {
   aberdeenHarbour: portByCode('GB ABD'),
   eastMidlandsAirport: portByCode('GB EMA'),
   edinburgh: portByCode('GB EDI'),
+  heathrowAirport: portByCode('GB LHR'),
+  holyheadPort: portByCode('GB HLY'),
 } as const;
 
 export type PointOfEntry = (typeof pointOfEntries)[keyof typeof pointOfEntries];
