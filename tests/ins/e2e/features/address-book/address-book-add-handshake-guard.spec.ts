@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
-test.describe('INS address book add handshake guard', { tag: ['@integration'] }, () => {
+test.describe('INS address book add handshake guard', () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('INS handshake routes are only exercised against the compose stack');
   });

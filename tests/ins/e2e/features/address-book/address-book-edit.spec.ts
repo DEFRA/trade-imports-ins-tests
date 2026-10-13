@@ -11,7 +11,7 @@ const baseAddress = {
   email: 'edit@example.co.uk',
 };
 
-test.describe('Address book edit', { tag: '@integration' }, () => {
+test.describe('Address book edit', () => {
   test('an edit replaces the whole record, clearing the optional fields left blank', async ({ pages, insPages, addressBookApi }) => {
     const originalName = `Edit Test Farm ${Date.now()}`;
     const created = await addressBookApi.createAddress({ name: originalName, ...baseAddress });

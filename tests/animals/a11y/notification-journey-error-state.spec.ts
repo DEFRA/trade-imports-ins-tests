@@ -1,4 +1,5 @@
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
+import { getRelativeDatePickerValue } from '@utils/date-utils';
 
 // govuk-frontend's conditional-reveal radios set aria-expanded on the radio input,
 // which axe's aria-allowed-attr rule rejects.
@@ -47,6 +48,9 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Arrival details with validation errors', async () => {
       await animalsPages.overview.task('Arrival details').click();
       await animalsPages.arrivalDetails.heading.waitFor();
+      // Every field is optional on a draft, so an empty save goes through; an arrival
+      // date outside the allowed window is what raises the error summary.
+      await animalsPages.arrivalDetails.fillArrivalDate(getRelativeDatePickerValue({ yearOffset: -1 }));
       await animalsPages.arrivalDetails.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();

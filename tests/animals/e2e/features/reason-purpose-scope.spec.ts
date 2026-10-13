@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Reason and purpose scope', { tag: '@duplicated-in-frontend' }, () => {
   test('purpose is owed only for the internal market and is wiped when the reason changes', async ({
     animalsJourney,
     pages,

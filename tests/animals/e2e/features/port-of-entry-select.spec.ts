@@ -4,7 +4,7 @@ import { getRelativeDatePickerValue } from '@utils/date-utils';
 const PORT_OPTION = 'Aberdeen Harbour (GB ABD)';
 const PORT_CODE = 'GB ABD';
 
-test.describe('Port of entry type-ahead', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Port of entry type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('enhances the select, filters by name or code, submits and persists the code', async ({ animalsJourney, pages, animalsPages }) => {
     await animalsJourney.toArrivalDetails();
     const journeyId = animalsPages.arrivalDetails.journeyIdFromUrl();
