@@ -10,7 +10,7 @@ const expectedGroups = [
   ['Fish (0301)', '0301', ['Salmo salar']],
 ] as const;
 
-test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toCommoditySelection();
   });

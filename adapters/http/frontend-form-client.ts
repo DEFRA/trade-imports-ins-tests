@@ -68,6 +68,31 @@ export class FrontendFormClient {
     return minted;
   }
 
+  async getPageHtml(path: string): Promise<string> {
+    const response = await this.request.get(path, { maxRedirects: 0 });
+    if (response.status() !== HTTP_STATUS_OK) {
+      throw new Error(
+        `GET ${path} answered ${response.status()} (${response.headers().location ?? 'no Location'}) instead of rendering the page.`,
+      );
+    }
+    return response.text();
+  }
+
+  // For a post that renders the next page itself instead of redirecting to it, as postForm expects.
+  async postFormReturningHtml(path: string, fields: FormFields = {}): Promise<string> {
+    const response = await this.request.post(path, {
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      data: encodeFormBody({ ...fields, crumb: await this.crumbToken() }),
+      maxRedirects: 0,
+    });
+    if (response.status() !== HTTP_STATUS_OK) {
+      throw new Error(
+        `POST ${path} answered ${response.status()} (${response.headers().location ?? 'no Location'}) instead of rendering the next page.`,
+      );
+    }
+    return response.text();
+  }
+
   // Pass redirectsTo for any transition (amend, cancel, delete): a refusal redirects too, just elsewhere, so 3xx alone reads it as success.
   async postForm(path: string, fields: FormFields = {}, { redirectsTo }: { redirectsTo?: RegExp } = {}): Promise<string> {
     const response = await this.request.post(path, {

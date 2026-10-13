@@ -2,6 +2,7 @@ import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { JourneyOptions } from '@domain/animals/constants/journey-options';
+import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
@@ -15,8 +16,31 @@ export type AccompanyingDocumentAnswer = {
   type: string;
 };
 
+export type ArrivalDetailsAnswer = {
+  means?: string;
+  port?: string;
+  transportId?: string;
+  documentReference?: string;
+};
+
+// The overview's task rows once a full opening run has answered everything,
+// in the order the overview lists them.
+export const OPENING_RUN_TASKS = [
+  'Where is this consignment coming from?',
+  'What are you importing?',
+  'Main reason for import',
+  'Commodity details',
+  'Identification details',
+  'Additional details',
+  'Arrival details',
+  'Transport details',
+  'Upload documents',
+  'Roles and addresses',
+  'Contact address for this consignment',
+] as const;
+
 const COUNTRY = 'France';
-const PORT = 'Aberdeen Harbour (GB ABD)';
+const PORT = pointOfEntries.aberdeenHarbour.display;
 // Inside the arrival-date window (1 week back to 6 months ahead) wherever the
 // wall clock happens to be, in the unpadded d/m/yyyy the app itself renders —
 // so a CYA assertion compares against the app's shape, not the typed string it
@@ -175,21 +199,50 @@ export class AnimalsJourney {
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
   }
 
-  async answerAddresses(): Promise<void> {
-    await this.fillAddressesAndOpenCph();
+  // From the addresses page: answer the CPH number, then leave the page.
+  async addCphAndLeaveAddresses(): Promise<void> {
+    await this.animalsPages.addresses.addCph.click();
+    await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
     await this.animalsPages.cphNumber.fillCphNumber();
     await this.animalsPages.cphNumber.saveAndContinue.click();
     await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     await this.animalsPages.addresses.continueButton.click();
+  }
+
+  async answerAddresses(): Promise<void> {
+    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.addFiveParties();
+    await this.addCphAndLeaveAddresses();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async fillArrivalDetails(means: string = 'Road Vehicle'): Promise<void> {
+  async fillArrivalDetails({
+    means = 'Road Vehicle',
+    port = PORT,
+    transportId = 'FR-892-LK',
+    documentReference = 'CMR-2026-884721',
+  }: ArrivalDetailsAnswer = {}): Promise<void> {
     await this.animalsPages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
-    await this.animalsPages.arrivalDetails.selectPort(PORT);
+    await this.animalsPages.arrivalDetails.selectPort(port);
     await this.animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: means });
-    await this.animalsPages.arrivalDetails.transportIdentification.fill('FR-892-LK');
-    await this.animalsPages.arrivalDetails.transportDocumentReference.fill('CMR-2026-884721');
+    await this.animalsPages.arrivalDetails.transportIdentification.fill(transportId);
+    await this.animalsPages.arrivalDetails.transportDocumentReference.fill(documentReference);
+  }
+
+  // On the documents page: add one document and wait for its virus scan, so
+  // the submission carries it.
+  async uploadDocumentAndWaitForScan(document: AccompanyingDocumentAnswer): Promise<void> {
+    await this.animalsPages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
+    await this.animalsPages.accompanyingDocuments.saveAndAddAnother.click();
+    await this.animalsPages.accompanyingDocuments
+      .documentRow(document.reference)
+      .filter({ hasText: 'Check completed' })
+      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
+  }
+
+  async chooseContactAddress(): Promise<void> {
+    await this.animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
+    await this.animalsPages.contactAddress.saveAndContinue.click();
   }
 
   // Re-navigate from the hub to the transporter list page within an already
@@ -231,8 +284,7 @@ export class AnimalsJourney {
 
   async answerContact(): Promise<void> {
     await this.animalsPages.overview.task('Contact address for this consignment').click();
-    await this.animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
-    await this.animalsPages.contactAddress.saveAndContinue.click();
+    await this.chooseContactAddress();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -373,12 +425,7 @@ export class AnimalsJourney {
     await this.completeAnswerSections();
     await this.animalsPages.overview.task('Upload documents').click();
     await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await this.animalsPages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
-    await this.animalsPages.accompanyingDocuments.saveAndAddAnother.click();
-    await this.animalsPages.accompanyingDocuments
-      .documentRow(document.reference)
-      .filter({ hasText: 'Check completed' })
-      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
+    await this.uploadDocumentAndWaitForScan(document);
     await this.animalsPages.overview.open(this.animalsPages.accompanyingDocuments.journeyIdFromUrl());
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.fromOverviewToDeclaration();
@@ -462,11 +509,12 @@ export class AnimalsJourney {
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
-    await pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
-    await pages.arrivalDetails.selectPort('Heathrow Airport (GB LHR)');
-    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Airplane' });
-    await pages.arrivalDetails.transportIdentification.fill('BA0117');
-    await pages.arrivalDetails.transportDocumentReference.fill('AWB-2026-0001');
+    await this.fillArrivalDetails({
+      port: pointOfEntries.heathrowAirport.display,
+      means: 'Airplane',
+      transportId: 'BA0117',
+      documentReference: 'AWB-2026-0001',
+    });
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);
@@ -474,26 +522,15 @@ export class AnimalsJourney {
     await pages.transporter.saveAndContinue.click();
 
     await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await pages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
-    await pages.accompanyingDocuments.saveAndAddAnother.click();
-    await pages.accompanyingDocuments
-      .documentRow(document.reference)
-      .filter({ hasText: 'Check completed' })
-      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
+    await this.uploadDocumentAndWaitForScan(document);
     await pages.accompanyingDocuments.continueButton.click();
 
     await pages.addresses.heading.waitFor(pageLoadWait);
     await this.addFiveParties();
-    await pages.addresses.addCph.click();
-    await pages.cphNumber.heading.waitFor(pageLoadWait);
-    await pages.cphNumber.fillCphNumber();
-    await pages.cphNumber.saveAndContinue.click();
-    await pages.addresses.heading.waitFor(pageLoadWait);
-    await pages.addresses.continueButton.click();
+    await this.addCphAndLeaveAddresses();
 
     await pages.contactAddress.heading.waitFor(pageLoadWait);
-    await pages.contactAddress.address('Animal and Plant Health Agency').check();
-    await pages.contactAddress.saveAndContinue.click();
+    await this.chooseContactAddress();
 
     await pages.notificationView.heading.waitFor(pageLoadWait);
     return journeyId;
@@ -513,7 +550,7 @@ export class AnimalsJourney {
     await pages.importReason.heading.waitFor(pageLoadWait);
     await pages.importReason.reason('Temporary admission horses').check();
     await pages.importReason.temporaryAdmissionExitDate.fill(TEMPORARY_ADMISSION_EXIT_DATE);
-    await pages.importReason.temporaryAdmissionPortOfExit.selectOption('GB HLY');
+    await pages.importReason.selectTemporaryAdmissionPortOfExit('GB HLY');
     await pages.importReason.saveAndContinue.click();
 
     await pages.consignmentDetails.heading.waitFor(pageLoadWait);
@@ -532,11 +569,12 @@ export class AnimalsJourney {
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
-    await pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
-    await pages.arrivalDetails.selectPort('Holyhead Port (GB HLY)');
-    await pages.arrivalDetails.meansOfTransport.selectOption({ label: 'Vessel' });
-    await pages.arrivalDetails.transportIdentification.fill(HORSE_TRANSPORT_ID);
-    await pages.arrivalDetails.transportDocumentReference.fill('BOL-2026-0001');
+    await this.fillArrivalDetails({
+      port: pointOfEntries.holyheadPort.display,
+      means: 'Vessel',
+      transportId: HORSE_TRANSPORT_ID,
+      documentReference: 'BOL-2026-0001',
+    });
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);
@@ -544,12 +582,7 @@ export class AnimalsJourney {
     await pages.transporter.saveAndContinue.click();
 
     await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await pages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
-    await pages.accompanyingDocuments.saveAndAddAnother.click();
-    await pages.accompanyingDocuments
-      .documentRow(document.reference)
-      .filter({ hasText: 'Check completed' })
-      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
+    await this.uploadDocumentAndWaitForScan(document);
     await pages.accompanyingDocuments.continueButton.click();
 
     await pages.addresses.heading.waitFor(pageLoadWait);
@@ -557,8 +590,7 @@ export class AnimalsJourney {
     await pages.addresses.continueButton.click();
 
     await pages.contactAddress.heading.waitFor(pageLoadWait);
-    await pages.contactAddress.address('Animal and Plant Health Agency').check();
-    await pages.contactAddress.saveAndContinue.click();
+    await this.chooseContactAddress();
 
     await pages.notificationView.heading.waitFor(pageLoadWait);
     return journeyId;

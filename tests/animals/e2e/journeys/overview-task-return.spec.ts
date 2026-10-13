@@ -1,10 +1,9 @@
 import { SET_BASES } from '@page-objects/shared/sets';
 import { fileUploadPaths } from '@resources/file-upload/paths';
-import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 import { test, expect } from '@fixtures';
 
-test.describe('Overview task return', { tag: ['@integration'] }, () => {
+test.describe('Overview task return', () => {
   test('each task opened from the overview returns to the overview on Save and continue, at its opening-run address, and reads Complete', async ({
     animalsJourney,
     animalsPages,
@@ -65,7 +64,7 @@ test.describe('Overview task return', { tag: ['@integration'] }, () => {
     await expectComplete('Additional details');
 
     await openTask('Arrival details', 'port-of-entry');
-    await animalsJourney.fillArrivalDetails('Road Vehicle');
+    await animalsJourney.fillArrivalDetails({ means: 'Road Vehicle' });
     await animalsPages.arrivalDetails.saveAndContinue.click();
     await expectOnOverview();
     await expect(animalsPages.transitedCountries.heading).toBeHidden();
@@ -85,24 +84,13 @@ test.describe('Overview task return', { tag: ['@integration'] }, () => {
     await expectOnOverview();
     await expectComplete('Transport details');
 
-    const document = {
+    await openTask('Upload documents', 'accompanying-documents');
+    await animalsJourney.uploadDocumentAndWaitForScan({
       reference: `OVERVIEW${Date.now()}`,
       issueDate: '03/01/2026',
+      filePath: fileUploadPaths.safeFile1kbPdf,
       type: 'VETERINARY_HEALTH_CERTIFICATE',
-    };
-    await openTask('Upload documents', 'accompanying-documents');
-    await animalsPages.accompanyingDocuments.fillDocument(
-      document.reference,
-      document.issueDate,
-      fileUploadPaths.safeFile1kbPdf,
-      document.type,
-    );
-    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
-    await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
-    await animalsPages.accompanyingDocuments
-      .documentRow(document.reference)
-      .filter({ hasText: 'Check completed' })
-      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
+    });
     await animalsPages.accompanyingDocuments.continueButton.click();
     await expectOnOverview();
     await expectComplete('Upload documents');

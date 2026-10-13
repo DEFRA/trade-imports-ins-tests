@@ -6,7 +6,7 @@ import { COLD_START } from '@fixtures/auth-state';
 // These tests ARE the sign-in journey, so they start unauthenticated.
 test.use({ storageState: COLD_START });
 
-test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
+test.describe('Authentication', { tag: '@auth' }, () => {
   test.beforeEach(async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toSignIn((attemptSignIn) => animalsPages.dashboard.open(attemptSignIn));
   });

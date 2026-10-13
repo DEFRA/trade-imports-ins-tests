@@ -1,24 +1,10 @@
 import { SET_BASES } from '@page-objects/shared/sets';
 import { fileUploadPaths } from '@resources/file-upload/paths';
-import { HORSE_TRANSPORT_ID, HORSE_TRANSPORTER, TEMPORARY_ADMISSION_EXIT_DATE } from '@flows/animals/journey';
+import { HORSE_TRANSPORT_ID, HORSE_TRANSPORTER, OPENING_RUN_TASKS, TEMPORARY_ADMISSION_EXIT_DATE } from '@flows/animals/journey';
 
 import { test, expect } from '@fixtures';
 
-const HORSE_BY_SEA_TASKS = [
-  'Where is this consignment coming from?',
-  'What are you importing?',
-  'Main reason for import',
-  'Commodity details',
-  'Identification details',
-  'Additional details',
-  'Arrival details',
-  'Transport details',
-  'Upload documents',
-  'Roles and addresses',
-  'Contact address for this consignment',
-];
-
-test.describe('Horse by sea under temporary admission', { tag: ['@integration'] }, () => {
+test.describe('Horse by sea under temporary admission', () => {
   test('walks a horse-by-sea notification under temporary admission from create to submitted, with every task complete', async ({
     animalsJourney,
     animalsPages,
@@ -35,10 +21,10 @@ test.describe('Horse by sea under temporary admission', { tag: ['@integration'] 
     await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/notification-view$`));
 
     await animalsPages.overview.open(journeyId);
-    for (const task of HORSE_BY_SEA_TASKS) {
+    for (const task of OPENING_RUN_TASKS) {
       await expect(animalsPages.overview.taskStatus(task)).toHaveText('Complete');
     }
-    await expect(animalsPages.overview.taskStatuses).toHaveCount(HORSE_BY_SEA_TASKS.length);
+    await expect(animalsPages.overview.taskStatuses).toHaveCount(OPENING_RUN_TASKS.length);
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 3, name: 'Main import reason' })).toBeVisible();

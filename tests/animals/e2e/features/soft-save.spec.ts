@@ -14,7 +14,7 @@ const IMPOSSIBLE_EXIT_DATE = '31/2/2026';
 const EXIT_DATE_ERROR = 'Enter a real date';
 const CHANGE_REASON_FOR_IMPORT = 'Change reason for import';
 
-test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
+test.describe('Save and return to overview', () => {
   test('main reason for import: when a required answer is missing, saves, leaves the task not complete and keeps the answers', async ({
     animalsJourney,
     animalsPages,
@@ -29,7 +29,7 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
     // Assert
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.importReason.errorSummary).toBeHidden();
-    await expect(animalsPages.overview.taskStatus(IMPORT_REASON_TASK)).not.toHaveText(COMPLETE);
+    await expect(animalsPages.overview.taskStatus(IMPORT_REASON_TASK)).toHaveText(TO_DO);
     await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await expect(animalsPages.importReason.reason('Transit')).toBeChecked();
   });
@@ -41,7 +41,7 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
     // Arrange
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transit').check();
-    await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
+    await animalsPages.importReason.selectTransitDestinationCountry('FR');
 
     // Act
     await animalsPages.importReason.saveAndReturnToOverview.click();
@@ -52,8 +52,8 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
     await expect(animalsPages.overview.taskStatus(IMPORT_REASON_TASK)).not.toHaveText(COMPLETE);
     await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await expect(animalsPages.importReason.reason('Transit')).toBeChecked();
-    await expect(animalsPages.importReason.transitDestinationCountry).toHaveValue('FR');
-    await expect(animalsPages.importReason.transitPortOfExit).toHaveValue('');
+    await expect(animalsPages.importReason.transitDestinationCountryValue).toHaveValue('FR');
+    await expect(animalsPages.importReason.transitPortOfExitValue).toHaveValue('');
   });
 
   test('main reason for import: when the reason changes from internal market to transit, clears the saved purpose', async ({
@@ -104,7 +104,7 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Temporary admission horses').check();
     await animalsPages.importReason.temporaryAdmissionExitDate.fill(IMPOSSIBLE_EXIT_DATE);
-    await animalsPages.importReason.temporaryAdmissionPortOfExit.selectOption({ index: 1 });
+    await animalsPages.importReason.selectTemporaryAdmissionPortOfExitByIndex(1);
 
     // Act
     await animalsPages.importReason.saveAndReturnToOverview.click();
@@ -119,7 +119,7 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
     await expect(animalsPages.importReason.heading).toBeVisible();
     await expect(animalsPages.importReason.reason('Temporary admission horses')).not.toBeChecked();
     await expect(animalsPages.importReason.temporaryAdmissionExitDate).toHaveValue('');
-    await expect(animalsPages.importReason.temporaryAdmissionPortOfExit).toHaveValue('');
+    await expect(animalsPages.importReason.temporaryAdmissionPortOfExitValue).toHaveValue('');
   });
 
   test('main reason for import while amending: Save and return with transit and no port of exit saves without an error and goes to the review', async ({
@@ -133,7 +133,7 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
     await animalsPages.notificationView.changeLink(CHANGE_REASON_FOR_IMPORT).click();
     await expect(animalsPages.importReason.heading).toBeVisible();
     await animalsPages.importReason.reason('Transit').check();
-    await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
+    await animalsPages.importReason.selectTransitDestinationCountry('FR');
 
     // Act
     await animalsPages.importReason.saveAndReturn.click();
@@ -181,7 +181,7 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
 
     // Assert
     await expect(animalsPages.overview.heading).toBeVisible();
-    await expect(animalsPages.overview.taskStatus(ORIGIN_TASK)).not.toHaveText(COMPLETE);
+    await expect(animalsPages.overview.taskStatus(ORIGIN_TASK)).toHaveText(TO_DO);
     await animalsPages.overview.task(ORIGIN_TASK).click();
     await expect(animalsPages.originOfImport.radioRequiresOriginCode('Yes')).toBeChecked();
   });
@@ -221,7 +221,7 @@ test.describe('Save and return to overview', { tag: ['@integration'] }, () => {
     await expect(animalsPages.consignmentDetails.errorSummary).toBeVisible();
     await expect(animalsPages.consignmentDetails.animalsRequiredErrorLink).toBeVisible();
     await animalsPages.overview.open(animalsPages.consignmentDetails.journeyIdFromUrl());
-    await expect(animalsPages.overview.taskStatus(COMMODITY_DETAILS_TASK)).not.toHaveText(COMPLETE);
+    await expect(animalsPages.overview.taskStatus(COMMODITY_DETAILS_TASK)).toHaveText(TO_DO);
   });
 
   test('origin of the import: when the region code is longer than five characters, refuses the save and keeps nothing', async ({

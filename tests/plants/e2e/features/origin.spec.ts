@@ -51,7 +51,7 @@ const plantsLine = {
   'EPPO code': 'QUERO',
 };
 
-test.describe('High-risk plants origin section', { tag: '@integration' }, () => {
+test.describe('High-risk plants origin section', () => {
   test('a country picked from the type-ahead is saved and shown again on return', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.chooseCommodityType(POTATOES);
