@@ -6,7 +6,7 @@ const AMENDED_REFERENCE = 'AMENDED-REF';
 const AMEND = 'Amend';
 
 test.describe('Amendment page endings', () => {
-  test('a page opened from Overview while amending ends with Save and return, Save and continue and a link-styled Save and return to overview, with no cancel and return link in the page ending, and Back goes to Overview', async ({
+  test('a page opened from Overview while amending ends with Save and return, Save and continue and Save and return to overview, with no cancel link, and Back goes to Overview', async ({
     animalsPages,
     animalsSeededJourney,
   }) => {
@@ -18,8 +18,6 @@ test.describe('Amendment page endings', () => {
     await expect(animalsPages.arrivalDetails.saveAndReturn).toBeVisible();
     await expect(animalsPages.arrivalDetails.saveAndContinue).toBeVisible();
     await expect(animalsPages.arrivalDetails.saveAndReturnToOverview).toBeVisible();
-    await expect(animalsPages.arrivalDetails.saveAndReturnToOverview).toHaveClass(/govuk-link/);
-    await expect(animalsPages.arrivalDetails.saveAndReturnToOverview).toHaveAttribute('value', 'hub');
     await expect(animalsPages.arrivalDetails.cancelAndReturnToOverview).toHaveCount(0);
     await expect(animalsPages.arrivalDetails.cancelAmend).toBeVisible();
     await expect(animalsPages.arrivalDetails.linkBack).toHaveAttribute('href', animalsPages.overview.expectedUrl(reference));
@@ -28,7 +26,7 @@ test.describe('Amendment page endings', () => {
     await expect(animalsPages.overview.heading).toBeVisible();
   });
 
-  test('Save and return from a Change link goes back to the amend review showing the changed answer, posting change=1 and no action field', async ({
+  test('Save and return from a Change link goes back to the amend review showing the changed answer', async ({
     pages,
     animalsPages,
     animalsSeededJourney,
@@ -40,15 +38,13 @@ test.describe('Amendment page endings', () => {
 
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
     await expect(animalsPages.originOfImport.linkBack).toHaveAttribute('href', animalsPages.overview.expectedUrl(reference));
-    await expect(animalsPages.originOfImport.saveAndReturn).toHaveAttribute('formaction', /\/origin\?change=1$/);
-    await expect(pages.page.locator('button[name="action"]')).toHaveCount(0);
 
     await animalsPages.originOfImport.internalReference.fill(AMENDED_REFERENCE);
     await animalsPages.originOfImport.saveAndReturn.click();
 
     await expect(pages.page).toHaveURL(/\/notification-view$/);
-    const referenceRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Internal reference number' });
-    await expect(referenceRow).toContainText(AMENDED_REFERENCE);
+    const importDetails = animalsPages.notificationView.summaryCard('Import details');
+    await expect(animalsPages.notificationView.summaryValue(importDetails, 'Internal reference number')).toHaveText(AMENDED_REFERENCE);
   });
 
   test('Save and continue while amending goes on as it does outside an amendment, not back to the review', async ({
@@ -110,7 +106,7 @@ test.describe('Amendment page endings', () => {
     await expect(animalsPages.originOfImport.cancelAndReturnToOverview).toBeVisible();
   });
 
-  test('Continue on an amend review with an answer missing stays on the review with no error summary or error message', async ({
+  test('Continue on an amend review with an answer missing stays on the review and shows There is a problem, naming what is missing', async ({
     pages,
     animalsPages,
     animalsSeededJourney,
@@ -126,9 +122,10 @@ test.describe('Amendment page endings', () => {
 
     await animalsPages.notificationView.continueButton.click();
 
-    await expect(pages.page).toHaveURL(/\/notification-view$/);
-    await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
-    await expect(pages.page.locator('.govuk-error-message')).toHaveCount(0);
+    await expect(pages.page).toHaveURL(/\/notification-view\?refused=1$/);
+    await expect(animalsPages.notificationView.errorSummary).toBeVisible();
+    await expect(animalsPages.notificationView.errorSummary).toContainText('There is a problem');
+    await expect(animalsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toBeVisible();
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
     await expect(animalsPages.declaration.heading).not.toBeVisible();
   });

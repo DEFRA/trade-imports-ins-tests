@@ -523,7 +523,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(plantsPages.consignmentContactSelect.saveAndReturnToOverview).toHaveCount(0);
   });
 
-  test('Continue on an incomplete amendment stays on the review with no error summary or error message', async ({
+  test('Continue on an incomplete amendment stays on the review and shows There is a problem, naming what is missing', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -536,14 +536,17 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.arrivalDetails.open(reference);
     await plantsPages.arrivalDetails.arrivalDate.fill('');
     await plantsPages.arrivalDetails.btnSaveAndReturnToOverview.click();
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(plantsPages.overview.taskRow('Arrival details')).toContainText('In progress');
+
     await plantsPages.notificationView.open(reference);
     await expect(plantsPages.notificationView.errorSummary).toHaveCount(0);
 
     await plantsPages.notificationView.btnContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
-    await expect(plantsPages.notificationView.errorSummary).toHaveCount(0);
-    await expect(pages.page.locator('.govuk-error-message')).toHaveCount(0);
+    await expect(plantsPages.notificationView.errorSummary).toContainText('There is a problem');
+    await expect(plantsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toBeVisible();
     await expect(plantsPages.overview.statusTag).toHaveText('Amend');
   });
 });
