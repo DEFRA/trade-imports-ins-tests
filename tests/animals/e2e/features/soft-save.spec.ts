@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-const COMPLETE = 'Complete';
+const TO_DO = 'To do';
 const ORIGIN_TASK = 'Where is this consignment coming from?';
 const IMPORT_REASON_TASK = 'Main reason for import';
 const COMMODITY_SELECTION_TASK = 'What are you importing?';
@@ -24,7 +24,7 @@ test.describe('Save and return to overview', () => {
     // Assert
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.importReason.errorSummary).toBeHidden();
-    await expect(animalsPages.overview.taskStatus(IMPORT_REASON_TASK)).not.toHaveText(COMPLETE);
+    await expect(animalsPages.overview.taskStatus(IMPORT_REASON_TASK)).toHaveText(TO_DO);
     await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await expect(animalsPages.importReason.reason('Transit')).toBeChecked();
   });
@@ -44,7 +44,7 @@ test.describe('Save and return to overview', () => {
 
     // Assert
     await expect(animalsPages.overview.heading).toBeVisible();
-    await expect(animalsPages.overview.taskStatus(ORIGIN_TASK)).not.toHaveText(COMPLETE);
+    await expect(animalsPages.overview.taskStatus(ORIGIN_TASK)).toHaveText(TO_DO);
     await animalsPages.overview.task(ORIGIN_TASK).click();
     await expect(animalsPages.originOfImport.radioRequiresOriginCode('Yes')).toBeChecked();
   });
@@ -84,7 +84,7 @@ test.describe('Save and return to overview', () => {
     await expect(animalsPages.consignmentDetails.errorSummary).toBeVisible();
     await expect(animalsPages.consignmentDetails.animalsRequiredErrorLink).toBeVisible();
     await animalsPages.overview.open(animalsPages.consignmentDetails.journeyIdFromUrl());
-    await expect(animalsPages.overview.taskStatus(COMMODITY_DETAILS_TASK)).not.toHaveText(COMPLETE);
+    await expect(animalsPages.overview.taskStatus(COMMODITY_DETAILS_TASK)).toHaveText(TO_DO);
   });
 
   test('origin of the import: when the region code is longer than five characters, refuses the save and keeps nothing', async ({
@@ -122,6 +122,6 @@ test.describe('Save and return to overview', () => {
     // Assert
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.commoditySelection.errorSummary).toBeHidden();
-    await expect(animalsPages.overview.taskStatus(COMMODITY_SELECTION_TASK)).not.toHaveText(COMPLETE);
+    await expect(animalsPages.overview.taskStatus(COMMODITY_SELECTION_TASK)).toHaveText(TO_DO);
   });
 });

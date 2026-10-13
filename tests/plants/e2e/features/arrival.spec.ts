@@ -272,7 +272,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsPages.arrivalDetails.btnSaveAndReturnToOverview.click();
 
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
-    await expect(plantsPages.overview.taskRow(ARRIVAL_TASK_ROW)).not.toContainText('Completed');
+    await expect(plantsPages.overview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Not yet started');
   });
 
   test('save and return to overview: when the time is not on the 24-hour clock, refuses the save', async ({
