@@ -15,7 +15,7 @@ const SECTION_CAPTIONS = [
 ];
 
 const NOT_APPLICABLE = 'Not applicable';
-const REASON_FOR_IMPORT = 'Reason for import';
+const REASON_FOR_IMPORT = 'Main import reason';
 
 const templateUrl = (templateId: string): RegExp => new RegExp(`${SET_BASES.liveAnimals}/templates/${templateId}$`);
 
@@ -63,7 +63,7 @@ test.describe('A template review', () => {
 
     await expect(pages.page).toHaveTitle('Review your template - Import notification service - GOV.UK');
     await expect(notificationView.templateHeading).toBeVisible();
-    await expect(notificationView.statusTag).toHaveText('Template');
+    await expect(notificationView.journeyStripTag).toHaveText('Template');
     await expect(notificationView.journeyStrip).toContainText(name);
     await expect(notificationView.errorSummary).toHaveCount(0);
     await expect(notificationView.cardErrors).toHaveCount(0);
@@ -79,15 +79,15 @@ test.describe('A template review', () => {
     await openTemplateReview(insPages, animalsPages, `Review cattle ${Date.now()}`);
 
     await expect(notificationView.sectionHeadings).toHaveText(SECTION_CAPTIONS);
-    await expect(notificationView.summaryCard('Uploaded documents')).toHaveCount(0);
-    await expect(pages.page.getByText('Arrival date at port of entry')).toHaveCount(0);
+    await expect(notificationView.summaryCard('Document 1')).toHaveCount(0);
+    await expect(pages.page.getByText('Arrival date at destination')).toHaveCount(0);
     await expect(notificationView.missingValues).toHaveCount(0);
     await expect(notificationView.rowValue('Arrival details', 'Port of entry')).toHaveText(NOT_APPLICABLE);
     await expect(notificationView.rowValue(REASON_FOR_IMPORT, REASON_FOR_IMPORT)).toHaveText(NOT_APPLICABLE);
-    await expect(notificationView.rowValue('Contact address for this consignment', 'Contact address')).toHaveText(NOT_APPLICABLE);
+    await expect(notificationView.rowValue('Contact address', 'Contact address')).toHaveText(NOT_APPLICABLE);
   });
 
-  test('for cattle the template review shows Certified for, Includes unweaned animals and the CPH number, no identification card, and one Main reason for import row', async ({
+  test('for cattle the template review shows Certified for, Includes unweaned animals and the CPH number, no identification card, and one Main import reason row', async ({
     pages,
     insPages,
     animalsPages,
@@ -96,10 +96,10 @@ test.describe('A template review', () => {
 
     await openTemplateReview(insPages, animalsPages, `Review cattle ${Date.now()}`);
 
-    await expect(notificationView.cardKeys('Additional animal details')).toHaveText(['Certified for', 'Includes unweaned animals']);
-    await expect(notificationView.cardKeys('Roles and addresses')).toContainText(['County parish holding (CPH) number']);
+    await expect(notificationView.cardKeys('Additional details')).toHaveText(['Certified for', 'Includes unweaned animals']);
+    await expect(notificationView.cardKeys('Addresses')).toContainText(['County parish holding (CPH) number']);
     await expect(notificationView.cardTitled('Identification details')).toHaveCount(0);
-    await expect(pages.page.getByRole('heading', { name: 'Animal details', exact: true })).toHaveCount(0);
+    await expect(pages.page.getByRole('heading', { name: 'Identification details', exact: true })).toHaveCount(0);
     await expect(notificationView.cardKeys(REASON_FOR_IMPORT)).toHaveText([REASON_FOR_IMPORT]);
   });
 
@@ -121,7 +121,7 @@ test.describe('A template review', () => {
     const { notificationView, originOfImport, contactAddress } = animalsPages;
     const templateId = await openTemplateReview(insPages, animalsPages, `Review cattle ${Date.now()}`);
 
-    await notificationView.changeLink('Change import details').click();
+    await notificationView.changeLink('Change origin of import').click();
 
     await expect(originOfImport.heading).toBeVisible();
     await expect(originOfImport.statusTag).toHaveText('Template');
@@ -130,7 +130,7 @@ test.describe('A template review', () => {
 
     await pages.page.goBack();
     await expect(notificationView.templateHeading).toBeVisible();
-    await notificationView.changeLink('Change contact address for this consignment').click();
+    await notificationView.changeLink('Change contact address').click();
 
     await expect(contactAddress.heading).toBeVisible();
     await expect(contactAddress.statusTag).toHaveText('Template');

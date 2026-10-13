@@ -70,7 +70,7 @@ test.describe('Changing one section of a saved template', () => {
     const name = changedName();
     const templateId = await saveAndView(insPages, animalsPages, name);
 
-    await templatePage.changeLink('import details').click();
+    await templatePage.changeLink('origin of import').click();
 
     await expect(originOfImport.heading).toBeVisible();
     await expect(originOfImport.internalReference).toHaveValue(SAVED_REFERENCE);
@@ -98,12 +98,12 @@ test.describe('Changing one section of a saved template', () => {
     await animalsPages.manageTemplates.open();
     await animalsPages.manageTemplates.linkViewTemplate(name).click();
 
-    await templatePage.changeLink('import details').click();
+    await templatePage.changeLink('origin of import').click();
     await originOfImport.internalReference.fill(CHANGED_REFERENCE);
     await originOfImport.btnSaveAndReturnToTemplate.click();
 
     await expect(pages.page).toHaveURL(templateUrl(templateId));
-    await expect(templatePage.rowValue('Import details', 'Internal reference number')).toContainText(CHANGED_REFERENCE);
+    await expect(templatePage.rowValue('Origin of import', 'Internal reference number')).toContainText(CHANGED_REFERENCE);
     await expect(templatePage.successBannerTitle).toBeVisible();
     await expect(templatePage.successBannerHeading(`${name} has been updated`)).toBeVisible();
     await expect(templatePage.dateCreated).toHaveText(`Date created: ${today}`);
@@ -118,12 +118,12 @@ test.describe('Changing one section of a saved template', () => {
     const { templatePage, originOfImport } = animalsPages;
     const templateId = await saveAndView(insPages, animalsPages, changedName());
 
-    await templatePage.changeLink('import details').click();
+    await templatePage.changeLink('origin of import').click();
     await originOfImport.internalReference.fill(UNSAVED_REFERENCE);
     await originOfImport.linkCancelToTemplate.click();
 
     await expect(pages.page).toHaveURL(templateUrl(templateId));
-    await expect(templatePage.rowValue('Import details', 'Internal reference number')).toContainText(SAVED_REFERENCE);
+    await expect(templatePage.rowValue('Origin of import', 'Internal reference number')).toContainText(SAVED_REFERENCE);
     await expect(templatePage.successBanner).toHaveCount(0);
   });
 

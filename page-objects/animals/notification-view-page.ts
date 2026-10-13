@@ -25,6 +25,11 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Review your template' });
   }
 
+  /** The status bar's tag, which reads Template while a template is being created. */
+  get journeyStripTag(): Locator {
+    return this.journeyStrip.locator('.govuk-tag');
+  }
+
   get btnSaveTemplate(): Locator {
     return this.page.getByRole('button', { name: 'Save template', exact: true });
   }

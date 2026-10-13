@@ -126,25 +126,25 @@ test.describe('A saved template', () => {
     const templateId = await saveAndView(insPages, animalsPages, viewedName());
 
     await expect(templatePage.sectionHeadings).toHaveText(SECTION_CAPTIONS);
-    await expect(templatePage.rowValue('Import details', 'Country of origin')).toContainText('France');
-    await expect(templatePage.changeLink('import details')).toHaveAttribute(
+    await expect(templatePage.rowValue('Origin of import', 'Country of origin')).toContainText('France');
+    await expect(templatePage.changeLink('origin of import')).toHaveAttribute(
       'href',
       new RegExp(`/templates/${templateId}/origin\\?change=1$`),
     );
-    await expect(templatePage.changeLink('commodity 1')).toHaveAttribute(
+    await expect(templatePage.changeLink('Cow (0102)')).toHaveAttribute(
       'href',
       new RegExp(`/templates/${templateId}/consignment-details\\?change=1$`),
     );
-    await expect(templatePage.changeLink('roles and addresses')).toHaveAttribute(
+    await expect(templatePage.changeLink('addresses')).toHaveAttribute(
       'href',
       new RegExp(`/templates/${templateId}/addresses\\?change=1$`),
     );
-    await expect(templatePage.changeLink('contact address for this consignment')).toHaveAttribute(
+    await expect(templatePage.changeLink('contact address')).toHaveAttribute(
       'href',
       new RegExp(`/templates/${templateId}/consignment/contact/select\\?change=1$`),
     );
 
-    await templatePage.changeLink('import details').click();
+    await templatePage.changeLink('origin of import').click();
     await expect(pages.page).toHaveURL(new RegExp(`/templates/${templateId}/origin\\?change=1$`));
   });
 
