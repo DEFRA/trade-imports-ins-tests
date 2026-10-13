@@ -1,8 +1,9 @@
 import { test, expect } from '@fixtures';
 import { getRelativeDatePickerValue } from '@utils/date-utils';
+import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 
-const PORT_OPTION = 'Aberdeen Harbour (GB ABD)';
-const PORT_CODE = 'GB ABD';
+const PORT_OPTION = pointOfEntries.aberdeenHarbour.display;
+const PORT_CODE = pointOfEntries.aberdeenHarbour.value;
 
 test.describe('Port of entry type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('enhances the select, filters by name or code, submits and persists the code', async ({ animalsJourney, pages, animalsPages }) => {

@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { portByCode } from '@domain/shared/fixtures/reference-data';
 import type { PlantsJourney } from '@flows/plants/journey';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
@@ -57,7 +58,7 @@ const ARRIVING_ON = '27/3/2027';
 const ARRIVING_AT = '14:30';
 
 // A port the reference data has held throughout, offered as "{name} ({code})".
-const ABERDEEN_HARBOUR = 'Aberdeen Harbour (GB ABD)';
+const ABERDEEN_HARBOUR = portByCode('GB ABD').display;
 
 // The window is four days (reg 26(1)), and the hint is the only place a trader
 // reads it — so it is matched in full rather than on the number alone.

@@ -37,6 +37,11 @@ export class PlantsOriginPage extends PlantsNotificationPage {
     return this.page.locator('select[name="countryOfOrigin"]');
   }
 
+  // Every country offered, skipping the empty placeholder option.
+  get countryOptions(): Locator {
+    return this.countrySelect.locator('option:not([value=""])');
+  }
+
   countryOption(name: string): Locator {
     return this.page.getByRole('option', { name, exact: true });
   }

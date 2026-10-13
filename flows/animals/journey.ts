@@ -2,6 +2,7 @@ import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { JourneyOptions } from '@domain/animals/constants/journey-options';
+import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
@@ -39,7 +40,7 @@ export const OPENING_RUN_TASKS = [
 ] as const;
 
 const COUNTRY = 'France';
-const PORT = 'Aberdeen Harbour (GB ABD)';
+const PORT = pointOfEntries.aberdeenHarbour.display;
 // Inside the arrival-date window (1 week back to 6 months ahead) wherever the
 // wall clock happens to be, in the unpadded d/m/yyyy the app itself renders —
 // so a CYA assertion compares against the app's shape, not the typed string it
@@ -507,7 +508,7 @@ export class AnimalsJourney {
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
-      port: 'Heathrow Airport (GB LHR)',
+      port: pointOfEntries.heathrowAirport.display,
       means: 'Airplane',
       transportId: 'BA0117',
       documentReference: 'AWB-2026-0001',
@@ -567,7 +568,7 @@ export class AnimalsJourney {
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
-      port: 'Holyhead Port (GB HLY)',
+      port: pointOfEntries.holyheadPort.display,
       means: 'Vessel',
       transportId: HORSE_TRANSPORT_ID,
       documentReference: 'BOL-2026-0001',

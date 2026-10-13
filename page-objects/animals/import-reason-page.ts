@@ -31,16 +31,59 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.page.locator('#transitPortOfExit');
   }
 
+  // The hidden select the type-ahead enhances: it carries the option list and
+  // the code the form submits.
+  get transitPortOfExitValue(): Locator {
+    return this.hiddenSelect('transitPortOfExit');
+  }
+
+  // Every port offered, skipping the empty placeholder.
+  get transitPortOfExitOptions(): Locator {
+    return this.transitPortOfExitValue.locator('option:not([value=""])');
+  }
+
   get transitDestinationCountry(): Locator {
     return this.page.locator('#transitDestinationCountry');
+  }
+
+  get transitDestinationCountryValue(): Locator {
+    return this.hiddenSelect('transitDestinationCountry');
+  }
+
+  // Every country offered, skipping the empty placeholder.
+  get transitDestinationCountryOptions(): Locator {
+    return this.transitDestinationCountryValue.locator('option:not([value=""])');
   }
 
   get transhipmentDestinationCountry(): Locator {
     return this.page.locator('#transhipmentDestinationCountry');
   }
 
+  get transhipmentDestinationCountryValue(): Locator {
+    return this.hiddenSelect('transhipmentDestinationCountry');
+  }
+
+  // Every country offered, skipping the empty placeholder.
+  get transhipmentDestinationCountryOptions(): Locator {
+    return this.transhipmentDestinationCountryValue.locator('option:not([value=""])');
+  }
+
+  // A territory is coded by ISO 3166-2, the parent country code and a hyphen; a country's alpha-2 code has none.
+  get transhipmentTerritoryOptions(): Locator {
+    return this.transhipmentDestinationCountryValue.locator('option[value*="-"]');
+  }
+
   get temporaryAdmissionPortOfExit(): Locator {
     return this.page.locator('#temporaryAdmissionPortOfExit');
+  }
+
+  get temporaryAdmissionPortOfExitValue(): Locator {
+    return this.hiddenSelect('temporaryAdmissionPortOfExit');
+  }
+
+  // Every port offered, skipping the empty placeholder.
+  get temporaryAdmissionPortOfExitOptions(): Locator {
+    return this.temporaryAdmissionPortOfExitValue.locator('option:not([value=""])');
   }
 
   get temporaryAdmissionExitDate(): Locator {
@@ -93,6 +136,10 @@ export class AnimalsImportReasonPage extends NotificationPage {
 
   async selectTransitDestinationCountry(value: string): Promise<void> {
     await this.chooseEnhancedSelect('transitDestinationCountry', { value });
+  }
+
+  async selectTranshipmentDestinationCountry(value: string): Promise<void> {
+    await this.chooseEnhancedSelect('transhipmentDestinationCountry', { value });
   }
 
   async selectTemporaryAdmissionPortOfExitByIndex(index: number): Promise<void> {
