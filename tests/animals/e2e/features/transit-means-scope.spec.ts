@@ -16,7 +16,7 @@ test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () 
     const saveArrivalWithMeans = async (means: string) => {
       await animalsPages.overview.task('Arrival details').click();
       await expect(animalsPages.arrivalDetails.heading).toBeVisible();
-      await animalsJourney.fillArrivalDetails(means);
+      await animalsJourney.fillArrivalDetails({ means });
       await animalsPages.arrivalDetails.saveAndContinue.click();
       await expect(animalsPages.overview.heading).toBeVisible();
     };
