@@ -6,7 +6,8 @@ const AMENDED_REFERENCE = 'AMENDED-REF';
 const AMEND = 'Amend';
 
 test.describe('Amendment page endings', () => {
-  test('a page opened from Overview while amending ends with Save and return, Save and continue and Save and return to overview, with no cancel link, and Back goes to Overview', async ({
+  test('a page opened from Overview while amending ends with Save and return and Save and continue, then Save and return to overview on its own line, with no cancel link, and Back goes to Overview', async ({
+    pages,
     animalsPages,
     animalsSeededJourney,
   }) => {
@@ -15,8 +16,10 @@ test.describe('Amendment page endings', () => {
     await animalsPages.overview.task(ARRIVAL_DETAILS_TASK).click();
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
 
-    await expect(animalsPages.arrivalDetails.saveAndReturn).toBeVisible();
-    await expect(animalsPages.arrivalDetails.saveAndContinue).toBeVisible();
+    const buttonGroup = pages.page.locator('.govuk-button-group');
+    await expect(buttonGroup.getByRole('button', { name: 'Save and return', exact: true })).toBeVisible();
+    await expect(buttonGroup.getByRole('button', { name: 'Save and continue', exact: true })).toBeVisible();
+    await expect(buttonGroup.getByRole('button', { name: 'Save and return to overview', exact: true })).toHaveCount(0);
     await expect(animalsPages.arrivalDetails.saveAndReturnToOverview).toBeVisible();
     await expect(animalsPages.arrivalDetails.cancelAndReturnToOverview).toHaveCount(0);
     await expect(animalsPages.arrivalDetails.cancelAmend).toBeVisible();
