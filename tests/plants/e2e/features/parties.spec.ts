@@ -58,7 +58,7 @@ async function toParties(plantsPages: PlantsPages, journey: PlantsJourney, type:
   return reference;
 }
 
-test.describe('High-risk plants consignment parties section', { tag: '@integration' }, () => {
+test.describe('High-risk plants consignment parties section', () => {
   for (const type of [PLANTS, WOOD]) {
     test(`${type}: consignor is required, saves, and continues to scoped identification numbers`, async ({
       pages,

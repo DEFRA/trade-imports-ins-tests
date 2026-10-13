@@ -10,7 +10,7 @@ import { test, expect } from '@fixtures';
  * the declaration resubmit is gated on every task row being fulfilled, and
  * the API seed answers only the origin and commodity sections.
  */
-test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
+test.describe('Amend resubmission', () => {
   test('resubmits an amended notification: Submitted → Amending → Submitted with the edited answer kept', async ({
     animalsJourney,
     journeyContext,

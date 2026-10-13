@@ -12,7 +12,7 @@ const transporter = {
   telephoneNumber: '+44 28 9446 1200',
 };
 
-test.describe('Commercial transporter scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Commercial transporter scope', { tag: '@duplicated-in-frontend' }, () => {
   test('commercial transporter is owed only for the commercial type and is wiped when the type changes', async ({
     animalsJourney,
     pages,

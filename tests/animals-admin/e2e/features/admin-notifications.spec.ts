@@ -13,7 +13,7 @@ const COMPOSE_ONLY_SKIP_REASON = 'persistence checked only in the docker compose
 const OBJECT_ID_PATTERN = /^[a-f0-9]{24}$/i;
 const AUDIT_TIMESTAMP_PATTERN = /\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/;
 
-test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, () => {
+test.describe('Notifications (admin)', { tag: '@mongodb' }, () => {
   test.describe.configure({ mode: 'default' });
 
   test(

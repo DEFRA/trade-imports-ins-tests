@@ -242,7 +242,7 @@ async function writeIndexHtml(
   // Per-domain active scripts set ZAP_SCOPE — warn callout (not fail) so a
   // green scoped report is never mistaken for a full-corpus active scan.
   const scopedSection = scope
-    ? `<div class="callout warn"><h2 class="warn">Scoped scan</h2><p>Active scan limited to Playwright project <code>${scope.project}</code> (ZAP contexts: ${scope.contexts.join(', ')}). Other declared contexts were not driven and were not gated for traffic — not a full-corpus active scan.</p></div>`
+    ? `<div class="callout warn"><h2 class="warn">Scoped scan</h2><p>Active scan limited to domain <code>${scope.domain}</code> (ZAP contexts: ${scope.contexts.join(', ')}). Other declared contexts were not driven and were not gated for traffic — not a full-corpus active scan.</p></div>`
     : '';
 
   await wrapAsHtml('zap.log', ZAP_LOG_ARTEFACT);
@@ -259,7 +259,7 @@ async function writeIndexHtml(
     console.error(`could not copy Playwright's own report from ${PLAYWRIGHT_REPORT_DIR}`);
   }
 
-  const profileLabel = scope ? `${zapProfile} (scoped: ${scope.project})` : zapProfile;
+  const profileLabel = scope ? `${zapProfile} (scoped: ${scope.domain})` : zapProfile;
 
   const html = `<!doctype html>
 <html lang="en">

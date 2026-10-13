@@ -12,7 +12,7 @@ const baseAddress = {
   email: 'delete@example.co.uk',
 };
 
-test.describe('Address book delete', { tag: '@integration' }, () => {
+test.describe('Address book delete', () => {
   test('deleting through the UI tombstones the record rather than removing it', async ({ pages, insPages, addressBookApi }) => {
     const name = `Delete Test Farm ${Date.now()}`;
     const created = await addressBookApi.createAddress({ name, ...baseAddress });

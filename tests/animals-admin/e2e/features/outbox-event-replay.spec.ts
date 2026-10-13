@@ -16,7 +16,7 @@ const milestonesOf = (eventTypes: string[]): string[] => eventTypes.filter((even
 const eventTypesOn = async (outboxEvents: AnimalsAdminOutboxEventsPage): Promise<string[]> =>
   (await outboxEvents.eventTypeCells.allTextContents()).map((eventType) => eventType.trim());
 
-test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () => {
+test.describe('Outbox event replay', { tag: '@compose' }, () => {
   test.beforeEach(async ({ animalsSeededJourney }) => {
     await animalsSeededJourney.createAmendNotification();
   });

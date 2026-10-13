@@ -2,7 +2,7 @@ import type { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
 import { ARRIVAL_DATE } from '@flows/animals/journey';
 
-test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-frontend' }, () => {
   test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({ animalsJourney, pages }) => {
     await animalsJourney.startNotification();
 

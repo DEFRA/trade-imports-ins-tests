@@ -3,7 +3,7 @@ import { COLD_START } from '@fixtures/auth-state';
 import { createInsPages } from '@page-objects';
 import { users } from '@config/users';
 
-test.describe('Address book cross-user visibility', { tag: '@integration' }, () => {
+test.describe('Address book cross-user visibility', () => {
   test('an address added by one user is visible to another user in the same organisation', async ({ browser, pages, insPages }) => {
     const createdName = `Cross User Farm ${Date.now()}`;
 
