@@ -49,7 +49,7 @@ export class InsNotificationTypePage extends BasePage {
   }
 
   get phaseBanner(): Locator {
-    return this.page.locator('.govuk-phase-banner');
+    return this.page.locator('.govuk-phase-banner', { hasText: 'Alpha' });
   }
 
   /**

@@ -140,7 +140,7 @@ test.describe('INS type question: What are you importing?', () => {
     await expect(strip.locator('.govuk-tag')).toHaveText('Draft');
     await expect(strip).toContainText(GBN_AG);
     await expect(strip).toContainText(id);
-    await expect(pages.page.locator('.govuk-phase-banner')).toContainText('Alpha');
+    await expect(pages.page.locator('.govuk-phase-banner', { hasText: 'Alpha' })).toBeVisible();
   });
 
   test('choosing Germinal products sends the user to the germinal products start and creates no live-animals notification', async ({
