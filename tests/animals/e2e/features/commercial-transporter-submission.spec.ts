@@ -26,6 +26,8 @@ test.describe('Commercial transporter journeys', () => {
     await animalsPages.transitedCountries.addCountry('Belgium');
     await animalsPages.transitedCountries.saveAndContinue.click();
 
+    await animalsPages.overview.heading.waitFor();
+    await animalsPages.overview.task('Transport details').click();
     await animalsPages.transporter.heading.waitFor();
     await animalsPages.transporter.addTransporter.click();
     await animalsPages.transporterAdd.heading.waitFor();

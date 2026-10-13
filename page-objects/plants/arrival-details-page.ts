@@ -72,10 +72,6 @@ export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
     return this.page.getByRole('button', { name: 'Save and continue', exact: true });
   }
 
-  get btnSaveAndReturnToOverview(): Locator {
-    return this.page.getByRole('button', { name: 'Save and return to overview', exact: true });
-  }
-
   /** A plain link, not a govukButton, so it is addressed by the link role. */
   get linkCancel(): Locator {
     return this.page.getByRole('link', { name: 'Cancel and return to overview', exact: true });

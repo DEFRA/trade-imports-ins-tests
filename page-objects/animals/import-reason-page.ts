@@ -99,7 +99,15 @@ export class AnimalsImportReasonPage extends NotificationPage {
     await this.chooseEnhancedSelect('temporaryAdmissionPortOfExit', { index });
   }
 
+  async selectTemporaryAdmissionPortOfExit(value: string): Promise<void> {
+    await this.chooseEnhancedSelect('temporaryAdmissionPortOfExit', { value });
+  }
+
   get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
+  }
+
+  get errorSummary(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
   }
 }

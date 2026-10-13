@@ -83,10 +83,6 @@ export class PlantsConsignmentContactSelectPage extends PlantsNotificationPage {
     return this.page.getByRole('button', { name: 'Save and continue', exact: true });
   }
 
-  get btnSaveAndReturn(): Locator {
-    return this.page.getByRole('button', { name: 'Save and return to overview', exact: true });
-  }
-
   get errorSummary(): Locator {
     return this.page.getByRole('alert');
   }

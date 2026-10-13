@@ -97,12 +97,11 @@ async function completeNotification(
     await plantsPages.consignmentContactSelect.address(address.name).check();
   }
   await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
-  await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+  await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
   return { reference, address };
 }
 
-async function openReview(plantsPages: PlantsPages) {
-  await plantsPages.overview.taskRowLink('Check and submit').click();
+async function expectReview(plantsPages: PlantsPages) {
   await expect(plantsPages.notificationView.heading).toBeVisible();
 }
 
@@ -128,12 +127,19 @@ async function amend(pages: SharedPages, plantsPages: PlantsPages, reference: st
     .getByRole('button', { name: `Amend notification ${reference}`, exact: true })
     .click();
   await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
-  await expect(plantsPages.overview.statusTag).toHaveText('Amending');
+  await expect(plantsPages.overview.statusTag).toHaveText('Amend');
+  await expect(plantsPages.overview.cancelAmend).toBeVisible();
 }
 
 test.describe('High-risk plants check and submit section', () => {
   test('review stays blocked until the final required row is complete', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
     const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { contact: false });
+    const contactEntry = plantsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete contact', exact: true });
+    await expect(contactEntry).toHaveAttribute('href', '#contact');
+    await plantsPages.notificationView.btnContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(contactEntry).toBeVisible();
+    await plantsPages.overview.open(reference);
     const review = plantsPages.overview.taskRowByTitle('Check and submit');
     await expect(review).toContainText('Cannot start yet');
     await expect(review.getByRole('link')).toHaveCount(0);
@@ -141,7 +147,9 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.consignmentContactSelect.searchFor(address.name);
     await plantsPages.consignmentContactSelect.address(address.name).check();
     await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
-    await openReview(plantsPages);
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await plantsPages.overview.taskRowLink('Check and submit').click();
+    await expectReview(plantsPages);
   });
 
   test('CYA renders numbered sections, scoped cards and contact details, and Change returns to saved answers', async ({
@@ -151,7 +159,7 @@ test.describe('High-risk plants check and submit section', () => {
     addressBookApi,
   }) => {
     const { address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    await openReview(plantsPages);
+    await expectReview(plantsPages);
     await expect(pages.page.getByRole('heading', { level: 2, name: /^[1-3]\. / })).toHaveText([
       '1. About the consignment',
       '2. Arrival and destination',
@@ -185,7 +193,7 @@ test.describe('High-risk plants check and submit section', () => {
     addressBookApi,
   }) => {
     const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    await openReview(plantsPages);
+    await expectReview(plantsPages);
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrl(reference));
     await plantsPages.declaration.btnContinue.click();
@@ -220,7 +228,7 @@ test.describe('High-risk plants check and submit section', () => {
   ]) {
     test(`${type}: late notifications are accepted and highlighted`, async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
       const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { type, days });
-      await openReview(plantsPages);
+      await expectReview(plantsPages);
       // govukWarningText always prepends a visually-hidden "Warning" fallback inside
       // the same <strong>, so an exact match can never pass here — pin the message
       // as a substring instead (unpassable-assertion exception: the accessible-tree
@@ -278,7 +286,7 @@ test.describe('High-risk plants check and submit section', () => {
     addressBookApi,
   }) => {
     const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    await openReview(plantsPages);
+    await expectReview(plantsPages);
     await addressBookApi.deleteAddress(address.id);
     await pages.page.reload();
     const destination = plantsPages.notificationView.card('Place of destination');
@@ -329,7 +337,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(destination).not.toContainText('Dundee');
   });
 
-  for (const source of ['dashboard', 'CYA']) {
+  for (const source of ['dashboard', 'CYA', 'question page']) {
     test(`cancel amendment from ${source} restores submitted answers and read-only CYA`, async ({
       pages,
       plantsPages,
@@ -337,7 +345,7 @@ test.describe('High-risk plants check and submit section', () => {
       addressBookApi,
     }) => {
       const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-      await openReview(plantsPages);
+      await expectReview(plantsPages);
       await submit(plantsPages);
       await amend(pages, plantsPages, reference);
       await plantsPages.identificationNumbers.open(reference);
@@ -345,16 +353,21 @@ test.describe('High-risk plants check and submit section', () => {
       await plantsPages.identificationNumbers.btnSaveAndContinue.click();
       await plantsPages.dashboard.open();
       await plantsPages.dashboard.searchForReference(reference);
-      await expect(plantsPages.dashboard.statusTag(reference)).toHaveText('Amending');
+      await expect(plantsPages.dashboard.statusTag(reference)).toHaveText('Amend');
       if (source === 'dashboard') {
         await plantsPages.dashboard
           .notificationCard(reference)
           .getByRole('link', { name: `Cancel amendment (${reference})`, exact: true })
           .click();
-      } else {
+      } else if (source === 'CYA') {
         await plantsPages.notificationView.open(reference);
         await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('DiscardMe99');
-        await pages.page.getByRole('link', { name: 'Cancel amendment', exact: true }).click();
+        await expect(plantsPages.notificationView.statusTag).toHaveText('Amend');
+        await plantsPages.notificationView.cancelAmend.click();
+      } else {
+        await plantsPages.identificationNumbers.open(reference);
+        await expect(plantsPages.identificationNumbers.statusTag).toHaveText('Amend');
+        await plantsPages.identificationNumbers.cancelAmend.click();
       }
       await expect(pages.page.getByRole('heading', { name: 'Cancel this amendment?', level: 1 })).toBeVisible();
       await pages.page.getByRole('button', { name: 'Yes, cancel amendment', exact: true }).click();
@@ -371,7 +384,7 @@ test.describe('High-risk plants check and submit section', () => {
 
   test('a submitted notification can be deleted from CYA', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
     const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    await openReview(plantsPages);
+    await expectReview(plantsPages);
     await submit(plantsPages);
     await plantsPages.confirmation.viewNotification.click();
     await pages.page.getByRole('button', { name: 'Delete notification', exact: true }).click();
@@ -391,7 +404,7 @@ test.describe('High-risk plants check and submit section', () => {
       addressBookApi,
     }) => {
       const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { days: initiallyLate ? 0 : 7 });
-      await openReview(plantsPages);
+      await expectReview(plantsPages);
       await submit(plantsPages);
       await plantsPages.confirmation.viewNotification.click();
       await expect(plantsPages.notificationView.lateBanner).toHaveCount(initiallyLate ? 1 : 0);
@@ -412,6 +425,134 @@ test.describe('High-risk plants check and submit section', () => {
       await expect(plantsPages.notificationView.lateBanner).toHaveCount(initiallyLate ? 1 : 0);
     });
   }
+
+  test('while amending, an overview-linked page ends with the three amend controls and Save and return goes back to the review showing the change', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    await submit(plantsPages);
+    await amend(pages, plantsPages, reference);
+
+    await plantsPages.overview.taskRowLink('Identification numbers').click();
+    await expect(plantsPages.identificationNumbers.heading).toBeVisible();
+    await expect(plantsPages.identificationNumbers.saveAndReturn).toBeVisible();
+    await expect(plantsPages.identificationNumbers.btnSaveAndContinue).toBeVisible();
+    await expect(plantsPages.identificationNumbers.saveAndReturnToOverview).toBeVisible();
+    await expect(plantsPages.identificationNumbers.cancelAndReturnToOverview).toHaveCount(0);
+
+    await plantsPages.identificationNumbers.producer.fill('AMENDED1');
+    await plantsPages.identificationNumbers.saveAndReturn.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('AMENDED1');
+  });
+
+  test('while amending, a question page opened from a Change link on the review returns to the review showing the change', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    await submit(plantsPages);
+    await amend(pages, plantsPages, reference);
+
+    await plantsPages.notificationView.open(reference);
+    await plantsPages.notificationView
+      .card('Identification numbers')
+      .getByRole('link', { name: /^Change/ })
+      .first()
+      .click();
+    await expect(plantsPages.identificationNumbers.heading).toBeVisible();
+    await expect(plantsPages.identificationNumbers.saveAndReturn).toBeVisible();
+
+    await plantsPages.identificationNumbers.producer.fill('CHANGED2');
+    await plantsPages.identificationNumbers.saveAndReturn.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('CHANGED2');
+  });
+
+  test('while amending, Save and continue goes to the next page of the task and Save and return to overview goes to Overview', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { type: PLANTS, days: -1 });
+    await submit(plantsPages);
+    await amend(pages, plantsPages, reference);
+
+    await plantsPages.arrivalStatus.open(reference);
+    await plantsPages.arrivalStatus.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(plantsPages.arrivalDetails.linkBack).toHaveAttribute('href', plantsPages.overview.expectedUrl(reference));
+
+    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+  });
+
+  test('while amending, the address pickers end with Save and return and Save and continue only', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { type: PLANTS, days: -1 });
+    await submit(plantsPages);
+    await amend(pages, plantsPages, reference);
+
+    await plantsPages.consignorSelect.open(reference);
+    await expect(plantsPages.consignorSelect.saveAndReturn).toBeVisible();
+    await expect(plantsPages.consignorSelect.btnSaveAndContinue).toBeVisible();
+    await expect(plantsPages.consignorSelect.saveAndReturnToOverview).toHaveCount(0);
+    await expect(plantsPages.consignorSelect.cancelAndReturnToOverview).toHaveCount(0);
+    await plantsPages.consignorSelect.saveAndReturn.click();
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+
+    await plantsPages.placeOfDestination.open(reference);
+    await expect(plantsPages.placeOfDestination.saveAndReturn).toBeVisible();
+    await expect(plantsPages.placeOfDestination.btnSaveAndContinue).toBeVisible();
+    await expect(plantsPages.placeOfDestination.saveAndReturnToOverview).toHaveCount(0);
+
+    await plantsPages.consignmentContactSelect.open(reference);
+    await expect(plantsPages.consignmentContactSelect.saveAndReturn).toBeVisible();
+    await expect(plantsPages.consignmentContactSelect.btnSaveAndContinue).toBeVisible();
+    await expect(plantsPages.consignmentContactSelect.saveAndReturnToOverview).toHaveCount(0);
+  });
+
+  test('Continue on an incomplete amendment stays on the review and shows There is a problem, naming what is missing', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    await submit(plantsPages);
+    await amend(pages, plantsPages, reference);
+
+    await plantsPages.arrivalDetails.open(reference);
+    await plantsPages.arrivalDetails.arrivalDate.fill('');
+    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(plantsPages.overview.taskRow('Arrival details')).toContainText('In progress');
+
+    await plantsPages.notificationView.open(reference);
+    await expect(plantsPages.notificationView.errorSummary).toHaveCount(0);
+
+    await plantsPages.notificationView.btnContinue.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(plantsPages.notificationView.errorSummary).toContainText('There is a problem');
+    await expect(plantsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toHaveAttribute(
+      'href',
+      '#arrival-details',
+    );
+    await expect(plantsPages.overview.statusTag).toHaveText('Amend');
+  });
 });
 
 test.describe('High-risk plants copied addresses are edited on the notification', () => {
@@ -549,7 +690,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     const error = 'Correct the address details for the place of destination';
     const contactError = 'Correct the contact address details for this consignment';
 
-    await openReview(plantsPages);
+    await expectReview(plantsPages);
     await expect(plantsPages.notificationView.errorSummary).toContainText(error);
     await expect(plantsPages.notificationView.errorSummary).toContainText(contactError);
     // The card says which field to correct, against the row that holds it.

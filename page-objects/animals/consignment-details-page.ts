@@ -22,6 +22,14 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
+  get errorSummary(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
+  }
+
+  get animalsRequiredErrorLink(): Locator {
+    return this.page.getByRole('link', { name: 'Enter the number of animals' });
+  }
+
   /**
    * Fills the animal count on every commodity line the page is showing. The
    * count is save-blocking per line, so a page carrying more than one line
