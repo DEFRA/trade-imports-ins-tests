@@ -47,9 +47,9 @@ export function destinationCountryNames(): string[] {
   return countryNamesWithSubdivisions((subDivision, country) => `${subDivision.name} (${country.name})`);
 }
 
-/** Every port select and review row reads '<name> (<code>)'. */
+/** Every port select and review row reads '<name> - <code>'. */
 export function portLabel(port: CapturedPort): string {
-  return `${port.name} (${port.code})`;
+  return `${port.name} - ${port.code}`;
 }
 
 export function portByCode(code: string): { value: string; display: string } {
