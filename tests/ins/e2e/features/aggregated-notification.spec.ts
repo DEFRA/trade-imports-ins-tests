@@ -77,15 +77,17 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb'] }
       await animalsPages.declaration.continueButton.click();
       await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
 
-      // Then — same document is updated to SUBMITTED (no duplicate created)
-      await expect.poll(() => collection.findOne({ _id: aggregateId, status: 'SUBMITTED' }), { timeout: timeouts.long }).not.toBeNull();
+      // Then — same document is updated to SUBMITTED_ACTION_REQUIRED (no duplicate created)
+      await expect
+        .poll(() => collection.findOne({ _id: aggregateId, status: 'SUBMITTED_ACTION_REQUIRED' }), { timeout: timeouts.long })
+        .not.toBeNull();
 
       expect(await collection.countDocuments({ _id: aggregateId })).toBe(1);
 
       const submittedDoc = await collection.findOne({ _id: aggregateId });
       expect(submittedDoc._id).toBe(aggregateId);
       expect(submittedDoc.referenceNumber).toBe(referenceNumber);
-      expect(submittedDoc.status).toBe('SUBMITTED');
+      expect(submittedDoc.status).toBe('SUBMITTED_ACTION_REQUIRED');
       expect(submittedDoc.originCountry).toBe(defaultJourneyOptions.countryCode.value);
       expect(submittedDoc.commodity).toBe(commodityCodes.cow);
       expect(submittedDoc.arrivalDate).toBeInstanceOf(Date);

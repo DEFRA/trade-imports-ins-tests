@@ -5,6 +5,7 @@ import { skipIfNonStubStackEnvironment, skipUnlessNonStubStackEnvironment } from
 import type { AnimalsPages } from '@page-objects';
 import type { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 import type { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
+import type { AnimalsJourney } from '@flows/animals/journey';
 
 const PARTY_ADD_LINK_CASES: Array<{
   hubRole: Parameters<AnimalsAddressesPage['addParty']>[0];
@@ -22,26 +23,32 @@ const PARTY_ADD_LINK_CASES: Array<{
  * Adding records is delegated to the INS frontend; these specs prove the journey
  * does not serve its own create page and links out with the handshake query.
  */
+const openPartyPicker = async (
+  animalsJourney: AnimalsJourney,
+  animalsPages: AnimalsPages,
+  hubRole: Parameters<AnimalsAddressesPage['addParty']>[0],
+): Promise<void> => {
+  await animalsJourney.startNotification();
+  await animalsJourney.unlockSections();
+
+  await animalsPages.overview.task('Roles and addresses').click();
+  await animalsPages.addresses.addParty(hubRole).click();
+};
+
 test.describe('Addresses are read-only in the journey', () => {
   test.describe('party picker add link', () => {
     for (const { hubRole, picker } of PARTY_ADD_LINK_CASES) {
       test.describe(hubRole, () => {
-        test.beforeEach(async ({ animalsJourney, animalsPages }) => {
-          await animalsJourney.startNotification();
-          await animalsJourney.unlockSections();
-
-          await animalsPages.overview.task('Roles and addresses').click();
-          await animalsPages.addresses.addParty(hubRole).click();
-        });
-
-        test('offers no INS add link in stub mode', async ({ animalsPages }) => {
+        test('offers no INS add link in stub mode', async ({ animalsJourney, animalsPages }) => {
           skipIfNonStubStackEnvironment('the INS add link is shown when animals-frontend runs outside stub mode (compose or CDP)');
+          await openPartyPicker(animalsJourney, animalsPages, hubRole);
           await expect(picker(animalsPages).saveAndContinue).toBeVisible();
           await expect(picker(animalsPages).addNewAddress).toHaveCount(0);
         });
 
-        test('links to INS to add an address when the full stack is running', async ({ pages, animalsPages }) => {
+        test('links to INS to add an address when the full stack is running', async ({ pages, animalsJourney, animalsPages }) => {
           skipUnlessNonStubStackEnvironment('the handshake link is only rendered outside stub mode (compose or CDP)');
+          await openPartyPicker(animalsJourney, animalsPages, hubRole);
           await expect(picker(animalsPages).saveAndContinue).toBeVisible();
           await expect(pages.page.getByRole('button', { name: /add.*address/i })).toHaveCount(0);
           await expect(picker(animalsPages).addNewAddress).toBeVisible();

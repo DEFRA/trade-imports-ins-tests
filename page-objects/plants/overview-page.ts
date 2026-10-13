@@ -31,6 +31,16 @@ export class PlantsOverviewPage extends PlantsNotificationPage {
     return this.page.getByRole('heading', { level: 2, name: /^[1-4]\. / });
   }
 
+  /** The one region that holds every numbered group; its name is never shown as a heading. */
+  get taskListRegion(): Locator {
+    return this.page.getByRole('region', { name: 'Notification tasklist', exact: true });
+  }
+
+  /** A numbered group's region, named by its caption, inside the task list region. */
+  groupRegion(caption: string): Locator {
+    return this.taskListRegion.getByRole('region', { name: caption, exact: true });
+  }
+
   /** A row is addressed through its link, which is the only text govukTaskList
    * gives it when the row carries no hint. */
   taskRowLink(title: string): Locator {

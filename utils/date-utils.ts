@@ -122,10 +122,19 @@ function todayInServiceZone(): { year: number; month: number; day: number } {
  * `arrivalWindow`. Use this when asserting against app output such as the date
  * picker's `data-min-date`.
  */
-export function getRelativeAppDateText({
+export function getRelativeAppDateText(options: Pick<RelativeDateTimeOptions, 'dayOffset' | 'monthOffset'> = {}): string {
+  const { day, month, year } = getRelativeAppDateParts(options);
+  return `${day}/${month}/${year}`;
+}
+
+/**
+ * Gives the same day as `getRelativeAppDateText`, as parts: `{ day, month, year }`
+ * strings with no leading zeros, the shape the frontend stores for a date answer.
+ */
+export function getRelativeAppDateParts({
   dayOffset = 0,
   monthOffset = 0,
-}: Pick<RelativeDateTimeOptions, 'dayOffset' | 'monthOffset'> = {}): string {
+}: Pick<RelativeDateTimeOptions, 'dayOffset' | 'monthOffset'> = {}): DateInput {
   const { year, month, day } = todayInServiceZone();
   const targetMonth = month - 1 + monthOffset;
   // Day 0 of the following month is the last day of the target month.
@@ -133,7 +142,11 @@ export function getRelativeAppDateText({
   const clamped = new Date(Date.UTC(year, targetMonth, Math.min(day, lastDayOfTargetMonth)));
   clamped.setUTCDate(clamped.getUTCDate() + dayOffset);
 
-  return `${clamped.getUTCDate()}/${clamped.getUTCMonth() + 1}/${clamped.getUTCFullYear()}`;
+  return {
+    day: String(clamped.getUTCDate()),
+    month: String(clamped.getUTCMonth() + 1),
+    year: String(clamped.getUTCFullYear()),
+  };
 }
 
 /**

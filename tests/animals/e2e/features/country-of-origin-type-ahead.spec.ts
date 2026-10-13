@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { originPageCountryNames } from '@domain/shared/fixtures/reference-data';
+import { animalsOriginPageCountryNames } from '@domain/shared/fixtures/reference-data';
 
 test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('filters as you type, submits the country code and persists it', async ({ animalsJourney, animalsPages }) => {
@@ -10,6 +10,8 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
     await expect(field).toBeVisible();
     await expect(field).toHaveRole('combobox');
     await expect(field).toHaveAccessibleName('Country of origin');
+    await expect(field).toHaveAttribute('placeholder', 'Search for a country');
+    await expect(animalsPages.originOfImport.countryHint).toHaveCount(0);
 
     // The type-ahead enhances a native select. The select stays in the DOM as the
     // no-JavaScript fallback and is what carries the code the form submits, so the
@@ -17,7 +19,7 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
     // origin country and territory.
     const fallback = animalsPages.originOfImport.countrySelect;
     await expect(fallback.locator('option').first()).toHaveText('Select a country');
-    await expect(fallback.locator('option')).toHaveCount(originPageCountryNames().length + 1);
+    await expect(fallback.locator('option')).toHaveCount(animalsOriginPageCountryNames().length + 1);
 
     await field.click();
     await field.fill('Belg');
@@ -35,5 +37,26 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
     await expect(fallback).toHaveValue('BE');
     // The chosen country is left sitting visibly in the search box on return.
     await expect(animalsPages.originOfImport.countryOfOrigin).toHaveValue('Belgium');
+  });
+});
+
+test.describe('Country of origin without JavaScript', { tag: '@duplicated-in-frontend' }, () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('shows no hint, begins with Select a country, and saves the chosen country', async ({ animalsJourney, animalsPages }) => {
+    await animalsJourney.startNotification();
+    await animalsPages.overview.task('Where is this consignment coming from?').click();
+
+    await expect(animalsPages.originOfImport.countryOfOrigin).toHaveAccessibleName('Country of origin');
+    await expect(animalsPages.originOfImport.countryHint).toHaveCount(0);
+    await expect(animalsPages.originOfImport.countrySelect.locator('option').first()).toHaveText('Select a country');
+
+    await animalsPages.originOfImport.selectCountry('Belgium');
+    await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
+    await animalsPages.originOfImport.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+
+    await animalsPages.overview.task('Where is this consignment coming from?').click();
+    await expect(animalsPages.originOfImport.countrySelect).toHaveValue('BE');
   });
 });

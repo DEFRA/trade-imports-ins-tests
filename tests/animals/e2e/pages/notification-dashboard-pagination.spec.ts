@@ -1,13 +1,11 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Dashboard pagination', () => {
-  test('uses GOV.UK pagination and reports the result range', async ({ animalsJourney, pages, animalsPages }) => {
-    await animalsJourney.toNotificationDashboard();
+  test('uses GOV.UK pagination and reports the result range', async ({ animalsSeededJourney, animalsJourney, pages, animalsPages }) => {
     for (let index = 0; index < 26; index += 1) {
-      await animalsPages.dashboard.btnCreateNewNotification.click();
-      await animalsPages.originOfImport.heading.waitFor();
-      await animalsPages.dashboard.open(false);
+      await animalsSeededJourney.createEmptyNotification();
     }
+    await animalsJourney.toNotificationDashboard();
 
     await expect(animalsPages.dashboard.totalResults).toHaveText(/^Showing 1 to 25 of \d+ Results$/);
     await expect(animalsPages.dashboard.linkNextPage).toBeVisible();

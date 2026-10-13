@@ -88,6 +88,26 @@ test.describe('High-risk plants start section', () => {
     await expect(plantsPages.overview.linkBack).toHaveAttribute('href', plantsPages.dashboard.expectedUrl);
   });
 
+  test('the Overview holds each numbered group in a named region inside one Notification tasklist region', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
+    await plantsJourney.startNotification();
+    await plantsJourney.toOverview();
+
+    await expect(plantsPages.overview.taskListRegion).toBeVisible();
+    await expect(plantsPages.overview.taskListRegion.getByRole('region')).toHaveCount(4);
+
+    for (const caption of ['1. About the consignment', '2. Arrival and destination', '3. Consignment parties', '4. Check and submit']) {
+      const group = plantsPages.overview.groupRegion(caption);
+      await expect(group.getByRole('heading', { level: 2, name: caption })).toBeVisible();
+      await expect(group.locator('.govuk-task-list')).toHaveCount(1);
+    }
+
+    await expect(pages.page.getByText('Notification tasklist')).toHaveCount(0);
+  });
+
   test('the new draft is listed on the dashboard and Resume reopens it', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.toOverview();

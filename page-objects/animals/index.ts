@@ -6,6 +6,7 @@ import { AnimalsAnimalIdentificationPage } from '@page-objects/animals/animal-id
 import { AnimalsArrivalDetailsPage } from '@page-objects/animals/arrival-details-page';
 import { AnimalsCommercialTransporterPage } from '@page-objects/animals/commercial-transporter-page';
 import { AnimalsCommoditySelectionPage } from '@page-objects/animals/commodity-selection-page';
+import { AnimalsConfirmationPage } from '@page-objects/animals/confirmation-page';
 import { AnimalsConsignmentDetailsPage } from '@page-objects/animals/consignment-details-page';
 import { AnimalsContactAddressPage } from '@page-objects/animals/contact-address-page';
 import { AnimalsCphNumberPage } from '@page-objects/animals/cph-number-page';
@@ -58,6 +59,7 @@ export function createAnimalsPages(page: Page) {
     contactAddressEdit: new AnimalsPartyEditPage(page, 'consignment/contact/edit', 'Contact address for consignment'),
     notificationView: new AnimalsNotificationViewPage(page),
     declaration: new AnimalsDeclarationPage(page),
+    confirmation: new AnimalsConfirmationPage(page),
     notificationCancelAmend: new AnimalsNotificationCancelAmendPage(page),
   };
 }

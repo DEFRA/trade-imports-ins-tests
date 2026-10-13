@@ -15,6 +15,15 @@ export class PlantsDeclarationPage extends PlantsNotificationPage {
       exact: true,
     });
   }
+  get confirmationGroup(): Locator {
+    return this.page.getByRole('group', { name: 'Declaration confirmation', exact: true });
+  }
+  get confirmationLegend(): Locator {
+    return this.confirmationGroup.locator('legend');
+  }
+  get confirmationCheckboxes(): Locator {
+    return this.confirmationGroup.locator('.govuk-checkboxes');
+  }
   get btnContinue(): Locator {
     return this.page.getByRole('button', { name: 'Continue', exact: true });
   }

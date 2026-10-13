@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
-const CHANGE_IMPORT_DETAILS = 'Change import details';
+const CHANGE_ORIGIN_OF_IMPORT = 'Change origin of import';
 const AMENDED_REFERENCE = 'AMENDED-REF';
 const AMEND = 'Amend';
 
@@ -36,7 +36,7 @@ test.describe('Amendment page endings', () => {
   }) => {
     const reference = await animalsSeededJourney.createAmendNotification();
     await animalsPages.notificationView.open(reference);
-    await animalsPages.notificationView.changeLink(CHANGE_IMPORT_DETAILS).click();
+    await animalsPages.notificationView.changeLink(CHANGE_ORIGIN_OF_IMPORT).click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
 
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
@@ -46,7 +46,7 @@ test.describe('Amendment page endings', () => {
     await animalsPages.originOfImport.saveAndReturn.click();
 
     await expect(pages.page).toHaveURL(/\/notification-view$/);
-    const importDetails = animalsPages.notificationView.summaryCard('Import details');
+    const importDetails = animalsPages.notificationView.summaryCard('Origin of import');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Internal reference number')).toHaveText(AMENDED_REFERENCE);
   });
 
@@ -57,7 +57,7 @@ test.describe('Amendment page endings', () => {
   }) => {
     const reference = await animalsSeededJourney.createAmendNotification();
     await animalsPages.notificationView.open(reference);
-    await animalsPages.notificationView.changeLink(CHANGE_IMPORT_DETAILS).click();
+    await animalsPages.notificationView.changeLink(CHANGE_ORIGIN_OF_IMPORT).click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
 
     await animalsPages.originOfImport.saveAndContinue.click();
@@ -109,7 +109,7 @@ test.describe('Amendment page endings', () => {
     await expect(animalsPages.originOfImport.cancelAndReturnToOverview).toBeVisible();
   });
 
-  test('Continue on an amend review with an answer missing stays on the review and shows There is a problem, naming what is missing', async ({
+  test('Continue on an amend review with an answer missing is refused, names what is missing and stays amending', async ({
     pages,
     animalsPages,
     animalsSeededJourney,
@@ -126,7 +126,6 @@ test.describe('Amendment page endings', () => {
     await animalsPages.notificationView.continueButton.click();
 
     await expect(pages.page).toHaveURL(/\/notification-view\?refused=1$/);
-    await expect(animalsPages.notificationView.errorSummary).toBeVisible();
     await expect(animalsPages.notificationView.errorSummary).toContainText('There is a problem');
     await expect(animalsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toBeVisible();
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);

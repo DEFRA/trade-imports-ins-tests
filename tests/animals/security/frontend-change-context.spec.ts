@@ -7,7 +7,7 @@ test.describe('Security scan (frontend, change context)', { tag: '@active' }, ()
     // elsewhere in this suite — no other spec sends this parameter.
     await animalsJourney.toReview();
 
-    await animalsPages.notificationView.changeLink('Change import details').click();
+    await animalsPages.notificationView.changeLink('Change origin of import').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
     await animalsPages.originOfImport.selectCountry('Belgium');
