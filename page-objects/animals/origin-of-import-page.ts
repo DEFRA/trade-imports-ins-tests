@@ -100,14 +100,6 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
   }
 
-  errorLinkNamed(message: string): Locator {
-    return this.page.getByRole('link', { name: message });
-  }
-
-  get regionCodeMaxLengthErrorLink(): Locator {
-    return this.page.getByRole('link', { name: 'Region of origin code must be 5 characters or less' });
-  }
-
   /** The Draft tag, which only a notification's strip carries. */
   get draftTag(): Locator {
     return this.journeyStrip.getByText('Draft');
@@ -151,5 +143,13 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
 
   get errorSummaryLinks(): Locator {
     return this.page.locator('.govuk-error-summary').getByRole('link');
+  }
+
+  errorLinkNamed(message: string): Locator {
+    return this.page.getByRole('link', { name: message });
+  }
+
+  get regionCodeMaxLengthErrorLink(): Locator {
+    return this.page.getByRole('link', { name: 'Region of origin code must be 5 characters or less' });
   }
 }

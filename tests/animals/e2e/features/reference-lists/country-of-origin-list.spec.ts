@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
-import { originPageCountryNames } from '@domain/shared/fixtures/reference-data';
+import { animalsOriginPageCountryNames } from '@domain/shared/fixtures/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
-test.describe('Country of origin list', { tag: ['@integration'] }, () => {
+test.describe('Country of origin list', () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment("the list is the stub's MDM fixture, which only the compose stack is sure to serve");
   });
@@ -14,11 +14,11 @@ test.describe('Country of origin list', { tag: ['@integration'] }, () => {
     await animalsJourney.startNotification();
     await animalsPages.overview.task('Where is this consignment coming from?').click();
 
-    await expect(animalsPages.originOfImport.countryOptions).toHaveText(originPageCountryNames());
+    await expect(animalsPages.originOfImport.countryOptions).toHaveText(animalsOriginPageCountryNames());
   });
 });
 
-test.describe('Country of origin list without JavaScript', { tag: ['@integration'] }, () => {
+test.describe('Country of origin list without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
   test.beforeEach(() => {
@@ -32,6 +32,6 @@ test.describe('Country of origin list without JavaScript', { tag: ['@integration
     await animalsJourney.startNotification();
     await animalsPages.overview.task('Where is this consignment coming from?').click();
 
-    await expect(animalsPages.originOfImport.countryOptions).toHaveText(originPageCountryNames());
+    await expect(animalsPages.originOfImport.countryOptions).toHaveText(animalsOriginPageCountryNames());
   });
 });

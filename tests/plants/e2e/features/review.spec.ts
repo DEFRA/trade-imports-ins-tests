@@ -1,9 +1,10 @@
 import { SET_BASES } from '@page-objects/shared/sets';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
+import { portByCode } from '@domain/shared/fixtures/reference-data';
 import type { PlantsPages, SharedPages } from '@page-objects';
 import type { PlantsJourney } from '@flows/plants/journey';
-import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
+import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { getRelativeServiceDisplayDate } from '@utils/date-utils';
 
 const POTATOES = 'Potatoes (seed or ware)';
@@ -17,22 +18,44 @@ function arrivalDate(days: number): string {
   return new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London' }).format(date);
 }
 
+type NotificationOptions = {
+  type?: string;
+  days?: number;
+  contact?: boolean;
+  /** The country the minted record carries. The address book API accepts any non-blank value; the journey does not. */
+  countryCode?: string;
+  /** The minted record's name. Must stay unique: the book is shared and never wiped. */
+  name?: string;
+  /** A record to pick instead of minting one, so two notifications can copy the same address. */
+  existing?: AddressBookRecord;
+};
+
 async function completeNotification(
   pages: SharedPages,
   plantsPages: PlantsPages,
   journey: PlantsJourney,
   api: AddressBookApiClient,
-  { type = POTATOES, days = 7, contact = true } = {},
+  {
+    type = POTATOES,
+    days = 7,
+    contact = true,
+    countryCode = 'GB',
+    name = `Review Nursery ${randomUUID()}`,
+    existing,
+  }: NotificationOptions = {},
 ) {
-  const address = await api.createAddress({
-    name: `Review Nursery ${randomUUID()}`,
-    addressLine1: '4 Nursery Lane',
-    townOrCity: 'Perth',
-    postcode: 'PH1 5EX',
-    countryCode: 'GB',
-    phone: '01738 555 0143',
-    email: 'review@example.co.uk',
-  });
+  const address =
+    existing ??
+    (await api.createAddress({
+      name,
+      addressLine1: '4 Nursery Lane',
+      townOrCity: 'Perth',
+      county: 'Perthshire',
+      postcode: 'PH1 5EX',
+      countryCode,
+      phone: '01738 555 0143',
+      email: 'review@example.co.uk',
+    }));
   const reference = await journey.startNotification();
   await journey.chooseCommodityType(type);
   if (type === POTATOES) {
@@ -50,7 +73,7 @@ async function completeNotification(
   if (type === POTATOES) {
     await journey.toArrivalDetails('France');
     await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-    await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour - GB ABD');
+    await plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
   } else {
     await journey.toArrivalStatus('Germany');
     await journey.answerArrivalStatus('Yes, it has already arrived');
@@ -110,13 +133,14 @@ async function amend(pages: SharedPages, plantsPages: PlantsPages, reference: st
   await expect(plantsPages.overview.cancelAmend).toBeVisible();
 }
 
-test.describe('High-risk plants check and submit section', { tag: '@integration' }, () => {
+test.describe('High-risk plants check and submit section', () => {
   test('review stays blocked until the final required row is complete', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
     const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { contact: false });
-    await expect(plantsPages.notificationView.errorSummary).toContainText('Complete contact address for consignment');
+    const contactEntry = plantsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete contact', exact: true });
+    await expect(contactEntry).toHaveAttribute('href', '#contact');
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
-    await expect(plantsPages.notificationView.errorSummary).toContainText('Complete contact address for consignment');
+    await expect(contactEntry).toBeVisible();
     await plantsPages.overview.open(reference);
     const review = plantsPages.overview.taskRowByTitle('Check and submit');
     await expect(review).toContainText('Cannot start yet');
@@ -148,7 +172,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(contact).toContainText(address.name);
     await expect(plantsPages.notificationView.rowValue('Contact', 'Address')).toHaveJSProperty(
       'innerText',
-      '4 Nursery Lane\nPerth\nPH1 5EX\nUnited Kingdom',
+      '4 Nursery Lane\nPerth\nPerthshire\nPH1 5EX\nUnited Kingdom',
     );
     await expect(contact).not.toContainText('01738 555 0143');
     await expect(contact).not.toContainText('review@example.co.uk');
@@ -156,7 +180,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     const destination = plantsPages.notificationView.card('Place of destination');
     await expect(plantsPages.notificationView.rowValue('Place of destination', 'Address')).toHaveJSProperty(
       'innerText',
-      '4 Nursery Lane\nPerth\nPH1 5EX\nUnited Kingdom',
+      '4 Nursery Lane\nPerth\nPerthshire\nPH1 5EX\nUnited Kingdom',
     );
     await expect(destination).not.toContainText('01738 555 0143');
     await expect(destination).not.toContainText('review@example.co.uk');
@@ -197,9 +221,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(plantsPages.overview.statusTag).toHaveText('Submitted');
     await expect(plantsPages.confirmation.notificationDate).toBeVisible();
     await expect(plantsPages.confirmation.content).toContainText(
-      new RegExp(
-        `Date of notification[^0-9]{0,20}(${getRelativeServiceDisplayDate(-1)}|${getRelativeServiceDisplayDate()}|${getRelativeServiceDisplayDate(1)})`,
-      ),
+      new RegExp(`Date of notification[^0-9]{0,20}(${getRelativeServiceDisplayDate()}|${getRelativeServiceDisplayDate(1)})`),
     );
     await expect(plantsPages.confirmation.lateBanner).toHaveCount(0);
     await plantsPages.confirmation.viewNotification.click();
@@ -271,7 +293,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
   });
 
-  test('a deleted destination renders Not provided on CYA and blocks submission', async ({
+  test('a destination deleted from the address book keeps its copy on CYA and submits', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -282,14 +304,19 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await addressBookApi.deleteAddress(address.id);
     await pages.page.reload();
     const destination = plantsPages.notificationView.card('Place of destination');
-    await expect(destination.getByText('Not provided', { exact: true })).toHaveCount(2);
-    await expect(destination).not.toContainText(address.name);
-    await plantsPages.notificationView.btnContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
-    await expect(plantsPages.notificationView.errorSummary).toContainText('Select an address for the place of destination');
+    await expect(destination).toContainText(address.name);
+    await expect(destination).toContainText('PH1 5EX');
+    await submit(plantsPages);
+    await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrl(reference));
+
+    // The submitted notification keeps the copy even though its record is gone.
+    await plantsPages.confirmation.viewNotification.click();
+    await assertReadOnly(plantsPages, reference);
+    await expect(destination).toContainText(address.name);
+    await expect(destination).toContainText('PH1 5EX');
   });
 
-  test('editing a linked address in the address book changes what the notification shows', async ({
+  test('editing the record in the address book does not change what the notification shows', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -299,17 +326,8 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     const originalName = address.name;
     const renamed = `Renamed Holding ${randomUUID()}`;
 
-    await plantsPages.placeOfDestination.open(reference);
-    await expect(plantsPages.placeOfDestination.selectedAddress(originalName)).toBeVisible();
-    await plantsPages.notificationView.open(reference);
-    const destination = plantsPages.notificationView.card('Place of destination');
-    await expect(destination).toContainText(originalName);
-    await expect(destination).toContainText('Perth');
-    await expect(destination).toContainText('PH1 5EX');
-
-    // The notification stores the address-book id only. Editing the record
-    // behind the journey's back must change what the picker inset and CYA
-    // card show; a copy taken at selection would still read the old details.
+    // The notification holds a copy taken when the address was picked, so a
+    // later change to the record must not reach the picker card or CYA.
     await addressBookApi.updateAddress(address.id, {
       name: renamed,
       addressLine1: '4 Nursery Lane',
@@ -321,16 +339,16 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     });
 
     await plantsPages.placeOfDestination.open(reference);
-    await expect(plantsPages.placeOfDestination.selectedAddress(renamed)).toBeVisible();
-    await expect(plantsPages.placeOfDestination.selectedAddress(originalName)).toHaveCount(0);
+    await expect(plantsPages.placeOfDestination.currentAddress).toContainText(originalName);
+    await expect(plantsPages.placeOfDestination.currentAddress).not.toContainText(renamed);
 
     await plantsPages.notificationView.open(reference);
-    await expect(destination).toContainText(renamed);
-    await expect(destination).toContainText('Dundee');
-    await expect(destination).toContainText('DD1 1AA');
-    await expect(destination).not.toContainText(originalName);
-    await expect(destination).not.toContainText('Perth');
-    await expect(destination).not.toContainText('PH1 5EX');
+    const destination = plantsPages.notificationView.card('Place of destination');
+    await expect(destination).toContainText(originalName);
+    await expect(destination).toContainText('Perth');
+    await expect(destination).toContainText('PH1 5EX');
+    await expect(destination).not.toContainText(renamed);
+    await expect(destination).not.toContainText('Dundee');
   });
 
   for (const source of ['dashboard', 'CYA', 'question page']) {
@@ -578,7 +596,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
     await expect(plantsPages.arrivalDetails.linkBack).toHaveAttribute('href', plantsPages.overview.expectedUrl(reference));
 
-    await plantsPages.arrivalDetails.btnSaveAndReturnToOverview.click();
+    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
   });
 
@@ -603,7 +621,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await plantsPages.placeOfDestination.open(reference);
     await expect(plantsPages.placeOfDestination.saveAndReturn).toBeVisible();
     await expect(plantsPages.placeOfDestination.btnSaveAndContinue).toBeVisible();
-    await expect(plantsPages.placeOfDestination.btnSaveAndReturnToOverview).toHaveCount(0);
+    await expect(plantsPages.placeOfDestination.saveAndReturnToOverview).toHaveCount(0);
 
     await plantsPages.consignmentContactSelect.open(reference);
     await expect(plantsPages.consignmentContactSelect.saveAndReturn).toBeVisible();
@@ -708,14 +726,194 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
 
     await plantsPages.arrivalDetails.open(reference);
     await plantsPages.arrivalDetails.arrivalDate.fill('');
-    await plantsPages.arrivalDetails.btnSaveAndReturnToOverview.click();
+    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(plantsPages.overview.taskRow('Arrival details')).toContainText('In progress');
+
     await plantsPages.notificationView.open(reference);
     await expect(plantsPages.notificationView.errorSummary).toHaveCount(0);
 
     await plantsPages.notificationView.btnContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
-    await expect(plantsPages.notificationView.errorSummary).toContainText('Complete arrival details');
+    await expect(plantsPages.notificationView.errorSummary).toContainText('There is a problem');
+    await expect(plantsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toHaveAttribute(
+      'href',
+      '#arrival-details',
+    );
     await expect(plantsPages.overview.statusTag).toHaveText('Amend');
+  });
+});
+
+test.describe('High-risk plants copied addresses are edited on the notification', () => {
+  test('Edit details on CYA changes only this notification, not the address book record or another notification', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    test.slow();
+    const { reference: otherReference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { existing: address });
+    const editedName = `Edited Holding ${randomUUID()}`;
+
+    await plantsPages.notificationView.open(reference);
+    await plantsPages.notificationView.editDetails('Place of destination').click();
+    const form = plantsPages.placeOfDestinationEdit;
+    await expect(form.heading).toBeVisible();
+    await form.fill({ name: editedName, townOrCity: 'Dundee', postcode: 'DD1 1AA' });
+    await form.saveChanges.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    const destination = plantsPages.notificationView.card('Place of destination');
+    await expect(destination).toContainText(editedName);
+    await expect(destination).toContainText('Dundee');
+    await expect(destination).not.toContainText('PH1 5EX');
+
+    expect(await addressBookApi.getAddress(address.id)).toMatchObject({ name: address.name, townOrCity: 'Perth', deleted: false });
+
+    await plantsPages.notificationView.open(otherReference);
+    await expect(destination).toContainText(address.name);
+    await expect(destination).not.toContainText(editedName);
+  });
+
+  test('the edit form opens from the picker with every field, including County', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+
+    await plantsPages.consignmentContactSelect.open(reference);
+    await expect(plantsPages.consignmentContactSelect.currentAddress).toContainText(address.name);
+    await plantsPages.consignmentContactSelect.editCurrentAddress.click();
+
+    const form = plantsPages.contactAddressEdit;
+    await expect(form.heading).toBeVisible();
+    await expect(form.roleCaption).toBeVisible();
+    await expect(form.name).toHaveValue(address.name);
+    await expect(form.addressLine1).toHaveValue('4 Nursery Lane');
+    await expect(form.addressLine2).toHaveValue('');
+    await expect(form.townOrCity).toHaveValue('Perth');
+    await expect(form.county).toHaveValue('Perthshire');
+    await expect(form.postcode).toHaveValue('PH1 5EX');
+    await expect(form.country).toHaveValue('GB');
+    await expect(form.phone).toHaveValue('01738 555 0143');
+    await expect(form.email).toHaveValue('review@example.co.uk');
+
+    // Cancel goes back to the picker it was opened from, leaving the copy as it was.
+    await form.fill({ name: 'Never Saved Ltd' });
+    await form.cancel.click();
+    await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrl(reference));
+    await expect(plantsPages.consignmentContactSelect.currentAddress).toContainText(address.name);
+    await expect(plantsPages.consignmentContactSelect.currentAddress).not.toContainText('Never Saved Ltd');
+  });
+
+  test('the consignor picker shows the copied address and its Edit details opens the consignor edit form', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, {
+      type: PLANTS,
+      days: -1,
+    });
+
+    await plantsPages.consignorSelect.open(reference);
+    await expect(plantsPages.consignorSelect.currentAddress).toContainText(address.name);
+    await expect(plantsPages.consignorSelect.currentAddress).toContainText('PH1 5EX');
+    await plantsPages.consignorSelect.editCurrentAddress.click();
+
+    const form = plantsPages.consignorEdit;
+    await expect(pages.page).toHaveURL((url) => url.pathname === form.expectedUrl(reference));
+    await expect(form.heading).toBeVisible();
+    await expect(form.roleCaption).toBeVisible();
+    await expect(form.name).toHaveValue(address.name);
+    await expect(form.postcode).toHaveValue('PH1 5EX');
+  });
+
+  test('an edit that breaks the address book rules is refused with its messages, and nothing is saved', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+
+    await plantsPages.notificationView.open(reference);
+    await plantsPages.notificationView.editDetails('Place of destination').click();
+    const form = plantsPages.placeOfDestinationEdit;
+    await form.fill({ name: '', postcode: 'PH1 5EX 12345', email: 'not-an-email' });
+    await form.saveChanges.click();
+
+    await expect(form.heading).toBeVisible();
+    await expect(form.errorSummary).toContainText('Enter a name');
+    await expect(form.errorSummary).toContainText('Postcode must be 12 characters or fewer');
+    await expect(form.errorSummary).toContainText('Enter an email address in the correct format');
+    await expect(form.name).toHaveAccessibleDescription(/Enter a name/);
+    await expect(form.postcode).toHaveAccessibleDescription(/Postcode must be 12 characters or fewer/);
+    await expect(form.email).toHaveAccessibleDescription(/Enter an email address in the correct format/);
+
+    await plantsPages.notificationView.open(reference);
+    const destination = plantsPages.notificationView.card('Place of destination');
+    await expect(destination).toContainText(address.name);
+    await expect(destination).not.toContainText('PH1 5EX 12345');
+  });
+
+  test('a copied address that breaks the address book rules blocks Continue and Submit until it is corrected', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    test.slow();
+    // The address book API takes any non-blank country, so a record can hold a
+    // country name where the journey expects a code. Named for what it is, since
+    // it stays in the shared book for anyone picking addresses by hand.
+    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, {
+      countryCode: 'United Kingdom',
+      name: `Invalid address (country "United Kingdom" is not a code) ${randomUUID()}`,
+    });
+    // The same record was picked for the destination and the contact, so both copies break the rules.
+    const error = 'Correct the address details for the place of destination';
+    const contactError = 'Correct the contact address details for this consignment';
+
+    await expectReview(plantsPages);
+    await expect(plantsPages.notificationView.errorSummary).toContainText(error);
+    await expect(plantsPages.notificationView.errorSummary).toContainText(contactError);
+    // The card says which field to correct, against the row that holds it.
+    await expect(plantsPages.notificationView.row('Place of destination', 'Address')).toContainText('Enter a valid country');
+    await expect(plantsPages.notificationView.row('Place of destination', 'Name')).not.toContainText('Enter');
+    await plantsPages.notificationView.btnContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(plantsPages.notificationView.errorSummary).toContainText(error);
+
+    // A bookmarked declaration cannot submit what the review refuses.
+    await plantsPages.declaration.open(reference);
+    await plantsPages.declaration.checkbox.check();
+    await plantsPages.declaration.btnContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(plantsPages.notificationView.statusTag).toHaveText('Draft');
+
+    // Correcting one address clears its own error and leaves the other.
+    await plantsPages.notificationView.errorSummary.getByRole('link', { name: error }).click();
+    await expect(plantsPages.placeOfDestinationEdit.heading).toBeVisible();
+    await plantsPages.placeOfDestinationEdit.country.selectOption('GB');
+    await plantsPages.placeOfDestinationEdit.saveChanges.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(plantsPages.notificationView.errorSummary).not.toContainText(error);
+    await expect(plantsPages.notificationView.errorSummary).toContainText(contactError);
+
+    await plantsPages.notificationView.errorSummary.getByRole('link', { name: contactError }).click();
+    await expect(plantsPages.contactAddressEdit.heading).toBeVisible();
+    await plantsPages.contactAddressEdit.country.selectOption('GB');
+    await plantsPages.contactAddressEdit.saveChanges.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(plantsPages.notificationView.errorSummary).toHaveCount(0);
+    await submit(plantsPages);
   });
 });

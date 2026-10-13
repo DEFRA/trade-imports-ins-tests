@@ -28,18 +28,6 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.page.getByRole('link', { name, exact: true });
   }
 
-  // Every task row's status tag, so a spec can count the rows the overview draws.
-  get taskStatuses(): Locator {
-    return this.page.locator('.govuk-task-list__status');
-  }
-
-  taskStatus(name: string): Locator {
-    return this.page
-      .locator('.govuk-task-list__item')
-      .filter({ has: this.page.getByRole('link', { name, exact: true }) })
-      .locator('.govuk-task-list__status');
-  }
-
   taskListHeading(name: string): Locator {
     return this.page.getByRole('heading', { level: 2, name, exact: true });
   }
@@ -85,5 +73,17 @@ export class AnimalsOverviewPage extends NotificationPage {
   /** Every link in the page body whose address contains the fragment. */
   linksTo(fragment: string): Locator {
     return this.page.locator(`main a[href*="${fragment}"]`);
+  }
+
+  // Every task row's status tag, so a spec can count the rows the overview draws.
+  get taskStatuses(): Locator {
+    return this.page.locator('.govuk-task-list__status');
+  }
+
+  taskStatus(name: string): Locator {
+    return this.page
+      .locator('.govuk-task-list__item')
+      .filter({ has: this.page.getByRole('link', { name, exact: true }) })
+      .locator('.govuk-task-list__status');
   }
 }

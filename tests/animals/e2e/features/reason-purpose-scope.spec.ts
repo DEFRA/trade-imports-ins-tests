@@ -6,7 +6,7 @@ const TO_DO = 'To do';
 const IMPORT_REASON_TASK = 'Main import reason';
 const ADDITIONAL_DETAILS_TASK = 'Additional details';
 
-test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Reason and purpose scope', { tag: '@duplicated-in-frontend' }, () => {
   test('purpose is owed only for the internal market and is wiped when the reason changes', async ({
     animalsJourney,
     pages,
@@ -34,8 +34,8 @@ test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-i
     // reason, so the walk answers them on the same submit.
     await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await animalsPages.importReason.reason('Transit').check();
-    await animalsPages.importReason.transitPortOfExit.selectOption({ index: 1 });
-    await animalsPages.importReason.transitDestinationCountry.selectOption('FR');
+    await animalsPages.importReason.selectTransitPortOfExitByIndex(2);
+    await animalsPages.importReason.selectTransitDestinationCountry('FR');
     await animalsPages.importReason.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.taskStatus(IMPORT_REASON_TASK)).toHaveText(COMPLETE);
@@ -88,7 +88,7 @@ test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-i
 
     await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await animalsPages.importReason.reason('Transhipment or onward travel').check();
-    await animalsPages.importReason.transhipmentDestinationCountry.selectOption('FR');
+    await animalsPages.importReason.selectTranshipmentDestinationCountry('FR');
     await animalsPages.importReason.saveAndContinue.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
@@ -106,7 +106,7 @@ test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-i
     await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await animalsPages.importReason.reason('Temporary admission horses').check();
     await animalsPages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
-    await animalsPages.importReason.temporaryAdmissionPortOfExit.selectOption({ index: 1 });
+    await animalsPages.importReason.selectTemporaryAdmissionPortOfExitByIndex(1);
     await animalsPages.importReason.saveAndContinue.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();

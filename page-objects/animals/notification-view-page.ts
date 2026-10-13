@@ -20,6 +20,46 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Review your notification' });
   }
 
+  /** The heading while a template is being created: the same page in template mode. */
+  get templateHeading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'Review your template' });
+  }
+
+  get btnSaveTemplate(): Locator {
+    return this.page.getByRole('button', { name: 'Save template', exact: true });
+  }
+
+  get sectionHeadings(): Locator {
+    return this.page.getByRole('main').getByRole('heading', { level: 2 });
+  }
+
+  get cardErrors(): Locator {
+    return this.page.locator('.govuk-summary-card .govuk-error-message');
+  }
+
+  get missingValues(): Locator {
+    return this.page.locator('.app-summary-list__value--missing');
+  }
+
+  /** The row terms of one card. */
+  cardKeys(card: string): Locator {
+    return this.summaryCard(card).locator('.govuk-summary-list__key');
+  }
+
+  /** The value of the card's row whose term is exactly `key`. */
+  rowValue(card: string, key: string): Locator {
+    return this.summaryCard(card)
+      .locator('.govuk-summary-list__row')
+      .filter({ has: this.page.getByRole('term').and(this.page.getByText(key, { exact: true })) })
+      .getByRole('definition')
+      .first();
+  }
+
+  /** A card by its title alone, so a card of another name never matches by its content. */
+  cardTitled(title: string): Locator {
+    return this.page.locator('.govuk-summary-card__title', { hasText: title });
+  }
+
   /** The level-1 heading of a submitted notification's view, named exactly its reference. */
   viewHeading(reference: string): Locator {
     return this.page.getByRole('heading', { level: 1, name: reference, exact: true });
@@ -59,51 +99,6 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   get statusBarCancelAmend(): Locator {
     return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
-  }
-
-  /** The heading while a template is being created: the same page in template mode. */
-  get templateHeading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Review your template' });
-  }
-
-  /** The status bar's tag, which reads Template while a template is being created. */
-  get journeyStripTag(): Locator {
-    return this.journeyStrip.locator('.govuk-tag');
-  }
-
-  get btnSaveTemplate(): Locator {
-    return this.page.getByRole('button', { name: 'Save template', exact: true });
-  }
-
-  get sectionHeadings(): Locator {
-    return this.page.getByRole('main').getByRole('heading', { level: 2 });
-  }
-
-  get cardErrors(): Locator {
-    return this.page.locator('.govuk-summary-card .govuk-error-message');
-  }
-
-  get missingValues(): Locator {
-    return this.page.locator('.app-summary-list__value--missing');
-  }
-
-  /** The row terms of one card. */
-  cardKeys(card: string): Locator {
-    return this.summaryCard(card).locator('.govuk-summary-list__key');
-  }
-
-  /** The value of the card's row whose term is exactly `key`. */
-  rowValue(card: string, key: string): Locator {
-    return this.summaryCard(card)
-      .locator('.govuk-summary-list__row')
-      .filter({ has: this.page.getByRole('term').and(this.page.getByText(key, { exact: true })) })
-      .getByRole('definition')
-      .first();
-  }
-
-  /** A card by its title alone, so a card of another name never matches by its content. */
-  cardTitled(title: string): Locator {
-    return this.page.locator('.govuk-summary-card__title', { hasText: title });
   }
 
   get referenceNumberCaption(): Locator {

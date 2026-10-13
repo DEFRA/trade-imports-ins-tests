@@ -4,7 +4,7 @@ import { getRelativeServiceDisplayDate } from '@utils/date-utils';
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
 const EXACT_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
 
-test.describe('Notification view states', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, () => {
   test.describe('DRAFT', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
       await animalsSeededJourney.createDraftNotification('unlocked');
@@ -96,7 +96,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     test('Continue: when the notification is unfinished, stays put and names what is left', async ({ pages, animalsPages }) => {
       await animalsPages.notificationView.continueButton.click();
 
-      await expect(pages.page).toHaveURL(/\/notification-view$/);
+      await expect(pages.page).toHaveURL(/\/notification-view\?refused=1$/);
       await expect(animalsPages.notificationView.errorSummary).toBeVisible();
       await expect(animalsPages.notificationView.errorSummary).toContainText('There is a problem');
       await expect(animalsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toBeVisible();

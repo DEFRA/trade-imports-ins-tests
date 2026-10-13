@@ -5,7 +5,7 @@ import { getRelativeAppDateParts } from '@utils/date-utils';
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
 const NO_LONGER_IN_WINDOW = 'The saved arrival date is no longer a date you can choose. Enter a new arrival date.';
 
-test.describe('Arrival details when the saved arrival date goes stale', { tag: ['@integration'] }, () => {
+test.describe('Arrival details when the saved arrival date goes stale', () => {
   test('overview: when the saved arrival date is now more than 7 days in the past, Arrival details reads To do and the page names the date', async ({
     pages,
     animalsPages,

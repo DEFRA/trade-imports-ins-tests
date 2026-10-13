@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { portByCode } from '@domain/shared/fixtures/reference-data';
 import type { PlantsJourney } from '@flows/plants/journey';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
@@ -57,9 +58,9 @@ const ARRIVING_ON = '27/3/2027';
 const ARRIVING_AT = '14:30';
 
 // A port the reference data has held throughout, offered as "{name} - {code}".
-const ABERDEEN_HARBOUR = 'Aberdeen Harbour - GB ABD';
-const PORT_OF_DOVER = 'Port of Dover - GB DVR';
-const PORT_OF_DOVER_CODE = 'GB DVR';
+const ABERDEEN_HARBOUR = portByCode('GB ABD').display;
+const PORT_OF_DOVER = portByCode('GB DVR').display;
+const PORT_OF_DOVER_CODE = portByCode('GB DVR').value;
 
 // The window is four days (reg 26(1)), and the hint is the only place a trader
 // reads it — so it is matched in full rather than on the number alone.
@@ -105,7 +106,7 @@ const toPotatoArrivalDetails = async (plantsJourney: PlantsJourney): Promise<str
   return reference;
 };
 
-test.describe('High-risk plants arrival section', { tag: '@integration' }, () => {
+test.describe('High-risk plants arrival section', () => {
   test('the arrival-status question offers both branches, and the post-arrival one quotes the window', async ({
     pages,
     plantsPages,
@@ -271,10 +272,10 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
   }) => {
     const reference = await toPotatoArrivalDetails(plantsJourney);
 
-    await plantsPages.arrivalDetails.btnSaveAndReturnToOverview.click();
+    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
-    await expect(plantsPages.overview.taskRow(ARRIVAL_TASK_ROW)).not.toContainText('Completed');
+    await expect(plantsPages.overview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Not yet started');
   });
 
   test('save and return to overview: when the time is not on the 24-hour clock, refuses the save', async ({
@@ -287,7 +288,7 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVING_ON);
     await plantsPages.arrivalDetails.arrivalTime.fill(NOT_ON_THE_CLOCK);
     await plantsPages.arrivalDetails.selectPlaceOfLanding(ABERDEEN_HARBOUR);
-    await plantsPages.arrivalDetails.btnSaveAndReturnToOverview.click();
+    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
     await expect(plantsPages.arrivalDetails.errorSummary).toContainText(REAL_TIME_ERROR);
@@ -308,7 +309,7 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
 
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVED_ON);
-    await plantsPages.arrivalDetails.btnSaveAndReturnToOverview.click();
+    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
 

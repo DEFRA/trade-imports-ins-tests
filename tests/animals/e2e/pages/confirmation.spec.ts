@@ -1,14 +1,18 @@
 import { test, expect } from '@fixtures';
 import { commercialInvoiceDocument } from '@domain/animals/fixtures/seeded-journey';
 
-test.describe('Import notification submitted page', { tag: ['@integration'] }, () => {
-  test('a notification not yet submitted goes to its declaration', async ({ pages, animalsSeededJourney, animalsPages }) => {
+test.describe('Import notification submitted page', () => {
+  test('a notification not yet submitted goes by its declaration to the review it must pass first', async ({
+    pages,
+    animalsSeededJourney,
+    animalsPages,
+  }) => {
     const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
 
     await animalsPages.confirmation.open(referenceNumber);
 
-    await expect(pages.page).toHaveURL(animalsPages.declaration.expectedUrl(referenceNumber));
-    await expect(animalsPages.declaration.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrl(referenceNumber));
+    await expect(animalsPages.notificationView.heading).toBeVisible();
   });
 
   test('submitted with no document: asks for the ITAHC and tells the trader they can view or change it from the dashboard', async ({

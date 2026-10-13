@@ -1,14 +1,13 @@
 import { test, expect } from '@fixtures';
 
-test.describe('INS page titles', { tag: '@integration' }, () => {
+test.describe('INS page titles', { tag: '@duplicated-in-frontend' }, () => {
   test('the home is titled Dashboard - Import notification service - GOV.UK', async ({ pages, insPages }) => {
     // Given a signed-in trader
     // When they open the home
     await insPages.dashboard.open();
 
-    // Then the title names the page, then the service, then GOV.UK, with no pipe
+    // Then the title names the page, then the service, then GOV.UK
     await expect(pages.page).toHaveTitle('Dashboard - Import notification service - GOV.UK');
-    await expect(pages.page).not.toHaveTitle(/\|/);
   });
 
   test('the address book follows the same title pattern', async ({ pages, insPages }) => {

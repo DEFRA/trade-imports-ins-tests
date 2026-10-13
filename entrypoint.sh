@@ -11,7 +11,7 @@
 #   security:active     — refused; the @active suite is destructive, so it only
 #                         runs against the disposable docker-compose stack
 #
-# Or scoped to one domain's Playwright project, as <domain>:<suite>:
+# Or scoped to one domain's test directory (tests/<domain>/), as <domain>:<suite>:
 #   domain — animals, animals-admin, ins, plants
 #   suite  — e2e, a11y, security, security:active, dynamics (same behaviour as above)
 # e.g. animals:a11y, ins:security, plants:e2e, animals:dynamics
@@ -23,10 +23,16 @@ echo "run_id: $RUN_ID"
 PROFILE="${PROFILE:-default}"
 requested_profile="$PROFILE"
 domain="${PROFILE%%:*}"
-PROJECT_ARG=""
+SUITE_PATH=""
 case " $DOMAINS " in
   *" $domain "*)
-    PROJECT_ARG="--project=$domain"
+    # The trailing slash matters: Playwright treats the path as a regex, so
+    # tests/animals would also select tests/animals-admin.
+    SUITE_PATH="tests/$domain/"
+    if [ ! -d "$SUITE_PATH" ]; then
+      echo "no test directory '$SUITE_PATH' for PROFILE '${requested_profile}'"
+      exit 1
+    fi
     # config/zap.ts keys off the bare suite (security / security:active), so
     # the domain prefix must not reach the Node side.
     case "${PROFILE#*:}" in
@@ -145,9 +151,9 @@ run_security_profile() {
     # its own.
     if [ "$PROFILE" = "security:active" ]; then
       # Unreachable on CDP — refused at the top of this function.
-      npm run test:security:active ${PROJECT_ARG:+-- "$PROJECT_ARG"} && npm run _zap_run_and_gate
+      npm run test:security:active ${SUITE_PATH:+-- "$SUITE_PATH"} && npm run _zap_run_and_gate
     else
-      npm run test:security ${PROJECT_ARG:+-- "$PROJECT_ARG"} && npm run _zap_run_and_gate
+      npm run test:security ${SUITE_PATH:+-- "$SUITE_PATH"} && npm run _zap_run_and_gate
     fi
     security_exit_code=$?
     if [ $security_exit_code -ne 0 ]; then
@@ -221,13 +227,13 @@ case "$PROFILE" in
   default)
     # Record a non-zero npm test exit in the FAILED marker: a run that dies
     # before Playwright starts must not report a pass.
-    npm test ${PROJECT_ARG:+-- "$PROJECT_ARG"} || echo "npm test exited $? before completing" >> FAILED
+    npm test ${SUITE_PATH:+-- "$SUITE_PATH"} || echo "npm test exited $? before completing" >> FAILED
     ;;
   a11y)
-    npm run test:a11y ${PROJECT_ARG:+-- "$PROJECT_ARG"} || echo "npm run test:a11y exited $? before completing" >> FAILED
+    npm run test:a11y ${SUITE_PATH:+-- "$SUITE_PATH"} || echo "npm run test:a11y exited $? before completing" >> FAILED
     ;;
   dynamics)
-    npm run test:dynamics ${PROJECT_ARG:+-- "$PROJECT_ARG"} || echo "npm run test:dynamics exited $? before completing" >> FAILED
+    npm run test:dynamics ${SUITE_PATH:+-- "$SUITE_PATH"} || echo "npm run test:dynamics exited $? before completing" >> FAILED
     ;;
   browserstack)
     echo "browserstack profile runs are not implemented yet."

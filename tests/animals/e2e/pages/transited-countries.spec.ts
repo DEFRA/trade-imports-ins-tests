@@ -5,7 +5,7 @@ import { test, expect } from '@fixtures';
 
 const TRANSIT_BROWSER_TITLE = 'Transit countries - Import notification service - GOV.UK';
 
-test.describe('Transited countries page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toTransitedCountries();
   });
@@ -93,7 +93,7 @@ const addTerritoryAndReopen = async (page: Page, transited: AnimalsTransitedCoun
   await expect(transited.row(name)).toBeVisible();
 };
 
-test.describe('Transited countries page — territories', { tag: ['@integration'] }, () => {
+test.describe('Transited countries page — territories', () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toTransitedCountries();
   });
@@ -106,7 +106,7 @@ test.describe('Transited countries page — territories', { tag: ['@integration'
   });
 });
 
-test.describe('Transited countries page — territories without JavaScript', { tag: ['@integration'] }, () => {
+test.describe('Transited countries page — territories without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
   test.beforeEach(async ({ animalsJourney }) => {
@@ -121,7 +121,7 @@ test.describe('Transited countries page — territories without JavaScript', { t
   });
 });
 
-test.describe('Transited countries page — how it is reached', { tag: ['@integration'] }, () => {
+test.describe('Transited countries page — how it is reached', () => {
   test('back link goes to arrival details when the page was reached by Save and continue on arrival details', async ({
     animalsJourney,
     animalsPages,

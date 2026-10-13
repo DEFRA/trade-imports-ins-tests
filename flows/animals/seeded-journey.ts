@@ -19,6 +19,15 @@ import { SET_BASES } from '@page-objects/shared/sets';
 
 export const CREATE_PATH = `${SET_BASES.liveAnimals}/notifications`;
 const CREATED_AT_ORIGIN = new RegExp(`^${CREATE_PATH}/(?<journeyId>[^/]+)/origin$`);
+const CONCURRENCY_TOKEN_FIELD = /name="concurrencyToken" value="(?<token>[^"]+)"/;
+
+const concurrencyTokenIn = (html: string, slug: string): string => {
+  const token = CONCURRENCY_TOKEN_FIELD.exec(html)?.groups?.token;
+  if (!token) {
+    throw new Error(`The ${slug} page rendered no concurrencyToken field, so there is nothing to declare against.`);
+  }
+  return token;
+};
 
 /**
  * Seeds through the frontend's save-and-continue routes, never the backend: only the frontend
@@ -94,10 +103,16 @@ export class AnimalsSeededJourney {
   }
 
   private async declare(journeyId: string): Promise<void> {
+    const declarationPath = `${CREATE_PATH}/${journeyId}/${declarationStep.slug}`;
+    const review = await this.forms.getPageHtml(`${CREATE_PATH}/${journeyId}/${declarationStep.reviewSlug}`);
+    const concurrencyToken = concurrencyTokenIn(review, declarationStep.reviewSlug);
+    const declaration = await this.forms.postFormReturningHtml(declarationPath, { ...declarationStep.review, concurrencyToken });
     // redirectsTo is the assertion: a refused submission lands back on check-your-answers, not the confirmation.
-    await this.forms.postForm(`${CREATE_PATH}/${journeyId}/${declarationStep.slug}`, declarationStep.form, {
-      redirectsTo: /\/confirmation$/,
-    });
+    await this.forms.postForm(
+      declarationPath,
+      { ...declarationStep.declare, concurrencyToken: concurrencyTokenIn(declaration, declarationStep.slug) },
+      { redirectsTo: /\/confirmation$/ },
+    );
   }
 
   async createAmendNotification(): Promise<string> {

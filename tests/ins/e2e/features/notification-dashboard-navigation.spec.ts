@@ -3,7 +3,7 @@ import { SET_BASES } from '@page-objects/shared/sets';
 import { test, expect } from '@fixtures';
 import { timeouts } from '@config/timeouts';
 
-test.describe('INS dashboard notification navigation', { tag: ['@integration'] }, () => {
+test.describe('INS dashboard notification navigation', () => {
   test('viewing a notification submitted without its health certificate from the INS dashboard opens its read-only view in the owning journey frontend', async ({
     animalsJourney,
     journeyContext,

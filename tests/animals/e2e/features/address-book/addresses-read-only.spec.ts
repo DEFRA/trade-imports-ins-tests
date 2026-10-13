@@ -35,7 +35,7 @@ const openPartyPicker = async (
   await animalsPages.addresses.addParty(hubRole).click();
 };
 
-test.describe('Addresses are read-only in the journey', { tag: ['@integration'] }, () => {
+test.describe('Addresses are read-only in the journey', () => {
   test.describe('party picker add link', () => {
     for (const { hubRole, picker } of PARTY_ADD_LINK_CASES) {
       test.describe(hubRole, () => {

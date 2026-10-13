@@ -5,7 +5,7 @@ import { users } from '@config/users';
 
 const FEEDBACK_MAILTO = 'mailto:APHAServiceDesk@apha.gov.uk';
 
-test.describe('Manage templates', { tag: '@integration' }, () => {
+test.describe('Manage templates', () => {
   test('shows the Manage templates page with its heading, intro line and phase banner, and no Back link', async ({
     pages,
     animalsPages,

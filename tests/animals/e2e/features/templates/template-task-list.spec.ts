@@ -19,7 +19,7 @@ const SECTION_CAPTIONS = [
 const templateUrl = (templateId: string, slug = ''): RegExp =>
   new RegExp(`${SET_BASES.liveAnimals}/templates/${templateId}${slug ? `/${slug}` : ''}$`);
 
-test.describe("A template's task list", { tag: '@integration' }, () => {
+test.describe("A template's task list", () => {
   /** Walks Manage templates, the type question, the name page and Origin, ending on 'What are you importing?'. */
   const startAtTemplateCommodities = async (pages: { page: Page }, insPages: InsPages, animalsPages: AnimalsPages): Promise<string> => {
     const { templateName, originOfImport, commoditySelection } = animalsPages;
@@ -100,7 +100,7 @@ test.describe("A template's task list", { tag: '@integration' }, () => {
     await expect(overview.sectionHeadings).toHaveText(SECTION_CAPTIONS);
     await expect(overview.taskLists).toHaveCount(5);
     const tasksBySection = [
-      ['Where is this consignment coming from?', 'What are you importing?', 'Main import reason'],
+      ['Where is this consignment coming from?', 'What are you importing?', 'Main reason for import'],
       ['Commodity details', 'Identification details', 'Additional details'],
       ['Arrival details', 'Transport details'],
       ['Roles and addresses'],
@@ -115,7 +115,7 @@ test.describe("A template's task list", { tag: '@integration' }, () => {
 
     await expect(overview.taskStatus('Where is this consignment coming from?')).toHaveText('Complete');
     await expect(overview.taskStatus('What are you importing?')).toHaveText('Complete');
-    await expect(overview.taskStatus('Main import reason')).toHaveText('To do');
+    await expect(overview.taskStatus('Main reason for import')).toHaveText('To do');
 
     await overview.task('Where is this consignment coming from?').click();
 

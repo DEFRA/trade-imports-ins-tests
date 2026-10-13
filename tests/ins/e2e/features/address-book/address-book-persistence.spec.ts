@@ -5,7 +5,7 @@ import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
 
-test.describe('Address book persistence round-trip', { tag: ['@integration', '@mongodb'] }, () => {
+test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
   });

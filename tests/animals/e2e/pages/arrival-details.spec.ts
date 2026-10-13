@@ -5,7 +5,7 @@ const EARLIEST_ALLOWED = getRelativeAppDateText({ dayOffset: -7 });
 const LATEST_ALLOWED = getRelativeAppDateText({ monthOffset: 6 });
 const OUT_OF_RANGE_MESSAGE = `Arrival date at port of entry must be between ${EARLIEST_ALLOWED} and ${LATEST_ALLOWED}`;
 
-test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toArrivalDetails();
   });

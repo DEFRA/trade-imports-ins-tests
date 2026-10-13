@@ -14,7 +14,7 @@ const NO_SUCH_TEMPLATE = '000000000000000000000000';
 
 const templateUrl = (templateId: string): RegExp => new RegExp(`${SET_BASES.liveAnimals}/templates/${templateId}$`);
 
-test.describe('Changing one section of a saved template', { tag: '@integration' }, () => {
+test.describe('Changing one section of a saved template', () => {
   /** Presses Create new template on Manage templates and signs in again on the INS type question when asked. */
   const createNewTemplate = async (page: Page, insPages: InsPages, animalsPages: AnimalsPages): Promise<void> => {
     const animalsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')).origin;
@@ -70,7 +70,7 @@ test.describe('Changing one section of a saved template', { tag: '@integration' 
     const name = changedName();
     const templateId = await saveAndView(insPages, animalsPages, name);
 
-    await templatePage.changeLink('origin of import').click();
+    await templatePage.changeLink('import details').click();
 
     await expect(originOfImport.heading).toBeVisible();
     await expect(originOfImport.internalReference).toHaveValue(SAVED_REFERENCE);
@@ -98,12 +98,12 @@ test.describe('Changing one section of a saved template', { tag: '@integration' 
     await animalsPages.manageTemplates.open();
     await animalsPages.manageTemplates.linkViewTemplate(name).click();
 
-    await templatePage.changeLink('origin of import').click();
+    await templatePage.changeLink('import details').click();
     await originOfImport.internalReference.fill(CHANGED_REFERENCE);
     await originOfImport.btnSaveAndReturnToTemplate.click();
 
     await expect(pages.page).toHaveURL(templateUrl(templateId));
-    await expect(templatePage.rowValue('Origin of import', 'Internal reference number')).toContainText(CHANGED_REFERENCE);
+    await expect(templatePage.rowValue('Import details', 'Internal reference number')).toContainText(CHANGED_REFERENCE);
     await expect(templatePage.successBannerTitle).toBeVisible();
     await expect(templatePage.successBannerHeading(`${name} has been updated`)).toBeVisible();
     await expect(templatePage.dateCreated).toHaveText(`Date created: ${today}`);
@@ -118,12 +118,12 @@ test.describe('Changing one section of a saved template', { tag: '@integration' 
     const { templatePage, originOfImport } = animalsPages;
     const templateId = await saveAndView(insPages, animalsPages, changedName());
 
-    await templatePage.changeLink('origin of import').click();
+    await templatePage.changeLink('import details').click();
     await originOfImport.internalReference.fill(UNSAVED_REFERENCE);
     await originOfImport.linkCancelToTemplate.click();
 
     await expect(pages.page).toHaveURL(templateUrl(templateId));
-    await expect(templatePage.rowValue('Origin of import', 'Internal reference number')).toContainText(SAVED_REFERENCE);
+    await expect(templatePage.rowValue('Import details', 'Internal reference number')).toContainText(SAVED_REFERENCE);
     await expect(templatePage.successBanner).toHaveCount(0);
   });
 

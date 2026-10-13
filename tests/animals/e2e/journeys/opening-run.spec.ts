@@ -1,9 +1,10 @@
 import { SET_BASES } from '@page-objects/shared/sets';
 import { fileUploadPaths } from '@resources/file-upload/paths';
+import { OPENING_RUN_TASKS } from '@flows/animals/journey';
 
 import { test, expect } from '@fixtures';
 
-test.describe('Opening run', { tag: ['@integration'] }, () => {
+test.describe('Opening run', () => {
   test('walks a cattle-by-air notification through the opening run in Design Release 2.1 order, from create to submitted', async ({
     animalsJourney,
     animalsPages,
@@ -20,21 +21,10 @@ test.describe('Opening run', { tag: ['@integration'] }, () => {
     await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/notification-view$`));
 
     await animalsPages.overview.open(journeyId);
-    for (const task of [
-      'Where is this consignment coming from?',
-      'What are you importing?',
-      'Main import reason',
-      'Commodity details',
-      'Identification details',
-      'Additional details',
-      'Arrival details',
-      'Transport details',
-      'Upload documents',
-      'Roles and addresses',
-      'Contact address for this consignment',
-    ]) {
+    for (const task of OPENING_RUN_TASKS) {
       await expect(animalsPages.overview.taskStatus(task)).toHaveText('Complete');
     }
+    await expect(animalsPages.overview.taskStatuses).toHaveCount(OPENING_RUN_TASKS.length);
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
 

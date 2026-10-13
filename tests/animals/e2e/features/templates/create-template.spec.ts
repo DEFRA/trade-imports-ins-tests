@@ -20,7 +20,7 @@ function requestsToAnimals(page: Page): URL[] {
   return urls;
 }
 
-test.describe('Create a template', { tag: '@integration' }, () => {
+test.describe('Create a template', () => {
   test.beforeEach(async ({ pages, insPages, animalsPages }) => {
     await animalsPages.manageTemplates.open();
     const animalsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')).origin;

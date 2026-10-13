@@ -5,7 +5,7 @@ import { SET_BASES } from '@page-objects/shared/sets';
 
 test.use({ storageState: COLD_START });
 
-test.describe('Sessions across services', { tag: ['@compose', '@integration'] }, () => {
+test.describe('Sessions across services', { tag: '@compose' }, () => {
   test('signing in to animals, then ins, then plants in one browser keeps all three sessions', async ({
     pages,
     animalsPages,

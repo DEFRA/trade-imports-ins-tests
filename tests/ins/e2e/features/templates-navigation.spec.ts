@@ -3,7 +3,7 @@ import { requireBaseUrl } from '@page-objects/shared/base-page';
 
 const NAVIGATION_ITEMS = ['Dashboard', 'Templates', 'Address book', 'Manage account', 'Log out'];
 
-test.describe('Templates in the service navigation (INS)', { tag: ['@compose', '@integration'] }, () => {
+test.describe('Templates in the service navigation (INS)', { tag: '@compose' }, () => {
   test('offers Dashboard, Templates, Address book, Manage account and Log out, in that order, on the INS dashboard', async ({
     insPages,
   }) => {

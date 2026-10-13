@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () => {
+test.describe('Cancel amendment through the UI', () => {
   test.describe('from an amending notification', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions }) => {
       const referenceNumber = await animalsSeededJourney.createAmendNotification();
@@ -123,7 +123,7 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
   );
 });
 
-test.describe('Cancel amend without JavaScript', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Cancel amend without JavaScript', { tag: '@duplicated-in-frontend' }, () => {
   test.use({ javaScriptEnabled: false });
 
   test('the status bar Cancel amend on a question page restores the submitted answers', async ({

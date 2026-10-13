@@ -103,7 +103,12 @@ export const seedSteps = async (resolveParties: () => Promise<PartyIds>, depth: 
   return depth === 'draft' ? throughArrival : [...throughArrival, ...transportSteps, contactStep(parties)];
 };
 
-export const declarationStep: SeedStep = { slug: 'declaration', form: { declaration: 'confirmed' } };
+export const declarationStep: { reviewSlug: string; slug: string; review: FormFields; declare: FormFields } = {
+  reviewSlug: 'notification-view',
+  slug: 'declaration',
+  review: { step: 'review' },
+  declare: { step: 'declare', declaration: 'confirmed' },
+};
 
 /** The ITAHC a seeded notification carries so its submission records nothing outstanding. */
 export const healthCertificateDocument: FormFields = {

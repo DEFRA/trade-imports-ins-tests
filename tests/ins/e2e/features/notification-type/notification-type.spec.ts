@@ -20,7 +20,7 @@ function requestsTo(page: Page, baseUrlEnv: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE
   return urls;
 }
 
-test.describe('INS type question: What are you importing?', { tag: ['@integration'] }, () => {
+test.describe('INS type question: What are you importing?', () => {
   test('starting a new notification from the INS home asks what you are importing, and Back leaves no notification behind', async ({
     pages,
     insPages,
@@ -140,7 +140,7 @@ test.describe('INS type question: What are you importing?', { tag: ['@integratio
     await expect(strip.locator('.govuk-tag')).toHaveText('Draft');
     await expect(strip).toContainText(GBN_AG);
     await expect(strip).toContainText(id);
-    await expect(pages.page.locator('.govuk-phase-banner')).toContainText('Alpha');
+    await expect(pages.page.locator('.govuk-phase-banner', { hasText: 'Alpha' })).toBeVisible();
   });
 
   test('choosing Germinal products sends the user to the germinal products start and creates no live-animals notification', async ({

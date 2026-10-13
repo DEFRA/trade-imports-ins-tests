@@ -2,7 +2,7 @@ import { SET_BASES } from '@page-objects/shared/sets';
 
 import { test, expect } from '@fixtures';
 
-test('promoted frontend sends a Content-Security-Policy header', { tag: '@integration' }, async ({ animalsJourney, pages }) => {
+test('promoted frontend sends a Content-Security-Policy header', async ({ animalsJourney, pages }) => {
   await animalsJourney.toNotificationDashboard();
   // The dashboard is the set's own base, not the root — reloading it fetches
   // `/live-animals`, so matching on `/` would wait for a document that never comes.

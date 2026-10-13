@@ -61,7 +61,7 @@ export class AnimalsTemplatePage extends BasePage {
     return this.page.getByRole('main').getByRole('heading', { level: 2 });
   }
 
-  /** The card's one Change link, named the way a screen reader reads it: 'Change origin of import'. */
+  /** The card's one Change link, named the way a screen reader reads it: 'Change import details (Import details)'. */
   changeLink(hiddenText: string): Locator {
     return this.page.getByRole('link', { name: `Change ${hiddenText}` });
   }
