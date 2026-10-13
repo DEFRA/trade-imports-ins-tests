@@ -3,7 +3,9 @@ import { test, expect } from '@fixtures';
 test.describe('Declaration page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsSeededJourney, animalsPages }) => {
     const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.declaration);
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    await animalsPages.notificationView.continueButton.click();
+    await animalsPages.declaration.heading.waitFor();
   });
 
   test('renders the page controls', async ({ animalsPages }) => {
