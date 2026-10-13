@@ -134,10 +134,11 @@ async function amend(pages: SharedPages, plantsPages: PlantsPages, reference: st
 test.describe('High-risk plants check and submit section', () => {
   test('review stays blocked until the final required row is complete', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
     const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { contact: false });
-    await expect(plantsPages.notificationView.errorSummary).toContainText('Complete contact address for consignment');
+    const contactEntry = plantsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete contact', exact: true });
+    await expect(contactEntry).toHaveAttribute('href', '#contact');
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
-    await expect(plantsPages.notificationView.errorSummary).toContainText('Complete contact address for consignment');
+    await expect(contactEntry).toBeVisible();
     await plantsPages.overview.open(reference);
     const review = plantsPages.overview.taskRowByTitle('Check and submit');
     await expect(review).toContainText('Cannot start yet');
@@ -546,7 +547,10 @@ test.describe('High-risk plants check and submit section', () => {
 
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
     await expect(plantsPages.notificationView.errorSummary).toContainText('There is a problem');
-    await expect(plantsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toBeVisible();
+    await expect(plantsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toHaveAttribute(
+      'href',
+      '#arrival-details',
+    );
     await expect(plantsPages.overview.statusTag).toHaveText('Amend');
   });
 });
