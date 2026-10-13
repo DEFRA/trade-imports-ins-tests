@@ -2,6 +2,7 @@ import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { JourneyOptions } from '@domain/animals/constants/journey-options';
+import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 
@@ -15,7 +16,7 @@ export type AccompanyingDocumentAnswer = {
 };
 
 const COUNTRY = 'France';
-const PORT = 'Aberdeen Harbour (GB ABD)';
+const PORT = pointOfEntries.aberdeenHarbour.display;
 // Inside the arrival-date window (1 week back to 6 months ahead) wherever the
 // wall clock happens to be, in the unpadded d/m/yyyy the app itself renders —
 // so a CYA assertion compares against the app's shape, not the typed string it

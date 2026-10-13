@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
+import { portByCode } from '@domain/shared/fixtures/reference-data';
 import { COLD_START } from '@fixtures/auth-state';
 import type { CommodityLine } from '@flows/plants/journey';
 
@@ -82,7 +83,7 @@ test.describe('High-risk plants full happy-path journeys', () => {
       if (scenario.type === POTATOES) {
         await plantsJourney.toArrivalDetails(scenario.country);
         await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-        await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour (GB ABD)');
+        await plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
       } else {
         await plantsJourney.toArrivalStatus(scenario.country);
         await plantsJourney.answerArrivalStatus('No, it has not arrived yet');

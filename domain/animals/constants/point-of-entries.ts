@@ -1,7 +1,10 @@
+import { portByCode } from '@domain/shared/fixtures/reference-data';
+
 export const pointOfEntries = {
-  aberdeen: { value: 'GB DYC', display: 'Aberdeen Airport (GB DYC)' },
-  eastMidlandsAirport: { value: 'GB EMA', display: 'East Midlands Airport (GB EMA)' },
-  edinburgh: { value: 'GB EDI', display: 'Edinburgh Airport (GB EDI)' },
+  aberdeen: portByCode('GB DYC'),
+  aberdeenHarbour: portByCode('GB ABD'),
+  eastMidlandsAirport: portByCode('GB EMA'),
+  edinburgh: portByCode('GB EDI'),
 } as const;
 
 export type PointOfEntry = (typeof pointOfEntries)[keyof typeof pointOfEntries];

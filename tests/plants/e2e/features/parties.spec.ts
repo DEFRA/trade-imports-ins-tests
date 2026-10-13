@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
+import { portByCode } from '@domain/shared/fixtures/reference-data';
 import type { PlantsPages } from '@page-objects';
 import type { PlantsJourney } from '@flows/plants/journey';
 
@@ -45,7 +46,7 @@ async function toParties(plantsPages: PlantsPages, journey: PlantsJourney, type:
   if (type === POTATOES) {
     await journey.toArrivalDetails('France');
     await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-    await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour (GB ABD)');
+    await plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
   } else {
     await journey.toArrivalStatus('Germany');
     await journey.answerArrivalStatus('No, it has not arrived yet');

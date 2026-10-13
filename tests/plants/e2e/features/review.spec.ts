@@ -1,6 +1,7 @@
 import { SET_BASES } from '@page-objects/shared/sets';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
+import { portByCode } from '@domain/shared/fixtures/reference-data';
 import type { PlantsPages, SharedPages } from '@page-objects';
 import type { PlantsJourney } from '@flows/plants/journey';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
@@ -72,7 +73,7 @@ async function completeNotification(
   if (type === POTATOES) {
     await journey.toArrivalDetails('France');
     await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-    await plantsPages.arrivalDetails.selectPlaceOfLanding('Aberdeen Harbour (GB ABD)');
+    await plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
   } else {
     await journey.toArrivalStatus('Germany');
     await journey.answerArrivalStatus('Yes, it has already arrived');

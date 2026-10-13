@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { originPageCountryNames } from '@domain/shared/fixtures/reference-data';
 
 test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('filters as you type, submits the country code and persists it', async ({ animalsJourney, animalsPages }) => {
@@ -12,12 +13,11 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
 
     // The type-ahead enhances a native select. The select stays in the DOM as the
     // no-JavaScript fallback and is what carries the code the form submits, so the
-    // full option list is asserted there: the placeholder plus the 31 SPS origin
-    // countries and nine journey subdivisions. The scroll-only divider rule is gone
-    // — a searchable list has no use for it.
+    // full option list is asserted there: the placeholder plus every captured
+    // origin country and territory.
     const fallback = animalsPages.originOfImport.countrySelect;
     await expect(fallback.locator('option').first()).toHaveText('Select a country');
-    await expect(fallback.locator('option')).toHaveCount(41);
+    await expect(fallback.locator('option')).toHaveCount(originPageCountryNames().length + 1);
 
     await field.click();
     await field.fill('Belg');
