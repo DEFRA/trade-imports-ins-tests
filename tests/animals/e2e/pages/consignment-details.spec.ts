@@ -44,7 +44,7 @@ test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () =
   });
 });
 
-test.describe('Commodity details page — a commodity not counted in packages', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Commodity details page — a commodity not counted in packages', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toCommoditySelection();
     await animalsPages.commoditySelection.selectSpecies(['Salmo salar']);
@@ -63,7 +63,7 @@ test.describe('Commodity details page — a commodity not counted in packages', 
   });
 });
 
-test.describe('Commodity details page — two species', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+test.describe('Commodity details page — two species', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toCommoditySelection();
     await animalsPages.commoditySelection.selectSpecies(['Bos taurus', 'Bison bison']);
