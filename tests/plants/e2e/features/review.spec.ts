@@ -895,7 +895,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await plantsPages.declaration.checkbox.check();
     await plantsPages.declaration.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
-    await expect(plantsPages.overview.statusTag).not.toHaveText('Submitted');
+    await expect(plantsPages.notificationView.statusTag).toHaveText('Draft');
 
     // Correcting one address clears its own error and leaves the other.
     await plantsPages.notificationView.errorSummary.getByRole('link', { name: error }).click();

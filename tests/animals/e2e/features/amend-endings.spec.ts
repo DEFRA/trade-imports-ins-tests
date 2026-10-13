@@ -46,7 +46,7 @@ test.describe('Amendment page endings', () => {
     await animalsPages.originOfImport.saveAndReturn.click();
 
     await expect(pages.page).toHaveURL(/\/notification-view$/);
-    const importDetails = animalsPages.notificationView.summaryCard('Import details');
+    const importDetails = animalsPages.notificationView.summaryCard('Origin of import');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Internal reference number')).toHaveText(AMENDED_REFERENCE);
   });
 
