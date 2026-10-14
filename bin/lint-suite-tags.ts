@@ -1,11 +1,11 @@
 /**
- * Fails when a spec's tags disagree with the test suite directory it lives in.
+ * Fails when a spec's tags disagree with the test type directory it lives in.
  *
- * Test suites are selected by tag, not by directory: `npm test` runs a domain's
+ * Test types are selected by tag, not by directory: `npm test` runs a domain's
  * whole directory minus `@a11y`, `@active`, `@compose` and `@dynamics`. So a
  * spec under security/ without `@active` would run in every e2e and PR check,
  * and one under a11y/ without `@a11y` would run in e2e and be missed by the
- * a11y suite. The rules, for tests/<domain>/<suite>/:
+ * a11y run. The rules, for tests/<domain>/<type>/:
  *
  *     a11y/      every test carries @a11y
  *     security/  every test carries @active
@@ -26,8 +26,8 @@ import { SERVICE_TAG_DOMAINS } from '@config/service-tags';
 type Spec = { title: string; file: string; line: number; tags: string[] };
 type Suite = { specs?: Spec[]; suites?: Suite[] };
 
-const SUITE_TAG: Record<string, string> = { a11y: 'a11y', security: 'active' };
-const SUITE_TAGS = Object.values(SUITE_TAG);
+const TYPE_TAG: Record<string, string> = { a11y: 'a11y', security: 'active' };
+const TYPE_TAGS = Object.values(TYPE_TAG);
 
 const MAX_LIST_BYTES = 64 * 1024 * 1024;
 
@@ -43,15 +43,15 @@ const listSpecs = (): Spec[] => {
 // The JSON reporter may or may not keep the leading @.
 const tagNames = (spec: Spec): string[] => spec.tags.map((tag) => tag.replace(/^@/, ''));
 
-// A spec's suite tag must match its suite directory.
-const suiteDirectoryViolations = (spec: Spec): string[] => {
-  const [domain, suite] = spec.file.split('/');
+// A spec's type tag must match its test type directory.
+const testTypeViolations = (spec: Spec): string[] => {
+  const [domain, type] = spec.file.split('/');
   const tags = tagNames(spec);
-  const required = SUITE_TAG[suite];
+  const required = TYPE_TAG[type];
   if (required) {
-    return tags.includes(required) ? [] : [`needs @${required} (it is under ${domain}/${suite}/)`];
+    return tags.includes(required) ? [] : [`needs @${required} (it is under ${domain}/${type}/)`];
   }
-  return SUITE_TAGS.filter((tag) => tags.includes(tag)).map((tag) => `must not carry @${tag} (it is under ${domain}/${suite}/)`);
+  return TYPE_TAGS.filter((tag) => tags.includes(tag)).map((tag) => `must not carry @${tag} (it is under ${domain}/${type}/)`);
 };
 
 // A spec must not carry a service tag for the domain it sits in; that domain already runs by path.
@@ -63,7 +63,7 @@ const serviceTagViolations = (spec: Spec): string[] => {
     .map(([tag]) => `must not carry ${tag} (it is under ${domain}/, which that service already runs)`);
 };
 
-const violationsOf = (spec: Spec): string[] => [...suiteDirectoryViolations(spec), ...serviceTagViolations(spec)];
+const violationsOf = (spec: Spec): string[] => [...testTypeViolations(spec), ...serviceTagViolations(spec)];
 
 const specs = listSpecs();
 const failures = specs.flatMap((spec) =>
