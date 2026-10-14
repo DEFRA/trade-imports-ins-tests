@@ -9,7 +9,7 @@ import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
-test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb'] }, () => {
+test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '@animals-backend'] }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('aggregated notification assertions read Mongo directly, which only the compose stack exposes');
   });
