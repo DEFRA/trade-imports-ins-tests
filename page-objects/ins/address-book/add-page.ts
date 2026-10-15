@@ -7,6 +7,8 @@ export type NewAddressDetails = AddressDetails;
 export class InsAddressBookAddPage extends InsAddressBookFormPage {
   readonly expectedUrl = '/address-book/add';
 
+  protected override readonly nameLabel = 'Name or organisation';
+
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Add address and contact details' });
   }
@@ -24,8 +26,8 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
-  get btnCancel(): Locator {
-    return this.page.getByRole('button', { name: 'Cancel and return to address book' });
+  get linkCancel(): Locator {
+    return this.page.getByRole('link', { name: 'Cancel and return to address book', exact: true });
   }
 
   get btnCancelFromJourney(): Locator {
