@@ -66,41 +66,45 @@ test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
     );
   });
 
-  test('seeds a complete journey into every section of the notification document', async ({ animalsSeededJourney, addressBookApi }) => {
-    const consignor = await addressBookApi.findByName('Astra Rosales');
-    const placeOfOrigin = await addressBookApi.findByName('Origin Farm');
+  test(
+    'seeds a complete journey into every section of the notification document',
+    { tag: '@animals-frontend' },
+    async ({ animalsSeededJourney, addressBookApi }) => {
+      const consignor = await addressBookApi.findByName('Astra Rosales');
+      const placeOfOrigin = await addressBookApi.findByName('Origin Farm');
 
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+      const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
 
-    const client = new MongoDbClient();
-    try {
-      await client.connect();
-      const collection = client.collection<NotificationDocument>('trade-imports-animals-backend', 'notification');
-      await expect.poll(() => collection.countDocuments({ referenceNumber }), { timeout: timeouts.short }).toBe(1);
+      const client = new MongoDbClient();
+      try {
+        await client.connect();
+        const collection = client.collection<NotificationDocument>('trade-imports-animals-backend', 'notification');
+        await expect.poll(() => collection.countDocuments({ referenceNumber }), { timeout: timeouts.short }).toBe(1);
 
-      const [doc] = await collection.find({ referenceNumber }).toArray();
-      const { notification } = doc;
-      const [complement] = notification.commodity.commodityComplement;
-      const [species] = complement.species;
+        const [doc] = await collection.find({ referenceNumber }).toArray();
+        const { notification } = doc;
+        const [complement] = notification.commodity.commodityComplement;
+        const [species] = complement.species;
 
-      expect(doc.status).toBe('DRAFT');
-      expect(notification.origin.countryCode).toBe('FR');
-      expect(species.earTag).toBe('UK123456789012');
-      expect(complement.totalNoOfAnimals).toBe(1);
-      expect(notification.reasonForImport).toBe('internalMarket');
-      expect(notification.additionalDetails.unweanedAnimals).toBe('no');
-      // Each party is a copy of the record picked, with no link back to the book.
-      expect(notification.consignor).not.toHaveProperty('addressId');
-      expect(notification.consignor?.name).toBe(consignor.name);
-      expect(notification.placeOfOrigin?.name).toBe(placeOfOrigin.name);
-      expect(notification.placeOfOrigin?.address?.postcode).toBe(placeOfOrigin.postcode);
-      expect(notification.cphNumber).toBe('123456789');
-      expect(notification.transport.portOfEntry).toBe('GB ABD');
-      expect(notification.transport.arrivalDate).toBeDefined();
-      expect(notification.transport.transporter?.approvalNumber).toBe('ES-T2-45001294');
-      expect(notification.consignment?.name).toBe('Animal and Plant Health Agency');
-    } finally {
-      await client.close();
-    }
-  });
+        expect(doc.status).toBe('DRAFT');
+        expect(notification.origin.countryCode).toBe('FR');
+        expect(species.earTag).toBe('UK123456789012');
+        expect(complement.totalNoOfAnimals).toBe(1);
+        expect(notification.reasonForImport).toBe('internalMarket');
+        expect(notification.additionalDetails.unweanedAnimals).toBe('no');
+        // Each party is a copy of the record picked, with no link back to the book.
+        expect(notification.consignor).not.toHaveProperty('addressId');
+        expect(notification.consignor?.name).toBe(consignor.name);
+        expect(notification.placeOfOrigin?.name).toBe(placeOfOrigin.name);
+        expect(notification.placeOfOrigin?.address?.postcode).toBe(placeOfOrigin.postcode);
+        expect(notification.cphNumber).toBe('123456789');
+        expect(notification.transport.portOfEntry).toBe('GB ABD');
+        expect(notification.transport.arrivalDate).toBeDefined();
+        expect(notification.transport.transporter?.approvalNumber).toBe('ES-T2-45001294');
+        expect(notification.consignment?.name).toBe('Animal and Plant Health Agency');
+      } finally {
+        await client.close();
+      }
+    },
+  );
 });

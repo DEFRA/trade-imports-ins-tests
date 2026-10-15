@@ -303,40 +303,39 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(destination).toContainText('PH1 5EX');
   });
 
-  test('editing the record in the address book does not change what the notification shows', async ({
-    pages,
-    plantsPages,
-    plantsJourney,
-    addressBookApi,
-  }) => {
-    const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    const originalName = address.name;
-    const renamed = `Renamed Holding ${randomUUID()}`;
+  test(
+    'editing the record in the address book does not change what the notification shows',
+    { tag: '@address-book' },
+    async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
+      const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+      const originalName = address.name;
+      const renamed = `Renamed Holding ${randomUUID()}`;
 
-    // The notification holds a copy taken when the address was picked, so a
-    // later change to the record must not reach the picker card or CYA.
-    await addressBookApi.updateAddress(address.id, {
-      name: renamed,
-      addressLine1: '4 Nursery Lane',
-      townOrCity: 'Dundee',
-      postcode: 'DD1 1AA',
-      countryCode: 'GB',
-      phone: '01738 555 0143',
-      email: 'review@example.co.uk',
-    });
+      // The notification holds a copy taken when the address was picked, so a
+      // later change to the record must not reach the picker card or CYA.
+      await addressBookApi.updateAddress(address.id, {
+        name: renamed,
+        addressLine1: '4 Nursery Lane',
+        townOrCity: 'Dundee',
+        postcode: 'DD1 1AA',
+        countryCode: 'GB',
+        phone: '01738 555 0143',
+        email: 'review@example.co.uk',
+      });
 
-    await plantsPages.placeOfDestination.open(reference);
-    await expect(plantsPages.placeOfDestination.currentAddress).toContainText(originalName);
-    await expect(plantsPages.placeOfDestination.currentAddress).not.toContainText(renamed);
+      await plantsPages.placeOfDestination.open(reference);
+      await expect(plantsPages.placeOfDestination.currentAddress).toContainText(originalName);
+      await expect(plantsPages.placeOfDestination.currentAddress).not.toContainText(renamed);
 
-    await plantsPages.notificationView.open(reference);
-    const destination = plantsPages.notificationView.card('Place of destination');
-    await expect(destination).toContainText(originalName);
-    await expect(destination).toContainText('Perth');
-    await expect(destination).toContainText('PH1 5EX');
-    await expect(destination).not.toContainText(renamed);
-    await expect(destination).not.toContainText('Dundee');
-  });
+      await plantsPages.notificationView.open(reference);
+      const destination = plantsPages.notificationView.card('Place of destination');
+      await expect(destination).toContainText(originalName);
+      await expect(destination).toContainText('Perth');
+      await expect(destination).toContainText('PH1 5EX');
+      await expect(destination).not.toContainText(renamed);
+      await expect(destination).not.toContainText('Dundee');
+    },
+  );
 
   for (const source of ['dashboard', 'CYA', 'question page']) {
     test(`cancel amendment from ${source} restores submitted answers and read-only CYA`, async ({

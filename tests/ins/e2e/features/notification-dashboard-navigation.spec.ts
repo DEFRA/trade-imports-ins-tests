@@ -3,7 +3,7 @@ import { SET_BASES } from '@page-objects/shared/sets';
 import { test, expect } from '@fixtures';
 import { timeouts } from '@config/timeouts';
 
-test.describe('INS dashboard notification navigation', { tag: '@animals-backend' }, () => {
+test.describe('INS dashboard notification navigation', { tag: ['@animals-backend', '@animals-frontend'] }, () => {
   test('viewing a submitted notification from the INS dashboard opens it in the owning journey frontend', async ({
     animalsJourney,
     journeyContext,

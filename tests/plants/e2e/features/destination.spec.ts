@@ -229,35 +229,34 @@ test.describe('High-risk plants destination section', () => {
     await expect(plantsPages.placeOfDestination.address(target)).toHaveCount(0);
   });
 
-  test('deleting the chosen address from the address book leaves its copy on the notification', async ({
-    pages,
-    plantsPages,
-    plantsJourney,
-    addressBookApi,
-  }) => {
-    const token = `Montrose${Date.now()}`;
-    const name = `Deleted Nursery ${token}`;
-    const record = await addressBookApi.createAddress(addressNamed(name));
+  test(
+    'deleting the chosen address from the address book leaves its copy on the notification',
+    { tag: '@address-book' },
+    async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
+      const token = `Montrose${Date.now()}`;
+      const name = `Deleted Nursery ${token}`;
+      const record = await addressBookApi.createAddress(addressNamed(name));
 
-    const reference = await plantsToDestination(plantsPages, plantsJourney, NOT_YET_ARRIVED);
-    await chooseAddress(plantsPages, token, name);
+      const reference = await plantsToDestination(plantsPages, plantsJourney, NOT_YET_ARRIVED);
+      await chooseAddress(plantsPages, token, name);
 
-    await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrl(reference));
 
-    // The notification holds a copy of the address taken when it was picked, so
-    // the record leaving the address book does not take the answer with it.
-    await addressBookApi.deleteAddress(record.id);
+      // The notification holds a copy of the address taken when it was picked, so
+      // the record leaving the address book does not take the answer with it.
+      await addressBookApi.deleteAddress(record.id);
 
-    await plantsPages.overview.open(reference);
-    await expect(plantsPages.overview.taskRow(DESTINATION_TASK_ROW)).toContainText('Completed');
+      await plantsPages.overview.open(reference);
+      await expect(plantsPages.overview.taskRow(DESTINATION_TASK_ROW)).toContainText('Completed');
 
-    // The list can no longer tick the deleted record, but the copy is still shown.
-    await plantsPages.placeOfDestination.open(reference);
-    await expect(plantsPages.placeOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
-    await expect(plantsPages.placeOfDestination.selectedAddressInset).toHaveCount(0);
-    await expect(plantsPages.placeOfDestination.currentAddress).toContainText(name);
-    await expect(plantsPages.placeOfDestination.currentAddress).toContainText('PH1 5EX');
-  });
+      // The list can no longer tick the deleted record, but the copy is still shown.
+      await plantsPages.placeOfDestination.open(reference);
+      await expect(plantsPages.placeOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
+      await expect(plantsPages.placeOfDestination.selectedAddressInset).toHaveCount(0);
+      await expect(plantsPages.placeOfDestination.currentAddress).toContainText(name);
+      await expect(plantsPages.placeOfDestination.currentAddress).toContainText('PH1 5EX');
+    },
+  );
 
   test('Edit details on the picker changes the copy on this notification, not the address book record', async ({
     pages,
