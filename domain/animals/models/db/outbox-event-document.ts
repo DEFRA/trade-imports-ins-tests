@@ -73,7 +73,8 @@ export type GbnAgTradeCountrySubDivision = {
 
 export type GbnAgTradeCountry = {
   code?: CodedValue;
-  subordinateTradeCountrySubDivision?: GbnAgTradeCountrySubDivision;
+  subordinateTradeCountrySubDivision?: GbnAgTradeCountrySubDivision[] | null;
+  regionOfOriginCode?: string | null;
 };
 
 export type GbnAgLogisticsLocation = {

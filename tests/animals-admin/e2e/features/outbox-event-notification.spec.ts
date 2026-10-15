@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { defaultJourneyOptions, CONSIGNOR_NAME, CPH_NUMBER } from '@domain/animals/constants/journey-options';
+import { countryCodes } from '@domain/animals/constants/country-codes';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
 import { fileUploadPaths } from '@resources/file-upload/paths';
@@ -72,9 +73,10 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(POINT_OF_ENTRY);
       expect(data.specifiedConsignment.includedConsignmentItem).toHaveLength(1);
       // The journey answers the region, CPH, transport and animal questions, so each reaches the event.
-      const region = data.specifiedConsignment.originCountry?.subordinateTradeCountrySubDivision;
-      expect(region?.identifier).toBe('FR-75');
-      expect(region?.functionTypeCode?.content).toBe('106');
+      // The journey picks a whole country, so there is no subdivision; the region of origin code has its own field.
+      const originCountry = data.specifiedConsignment.originCountry;
+      expect(originCountry?.regionOfOriginCode).toBe('FR-75');
+      expect(originCountry?.subordinateTradeCountrySubDivision ?? null).toBeNull();
       expect(data.specifiedConsignment.finalDestinationLocation?.identifier).toBe(CPH_NUMBER);
       expect(data.specifiedConsignment.finalDestinationLocation?.urlId).toBe('https://refdata.tbc.defra.gov.uk/cph_number');
       const transitCountries = data.specifiedConsignment.transitTradeCountry ?? [];
@@ -106,6 +108,40 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       expect(statusChanges[1].status).toBe('SUBMITTED');
       expect(statusChanges[1].dateChanged).toEqual(expect.any(Date));
       expect(actorWithNullableFields(statusChanges[1].actor)).toEqual(EXPECTED_ACTOR);
+    } finally {
+      await client.close();
+    }
+  });
+
+  test('carries a country subdivision and the region of origin code separately on the NotificationSubmitted event', async ({
+    animalsJourney,
+    journeyContext,
+  }) => {
+    test.slow();
+    await animalsJourney.submitNotification({ countryCode: countryCodes.subdivisions.canaryIslands });
+    const aggregateId = aggregateIdFor(journeyContext.journeyId);
+    const client = new MongoDbClient();
+
+    try {
+      await client.connect();
+      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
+      await expect
+        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_SUBMITTED }), { timeout: timeouts.long })
+        .toBe(1);
+
+      const doc = await collection.findOne({ aggregateId, eventType: NOTIFICATION_SUBMITTED });
+      const originCountry = doc?.data.specifiedConsignment.originCountry;
+      // The country is the subdivision's parent; the subdivision is the region of origin entry, named by its MDM list.
+      expect(originCountry?.code?.value).toBe('ES');
+      expect(originCountry?.subordinateTradeCountrySubDivision).toEqual([
+        {
+          identifier: 'ES-CN',
+          urlId: 'https://refdata.tbc.defra.gov.uk/country_subdivisions',
+          functionTypeCode: { content: '106' },
+        },
+      ]);
+      // The journey answers the region of origin code under the parent country's prefix.
+      expect(originCountry?.regionOfOriginCode).toBe('ES-75');
     } finally {
       await client.close();
     }
