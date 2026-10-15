@@ -16,8 +16,8 @@ export class InsAddressBookListPage extends BasePage {
     return this.page.getByText('You have no addresses yet.');
   }
 
-  get linkAddNewAddress(): Locator {
-    return this.page.getByRole('link', { name: 'Add a new address' });
+  get btnAddNewAddress(): Locator {
+    return this.page.getByRole('button', { name: 'Add a new address' });
   }
 
   get successBanner(): Locator {
