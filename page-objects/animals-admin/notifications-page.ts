@@ -96,7 +96,8 @@ export class AnimalsAdminNotificationsPage extends BasePage {
   }
 
   async findRowByReference(referenceNumber: string, maxPages: number = 10): Promise<void> {
-    await this.page.goto(this.expectedUrl);
+    // Absolute, like the dashboard's open: a spec in another domain has another baseURL.
+    await this.navigateToAdminPortal(this.expectedUrl);
 
     const checkbox = this.checkboxNotificationByReference(referenceNumber);
     const nextLink = this.pagination.getByRole('link', { name: 'Next page' });
