@@ -11,6 +11,12 @@ export const E2E_ORGANISATION_ID = '5900001';
 
 const ORGANISATION_ID_HEADER = 'Trade-Imports-Organisation-Id';
 
+/** The address types the address book accepts. */
+export const ADDRESS_TYPES = ['ORIGIN_OR_CONSIGNOR', 'DESTINATION_CONSIGNEE_OR_IMPORTER', 'BRANCH'] as const;
+
+/** The uses an address book record can carry. */
+export const ADDRESS_USES = ['PLACE_OF_ORIGIN', 'CONSIGNOR', 'PLACE_OF_DESTINATION', 'CONSIGNEE', 'IMPORTER', 'BRANCH_ADDRESS'] as const;
+
 export interface AddressBookRecord {
   id: string;
   name: string;
@@ -22,6 +28,9 @@ export interface AddressBookRecord {
   countryCode: string;
   phone: string;
   email: string;
+  // Plain strings, not the constants' literal types, so a spec can send an unknown one.
+  addressType?: string | null;
+  uses?: string[];
   deleted: boolean;
 }
 

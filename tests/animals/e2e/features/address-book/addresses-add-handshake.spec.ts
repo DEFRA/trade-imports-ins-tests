@@ -36,6 +36,7 @@ test.describe('Add an address from the journey via INS', () => {
       await insPages.addressBookAdd.ensureSignedIn();
       await expect(pages.page).toHaveURL(insAddUrlPattern);
       await expect(insPages.addressBookAdd.heading).toBeVisible();
+      await expect(insPages.addressBookAddressType.heading).toHaveCount(0);
 
       await insPages.addressBookAdd.fill(details);
       await insPages.addressBookAdd.save();
