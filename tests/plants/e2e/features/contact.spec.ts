@@ -35,49 +35,48 @@ async function openContact(plantsPages: PlantsPages, journey: PlantsJourney): Pr
 }
 
 test.describe('High-risk plants contact', () => {
-  test('searches the address book, pages the matches five at a time and persists a row ticked on a later page', async ({
-    pages,
-    plantsPages,
-    plantsJourney,
-    addressBookApi,
-  }) => {
-    const token = randomUUID();
-    const records: AddressBookRecord[] = [];
-    // The book lists newest first, so the five newer records fill page one of
-    // the search and push the first one minted onto page two.
-    for (let index = 0; index <= PICKER_PAGE_SIZE; index++) {
-      records.push(await addressBookApi.createAddress(addressNamed(`Contact ${token} ${index}`)));
-    }
-    const target = records[0];
+  test(
+    'searches the address book, pages the matches five at a time and persists a row ticked on a later page',
+    { tag: '@address-book' },
+    async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
+      const token = randomUUID();
+      const records: AddressBookRecord[] = [];
+      // The book lists newest first, so the five newer records fill page one of
+      // the search and push the first one minted onto page two.
+      for (let index = 0; index <= PICKER_PAGE_SIZE; index++) {
+        records.push(await addressBookApi.createAddress(addressNamed(`Contact ${token} ${index}`)));
+      }
+      const target = records[0];
 
-    const reference = await openContact(plantsPages, plantsJourney);
-    const contact = plantsPages.consignmentContactSelect;
-    await expect(pages.page).toHaveURL(contact.expectedUrl(reference));
-    await expect(contact.heading).toBeVisible();
+      const reference = await openContact(plantsPages, plantsJourney);
+      const contact = plantsPages.consignmentContactSelect;
+      await expect(pages.page).toHaveURL(contact.expectedUrl(reference));
+      await expect(contact.heading).toBeVisible();
 
-    await contact.searchFor(token);
-    await expect(contact.resultsCaption).toHaveText('Showing 5 of 6 addresses');
-    await expect(contact.address(target.name)).toHaveCount(0);
+      await contact.searchFor(token);
+      await expect(contact.resultsCaption).toHaveText('Showing 5 of 6 addresses');
+      await expect(contact.address(target.name)).toHaveCount(0);
 
-    // Paging is a link, not a submit, and it carries the search term with it.
-    await contact.pageLink(2).click();
-    await expect(contact.resultsCaption).toHaveText('Showing 1 of 6 addresses');
+      // Paging is a link, not a submit, and it carries the search term with it.
+      await contact.pageLink(2).click();
+      await expect(contact.resultsCaption).toHaveText('Showing 1 of 6 addresses');
 
-    await contact.address(target.name).check();
-    await contact.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
-    await expect(plantsPages.overview.taskRow(CONTACT)).toContainText('Completed');
-    // Contact ends its own section; review is entered from Overview once every task is complete.
-    const review = pages.page.getByRole('listitem').filter({ hasText: 'Check and submit' });
-    await expect(review).toContainText('Cannot start yet');
-    await expect(review.getByRole('link')).toHaveCount(0);
+      await contact.address(target.name).check();
+      await contact.btnSaveAndContinue.click();
+      await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+      await expect(plantsPages.overview.taskRow(CONTACT)).toContainText('Completed');
+      // Contact ends its own section; review is entered from Overview once every task is complete.
+      const review = pages.page.getByRole('listitem').filter({ hasText: 'Check and submit' });
+      await expect(review).toContainText('Cannot start yet');
+      await expect(review.getByRole('link')).toHaveCount(0);
 
-    // Re-entering opens on page one of the whole book, where the chosen record
-    // is not rendered — the picker still knows it, and says so in the inset.
-    await contact.open(reference);
-    await expect(contact.selectedAddress(target.name)).toBeVisible();
-    await expect(contact.address(target.name)).toHaveCount(0);
-  });
+      // Re-entering opens on page one of the whole book, where the chosen record
+      // is not rendered — the picker still knows it, and says so in the inset.
+      await contact.open(reference);
+      await expect(contact.selectedAddress(target.name)).toBeVisible();
+      await expect(contact.address(target.name)).toHaveCount(0);
+    },
+  );
 
   test('continues through declaration to confirmation after checking Back navigation', async ({
     pages,

@@ -9,7 +9,7 @@ export const SERVICE_TAG_DOMAINS: Record<string, string[]> = {
   '@ins-backend': ['ins'],
   '@ins-frontend': ['ins'],
   '@animals-admin': ['animals-admin'],
-  '@animals-backend': ['animals'],
+  '@animals-backend': ['animals', 'animals-admin'],
   '@animals-frontend': ['animals'],
   '@plants-backend': ['plants'],
   '@plants-frontend': ['plants'],

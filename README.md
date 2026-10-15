@@ -97,7 +97,7 @@ the same suite as the all-domain script, limited to that domain's `tests/<domain
 | `ins`           | `test:docker-compose:ins`           | —                                        | —                                    | `test:docker-compose:ins:security`           | `test:docker-compose:ins:security:active`           |
 | `plants`        | `test:docker-compose:plants`        | —                                        | —                                    | —                                            | —                                                   |
 
-A dash means the domain has no specs for that suite yet.
+A dash means the domain has no specs of that test type yet.
 
 Per-domain `security:active` sets `ZAP_SCOPE` so the no-traffic gate only covers
 that domain's ZAP contexts; the report is labelled scoped. Full-corpus active
@@ -199,22 +199,24 @@ reusable workflow.
 
 ### Domains, test suites and projects
 
-Tests are split into four domains, one per deployable app. A domain's specs
+Tests are split into four domains, each a functional area of the product. One
+or more services serve a domain: `animals` covers the animals frontend and
+backend, and `ins` covers the ins frontend, ins backend and address book. A domain's specs
 live under its own `tests/<domain>/` directory, and its base URL is resolved
 from the spec's directory:
 
-| Domain          | Service                          | Directory              |
+| Domain          | Front end                        | Directory              |
 | --------------- | -------------------------------- | ---------------------- |
 | `animals`       | `trade-imports-animals-frontend` | `tests/animals/`       |
 | `animals-admin` | `trade-imports-animals-admin`    | `tests/animals-admin/` |
 | `ins`           | `trade-imports-ins-frontend`     | `tests/ins/`           |
 | `plants`        | `trade-imports-plants-frontend`  | `tests/plants/`        |
 
-A test suite is a group of specs you run together: a domain's directory, or a
-suite within it such as `tests/animals/e2e/`. Select one or several by path:
+A test suite is a group of specs you run together: a domain's directory, or one
+test type within it such as `tests/animals/e2e/`. Select one or several by path:
 
 ```bash
-npm run test:docker-compose -- tests/animals/ tests/ins/
+npm run test:docker-compose -- tests/animals/ tests/ins/e2e/
 ```
 
 Always end a directory with `/`. Playwright reads the path as a regex, so
@@ -237,8 +239,11 @@ tests/<domain>/
   security/
 ```
 
-Folders only organise specs: tags (`@a11y`, `@active`, `@compose`, `@dynamics`, `@visual`)
-select the suite, and the directory selects the domain.
+Folders only organise specs: type tags (`@a11y`, `@active`, `@compose`, `@dynamics`, `@visual`)
+select the test type, and the directory selects the domain. A service tag, such as
+`@ins-backend`, is a different kind: it names a service whose pull request
+should also run the spec, whatever test type or domain the spec is in (see
+[GitHub Actions workflow](#github-actions-workflow)).
 
 `npm run lint` runs `lint:suite-tags` to keep the two in step: a test under `a11y/` must carry
 `@a11y`, one under `security/` must carry `@active`, and one under `e2e/` neither.
@@ -370,7 +375,7 @@ suite with its domain name as `<domain>:<suite>`:
 | `<domain>:security:active` | **not supported on CDP**, as `security:active`          |
 
 `<domain>` is one of `animals`, `animals-admin`, `ins` or `plants`, e.g.
-`animals:a11y` or `plants:e2e`. A domain with no specs for a suite (for example
+`animals:a11y` or `plants:e2e`. A domain with no specs of a test type (for example
 `plants:a11y` today) fails with Playwright's "No tests found".
 
 ### Dynamics checks

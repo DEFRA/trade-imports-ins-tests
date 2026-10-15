@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Addresses picker', { tag: '@duplicated-in-frontend' }, () => {
+test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-book'] }, () => {
   test('the picker searches and pages the address book, and the row selected on a later page is the one that saves', async ({
     animalsJourney,
     pages,
