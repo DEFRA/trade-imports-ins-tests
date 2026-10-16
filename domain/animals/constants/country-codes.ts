@@ -1,6 +1,9 @@
-import { countryByCode } from '@domain/shared/fixtures/reference-data';
+import { countryByCode, subdivisionByCode } from '@domain/shared/fixtures/reference-data';
 
 export const countryCodes = {
+  subdivisions: {
+    canaryIslands: subdivisionByCode('ES-CN'),
+  },
   eu: {
     austria: countryByCode('AT'),
     belgium: countryByCode('BE'),

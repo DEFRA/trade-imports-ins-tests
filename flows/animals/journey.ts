@@ -288,8 +288,8 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async completeAnswerSections(): Promise<void> {
-    await this.answerOrigin({ requiresRegionCode: 'Yes', internalReference: 'Imports456GB' });
+  async completeAnswerSections(origin: Pick<JourneyOptions, 'countryCode'> = {}): Promise<void> {
+    await this.answerOrigin({ requiresRegionCode: 'Yes', internalReference: 'Imports456GB', ...origin });
     await this.answerCommodity();
     await this.answerAnimalIdentification();
     await this.answerReasonAndAdditionalDetails();
@@ -407,14 +407,14 @@ export class AnimalsJourney {
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
-  async toDeclaration(): Promise<void> {
+  async toDeclaration(origin: Pick<JourneyOptions, 'countryCode'> = {}): Promise<void> {
     await this.startNotification();
-    await this.completeAnswerSections();
+    await this.completeAnswerSections(origin);
     await this.fromOverviewToDeclaration();
   }
 
-  async submitNotification(): Promise<void> {
-    await this.toDeclaration();
+  async submitNotification(origin: Pick<JourneyOptions, 'countryCode'> = {}): Promise<void> {
+    await this.toDeclaration(origin);
     await this.confirmDeclaration();
   }
 
