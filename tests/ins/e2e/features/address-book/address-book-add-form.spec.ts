@@ -35,13 +35,27 @@ test.describe('The add-details form for an address entered by hand', () => {
     await expect(insPages.addressBookAdd.inputPhone).toBeVisible();
   });
 
-  test('for Origin or Consignor the Country select opens on United Kingdom, its blank first option reading Select one', async ({
-    insPages,
-  }) => {
+  test('the Country select opens on its blank first option, Select one, with nothing pre-selected', async ({ insPages }) => {
     await insPages.addressBookAdd.open();
 
-    await expect(insPages.addressBookAdd.selectCountry).toHaveValue('GB');
+    await expect(insPages.addressBookAdd.selectCountry).toHaveValue('');
     await expect(insPages.addressBookAdd.countryOptionsIncludingPlaceholder.first()).toHaveText('Select one');
+  });
+
+  test('Add a new address on the address book opens the add-details form, whose Back link returns to the address book', async ({
+    pages,
+    insPages,
+  }) => {
+    await insPages.addressBookList.open();
+    await insPages.addressBookList.btnAddNewAddress.click();
+
+    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookAdd.expectedUrl}$`));
+    await expect(insPages.addressBookAdd.heading).toBeVisible();
+
+    await insPages.addressBookAdd.linkBack.click();
+
+    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await expect(insPages.addressBookList.heading).toBeVisible();
   });
 
   test('Cancel and return to address book is a link below Save and continue that returns to the address book and saves nothing', async ({

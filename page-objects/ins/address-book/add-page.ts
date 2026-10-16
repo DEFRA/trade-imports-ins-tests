@@ -1,5 +1,4 @@
 import { Locator } from '@playwright/test';
-import { InsAddressBookAddressTypePage } from '@page-objects/ins/address-book/address-type-page';
 import { type AddressDetails, InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 
 export type NewAddressDetails = AddressDetails;
@@ -10,16 +9,7 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
   protected override readonly nameLabel = 'Name or organisation';
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Add address and contact details' });
-  }
-
-  get caption(): Locator {
-    return this.page.getByText('Add new address', { exact: true });
-  }
-
-  /** The notification status banner the journey views render above their content. */
-  get journeyStrip(): Locator {
-    return this.page.locator('.app-journey-strip');
+    return this.page.getByRole('heading', { level: 1, name: 'Add address details' });
   }
 
   get btnSaveAndContinue(): Locator {
@@ -34,12 +24,9 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
     return this.page.getByRole('button', { name: 'Cancel and return to address page' });
   }
 
-  /** Opens the form the way a trader does: through Choose an address type. */
   async open(attemptSignIn: boolean = true, options?: { userId?: string; organisationSbi?: string }): Promise<void> {
-    const typePage = new InsAddressBookAddressTypePage(this.page);
-    await typePage.open(attemptSignIn, options);
-    if (!attemptSignIn) return;
-    await typePage.choose('Origin or Consignor');
+    await this.page.goto(this.expectedUrl);
+    await this.signInWhenRequested(attemptSignIn, options);
   }
 
   /** Complete OIDC when a cross-app link lands on INS without an existing session. */
