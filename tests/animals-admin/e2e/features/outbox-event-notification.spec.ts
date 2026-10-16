@@ -73,16 +73,21 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(POINT_OF_ENTRY);
       expect(data.specifiedConsignment.includedConsignmentItem).toHaveLength(1);
       // The journey answers the region, CPH, transport and animal questions, so each reaches the event.
-      // The journey picks a whole country, so there is no subdivision; the region of origin code has its own field.
+      // The journey picks a whole country, so the event leaves the subdivision out rather than
+      // sending it as null; the region of origin code has its own field.
       const originCountry = data.specifiedConsignment.originCountry;
       expect(originCountry?.regionOfOriginCode).toBe('FR-75');
-      expect(originCountry?.subordinateTradeCountrySubDivision ?? null).toBeNull();
+      expect(originCountry).not.toHaveProperty('subordinateTradeCountrySubDivision');
       expect(data.specifiedConsignment.finalDestinationLocation?.identifier).toBe(CPH_NUMBER);
       expect(data.specifiedConsignment.finalDestinationLocation?.urlId).toBe('https://refdata.tbc.defra.gov.uk/cph_number');
       const transitCountries = data.specifiedConsignment.transitTradeCountry ?? [];
       expect(transitCountries).toHaveLength(2);
       expect(transitCountries[0].code?.value).toBe('FR');
       expect(transitCountries[1].code?.value).toBe('BE');
+      for (const transitCountry of transitCountries) {
+        expect(transitCountry).not.toHaveProperty('subordinateTradeCountrySubDivision');
+        expect(transitCountry).not.toHaveProperty('regionOfOriginCode');
+      }
       const [movement] = data.specifiedConsignment.mainCarriageLogisticsTransportMovement ?? [];
       const [transportDocument] = movement.transportContractRelatedReferencedDocument ?? [];
       expect(transportDocument.typeCode).toBe('730'); // road consignment note, as the journey travels by road
