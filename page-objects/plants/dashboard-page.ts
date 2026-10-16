@@ -73,6 +73,10 @@ export class PlantsDashboardPage extends BasePage {
     return this.cardAction(reference, 'Delete');
   }
 
+  amend(reference: string): Locator {
+    return this.notificationCard(reference).getByRole('button', { name: `Amend notification ${reference}`, exact: true });
+  }
+
   get deletedBanner(): Locator {
     return this.page.locator('.govuk-notification-banner');
   }

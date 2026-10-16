@@ -1,5 +1,31 @@
+import { randomUUID } from 'node:crypto';
 import type { PlantsPages } from '@page-objects';
 import type { JourneyContext } from '@flows/shared/journey-context';
+import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
+import { portByCode } from '@domain/shared/fixtures/reference-data';
+
+export const POTATOES = 'Potatoes (seed or ware)';
+export const PLANTS = 'Plants for planting';
+export const potatoLine = { Variety: 'Maris Piper', Quantity: '250', 'Intended use': 'Planting' };
+
+// Use London calendar dates, like the service, and stay away from timing boundaries.
+export function arrivalDate(days: number): string {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() + days);
+  return new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London' }).format(date);
+}
+
+type NotificationOptions = {
+  type?: string;
+  days?: number;
+  contact?: boolean;
+  /** The country the minted record carries. The address book API accepts any non-blank value; the journey does not. */
+  countryCode?: string;
+  /** The minted record's name. Must stay unique: the book is shared and never wiped. */
+  name?: string;
+  /** A record to pick instead of minting one, so two notifications can copy the same address. */
+  existing?: AddressBookRecord;
+};
 
 /**
  * One commodity line's answers, keyed by the label the trader reads. Which
@@ -146,6 +172,87 @@ export class PlantsJourney {
       }
       await this.plantsPages.commodityDetails.field(label).fill(value);
     }
+  }
+
+  /**
+   * A notification answered through to Check your answers, with one address-book
+   * record picked for the place of destination and the contact (and the consignor,
+   * for plants for planting). Mints the record unless `existing` names one.
+   */
+  async completeNotification(
+    api: AddressBookApiClient,
+    {
+      type = POTATOES,
+      days = 7,
+      contact = true,
+      countryCode = 'GB',
+      name = `Review Nursery ${randomUUID()}`,
+      existing,
+    }: NotificationOptions = {},
+  ): Promise<{ reference: string; address: AddressBookRecord }> {
+    const address =
+      existing ??
+      (await api.createAddress({
+        name,
+        addressLine1: '4 Nursery Lane',
+        townOrCity: 'Perth',
+        county: 'Perthshire',
+        postcode: 'PH1 5EX',
+        countryCode,
+        phone: '01738 555 0143',
+        email: 'review@example.co.uk',
+      }));
+    const reference = await this.startNotification();
+    await this.chooseCommodityType(type);
+    if (type === POTATOES) {
+      await this.addCommodityLine('Seed potatoes', potatoLine);
+    } else {
+      await this.addCommodityLine(PLANTS, {
+        Genus: 'Quercus (oak)',
+        Species: 'Quercus robur',
+        'Commodity code': '0602 20 20',
+        Quantity: '120',
+        'EPPO code': 'QUERO',
+      });
+    }
+    await this.toOrigin();
+    if (type === POTATOES) {
+      await this.toArrivalDetails('France');
+      await this.plantsPages.arrivalDetails.arrivalTime.fill('14:30');
+      await this.plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
+    } else {
+      await this.toArrivalStatus('Germany');
+      await this.answerArrivalStatus('Yes, it has already arrived');
+    }
+    await this.plantsPages.arrivalDetails.arrivalDate.fill(arrivalDate(days));
+    await this.plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await this.plantsPages.placeOfDestination.searchFor(address.name);
+    await this.plantsPages.placeOfDestination.address(address.name).check();
+    await this.plantsPages.placeOfDestination.btnSaveAndContinue.click();
+    if (type === PLANTS) {
+      await this.plantsPages.consignorSelect.searchFor(address.name);
+      await this.plantsPages.consignorSelect.address(address.name).check();
+      await this.plantsPages.consignorSelect.btnSaveAndContinue.click();
+      await this.plantsPages.identificationNumbers.supplier.fill('S123');
+    } else {
+      await this.plantsPages.identificationNumbers.producer.fill('P123');
+      await this.plantsPages.identificationNumbers.crop.fill('C123');
+    }
+    await this.plantsPages.identificationNumbers.btnSaveAndContinue.click();
+    if (contact) {
+      await this.plantsPages.consignmentContactSelect.searchFor(address.name);
+      await this.plantsPages.consignmentContactSelect.address(address.name).check();
+    }
+    await this.plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
+    await this.plantsPages.notificationView.heading.waitFor();
+    return { reference, address };
+  }
+
+  async submitFromReview(): Promise<void> {
+    await this.plantsPages.notificationView.btnContinue.click();
+    await this.plantsPages.declaration.checkbox.check();
+    await this.plantsPages.declaration.btnContinue.click();
+    await this.plantsPages.confirmation.heading.waitFor();
   }
 
   async returnToDashboard(): Promise<void> {
