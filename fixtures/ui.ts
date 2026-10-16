@@ -17,6 +17,7 @@ import { AnimalsNotificationActions } from '@flows/animals/notification-actions'
 import { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { AnimalsAdminNavigation } from '@flows/animals-admin/navigation';
 import { PlantsJourney } from '@flows/plants/journey';
+import { PlantsNotificationActions } from '@flows/plants/notification-actions';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { FrontendFormClient } from '@adapters/http/frontend-form-client';
@@ -48,6 +49,7 @@ export interface PageFixtures {
   animalsNotificationActions: AnimalsNotificationActions;
   animalsAdminNavigation: AnimalsAdminNavigation;
   plantsJourney: PlantsJourney;
+  plantsNotificationActions: PlantsNotificationActions;
   notificationApi: NotificationApiClient;
   addressBookApi: AddressBookApiClient;
   frontendForms: FrontendFormClient;
@@ -110,6 +112,9 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   },
   plantsJourney: async ({ plantsPages, journeyContext }, use) => {
     await use(new PlantsJourney(plantsPages, journeyContext));
+  },
+  plantsNotificationActions: async ({ plantsPages, pages }, use) => {
+    await use(new PlantsNotificationActions(plantsPages, pages));
   },
   notificationApi: async ({ request }, use) => {
     await use(new NotificationApiClient(request));
