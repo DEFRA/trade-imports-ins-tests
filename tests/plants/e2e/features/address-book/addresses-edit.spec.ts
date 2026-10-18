@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { PLANTS } from '@flows/plants/journey';
+import { PLANTS_FOR_PLANTING } from '@flows/plants/journey';
 
 test.describe('Copied addresses are edited on the notification', () => {
   test('a copied address offers both Change and Edit details on the picker and the review', async ({
@@ -9,7 +9,7 @@ test.describe('Copied addresses are edited on the notification', () => {
   }) => {
     // Plants for planting, so the consignor is asked as well as the destination and contact.
     const { reference, address } = await plantsJourney.completeNotification(addressBookApi, {
-      type: PLANTS,
+      type: PLANTS_FOR_PLANTING,
       days: -1,
     });
 

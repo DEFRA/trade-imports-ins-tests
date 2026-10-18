@@ -3,32 +3,14 @@ import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { portByCode } from '@domain/shared/fixtures/reference-data';
 import type { PlantsPages } from '@page-objects';
-import type { PlantsJourney } from '@flows/plants/journey';
+import { nurseryAddress, type PlantsJourney } from '@flows/plants/journey';
 
 const CONTACT = 'Contact address for consignment';
 
-// The picker shows five rows a page (design 05-03..06), whatever page size the
-// address-book API itself serves.
 const PICKER_PAGE_SIZE = 5;
 
-/** A record only this run can find: the address book is shared across workers
- * and never wiped, so anything that counts rows has to search its own token. */
-const addressNamed = (name: string) => ({
-  name,
-  addressLine1: '4 Nursery Lane',
-  townOrCity: 'Perth',
-  postcode: 'PH1 5EX',
-  countryCode: 'GB',
-  phone: '01738 555 0143',
-  email: 'contact@example.co.uk',
-});
-
 async function openContact(plantsPages: PlantsPages, journey: PlantsJourney): Promise<string> {
-  const reference = await journey.startNotification();
-  await journey.chooseCommodityType('Potatoes (seed or ware)');
-  await journey.addCommodityLine('Seed potatoes', { Variety: 'Maris Piper', Quantity: '250', 'Intended use': 'Planting' });
-  await journey.toOrigin();
-  await journey.toArrivalDetails('France');
+  const reference = await journey.toArrivalDetailsOfNewPotatoNotification();
   await plantsPages.overview.open(reference);
   await plantsPages.overview.taskRow(CONTACT).getByRole('link', { name: CONTACT, exact: true }).click();
   return reference;
@@ -44,7 +26,7 @@ test.describe('High-risk plants contact', () => {
       // The book lists newest first, so the five newer records fill page one of
       // the search and push the first one minted onto page two.
       for (let index = 0; index <= PICKER_PAGE_SIZE; index++) {
-        records.push(await addressBookApi.createAddress(addressNamed(`Contact ${token} ${index}`)));
+        records.push(await addressBookApi.createAddress(nurseryAddress(`Contact ${token} ${index}`)));
       }
       const target = records[0];
 
@@ -84,7 +66,7 @@ test.describe('High-risk plants contact', () => {
     plantsJourney,
     addressBookApi,
   }) => {
-    const address = await addressBookApi.createAddress(addressNamed(`Review ${randomUUID()}`));
+    const address = await addressBookApi.createAddress(nurseryAddress(`Review ${randomUUID()}`));
     const reference = await openContact(plantsPages, plantsJourney);
     await plantsPages.consignmentContactSelect.searchFor(address.name);
     await plantsPages.consignmentContactSelect.address(address.name).check();

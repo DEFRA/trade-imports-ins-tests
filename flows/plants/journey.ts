@@ -4,9 +4,58 @@ import type { JourneyContext } from '@flows/shared/journey-context';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { portByCode } from '@domain/shared/fixtures/reference-data';
 
+/**
+ * One commodity line's answers, keyed by the label the trader reads. Which
+ * labels a line carries is decided by its category, so the shape is open: a
+ * caller writes exactly the fields that category asks for, and a missing or
+ * surplus one shows up as the page rejecting the line.
+ */
+export type CommodityLine = Record<string, string>;
+
+export type CategorisedLine = { category: string; line: CommodityLine };
+
 export const POTATOES = 'Potatoes (seed or ware)';
-export const PLANTS = 'Plants for planting';
+export const PLANTS_FOR_PLANTING = 'Plants for planting';
+export const WOOD_AND_CUT_TREES = 'Wood and cut trees';
+
+export const SEED_POTATOES = 'Seed potatoes';
+const CUT_CONIFEROUS_TREES = 'Cut coniferous trees more than 3 metres high';
+
 export const potatoLine = { Variety: 'Maris Piper', Quantity: '250', 'Intended use': 'Planting' };
+
+export const plantsLine = {
+  Genus: 'Quercus (oak)',
+  Species: 'Quercus robur',
+  'Commodity code': '0602 20 20',
+  Quantity: '120',
+  'EPPO code': 'QUERO',
+};
+
+const coniferousTreesLine = {
+  'Commodity code': '4403 25 10',
+  Quantity: '40',
+  'Size of the trees': '4.5',
+  'Phytosanitary treatments applied': 'Kiln dried (KD)',
+};
+
+const DEFAULT_LINE_BY_COMMODITY_TYPE: Record<string, CategorisedLine> = {
+  [POTATOES]: { category: SEED_POTATOES, line: potatoLine },
+  [PLANTS_FOR_PLANTING]: { category: PLANTS_FOR_PLANTING, line: plantsLine },
+  [WOOD_AND_CUT_TREES]: { category: CUT_CONIFEROUS_TREES, line: coniferousTreesLine },
+};
+
+const NOT_YET_ARRIVED = 'No, it has not arrived yet';
+
+export const nurseryAddress = (name: string, countryCode = 'GB') => ({
+  name,
+  addressLine1: '4 Nursery Lane',
+  townOrCity: 'Perth',
+  county: 'Perthshire',
+  postcode: 'PH1 5EX',
+  countryCode,
+  phone: '01738 555 0143',
+  email: 'review@example.co.uk',
+});
 
 // Use London calendar dates, like the service, and stay away from timing boundaries.
 export function arrivalDate(days: number): string {
@@ -27,16 +76,7 @@ type NotificationOptions = {
   existing?: AddressBookRecord;
 };
 
-/**
- * One commodity line's answers, keyed by the label the trader reads. Which
- * labels a line carries is decided by its category, so the shape is open: a
- * caller writes exactly the fields that category asks for, and a missing or
- * surplus one shows up as the page rejecting the line.
- */
-export type CommodityLine = Record<string, string>;
-
-/** The one field on a line that is a type-ahead rather than a text input. */
-const GENUS = 'Genus';
+const TYPE_AHEAD_FIELD = 'Genus';
 
 export class PlantsJourney {
   constructor(
@@ -131,6 +171,53 @@ export class PlantsJourney {
     await this.plantsPages.origin.heading.waitFor();
   }
 
+  async toOriginOfNewNotification(
+    commodityType: string,
+    { category, line }: CategorisedLine = DEFAULT_LINE_BY_COMMODITY_TYPE[commodityType],
+  ): Promise<string> {
+    const reference = await this.startNotification();
+    await this.chooseCommodityType(commodityType);
+    await this.addCommodityLine(category, line);
+    await this.toOrigin();
+    return reference;
+  }
+
+  async toArrivalStatusOfNewPlantsNotification(): Promise<string> {
+    const reference = await this.toOriginOfNewNotification(PLANTS_FOR_PLANTING);
+    await this.toArrivalStatus('Germany');
+    return reference;
+  }
+
+  async toArrivalDetailsOfNewPotatoNotification(): Promise<string> {
+    const reference = await this.toOriginOfNewNotification(POTATOES);
+    await this.toArrivalDetails('France');
+    return reference;
+  }
+
+  /** Answers arrival as a pre-arrival notification and lands on the place of destination. */
+  async toDestinationOfNewNotification(commodityType: string): Promise<string> {
+    let reference: string;
+    if (commodityType === POTATOES) {
+      reference = await this.toArrivalDetailsOfNewPotatoNotification();
+      await this.plantsPages.arrivalDetails.arrivalTime.fill('14:30');
+      await this.plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
+    } else {
+      reference = await this.toOriginOfNewNotification(commodityType);
+      await this.toArrivalStatus('Germany');
+      await this.answerArrivalStatus(NOT_YET_ARRIVED);
+    }
+    await this.plantsPages.arrivalDetails.arrivalDate.fill(arrivalDate(7));
+    await this.plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await this.plantsPages.placeOfDestination.heading.waitFor();
+    return reference;
+  }
+
+  async chooseDestination(addressName: string): Promise<void> {
+    await this.plantsPages.placeOfDestination.searchFor(addressName);
+    await this.plantsPages.placeOfDestination.address(addressName).check();
+    await this.plantsPages.placeOfDestination.btnSaveAndContinue.click();
+  }
+
   /**
    * Names the country and carries on to the arrival-status question, which only
    * plants for planting and wood and cut trees are asked. A potato
@@ -166,7 +253,7 @@ export class PlantsJourney {
 
   private async fillCommodityLine(values: CommodityLine): Promise<void> {
     for (const [label, value] of Object.entries(values)) {
-      if (label === GENUS) {
+      if (label === TYPE_AHEAD_FIELD) {
         await this.plantsPages.commodityDetails.selectGenus(value);
         continue;
       }
@@ -190,32 +277,8 @@ export class PlantsJourney {
       existing,
     }: NotificationOptions = {},
   ): Promise<{ reference: string; address: AddressBookRecord }> {
-    const address =
-      existing ??
-      (await api.createAddress({
-        name,
-        addressLine1: '4 Nursery Lane',
-        townOrCity: 'Perth',
-        county: 'Perthshire',
-        postcode: 'PH1 5EX',
-        countryCode,
-        phone: '01738 555 0143',
-        email: 'review@example.co.uk',
-      }));
-    const reference = await this.startNotification();
-    await this.chooseCommodityType(type);
-    if (type === POTATOES) {
-      await this.addCommodityLine('Seed potatoes', potatoLine);
-    } else {
-      await this.addCommodityLine(PLANTS, {
-        Genus: 'Quercus (oak)',
-        Species: 'Quercus robur',
-        'Commodity code': '0602 20 20',
-        Quantity: '120',
-        'EPPO code': 'QUERO',
-      });
-    }
-    await this.toOrigin();
+    const address = existing ?? (await api.createAddress(nurseryAddress(name, countryCode)));
+    const reference = await this.toOriginOfNewNotification(type);
     if (type === POTATOES) {
       await this.toArrivalDetails('France');
       await this.plantsPages.arrivalDetails.arrivalTime.fill('14:30');
@@ -226,10 +289,8 @@ export class PlantsJourney {
     }
     await this.plantsPages.arrivalDetails.arrivalDate.fill(arrivalDate(days));
     await this.plantsPages.arrivalDetails.btnSaveAndContinue.click();
-    await this.plantsPages.placeOfDestination.searchFor(address.name);
-    await this.plantsPages.placeOfDestination.address(address.name).check();
-    await this.plantsPages.placeOfDestination.btnSaveAndContinue.click();
-    if (type === PLANTS) {
+    await this.chooseDestination(address.name);
+    if (type === PLANTS_FOR_PLANTING) {
       await this.plantsPages.consignorSelect.searchFor(address.name);
       await this.plantsPages.consignorSelect.address(address.name).check();
       await this.plantsPages.consignorSelect.btnSaveAndContinue.click();

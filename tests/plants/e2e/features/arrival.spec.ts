@@ -1,14 +1,8 @@
 import { test, expect } from '@fixtures';
 import { portByCode } from '@domain/shared/fixtures/reference-data';
-import type { PlantsJourney } from '@flows/plants/journey';
+import { POTATOES } from '@flows/plants/journey';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
-const POTATOES = 'Potatoes (seed or ware)';
-const PLANTS_FOR_PLANTING = 'Plants for planting';
-
-const SEED_POTATOES = 'Seed potatoes';
-
-const GERMANY = 'Germany';
 const FRANCE = 'France';
 
 const ARRIVAL_TASK_ROW = 'Arrival details';
@@ -68,49 +62,13 @@ const POST_ARRIVAL_HINT =
 const PRE_ARRIVAL_HINT =
   'You are making a pre-arrival notification. You will give the expected date of landing and the intended destination.';
 
-const potatoLine = {
-  Variety: 'Maris Piper',
-  Quantity: '250',
-  'Intended use': 'Planting',
-};
-
-const plantsLine = {
-  Genus: 'Quercus (oak)',
-  Species: 'Quercus robur',
-  'Commodity code': '0602 20 20',
-  Quantity: '120',
-  'EPPO code': 'QUERO',
-};
-
-/** Reaches the arrival-status page on a plants-for-planting notification, the
- * shortest journey that is asked the question. */
-const toArrivalStatus = async (plantsJourney: PlantsJourney): Promise<string> => {
-  const reference = await plantsJourney.startNotification();
-  await plantsJourney.chooseCommodityType(PLANTS_FOR_PLANTING);
-  await plantsJourney.addCommodityLine(PLANTS_FOR_PLANTING, plantsLine);
-  await plantsJourney.toOrigin();
-  await plantsJourney.toArrivalStatus(GERMANY);
-  return reference;
-};
-
-/** Reaches the arrival details on a seed-potato notification, which is never
- * asked the arrival-status question. */
-const toPotatoArrivalDetails = async (plantsJourney: PlantsJourney): Promise<string> => {
-  const reference = await plantsJourney.startNotification();
-  await plantsJourney.chooseCommodityType(POTATOES);
-  await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine);
-  await plantsJourney.toOrigin();
-  await plantsJourney.toArrivalDetails(FRANCE);
-  return reference;
-};
-
 test.describe('High-risk plants arrival section', () => {
   test('the arrival-status question offers both branches, and the post-arrival one quotes the window', async ({
     pages,
     plantsPages,
     plantsJourney,
   }) => {
-    const reference = await toArrivalStatus(plantsJourney);
+    const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
     await expect(plantsPages.arrivalStatus.heading).toBeVisible();
@@ -121,7 +79,7 @@ test.describe('High-risk plants arrival section', () => {
   });
 
   test('the question must be answered before the notification moves on', async ({ pages, plantsPages, plantsJourney }) => {
-    const reference = await toArrivalStatus(plantsJourney);
+    const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
 
     await plantsPages.arrivalStatus.btnSaveAndContinue.click();
 
@@ -134,7 +92,7 @@ test.describe('High-risk plants arrival section', () => {
     plantsPages,
     plantsJourney,
   }) => {
-    const reference = await toArrivalStatus(plantsJourney);
+    const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
 
     await plantsPages.arrivalStatus.arrivalStatus(ALREADY_ARRIVED).check();
     await plantsPages.arrivalStatus.btnSaveAndContinue.click();
@@ -148,7 +106,7 @@ test.describe('High-risk plants arrival section', () => {
   });
 
   test('the arrival date is asked under the sentence the arrival status chose', async ({ plantsPages, plantsJourney }) => {
-    await toArrivalStatus(plantsJourney);
+    await plantsJourney.toArrivalStatusOfNewPlantsNotification();
     await plantsJourney.answerArrivalStatus(NOT_YET_ARRIVED);
 
     // The one date field means three different things, and the label is the
@@ -162,7 +120,7 @@ test.describe('High-risk plants arrival section', () => {
   });
 
   test('the arrival date must be given before the notification moves on', async ({ pages, plantsPages, plantsJourney }) => {
-    const reference = await toArrivalStatus(plantsJourney);
+    const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
 
     await plantsPages.arrivalDetails.btnSaveAndContinue.click();
@@ -176,7 +134,7 @@ test.describe('High-risk plants arrival section', () => {
     plantsPages,
     plantsJourney,
   }) => {
-    const reference = await toArrivalStatus(plantsJourney);
+    const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
 
     await expect(plantsPages.arrivalDetails.dateQuestionLabelled(POST_ARRIVAL_DATE_LABEL)).toBeVisible();
@@ -204,7 +162,7 @@ test.describe('High-risk plants arrival section', () => {
     plantsPages,
     plantsJourney,
   }) => {
-    const reference = await toArrivalStatus(plantsJourney);
+    const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVED_ON);
     await plantsPages.arrivalDetails.btnSaveAndContinue.click();
@@ -224,7 +182,7 @@ test.describe('High-risk plants arrival section', () => {
   });
 
   test('a date that names no day on the calendar is refused', async ({ pages, plantsPages, plantsJourney }) => {
-    const reference = await toArrivalStatus(plantsJourney);
+    const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
     await plantsJourney.answerArrivalStatus(NOT_YET_ARRIVED);
 
     await plantsPages.arrivalDetails.arrivalDate.fill(NOT_A_REAL_DATE);
@@ -242,10 +200,7 @@ test.describe('High-risk plants arrival section', () => {
     plantsPages,
     plantsJourney,
   }) => {
-    const reference = await plantsJourney.startNotification();
-    await plantsJourney.chooseCommodityType(POTATOES);
-    await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine);
-    await plantsJourney.toOrigin();
+    const reference = await plantsJourney.toOriginOfNewNotification(POTATOES);
 
     await plantsPages.origin.selectCountry(FRANCE);
     await plantsPages.origin.btnSaveAndContinue.click();
@@ -268,7 +223,7 @@ test.describe('High-risk plants arrival section', () => {
     plantsPages,
     plantsJourney,
   }) => {
-    const reference = await toPotatoArrivalDetails(plantsJourney);
+    const reference = await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
 
     await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
 
@@ -281,7 +236,7 @@ test.describe('High-risk plants arrival section', () => {
     plantsPages,
     plantsJourney,
   }) => {
-    const reference = await toPotatoArrivalDetails(plantsJourney);
+    const reference = await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
 
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVING_ON);
     await plantsPages.arrivalDetails.arrivalTime.fill(NOT_ON_THE_CLOCK);
@@ -303,7 +258,7 @@ test.describe('High-risk plants arrival section', () => {
     plantsPages,
     plantsJourney,
   }) => {
-    const reference = await toArrivalStatus(plantsJourney);
+    const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
 
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVED_ON);
@@ -320,7 +275,7 @@ test.describe('High-risk plants arrival section', () => {
     plantsPages,
     plantsJourney,
   }) => {
-    const reference = await toPotatoArrivalDetails(plantsJourney);
+    const reference = await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
 
     await plantsPages.arrivalDetails.btnSaveAndContinue.click();
 

@@ -1,10 +1,6 @@
 import { test, expect } from '@fixtures';
+import { PLANTS_FOR_PLANTING, POTATOES, SEED_POTATOES, WOOD_AND_CUT_TREES } from '@flows/plants/journey';
 
-const POTATOES = 'Potatoes (seed or ware)';
-const PLANTS_FOR_PLANTING = 'Plants for planting';
-const WOOD_AND_CUT_TREES = 'Wood and cut trees';
-
-const SEED_POTATOES = 'Seed potatoes';
 const WARE_POTATOES = 'Ware potatoes';
 const TREES_FOR_PLANTING = 'Trees for planting';
 const CUT_CONIFEROUS_TREES = 'Cut coniferous trees more than 3 metres high';
