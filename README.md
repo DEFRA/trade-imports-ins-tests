@@ -291,10 +291,24 @@ See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
 
 ### Target CDP environments (from local machine)
 
-To run tests against a CDP environment from your local machine:
+To run tests against a CDP environment from your local machine (on the CCoE AWS OpenVPN):
 
-1. Set `PLAYWRIGHT_ENVIRONMENT` to one of `dev`, `test`, or `perf-test` in your `.env`.
+1. Set these in your `.env`:
+
+   ```bash
+   PLAYWRIGHT_ENVIRONMENT=dev   # or test, perf-test
+   CDP_LOCAL=true
+   DEVELOPER_API_KEY=<your developer API key from the CDP Portal>
+   ```
+
 2. Run tests with `npm test`.
+
+CDP blocks direct calls to its backend services from outside its network, so
+global set-up cannot reach the backend or the address book without
+`CDP_LOCAL=true`. That setting sends those calls through the protected
+ephemeral gateway, which needs `DEVELOPER_API_KEY` as `x-api-key`. The run
+stops at once if `CDP_LOCAL=true` and the key is missing. The CDP Portal run
+sits inside CDP and needs neither.
 
 Use `.env.example` as a template.
 When running via the CDP Portal, `ENVIRONMENT` is provided by the portal; use `PLAYWRIGHT_ENVIRONMENT` and avoid setting `ENVIRONMENT` locally.
