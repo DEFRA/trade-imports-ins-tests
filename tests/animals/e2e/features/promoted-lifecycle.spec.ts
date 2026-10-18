@@ -3,7 +3,7 @@ import { notificationFulfilmentsStatuses } from '@domain/animals/models/api/noti
 import { notificationStatuses } from '@domain/animals/models/api/notification';
 
 test.describe('Notification lifecycle', { tag: '@compose' }, () => {
-  test('creates, submits, amends, cancels, copies and soft-deletes a notification; fulfilment view reflects each transition; copy no longer dedupes', async ({
+  test('creates, submits, amends, cancels, copies and soft-deletes a notification; fulfilment view reflects each transition; each copy gets its own reference number', async ({
     notificationApi,
   }) => {
     // Create the notification. Backend mints the reference number and returns
@@ -34,10 +34,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     const cancelled = await notificationApi.cancelAmendNotification(id);
     expect(cancelled.status).toBe(notificationStatuses.submitted);
 
-    // Copy no longer dedupes — two calls produce two distinct copies.
-    // Copy is a WYSIWYG operation post-EUDPA-314, so the caller passes the
-    // source's current concurrencyToken; copy does not mutate the source, so
-    // both calls carry the same token.
+    // Copy leaves the source unchanged, so both calls carry the source's current concurrencyToken.
     const firstCopy = await notificationApi.copyNotification(id, cancelled.concurrencyToken);
     const secondCopy = await notificationApi.copyNotification(id, cancelled.concurrencyToken);
     expect(firstCopy.referenceNumber).not.toBe(id);

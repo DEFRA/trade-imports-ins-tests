@@ -32,9 +32,7 @@ export type OutboxEventStatusChange = {
   actor?: OutboxEventActor | null;
 };
 
-// The outbox event `data` is the GBN-AG payload produced by the backend GbnAgMapper
-// (EUDPA-274), not the raw notification shape. Only the sections/fields the outbox
-// E2E smoke-checks are typed; unmapped-for-now slots are omitted or left optional.
+// Only the GBN-AG sections and fields a spec asserts on are typed.
 export type GbnAgEventData = {
   $model: string;
   $type: string;

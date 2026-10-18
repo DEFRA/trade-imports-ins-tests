@@ -1,5 +1,6 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import noTicketOrSessionVocabulary from './eslint-rules/no-ticket-or-session-vocabulary.mjs';
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -12,8 +13,12 @@ export default tseslint.config(
     },
   },
   {
+    plugins: {
+      local: { rules: { 'no-ticket-or-session-vocabulary': noTicketOrSessionVocabulary } },
+    },
     rules: {
       '@typescript-eslint/no-floating-promises': 'error',
+      'local/no-ticket-or-session-vocabulary': 'error',
     },
   },
   {
@@ -50,6 +55,7 @@ export default tseslint.config(
       'allure-report',
       'zap-report',
       '*.mjs',
+      'eslint-rules',
     ],
   },
 );

@@ -52,8 +52,6 @@ test.describe('Authentication', { tag: '@auth' }, () => {
     await expect(pages.signOut.heading).toBeVisible();
   });
 
-  // Design release 1 shows no signed-in identity: the email address and the strip that carried it are gone,
-  // and sign-out lives in the service navigation as "Log out". Asserting the absence keeps that decision covered.
   test('does not display the signed in user after signing in', async ({ pages, animalsPages }) => {
     await pages.signIn.signIn();
     await expect(animalsPages.dashboard.user()).toHaveCount(0);

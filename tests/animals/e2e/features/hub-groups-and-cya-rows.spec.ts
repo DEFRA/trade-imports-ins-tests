@@ -7,8 +7,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
   test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({ animalsJourney, pages }) => {
     await animalsJourney.startNotification();
 
-    // Design release 1 sits the whole list under its own heading, so the
-    // section captions dropped from h2 to h3.
     await expect(pages.page.getByRole('heading', { level: 2, name: 'Notification tasklist' })).toBeVisible();
 
     // The commodity-total labels are h3s too, so the section headings are read
@@ -22,8 +20,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       '6. Contact address',
     ]);
 
-    // Design release 1 ends the hub with the review as a primary button beside
-    // the secondary return, not as a seventh section holding a locked row.
     await expect(pages.page.locator('.govuk-button-group .govuk-button')).toHaveText(['Review and submit', 'Return to dashboard']);
 
     // One task list per group, in the same order as the headings. Conditional

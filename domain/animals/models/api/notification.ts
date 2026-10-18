@@ -9,11 +9,7 @@ export const notificationStatuses = {
 
 export type NotificationStatus = (typeof notificationStatuses)[keyof typeof notificationStatuses];
 
-/**
- * A Standard Address Block on the wire. Field names follow the address book
- * (EUDPA-294 replaced an older shape carrying `addressLine3`, `city` and a
- * free-text `country`).
- */
+/** A Standard Address Block on the wire. */
 export type PartyAddress = {
   addressLine1: string;
   addressLine2?: string;
