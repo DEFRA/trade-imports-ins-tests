@@ -41,8 +41,9 @@ async function expectFieldsGroupedUnderSections(form: InsAddressBookFormPage): P
 }
 
 test.describe('The add-details form for an address entered by hand', () => {
-  test('the add-details step groups its fields under Address and Contact details, with Name or organisation first and County between Town or city and Postcode', async ({
+  test('the add-details step groups its fields under Address and Contact details, with Name or organisation first and County between Town or city and Postcode, while the edit page keeps Name or organisation name', async ({
     insPages,
+    addressBookApi,
   }) => {
     await insPages.addressBookAdd.open();
 
@@ -50,6 +51,11 @@ test.describe('The add-details form for an address entered by hand', () => {
     for (const [index, name] of FIELD_NAMES_IN_ORDER.entries()) {
       await expect(insPages.addressBookAdd.textboxes.nth(index)).toHaveAccessibleName(name);
     }
+
+    const created = await addressBookApi.createAddress({ name: `Form Label Farm ${Date.now()}`, ...baseAddress });
+    await insPages.addressBookEdit.open(created.id);
+
+    await expect(insPages.addressBookEdit.inputName).toHaveAccessibleName('Name or organisation name');
   });
 
   test('the Country select opens on its blank first option, Select one, with nothing pre-selected', async ({ insPages }) => {
