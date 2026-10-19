@@ -5,8 +5,6 @@ const DESTINATION_TASK_ROW = 'Place of destination';
 
 const ALREADY_ARRIVED = 'Yes, it has already arrived';
 
-// One page asks three questions and the heading is the only thing that says
-// which, so each is matched in full rather than on a shared fragment.
 const PRE_ARRIVAL_DESTINATION_HEADING = 'Place of destination';
 const POST_ARRIVAL_DESTINATION_HEADING = 'Where is the consignment now?';
 
@@ -29,9 +27,6 @@ test.describe('High-risk plants destination section', () => {
     await expect(plantsPages.placeOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
     await expect(plantsPages.placeOfDestination.descriptionNamed(INTENDED_DESTINATION_DESCRIPTION)).toBeVisible();
 
-    // The state is read from the arrival answer on every render rather than
-    // stored with the destination, so re-answering the arrival question
-    // re-asks this one.
     await plantsPages.arrivalStatus.open(reference);
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
 
@@ -43,8 +38,6 @@ test.describe('High-risk plants destination section', () => {
   test('a potato notification is asked for the place of destination', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.toDestinationOfNewNotification(POTATOES);
 
-    // Potatoes have no arrival status to read, so the page is asked in its
-    // pre-arrival state without the trader ever having chosen one.
     await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
     await expect(plantsPages.placeOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
     await expect(plantsPages.placeOfDestination.descriptionNamed(INTENDED_DESTINATION_DESCRIPTION)).toBeVisible();
@@ -72,8 +65,6 @@ test.describe('High-risk plants destination section', () => {
 
     await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
 
-    // The picker opens on the whole book, however many addresses the
-    // organisation has saved by now.
     await expect(plantsPages.placeOfDestination.resultsCaption).toHaveText(FULL_BOOK_CAPTION);
 
     await plantsPages.placeOfDestination.searchFor(token);
@@ -84,11 +75,9 @@ test.describe('High-risk plants destination section', () => {
 
     await plantsPages.placeOfDestination.searchFor(`${token} Ardnamurchan`);
 
-    // Nothing matching is a sentence, not an empty table.
     await expect(plantsPages.placeOfDestination.noMatches).toBeVisible();
     await expect(plantsPages.placeOfDestination.resultsCaption).toHaveCount(0);
 
-    // Clearing the search restores the whole book.
     await plantsPages.placeOfDestination.searchFor('');
     await expect(plantsPages.placeOfDestination.resultsCaption).toHaveText(FULL_BOOK_CAPTION);
   });
@@ -101,8 +90,7 @@ test.describe('High-risk plants destination section', () => {
   }) => {
     const token = `Peterhead${Date.now()}`;
     const target = `Target Nursery ${token}`;
-    // The target first, then a full page of newer ones: the book lists newest
-    // first, so those five fill page one and push the target onto page two.
+    // The book lists newest first, so the newer records fill page one and push the target onto page two.
     await addressBookApi.createAddress(nurseryAddress(target));
     for (let newer = 0; newer < PICKER_PAGE_SIZE; newer += 1) {
       await addressBookApi.createAddress(nurseryAddress(`Newer Than Target ${token} ${newer}`));
@@ -114,23 +102,17 @@ test.describe('High-risk plants destination section', () => {
     await expect(plantsPages.placeOfDestination.resultsCaption).toHaveText('Showing 5 of 6 addresses');
     await expect(plantsPages.placeOfDestination.address(target)).toHaveCount(0);
 
-    // Paging is a link, not a submit, and it carries the search term with it.
     await plantsPages.placeOfDestination.pageLink(2).click();
     await expect(plantsPages.placeOfDestination.resultsCaption).toHaveText('Showing 1 of 6 addresses');
 
     await plantsPages.placeOfDestination.address(target).check();
     await plantsPages.placeOfDestination.btnSaveAndContinue.click();
 
-    // The consignor page follows the destination in the opening run, so
-    // Continue reaches that rather than the Overview.
     await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrl(reference));
 
     await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRow(DESTINATION_TASK_ROW)).toContainText('Completed');
 
-    // Re-entering opens on page one of the whole book, where the chosen record
-    // is not rendered — the picker still knows it, and says so in the inset.
-    // That is the no-JS selection-across-pagination guarantee.
     await plantsPages.placeOfDestination.open(reference);
     await expect(plantsPages.placeOfDestination.selectedAddress(target)).toBeVisible();
     await expect(plantsPages.placeOfDestination.address(target)).toHaveCount(0);
@@ -149,14 +131,11 @@ test.describe('High-risk plants destination section', () => {
 
       await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrl(reference));
 
-      // The notification holds a copy of the address taken when it was picked, so
-      // the record leaving the address book does not take the answer with it.
       await addressBookApi.deleteAddress(record.id);
 
       await plantsPages.overview.open(reference);
       await expect(plantsPages.overview.taskRow(DESTINATION_TASK_ROW)).toContainText('Completed');
 
-      // The list can no longer tick the deleted record, but the copy is still shown.
       await plantsPages.placeOfDestination.open(reference);
       await expect(plantsPages.placeOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
       await expect(plantsPages.placeOfDestination.selectedAddressInset).toHaveCount(0);
@@ -192,7 +171,6 @@ test.describe('High-risk plants destination section', () => {
     await form.fill({ name: editedName, townOrCity: 'Dundee' });
     await form.saveChanges.click();
 
-    // Saving returns to the picker it was opened from, showing the edited copy.
     await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
     await expect(plantsPages.placeOfDestination.currentAddress).toContainText(editedName);
     await expect(plantsPages.placeOfDestination.currentAddress).toContainText('Dundee');

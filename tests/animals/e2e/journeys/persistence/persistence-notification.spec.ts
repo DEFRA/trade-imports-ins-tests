@@ -6,13 +6,6 @@ import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { ARRIVAL_DATE } from '@flows/animals/journey';
 import { toIsoDate } from '@utils/date-utils';
 
-/**
- * Integration seam: real UI-create -> backend/Mongo persistence -> reload.
- *
- * The frontend Mapper A contract units (frontend repo) pin the exact payload shape; this seam proves the
- * round-trip end to end — the journey's answers survive to Mongo and the persisted notification re-renders.
- * Assertions cover a representative field per section rather than every field.
- */
 test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
@@ -44,9 +37,6 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
     addressBookApi,
   }) => {
     test.slow();
-    // Read each role's record from the once-seeded journey fixtures (API globalSetup),
-    // so every party is checked against the details of the record picked for it —
-    // a role mix-up would otherwise pass if we only asserted "some string".
     const consignor = await addressBookApi.findByName('Astra Rosales');
     const destination = await addressBookApi.findByName('Tech Imports Ltd');
     const placeOfOrigin = await addressBookApi.findByName('Origin Farm');
@@ -84,7 +74,6 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
       expect(notification.purposeInInternalMarket).toBe('breeding');
       expect(notification.additionalDetails.certifiedFor).toBe('slaughter');
       expect(notification.additionalDetails.unweanedAnimals).toBe('no');
-      // Every party is a copy of the record picked for it, with no link back to the address book.
       expect(notification.consignor).not.toHaveProperty('addressId');
       expect(notification.consignor).toMatchObject({
         name: consignor.name,
@@ -108,7 +97,6 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
       expect(notification.transport.meansOfTransport).toBe('ROAD_VEHICLE');
       expect(notification.transport.transportIdentification).toBe('FR-892-LK');
       expect(notification.transport.transportDocumentReference).toBe('CMR-2026-884721');
-      // Countries are added one at a time, so the list keeps the order they were added in.
       expect(notification.transport.transitedCountries).toEqual(['FR', 'BE']);
       expect(notification.transport.transporter?.name).toBe('García Livestock Transport SL');
       expect(notification.transport.transporter?.type).toBe('Commercial');

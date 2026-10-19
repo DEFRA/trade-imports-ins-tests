@@ -4,7 +4,6 @@ import { portByCode } from '@domain/shared/fixtures/reference-data';
 import { COLD_START } from '@fixtures/auth-state';
 import { PLANTS_FOR_PLANTING, POTATOES, WOOD_AND_CUT_TREES, arrivalDate, nurseryAddress, type CommodityLine } from '@flows/plants/journey';
 
-// Mirror the five mural use cases in the plants set's flow/fixtures/happy-path.json.
 const scenarios: { name: string; type: string; category: string; country: string; late: boolean; line: CommodityLine }[] = [
   {
     name: 'ware potatoes from Spain before arrival',
@@ -105,7 +104,6 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await expect(plantsPages.confirmation.panel).toContainText(reference);
       await expect(plantsPages.confirmation.lateBanner).toHaveCount(scenario.late ? 1 : 0);
       await plantsPages.confirmation.viewNotification.click();
-      // Reload proves the submitted answers survive a fresh read.
       await pages.page.reload();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
       await expect(plantsPages.notificationView.heading).toBeVisible();

@@ -21,9 +21,6 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(countryRow).toContainText('Belgium');
 
-    // Additional animal details leg: without change context this save would
-    // continue into the consignment flow; under change context it returns to
-    // the summary.
     const certifiedForRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Certified for' });
     await expect(certifiedForRow).toContainText('Slaughter');
     await animalsPages.notificationView.changeLink('Change additional animal details').click();

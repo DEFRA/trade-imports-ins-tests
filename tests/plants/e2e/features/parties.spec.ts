@@ -38,7 +38,6 @@ test.describe('High-risk plants consignment parties section', () => {
       } else {
         await expect(numbers.supplier).toHaveCount(0);
       }
-      // The optional reference can be left blank, including on wood's only field.
       await numbers.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrl(reference));
       await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();

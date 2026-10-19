@@ -22,10 +22,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
 
     await expect(pages.page.locator('.govuk-button-group .govuk-button')).toHaveText(['Review and submit', 'Return to dashboard']);
 
-    // One task list per group, in the same order as the headings. Conditional
-    // rows (exit details, transit countries, animal identification) are not
-    // owed on a fresh notification, so only the always-present tasks are
-    // pinned per group.
     const taskLists = pages.page.locator('ul.app-task-list');
     await expect(taskLists).toHaveCount(6);
     const expectListedTasks = async (list: Locator, tasks: string[]) => {
@@ -37,8 +33,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       'Main reason for import',
     ]);
     await expectListedTasks(taskLists.nth(1), ['Additional details']);
-    // Identification is only owed once a chosen commodity carries identifiers,
-    // and nothing has been chosen yet, so the row is off the hub altogether.
     await expect(taskLists.nth(1)).not.toContainText('Identification details');
     await expectListedTasks(taskLists.nth(2), ['Arrival details', 'Transport details']);
     await expectListedTasks(taskLists.nth(3), ['Upload documents']);
@@ -61,7 +55,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(pages.page.getByRole('heading', { level: 2, name: '1. About the consignment' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '2. Description of the goods' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '3. Transport and arrival' })).toBeVisible();
-    // Documents are optional, so the section stands even with nothing uploaded.
     await expect(pages.page.getByRole('heading', { level: 2, name: '4. Documents' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '5. Consignment parties' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '6. Contact address' })).toBeVisible();
@@ -105,7 +98,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(value(arrivalDetails, 'Transport document reference')).toHaveText('CMR-2026-884721');
 
     const transitCountries = animalsPages.notificationView.summaryCard('Transit countries');
-    // Read back in the order they were added, not alphabetically.
     await expect(value(transitCountries, 'Countries that the consignment will travel through')).toHaveText('France, Belgium');
 
     const transportDetails = animalsPages.notificationView.summaryCard('Transport details');
@@ -118,7 +110,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(value(rolesAndAddresses, 'Consignee')).toContainText('British Livestock Ltd');
     await expect(value(rolesAndAddresses, 'Importer')).toContainText('Import Co UK');
     await expect(value(rolesAndAddresses, 'Place of destination')).toContainText('Tech Imports Ltd');
-    // The CYA renders the CPH normalised (separators stripped), not as typed.
     await expect(value(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText('123456789');
 
     const contactAddress = animalsPages.notificationView.summaryCard('Contact address for this consignment');

@@ -32,7 +32,6 @@ export type OutboxEventStatusChange = {
   actor?: OutboxEventActor | null;
 };
 
-// Only the GBN-AG sections and fields a spec asserts on are typed.
 export type GbnAgEventData = {
   $model: string;
   $type: string;

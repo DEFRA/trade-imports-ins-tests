@@ -19,7 +19,6 @@ test.describe('High-risk plants overview task return', () => {
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVING_ON);
     await plantsPages.arrivalDetails.btnSaveAndContinue.click();
 
-    // In the opening run, arrival details carries on to the place of destination.
     await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
 
     await plantsPages.overview.open(reference);
@@ -30,7 +29,6 @@ test.describe('High-risk plants overview task return', () => {
     await plantsPages.overview.taskRowLink(ARRIVAL_TASK_ROW).click();
     await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
 
-    // The task's own pages come first.
     await plantsPages.arrivalStatus.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
 

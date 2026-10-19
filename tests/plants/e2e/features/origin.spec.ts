@@ -6,9 +6,6 @@ const CONIFER_WOOD_WITHOUT_BARK = 'Conifer wood without bark (from Italy, France
 
 const ORIGIN_TASK_ROW = 'Where is this consignment coming from?';
 
-// The origin block is the whole Common SPS Area, so Norway is on offer even
-// though it is not an EU member State — which is what makes it the country that
-// tells the seed-potato scope apart from the plants-and-wood one.
 const FRANCE = 'France';
 const GERMANY = 'Germany';
 const ITALY = 'Italy';
@@ -18,8 +15,6 @@ const SPAIN = 'Spain';
 const WARE_POTATO_GUIDANCE =
   'Notify ware potatoes grown, or suspected to have been grown, in Poland, Portugal, Romania or Spain. Spain does not include the Balearic Islands.';
 
-// The en dashes are the copy's own — matched literally so a change of
-// punctuation is caught here rather than passing on a loose substring.
 const WARE_POTATO_ERROR = 'Select Poland, Portugal, Romania or Spain – ware potatoes from other countries do not need to be notified';
 const CONIFER_WOOD_ERROR =
   'Select Italy, France, Portugal or Spain – conifer wood without bark from other countries does not need to be notified';
@@ -50,9 +45,6 @@ test.describe('High-risk plants origin section', () => {
     await plantsPages.origin.selectCountry(FRANCE);
     await plantsPages.origin.btnSaveAndContinue.click();
 
-    // The arrival-status question that follows origin is out of scope for
-    // potatoes, so Continue passes it over and lands on the arrival details —
-    // the page every commodity type is asked.
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
 
     await plantsPages.origin.open(reference);
@@ -62,8 +54,6 @@ test.describe('High-risk plants origin section', () => {
   test('a seed-potato consignment may name any country in the origin block', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.toOriginOfNewNotification(POTATOES);
 
-    // Seed potatoes are scoped to the whole Common SPS Area, so nothing is
-    // narrowed and no scope guidance is shown.
     await expect(plantsPages.origin.guidance).toHaveCount(0);
 
     await plantsPages.origin.selectCountry(NORWAY);
@@ -96,8 +86,7 @@ test.describe('High-risk plants origin section', () => {
   }) => {
     const reference = await plantsJourney.toOriginOfNewNotification(WOOD_AND_CUT_TREES, coniferWoodWithoutBarkLine);
 
-    // Germany rather than a non-EU country: this scope is narrower than EU
-    // membership, and only a member State outside the four proves that.
+    // An EU member State outside the four, so the refusal proves this scope is narrower than EU membership.
     await plantsPages.origin.selectCountry(GERMANY);
     await plantsPages.origin.btnSaveAndContinue.click();
 
@@ -107,8 +96,6 @@ test.describe('High-risk plants origin section', () => {
     await plantsPages.origin.selectCountry(ITALY);
     await plantsPages.origin.btnSaveAndContinue.click();
 
-    // Wood is asked whether the consignment has arrived, so Continue carries on
-    // into the arrival section rather than returning to the Overview.
     await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
     await expect(plantsPages.arrivalStatus.heading).toBeVisible();
   });
@@ -125,8 +112,6 @@ test.describe('High-risk plants origin section', () => {
     await plantsPages.origin.selectCountry(GERMANY);
     await plantsPages.origin.btnSaveAndContinue.click();
 
-    // Plants for planting are asked whether the consignment has arrived, so
-    // Continue carries on into the arrival section.
     await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
     await expect(plantsPages.arrivalStatus.heading).toBeVisible();
   });
@@ -170,8 +155,6 @@ test.describe('High-risk plants origin section', () => {
     await plantsPages.origin.selectCountry(FRANCE);
     await plantsPages.origin.btnSaveAndContinue.click();
 
-    // Continue carries a potato notification on to the arrival details, so the
-    // hub is reached by opening it rather than by being returned to it.
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
 
     await plantsPages.overview.open(reference);

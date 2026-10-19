@@ -32,8 +32,6 @@ test.describe('High-risk plants commodity section', () => {
     await expect(details.category(TREES_FOR_PLANTING)).toBeVisible();
     await expect(details.categoryRadios).toHaveCount(2);
 
-    // The five wood categories are the only set the journey offers that is not
-    // a pair, so the count is worth stating as well as the one named category.
     await plantsJourney.changeCommodityType(reference, WOOD_AND_CUT_TREES);
     await expect(pages.page).toHaveURL(details.expectedUrl(reference));
     await expect(details.category(CUT_CONIFEROUS_TREES)).toBeVisible();
@@ -79,8 +77,6 @@ test.describe('High-risk plants commodity section', () => {
     await plantsPages.commodityDetails.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.commodityDetails.editUrl(reference, 0));
 
-    // Wood is identified by its commodity code, not a genus, and only cut trees
-    // are asked how tall they are.
     await expect(plantsPages.commodityDetails.field('Phytosanitary treatments applied')).toBeVisible();
     await expect(plantsPages.commodityDetails.field('Size of the trees')).toBeVisible();
     await expect(plantsPages.commodityDetails.field('Genus')).toHaveCount(0);

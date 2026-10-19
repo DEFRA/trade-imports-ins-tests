@@ -18,7 +18,6 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.page.getByRole('link', { name, exact: true });
   }
 
-  // Every task row's status tag, so a spec can count the rows the overview draws.
   get taskStatuses(): Locator {
     return this.page.locator('.govuk-task-list__status');
   }
