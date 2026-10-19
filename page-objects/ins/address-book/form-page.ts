@@ -15,13 +15,29 @@ export type AddressDetails = {
 
 /**
  * The Standard Address Block form, shared by add and edit — both render the
- * same fields against the same schema, so only the URL, the heading and the
- * submit button differ. Optional fields are filled with the empty string when
- * omitted so that editing can clear a value that is already stored.
+ * same fields against the same schema, so only the URL, the heading, the name
+ * label ('Name or organisation' on add, 'Name or organisation name' on edit)
+ * and the submit button differ. Optional fields are filled with the empty
+ * string when omitted so that editing can clear a value that is already stored.
  */
 export abstract class InsAddressBookFormPage extends BasePage {
+  protected readonly nameLabel: string = 'Name or organisation name';
+
   get inputName(): Locator {
-    return this.page.getByLabel('Name or organisation name');
+    return this.page.getByLabel(this.nameLabel, { exact: true });
+  }
+
+  sectionHeading(name: 'Address' | 'Contact details'): Locator {
+    return this.page.getByRole('heading', { level: 2, name, exact: true });
+  }
+
+  /** The form's text inputs in page order, used to pin where each field sits. */
+  get textboxes(): Locator {
+    return this.page.getByRole('main').getByRole('textbox');
+  }
+
+  get countryOptionsIncludingPlaceholder(): Locator {
+    return this.selectCountry.getByRole('option');
   }
 
   get inputAddressLine1(): Locator {
@@ -63,6 +79,11 @@ export abstract class InsAddressBookFormPage extends BasePage {
 
   get errorSummary(): Locator {
     return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
+  }
+
+  /** The error summary's link to a field, matched on the whole message. */
+  errorSummaryLink(message: string): Locator {
+    return this.page.getByRole('alert').getByRole('link', { name: message, exact: true });
   }
 
   async fill(details: AddressDetails): Promise<void> {
