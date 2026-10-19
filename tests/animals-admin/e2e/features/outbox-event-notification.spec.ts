@@ -136,7 +136,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
 
       const doc = await collection.findOne({ aggregateId, eventType: NOTIFICATION_SUBMITTED });
       const originCountry = doc?.data.specifiedConsignment.originCountry;
-      // The country is the subdivision's parent; the subdivision is the region of origin entry, named by its MDM list.
+      // The country is the subdivision's parent; the subdivision is the '106' entry, named by its MDM list.
       expect(originCountry?.code?.value).toBe('ES');
       expect(originCountry?.subordinateTradeCountrySubDivision).toEqual([
         {
