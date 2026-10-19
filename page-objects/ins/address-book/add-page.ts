@@ -20,6 +20,10 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
     return this.page.getByRole('link', { name: 'Cancel and return to address book', exact: true });
   }
 
+  get btnCancel(): Locator {
+    return this.page.getByRole('button', { name: 'Cancel and return to address book' });
+  }
+
   get btnCancelFromJourney(): Locator {
     return this.page.getByRole('button', { name: 'Cancel and return to address page' });
   }

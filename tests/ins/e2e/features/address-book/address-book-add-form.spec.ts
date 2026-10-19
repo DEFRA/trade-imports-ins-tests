@@ -89,7 +89,7 @@ test.describe('The add-details form for an address entered by hand', () => {
     const name = `Cancelled Farm ${Date.now()}`;
     await insPages.addressBookAdd.open();
     await insPages.addressBookAdd.inputName.fill(name);
-    await expect(pages.page.getByRole('button', { name: 'Cancel and return to address book' })).toHaveCount(0);
+    await expect(insPages.addressBookAdd.btnCancel).toHaveCount(0);
 
     const buttonBox = await insPages.addressBookAdd.btnSaveAndContinue.boundingBox();
     const linkBox = await insPages.addressBookAdd.linkCancel.boundingBox();
