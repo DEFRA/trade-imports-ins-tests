@@ -93,8 +93,10 @@ test.describe('Address book validation messages', () => {
   test('the address book API refuses a blank name, postcode, country and phone with the same messages, keyed by field', async ({
     addressBookApi,
   }) => {
+    // Name and postcode are blank, so the town is the searchable marker.
+    const townOrCity = `Refused Town ${Date.now()}`;
     const caught = await addressBookApi
-      .createAddress({ ...baseAddress, name: '', postcode: '', countryCode: '', phone: '' })
+      .createAddress({ ...baseAddress, townOrCity, name: '', postcode: '', countryCode: '', phone: '' })
       .catch((error: unknown) => error);
 
     const { status, body } = refusal(caught);
@@ -104,5 +106,6 @@ test.describe('Address book validation messages', () => {
     expect(body.errors.postcode).toContain(MESSAGES.postcode);
     expect(body.errors.countryCode).toContain(MESSAGES.country);
     expect(body.errors.phone).toContain(MESSAGES.phone);
+    expect(await addressBookApi.listAddresses(townOrCity)).toHaveLength(0);
   });
 });
