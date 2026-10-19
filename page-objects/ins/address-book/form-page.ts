@@ -15,11 +15,10 @@ export type AddressDetails = {
 
 /**
  * The Standard Address Block form, shared by add and edit — both render the
- * same fields against the same schema, so only the URL, the heading and the
- * submit button differ. Optional fields are filled with the empty string when
- * omitted so that editing can clear a value that is already stored. The name
- * label differs: the add form says 'Name or organisation', the edit form
- * 'Name or organisation name'.
+ * same fields against the same schema, so only the URL, the heading, the name
+ * label ('Name or organisation' on add, 'Name or organisation name' on edit)
+ * and the submit button differ. Optional fields are filled with the empty
+ * string when omitted so that editing can clear a value that is already stored.
  */
 export abstract class InsAddressBookFormPage extends BasePage {
   protected readonly nameLabel: string = 'Name or organisation name';
