@@ -31,6 +31,15 @@ export function countryByCode(code: string): { value: string; display: string } 
   return { value: country.code, display: country.name };
 }
 
+/** A country subdivision, which the origin page offers by its own name alongside the countries. */
+export function subdivisionByCode(code: string): { value: string; display: string } {
+  const subDivision = countriesOrigin.flatMap((country) => country.subDivisions).find((candidate) => candidate.code === code);
+  if (!subDivision) {
+    throw new Error(`Subdivision ${code} is not in the captured origin list`);
+  }
+  return { value: subDivision.code, display: subDivision.name };
+}
+
 function countryNamesWithSubdivisions(subdivisionName: (subDivision: CapturedSubDivision, country: CapturedCountry) => string): string[] {
   return countriesOrigin
     .flatMap((country) => [country.name, ...country.subDivisions.map((subDivision) => subdivisionName(subDivision, country))])
