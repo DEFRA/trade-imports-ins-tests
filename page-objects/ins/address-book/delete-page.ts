@@ -10,12 +10,30 @@ export class InsAddressBookDeletePage extends BasePage {
     return this.page.getByRole('heading', { level: 1, name: 'Delete this address?' });
   }
 
-  get btnConfirm(): Locator {
-    return this.page.getByRole('button', { name: 'Yes, delete this address' });
+  /** The summary-list labels. */
+  get terms(): Locator {
+    return this.page.getByRole('term');
   }
 
-  get btnCancel(): Locator {
-    return this.page.getByRole('button', { name: 'Cancel' });
+  /** The summary-list values. */
+  get values(): Locator {
+    return this.page.getByRole('definition');
+  }
+
+  get confirmation(): Locator {
+    return this.page.getByText('Confirm that you want to delete this address.');
+  }
+
+  get warning(): Locator {
+    return this.page.getByText('This action cannot be undone.');
+  }
+
+  get btnConfirm(): Locator {
+    return this.page.getByRole('button', { name: 'Yes, delete', exact: true });
+  }
+
+  get linkCancel(): Locator {
+    return this.page.getByRole('link', { name: 'No, cancel' });
   }
 
   async open(addressId: string, attemptSignIn: boolean = true, options?: { userId?: string; organisationSbi?: string }): Promise<void> {
@@ -25,5 +43,9 @@ export class InsAddressBookDeletePage extends BasePage {
 
   async confirm(): Promise<void> {
     await this.btnConfirm.click();
+  }
+
+  async cancel(): Promise<void> {
+    await this.linkCancel.click();
   }
 }
