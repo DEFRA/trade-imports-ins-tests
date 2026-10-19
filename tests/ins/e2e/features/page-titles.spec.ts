@@ -20,6 +20,45 @@ test.describe('INS page titles', { tag: '@duplicated-in-frontend' }, () => {
     await expect(pages.page).toHaveTitle('Address book - Import notification service - GOV.UK');
   });
 
+  test("an address's own page is titled with its name", async ({ pages, insPages, addressBookApi }) => {
+    // Given a trader with an address in their book
+    const name = `View Title Farm ${Date.now()}`;
+    const created = await addressBookApi.createAddress({
+      name,
+      addressLine1: '1 Title Lane',
+      townOrCity: 'Carlisle',
+      postcode: 'CA1 3CC',
+      countryCode: 'GB',
+      phone: '01228 555 0105',
+      email: 'title@example.co.uk',
+    });
+
+    // When they open that address's page
+    await insPages.addressBookView.open(created.id);
+
+    // Then the title names the address, then the service, then GOV.UK
+    await expect(pages.page).toHaveTitle(`${name} - Import notification service - GOV.UK`);
+  });
+
+  test('the delete page is titled Delete this address?', async ({ pages, insPages, addressBookApi }) => {
+    // Given a trader with an address in their book
+    const created = await addressBookApi.createAddress({
+      name: `Delete Title Farm ${Date.now()}`,
+      addressLine1: '2 Title Lane',
+      townOrCity: 'Carlisle',
+      postcode: 'CA1 3CC',
+      countryCode: 'GB',
+      phone: '01228 555 0106',
+      email: 'title@example.co.uk',
+    });
+
+    // When they open that address's delete page
+    await insPages.addressBookDelete.open(created.id);
+
+    // Then the title asks the question, then names the service, then GOV.UK
+    await expect(pages.page).toHaveTitle('Delete this address? - Import notification service - GOV.UK');
+  });
+
   test('a page showing errors opens its title with Error:', async ({ pages, insPages }) => {
     // Given a trader on the add address page
     await insPages.addressBookAdd.open();

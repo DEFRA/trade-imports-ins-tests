@@ -16,6 +16,11 @@ export class InsAddressBookViewPage extends BasePage {
     return this.page.getByRole('definition');
   }
 
+  /** The summary-list labels, in the order the Standard Address Block is rendered. */
+  get terms(): Locator {
+    return this.page.getByRole('term');
+  }
+
   get btnEdit(): Locator {
     return this.page.getByRole('button', { name: 'Edit' });
   }

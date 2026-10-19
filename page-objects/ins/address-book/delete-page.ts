@@ -7,7 +7,7 @@ export class InsAddressBookDeletePage extends BasePage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Delete address' });
+    return this.page.getByRole('heading', { level: 1, name: 'Delete this address?' });
   }
 
   get btnConfirm(): Locator {
