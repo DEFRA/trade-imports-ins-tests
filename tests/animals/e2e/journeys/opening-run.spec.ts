@@ -5,7 +5,7 @@ import { OPENING_RUN_TASKS } from '@flows/animals/journey';
 import { test, expect } from '@fixtures';
 
 test.describe('Opening run', () => {
-  test('walks a cattle-by-air notification through the opening run in Design Release 2.1 order, from create to submitted', async ({
+  test('walks a cattle-by-air notification through every opening-run task, from create to submitted', async ({
     animalsJourney,
     animalsPages,
     pages,

@@ -3,41 +3,31 @@ import { notificationFulfilmentsStatuses } from '@domain/animals/models/api/noti
 import { notificationStatuses } from '@domain/animals/models/api/notification';
 
 test.describe('Notification lifecycle', { tag: '@compose' }, () => {
-  test('creates, submits, amends, cancels, copies and soft-deletes a notification; fulfilment view reflects each transition; copy no longer dedupes', async ({
+  test('creates, submits, amends, cancels, copies and soft-deletes a notification; fulfilment view reflects each transition; each copy gets its own reference number', async ({
     notificationApi,
   }) => {
-    // Create the notification. Backend mints the reference number and returns
-    // the notification entity carrying the empty fulfilments payload.
     const notification = await notificationApi.createNotification({ fulfilments: [] });
     const id = notification.referenceNumber;
     expect(notification.status).toBe(notificationStatuses.draft);
 
-    // Fulfilment-view read reflects the same notification under a shape-specialised projection.
     const initial = await notificationApi.getNotificationFulfilments(id);
     expect(initial.referenceNumber).toBe(id);
     expect(initial.status).toBe(notificationFulfilmentsStatuses.draft);
     expect(initial.fulfilments).toEqual([]);
 
-    // Submit.
     const submitted = await notificationApi.submitNotification(id, notification.concurrencyToken);
     expect(submitted.status).toBe(notificationStatuses.submitted);
     const submittedFulfilments = await notificationApi.getNotificationFulfilments(id);
     expect(submittedFulfilments.status).toBe(notificationFulfilmentsStatuses.submitted);
 
-    // Amend.
     const amended = await notificationApi.amendNotification(id);
     expect(amended.status).toBe(notificationStatuses.amend);
     const amendedFulfilments = await notificationApi.getNotificationFulfilments(id);
     expect(amendedFulfilments.status).toBe(notificationFulfilmentsStatuses.amend);
 
-    // Cancel-amend.
     const cancelled = await notificationApi.cancelAmendNotification(id);
     expect(cancelled.status).toBe(notificationStatuses.submitted);
 
-    // Copy no longer dedupes — two calls produce two distinct copies.
-    // Copy is a WYSIWYG operation post-EUDPA-314, so the caller passes the
-    // source's current concurrencyToken; copy does not mutate the source, so
-    // both calls carry the same token.
     const firstCopy = await notificationApi.copyNotification(id, cancelled.concurrencyToken);
     const secondCopy = await notificationApi.copyNotification(id, cancelled.concurrencyToken);
     expect(firstCopy.referenceNumber).not.toBe(id);
@@ -45,7 +35,6 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     expect(firstCopy.status).toBe(notificationStatuses.draft);
     expect(secondCopy.status).toBe(notificationStatuses.draft);
 
-    // Soft-delete is idempotent — repeated calls return the DELETED notification unchanged.
     const deleted = await notificationApi.softDeleteNotification(id);
     expect(deleted.status).toBe(notificationStatuses.deleted);
     const repeatDelete = await notificationApi.softDeleteNotification(id);

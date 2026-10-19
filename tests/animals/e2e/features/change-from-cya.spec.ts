@@ -10,10 +10,6 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
 
-    // Design release 1 puts one Change link in each card's heading and none on
-    // a row, so the link is named for the card and reaches every answer in it.
-    // Origin leg: the Change link threads ?change=1 to the answering page, so
-    // the save exits back to check your answers instead of the flow target.
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
     await expect(countryRow).toContainText('France');
     await animalsPages.notificationView.changeLink('Change import details').click();
@@ -25,9 +21,6 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(countryRow).toContainText('Belgium');
 
-    // Additional animal details leg: without change context this save would
-    // continue into the consignment flow; under change context it returns to
-    // the summary.
     const certifiedForRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Certified for' });
     await expect(certifiedForRow).toContainText('Slaughter');
     await animalsPages.notificationView.changeLink('Change additional animal details').click();

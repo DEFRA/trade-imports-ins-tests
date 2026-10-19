@@ -34,9 +34,6 @@ test.describe('Authentication', { tag: '@auth' }, () => {
     await expect(pages.signIn.errorSummary).toContainText('Enter a valid 10-digit customer reference number (CRN) and password');
   });
 
-  // No set is served at the root any more, so `/` is a server-wide redirect to
-  // the default set. This is the path a user takes with no stored redirect —
-  // signing in and being put somewhere sensible rather than nowhere.
   test('redirects the service root to the default set’s dashboard', async ({ pages, animalsPages }) => {
     await pages.signIn.signIn();
     await pages.page.goto('/');
@@ -52,8 +49,6 @@ test.describe('Authentication', { tag: '@auth' }, () => {
     await expect(pages.signOut.heading).toBeVisible();
   });
 
-  // Design release 1 shows no signed-in identity: the email address and the strip that carried it are gone,
-  // and sign-out lives in the service navigation as "Log out". Asserting the absence keeps that decision covered.
   test('does not display the signed in user after signing in', async ({ pages, animalsPages }) => {
     await pages.signIn.signIn();
     await expect(animalsPages.dashboard.user()).toHaveCount(0);

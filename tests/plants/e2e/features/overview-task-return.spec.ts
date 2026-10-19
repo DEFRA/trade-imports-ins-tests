@@ -1,9 +1,5 @@
 import { test, expect } from '@fixtures';
-import type { PlantsJourney } from '@flows/plants/journey';
-
-const PLANTS_FOR_PLANTING = 'Plants for planting';
-
-const GERMANY = 'Germany';
+import { PLANTS_FOR_PLANTING, plantsLine } from '@flows/plants/journey';
 
 const ARRIVAL_TASK_ROW = 'Arrival details';
 const COMMODITIES_TASK_ROW = 'What are you importing?';
@@ -12,37 +8,17 @@ const NOT_YET_ARRIVED = 'No, it has not arrived yet';
 
 const ARRIVING_ON = '27/3/2027';
 
-const plantsLine = {
-  Genus: 'Quercus (oak)',
-  Species: 'Quercus robur',
-  'Commodity code': '0602 20 20',
-  Quantity: '120',
-  'EPPO code': 'QUERO',
-};
-
-/** Reaches the arrival-status page on a plants-for-planting notification, the
- * shortest journey that is asked the question. */
-const toArrivalStatus = async (plantsJourney: PlantsJourney): Promise<string> => {
-  const reference = await plantsJourney.startNotification();
-  await plantsJourney.chooseCommodityType(PLANTS_FOR_PLANTING);
-  await plantsJourney.addCommodityLine(PLANTS_FOR_PLANTING, plantsLine);
-  await plantsJourney.toOrigin();
-  await plantsJourney.toArrivalStatus(GERMANY);
-  return reference;
-};
-
 test.describe('High-risk plants overview task return', () => {
   test('arrival details opened from the overview returns to the overview, not the place of destination', async ({
     pages,
     plantsPages,
     plantsJourney,
   }) => {
-    const reference = await toArrivalStatus(plantsJourney);
+    const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
     await plantsJourney.answerArrivalStatus(NOT_YET_ARRIVED);
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVING_ON);
     await plantsPages.arrivalDetails.btnSaveAndContinue.click();
 
-    // In the opening run, arrival details carries on to the place of destination.
     await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
 
     await plantsPages.overview.open(reference);
@@ -53,7 +29,6 @@ test.describe('High-risk plants overview task return', () => {
     await plantsPages.overview.taskRowLink(ARRIVAL_TASK_ROW).click();
     await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
 
-    // The task's own pages come first.
     await plantsPages.arrivalStatus.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
 

@@ -9,11 +9,7 @@ export const notificationStatuses = {
 
 export type NotificationStatus = (typeof notificationStatuses)[keyof typeof notificationStatuses];
 
-/**
- * A Standard Address Block on the wire. Field names follow the address book
- * (EUDPA-294 replaced an older shape carrying `addressLine3`, `city` and a
- * free-text `country`).
- */
+/** A Standard Address Block on the wire. */
 export type PartyAddress = {
   addressLine1: string;
   addressLine2?: string;
@@ -23,11 +19,7 @@ export type PartyAddress = {
   countryCode: string;
 };
 
-/**
- * A party on a notification — a copy of the address-book record picked for the
- * role, with no link back to it. Backend `NotificationResponse` returns
- * `ConsignmentParty` with this shape.
- */
+/** A party on a notification: a copy of the address-book record picked for the role, with no link back to it. */
 export type ConsignmentParty = {
   name?: string;
   email?: string;
@@ -35,10 +27,6 @@ export type ConsignmentParty = {
   address?: PartyAddress;
 };
 
-/**
- * Transporter is not an address-book party: it carries an approval number and
- * type the book does not hold.
- */
 export type Transporter = {
   name: string;
   address: PartyAddress;
@@ -46,11 +34,7 @@ export type Transporter = {
   type: string;
 };
 
-/**
- * One animal-identifier unit on a species line. Every unit on the line, not
- * just the first — see `SpeciesEntry.earTag`/`passport`/`microchip` for the
- * legacy first-unit-only scalars kept alongside this list.
- */
+/** One animal-identifier unit on a species line. */
 export type AnimalIdentifier = {
   microchip?: string;
   passport?: string;
@@ -61,12 +45,9 @@ export type AnimalIdentifier = {
 };
 
 /**
- * Per-species counts are strings on the wire (the frontend submits raw form
- * input values) but echo back as numbers once the backend has stored them.
- *
- * `earTag`/`passport`/`microchip` carry only the line's first
- * animal-identifier unit  — `animalIdentifiers` carries every
- * unit.
+ * Counts are sent as strings and read back as numbers. `earTag`, `passport`
+ * and `microchip` hold the line's first animal-identifier unit;
+ * `animalIdentifiers` holds every unit.
  */
 export type SpeciesEntry = {
   value: string;
@@ -113,11 +94,7 @@ export type Transport = {
   transporter?: Transporter;
 };
 
-/**
- * Wire shape of the backend /notifications API. Sections a draft has not
- * reached yet are echoed back as null by the backend, so every section is
- * nullable as well as optional.
- */
+/** Wire shape of the /notifications API. A section a draft has not reached is null. */
 export type Notification = {
   referenceNumber?: string;
   origin?: Origin | null;

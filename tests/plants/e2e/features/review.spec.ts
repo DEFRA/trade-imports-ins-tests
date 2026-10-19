@@ -1,7 +1,7 @@
 import { SET_BASES } from '@page-objects/shared/sets';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { POTATOES, PLANTS, potatoLine, arrivalDate } from '@flows/plants/journey';
+import { POTATOES, PLANTS_FOR_PLANTING, potatoLine, arrivalDate } from '@flows/plants/journey';
 import type { PlantsPages, SharedPages } from '@page-objects';
 import { getRelativeServiceDisplayDate } from '@utils/date-utils';
 
@@ -112,7 +112,7 @@ test.describe('High-risk plants check and submit section', () => {
   for (const { type, days, rule } of [
     { type: POTATOES, days: 0, rule: 'Notifications for potatoes must be made at least 2 days before the expected date of arrival.' },
     {
-      type: PLANTS,
+      type: PLANTS_FOR_PLANTING,
       days: -7,
       rule: 'Notifications for plants for planting and wood must be made no later than 4 days after the date of arrival.',
     },
@@ -120,11 +120,7 @@ test.describe('High-risk plants check and submit section', () => {
     test(`${type}: late notifications are accepted and highlighted`, async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
       const { reference } = await plantsJourney.completeNotification(addressBookApi, { type, days });
       await expectReview(plantsPages);
-      // govukWarningText always prepends a visually-hidden "Warning" fallback inside
-      // the same <strong>, so an exact match can never pass here — pin the message
-      // as a substring instead (unpassable-assertion exception: the accessible-tree
-      // snapshot shows `strong: Warning If you submit...`, the app renders the
-      // correct message, and no other spec in this repo asserts govukWarningText by exact text).
+      // The warning's text opens with a visually hidden "Warning", so the message is matched as a substring.
       await expect(
         pages.page.getByText(`If you submit this notification today it will be late. ${rule} You can still submit it.`, { exact: false }),
       ).toBeVisible();
@@ -138,15 +134,6 @@ test.describe('High-risk plants check and submit section', () => {
       await plantsPages.dashboard.open();
       await plantsPages.dashboard.searchForReference(reference);
       await expect(plantsPages.dashboard.notificationCard(reference).getByText('Submitted', { exact: true })).toBeVisible();
-      // No dashboard Late tag assertion: ruled c-030/c-035 parks projecting
-      // lateNotificationIndicator onto the backend NotificationDto ("the mapper
-      // has no typed home for it ... explicit omission assertion on the
-      // NotificationDto" — plants-frontend rulings.json panel/rulings.json). The
-      // stub persistence layer already carries the row field correctly (proven
-      // directly against the stub), but this stack runs the real
-      // trade-imports-plants-backend, which has no such field yet (confirmed:
-      // no lateNotificationIndicator anywhere under plants-backend/src/main) — so
-      // the tag cannot render here until that residual-parked mapping is built.
     });
   }
 
@@ -186,7 +173,6 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsJourney.submitFromReview();
     await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrl(reference));
 
-    // The submitted notification keeps the copy even though its record is gone.
     await plantsPages.confirmation.viewNotification.click();
     await assertReadOnly(plantsPages);
     await expect(destination).toContainText(address.name);
@@ -201,8 +187,6 @@ test.describe('High-risk plants check and submit section', () => {
       const originalName = address.name;
       const renamed = `Renamed Holding ${randomUUID()}`;
 
-      // The notification holds a copy taken when the address was picked, so a
-      // later change to the record must not reach the picker card or CYA.
       await addressBookApi.updateAddress(address.id, {
         name: renamed,
         addressLine1: '4 Nursery Lane',
@@ -313,8 +297,6 @@ test.describe('High-risk plants check and submit section', () => {
       await plantsPages.confirmation.viewNotification.click();
       await pages.page.reload();
       await assertReadOnly(plantsPages);
-      // readDate (shared/kit.js) keeps the day/month/year digits verbatim from the
-      // single free-text field, so the card echoes the zero-padded string as typed.
       await expect(plantsPages.notificationView.card('Arrival details')).toContainText(amendedDate);
       await expect(plantsPages.notificationView.lateBanner).toHaveCount(initiallyLate ? 1 : 0);
     });
@@ -381,7 +363,7 @@ test.describe('High-risk plants check and submit section', () => {
     plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await plantsJourney.completeNotification(addressBookApi, { type: PLANTS, days: -1 });
+    const { reference } = await plantsJourney.completeNotification(addressBookApi, { type: PLANTS_FOR_PLANTING, days: -1 });
     await plantsJourney.submitFromReview();
     await plantsNotificationActions.amendNotification(reference);
     await expectAmending(pages, plantsPages, reference);
@@ -402,7 +384,7 @@ test.describe('High-risk plants check and submit section', () => {
     plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await plantsJourney.completeNotification(addressBookApi, { type: PLANTS, days: -1 });
+    const { reference } = await plantsJourney.completeNotification(addressBookApi, { type: PLANTS_FOR_PLANTING, days: -1 });
     await plantsJourney.submitFromReview();
     await plantsNotificationActions.amendNotification(reference);
     await expectAmending(pages, plantsPages, reference);
@@ -516,7 +498,6 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await expect(form.phone).toHaveValue('01738 555 0143');
     await expect(form.email).toHaveValue('review@example.co.uk');
 
-    // Cancel goes back to the picker it was opened from, leaving the copy as it was.
     await form.fill({ name: 'Never Saved Ltd' });
     await form.cancel.click();
     await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrl(reference));
@@ -531,7 +512,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     addressBookApi,
   }) => {
     const { reference, address } = await plantsJourney.completeNotification(addressBookApi, {
-      type: PLANTS,
+      type: PLANTS_FOR_PLANTING,
       days: -1,
     });
 
@@ -582,35 +563,28 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     addressBookApi,
   }) => {
     test.slow();
-    // The address book API takes any non-blank country, so a record can hold a
-    // country name where the journey expects a code. Named for what it is, since
-    // it stays in the shared book for anyone picking addresses by hand.
     const { reference } = await plantsJourney.completeNotification(addressBookApi, {
       countryCode: 'United Kingdom',
       name: `Invalid address (country "United Kingdom" is not a code) ${randomUUID()}`,
     });
-    // The same record was picked for the destination and the contact, so both copies break the rules.
     const error = 'Correct the address details for the place of destination';
     const contactError = 'Correct the contact address details for this consignment';
 
     await expectReview(plantsPages);
     await expect(plantsPages.notificationView.errorSummary).toContainText(error);
     await expect(plantsPages.notificationView.errorSummary).toContainText(contactError);
-    // The card says which field to correct, against the row that holds it.
     await expect(plantsPages.notificationView.row('Place of destination', 'Address')).toContainText('Enter a valid country');
     await expect(plantsPages.notificationView.row('Place of destination', 'Name')).not.toContainText('Enter');
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
     await expect(plantsPages.notificationView.errorSummary).toContainText(error);
 
-    // A bookmarked declaration cannot submit what the review refuses.
     await plantsPages.declaration.open(reference);
     await plantsPages.declaration.checkbox.check();
     await plantsPages.declaration.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
     await expect(plantsPages.overview.statusTag).not.toHaveText('Submitted');
 
-    // Correcting one address clears its own error and leaves the other.
     await plantsPages.notificationView.errorSummary.getByRole('link', { name: error }).click();
     await expect(plantsPages.placeOfDestinationEdit.heading).toBeVisible();
     await plantsPages.placeOfDestinationEdit.country.selectOption('GB');
