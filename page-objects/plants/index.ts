@@ -11,6 +11,7 @@ import { PlantsDashboardPage } from '@page-objects/plants/dashboard-page';
 import { PlantsDeclarationPage } from '@page-objects/plants/declaration-page';
 import { PlantsDeleteNotificationPage } from '@page-objects/plants/delete-notification-page';
 import { PlantsIdentificationNumbersPage } from '@page-objects/plants/identification-numbers-page';
+import { PlantsNotificationCancelAmendPage } from '@page-objects/plants/notification-cancel-amend-page';
 import { PlantsNotificationViewPage } from '@page-objects/plants/notification-view-page';
 import { PlantsOriginPage } from '@page-objects/plants/origin-page';
 import { PlantsOverviewPage } from '@page-objects/plants/overview-page';
@@ -32,6 +33,7 @@ export function createPlantsPages(page: Page) {
     consignmentContactSelect: new PlantsConsignmentContactSelectPage(page),
     identificationNumbers: new PlantsIdentificationNumbersPage(page),
     notificationView: new PlantsNotificationViewPage(page),
+    notificationCancelAmend: new PlantsNotificationCancelAmendPage(page),
     declaration: new PlantsDeclarationPage(page),
     confirmation: new PlantsConfirmationPage(page),
     deleteNotification: new PlantsDeleteNotificationPage(page),

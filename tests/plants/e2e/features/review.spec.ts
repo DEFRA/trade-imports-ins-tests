@@ -1,116 +1,12 @@
 import { SET_BASES } from '@page-objects/shared/sets';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { portByCode } from '@domain/shared/fixtures/reference-data';
+import { POTATOES, PLANTS, potatoLine, arrivalDate } from '@flows/plants/journey';
 import type { PlantsPages, SharedPages } from '@page-objects';
-import type { PlantsJourney } from '@flows/plants/journey';
-import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { getRelativeServiceDisplayDate } from '@utils/date-utils';
-
-const POTATOES = 'Potatoes (seed or ware)';
-const PLANTS = 'Plants for planting';
-const potatoLine = { Variety: 'Maris Piper', Quantity: '250', 'Intended use': 'Planting' };
-
-// Use London calendar dates, like the service, and stay away from timing boundaries.
-function arrivalDate(days: number): string {
-  const date = new Date();
-  date.setUTCDate(date.getUTCDate() + days);
-  return new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London' }).format(date);
-}
-
-type NotificationOptions = {
-  type?: string;
-  days?: number;
-  contact?: boolean;
-  /** The country the minted record carries. The address book API accepts any non-blank value; the journey does not. */
-  countryCode?: string;
-  /** The minted record's name. Must stay unique: the book is shared and never wiped. */
-  name?: string;
-  /** A record to pick instead of minting one, so two notifications can copy the same address. */
-  existing?: AddressBookRecord;
-};
-
-async function completeNotification(
-  pages: SharedPages,
-  plantsPages: PlantsPages,
-  journey: PlantsJourney,
-  api: AddressBookApiClient,
-  {
-    type = POTATOES,
-    days = 7,
-    contact = true,
-    countryCode = 'GB',
-    name = `Review Nursery ${randomUUID()}`,
-    existing,
-  }: NotificationOptions = {},
-) {
-  const address =
-    existing ??
-    (await api.createAddress({
-      name,
-      addressLine1: '4 Nursery Lane',
-      townOrCity: 'Perth',
-      county: 'Perthshire',
-      postcode: 'PH1 5EX',
-      countryCode,
-      phone: '01738 555 0143',
-      email: 'review@example.co.uk',
-    }));
-  const reference = await journey.startNotification();
-  await journey.chooseCommodityType(type);
-  if (type === POTATOES) {
-    await journey.addCommodityLine('Seed potatoes', potatoLine);
-  } else {
-    await journey.addCommodityLine(PLANTS, {
-      Genus: 'Quercus (oak)',
-      Species: 'Quercus robur',
-      'Commodity code': '0602 20 20',
-      Quantity: '120',
-      'EPPO code': 'QUERO',
-    });
-  }
-  await journey.toOrigin();
-  if (type === POTATOES) {
-    await journey.toArrivalDetails('France');
-    await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-    await plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
-  } else {
-    await journey.toArrivalStatus('Germany');
-    await journey.answerArrivalStatus('Yes, it has already arrived');
-  }
-  await plantsPages.arrivalDetails.arrivalDate.fill(arrivalDate(days));
-  await plantsPages.arrivalDetails.btnSaveAndContinue.click();
-  await plantsPages.placeOfDestination.searchFor(address.name);
-  await plantsPages.placeOfDestination.address(address.name).check();
-  await plantsPages.placeOfDestination.btnSaveAndContinue.click();
-  if (type === PLANTS) {
-    await plantsPages.consignorSelect.searchFor(address.name);
-    await plantsPages.consignorSelect.address(address.name).check();
-    await plantsPages.consignorSelect.btnSaveAndContinue.click();
-    await plantsPages.identificationNumbers.supplier.fill('S123');
-  } else {
-    await plantsPages.identificationNumbers.producer.fill('P123');
-    await plantsPages.identificationNumbers.crop.fill('C123');
-  }
-  await plantsPages.identificationNumbers.btnSaveAndContinue.click();
-  if (contact) {
-    await plantsPages.consignmentContactSelect.searchFor(address.name);
-    await plantsPages.consignmentContactSelect.address(address.name).check();
-  }
-  await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
-  await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
-  return { reference, address };
-}
 
 async function expectReview(plantsPages: PlantsPages) {
   await expect(plantsPages.notificationView.heading).toBeVisible();
-}
-
-async function submit(plantsPages: PlantsPages) {
-  await plantsPages.notificationView.btnContinue.click();
-  await plantsPages.declaration.checkbox.check();
-  await plantsPages.declaration.btnContinue.click();
-  await expect(plantsPages.confirmation.heading).toBeVisible();
 }
 
 async function assertReadOnly(plantsPages: PlantsPages) {
@@ -120,13 +16,7 @@ async function assertReadOnly(plantsPages: PlantsPages) {
   await expect(plantsPages.notificationView.btnContinue).toHaveCount(0);
 }
 
-async function amend(pages: SharedPages, plantsPages: PlantsPages, reference: string) {
-  await plantsPages.dashboard.open();
-  await plantsPages.dashboard.searchForReference(reference);
-  await plantsPages.dashboard
-    .notificationCard(reference)
-    .getByRole('button', { name: `Amend notification ${reference}`, exact: true })
-    .click();
+async function expectAmending(pages: SharedPages, plantsPages: PlantsPages, reference: string) {
   await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
   await expect(plantsPages.overview.statusTag).toHaveText('Amend');
   await expect(plantsPages.overview.cancelAmend).toBeVisible();
@@ -134,7 +24,7 @@ async function amend(pages: SharedPages, plantsPages: PlantsPages, reference: st
 
 test.describe('High-risk plants check and submit section', () => {
   test('review stays blocked until the final required row is complete', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
-    const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { contact: false });
+    const { reference, address } = await plantsJourney.completeNotification(addressBookApi, { contact: false });
     const contactEntry = plantsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete contact', exact: true });
     await expect(contactEntry).toHaveAttribute('href', '#contact');
     await plantsPages.notificationView.btnContinue.click();
@@ -159,7 +49,7 @@ test.describe('High-risk plants check and submit section', () => {
     plantsJourney,
     addressBookApi,
   }) => {
-    const { address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    const { address } = await plantsJourney.completeNotification(addressBookApi);
     await expectReview(plantsPages);
     await expect(pages.page.getByRole('heading', { level: 2, name: /^[1-3]\. / })).toHaveText([
       '1. About the consignment',
@@ -193,7 +83,7 @@ test.describe('High-risk plants check and submit section', () => {
     plantsJourney,
     addressBookApi,
   }) => {
-    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
     await expectReview(plantsPages);
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrl(reference));
@@ -202,7 +92,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrl(reference));
     await plantsPages.declaration.linkBack.click();
     await expect(plantsPages.notificationView.heading).toBeVisible();
-    await submit(plantsPages);
+    await plantsJourney.submitFromReview();
     await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrl(reference));
     await expect(plantsPages.confirmation.panel).toContainText(reference);
     await expect(plantsPages.overview.statusTag).toHaveText('Submitted');
@@ -228,7 +118,7 @@ test.describe('High-risk plants check and submit section', () => {
     },
   ]) {
     test(`${type}: late notifications are accepted and highlighted`, async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
-      const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { type, days });
+      const { reference } = await plantsJourney.completeNotification(addressBookApi, { type, days });
       await expectReview(plantsPages);
       // govukWarningText always prepends a visually-hidden "Warning" fallback inside
       // the same <strong>, so an exact match can never pass here — pin the message
@@ -238,7 +128,7 @@ test.describe('High-risk plants check and submit section', () => {
       await expect(
         pages.page.getByText(`If you submit this notification today it will be late. ${rule} You can still submit it.`, { exact: false }),
       ).toBeVisible();
-      await submit(plantsPages);
+      await plantsJourney.submitFromReview();
       await expect(plantsPages.confirmation.panel).toContainText(reference);
       await expect(plantsPages.confirmation.lateBanner).toBeVisible();
       await expect(pages.page.getByText(rule, { exact: false })).toBeVisible();
@@ -266,7 +156,7 @@ test.describe('High-risk plants check and submit section', () => {
     plantsJourney,
     addressBookApi,
   }) => {
-    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
     await plantsPages.commodities.open(reference);
     await plantsJourney.addAnotherCommodityLine('Ware potatoes', { ...potatoLine, 'Intended use': 'Consumption' });
     await plantsPages.notificationView.open(reference);
@@ -286,14 +176,14 @@ test.describe('High-risk plants check and submit section', () => {
     plantsJourney,
     addressBookApi,
   }) => {
-    const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    const { reference, address } = await plantsJourney.completeNotification(addressBookApi);
     await expectReview(plantsPages);
     await addressBookApi.deleteAddress(address.id);
     await pages.page.reload();
     const destination = plantsPages.notificationView.card('Place of destination');
     await expect(destination).toContainText(address.name);
     await expect(destination).toContainText('PH1 5EX');
-    await submit(plantsPages);
+    await plantsJourney.submitFromReview();
     await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrl(reference));
 
     // The submitted notification keeps the copy even though its record is gone.
@@ -306,8 +196,8 @@ test.describe('High-risk plants check and submit section', () => {
   test(
     'editing the record in the address book does not change what the notification shows',
     { tag: '@address-book' },
-    async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
-      const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    async ({ plantsPages, plantsJourney, addressBookApi }) => {
+      const { reference, address } = await plantsJourney.completeNotification(addressBookApi);
       const originalName = address.name;
       const renamed = `Renamed Holding ${randomUUID()}`;
 
@@ -342,12 +232,14 @@ test.describe('High-risk plants check and submit section', () => {
       pages,
       plantsPages,
       plantsJourney,
+      plantsNotificationActions,
       addressBookApi,
     }) => {
-      const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+      const { reference } = await plantsJourney.completeNotification(addressBookApi);
       await expectReview(plantsPages);
-      await submit(plantsPages);
-      await amend(pages, plantsPages, reference);
+      await plantsJourney.submitFromReview();
+      await plantsNotificationActions.amendNotification(reference);
+      await expectAmending(pages, plantsPages, reference);
       await plantsPages.identificationNumbers.open(reference);
       await plantsPages.identificationNumbers.producer.fill('DiscardMe99');
       await plantsPages.identificationNumbers.btnSaveAndContinue.click();
@@ -383,9 +275,9 @@ test.describe('High-risk plants check and submit section', () => {
   }
 
   test('a submitted notification can be deleted from CYA', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
-    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
     await expectReview(plantsPages);
-    await submit(plantsPages);
+    await plantsJourney.submitFromReview();
     await plantsPages.confirmation.viewNotification.click();
     await pages.page.getByRole('button', { name: 'Delete notification', exact: true }).click();
     await expect(plantsPages.deleteNotification.heading).toBeVisible();
@@ -401,20 +293,22 @@ test.describe('High-risk plants check and submit section', () => {
       pages,
       plantsPages,
       plantsJourney,
+      plantsNotificationActions,
       addressBookApi,
     }) => {
-      const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { days: initiallyLate ? 0 : 7 });
+      const { reference } = await plantsJourney.completeNotification(addressBookApi, { days: initiallyLate ? 0 : 7 });
       await expectReview(plantsPages);
-      await submit(plantsPages);
+      await plantsJourney.submitFromReview();
       await plantsPages.confirmation.viewNotification.click();
       await expect(plantsPages.notificationView.lateBanner).toHaveCount(initiallyLate ? 1 : 0);
-      await amend(pages, plantsPages, reference);
+      await plantsNotificationActions.amendNotification(reference);
+      await expectAmending(pages, plantsPages, reference);
       await plantsPages.arrivalDetails.open(reference);
       const amendedDate = arrivalDate(initiallyLate ? 7 : 0);
       await plantsPages.arrivalDetails.arrivalDate.fill(amendedDate);
       await plantsPages.arrivalDetails.btnSaveAndContinue.click();
       await plantsPages.notificationView.open(reference);
-      await submit(plantsPages);
+      await plantsJourney.submitFromReview();
       await expect(plantsPages.confirmation.lateBanner).toHaveCount(initiallyLate ? 1 : 0);
       await plantsPages.confirmation.viewNotification.click();
       await pages.page.reload();
@@ -430,11 +324,13 @@ test.describe('High-risk plants check and submit section', () => {
     pages,
     plantsPages,
     plantsJourney,
+    plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    await submit(plantsPages);
-    await amend(pages, plantsPages, reference);
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
+    await plantsJourney.submitFromReview();
+    await plantsNotificationActions.amendNotification(reference);
+    await expectAmending(pages, plantsPages, reference);
 
     await plantsPages.overview.taskRowLink('Identification numbers').click();
     await expect(plantsPages.identificationNumbers.heading).toBeVisible();
@@ -454,11 +350,13 @@ test.describe('High-risk plants check and submit section', () => {
     pages,
     plantsPages,
     plantsJourney,
+    plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    await submit(plantsPages);
-    await amend(pages, plantsPages, reference);
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
+    await plantsJourney.submitFromReview();
+    await plantsNotificationActions.amendNotification(reference);
+    await expectAmending(pages, plantsPages, reference);
 
     await plantsPages.notificationView.open(reference);
     await plantsPages.notificationView
@@ -480,11 +378,13 @@ test.describe('High-risk plants check and submit section', () => {
     pages,
     plantsPages,
     plantsJourney,
+    plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { type: PLANTS, days: -1 });
-    await submit(plantsPages);
-    await amend(pages, plantsPages, reference);
+    const { reference } = await plantsJourney.completeNotification(addressBookApi, { type: PLANTS, days: -1 });
+    await plantsJourney.submitFromReview();
+    await plantsNotificationActions.amendNotification(reference);
+    await expectAmending(pages, plantsPages, reference);
 
     await plantsPages.arrivalStatus.open(reference);
     await plantsPages.arrivalStatus.btnSaveAndContinue.click();
@@ -499,11 +399,13 @@ test.describe('High-risk plants check and submit section', () => {
     pages,
     plantsPages,
     plantsJourney,
+    plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { type: PLANTS, days: -1 });
-    await submit(plantsPages);
-    await amend(pages, plantsPages, reference);
+    const { reference } = await plantsJourney.completeNotification(addressBookApi, { type: PLANTS, days: -1 });
+    await plantsJourney.submitFromReview();
+    await plantsNotificationActions.amendNotification(reference);
+    await expectAmending(pages, plantsPages, reference);
 
     await plantsPages.consignorSelect.open(reference);
     await expect(plantsPages.consignorSelect.saveAndReturn).toBeVisible();
@@ -528,11 +430,13 @@ test.describe('High-risk plants check and submit section', () => {
     pages,
     plantsPages,
     plantsJourney,
+    plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    await submit(plantsPages);
-    await amend(pages, plantsPages, reference);
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
+    await plantsJourney.submitFromReview();
+    await plantsNotificationActions.amendNotification(reference);
+    await expectAmending(pages, plantsPages, reference);
 
     await plantsPages.arrivalDetails.open(reference);
     await plantsPages.arrivalDetails.arrivalDate.fill('');
@@ -563,8 +467,8 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     addressBookApi,
   }) => {
     test.slow();
-    const { reference: otherReference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
-    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, { existing: address });
+    const { reference: otherReference, address } = await plantsJourney.completeNotification(addressBookApi);
+    const { reference } = await plantsJourney.completeNotification(addressBookApi, { existing: address });
     const editedName = `Edited Holding ${randomUUID()}`;
 
     await plantsPages.notificationView.open(reference);
@@ -593,7 +497,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     plantsJourney,
     addressBookApi,
   }) => {
-    const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    const { reference, address } = await plantsJourney.completeNotification(addressBookApi);
 
     await plantsPages.consignmentContactSelect.open(reference);
     await expect(plantsPages.consignmentContactSelect.currentAddress).toContainText(address.name);
@@ -626,7 +530,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     plantsJourney,
     addressBookApi,
   }) => {
-    const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, {
+    const { reference, address } = await plantsJourney.completeNotification(addressBookApi, {
       type: PLANTS,
       days: -1,
     });
@@ -645,12 +549,11 @@ test.describe('High-risk plants copied addresses are edited on the notification'
   });
 
   test('an edit that breaks the address book rules is refused with its messages, and nothing is saved', async ({
-    pages,
     plantsPages,
     plantsJourney,
     addressBookApi,
   }) => {
-    const { reference, address } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi);
+    const { reference, address } = await plantsJourney.completeNotification(addressBookApi);
 
     await plantsPages.notificationView.open(reference);
     await plantsPages.notificationView.editDetails('Place of destination').click();
@@ -682,7 +585,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     // The address book API takes any non-blank country, so a record can hold a
     // country name where the journey expects a code. Named for what it is, since
     // it stays in the shared book for anyone picking addresses by hand.
-    const { reference } = await completeNotification(pages, plantsPages, plantsJourney, addressBookApi, {
+    const { reference } = await plantsJourney.completeNotification(addressBookApi, {
       countryCode: 'United Kingdom',
       name: `Invalid address (country "United Kingdom" is not a code) ${randomUUID()}`,
     });
@@ -724,6 +627,6 @@ test.describe('High-risk plants copied addresses are edited on the notification'
 
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
     await expect(plantsPages.notificationView.errorSummary).toHaveCount(0);
-    await submit(plantsPages);
+    await plantsJourney.submitFromReview();
   });
 });

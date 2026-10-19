@@ -33,6 +33,10 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
       .locator('.govuk-summary-list__row')
       .filter({ has: this.page.locator('.govuk-summary-list__key').getByText(key, { exact: true }) });
   }
+  /** Picks another address for the role; Edit details changes the copy this notification holds. */
+  changeAddress(cardTitle: string): Locator {
+    return this.card(cardTitle).getByRole('link', { name: /^Change/ });
+  }
   /** Edits the copy this notification holds; the card's Change picks another address. */
   editDetails(cardTitle: string): Locator {
     return this.card(cardTitle).getByRole('link', { name: /^Edit details/ });
