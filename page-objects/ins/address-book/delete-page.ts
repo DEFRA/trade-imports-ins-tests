@@ -6,6 +6,11 @@ export class InsAddressBookDeletePage extends BasePage {
     return `/address-book/${addressId}/delete`;
   }
 
+  /** The page's path with a `return` query naming where the user came from. */
+  expectedUrlWithReturn(addressId: string, returnTo: string): string {
+    return `${this.expectedUrl(addressId)}?return=${encodeURIComponent(returnTo)}`;
+  }
+
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Delete this address?' });
   }
@@ -38,6 +43,17 @@ export class InsAddressBookDeletePage extends BasePage {
 
   async open(addressId: string, attemptSignIn: boolean = true, options?: { userId?: string; organisationSbi?: string }): Promise<void> {
     await this.page.goto(this.expectedUrl(addressId));
+    await this.signInWhenRequested(attemptSignIn, options);
+  }
+
+  /** Opens the page on the INS frontend's own origin, so it works from a spec in another domain. */
+  async openWithReturn(
+    addressId: string,
+    returnTo: string,
+    attemptSignIn: boolean = true,
+    options?: { userId?: string; organisationSbi?: string },
+  ): Promise<void> {
+    await this.navigateToInsFrontend(this.expectedUrlWithReturn(addressId, returnTo));
     await this.signInWhenRequested(attemptSignIn, options);
   }
 

@@ -68,6 +68,41 @@ test.describe('Address book delete', () => {
     await expect(insPages.addressBookList.successBanner).toHaveCount(0);
   });
 
+  test.describe('return', () => {
+    test('reached with a return, No, cancel goes to the view page carrying it, and Yes, delete lands on the return', async ({
+      pages,
+      insPages,
+      addressBookApi,
+    }) => {
+      const created = await addressBookApi.createAddress({ name: `Delete Return Farm ${Date.now()}`, ...baseAddress });
+      const viewHref = `/address-book/${created.id}?return=%2F`;
+
+      await insPages.addressBookDelete.openWithReturn(created.id, '/');
+
+      await expect(insPages.addressBookDelete.linkCancel).toHaveAttribute('href', viewHref);
+      await expect(insPages.addressBookDelete.linkBack).toHaveAttribute('href', viewHref);
+
+      await insPages.addressBookDelete.cancel();
+      await expect(pages.page).toHaveURL(new RegExp(`/address-book/${created.id}\\?return=%2F$`));
+
+      await insPages.addressBookView.btnDelete.click();
+      await insPages.addressBookDelete.confirm();
+
+      await expect(insPages.dashboard.heading).toBeVisible();
+      expect((await addressBookApi.getAddress(created.id)).deleted).toBe(true);
+    });
+
+    test("a return to the deleted address's own page lands on the address book", async ({ pages, insPages, addressBookApi }) => {
+      const created = await addressBookApi.createAddress({ name: `Delete Own Page Farm ${Date.now()}`, ...baseAddress });
+
+      await insPages.addressBookDelete.openWithReturn(created.id, `/address-book/${created.id}`);
+      await insPages.addressBookDelete.confirm();
+
+      await expectAddressBookList({ pages, insPages });
+      await expect(insPages.addressBookList.successBanner).toContainText('address deleted');
+    });
+  });
+
   test.describe('dead links', () => {
     test("an unknown address id's delete page returns to the address book", async ({ pages, insPages }) => {
       await insPages.addressBookDelete.open('ffffffffffffffffffffffff');

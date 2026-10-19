@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
+import { requireBaseUrl } from '@page-objects/shared/base-page';
 import type { Page, Locator } from '@playwright/test';
 
 const OTHER_ORGANISATION_ID = 'e2e-dead-link-other-org';
@@ -56,7 +57,38 @@ test.describe('Address book view', () => {
     ]);
   });
 
+  test.describe('return', () => {
+    test('Back follows an INS return, and Edit and Delete carry it on', async ({ insPages, addressBookApi }) => {
+      const created = await addressBookApi.createAddress({ name: `View Return Farm ${Date.now()}`, ...baseAddress });
+
+      await insPages.addressBookView.openWithReturn(created.id, '/');
+
+      await expect(insPages.addressBookView.btnEdit).toHaveAttribute('href', `/address-book/${created.id}/edit?return=%2F`);
+      await expect(insPages.addressBookView.btnDelete).toHaveAttribute('href', `/address-book/${created.id}/delete?return=%2F`);
+
+      await insPages.addressBookView.linkBack.click();
+
+      await expect(insPages.dashboard.heading).toBeVisible();
+    });
+
+    test('a return on another frontend is ignored', async ({ pages, insPages, addressBookApi }) => {
+      const created = await addressBookApi.createAddress({ name: `View Plants Return Farm ${Date.now()}`, ...baseAddress });
+      const plantsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL')).origin;
+
+      await insPages.addressBookView.openWithReturn(created.id, `${plantsOrigin}/high-risk-plants`);
+      await insPages.addressBookView.linkBack.click();
+
+      await expectAddressBookList({ pages, insPages });
+    });
+  });
+
   test.describe('dead links', () => {
+    test('an unknown address id carrying an honoured return lands on it', async ({ insPages }) => {
+      await insPages.addressBookView.openWithReturn('ffffffffffffffffffffffff', '/');
+
+      await expect(insPages.dashboard.heading).toBeVisible();
+    });
+
     test('an unknown address id returns to the address book', async ({ pages, insPages }) => {
       // When they open the view page for an id nobody has
       await insPages.addressBookView.open('ffffffffffffffffffffffff');

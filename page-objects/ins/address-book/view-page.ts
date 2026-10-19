@@ -6,6 +6,11 @@ export class InsAddressBookViewPage extends BasePage {
     return `/address-book/${addressId}`;
   }
 
+  /** The page's path with a `return` query naming where the user came from. */
+  expectedUrlWithReturn(addressId: string, returnTo: string): string {
+    return `${this.expectedUrl(addressId)}?return=${encodeURIComponent(returnTo)}`;
+  }
+
   /** The page is headed by the address's own name. */
   heading(name: string): Locator {
     return this.page.getByRole('heading', { level: 1, name });
@@ -31,6 +36,17 @@ export class InsAddressBookViewPage extends BasePage {
 
   async open(addressId: string, attemptSignIn: boolean = true, options?: { userId?: string; organisationSbi?: string }): Promise<void> {
     await this.page.goto(this.expectedUrl(addressId));
+    await this.signInWhenRequested(attemptSignIn, options);
+  }
+
+  /** Opens the page on the INS frontend's own origin, so it works from a spec in another domain. */
+  async openWithReturn(
+    addressId: string,
+    returnTo: string,
+    attemptSignIn: boolean = true,
+    options?: { userId?: string; organisationSbi?: string },
+  ): Promise<void> {
+    await this.navigateToInsFrontend(this.expectedUrlWithReturn(addressId, returnTo));
     await this.signInWhenRequested(attemptSignIn, options);
   }
 }
