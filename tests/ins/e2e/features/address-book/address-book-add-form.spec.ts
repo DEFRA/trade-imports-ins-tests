@@ -41,7 +41,7 @@ async function expectFieldsGroupedUnderSections(form: InsAddressBookFormPage): P
 }
 
 test.describe('The add-details form for an address entered by hand', () => {
-  test('the add-details step groups its fields under Address and Contact details, with Name or organisation and County between Town or city and Postcode', async ({
+  test('the add-details step groups its fields under Address and Contact details, with Name or organisation first and County between Town or city and Postcode', async ({
     insPages,
   }) => {
     await insPages.addressBookAdd.open();
