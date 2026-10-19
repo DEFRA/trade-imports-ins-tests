@@ -1,6 +1,6 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import noTicketOrSessionVocabulary from './eslint-rules/no-ticket-or-session-vocabulary.mjs';
+import { codeQuality } from './eslint-rules/code-quality.js';
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -13,12 +13,12 @@ export default tseslint.config(
     },
   },
   {
-    plugins: {
-      local: { rules: { 'no-ticket-or-session-vocabulary': noTicketOrSessionVocabulary } },
-    },
+    plugins: { 'code-quality': codeQuality },
     rules: {
       '@typescript-eslint/no-floating-promises': 'error',
-      'local/no-ticket-or-session-vocabulary': 'error',
+      'code-quality/no-tracking-references': 'error',
+      'code-quality/no-silent-catch': 'error',
+      'code-quality/no-message-only-error-log': 'error',
     },
   },
   {

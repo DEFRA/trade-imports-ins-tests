@@ -24,7 +24,7 @@ Playwright end-to-end, accessibility and security suite for the trade imports se
 ## Code quality
 
 - A comment describes only the lines below it, and only when a name or extraction cannot.
-- No ticket keys, backlog or ruling ids, release names or session words in comments or test titles. `npm run lint` enforces this (`eslint-rules/no-ticket-or-session-vocabulary.mjs`).
+- No ticket keys, backlog or ruling ids, release names or session words in comments or test titles. `npm run lint` enforces this, and the silent-catch and error-log rules, through `eslint-rules/code-quality.js`. That file is the same file as in the Node frontends, so Prettier skips it here; change it there first and copy it across.
 - No history: no before/after narration, no `REMOVED_*`, no "renamed from".
 - A name predicts its return value and side effects. One concept, one name. A rename covers the whole vocabulary.
 - Set-up used by two tests goes in the shared helper. Promoting a helper deletes the local copies.
