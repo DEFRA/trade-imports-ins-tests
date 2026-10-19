@@ -1,4 +1,6 @@
+import { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
+import { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 
 const baseAddress = {
   addressLine1: '5 Form Lane',
@@ -20,19 +22,34 @@ const FIELD_NAMES_IN_ORDER = [
   'Postcode or Zip code',
 ];
 
+async function expectAbove(upper: Locator, lower: Locator): Promise<void> {
+  const upperBox = await upper.boundingBox();
+  const lowerBox = await lower.boundingBox();
+  expect(upperBox).not.toBeNull();
+  expect(lowerBox).not.toBeNull();
+  expect(upperBox.y).toBeLessThan(lowerBox.y);
+}
+
+// Address heading, then Name down to Country; Contact details heading, then Email and Phone.
+async function expectFieldsGroupedUnderSections(form: InsAddressBookFormPage): Promise<void> {
+  await expect(form.sectionHeading('Address')).toBeVisible();
+  await expect(form.sectionHeading('Contact details')).toBeVisible();
+  await expectAbove(form.sectionHeading('Address'), form.inputName);
+  await expectAbove(form.selectCountry, form.sectionHeading('Contact details'));
+  await expectAbove(form.sectionHeading('Contact details'), form.inputEmail);
+  await expectAbove(form.sectionHeading('Contact details'), form.inputPhone);
+}
+
 test.describe('The add-details form for an address entered by hand', () => {
   test('the add-details step groups its fields under Address and Contact details, with Name or organisation and County between Town or city and Postcode', async ({
     insPages,
   }) => {
     await insPages.addressBookAdd.open();
 
-    await expect(insPages.addressBookAdd.sectionHeading('Address')).toBeVisible();
-    await expect(insPages.addressBookAdd.sectionHeading('Contact details')).toBeVisible();
+    await expectFieldsGroupedUnderSections(insPages.addressBookAdd);
     for (const [index, name] of FIELD_NAMES_IN_ORDER.entries()) {
       await expect(insPages.addressBookAdd.textboxes.nth(index)).toHaveAccessibleName(name);
     }
-    await expect(insPages.addressBookAdd.inputEmail).toBeVisible();
-    await expect(insPages.addressBookAdd.inputPhone).toBeVisible();
   });
 
   test('the Country select opens on its blank first option, Select one, with nothing pre-selected', async ({ insPages }) => {
@@ -91,8 +108,7 @@ test.describe('The add-details form for an address entered by hand', () => {
 
     await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.sectionHeading('Address')).toBeVisible();
-    await expect(insPages.addressBookEdit.sectionHeading('Contact details')).toBeVisible();
+    await expectFieldsGroupedUnderSections(insPages.addressBookEdit);
     await expect(insPages.addressBookEdit.inputName).toHaveValue(name);
   });
 });
