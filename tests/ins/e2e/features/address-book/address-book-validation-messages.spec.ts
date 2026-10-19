@@ -85,9 +85,8 @@ test.describe('Address book validation messages', () => {
     await expect(insPages.addressBookEdit.heading).toBeVisible();
     await expectFourMessages(insPages.addressBookEdit);
 
-    const stored = await addressBookApi.getAddress(created.id);
-    expect(stored.name).toBe(name);
-    expect(stored.postcode).toBe(baseAddress.postcode);
+    // Not toEqual(created): the create response's timestamps are finer-grained than a read's.
+    expect(await addressBookApi.getAddress(created.id)).toMatchObject({ name, ...baseAddress });
   });
 
   test('the address book API refuses a blank name, postcode, country and phone with the same messages, keyed by field', async ({
