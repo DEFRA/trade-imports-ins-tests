@@ -11,8 +11,6 @@ export type AddressDocument = {
   countryCode: string;
   phone: string;
   email: string;
-  addressType?: string;
-  uses?: string[];
   organisationId: string;
   status: string;
   createdAt: Date;
