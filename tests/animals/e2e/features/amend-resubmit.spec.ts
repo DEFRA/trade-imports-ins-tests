@@ -22,7 +22,7 @@ test.describe('Amend resubmission', () => {
     await animalsJourney.submitNotification();
 
     // Enter amend from the dashboard (SUBMITTED → AMEND) — re-enters at the hub.
-    await animalsNotificationActions.amendNotification(journeyContext.journeyId);
+    await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
     await expect(animalsPages.overview.statusTag).toHaveText('Amend');
 
     // Change the country of origin through the amending check your answers page.
@@ -48,7 +48,7 @@ test.describe('Amend resubmission', () => {
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
 
     // Back in Submitted: the view is read-only again and keeps the edited value.
-    await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
+    await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(countryRow).toContainText('Belgium');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
@@ -56,7 +56,7 @@ test.describe('Amend resubmission', () => {
 
     // And the dashboard offers Amend again for the resubmitted notification.
     await animalsPages.dashboard.open();
-    await animalsPages.dashboard.searchForReference(journeyContext.journeyId);
-    await expect(animalsPages.dashboard.amend(journeyContext.journeyId)).toBeVisible();
+    await animalsPages.dashboard.searchForReference(journeyContext.referenceNumber);
+    await expect(animalsPages.dashboard.amend(journeyContext.referenceNumber)).toBeVisible();
   });
 });

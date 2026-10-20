@@ -53,9 +53,9 @@ test.describe('Addresses are read-only in the journey', () => {
 
   test('the create-address page is no longer served', async ({ animalsJourney, journeyContext, pages }) => {
     await animalsJourney.startNotification();
-    const journeyId = journeyContext.journeyId;
+    const referenceNumber = journeyContext.referenceNumber;
 
-    const response = await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${journeyId}/addresses/create?for=consignor`);
+    const response = await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/addresses/create?for=consignor`);
 
     expect(response?.status()).toBe(404);
   });

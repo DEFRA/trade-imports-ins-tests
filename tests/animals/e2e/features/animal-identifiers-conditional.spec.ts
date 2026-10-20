@@ -123,8 +123,8 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     // journey rather than rendering. Reached from the hub, that next step is
     // the hub — the point being that the page itself is never shown, and no
     // free-text stand-in is offered anywhere.
-    const journeyId = animalsPages.overview.journeyIdFromUrl();
-    await animalsPages.animalIdentification.open(journeyId);
+    const referenceNumber = animalsPages.overview.referenceNumberFromUrl();
+    await animalsPages.animalIdentification.open(referenceNumber);
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.animalIdentification.heading).toHaveCount(0);
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);

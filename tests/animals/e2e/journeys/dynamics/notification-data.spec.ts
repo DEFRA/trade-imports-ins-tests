@@ -25,7 +25,7 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     // Built first: a missing ANIMALS_DYNAMICS_URL / DATAVERSE_* secret fails here, before the journey.
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     await animalsJourney.submitNotification();
-    const referenceNumber = journeyContext.journeyId;
+    const referenceNumber = journeyContext.referenceNumber;
 
     await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
       expect

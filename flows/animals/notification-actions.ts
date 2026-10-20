@@ -1,27 +1,29 @@
 import { pageLoadWait, timeouts } from '@config/timeouts';
 import type { CountryCode } from '@domain/animals/constants/country-codes';
+import type { JourneyContext } from '@flows/shared/journey-context';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 
 export class AnimalsNotificationActions {
   constructor(
     private readonly animalsPages: AnimalsPages,
     private readonly pages: SharedPages,
+    private readonly context: JourneyContext,
   ) {}
 
-  async toNotificationView(journeyId: string): Promise<void> {
-    await this.animalsPages.notificationView.open(journeyId);
+  async toNotificationView(referenceNumber: string): Promise<void> {
+    await this.animalsPages.notificationView.open(referenceNumber);
   }
 
-  async amendNotification(journeyId: string): Promise<void> {
+  async amendNotification(referenceNumber: string): Promise<void> {
     await this.animalsPages.dashboard.open();
-    await this.animalsPages.dashboard.searchForReference(journeyId);
-    await this.animalsPages.dashboard.amend(journeyId).click();
+    await this.animalsPages.dashboard.searchForReference(referenceNumber);
+    await this.animalsPages.dashboard.amend(referenceNumber).click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
   /** Amends a submitted notification's country of origin and resubmits it, landing on the submitted confirmation. */
-  async amendCountryOfOriginAndResubmit(journeyId: string, country: CountryCode): Promise<void> {
-    await this.amendNotification(journeyId);
+  async amendCountryOfOriginAndResubmit(referenceNumber: string, country: CountryCode): Promise<void> {
+    await this.amendNotification(referenceNumber);
     await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.animalsPages.notificationView.changeLink('Change import details').click();
     await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
@@ -35,29 +37,30 @@ export class AnimalsNotificationActions {
   }
 
   /** Copies a notification from its dashboard card, landing on the copy's overview. */
-  async copyNotification(journeyId: string): Promise<void> {
+  async copyNotification(referenceNumber: string): Promise<void> {
     await this.animalsPages.dashboard.open();
-    await this.animalsPages.dashboard.searchForReference(journeyId);
-    await this.animalsPages.dashboard.copyAsNew(journeyId).click();
+    await this.animalsPages.dashboard.searchForReference(referenceNumber);
+    await this.animalsPages.dashboard.copyAsNew(referenceNumber).click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    this.context.recordReferenceNumber(this.animalsPages.overview.referenceNumberFromUrl());
   }
 
   /**
    * Discards an in-progress amendment, restoring the submitted version. Waits on
    * `?cancelled=1` rather than the view's heading, which the error page also has.
    */
-  async cancelAmend(journeyId: string): Promise<void> {
-    await this.toNotificationView(journeyId);
+  async cancelAmend(referenceNumber: string): Promise<void> {
+    await this.toNotificationView(referenceNumber);
     await this.animalsPages.notificationView.cancelAmend.click();
     await this.animalsPages.notificationCancelAmend.heading.waitFor(pageLoadWait);
     await this.animalsPages.notificationCancelAmend.confirm.click();
     await this.pages.page.waitForURL(/\/notification-view\?cancelled=1$/, { timeout: timeouts.medium });
   }
 
-  async deleteNotification(journeyId: string): Promise<void> {
+  async deleteNotification(referenceNumber: string): Promise<void> {
     await this.animalsPages.dashboard.open();
-    await this.animalsPages.dashboard.searchFor(journeyId);
-    await this.animalsPages.dashboard.delete(journeyId).click();
+    await this.animalsPages.dashboard.searchFor(referenceNumber);
+    await this.animalsPages.dashboard.delete(referenceNumber).click();
     await this.pages.page.getByRole('heading', { name: 'Delete this notification?' }).waitFor(pageLoadWait);
     await this.pages.page.getByRole('button', { name: 'Yes, delete notification' }).click();
     await this.pages.page.getByText('The notification has been deleted.').waitFor(pageLoadWait);

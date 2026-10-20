@@ -8,7 +8,7 @@ const PORT_CODE = pointOfEntries.aberdeenHarbour.value;
 test.describe('Port of entry type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('enhances the select, filters by name or code, submits and persists the code', async ({ animalsJourney, pages, animalsPages }) => {
     await animalsJourney.toArrivalDetails();
-    const journeyId = animalsPages.arrivalDetails.journeyIdFromUrl();
+    const referenceNumber = animalsPages.arrivalDetails.referenceNumberFromUrl();
 
     const combobox = animalsPages.arrivalDetails.portOfEntry;
     await expect(combobox).toBeVisible();
@@ -31,7 +31,7 @@ test.describe('Port of entry type-ahead', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.arrivalDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    await animalsPages.arrivalDetails.open(journeyId);
+    await animalsPages.arrivalDetails.open(referenceNumber);
     await expect(animalsPages.arrivalDetails.portOfEntryValue).toHaveValue(PORT_CODE);
   });
 });

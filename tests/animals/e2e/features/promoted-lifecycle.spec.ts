@@ -5,9 +5,11 @@ import { notificationStatuses } from '@domain/animals/models/api/notification';
 test.describe('Notification lifecycle', { tag: '@compose' }, () => {
   test('creates, submits, amends, cancels, copies and soft-deletes a notification; fulfilment view reflects each transition; each copy gets its own reference number', async ({
     notificationApi,
+    journeyContext,
   }) => {
     const notification = await notificationApi.createNotification({ fulfilments: [] });
     const id = notification.referenceNumber;
+    journeyContext.recordReferenceNumber(id);
     expect(notification.status).toBe(notificationStatuses.draft);
 
     const initial = await notificationApi.getNotificationFulfilments(id);
@@ -29,7 +31,9 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     expect(cancelled.status).toBe(notificationStatuses.submitted);
 
     const firstCopy = await notificationApi.copyNotification(id, cancelled.concurrencyToken);
+    journeyContext.recordReferenceNumber(firstCopy.referenceNumber);
     const secondCopy = await notificationApi.copyNotification(id, cancelled.concurrencyToken);
+    journeyContext.recordReferenceNumber(secondCopy.referenceNumber);
     expect(firstCopy.referenceNumber).not.toBe(id);
     expect(secondCopy.referenceNumber).not.toBe(firstCopy.referenceNumber);
     expect(firstCopy.status).toBe(notificationStatuses.draft);
@@ -50,13 +54,13 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
   }) => {
     test.slow();
     await animalsJourney.submitNotification();
-    await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
+    await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
 
-    await animalsNotificationActions.amendNotification(journeyContext.journeyId);
+    await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.statusTag).toHaveText('Amend');
   });

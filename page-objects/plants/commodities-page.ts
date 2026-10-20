@@ -61,7 +61,7 @@ export class PlantsCommoditiesPage extends PlantsNotificationPage {
   }
 
   /** The list as a change of commodity type leaves it, reporting what it dropped. */
-  removedUrl(journeyId: string, removed: number): string {
-    return `${this.expectedUrl(journeyId)}?removed=${removed}`;
+  removedUrl(referenceNumber: string, removed: number): string {
+    return `${this.expectedUrl(referenceNumber)}?removed=${removed}`;
   }
 }

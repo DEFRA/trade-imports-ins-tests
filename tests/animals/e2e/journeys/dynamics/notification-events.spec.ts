@@ -41,7 +41,7 @@ test.describe('PIMS Dynamics notification events', { tag: '@dynamics' }, () => {
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     await animalsJourney.submitNotification();
     const submittedAt = Date.now();
-    const referenceNumber = journeyContext.journeyId;
+    const referenceNumber = journeyContext.referenceNumber;
 
     await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
       expect
@@ -70,7 +70,7 @@ test.describe('PIMS Dynamics notification events', { tag: '@dynamics' }, () => {
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     const amendedCountry = countryCodes.eu.belgium;
     await animalsJourney.submitNotification();
-    const referenceNumber = journeyContext.journeyId;
+    const referenceNumber = journeyContext.referenceNumber;
 
     await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
       expect
@@ -106,7 +106,7 @@ test.describe('PIMS Dynamics notification events', { tag: '@dynamics' }, () => {
     test.setTimeout(test.info().timeout + 5 * 60_000);
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     await animalsJourney.submitNotification();
-    const referenceNumber = journeyContext.journeyId;
+    const referenceNumber = journeyContext.referenceNumber;
 
     await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
       expect

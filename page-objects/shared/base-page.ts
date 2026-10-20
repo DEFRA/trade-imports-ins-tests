@@ -199,27 +199,27 @@ export class NotificationPage extends BasePage {
     return this.page.getByRole('button', { name: 'Save and return to overview', exact: true });
   }
 
-  expectedUrl(journeyId: string): string {
+  expectedUrl(referenceNumber: string): string {
     const suffix = this.slug ? `/${this.slug}` : '';
-    return `${this.setBase}/notifications/${journeyId}${suffix}`;
+    return `${this.setBase}/notifications/${referenceNumber}${suffix}`;
   }
 
   /**
    * Anchored at the set base rather than at `/notifications`, so a URL under another
    * set's prefix fails the match and throws here, naming the URL, instead of yielding
-   * a journey id that belongs to a different set.
+   * a reference number that belongs to a different set.
    */
-  journeyIdFromUrl(): string {
+  referenceNumberFromUrl(): string {
     const match = new URL(this.page.url()).pathname.match(new RegExp(`^${this.setBase}/notifications/([^/]+)`));
     if (!match) {
-      throw new Error(`No journey id in notification URL: ${this.page.url()}`);
+      throw new Error(`No reference number in notification URL: ${this.page.url()}`);
     }
     return match[1];
   }
 
   currentJourneyUrl(slug: string = this.slug): string {
     const suffix = slug ? `/${slug}` : '';
-    return `${this.setBase}/notifications/${this.journeyIdFromUrl()}${suffix}`;
+    return `${this.setBase}/notifications/${this.referenceNumberFromUrl()}${suffix}`;
   }
 
   /**
@@ -231,8 +231,8 @@ export class NotificationPage extends BasePage {
     await this.navigateToFrontend(path);
   }
 
-  async open(journeyId: string, attemptSignIn: boolean = true): Promise<void> {
-    await this.navigateToService(this.expectedUrl(journeyId));
+  async open(referenceNumber: string, attemptSignIn: boolean = true): Promise<void> {
+    await this.navigateToService(this.expectedUrl(referenceNumber));
     await this.signInWhenRequested(attemptSignIn);
   }
 }

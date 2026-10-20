@@ -12,15 +12,15 @@ test.describe('Opening run', () => {
   }) => {
     test.slow();
 
-    const journeyId = await animalsJourney.walkOpeningRunCattleByAir({
+    const referenceNumber = await animalsJourney.walkOpeningRunCattleByAir({
       reference: `AWBDOC${Date.now()}`,
       issueDate: '03/01/2026',
       filePath: fileUploadPaths.safeFile1kbPdf,
       type: 'VETERINARY_HEALTH_CERTIFICATE',
     });
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/notification-view$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
 
-    await animalsPages.overview.open(journeyId);
+    await animalsPages.overview.open(referenceNumber);
     for (const task of OPENING_RUN_TASKS) {
       await expect(animalsPages.overview.taskStatus(task)).toHaveText('Complete');
     }
@@ -62,18 +62,18 @@ test.describe('Opening run', () => {
   }) => {
     test.slow();
 
-    const journeyId = await animalsJourney.walkOpeningRunToRolesAndAddressesWithoutCph();
+    const referenceNumber = await animalsJourney.walkOpeningRunToRolesAndAddressesWithoutCph();
 
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.contactAddress.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/consignment/contact/select`));
+    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/consignment/contact/select`));
 
     await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
     await animalsPages.contactAddress.saveAndContinue.click();
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/notification-view$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete reason for import');
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete roles and addresses');
 

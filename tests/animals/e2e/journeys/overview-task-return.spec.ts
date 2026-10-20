@@ -11,17 +11,17 @@ test.describe('Overview task return', () => {
   }) => {
     test.slow();
 
-    const journeyId = await animalsJourney.startNotification();
+    const referenceNumber = await animalsJourney.startNotification();
 
     const expectOnOverview = async (): Promise<void> => {
       await expect(animalsPages.overview.heading).toBeVisible();
-      await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}$`));
+      await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}$`));
     };
 
     const openTask = async (name: string, slug: string): Promise<void> => {
-      await expect(animalsPages.overview.task(name)).toHaveAttribute('href', new RegExp(`/notifications/${journeyId}/${slug}$`));
+      await expect(animalsPages.overview.task(name)).toHaveAttribute('href', new RegExp(`/notifications/${referenceNumber}/${slug}$`));
       await animalsPages.overview.task(name).click();
-      await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/${slug}$`));
+      await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/${slug}$`));
     };
 
     const expectComplete = async (name: string): Promise<void> => {
@@ -109,16 +109,16 @@ test.describe('Overview task return', () => {
   }) => {
     test.slow();
 
-    const journeyId = await animalsJourney.startNotification();
+    const referenceNumber = await animalsJourney.startNotification();
     await animalsJourney.answerCommodity();
 
     await animalsPages.overview.task('Roles and addresses').click();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/addresses$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/addresses$`));
     await animalsJourney.addFiveParties();
     await animalsPages.addresses.continueButton.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}$`));
     await expect(animalsPages.cphNumber.heading).toBeHidden();
 
     await animalsPages.overview.task('Roles and addresses').click();
