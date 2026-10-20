@@ -12,6 +12,7 @@ const groupFor = ({ searchTerm, commodityCode, latinName }: CommodityLine) => ({
 
 const expectedGroups = [
   { query: '0102', commodityCode: '0102', latinNames: ['Bos taurus', 'Bison bonasus', 'Bubalus bubalis'] },
+  { query: 'cattle', commodityCode: '0102', latinNames: ['Bos', 'Bos taurus', 'Bibos spp.'] },
   groupFor(commodityLines.horse),
   groupFor(commodityLines.domesticCat),
   groupFor(commodityLines.ostrich),
