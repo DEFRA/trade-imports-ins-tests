@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { COLD_START } from '@fixtures/auth-state';
 import { createInsPages } from '@page-objects';
 import { users } from '@config/users';
-import type { Page, Locator } from '@playwright/test';
+import { expectAddressBookList } from './expect-address-book-list';
 
 const baseAddress = {
   addressLine1: '5 Vanishing Way',
@@ -54,6 +54,7 @@ test.describe('Address book delete', () => {
       useInnerText: true,
     });
     await expect(pages.page.getByText(baseAddress.email)).toHaveCount(0);
+    await expect(pages.page.getByText(baseAddress.phone)).toHaveCount(0);
     await expect(insPages.addressBookDelete.confirmation).toBeVisible();
     await expect(insPages.addressBookDelete.warning).toBeVisible();
 
@@ -164,15 +165,3 @@ test.describe('Address book delete', () => {
     }
   });
 });
-
-async function expectAddressBookList({
-  pages,
-  insPages,
-}: {
-  pages: { page: Page };
-  insPages: { addressBookList: { expectedUrl: string; heading: Locator } };
-}): Promise<void> {
-  await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
-  await expect(insPages.addressBookList.heading).toBeVisible();
-  await expect(pages.page.getByText('Page not found')).toHaveCount(0);
-}

@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
-import type { Page, Locator } from '@playwright/test';
+import { expectAddressBookList } from './expect-address-book-list';
 
 const OTHER_ORGANISATION_ID = 'e2e-dead-link-other-org';
 
@@ -133,15 +133,3 @@ test.describe('Address book view', () => {
     });
   });
 });
-
-async function expectAddressBookList({
-  pages,
-  insPages,
-}: {
-  pages: { page: Page };
-  insPages: { addressBookList: { expectedUrl: string; heading: Locator } };
-}): Promise<void> {
-  await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
-  await expect(insPages.addressBookList.heading).toBeVisible();
-  await expect(pages.page.getByText('Page not found')).toHaveCount(0);
-}
