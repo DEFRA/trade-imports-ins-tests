@@ -166,8 +166,7 @@ test.describe('High-risk plants arrival section', () => {
   }) => {
     const reference = await plantsJourney.toOriginOfNewNotification(POTATOES);
 
-    await plantsPages.origin.selectCountry(FRANCE);
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsJourney.toArrivalDetails(FRANCE);
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
     await expect(plantsPages.arrivalDetails.dateQuestionLabelled(POTATO_DATE_LABEL)).toBeVisible();

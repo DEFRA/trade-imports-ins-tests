@@ -64,7 +64,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(contact).toContainText('review@example.co.uk');
     await plantsPages.notificationView.change('Change country of origin (Import details)').click();
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
-    await plantsPages.origin.selectCountry('Germany');
+    await plantsPages.origin.country.choose('Germany');
     await plantsPages.origin.btnSaveAndContinue.click();
     await expect(plantsPages.notificationView.heading).toBeVisible();
     await expect(plantsPages.notificationView.card('Import details')).toContainText('Germany');

@@ -9,17 +9,17 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
 
   test('renders the page controls', async ({ animalsPages }) => {
     await expect(animalsPages.originOfImport.heading).toBeVisible();
-    await expect(animalsPages.originOfImport.countryOfOrigin).toBeVisible();
+    await expect(animalsPages.originOfImport.country.field).toBeVisible();
     await expect(animalsPages.originOfImport.radioRequiresOriginCode('No')).toBeVisible();
     await expect(animalsPages.originOfImport.saveAndContinue).toBeVisible();
   });
 
   test('shows the country selector on load', async ({ animalsPages }) => {
-    await expect(animalsPages.originOfImport.countryOfOrigin).toBeVisible();
+    await expect(animalsPages.originOfImport.country.field).toBeVisible();
   });
 
   test('accepts valid origin details', async ({ pages, animalsPages }) => {
-    await animalsPages.originOfImport.selectCountry('France');
+    await animalsPages.originOfImport.country.choose('France');
     await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
     await animalsPages.originOfImport.saveAndContinue.click();
 
@@ -45,13 +45,13 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.originOfImport.open(journeyId);
-    await expect(animalsPages.originOfImport.countrySelect).toHaveValue('');
+    await expect(animalsPages.originOfImport.country.select).toHaveValue('');
     await expect(animalsPages.originOfImport.radioRequiresOriginCode('No')).toBeChecked();
     await expect(animalsPages.originOfImport.internalReference).toHaveValue(INTERNAL_REFERENCE);
   });
 
   test('shows an error summary when a region of origin code is claimed but not given', async ({ animalsPages }) => {
-    await animalsPages.originOfImport.selectCountry('France');
+    await animalsPages.originOfImport.country.choose('France');
     await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
     await animalsPages.originOfImport.saveAndContinue.click();
 
@@ -61,7 +61,7 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
   test('persists a region of origin code selection', async ({ animalsPages }) => {
     const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
 
-    await animalsPages.originOfImport.selectCountry('France');
+    await animalsPages.originOfImport.country.choose('France');
     await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
     await animalsPages.originOfImport.regionCode.fill('75');
     await animalsPages.originOfImport.saveAndContinue.click();
@@ -75,13 +75,13 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
   test('persists a country subdivision selection', async ({ animalsPages }) => {
     const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
 
-    await animalsPages.originOfImport.selectCountry('Canary Islands');
+    await animalsPages.originOfImport.country.choose('Canary Islands');
     await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
     await animalsPages.originOfImport.internalReference.fill(INTERNAL_REFERENCE);
     await animalsPages.originOfImport.saveAndContinue.click();
 
     await animalsPages.originOfImport.open(journeyId);
-    await expect(animalsPages.originOfImport.countrySelect).toHaveValue('ES-CN');
-    await expect(animalsPages.originOfImport.countryOfOrigin).toHaveValue('Canary Islands');
+    await expect(animalsPages.originOfImport.country.select).toHaveValue('ES-CN');
+    await expect(animalsPages.originOfImport.country.field).toHaveValue('Canary Islands');
   });
 });

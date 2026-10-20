@@ -14,7 +14,7 @@ test.describe('Plants reference lists', () => {
   }) => {
     await plantsJourney.toOriginOfNewNotification(POTATOES);
 
-    await expect(plantsPages.origin.countryOptions).toHaveText(originPageCountryNames());
+    await expect(plantsPages.origin.country.selectableOptions).toHaveText(originPageCountryNames());
   });
 
   test('the place of landing list offers every captured port, in the order reference data serves them', async ({

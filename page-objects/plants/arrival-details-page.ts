@@ -1,5 +1,6 @@
 import { type Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
+import { TypeAhead } from '@page-objects/shared/type-ahead';
 
 /**
  * When the consignment arrives, and for potatoes what time and where it lands.
@@ -12,8 +13,11 @@ import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
  * place of landing are potato matters and are not rendered for anything else.
  */
 export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
+  private readonly placeOfLanding: TypeAhead;
+
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
     super(page, 'arrival-details');
+    this.placeOfLanding = new TypeAhead(page, 'proposedPlaceOfLanding');
   }
 
   get heading(): Locator {
@@ -53,24 +57,8 @@ export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
     return this.page.locator('select[name="proposedPlaceOfLanding"] option:not([value=""])');
   }
 
-  placeOfLandingOption(name: string): Locator {
-    return this.page.getByRole('option', { name, exact: true });
-  }
-
-  /** Ports are offered as "{name} ({code})", the one label both sides share. */
   async selectPlaceOfLanding(name: string): Promise<void> {
-    // The enhancement is a module script, so it has run by DOMContentLoaded.
-    // Waiting for that settles which element the id resolves to before the
-    // probe reads it. With JavaScript off the event has already fired.
-    await this.page.waitForLoadState('domcontentloaded');
-    const field = this.proposedPlaceOfLanding;
-    if ((await field.evaluate((el) => el.tagName)) === 'SELECT') {
-      await field.selectOption({ label: name });
-      return;
-    }
-    await field.click();
-    await field.fill(name);
-    await this.placeOfLandingOption(name).click();
+    await this.placeOfLanding.choose(name);
   }
 
   get btnSaveAndContinue(): Locator {

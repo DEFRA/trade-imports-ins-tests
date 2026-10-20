@@ -107,7 +107,7 @@ export class AnimalsJourney {
   }
 
   async fillOriginOfImport(options: JourneyOptions = {}): Promise<void> {
-    await this.animalsPages.originOfImport.selectCountry(options.countryCode?.display ?? COUNTRY);
+    await this.animalsPages.originOfImport.country.choose(options.countryCode?.display ?? COUNTRY);
     const requiresRegionCode = options.requiresRegionCode ?? 'No';
     await this.animalsPages.originOfImport.radioRequiresOriginCode(requiresRegionCode).check();
     if (requiresRegionCode === 'Yes') {

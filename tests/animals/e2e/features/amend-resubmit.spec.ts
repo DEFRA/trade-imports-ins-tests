@@ -33,11 +33,7 @@ test.describe('Amend resubmission', () => {
     expect(await pages.page.getByRole('link', { name: /^Change/ }).count()).toBeGreaterThanOrEqual(4);
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
     await expect(countryRow).toContainText('France');
-    await animalsPages.notificationView.changeLink('Change import details').click();
-    await expect(animalsPages.originOfImport.heading).toBeVisible();
-    await animalsPages.originOfImport.selectCountry('Belgium');
-    await animalsPages.originOfImport.saveAndReturn.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await animalsNotificationActions.changeCountryOfOrigin('Belgium');
     await expect(countryRow).toContainText('Belgium');
 
     // Resubmit through the declaration (AMEND → SUBMITTED).

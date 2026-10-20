@@ -21,7 +21,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Origin of import with validation errors', async () => {
       await animalsPages.overview.task('Where is this consignment coming from?').click();
       await animalsPages.originOfImport.heading.waitFor();
-      await expect(animalsPages.originOfImport.countryOfOrigin).toHaveValue('');
+      await expect(animalsPages.originOfImport.country.field).toHaveValue('');
       await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
       await animalsPages.originOfImport.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();

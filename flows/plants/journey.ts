@@ -193,14 +193,14 @@ export class PlantsJourney {
 
   /** Names the country and lands on the arrival-status question. Not for potatoes, which skip it: use `toArrivalDetails`. */
   async toArrivalStatus(country: string): Promise<void> {
-    await this.plantsPages.origin.selectCountry(country);
+    await this.plantsPages.origin.country.choose(country);
     await this.plantsPages.origin.btnSaveAndContinue.click();
     await this.plantsPages.arrivalStatus.heading.waitFor();
   }
 
   /** Names the country on a potato notification and lands on the arrival details. */
   async toArrivalDetails(country: string): Promise<void> {
-    await this.plantsPages.origin.selectCountry(country);
+    await this.plantsPages.origin.country.choose(country);
     await this.plantsPages.origin.btnSaveAndContinue.click();
     await this.plantsPages.arrivalDetails.heading.waitFor();
   }

@@ -42,13 +42,20 @@ test.describe('High-risk plants origin section', () => {
 
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
 
-    await plantsPages.origin.selectCountry(FRANCE);
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsJourney.toArrivalDetails(FRANCE);
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
 
     await plantsPages.origin.open(reference);
-    await expect(plantsPages.origin.countryOfOrigin).toHaveValue(FRANCE);
+    await expect(plantsPages.origin.country.field).toHaveValue(FRANCE);
+  });
+
+  test('a country suggestion shows the letters typed in bold', async ({ plantsPages, plantsJourney }) => {
+    await plantsJourney.toOriginOfNewNotification(POTATOES);
+
+    await plantsPages.origin.country.field.fill('fra');
+
+    await expect(plantsPages.origin.country.boldLettersOf(FRANCE)).toHaveText(['Fra']);
   });
 
   test('a seed-potato consignment may name any country in the origin block', async ({ pages, plantsPages, plantsJourney }) => {
@@ -56,7 +63,7 @@ test.describe('High-risk plants origin section', () => {
 
     await expect(plantsPages.origin.guidance).toHaveCount(0);
 
-    await plantsPages.origin.selectCountry(NORWAY);
+    await plantsPages.origin.country.choose(NORWAY);
     await plantsPages.origin.btnSaveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
@@ -67,13 +74,13 @@ test.describe('High-risk plants origin section', () => {
 
     await expect(plantsPages.origin.guidance).toHaveText(WARE_POTATO_GUIDANCE);
 
-    await plantsPages.origin.selectCountry(FRANCE);
+    await plantsPages.origin.country.choose(FRANCE);
     await plantsPages.origin.btnSaveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
     await expect(plantsPages.origin.errorSummary).toContainText(WARE_POTATO_ERROR);
 
-    await plantsPages.origin.selectCountry(SPAIN);
+    await plantsPages.origin.country.choose(SPAIN);
     await plantsPages.origin.btnSaveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
@@ -86,14 +93,13 @@ test.describe('High-risk plants origin section', () => {
   }) => {
     const reference = await plantsJourney.toOriginOfNewNotification(WOOD_AND_CUT_TREES, coniferWoodWithoutBarkLine);
 
-    // An EU member State outside the four, so the refusal proves this scope is narrower than EU membership.
-    await plantsPages.origin.selectCountry(GERMANY);
+    await plantsPages.origin.country.choose(GERMANY);
     await plantsPages.origin.btnSaveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
     await expect(plantsPages.origin.errorSummary).toContainText(CONIFER_WOOD_ERROR);
 
-    await plantsPages.origin.selectCountry(ITALY);
+    await plantsPages.origin.country.choose(ITALY);
     await plantsPages.origin.btnSaveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
@@ -103,13 +109,13 @@ test.describe('High-risk plants origin section', () => {
   test('a plants-for-planting line is narrowed to the EU member States', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.toOriginOfNewNotification(PLANTS_FOR_PLANTING);
 
-    await plantsPages.origin.selectCountry(NORWAY);
+    await plantsPages.origin.country.choose(NORWAY);
     await plantsPages.origin.btnSaveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
     await expect(plantsPages.origin.errorSummary).toContainText(EU_MEMBER_STATE_ERROR);
 
-    await plantsPages.origin.selectCountry(GERMANY);
+    await plantsPages.origin.country.choose(GERMANY);
     await plantsPages.origin.btnSaveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
@@ -122,16 +128,14 @@ test.describe('High-risk plants origin section', () => {
     plantsJourney,
   }) => {
     const reference = await plantsJourney.toOriginOfNewNotification(POTATOES);
-    await plantsPages.origin.selectCountry(FRANCE);
-    await plantsPages.origin.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await plantsJourney.toArrivalDetails(FRANCE);
 
     await plantsPages.commodities.open(reference);
     await plantsJourney.addAnotherCommodityLine(wareLine.category, wareLine.line);
 
     await plantsPages.origin.open(reference);
     await expect(plantsPages.origin.guidance).toHaveText(WARE_POTATO_GUIDANCE);
-    await expect(plantsPages.origin.countryOfOrigin).toHaveValue(FRANCE);
+    await expect(plantsPages.origin.country.field).toHaveValue(FRANCE);
 
     await plantsPages.origin.btnSaveAndContinue.click();
 
@@ -152,8 +156,7 @@ test.describe('High-risk plants origin section', () => {
   test('the origin task row reads Completed once a country is saved', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.toOriginOfNewNotification(POTATOES);
 
-    await plantsPages.origin.selectCountry(FRANCE);
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsJourney.toArrivalDetails(FRANCE);
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
 

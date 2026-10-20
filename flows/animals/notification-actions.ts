@@ -11,6 +11,15 @@ export class AnimalsNotificationActions {
     await this.animalsPages.notificationView.open(journeyId);
   }
 
+  /** From the notification view, changes the country of origin and returns to the view. */
+  async changeCountryOfOrigin(country: string): Promise<void> {
+    await this.animalsPages.notificationView.changeLink('Change import details').click();
+    await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
+    await this.animalsPages.originOfImport.country.choose(country);
+    await this.animalsPages.originOfImport.saveAndReturn.click();
+    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+  }
+
   async amendNotification(journeyId: string): Promise<void> {
     await this.animalsPages.dashboard.open();
     await this.animalsPages.dashboard.searchForReference(journeyId);

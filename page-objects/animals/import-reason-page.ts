@@ -1,5 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import { TypeAhead } from '@page-objects/shared/type-ahead';
 
 export class AnimalsImportReasonPage extends NotificationPage {
   constructor(page: Page) {
@@ -94,60 +95,28 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.page.locator(`select#${fieldId}-select`);
   }
 
-  private listOption(name: string): Locator {
-    return this.page.getByRole('option', { name, exact: true });
-  }
-
-  // Ports and countries on this page are accessible-autocomplete fields with a
-  // native <select> fallback. With JavaScript the enhancement takes the id onto
-  // the combobox input and renames the select "{id}-select".
-  private async chooseEnhancedSelect(fieldId: string, choice: { index: number } | { value: string }): Promise<void> {
-    await this.page.waitForLoadState('domcontentloaded');
-    const field = this.page.locator(`#${fieldId}`);
-    const hidden = this.hiddenSelect(fieldId);
-
-    if ((await field.evaluate((el) => el.tagName)) === 'SELECT') {
-      if ('index' in choice) {
-        await field.selectOption({ index: choice.index });
-      } else {
-        await field.selectOption(choice.value);
-      }
-      return;
-    }
-
-    let label: string;
-    if ('index' in choice) {
-      label = (await hidden.locator('option').nth(choice.index).textContent())?.trim() ?? '';
-    } else {
-      label = (await hidden.locator(`option[value="${choice.value}"]`).textContent())?.trim() ?? '';
-    }
-    if (!label) {
-      throw new Error(`No option for ${fieldId}: ${JSON.stringify(choice)}`);
-    }
-
-    await field.click();
-    await field.fill(label);
-    await this.listOption(label).click();
+  private typeAhead(fieldId: string): TypeAhead {
+    return new TypeAhead(this.page, fieldId);
   }
 
   async selectTransitPortOfExitByIndex(index: number): Promise<void> {
-    await this.chooseEnhancedSelect('transitPortOfExit', { index });
+    await this.typeAhead('transitPortOfExit').chooseByIndex(index);
   }
 
   async selectTransitDestinationCountry(value: string): Promise<void> {
-    await this.chooseEnhancedSelect('transitDestinationCountry', { value });
+    await this.typeAhead('transitDestinationCountry').chooseByValue(value);
   }
 
   async selectTranshipmentDestinationCountry(value: string): Promise<void> {
-    await this.chooseEnhancedSelect('transhipmentDestinationCountry', { value });
+    await this.typeAhead('transhipmentDestinationCountry').chooseByValue(value);
   }
 
   async selectTemporaryAdmissionPortOfExitByIndex(index: number): Promise<void> {
-    await this.chooseEnhancedSelect('temporaryAdmissionPortOfExit', { index });
+    await this.typeAhead('temporaryAdmissionPortOfExit').chooseByIndex(index);
   }
 
   async selectTemporaryAdmissionPortOfExit(value: string): Promise<void> {
-    await this.chooseEnhancedSelect('temporaryAdmissionPortOfExit', { value });
+    await this.typeAhead('temporaryAdmissionPortOfExit').chooseByValue(value);
   }
 
   get saveAndContinue(): Locator {
