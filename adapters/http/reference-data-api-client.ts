@@ -33,10 +33,10 @@ export class ReferenceDataApiClient {
     const search = encodeURIComponent(line.searchTerm);
     const response = await this.rest.get<CommoditySearchResponse>(`/commodities?search=${search}&size=${PICKER_PAGE_SIZE}`);
     const species = response.groups
-      .find((group) => group.code === line.code)
+      .find((group) => group.code === line.commodityCode)
       ?.species.find((candidate) => candidate.latinName === line.latinName);
     if (!species) {
-      throw new Error(`Searching "${line.searchTerm}" does not list ${line.latinName} under ${line.code}`);
+      throw new Error(`Searching "${line.searchTerm}" does not list ${line.latinName} under ${line.commodityCode}`);
     }
     return species;
   }

@@ -9,6 +9,7 @@ import {
   type PartyIds,
   type PartyRole,
   type SeedDepth,
+  type SeedStep,
 } from '@domain/animals/fixtures/seeded-journey';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { SET_BASES } from '@page-objects/shared/sets';
@@ -50,15 +51,18 @@ export class AnimalsSeededJourney {
 
   async createDraftNotification(depth: SeedDepth = 'readyToSubmit'): Promise<string> {
     const referenceNumber = await this.createEmptyNotification();
-    for (const { slug, form, rendersPage } of await seedSteps(() => this.partyIds(), depth)) {
-      const path = `${CREATE_PATH}/${referenceNumber}/${slug}`;
-      if (rendersPage) {
-        await this.forms.postFormReturningHtml(path, form);
-      } else {
-        await this.forms.postForm(path, form);
-      }
+    for (const step of await seedSteps(() => this.partyIds(), depth)) {
+      await this.postSeedStep(`${CREATE_PATH}/${referenceNumber}/${step.slug}`, step);
     }
     return referenceNumber;
+  }
+
+  private async postSeedStep(path: string, { form, answersWithPage }: SeedStep): Promise<void> {
+    if (answersWithPage) {
+      await this.forms.postFormReturningHtml(path, form);
+    } else {
+      await this.forms.postForm(path, form);
+    }
   }
 
   async createSubmittedNotification(): Promise<string> {

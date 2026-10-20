@@ -1,4 +1,4 @@
-import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 
 import { test, expect } from '@fixtures';
 
@@ -20,23 +20,6 @@ test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, ()
       name: 'Does the consignment contain any unweaned animals?',
     });
 
-    // Each call ADDS a commodity line. The animal count is save-blocking on
-    // every line, so each box the consignment page is showing — the lines
-    // added on earlier passes included — is filled before it hands back to the
-    // hub.
-    const addCommodity = async (line: CommodityLine): Promise<void> => {
-      await animalsPages.overview.open(referenceNumber);
-      await animalsPages.overview.task('What are you importing?').click();
-      await animalsPages.commoditySelection.selectSpecies([line]);
-      await animalsPages.commoditySelection.saveAndContinue.click();
-      await animalsPages.overview.heading.waitFor();
-      await animalsPages.overview.task('Commodity details').click();
-      await animalsPages.consignmentDetails.heading.waitFor();
-      await animalsPages.consignmentDetails.fillEveryAnimalCount('1');
-      await animalsPages.consignmentDetails.saveAndContinue.click();
-      await animalsPages.overview.heading.waitFor();
-    };
-
     // The additional details open from their own task.
     const openAdditionalDetails = async (): Promise<void> => {
       await animalsPages.overview.open(referenceNumber);
@@ -46,14 +29,14 @@ test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, ()
 
     // A non-triggering commodity (cats): certified-for shows, but the
     // notification-level unweaned-animals question is out of scope.
-    await addCommodity(commodityLines.domesticCat);
+    await animalsJourney.addCommodityLine(referenceNumber, commodityLines.domesticCat);
     await openAdditionalDetails();
     await expect(certifiedFor).toBeVisible();
     await expect(unweaned).toBeHidden();
 
     // Adding a triggering commodity (cattle) brings the unweaned-animals question
     // into scope across the commodity lines (frame:"anyItem").
-    await addCommodity(commodityLines.cattle);
+    await animalsJourney.addCommodityLine(referenceNumber, commodityLines.cattle);
     await openAdditionalDetails();
     await expect(certifiedFor).toBeVisible();
     await expect(unweaned).toBeVisible();

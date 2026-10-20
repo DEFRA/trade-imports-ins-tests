@@ -35,15 +35,12 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     await this.searchButton.click();
   }
 
-  /** The results for one CN code, headed with the code. */
   commodityGroup(code: string): Locator {
     return this.page.getByRole('group', { name: code, exact: true });
   }
 
-  /** A tick box is labelled with the Latin name alone, and one name can sit
-   * under several codes, so it is found inside its code's group. */
   species(line: CommodityLine): Locator {
-    return this.commodityGroup(line.code).getByRole('checkbox', { name: line.latinName, exact: true });
+    return this.commodityGroup(line.commodityCode).getByRole('checkbox', { name: line.latinName, exact: true });
   }
 
   /** A species has no tick box until its own query puts it in the results, so

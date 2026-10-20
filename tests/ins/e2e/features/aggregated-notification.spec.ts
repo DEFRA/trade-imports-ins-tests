@@ -61,8 +61,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(draftDoc.referenceNumber).toBe(referenceNumber);
       expect(draftDoc.status).toBe('DRAFT');
       expect(draftDoc.originCountry).toBe(defaultJourneyOptions.countryCode.value);
-      // answerCommodity() always picks the cattle line, whose code the frontend sends as the commodity name.
-      expect(draftDoc.commodity).toBe(commodityLines.cattle.code);
+      expect(draftDoc.commodity).toBe(commodityLines.cattle.commodityCode);
       expect(draftDoc.arrivalDate).toBeInstanceOf(Date);
       expect(draftDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
       expect(draftDoc.lastUpdated).toBeInstanceOf(Date);
@@ -85,7 +84,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(submittedDoc.referenceNumber).toBe(referenceNumber);
       expect(submittedDoc.status).toBe('SUBMITTED');
       expect(submittedDoc.originCountry).toBe(defaultJourneyOptions.countryCode.value);
-      expect(submittedDoc.commodity).toBe(commodityLines.cattle.code);
+      expect(submittedDoc.commodity).toBe(commodityLines.cattle.commodityCode);
       expect(submittedDoc.arrivalDate).toBeInstanceOf(Date);
       expect(submittedDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
       expect(submittedDoc.lastUpdated).toBeInstanceOf(Date);

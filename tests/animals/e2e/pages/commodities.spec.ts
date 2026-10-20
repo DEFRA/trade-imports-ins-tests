@@ -1,16 +1,21 @@
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 
 import { test, expect } from '@fixtures';
 
-// The page holds nothing until a query reaches it, and the stub answers only
-// the searches saved from MDM, so each group is found by a saved term. A group
-// is headed by its CN code and lists its species by Latin name.
+const NO_MATCH_QUERY = 'zzz';
+
+const groupFor = ({ searchTerm, commodityCode, latinName }: CommodityLine) => ({
+  query: searchTerm,
+  commodityCode,
+  latinNames: [latinName],
+});
+
 const expectedGroups = [
-  ['0102', '0102', ['Bos taurus', 'Bison bonasus', 'Bubalus bubalis']],
-  ['horse', '0101', ['Equus cabalus']],
-  ['domestic cat', '01061900', ['Felis catus']],
-  ['ostrich', '01063300', ['Struthio']],
-] as const;
+  { query: '0102', commodityCode: '0102', latinNames: ['Bos taurus', 'Bison bonasus', 'Bubalus bubalis'] },
+  groupFor(commodityLines.horse),
+  groupFor(commodityLines.domesticCat),
+  groupFor(commodityLines.ostrich),
+];
 
 test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -31,18 +36,18 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
   });
 
   test('groups the matching species under their commodity code', async ({ animalsPages }) => {
-    for (const [query, code, species] of expectedGroups) {
+    for (const { query, commodityCode, latinNames } of expectedGroups) {
       await animalsPages.commoditySelection.search(query);
-      const group = animalsPages.commoditySelection.commodityGroup(code);
+      const group = animalsPages.commoditySelection.commodityGroup(commodityCode);
       await expect(group).toBeVisible();
-      for (const name of species) {
+      for (const name of latinNames) {
         await expect(group.getByRole('checkbox', { name, exact: true })).toBeVisible();
       }
     }
   });
 
   test('says so when nothing matches', async ({ pages, animalsPages }) => {
-    await animalsPages.commoditySelection.search('zzz');
+    await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
     await expect(pages.page.getByText('No results found')).toBeVisible();
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
   });
@@ -75,7 +80,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
   test('counts what has been chosen and clears it on request', async ({ animalsPages }) => {
     await animalsPages.commoditySelection.selectSpecies([commodityLines.cattle]);
     // The panel is written on the server, so it appears on the next render.
-    await animalsPages.commoditySelection.search('zzz');
+    await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('1 selected');
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Bos taurus');
 

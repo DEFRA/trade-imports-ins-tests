@@ -173,6 +173,17 @@ only when the deletion is what it tests. Where expiry is on, the shared journey
 addresses seeded in `globalSetup` expire too; the next run's
 `ensureE2eAddressBook` creates them again.
 
+### Commodity lines in the animals specs
+
+`domain/animals/constants/commodity-lines.ts` names each line a spec chooses
+by its CN commodity code and Latin name. The commodity page labels each tick
+box with the Latin name alone, under a heading of the code, and one Latin name
+can sit under several codes (`Bos taurus` is under four), so a line needs both.
+The stack's MDM stub answers only the searches saved from MDM, so each line's
+`searchTerm` is a saved term whose first page of results lists that line. The
+frontend saves only a species its search showed, so a seeded journey posts the
+search before it posts the chosen species.
+
 ### Authenticated session reuse
 
 Each worker signs in once per domain and its tests restore that session

@@ -2,6 +2,7 @@ import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { defaultJourneyOptions, CONSIGNOR_NAME, CPH_NUMBER } from '@domain/animals/constants/journey-options';
 import { countryCodes } from '@domain/animals/constants/country-codes';
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
 import { fileUploadPaths } from '@resources/file-upload/paths';
@@ -95,11 +96,9 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       const tradeLines = data.specifiedConsignment.includedConsignmentItem?.[0].includedTradeLineItem ?? [];
       expect(tradeLines).toHaveLength(1);
       const [line] = tradeLines;
-      // The event repeats the commodity name as both description and common name, and the
-      // commodity name is now the CN code.
-      expect(line.description).toEqual(['0102']);
-      expect(line.commonName).toBe('0102');
-      expect(line.scientificName).toBe('Bos taurus');
+      expect(line.description).toEqual([commodityLines.cattle.commodityCode]);
+      expect(line.commonName).toBe(commodityLines.cattle.commodityCode);
+      expect(line.scientificName).toBe(commodityLines.cattle.latinName);
       expect(line.specifiedLineTradeDelivery?.[0].productUnitQuantity.content).toBe(1);
       expect(line.physicalReferencedLogisticsPackage?.[0].itemQuantity).toBe(5);
       const animals = line.individualTradeProductInstance ?? [];

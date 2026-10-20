@@ -2,7 +2,7 @@ import type { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
 import { ARRIVAL_DATE } from '@flows/animals/journey';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, speciesCardTitle } from '@domain/animals/constants/commodity-lines';
 
 test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-frontend' }, () => {
   test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({ animalsJourney, pages }) => {
@@ -49,8 +49,10 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
   }) => {
     test.slow();
     await animalsJourney.toReview();
-    // The common name is MDM's, saved from the search the species was ticked under.
     const { commonName } = await referenceDataApi.findSpecies(commodityLines.cattle);
+    if (!commonName) {
+      throw new Error(`Reference data gives ${commodityLines.cattle.latinName} no common name to assert on.`);
+    }
 
     const value = (card: Locator, key: string) =>
       card.locator('.govuk-summary-list__row', { has: pages.page.getByText(key, { exact: true }) }).locator('.govuk-summary-list__value');
@@ -83,10 +85,10 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(value(reasonForImport, 'Reason for import')).toHaveText('Internal market');
     await expect(value(reasonForImport, 'Purpose in the market')).toHaveText('Breeding');
 
-    const speciesCard = animalsPages.notificationView.summaryCard('0102 — Bos taurus');
-    await expect(value(speciesCard, 'Commodity code')).toHaveText('0102');
-    await expect(value(speciesCard, 'Common name')).toHaveText(commonName ?? '');
-    await expect(value(speciesCard, 'Species')).toHaveText('Bos taurus');
+    const speciesCard = animalsPages.notificationView.summaryCard(speciesCardTitle(commodityLines.cattle));
+    await expect(value(speciesCard, 'Commodity code')).toHaveText(commodityLines.cattle.commodityCode);
+    await expect(value(speciesCard, 'Common name')).toHaveText(commonName);
+    await expect(value(speciesCard, 'Species')).toHaveText(commodityLines.cattle.latinName);
     await expect(value(speciesCard, 'Number of animals')).toHaveText('1');
     await expect(value(speciesCard, 'Number of packages')).toHaveText('5');
     await expect(speciesCard.getByRole('heading', { name: 'Animal details' })).toBeVisible();

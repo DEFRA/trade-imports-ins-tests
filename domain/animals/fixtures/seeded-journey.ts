@@ -1,6 +1,6 @@
 import type { FormFields } from '@adapters/http/frontend-form-client';
 import { getRelativeAppDateText } from '@utils/date-utils';
-import { commodityLines, selectionKey } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, speciesCheckboxValue } from '@domain/animals/constants/commodity-lines';
 
 // Answers must stay in step with `flows/animals/journey.ts`; `api-seed-parity.spec.ts` compares the two.
 
@@ -21,8 +21,7 @@ export type PartyIds = Record<PartyRole, string>;
 export type SeedStep = {
   slug: string;
   form: FormFields;
-  /** The post answers with the page itself rather than redirecting to the next one. */
-  rendersPage?: boolean;
+  answersWithPage?: boolean;
 };
 
 export type SeedDepth = 'unlocked' | 'draft' | 'readyToSubmit';
@@ -43,9 +42,8 @@ const originStep: SeedStep = {
 };
 
 const commoditySteps: SeedStep[] = [
-  // The picker saves only a species its search showed, so the search goes first.
-  { slug: 'commodities', form: { commoditySearch: commodityLines.cattle.searchTerm, action: 'search' }, rendersPage: true },
-  { slug: 'commodities', form: { species: selectionKey(commodityLines.cattle) } },
+  { slug: 'commodities', form: { commoditySearch: commodityLines.cattle.searchTerm, action: 'search' }, answersWithPage: true },
+  { slug: 'commodities', form: { species: speciesCheckboxValue(commodityLines.cattle) } },
   {
     slug: 'consignment-details',
     form: { [`numberOfAnimalsQuantity-${FIRST_LINE_INDEX}`]: '1', [`numberOfPackages-${FIRST_LINE_INDEX}`]: '5' },

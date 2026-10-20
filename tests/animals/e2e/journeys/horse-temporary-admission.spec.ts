@@ -1,3 +1,4 @@
+import { commodityLines, speciesCardTitle } from '@domain/animals/constants/commodity-lines';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { HORSE_TRANSPORT_ID, HORSE_TRANSPORTER, OPENING_RUN_TASKS, TEMPORARY_ADMISSION_EXIT_DATE } from '@flows/animals/journey';
@@ -31,8 +32,8 @@ test.describe('Horse by sea under temporary admission', () => {
     const importDetails = animalsPages.notificationView.summaryCard('Import details');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Ireland');
 
-    const speciesCard = animalsPages.notificationView.summaryCard('0101 — Equus cabalus');
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText('Equus cabalus');
+    const speciesCard = animalsPages.notificationView.summaryCard(speciesCardTitle(commodityLines.horse));
+    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText(commodityLines.horse.latinName);
     await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('1');
 
     const reasonForImport = animalsPages.notificationView.summaryCard('Reason for import');

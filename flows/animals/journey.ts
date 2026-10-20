@@ -6,7 +6,7 @@ import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 
 export type AccompanyingDocumentAnswer = {
   reference: string;
@@ -138,6 +138,19 @@ export class AnimalsJourney {
     await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
     await this.animalsPages.consignmentDetails.numberOfAnimals.fill('1');
     await this.animalsPages.consignmentDetails.numberOfPackages.fill('5');
+    await this.animalsPages.consignmentDetails.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+  }
+
+  async addCommodityLine(referenceNumber: string, line: CommodityLine): Promise<void> {
+    await this.animalsPages.overview.open(referenceNumber);
+    await this.animalsPages.overview.task('What are you importing?').click();
+    await this.animalsPages.commoditySelection.selectSpecies([line]);
+    await this.animalsPages.commoditySelection.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.overview.task('Commodity details').click();
+    await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await this.animalsPages.consignmentDetails.fillEveryAnimalCount('1');
     await this.animalsPages.consignmentDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
