@@ -23,7 +23,7 @@ import { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { FrontendFormClient } from '@adapters/http/frontend-form-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { ensureE2eAddressBook } from '@domain/shared/fixtures/e2e-address-book';
-import type { JourneyContext } from '@flows/shared/journey-context';
+import { JourneyContext } from '@flows/shared/journey-context';
 
 dotenv.config({ quiet: true });
 
@@ -72,7 +72,7 @@ const main = async (): Promise<void> => {
       // find the shared journey fixtures by name.
       await ensureE2eAddressBook(addressBook);
       const forms = new FrontendFormClient(context);
-      const journeyContext: JourneyContext = {};
+      const journeyContext = new JourneyContext();
       const journey = new AnimalsSeededJourney(forms, addressBook, journeyContext);
       const ref = await seed(state, journey);
       console.log(ref);

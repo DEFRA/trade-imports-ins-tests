@@ -95,7 +95,7 @@ export class PlantsJourney {
     await this.plantsPages.dashboard.btnStartNewNotification.click();
     await this.plantsPages.commodityType.heading.waitFor();
     const referenceNumber = this.plantsPages.commodityType.referenceNumberFromUrl();
-    this.context.referenceNumber = referenceNumber;
+    this.context.recordReferenceNumber(referenceNumber);
     return referenceNumber;
   }
 

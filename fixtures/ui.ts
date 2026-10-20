@@ -11,7 +11,7 @@ import {
   type PlantsPages,
   type SharedPages,
 } from '@page-objects';
-import type { JourneyContext } from '@flows/shared/journey-context';
+import { JourneyContext } from '@flows/shared/journey-context';
 import { AnimalsJourney } from '@flows/animals/journey';
 import { AnimalsNotificationActions } from '@flows/animals/notification-actions';
 import { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
@@ -105,8 +105,12 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
     await use(createPlantsPages(page));
   },
   // eslint-disable-next-line no-empty-pattern
-  journeyContext: async ({}, use) => {
-    await use({});
+  journeyContext: async ({}, use, testInfo) => {
+    const journeyContext = new JourneyContext();
+    await use(journeyContext);
+    for (const referenceNumber of journeyContext.referenceNumbers) {
+      testInfo.annotations.push({ type: 'Reference number', description: referenceNumber });
+    }
   },
   animalsJourney: async ({ animalsPages, pages, journeyContext }, use) => {
     await use(new AnimalsJourney(animalsPages, pages, journeyContext));

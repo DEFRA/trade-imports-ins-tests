@@ -111,7 +111,7 @@ export class AnimalsSeededJourney {
   }
 
   private remember(referenceNumber: string): string {
-    this.context.referenceNumber = referenceNumber;
+    this.context.recordReferenceNumber(referenceNumber);
     return referenceNumber;
   }
 }

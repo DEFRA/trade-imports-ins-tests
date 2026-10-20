@@ -72,7 +72,7 @@ export class AnimalsJourney {
     await this.animalsPages.dashboard.btnCreateNewNotification.click();
     await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
     const referenceNumber = this.animalsPages.originOfImport.referenceNumberFromUrl();
-    this.context.referenceNumber = referenceNumber;
+    this.context.recordReferenceNumber(referenceNumber);
     return referenceNumber;
   }
 
