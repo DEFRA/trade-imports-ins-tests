@@ -25,7 +25,7 @@ test.describe('Address book delete', () => {
 
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
     await expect(insPages.addressBookList.row(name)).toHaveCount(0);
-    await expect(insPages.addressBookList.successBanner).toContainText(`Delete test farm ${stamp} address deleted`);
+    await expect(insPages.addressBookList.successBanner).toContainText(`${name} address deleted`);
 
     // The record is still there, flagged — the by-id endpoint is the only way
     // to see it, because list and search both omit tombstones. A hard delete
