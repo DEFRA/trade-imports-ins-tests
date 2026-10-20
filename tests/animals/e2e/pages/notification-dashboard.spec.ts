@@ -1,7 +1,6 @@
 import { test, expect } from '@fixtures';
+import { REFERENCE_NUMBER_PATTERN, WHOLE_REFERENCE_NUMBER_PATTERN } from '@domain/animals/constants/reference-number-patterns';
 
-const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
-const WHOLE_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
 const DISPLAYED_DATE_PATTERN = /\d{1,2} \w+ \d{4}/;
 
 test.describe('Import notification service dashboard', () => {

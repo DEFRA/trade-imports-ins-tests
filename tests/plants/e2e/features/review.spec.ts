@@ -258,14 +258,16 @@ test.describe('High-risk plants check and submit section', () => {
     });
   }
 
-  test('a submitted notification can be deleted from CYA', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
+  test('a submitted notification can be deleted from CYA', async ({
+    plantsPages,
+    plantsJourney,
+    plantsNotificationActions,
+    addressBookApi,
+  }) => {
     const { reference } = await plantsJourney.completeNotification(addressBookApi);
     await expectReview(plantsPages);
     await plantsJourney.submitFromReview();
-    await plantsPages.confirmation.viewNotification.click();
-    await pages.page.getByRole('button', { name: 'Delete notification', exact: true }).click();
-    await expect(plantsPages.deleteNotification.heading).toBeVisible();
-    await plantsPages.deleteNotification.btnConfirm.click();
+    await plantsNotificationActions.deleteNotification(reference);
     await expect(plantsPages.dashboard.heading).toBeVisible();
     await expect(plantsPages.dashboard.deletedBanner).toContainText('Notification deleted');
     await plantsPages.dashboard.searchForReference(reference);
