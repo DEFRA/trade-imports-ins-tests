@@ -1,16 +1,21 @@
-/** PIMS Dynamics is the animals Dynamics instance: its environment URL, table, reference column and delivery timing. */
-
-import { requireEnv } from '@config/dataverse';
 import { timeouts } from '@config/timeouts';
 
-export const ANIMALS_DYNAMICS_NOTIFICATIONS_ENTITY_SET = 'defraimp_importernotifications';
-export const ANIMALS_DYNAMICS_REFERENCE_COLUMN = 'defraimp_name';
-
 // Delivery is outbox → SQS → gateway → ASB → PIMS Dynamics.
-export const ANIMALS_DYNAMICS_ARRIVAL_TIMEOUT_MS = timeouts.veryLong;
+const arrivalTimeoutMs = timeouts.veryLong;
 
-// PIMS Dynamics stores the backend's submit time, slightly before the test's own; the tolerance also covers clock skew.
-export const ANIMALS_DYNAMICS_SUBMISSION_DATE_TOLERANCE_MS = timeouts.medium;
+/** How the animals tests wait on PIMS Dynamics, the animals Dynamics instance, and how they report the wait. */
+export const animalsDynamics = {
+  arrivalTimeoutMs,
 
-/** Trailing '/' stripped so the query URL and the token's `resource` match however the secret is typed. */
-export const getAnimalsDynamicsUrl = (): string => requireEnv('ANIMALS_DYNAMICS_URL')[0].replace(/\/+$/, '');
+  // PIMS Dynamics stores the backend's submit time, slightly before the test's own; the tolerance also covers clock skew.
+  submissionDateToleranceMs: timeouts.medium,
+
+  submissionPollAnnotation: 'PIMS Dynamics submission poll',
+
+  /** `expect.poll` options for waiting on PIMS Dynamics; `expectation` starts the failure message. */
+  pollOptions: (expectation: string, timeout: number = arrivalTimeoutMs) => ({
+    message: `${expectation} in PIMS Dynamics within ${timeout / 1000}s`,
+    timeout,
+    intervals: [timeouts.short],
+  }),
+} as const;

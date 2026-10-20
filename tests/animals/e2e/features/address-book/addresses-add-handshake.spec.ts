@@ -26,7 +26,7 @@ test.describe('Add an address from the journey via INS', () => {
         email: `handshake-${stamp}@example.co.uk`,
       };
 
-      const journeyId = await animalsJourney.startNotification();
+      const referenceNumber = await animalsJourney.startNotification();
       await animalsJourney.unlockSections();
 
       await animalsPages.overview.task('Roles and addresses').click();
@@ -39,7 +39,7 @@ test.describe('Add an address from the journey via INS', () => {
 
       await insPages.addressBookAdd.fill(details);
       await insPages.addressBookAdd.save();
-      await expect(pages.page).toHaveURL((url) => url.pathname === animalsPages.consignorSelection.expectedUrl(journeyId), {
+      await expect(pages.page).toHaveURL((url) => url.pathname === animalsPages.consignorSelection.expectedUrl(referenceNumber), {
         timeout: 15_000,
       });
 
@@ -58,7 +58,7 @@ test.describe('Add an address from the journey via INS', () => {
     'cancelling INS add returns to the picker without saving an address',
     { tag: '@ins-frontend' },
     async ({ animalsJourney, pages, animalsPages, insPages }) => {
-      const journeyId = await animalsJourney.startNotification();
+      const referenceNumber = await animalsJourney.startNotification();
       await animalsJourney.unlockSections();
 
       await animalsPages.overview.task('Roles and addresses').click();
@@ -69,7 +69,7 @@ test.describe('Add an address from the journey via INS', () => {
       await expect(insPages.addressBookAdd.heading).toBeVisible();
 
       await insPages.addressBookAdd.btnCancelFromJourney.click();
-      await expect(pages.page).toHaveURL((url) => url.pathname === animalsPages.consignorSelection.expectedUrl(journeyId), {
+      await expect(pages.page).toHaveURL((url) => url.pathname === animalsPages.consignorSelection.expectedUrl(referenceNumber), {
         timeout: 15_000,
       });
 

@@ -66,8 +66,8 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.partyRow(card, role).getByRole('definition').first();
   }
 
-  async open(journeyId: string, attemptSignIn: boolean = true): Promise<void> {
-    await super.open(journeyId, attemptSignIn);
+  async open(referenceNumber: string, attemptSignIn: boolean = true): Promise<void> {
+    await super.open(referenceNumber, attemptSignIn);
     if (attemptSignIn) await this.heading.waitFor(pageLoadWait);
   }
 }

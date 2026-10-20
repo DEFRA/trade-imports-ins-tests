@@ -71,34 +71,33 @@ export class AnimalsJourney {
     await this.toNotificationDashboard();
     await this.animalsPages.dashboard.btnCreateNewNotification.click();
     await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
-    const journeyId = this.animalsPages.originOfImport.journeyIdFromUrl();
-    this.context.journeyId = journeyId;
-    this.context.referenceNumber = journeyId;
-    return journeyId;
+    const referenceNumber = this.animalsPages.originOfImport.referenceNumberFromUrl();
+    this.context.recordReferenceNumber(referenceNumber);
+    return referenceNumber;
   }
 
   // Origin answered — most other tasks are gated behind it, so callers that
   // want a usable task list reach the overview this way, not via startNotificationAtOrigin().
   async startNotification(): Promise<string> {
-    const journeyId = await this.createNotificationAtOrigin();
+    const referenceNumber = await this.createNotificationAtOrigin();
     await this.fillOriginOfImport();
     await this.saveOriginOfImport();
     // Wait for the save to land before navigating away. Opening the overview
     // regardless hides a failed save — the run then dies several steps later on
     // a task stuck at "Not yet started", pointing at the wrong page entirely.
     await this.animalsPages.originOfImport.heading.waitFor({ ...pageLoadWait, state: 'hidden' });
-    await this.animalsPages.overview.open(journeyId);
+    await this.animalsPages.overview.open(referenceNumber);
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    return journeyId;
+    return referenceNumber;
   }
 
   // Origin unanswered — the entry guard is satisfied by the opening-run
   // marker set at creation, not by answering origin itself.
   async startNotificationAtOrigin(): Promise<string> {
-    const journeyId = await this.createNotificationAtOrigin();
-    await this.animalsPages.overview.open(journeyId);
+    const referenceNumber = await this.createNotificationAtOrigin();
+    await this.animalsPages.overview.open(referenceNumber);
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    return journeyId;
+    return referenceNumber;
   }
 
   // Origin unanswered, as a brand-new notification first shows it.
@@ -389,7 +388,7 @@ export class AnimalsJourney {
   // puts the commercial answer the register writes in scope.
   async toTransporterSelection(): Promise<void> {
     await this.toCommercialTransporter();
-    await this.animalsPages.transporterSelection.open(this.animalsPages.commercialTransporter.journeyIdFromUrl());
+    await this.animalsPages.transporterSelection.open(this.animalsPages.commercialTransporter.referenceNumberFromUrl());
     await this.animalsPages.transporterSelection.heading.waitFor(pageLoadWait);
   }
 
@@ -401,7 +400,7 @@ export class AnimalsJourney {
   }
 
   async toReview(): Promise<void> {
-    if (!this.context.journeyId) await this.startNotification();
+    if (!this.context.referenceNumber) await this.startNotification();
     await this.completeAnswerSections();
     await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
@@ -426,7 +425,7 @@ export class AnimalsJourney {
     await this.animalsPages.overview.task('Upload documents').click();
     await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
     await this.uploadDocumentAndWaitForScan(document);
-    await this.animalsPages.overview.open(this.animalsPages.accompanyingDocuments.journeyIdFromUrl());
+    await this.animalsPages.overview.open(this.animalsPages.accompanyingDocuments.referenceNumberFromUrl());
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.fromOverviewToDeclaration();
     await this.confirmDeclaration();
@@ -434,7 +433,7 @@ export class AnimalsJourney {
 
   async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
     const pages = this.animalsPages;
-    const journeyId = await this.createNotificationAtOrigin();
+    const referenceNumber = await this.createNotificationAtOrigin();
 
     await this.fillOriginOfImport();
     await this.saveOriginOfImport();
@@ -466,12 +465,12 @@ export class AnimalsJourney {
     await pages.accompanyingDocuments.continueButton.click();
 
     await pages.addresses.heading.waitFor(pageLoadWait);
-    return journeyId;
+    return referenceNumber;
   }
 
   async walkOpeningRunCattleByAir(document: AccompanyingDocumentAnswer): Promise<string> {
     const pages = this.animalsPages;
-    const journeyId = await this.createNotificationAtOrigin();
+    const referenceNumber = await this.createNotificationAtOrigin();
 
     await this.fillOriginOfImport({ requiresRegionCode: 'Yes', internalReference: 'CATTLE-2026-01' });
     await this.saveOriginOfImport();
@@ -531,12 +530,12 @@ export class AnimalsJourney {
     await this.chooseContactAddress();
 
     await pages.notificationView.heading.waitFor(pageLoadWait);
-    return journeyId;
+    return referenceNumber;
   }
 
   async walkOpeningRunHorseBySea(document: AccompanyingDocumentAnswer): Promise<string> {
     const pages = this.animalsPages;
-    const journeyId = await this.createNotificationAtOrigin();
+    const referenceNumber = await this.createNotificationAtOrigin();
 
     await this.fillOriginOfImport({ countryCode: countryCodes.eu.ireland });
     await this.saveOriginOfImport();
@@ -591,7 +590,7 @@ export class AnimalsJourney {
     await this.chooseContactAddress();
 
     await pages.notificationView.heading.waitFor(pageLoadWait);
-    return journeyId;
+    return referenceNumber;
   }
 
   async submitFromReview(): Promise<void> {

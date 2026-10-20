@@ -16,7 +16,7 @@ test.describe('Seeded and browser-driven notifications match', { tag: '@mongodb'
   }) => {
     test.slow();
     await animalsJourney.submitNotification();
-    const browserReference = journeyContext.journeyId;
+    const browserReference = journeyContext.referenceNumber;
     const seededReference = await animalsSeededJourney.createSubmittedNotification();
 
     const client = new MongoDbClient();

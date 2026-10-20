@@ -11,7 +11,7 @@ import {
   type PlantsPages,
   type SharedPages,
 } from '@page-objects';
-import type { JourneyContext } from '@flows/shared/journey-context';
+import { JourneyContext } from '@flows/shared/journey-context';
 import { AnimalsJourney } from '@flows/animals/journey';
 import { AnimalsNotificationActions } from '@flows/animals/notification-actions';
 import { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
@@ -105,14 +105,18 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
     await use(createPlantsPages(page));
   },
   // eslint-disable-next-line no-empty-pattern
-  journeyContext: async ({}, use) => {
-    await use({});
+  journeyContext: async ({}, use, testInfo) => {
+    const journeyContext = new JourneyContext();
+    await use(journeyContext);
+    for (const referenceNumber of journeyContext.referenceNumbers) {
+      testInfo.annotations.push({ type: 'Reference number', description: referenceNumber });
+    }
   },
   animalsJourney: async ({ animalsPages, pages, journeyContext }, use) => {
     await use(new AnimalsJourney(animalsPages, pages, journeyContext));
   },
-  animalsNotificationActions: async ({ animalsPages, pages }, use) => {
-    await use(new AnimalsNotificationActions(animalsPages, pages));
+  animalsNotificationActions: async ({ animalsPages, pages, journeyContext }, use) => {
+    await use(new AnimalsNotificationActions(animalsPages, pages, journeyContext));
   },
   animalsAdminNavigation: async ({ animalsAdminPages }, use) => {
     await use(new AnimalsAdminNavigation(animalsAdminPages));
@@ -147,7 +151,7 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   submitAnimalsNotificationThenOpenFreshSession: async ({ animalsJourney, journeyContext, openFreshSession }, use) => {
     await use(async () => {
       await animalsJourney.submitNotification();
-      const reference = journeyContext.journeyId;
+      const reference = journeyContext.referenceNumber;
       const freshPage = await openFreshSession();
       return { reference, freshPages: createAnimalsPages(freshPage), freshSharedPages: createSharedPages(freshPage) };
     });

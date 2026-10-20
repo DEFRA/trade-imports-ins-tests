@@ -51,8 +51,8 @@ test.describe('Addresses are copied, not linked', () => {
       await expect(consignorRow).not.toContainText(renamed);
 
       // The full details on check-your-answers are still the ones copied at selection.
-      const journeyId = animalsPages.addresses.journeyIdFromUrl();
-      await animalsPages.notificationView.open(journeyId);
+      const referenceNumber = animalsPages.addresses.referenceNumberFromUrl();
+      await animalsPages.notificationView.open(referenceNumber);
       const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
       await expect(consignorCyaRow).toContainText(originalName);
       await expect(consignorCyaRow).toContainText('Carlisle');
@@ -92,8 +92,8 @@ test.describe('Addresses are copied, not linked', () => {
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
 
-    const journeyId = animalsPages.addresses.journeyIdFromUrl();
-    await animalsPages.notificationView.open(journeyId);
+    const referenceNumber = animalsPages.addresses.referenceNumberFromUrl();
+    await animalsPages.notificationView.open(referenceNumber);
     const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
     await expect(consignorCyaRow).toContainText(record.name);
     await expect(consignorCyaRow).toContainText(record.addressLine1);
@@ -125,8 +125,8 @@ test.describe('Addresses are copied, not linked', () => {
       });
 
       // A complete notification, so any error on the review page could only come from the deletion.
-      const journeyId = await animalsSeededJourney.createDraftNotification('readyToSubmit');
-      await animalsSeededJourney.resumeInUi(journeyId, animalsPages.addresses);
+      const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+      await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
       const consignorRow = animalsPages.addresses.partyRow('Consignor or exporter');
       await animalsPages.addresses.changeParty('Consignor or exporter').click();
       await animalsPages.consignorSelection.select(name);
@@ -146,7 +146,7 @@ test.describe('Addresses are copied, not linked', () => {
       await expect(consignorRow).not.toContainText('Not added yet');
       await expect(animalsPages.addresses.addParty('Consignor or exporter')).toHaveCount(0);
 
-      await animalsPages.notificationView.open(journeyId);
+      await animalsPages.notificationView.open(referenceNumber);
       const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
       await expect(consignorCyaRow).toContainText(name);
       await expect(consignorCyaRow).toContainText('Carlisle');
@@ -155,7 +155,7 @@ test.describe('Addresses are copied, not linked', () => {
       await expect(animalsPages.declaration.heading).toBeVisible();
 
       // The picker neither pre-selects nor offers the deleted record.
-      await animalsPages.addresses.open(journeyId);
+      await animalsPages.addresses.open(referenceNumber);
       await animalsPages.addresses.changeParty('Consignor or exporter').click();
       await expect(animalsPages.consignorSelection.selectedAddress).toHaveCount(0);
       await animalsPages.consignorSelection.search.fill(name);
@@ -189,15 +189,15 @@ test.describe('Addresses are copied, not linked', () => {
       email: 'unlisted@example.co.uk',
     });
 
-    const journeyId = await animalsSeededJourney.createDraftNotification('readyToSubmit');
-    await animalsSeededJourney.resumeInUi(journeyId, animalsPages.addresses);
+    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
     await animalsPages.addresses.changeParty('Consignor or exporter').click();
     await animalsPages.consignorSelection.select(name);
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
 
     // Named at the top of the page and against the role's own row, with the address still shown.
-    await animalsPages.notificationView.open(journeyId);
+    await animalsPages.notificationView.open(referenceNumber);
     const message = 'Correct the address details for the consignor';
     const consignorRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
     await expect(animalsPages.notificationView.errorSummary).toContainText(message);
@@ -212,7 +212,7 @@ test.describe('Addresses are copied, not linked', () => {
 
     // And so is the submit itself: the declaration hands back to the review page.
     await frontendForms.postForm(
-      animalsPages.declaration.expectedUrl(journeyId),
+      animalsPages.declaration.expectedUrl(referenceNumber),
       { declaration: 'confirmed' },
       {
         redirectsTo: /\/notification-view$/,

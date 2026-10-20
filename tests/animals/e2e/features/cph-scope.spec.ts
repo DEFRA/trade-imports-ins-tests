@@ -7,7 +7,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
   }) => {
     test.slow();
 
-    const journeyId = await animalsJourney.startNotification();
+    const referenceNumber = await animalsJourney.startNotification();
 
     const { cphRow } = animalsPages.addresses;
 
@@ -16,7 +16,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     // page is showing — the lines added on earlier passes included — is filled
     // before the page will hand back to the hub.
     const addCommodity = async (species: string): Promise<void> => {
-      await animalsPages.overview.open(journeyId);
+      await animalsPages.overview.open(referenceNumber);
       await animalsPages.overview.task('What are you importing?').click();
       await animalsPages.commoditySelection.selectSpecies([species]);
       await animalsPages.commoditySelection.saveAndContinue.click();
@@ -29,7 +29,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     };
 
     const openAddresses = async (): Promise<void> => {
-      await animalsPages.overview.open(journeyId);
+      await animalsPages.overview.open(referenceNumber);
       await animalsPages.overview.task('Roles and addresses').click();
       await expect(animalsPages.addresses.heading).toBeVisible();
     };
