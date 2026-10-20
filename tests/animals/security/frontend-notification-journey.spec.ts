@@ -8,6 +8,8 @@ test.describe('Security scan (frontend, submitted)', { tag: '@active' }, () => {
     await animalsJourney.submitNotification();
 
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyContext.journeyId}/confirmation$`));
+    await expect(pages.page).toHaveURL(
+      new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyContext.referenceNumber}/confirmation$`),
+    );
   });
 });

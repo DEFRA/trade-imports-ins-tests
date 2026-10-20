@@ -6,9 +6,9 @@ test.describe('Notification delete', { tag: '@duplicated-in-frontend' }, () => {
   test('deletes a draft notification', async ({ animalsJourney, journeyContext, pages }) => {
     test.slow();
     await animalsJourney.startNotification();
-    const { journeyId } = journeyContext;
+    const { referenceNumber } = journeyContext;
 
-    await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${journeyId}/delete`);
+    await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/delete`);
     await pages.page.getByRole('heading', { name: 'Delete this notification?' }).waitFor();
     await pages.page.getByRole('button', { name: 'Yes, delete notification' }).click();
     await expect(pages.page.getByText('The notification has been deleted.')).toBeVisible();

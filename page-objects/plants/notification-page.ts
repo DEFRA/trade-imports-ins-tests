@@ -3,7 +3,7 @@ import { SET_BASES, SetBase } from '@page-objects/shared/sets';
 
 /**
  * The plants journey's notification pages share the animals URL shape
- * (`/<set-id>/notifications/{journeyId}[/slug]`) but sit on their own frontend
+ * (`/<set-id>/notifications/{referenceNumber}[/slug]`) but sit on their own frontend
  * and under their own set, so those two facts are all that differ.
  */
 export class PlantsNotificationPage extends NotificationPage {

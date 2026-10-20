@@ -24,7 +24,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
 
     // Given — complete the journey up to the declaration page (notification is in DRAFT)
     await animalsJourney.toDeclaration();
-    const referenceNumber = journeyContext.journeyId;
+    const referenceNumber = journeyContext.referenceNumber;
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient(getMongoDbUri());
 

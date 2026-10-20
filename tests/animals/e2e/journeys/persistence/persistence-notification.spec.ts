@@ -14,7 +14,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
   test('draft notification persists as DRAFT up to declaration', async ({ animalsJourney, journeyContext }) => {
     test.slow();
     await animalsJourney.toDeclaration();
-    const referenceNumber = journeyContext.journeyId;
+    const referenceNumber = journeyContext.referenceNumber;
     const client = new MongoDbClient();
 
     try {
@@ -45,7 +45,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
     const contact = await addressBookApi.findByName('Animal and Plant Health Agency');
 
     await animalsJourney.submitNotification();
-    const referenceNumber = journeyContext.journeyId;
+    const referenceNumber = journeyContext.referenceNumber;
     const client = new MongoDbClient();
 
     try {

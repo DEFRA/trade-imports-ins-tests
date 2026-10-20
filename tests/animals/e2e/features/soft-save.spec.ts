@@ -64,7 +64,7 @@ test.describe('Save and return to overview', () => {
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
     await expect(animalsPages.arrivalDetails.errorSummary).toBeVisible();
     await expect(animalsPages.arrivalDetails.arrivalDateError).toContainText(ARRIVAL_DATE_ERROR);
-    await animalsPages.overview.open(animalsPages.arrivalDetails.journeyIdFromUrl());
+    await animalsPages.overview.open(animalsPages.arrivalDetails.referenceNumberFromUrl());
     await animalsPages.overview.task(ARRIVAL_DETAILS_TASK).click();
     await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue('');
   });
@@ -83,7 +83,7 @@ test.describe('Save and return to overview', () => {
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
     await expect(animalsPages.consignmentDetails.errorSummary).toBeVisible();
     await expect(animalsPages.consignmentDetails.animalsRequiredErrorLink).toBeVisible();
-    await animalsPages.overview.open(animalsPages.consignmentDetails.journeyIdFromUrl());
+    await animalsPages.overview.open(animalsPages.consignmentDetails.referenceNumberFromUrl());
     await expect(animalsPages.overview.taskStatus(COMMODITY_DETAILS_TASK)).toHaveText(TO_DO);
   });
 
@@ -104,7 +104,7 @@ test.describe('Save and return to overview', () => {
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await expect(animalsPages.originOfImport.errorSummary).toBeVisible();
     await expect(animalsPages.originOfImport.regionCodeMaxLengthErrorLink).toBeVisible();
-    await animalsPages.overview.open(animalsPages.originOfImport.journeyIdFromUrl());
+    await animalsPages.overview.open(animalsPages.originOfImport.referenceNumberFromUrl());
     await animalsPages.overview.task(ORIGIN_TASK).click();
     await expect(animalsPages.originOfImport.regionCode).toHaveValue('');
   });

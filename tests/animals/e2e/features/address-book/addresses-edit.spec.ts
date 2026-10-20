@@ -15,13 +15,13 @@ const OWN_RECORD = {
 
 /** A ready-to-submit notification whose consignor is a copy of the named record. */
 async function draftWithConsignor(animalsSeededJourney: AnimalsSeededJourney, animalsPages: AnimalsPages, name: string): Promise<string> {
-  const journeyId = await animalsSeededJourney.createDraftNotification('readyToSubmit');
-  await animalsSeededJourney.resumeInUi(journeyId, animalsPages.addresses);
+  const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+  await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
   await animalsPages.addresses.changeParty('Consignor or exporter').click();
   await animalsPages.consignorSelection.select(name);
   await animalsPages.consignorSelection.saveAndContinue.click();
   await animalsPages.addresses.heading.waitFor();
-  return journeyId;
+  return referenceNumber;
 }
 
 test.describe('Copied addresses are edited on the notification', () => {
@@ -39,8 +39,8 @@ test.describe('Copied addresses are edited on the notification', () => {
     const editedName = `Edited Holding ${stamp}`;
     const address = await addressBookApi.createAddress({ name, ...OWN_RECORD });
 
-    const otherJourneyId = await draftWithConsignor(animalsSeededJourney, animalsPages, name);
-    const journeyId = await draftWithConsignor(animalsSeededJourney, animalsPages, name);
+    const otherReferenceNumber = await draftWithConsignor(animalsSeededJourney, animalsPages, name);
+    const referenceNumber = await draftWithConsignor(animalsSeededJourney, animalsPages, name);
 
     await animalsPages.addresses.editPartyDetails('Consignor or exporter').click();
     await expect(animalsPages.consignorEdit.heading).toBeVisible();
@@ -51,7 +51,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(animalsPages.addresses.partyRow('Consignor or exporter')).toContainText(editedName);
 
-    await animalsPages.notificationView.open(journeyId);
+    await animalsPages.notificationView.open(referenceNumber);
     const consignorRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
     await expect(consignorRow).toContainText(editedName);
     await expect(consignorRow).toContainText('Penrith');
@@ -63,7 +63,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     expect(record).toMatchObject({ name, townOrCity: 'Carlisle', postcode: 'CA1 5EE', deleted: false });
 
     // The other notification holding a copy of the same record is untouched.
-    await animalsPages.notificationView.open(otherJourneyId);
+    await animalsPages.notificationView.open(otherReferenceNumber);
     await expect(consignorRow).toContainText(name);
     await expect(consignorRow).toContainText('Carlisle');
     await expect(consignorRow).not.toContainText(editedName);
@@ -100,8 +100,8 @@ test.describe('Copied addresses are edited on the notification', () => {
     animalsSeededJourney,
     animalsPages,
   }) => {
-    const journeyId = await animalsSeededJourney.createDraftNotification('readyToSubmit');
-    await animalsSeededJourney.resumeInUi(journeyId, animalsPages.addresses);
+    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
     await animalsPages.addresses.editPartyDetails('Place of origin').click();
 
     const form = animalsPages.placeOfOriginEdit;
@@ -120,7 +120,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(form.email).toHaveAccessibleDescription(/Enter an email address in the correct format/);
     await expect(form.country).toHaveAccessibleDescription(/Enter a country/);
 
-    await animalsPages.notificationView.open(journeyId);
+    await animalsPages.notificationView.open(referenceNumber);
     const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
     await expect(originRow).toContainText('Origin Farm');
     await expect(originRow).toContainText('V95 X7P2');
@@ -132,10 +132,10 @@ test.describe('Copied addresses are edited on the notification', () => {
     pages,
     animalsPages,
   }) => {
-    const journeyId = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
 
     // From the review page, back to the review page.
-    await animalsSeededJourney.resumeInUi(journeyId, animalsPages.notificationView);
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
     await animalsPages.notificationView.editPartyDetails('Roles and addresses', 'Consignor').click();
     await expect(animalsPages.consignorEdit.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/consignors\/edit\?return=notification-view/);
@@ -148,7 +148,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(consignorRow).not.toContainText('Never Saved Ltd');
 
     // From the contact page, back to the contact page.
-    await animalsSeededJourney.resumeInUi(journeyId, animalsPages.contactAddress);
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
     await animalsPages.contactAddress.editCurrentContact.click();
     await expect(animalsPages.contactAddressEdit.heading).toBeVisible();
     await animalsPages.contactAddressEdit.fill({ townOrCity: 'Never Saved Town' });
@@ -163,32 +163,32 @@ test.describe('Copied addresses are edited on the notification', () => {
     animalsSeededJourney,
     animalsPages,
   }) => {
-    const journeyId = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
 
-    await animalsSeededJourney.resumeInUi(journeyId, animalsPages.addresses);
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
     await expect(animalsPages.addresses.changeParty('Consignor or exporter')).toBeVisible();
     await expect(animalsPages.addresses.editPartyDetails('Consignor or exporter')).toBeVisible();
     await expect(animalsPages.addresses.addParty('Consignor or exporter')).toHaveCount(0);
 
     // The list below chooses a different contact; the current one is edited apart from it.
-    await animalsSeededJourney.resumeInUi(journeyId, animalsPages.contactAddress);
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
     await expect(animalsPages.contactAddress.address('Animal and Plant Health Agency')).toBeVisible();
     await expect(animalsPages.contactAddress.editCurrentContact).toBeVisible();
 
     // The review keeps one Change per card, and an Edit details per copied address.
-    await animalsSeededJourney.resumeInUi(journeyId, animalsPages.notificationView);
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
     await expect(animalsPages.notificationView.changeLink('Change roles and addresses')).toBeVisible();
     await expect(animalsPages.notificationView.editPartyDetails('Roles and addresses', 'Consignor')).toBeVisible();
     await expect(animalsPages.notificationView.changeLink(/^Change contact address/)).toBeVisible();
     await expect(animalsPages.notificationView.editPartyDetails('Contact address for this consignment', 'Contact address')).toBeVisible();
 
-    const unansweredJourneyId = await animalsSeededJourney.createDraftNotification('unlocked');
-    await animalsSeededJourney.resumeInUi(unansweredJourneyId, animalsPages.addresses);
+    const unansweredReferenceNumber = await animalsSeededJourney.createDraftNotification('unlocked');
+    await animalsSeededJourney.resumeInUi(unansweredReferenceNumber, animalsPages.addresses);
     await expect(animalsPages.addresses.addParty('Consignor or exporter')).toBeVisible();
     await expect(animalsPages.addresses.changeParty('Consignor or exporter')).toHaveCount(0);
     await expect(animalsPages.addresses.editPartyDetails('Consignor or exporter')).toHaveCount(0);
 
-    await animalsSeededJourney.resumeInUi(unansweredJourneyId, animalsPages.contactAddress);
+    await animalsSeededJourney.resumeInUi(unansweredReferenceNumber, animalsPages.contactAddress);
     await expect(animalsPages.contactAddress.currentContact).toHaveCount(0);
   });
 
@@ -199,9 +199,9 @@ test.describe('Copied addresses are edited on the notification', () => {
   }) => {
     const contact = 'Animal and Plant Health Agency';
     const editedName = `APHA Weybridge ${Date.now()}`;
-    const journeyId = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
 
-    await animalsSeededJourney.resumeInUi(journeyId, animalsPages.contactAddress);
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
     await animalsPages.contactAddress.editCurrentContact.click();
     const form = animalsPages.contactAddressEdit;
     await expect(form.roleCaption).toBeVisible();
@@ -213,7 +213,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(animalsPages.contactAddress.currentContact).toContainText(editedName);
     await expect(animalsPages.contactAddress.chosenAddress).toHaveCount(0);
 
-    await animalsPages.notificationView.open(journeyId);
+    await animalsPages.notificationView.open(referenceNumber);
     const contactRow = animalsPages.notificationView.partyRow('Contact address for this consignment', 'Contact address');
     await expect(contactRow).toContainText(editedName);
     await expect(contactRow).toContainText('Weybridge');

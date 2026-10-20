@@ -50,13 +50,13 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
   }) => {
     test.slow();
     await animalsJourney.submitNotification();
-    await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
+    await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
 
-    await animalsNotificationActions.amendNotification(journeyContext.journeyId);
+    await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.statusTag).toHaveText('Amend');
   });

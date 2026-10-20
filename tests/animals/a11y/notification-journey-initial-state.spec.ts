@@ -32,10 +32,10 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     // The entry guard holds the journey on origin until it is answered, so the
     // overview is only reachable once origin has been saved.
     await test.step('Overview', async () => {
-      const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
+      const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
       await animalsJourney.fillOriginOfImport();
       await animalsJourney.saveOriginOfImport();
-      await animalsPages.overview.open(journeyId);
+      await animalsPages.overview.open(referenceNumber);
       await animalsPages.overview.heading.waitFor();
       await runA11yScan();
     });
@@ -92,7 +92,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.overview.task('Upload documents').click();
       await animalsPages.accompanyingDocuments.heading.waitFor();
       await runA11yScan();
-      await animalsPages.overview.open(animalsPages.accompanyingDocuments.journeyIdFromUrl());
+      await animalsPages.overview.open(animalsPages.accompanyingDocuments.referenceNumberFromUrl());
       await animalsPages.overview.heading.waitFor();
     });
 

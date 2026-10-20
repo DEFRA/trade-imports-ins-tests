@@ -38,7 +38,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
   test('records a NotificationSubmitted outbox event on UI submission', async ({ animalsJourney, journeyContext }) => {
     test.slow();
     await animalsJourney.submitNotification();
-    const referenceNumber = journeyContext.journeyId;
+    const referenceNumber = journeyContext.referenceNumber;
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();
 
@@ -124,7 +124,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
   }) => {
     test.slow();
     await animalsJourney.submitNotification({ countryCode: countryCodes.subdivisions.canaryIslands });
-    const aggregateId = aggregateIdFor(journeyContext.journeyId);
+    const aggregateId = aggregateIdFor(journeyContext.referenceNumber);
     const client = new MongoDbClient();
 
     try {
@@ -164,7 +164,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       filePath: fileUploadPaths.safeFile1kbPdf,
       type: 'VETERINARY_HEALTH_CERTIFICATE',
     });
-    const aggregateId = aggregateIdFor(journeyContext.journeyId);
+    const aggregateId = aggregateIdFor(journeyContext.referenceNumber);
     const client = new MongoDbClient();
 
     try {

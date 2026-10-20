@@ -11,7 +11,7 @@ test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, ()
     // hosting the whole stack, which does not fit the default budget.
     test.slow();
 
-    const journeyId = await animalsJourney.startNotification();
+    const referenceNumber = await animalsJourney.startNotification();
 
     const certifiedFor = pages.page.getByRole('group', { name: 'What are the animals certified for?' });
     const unweaned = pages.page.getByRole('group', {
@@ -23,7 +23,7 @@ test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, ()
     // added on earlier passes included — is filled before it hands back to the
     // hub.
     const addCommodity = async (species: string): Promise<void> => {
-      await animalsPages.overview.open(journeyId);
+      await animalsPages.overview.open(referenceNumber);
       await animalsPages.overview.task('What are you importing?').click();
       await animalsPages.commoditySelection.selectSpecies([species]);
       await animalsPages.commoditySelection.saveAndContinue.click();
@@ -37,7 +37,7 @@ test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, ()
 
     // The additional details open from their own task.
     const openAdditionalDetails = async (): Promise<void> => {
-      await animalsPages.overview.open(journeyId);
+      await animalsPages.overview.open(referenceNumber);
       await animalsPages.overview.task('Additional details').click();
       await animalsPages.additionalDetails.heading.waitFor();
     };

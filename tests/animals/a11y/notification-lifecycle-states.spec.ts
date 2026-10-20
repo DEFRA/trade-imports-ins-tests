@@ -10,14 +10,14 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   }) => {
     test.slow();
     await animalsJourney.submitNotification();
-    const { journeyId } = journeyContext;
+    const { referenceNumber } = journeyContext;
 
     await test.step('Cancel this amendment?', async () => {
       await animalsPages.dashboard.open();
-      await animalsPages.dashboard.searchForReference(journeyId);
-      await animalsPages.dashboard.amend(journeyId).click();
+      await animalsPages.dashboard.searchForReference(referenceNumber);
+      await animalsPages.dashboard.amend(referenceNumber).click();
       await animalsPages.overview.heading.waitFor();
-      await animalsPages.notificationView.open(journeyId);
+      await animalsPages.notificationView.open(referenceNumber);
       await animalsPages.notificationView.cancelAmend.click();
       await animalsPages.notificationCancelAmend.heading.waitFor();
       await runA11yScan();
@@ -28,8 +28,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     await test.step('Delete this notification?', async () => {
       await animalsPages.dashboard.open();
-      await animalsPages.dashboard.searchFor(journeyId);
-      await animalsPages.dashboard.delete(journeyId).click();
+      await animalsPages.dashboard.searchFor(referenceNumber);
+      await animalsPages.dashboard.delete(referenceNumber).click();
       await pages.page.getByRole('heading', { name: 'Delete this notification?' }).waitFor();
       await runA11yScan();
     });

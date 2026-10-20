@@ -147,7 +147,7 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   submitAnimalsNotificationThenOpenFreshSession: async ({ animalsJourney, journeyContext, openFreshSession }, use) => {
     await use(async () => {
       await animalsJourney.submitNotification();
-      const reference = journeyContext.journeyId;
+      const reference = journeyContext.referenceNumber;
       const freshPage = await openFreshSession();
       return { reference, freshPages: createAnimalsPages(freshPage), freshSharedPages: createSharedPages(freshPage) };
     });
