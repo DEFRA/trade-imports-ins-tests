@@ -1,11 +1,13 @@
 import { pageLoadWait, timeouts } from '@config/timeouts';
 import type { CountryCode } from '@domain/animals/constants/country-codes';
+import type { JourneyContext } from '@flows/shared/journey-context';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 
 export class AnimalsNotificationActions {
   constructor(
     private readonly animalsPages: AnimalsPages,
     private readonly pages: SharedPages,
+    private readonly context: JourneyContext,
   ) {}
 
   async toNotificationView(referenceNumber: string): Promise<void> {
@@ -40,6 +42,7 @@ export class AnimalsNotificationActions {
     await this.animalsPages.dashboard.searchForReference(referenceNumber);
     await this.animalsPages.dashboard.copyAsNew(referenceNumber).click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    this.context.recordReferenceNumber(this.animalsPages.overview.referenceNumberFromUrl());
   }
 
   /**

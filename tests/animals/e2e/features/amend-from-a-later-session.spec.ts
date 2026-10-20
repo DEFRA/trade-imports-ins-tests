@@ -3,11 +3,14 @@ import { REFERENCE_NUMBER_PATTERN, WHOLE_REFERENCE_NUMBER_PATTERN } from '@domai
 import { AnimalsNotificationActions } from '@flows/animals/notification-actions';
 
 test.describe('Dashboard actions in a later browser session', () => {
-  test('amends a notification that an earlier browser session submitted', async ({ submitAnimalsNotificationThenOpenFreshSession }) => {
+  test('amends a notification that an earlier browser session submitted', async ({
+    submitAnimalsNotificationThenOpenFreshSession,
+    journeyContext,
+  }) => {
     test.slow();
     const { reference, freshPages, freshSharedPages } = await submitAnimalsNotificationThenOpenFreshSession();
 
-    await new AnimalsNotificationActions(freshPages, freshSharedPages).amendNotification(reference);
+    await new AnimalsNotificationActions(freshPages, freshSharedPages, journeyContext).amendNotification(reference);
 
     await expect(freshPages.overview.statusTag).toHaveText('Amend');
     await expect(freshPages.overview.journeyStrip).toContainText(reference);
@@ -15,11 +18,12 @@ test.describe('Dashboard actions in a later browser session', () => {
 
   test('copies a notification that an earlier browser session submitted into a new draft and leaves the original submitted', async ({
     submitAnimalsNotificationThenOpenFreshSession,
+    journeyContext,
   }) => {
     test.slow();
     const { reference, freshPages, freshSharedPages } = await submitAnimalsNotificationThenOpenFreshSession();
 
-    await new AnimalsNotificationActions(freshPages, freshSharedPages).copyNotification(reference);
+    await new AnimalsNotificationActions(freshPages, freshSharedPages, journeyContext).copyNotification(reference);
 
     await expect(freshPages.overview.statusTag).toHaveText('Draft');
     const copiedReference = (await freshPages.overview.journeyStrip.textContent())?.match(REFERENCE_NUMBER_PATTERN)?.[0];

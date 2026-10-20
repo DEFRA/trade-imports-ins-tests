@@ -115,8 +115,8 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   animalsJourney: async ({ animalsPages, pages, journeyContext }, use) => {
     await use(new AnimalsJourney(animalsPages, pages, journeyContext));
   },
-  animalsNotificationActions: async ({ animalsPages, pages }, use) => {
-    await use(new AnimalsNotificationActions(animalsPages, pages));
+  animalsNotificationActions: async ({ animalsPages, pages, journeyContext }, use) => {
+    await use(new AnimalsNotificationActions(animalsPages, pages, journeyContext));
   },
   animalsAdminNavigation: async ({ animalsAdminPages }, use) => {
     await use(new AnimalsAdminNavigation(animalsAdminPages));
