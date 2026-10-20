@@ -1,4 +1,5 @@
 import { pageLoadWait, timeouts } from '@config/timeouts';
+import type { CountryCode } from '@domain/animals/constants/country-codes';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 
 export class AnimalsNotificationActions {
@@ -16,6 +17,21 @@ export class AnimalsNotificationActions {
     await this.animalsPages.dashboard.searchForReference(journeyId);
     await this.animalsPages.dashboard.amend(journeyId).click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+  }
+
+  /** Amends a submitted notification's country of origin and resubmits it, landing on the submitted confirmation. */
+  async amendCountryOfOriginAndResubmit(journeyId: string, country: CountryCode): Promise<void> {
+    await this.amendNotification(journeyId);
+    await this.animalsPages.overview.reviewAndSubmitButton.click();
+    await this.animalsPages.notificationView.changeLink('Change import details').click();
+    await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
+    await this.animalsPages.originOfImport.selectCountry(country.display);
+    await this.animalsPages.originOfImport.saveAndReturn.click();
+    await this.animalsPages.notificationView.continueButton.click();
+    await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
+    await this.animalsPages.declaration.confirmation.check();
+    await this.animalsPages.declaration.continueButton.click();
+    await this.pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor(pageLoadWait);
   }
 
   /** Copies a notification from its dashboard card, landing on the copy's overview. */
