@@ -95,6 +95,7 @@ test.describe('Save and return to overview', () => {
     await animalsJourney.startNotification();
     await animalsPages.overview.task(ORIGIN_TASK).click();
     await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
+    await animalsPages.originOfImport.removeRegionCodeMaxlength();
     await animalsPages.originOfImport.regionCode.fill('ABCDEF');
 
     // Act

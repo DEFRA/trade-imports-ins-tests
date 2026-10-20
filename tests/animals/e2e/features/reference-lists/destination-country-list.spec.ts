@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { countryCodes } from '@domain/animals/constants/country-codes';
-import { destinationCountryNames } from '@domain/shared/fixtures/reference-data';
+import { countryAndSubdivisionNamesWithCountry } from '@domain/shared/fixtures/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Destination country list', () => {
@@ -15,14 +15,14 @@ test.describe('Destination country list', () => {
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transhipment or onward travel').check();
 
-    await expect(animalsPages.importReason.transhipmentDestinationCountryOptions).toHaveText(destinationCountryNames());
+    await expect(animalsPages.importReason.transhipmentDestinationCountryOptions).toHaveText(countryAndSubdivisionNamesWithCountry());
   });
 
   test('the transit destination country list offers the same places as the transhipment one', async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transit').check();
 
-    await expect(animalsPages.importReason.transitDestinationCountryOptions).toHaveText(destinationCountryNames());
+    await expect(animalsPages.importReason.transitDestinationCountryOptions).toHaveText(countryAndSubdivisionNamesWithCountry());
   });
 });
 

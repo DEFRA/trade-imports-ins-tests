@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { originPageCountryNames } from '@domain/shared/fixtures/reference-data';
+import { countryAndSubdivisionNamesWithCountry } from '@domain/shared/fixtures/reference-data';
 
 test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('filters as you type, submits the country code and persists it', async ({ animalsJourney, animalsPages }) => {
@@ -13,7 +13,7 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
 
     const fallback = animalsPages.originOfImport.country.select;
     await expect(fallback.locator('option').first()).toHaveText('Select a country');
-    await expect(fallback.locator('option')).toHaveCount(originPageCountryNames().length + 1);
+    await expect(fallback.locator('option')).toHaveCount(countryAndSubdivisionNamesWithCountry().length + 1);
 
     await field.click();
     await field.fill('Belg');
@@ -32,6 +32,14 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
     await expect(animalsPages.originOfImport.country.field).toHaveValue('Belgium');
   });
 
+  test('shows the search box placeholder and no hint', async ({ animalsJourney, animalsPages }) => {
+    await animalsJourney.startNotification();
+    await animalsPages.overview.task('Where is this consignment coming from?').click();
+
+    await expect(animalsPages.originOfImport.country.field).toHaveAttribute('placeholder', 'Search for a country');
+    await animalsPages.originOfImport.country.expectNoHint();
+  });
+
   test('shows the letters typed in bold in a country suggestion', async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.startNotification();
     await animalsPages.overview.task('Where is this consignment coming from?').click();
@@ -39,5 +47,27 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
     await animalsPages.originOfImport.country.field.fill('fra');
 
     await expect(animalsPages.originOfImport.country.boldLettersOf('France')).toHaveText(['Fra']);
+  });
+});
+
+test.describe('Country of origin without JavaScript', { tag: '@duplicated-in-frontend' }, () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('shows no hint, begins with Select a country, and saves the chosen country', async ({ animalsJourney, animalsPages }) => {
+    await animalsJourney.startNotification();
+    await animalsPages.overview.task('Where is this consignment coming from?').click();
+    const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
+    const { country } = animalsPages.originOfImport;
+    const { select } = country;
+
+    await country.expectNoHint();
+    await expect(select.locator('option').first()).toHaveText('Select a country');
+
+    await select.selectOption({ label: 'Belgium' });
+    await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
+    await animalsPages.originOfImport.saveAndContinue.click();
+
+    await animalsPages.originOfImport.open(referenceNumber);
+    await expect(select).toHaveValue('BE');
   });
 });

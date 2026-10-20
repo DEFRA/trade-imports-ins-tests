@@ -50,6 +50,13 @@ test.describe('High-risk plants origin section', () => {
     await expect(plantsPages.origin.country.field).toHaveValue(FRANCE);
   });
 
+  test('the country search box shows its placeholder and no hint', async ({ plantsPages, plantsJourney }) => {
+    await plantsJourney.toOriginOfNewNotification(POTATOES);
+
+    await expect(plantsPages.origin.country.field).toHaveAttribute('placeholder', 'Search for a country');
+    await plantsPages.origin.country.expectNoHint();
+  });
+
   test('a country suggestion shows the letters typed in bold', async ({ plantsPages, plantsJourney }) => {
     await plantsJourney.toOriginOfNewNotification(POTATOES);
 
@@ -162,5 +169,24 @@ test.describe('High-risk plants origin section', () => {
 
     await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRow(ORIGIN_TASK_ROW)).toContainText('Completed');
+  });
+});
+
+test.describe('High-risk plants origin section without JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('shows no hint, begins with Select a country, and saves the chosen country', async ({ pages, plantsPages, plantsJourney }) => {
+    const reference = await plantsJourney.toOriginOfNewNotification(POTATOES);
+    const { select } = plantsPages.origin.country;
+
+    await plantsPages.origin.country.expectNoHint();
+    await expect(select.locator('option').first()).toHaveText('Select a country');
+
+    await select.selectOption({ label: FRANCE });
+    await plantsPages.origin.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+
+    await plantsPages.origin.open(reference);
+    await expect(select.locator('option:checked')).toHaveText(FRANCE);
   });
 });

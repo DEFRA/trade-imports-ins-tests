@@ -1,4 +1,7 @@
-import { type Locator, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
+
+const SEARCH_BOX_ASSISTIVE_DESCRIPTION =
+  'When autocomplete results are available use up and down arrows to review and enter to select. Touch device users, explore by touch or with swipe gestures.';
 
 /**
  * A type-ahead that enhances a native select, addressed by the select's id.
@@ -15,12 +18,26 @@ export class TypeAhead {
     return this.page.locator(`#${this.fieldId}`);
   }
 
+  get formGroup(): Locator {
+    return this.field.locator('xpath=ancestor::*[contains(@class,"govuk-form-group")][1]');
+  }
+
+  async expectNoHint(): Promise<void> {
+    const isSearchBox = (await this.field.evaluate((element) => element.tagName)) === 'INPUT';
+    await expect(this.field).toHaveAccessibleDescription(isSearchBox ? SEARCH_BOX_ASSISTIVE_DESCRIPTION : '');
+    await expect(this.formGroup.locator('.govuk-hint')).toHaveCount(0);
+  }
+
   get select(): Locator {
     return this.page.locator(`select[name="${this.fieldId}"]`);
   }
 
   get selectableOptions(): Locator {
     return this.select.locator('option:not([value=""])');
+  }
+
+  get suggestions(): Locator {
+    return this.page.getByRole('option');
   }
 
   option(name: string): Locator {

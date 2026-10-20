@@ -1,6 +1,10 @@
 import { test, expect } from '@fixtures';
+import { countryCodes } from '@domain/animals/constants/country-codes';
 
 const INTERNAL_REFERENCE = 'Imports456GB';
+const REGION_HINT =
+  'Check the health certificate for a region of origin code. You can add the code later if you do not have the certificate now.';
+const INTERNAL_REFERENCE_HINT = 'Enter any internal reference you want to use to identify this consignment, or leave blank.';
 
 test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -18,6 +22,34 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await expect(animalsPages.originOfImport.country.field).toBeVisible();
   });
 
+  test('shows the region of origin code hint and the internal reference hint without its length limit', async ({ animalsPages }) => {
+    const { regionRequirementGroup, internalReference } = animalsPages.originOfImport;
+
+    await expect(regionRequirementGroup).toHaveAccessibleDescription(REGION_HINT);
+    await expect(internalReference).toHaveAccessibleDescription(INTERNAL_REFERENCE_HINT);
+  });
+
+  test('gives the revealed region code label the small label class and the internal reference box the full-width input class', async ({
+    animalsPages,
+  }) => {
+    const { regionCodeLabel, internalReference } = animalsPages.originOfImport;
+    await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
+
+    await expect(regionCodeLabel).toHaveAttribute('class', 'govuk-label govuk-label--s');
+    await expect(internalReference).toHaveAttribute('class', 'govuk-input');
+  });
+
+  test('the region code box stops typing at five characters, with autocomplete and spellcheck off', async ({ animalsPages }) => {
+    const { regionCode } = animalsPages.originOfImport;
+    await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
+
+    await regionCode.pressSequentially('ABCDEFG');
+
+    await expect(regionCode).toHaveValue('ABCDE');
+    await expect(regionCode).toHaveAttribute('autocomplete', 'off');
+    await expect(regionCode).toHaveAttribute('spellcheck', 'false');
+  });
+
   test('accepts valid origin details', async ({ pages, animalsPages }) => {
     await animalsPages.originOfImport.country.choose('France');
     await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
@@ -26,14 +58,6 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
 
-  /**
-   * The country does not block the save: a user who has the internal reference
-   * but is still waiting on the health certificate to confirm where the animal
-   * comes from records what they know and comes back to it. The commodity
-   * search is asked for by country of origin, so with the country unanswered
-   * there is no next page to offer and the user is set down on the overview.
-   * The gap is held at the overview task row and again at the check page.
-   */
   test('saves what the user has when submitted without a country', async ({ animalsPages }) => {
     const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
 
@@ -66,22 +90,48 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await animalsPages.originOfImport.regionCode.fill('75');
     await animalsPages.originOfImport.saveAndContinue.click();
 
-    // With a country chosen the opening run carries on to commodities, not the overview.
     await animalsPages.originOfImport.open(referenceNumber);
     await expect(animalsPages.originOfImport.radioRequiresOriginCode('Yes')).toBeChecked();
     await expect(animalsPages.originOfImport.regionCode).toHaveValue('75');
   });
 
-  test('persists a country subdivision selection', async ({ animalsPages }) => {
-    const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
+  test('answering No clears a saved region of origin code', async ({ animalsPages }) => {
+    const { originOfImport, notificationView } = animalsPages;
+    const referenceNumber = originOfImport.referenceNumberFromUrl();
+    await originOfImport.country.choose('France');
+    await originOfImport.radioRequiresOriginCode('Yes').check();
+    await originOfImport.regionCode.fill('75');
+    await originOfImport.saveAndContinue.click();
 
-    await animalsPages.originOfImport.country.choose('Canary Islands');
-    await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
+    await originOfImport.open(referenceNumber);
+    await originOfImport.radioRequiresOriginCode('No').check();
+    await originOfImport.saveAndContinue.click();
+
+    await notificationView.open(referenceNumber);
+    await expect(notificationView.summaryValue(notificationView.summaryCard('Import details'), 'Region of origin code')).toHaveText(
+      'Not applicable',
+    );
+
+    await originOfImport.open(referenceNumber);
+    await originOfImport.radioRequiresOriginCode('Yes').check();
+    await expect(originOfImport.regionCode).toHaveValue('');
+  });
+
+  test("persists a territory chosen as the country of origin, named with its country and with its country's code as the region code prefix", async ({
+    animalsPages,
+  }) => {
+    const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
+    const { value, display } = countryCodes.subdivisions.canaryIslands;
+
+    await animalsPages.originOfImport.country.choose(display);
+    await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
+    await animalsPages.originOfImport.regionCode.fill('12');
     await animalsPages.originOfImport.internalReference.fill(INTERNAL_REFERENCE);
     await animalsPages.originOfImport.saveAndContinue.click();
 
     await animalsPages.originOfImport.open(referenceNumber);
-    await expect(animalsPages.originOfImport.country.select).toHaveValue('ES-CN');
-    await expect(animalsPages.originOfImport.country.field).toHaveValue('Canary Islands');
+    await expect(animalsPages.originOfImport.country.select).toHaveValue(value);
+    await expect(animalsPages.originOfImport.country.field).toHaveValue(display);
+    await expect(animalsPages.originOfImport.regionCodePrefix).toHaveText('ES');
   });
 });

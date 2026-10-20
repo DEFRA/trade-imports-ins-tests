@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { countryByCode, originPageCountryNames, portLabel, portsOfEntry } from '@domain/shared/fixtures/reference-data';
+import { countryByCode, countryAndSubdivisionNames, portLabel, portsOfEntry } from '@domain/shared/fixtures/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { POTATOES } from '@flows/plants/journey';
 
@@ -14,7 +14,7 @@ test.describe('Plants reference lists', () => {
   }) => {
     await plantsJourney.toOriginOfNewNotification(POTATOES);
 
-    await expect(plantsPages.origin.country.selectableOptions).toHaveText(originPageCountryNames());
+    await expect(plantsPages.origin.country.selectableOptions).toHaveText(countryAndSubdivisionNames());
   });
 
   test('the place of landing list offers every captured port, in the order reference data serves them', async ({
