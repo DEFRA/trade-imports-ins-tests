@@ -1,3 +1,5 @@
+import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
+
 import { test, expect } from '@fixtures';
 
 test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
@@ -15,10 +17,10 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     // The animal count is save-blocking on every line, so each box the details
     // page is showing — the lines added on earlier passes included — is filled
     // before the page will hand back to the hub.
-    const addCommodity = async (species: string): Promise<void> => {
+    const addCommodity = async (line: CommodityLine): Promise<void> => {
       await animalsPages.overview.open(referenceNumber);
       await animalsPages.overview.task('What are you importing?').click();
-      await animalsPages.commoditySelection.selectSpecies([species]);
+      await animalsPages.commoditySelection.selectSpecies([line]);
       await animalsPages.commoditySelection.saveAndContinue.click();
       await expect(animalsPages.overview.heading).toBeVisible();
       await animalsPages.overview.task('Commodity details').click();
@@ -37,7 +39,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     // A non-triggering commodity (cats): CPH is out of scope, so the addresses
     // hub shows no CPH row and Continue returns straight to the hub — no CPH
     // page (the derived gate).
-    await addCommodity('Felis catus');
+    await addCommodity(commodityLines.domesticCat);
     await openAddresses();
     await expect(cphRow).toBeHidden();
     await animalsPages.addresses.continueButton.click();
@@ -46,7 +48,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
 
     // Adding a triggering commodity (cattle) brings CPH into scope across the
     // commodity lines (frame:"anyItem") — the row appears in its empty state.
-    await addCommodity('Bos taurus');
+    await addCommodity(commodityLines.cattle);
     await openAddresses();
     await expect(cphRow).toBeVisible();
     await expect(cphRow).toContainText('Not added yet');

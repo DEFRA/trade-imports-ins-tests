@@ -64,7 +64,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
       expect(notification.origin.requiresRegionCode).toBe('yes');
       expect(notification.origin.regionOfOriginCode).toBe('FR-75');
       expect(notification.origin.internalReference).toBe('Imports456GB');
-      expect(notification.commodity.name).toBe('Cow');
+      expect(notification.commodity.name).toBe('0102');
       expect(species.text).toBe('Bos taurus');
       expect(species.earTag).toBe('UK123456789012');
       expect(species.animalIdentifiers).toEqual([{ earTag: 'UK123456789012', passport: '' }]);

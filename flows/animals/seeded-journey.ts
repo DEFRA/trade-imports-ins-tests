@@ -50,8 +50,13 @@ export class AnimalsSeededJourney {
 
   async createDraftNotification(depth: SeedDepth = 'readyToSubmit'): Promise<string> {
     const referenceNumber = await this.createEmptyNotification();
-    for (const { slug, form } of await seedSteps(() => this.partyIds(), depth)) {
-      await this.forms.postForm(`${CREATE_PATH}/${referenceNumber}/${slug}`, form);
+    for (const { slug, form, rendersPage } of await seedSteps(() => this.partyIds(), depth)) {
+      const path = `${CREATE_PATH}/${referenceNumber}/${slug}`;
+      if (rendersPage) {
+        await this.forms.postFormReturningHtml(path, form);
+      } else {
+        await this.forms.postForm(path, form);
+      }
     }
     return referenceNumber;
   }

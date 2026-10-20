@@ -1,3 +1,5 @@
+import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
+
 import { test, expect } from '@fixtures';
 
 test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, () => {
@@ -22,10 +24,10 @@ test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, ()
     // every line, so each box the consignment page is showing — the lines
     // added on earlier passes included — is filled before it hands back to the
     // hub.
-    const addCommodity = async (species: string): Promise<void> => {
+    const addCommodity = async (line: CommodityLine): Promise<void> => {
       await animalsPages.overview.open(referenceNumber);
       await animalsPages.overview.task('What are you importing?').click();
-      await animalsPages.commoditySelection.selectSpecies([species]);
+      await animalsPages.commoditySelection.selectSpecies([line]);
       await animalsPages.commoditySelection.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Commodity details').click();
@@ -44,14 +46,14 @@ test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, ()
 
     // A non-triggering commodity (cats): certified-for shows, but the
     // notification-level unweaned-animals question is out of scope.
-    await addCommodity('Felis catus');
+    await addCommodity(commodityLines.domesticCat);
     await openAdditionalDetails();
     await expect(certifiedFor).toBeVisible();
     await expect(unweaned).toBeHidden();
 
     // Adding a triggering commodity (cattle) brings the unweaned-animals question
     // into scope across the commodity lines (frame:"anyItem").
-    await addCommodity('Bos taurus');
+    await addCommodity(commodityLines.cattle);
     await openAdditionalDetails();
     await expect(certifiedFor).toBeVisible();
     await expect(unweaned).toBeVisible();

@@ -1,13 +1,15 @@
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
+
 import { test, expect } from '@fixtures';
 
-// The page holds nothing until a query reaches it, so each commodity is found
-// by its own code. Cat and Dog share 01061900, so that query returns both.
+// The page holds nothing until a query reaches it, and the stub answers only
+// the searches saved from MDM, so each group is found by a saved term. A group
+// is headed by its CN code and lists its species by Latin name.
 const expectedGroups = [
-  ['Cow (0102)', '0102', ['Bison bison', 'Bos spp.', 'Bos taurus', 'Bubalus bubalis']],
-  ['Horse (0101)', '0101', ['Equus caballus']],
-  ['Cat (01061900)', '01061900', ['Felis catus']],
-  ['Dog (01061900)', '01061900', ['Canis lupus familiaris']],
-  ['Fish (0301)', '0301', ['Salmo salar']],
+  ['0102', '0102', ['Bos taurus', 'Bison bonasus', 'Bubalus bubalis']],
+  ['horse', '0101', ['Equus cabalus']],
+  ['domestic cat', '01061900', ['Felis catus']],
+  ['ostrich', '01063300', ['Struthio']],
 ] as const;
 
 test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, () => {
@@ -28,13 +30,13 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
   });
 
-  test('groups the matching species under their commodity heading', async ({ pages, animalsPages }) => {
-    for (const [legend, query, species] of expectedGroups) {
+  test('groups the matching species under their commodity code', async ({ animalsPages }) => {
+    for (const [query, code, species] of expectedGroups) {
       await animalsPages.commoditySelection.search(query);
-      const group = pages.page.getByRole('group', { name: legend });
+      const group = animalsPages.commoditySelection.commodityGroup(code);
       await expect(group).toBeVisible();
       for (const name of species) {
-        await expect(group.getByRole('checkbox', { name })).toBeVisible();
+        await expect(group.getByRole('checkbox', { name, exact: true })).toBeVisible();
       }
     }
   });
@@ -48,7 +50,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
   test('accepts and persists multiple commodity-species pairs found under different queries', async ({ pages, animalsPages }) => {
     test.slow();
 
-    await animalsPages.commoditySelection.selectSpecies(['Bos taurus', 'Felis catus']);
+    await animalsPages.commoditySelection.selectSpecies([commodityLines.cattle, commodityLines.domesticCat]);
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
@@ -64,16 +66,16 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Felis catus');
 
     // And each is ticked again when its own query brings it back on screen.
-    await animalsPages.commoditySelection.search('Bos taurus');
-    await expect(animalsPages.commoditySelection.species('Bos taurus')).toBeChecked();
-    await animalsPages.commoditySelection.search('Felis catus');
-    await expect(animalsPages.commoditySelection.species('Felis catus')).toBeChecked();
+    await animalsPages.commoditySelection.search(commodityLines.cattle.searchTerm);
+    await expect(animalsPages.commoditySelection.species(commodityLines.cattle)).toBeChecked();
+    await animalsPages.commoditySelection.search(commodityLines.domesticCat.searchTerm);
+    await expect(animalsPages.commoditySelection.species(commodityLines.domesticCat)).toBeChecked();
   });
 
   test('counts what has been chosen and clears it on request', async ({ animalsPages }) => {
-    await animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
+    await animalsPages.commoditySelection.selectSpecies([commodityLines.cattle]);
     // The panel is written on the server, so it appears on the next render.
-    await animalsPages.commoditySelection.search('Salmo');
+    await animalsPages.commoditySelection.search('zzz');
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('1 selected');
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Bos taurus');
 

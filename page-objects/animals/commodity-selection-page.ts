@@ -1,5 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import type { CommodityLine } from '@domain/animals/constants/commodity-lines';
 
 export class AnimalsCommoditySelectionPage extends NotificationPage {
   constructor(page: Page) {
@@ -34,17 +35,24 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     await this.searchButton.click();
   }
 
-  species(name: string): Locator {
-    return this.page.getByRole('checkbox', { name });
+  /** The results for one CN code, headed with the code. */
+  commodityGroup(code: string): Locator {
+    return this.page.getByRole('group', { name: code, exact: true });
+  }
+
+  /** A tick box is labelled with the Latin name alone, and one name can sit
+   * under several codes, so it is found inside its code's group. */
+  species(line: CommodityLine): Locator {
+    return this.commodityGroup(line.code).getByRole('checkbox', { name: line.latinName, exact: true });
   }
 
   /** A species has no tick box until its own query puts it in the results, so
-   * each name is searched for before it is ticked. Ticks made under an earlier
+   * each line is searched for before it is ticked. Ticks made under an earlier
    * query ride back with the form, so they survive the next search. */
-  async selectSpecies(names: string[]): Promise<void> {
-    for (const name of names) {
-      await this.search(name);
-      await this.species(name).check();
+  async selectSpecies(lines: CommodityLine[]): Promise<void> {
+    for (const line of lines) {
+      await this.search(line.searchTerm);
+      await this.species(line).check();
     }
   }
 

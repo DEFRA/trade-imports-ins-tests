@@ -1,3 +1,5 @@
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
+
 import { test, expect } from '@fixtures';
 
 test.describe('Animal identifiers — conditional identifier surface', { tag: '@duplicated-in-frontend' }, () => {
@@ -8,12 +10,12 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
   }) => {
     await animalsJourney.startNotification();
 
-    // Batch-create a Cats commodity line. The animal count is save-blocking,
+    // Batch-create a domestic cat commodity line. The animal count is save-blocking,
     // and a count of 2 keeps the identifier form open after the first record
     // is committed — at the declared count the maximum-reached state replaces
     // it, which is the cap spec's subject, not this one's.
     await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.selectSpecies(['Felis catus']);
+    await animalsPages.commoditySelection.selectSpecies([commodityLines.domesticCat]);
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();
@@ -73,12 +75,12 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
   }) => {
     await animalsJourney.startNotification();
 
-    // Cow carries an ear tag; Fish is on none of the identifier allowlists, so
-    // it has nothing to be asked. One consignment holding both separates the
-    // two: the page still exists for the Cow line and says nothing at all
-    // about the Fish one.
+    // Cattle carry an ear tag; ostriches are on none of the identifier allowlists, so
+    // they have nothing to be asked. One consignment holding both separates the
+    // two: the page still exists for the cattle line and says nothing at all
+    // about the ostrich one.
     await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.selectSpecies(['Bos taurus', 'Salmo salar']);
+    await animalsPages.commoditySelection.selectSpecies([commodityLines.cattle, commodityLines.ostrich]);
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();
@@ -93,9 +95,9 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
 
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus' })).toBeVisible();
     await expect(animalsPages.animalIdentification.earTag).toBeVisible();
-    // No panel for the Fish line, and no free-text stand-in for the identifier
+    // No panel for the ostrich line, and no free-text stand-in for the identifier
     // it does not have.
-    await expect(pages.page.getByRole('heading', { name: 'Enter details for Salmo salar' })).toHaveCount(0);
+    await expect(pages.page.getByRole('heading', { name: 'Enter details for Struthio' })).toHaveCount(0);
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
     await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
   });
@@ -108,7 +110,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await animalsJourney.startNotification();
 
     await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.selectSpecies(['Salmo salar']);
+    await animalsPages.commoditySelection.selectSpecies([commodityLines.ostrich]);
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();

@@ -95,8 +95,10 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       const tradeLines = data.specifiedConsignment.includedConsignmentItem?.[0].includedTradeLineItem ?? [];
       expect(tradeLines).toHaveLength(1);
       const [line] = tradeLines;
-      expect(line.description).toEqual(['Cow']);
-      expect(line.commonName).toBe('Cow');
+      // The event repeats the commodity name as both description and common name, and the
+      // commodity name is now the CN code.
+      expect(line.description).toEqual(['0102']);
+      expect(line.commonName).toBe('0102');
       expect(line.scientificName).toBe('Bos taurus');
       expect(line.specifiedLineTradeDelivery?.[0].productUnitQuantity.content).toBe(1);
       expect(line.physicalReferencedLogisticsPackage?.[0].itemQuantity).toBe(5);

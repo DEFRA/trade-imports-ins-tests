@@ -31,8 +31,8 @@ test.describe('Horse by sea under temporary admission', () => {
     const importDetails = animalsPages.notificationView.summaryCard('Import details');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Ireland');
 
-    const speciesCard = animalsPages.notificationView.summaryCard('Horse (0101) — Equus caballus');
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText('Equus caballus');
+    const speciesCard = animalsPages.notificationView.summaryCard('0101 — Equus cabalus');
+    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText('Equus cabalus');
     await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('1');
 
     const reasonForImport = animalsPages.notificationView.summaryCard('Reason for import');

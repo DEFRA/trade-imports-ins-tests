@@ -6,6 +6,7 @@ import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 
 export type AccompanyingDocumentAnswer = {
   reference: string;
@@ -130,7 +131,7 @@ export class AnimalsJourney {
 
   async answerCommodity(): Promise<void> {
     await this.animalsPages.overview.task('What are you importing?').click();
-    await this.animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
+    await this.animalsPages.commoditySelection.selectSpecies([commodityLines.cattle]);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Commodity details').click();
@@ -308,7 +309,7 @@ export class AnimalsJourney {
 
   async toConsignmentDetails(): Promise<void> {
     await this.toCommoditySelection();
-    await this.animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
+    await this.animalsPages.commoditySelection.selectSpecies([commodityLines.cattle]);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Commodity details').click();
@@ -439,7 +440,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies(['Bos taurus']);
+    await pages.commoditySelection.selectSpecies([commodityLines.cattle]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);
@@ -476,7 +477,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies(['Bos taurus']);
+    await pages.commoditySelection.selectSpecies([commodityLines.cattle]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);
@@ -541,7 +542,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies(['Equus caballus']);
+    await pages.commoditySelection.selectSpecies([commodityLines.horse]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);

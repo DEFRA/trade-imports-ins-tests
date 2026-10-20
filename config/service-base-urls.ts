@@ -14,6 +14,8 @@ export const getBackendBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_
 
 export const getAddressBookBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_ADDRESS_BOOK_URL');
 
+export const getReferenceDataBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_REFERENCE_DATA_URL');
+
 export const getMongoDbUri = (): string => getServiceBaseUrl('MONGODB_URI');
 
 export const getSqsEndpoint = (): string => getServiceBaseUrl('AWS_SQS_ENDPOINT');
