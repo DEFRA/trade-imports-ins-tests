@@ -29,4 +29,12 @@ export class PlantsNotificationActions {
     await this.plantsPages.notificationCancelAmend.confirm.click();
     await this.pages.page.waitForURL(/\/notification-view\?cancelled=1$/, { timeout: timeouts.medium });
   }
+
+  async deleteNotification(journeyId: string): Promise<void> {
+    await this.toNotificationView(journeyId);
+    await this.plantsPages.notificationView.btnDelete.click();
+    await this.plantsPages.deleteNotification.heading.waitFor(pageLoadWait);
+    await this.plantsPages.deleteNotification.btnConfirm.click();
+    await this.plantsPages.dashboard.deletedBanner.waitFor(pageLoadWait);
+  }
 }
