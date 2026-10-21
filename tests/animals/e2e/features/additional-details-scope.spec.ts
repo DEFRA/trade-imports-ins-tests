@@ -1,59 +1,54 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, () => {
-  test('the unweaned-animals question shows only when a triggering commodity line exists', async ({
-    animalsJourney,
-    pages,
-    animalsPages,
-  }) => {
-    // Proving scope needs three commodity shapes, and each one walks the hub,
-    // selection and consignment pages — roughly 25 loads against a CI runner
-    // hosting the whole stack, which does not fit the default budget.
+  test('the unweaned-animals question shows only when a triggering commodity line exists', async ({ animalsJourney, pages }) => {
     test.slow();
 
-    const referenceNumber = await animalsJourney.startNotification();
+    await animalsJourney.startNotification();
 
     const certifiedFor = pages.page.getByRole('group', { name: 'What are the animals certified for?' });
     const unweaned = pages.page.getByRole('group', {
       name: 'Does the consignment contain any unweaned animals?',
     });
 
-    // Each call ADDS a commodity line. The animal count is save-blocking on
-    // every line, so each box the consignment page is showing — the lines
-    // added on earlier passes included — is filled before it hands back to the
-    // hub.
-    const addCommodity = async (species: string): Promise<void> => {
-      await animalsPages.overview.open(referenceNumber);
-      await animalsPages.overview.task('What are you importing?').click();
-      await animalsPages.commoditySelection.selectSpecies([species]);
-      await animalsPages.commoditySelection.saveAndContinue.click();
-      await animalsPages.overview.heading.waitFor();
-      await animalsPages.overview.task('Commodity details').click();
-      await animalsPages.consignmentDetails.heading.waitFor();
-      await animalsPages.consignmentDetails.fillEveryAnimalCount('1');
-      await animalsPages.consignmentDetails.saveAndContinue.click();
-      await animalsPages.overview.heading.waitFor();
-    };
-
-    // The additional details open from their own task.
-    const openAdditionalDetails = async (): Promise<void> => {
-      await animalsPages.overview.open(referenceNumber);
-      await animalsPages.overview.task('Additional details').click();
-      await animalsPages.additionalDetails.heading.waitFor();
-    };
-
-    // A non-triggering commodity (cats): certified-for shows, but the
-    // notification-level unweaned-animals question is out of scope.
-    await addCommodity('Felis catus');
-    await openAdditionalDetails();
+    await animalsJourney.addCommodityToCurrentNotification('Felis catus');
+    await animalsJourney.toAdditionalDetailsOfCurrentNotification();
     await expect(certifiedFor).toBeVisible();
     await expect(unweaned).toBeHidden();
 
-    // Adding a triggering commodity (cattle) brings the unweaned-animals question
-    // into scope across the commodity lines (frame:"anyItem").
-    await addCommodity('Bos taurus');
-    await openAdditionalDetails();
+    await animalsJourney.addCommodityToCurrentNotification('Bos taurus');
+    await animalsJourney.toAdditionalDetailsOfCurrentNotification();
     await expect(certifiedFor).toBeVisible();
     await expect(unweaned).toBeVisible();
+  });
+
+  test('a saved unweaned-animals answer is cleared when the commodities change to ones the question is not asked for', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    test.slow();
+
+    await animalsJourney.startNotification();
+    await animalsJourney.addCommodityToCurrentNotification('Bos taurus');
+    await animalsJourney.toAdditionalDetailsOfCurrentNotification();
+    await animalsPages.additionalDetails.certifiedFor('Slaughter').check();
+    await animalsPages.additionalDetails.containsUnweanedAnimals('Yes').check();
+    await animalsPages.additionalDetails.saveAndContinue.click();
+    await animalsPages.overview.heading.waitFor();
+
+    await animalsPages.overview.task('What are you importing?').click();
+    await animalsPages.commoditySelection.clearAll.click();
+    await animalsPages.commoditySelection.selectSpecies(['Felis catus']);
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await animalsPages.overview.heading.waitFor();
+    await animalsPages.overview.reviewAndSubmitButton.click();
+
+    const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional animal details');
+    await expect(additionalAnimalDetails.getByRole('term')).toHaveText(['Certified for']);
+
+    await animalsJourney.addCommodityToCurrentNotification('Bos taurus');
+    await animalsJourney.toAdditionalDetailsOfCurrentNotification();
+    await expect(animalsPages.additionalDetails.containsUnweanedAnimals('Yes')).not.toBeChecked();
+    await expect(animalsPages.additionalDetails.containsUnweanedAnimals('No')).not.toBeChecked();
   });
 });

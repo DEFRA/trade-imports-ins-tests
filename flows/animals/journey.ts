@@ -23,8 +23,6 @@ export type ArrivalDetailsAnswer = {
   documentReference?: string;
 };
 
-// The overview's task rows once a full opening run has answered everything,
-// in the order the overview lists them.
 export const OPENING_RUN_TASKS = [
   'Where is this consignment coming from?',
   'What are you importing?',
@@ -41,12 +39,7 @@ export const OPENING_RUN_TASKS = [
 
 const COUNTRY = 'France';
 const PORT = pointOfEntries.aberdeenHarbour.display;
-// Inside the arrival-date window (1 week back to 6 months ahead) wherever the
-// wall clock happens to be, in the unpadded d/m/yyyy the app itself renders —
-// so a CYA assertion compares against the app's shape, not the typed string it
-// happens to echo back.
 export const ARRIVAL_DATE = getRelativeAppDateText({ monthOffset: 1 });
-// After the arrival date, in the app's own d/m/yyyy.
 export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffset: 2 });
 export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
 export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
@@ -76,23 +69,16 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
-  // Origin answered — most other tasks are gated behind it, so callers that
-  // want a usable task list reach the overview this way, not via startNotificationAtOrigin().
   async startNotification(): Promise<string> {
     const referenceNumber = await this.createNotificationAtOrigin();
     await this.fillOriginOfImport();
     await this.saveOriginOfImport();
-    // Wait for the save to land before navigating away. Opening the overview
-    // regardless hides a failed save — the run then dies several steps later on
-    // a task stuck at "Not yet started", pointing at the wrong page entirely.
     await this.animalsPages.originOfImport.heading.waitFor({ ...pageLoadWait, state: 'hidden' });
     await this.animalsPages.overview.open(referenceNumber);
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     return referenceNumber;
   }
 
-  // Origin unanswered — the entry guard is satisfied by the opening-run
-  // marker set at creation, not by answering origin itself.
   async startNotificationAtOrigin(): Promise<string> {
     const referenceNumber = await this.createNotificationAtOrigin();
     await this.animalsPages.overview.open(referenceNumber);
@@ -100,7 +86,6 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
-  // Origin unanswered, as a brand-new notification first shows it.
   async toOriginOfImport(): Promise<void> {
     await this.createNotificationAtOrigin();
   }
@@ -128,13 +113,29 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async answerCommodity(): Promise<void> {
-    await this.animalsPages.overview.task('What are you importing?').click();
-    await this.animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
+  private async chooseSpeciesAndOpenCommodityDetails(species: string[]): Promise<void> {
+    await this.animalsPages.commoditySelection.selectSpecies(species);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Commodity details').click();
     await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
+  }
+
+  private async openCurrentOverview(): Promise<void> {
+    const { referenceNumber } = this.context;
+    if (!referenceNumber) throw new Error('No notification has been started');
+    await this.animalsPages.overview.open(referenceNumber);
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+  }
+
+  private async openAdditionalDetailsFromOverview(): Promise<void> {
+    await this.animalsPages.overview.task('Additional details').click();
+    await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
+  }
+
+  async answerCommodity(): Promise<void> {
+    await this.animalsPages.overview.task('What are you importing?').click();
+    await this.chooseSpeciesAndOpenCommodityDetails(['Bos taurus']);
     await this.animalsPages.consignmentDetails.numberOfAnimals.fill('1');
     await this.animalsPages.consignmentDetails.numberOfPackages.fill('5');
     await this.animalsPages.consignmentDetails.saveAndContinue.click();
@@ -151,13 +152,10 @@ export class AnimalsJourney {
   async answerReasonAndAdditionalDetails(): Promise<void> {
     await this.animalsPages.overview.task('Main reason for import').click();
     await this.animalsPages.importReason.reason('Internal market').check();
-    // The purpose is a conditional reveal under the reason, so both answers go
-    // in on the one submit.
     await this.animalsPages.importReason.purpose('Breeding').check();
     await this.animalsPages.importReason.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    await this.animalsPages.overview.task('Additional details').click();
-    await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
+    await this.openAdditionalDetailsFromOverview();
     await this.animalsPages.additionalDetails.certifiedFor('Slaughter').check();
     await this.animalsPages.additionalDetails.containsUnweanedAnimals('No').check();
     await this.animalsPages.additionalDetails.saveAndContinue.click();
@@ -198,7 +196,6 @@ export class AnimalsJourney {
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
   }
 
-  // From the addresses page: answer the CPH number, then leave the page.
   async addCphAndLeaveAddresses(): Promise<void> {
     await this.animalsPages.addresses.addCph.click();
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
@@ -228,8 +225,6 @@ export class AnimalsJourney {
     await this.animalsPages.arrivalDetails.transportDocumentReference.fill(documentReference);
   }
 
-  // On the documents page: add one document and wait for its virus scan, so
-  // the submission carries it.
   async uploadDocumentAndWaitForScan(document: AccompanyingDocumentAnswer): Promise<void> {
     await this.animalsPages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
     await this.animalsPages.accompanyingDocuments.saveAndAddAnother.click();
@@ -244,10 +239,6 @@ export class AnimalsJourney {
     await this.animalsPages.contactAddress.saveAndContinue.click();
   }
 
-  // Re-navigate from the hub to the transporter list page within an already
-  // unlocked journey. The page itself saves through unfilled; it is filled
-  // because a road vehicle keeps transited countries in scope, which is
-  // answered on the way.
   async reachTransporterFromHub(): Promise<void> {
     await this.animalsPages.overview.task('Arrival details').click();
     await this.animalsPages.arrivalDetails.heading.waitFor(pageLoadWait);
@@ -297,22 +288,24 @@ export class AnimalsJourney {
     await this.answerContact();
   }
 
-  // Reach helpers — land on a page UNFILLED so a per-page spec can drive it.
-  // The commodity section (and everything downstream) is gated behind origin,
-  // so any reach past origin runs unlockSections first.
   async toCommoditySelection(): Promise<void> {
     await this.startNotification();
     await this.animalsPages.overview.task('What are you importing?').click();
     await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
   }
 
-  async toConsignmentDetails(): Promise<void> {
+  async toConsignmentDetails(species: string[] = ['Bos taurus']): Promise<void> {
     await this.toCommoditySelection();
-    await this.animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
-    await this.animalsPages.commoditySelection.saveAndContinue.click();
+    await this.chooseSpeciesAndOpenCommodityDetails(species);
+  }
+
+  async addCommodityToCurrentNotification(species: string): Promise<void> {
+    await this.openCurrentOverview();
+    await this.animalsPages.overview.task('What are you importing?').click();
+    await this.chooseSpeciesAndOpenCommodityDetails([species]);
+    await this.animalsPages.consignmentDetails.fillEveryAnimalCount('1');
+    await this.animalsPages.consignmentDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    await this.animalsPages.overview.task('Commodity details').click();
-    await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
   }
 
   async toAnimalIdentification(): Promise<void> {
@@ -335,8 +328,18 @@ export class AnimalsJourney {
     await this.animalsPages.importReason.purpose('Breeding').check();
     await this.animalsPages.importReason.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    await this.animalsPages.overview.task('Additional details').click();
-    await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
+    await this.openAdditionalDetailsFromOverview();
+  }
+
+  async toAdditionalDetailsOfCurrentNotification(): Promise<void> {
+    await this.openCurrentOverview();
+    await this.openAdditionalDetailsFromOverview();
+  }
+
+  async toRolesAndAddressesOfCurrentNotification(): Promise<void> {
+    await this.openCurrentOverview();
+    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
   }
 
   async toCphNumber(): Promise<void> {
@@ -370,9 +373,6 @@ export class AnimalsJourney {
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
   }
 
-  // The commercial arm of the add route: the list first, then the type
-  // question, and then the form for a commercial transporter that is not on
-  // the list.
   async toCommercialTransporter(): Promise<void> {
     await this.toTransporter();
     await this.animalsPages.transporter.addTransporter.click();
@@ -382,10 +382,6 @@ export class AnimalsJourney {
     await this.animalsPages.commercialTransporter.heading.waitFor(pageLoadWait);
   }
 
-  // The approved commercial register, which nothing links to now that the add
-  // route's commercial arm is the add-commercial form. It is reached by its own
-  // URL, through that arm so the transporter type is answered — which is what
-  // puts the commercial answer the register writes in scope.
   async toTransporterSelection(): Promise<void> {
     await this.toCommercialTransporter();
     await this.animalsPages.transporterSelection.open(this.animalsPages.commercialTransporter.referenceNumberFromUrl());
@@ -417,8 +413,6 @@ export class AnimalsJourney {
     await this.confirmDeclaration();
   }
 
-  // The same full journey with one accompanying document added, waiting for its
-  // virus scan so the submission carries it.
   async submitNotificationWithDocument(document: AccompanyingDocumentAnswer): Promise<void> {
     await this.startNotification();
     await this.completeAnswerSections();

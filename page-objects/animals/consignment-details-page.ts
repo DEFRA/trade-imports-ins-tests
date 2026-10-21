@@ -30,12 +30,26 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.page.getByRole('link', { name: 'Enter the number of animals' });
   }
 
-  /**
-   * Fills the animal count on every commodity line the page is showing. The
-   * count is save-blocking per line, so a page carrying more than one line
-   * will not save until each box holds a number — and `numberOfAnimals` is
-   * ambiguous under strict mode once a second line is on the page.
-   */
+  get caption(): Locator {
+    return this.page.getByText('Description of the goods', { exact: true });
+  }
+
+  get headingBelowCaption(): Locator {
+    return this.caption.locator('xpath=following-sibling::*[1]');
+  }
+
+  get selectedCommodities(): Locator {
+    return this.page.getByRole('table', { name: 'Selected commodities' });
+  }
+
+  selectedCommodityRow(commodityCode: string): Locator {
+    return this.selectedCommodities.getByRole('row').filter({ has: this.page.getByRole('cell', { name: commodityCode, exact: true }) });
+  }
+
+  speciesCell(row: Locator): Locator {
+    return row.getByRole('cell').nth(2);
+  }
+
   async fillEveryAnimalCount(count: string): Promise<void> {
     for (const box of await this.numberOfAnimals.all()) {
       await box.fill(count);

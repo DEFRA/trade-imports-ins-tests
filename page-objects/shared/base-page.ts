@@ -187,6 +187,10 @@ export class NotificationPage extends BasePage {
     return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
   }
 
+  get errorSummaryLinks(): Locator {
+    return this.page.getByRole('alert').getByRole('link');
+  }
+
   get saveAndReturn(): Locator {
     return this.page.getByRole('button', { name: 'Save and return', exact: true });
   }
