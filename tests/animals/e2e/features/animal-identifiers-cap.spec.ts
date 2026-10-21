@@ -13,7 +13,7 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
 
     // A cattle line with a declared count of 2 (M = 2).
     await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.selectSpecies([commodityLines.cattle]);
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();

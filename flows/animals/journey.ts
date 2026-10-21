@@ -114,7 +114,7 @@ export class AnimalsJourney {
 
   async answerCommodity(): Promise<void> {
     await this.animalsPages.overview.task('What are you importing?').click();
-    await this.animalsPages.commoditySelection.selectSpecies([commodityLines.cattle]);
+    await this.animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Commodity details').click();
@@ -128,7 +128,7 @@ export class AnimalsJourney {
   async addCommodityLine(referenceNumber: string, line: CommodityLine): Promise<void> {
     await this.animalsPages.overview.open(referenceNumber);
     await this.animalsPages.overview.task('What are you importing?').click();
-    await this.animalsPages.commoditySelection.selectSpecies([line]);
+    await this.animalsPages.commoditySelection.searchAndCheckSpecies([line]);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Commodity details').click();
@@ -293,7 +293,7 @@ export class AnimalsJourney {
 
   async toConsignmentDetails(): Promise<void> {
     await this.toCommoditySelection();
-    await this.animalsPages.commoditySelection.selectSpecies([commodityLines.cattle]);
+    await this.animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Commodity details').click();
@@ -415,7 +415,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies([commodityLines.cattle]);
+    await pages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);
@@ -452,7 +452,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies([commodityLines.cattle]);
+    await pages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);
@@ -517,7 +517,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies([commodityLines.horse]);
+    await pages.commoditySelection.searchAndCheckSpecies([commodityLines.horse]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);

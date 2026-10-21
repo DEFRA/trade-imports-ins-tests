@@ -30,7 +30,7 @@ test.describe('Overview task return', () => {
     };
 
     await openTask('What are you importing?', 'commodities');
-    await animalsPages.commoditySelection.selectSpecies([commodityLines.cattle]);
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expectOnOverview();
     await expect(animalsPages.consignmentDetails.heading).toBeHidden();

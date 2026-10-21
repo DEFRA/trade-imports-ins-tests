@@ -56,7 +56,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
   test('accepts and persists multiple commodity-species pairs found under different queries', async ({ pages, animalsPages }) => {
     test.slow();
 
-    await animalsPages.commoditySelection.selectSpecies([commodityLines.cattle, commodityLines.domesticCat]);
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle, commodityLines.domesticCat]);
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
@@ -79,7 +79,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
   });
 
   test('counts what has been chosen and clears it on request', async ({ animalsPages }) => {
-    await animalsPages.commoditySelection.selectSpecies([commodityLines.cattle]);
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     // The panel is written on the server, so it appears on the next render.
     await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('1 selected');

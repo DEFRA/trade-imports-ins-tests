@@ -32,7 +32,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     await test.step('Commodity selection', async () => {
       await animalsPages.overview.task('What are you importing?').click();
-      await animalsPages.commoditySelection.selectSpecies([commodityLines.cattle]);
+      await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
       await runA11yScan();
       await animalsPages.commoditySelection.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();

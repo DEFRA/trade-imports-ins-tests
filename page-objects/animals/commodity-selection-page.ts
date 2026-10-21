@@ -43,10 +43,7 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.commodityGroup(line.commodityCode).getByRole('checkbox', { name: line.latinName, exact: true });
   }
 
-  /** A species has no tick box until its own query puts it in the results, so
-   * each line is searched for before it is ticked. Ticks made under an earlier
-   * query ride back with the form, so they survive the next search. */
-  async selectSpecies(lines: CommodityLine[]): Promise<void> {
+  async searchAndCheckSpecies(lines: CommodityLine[]): Promise<void> {
     for (const line of lines) {
       await this.search(line.searchTerm);
       await this.species(line).check();

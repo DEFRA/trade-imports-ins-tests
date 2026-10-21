@@ -11,7 +11,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await animalsJourney.startNotification();
 
     await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.selectSpecies([commodityLines.domesticCat]);
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.domesticCat]);
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();
@@ -72,7 +72,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await animalsJourney.startNotification();
 
     await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.selectSpecies([commodityLines.cattle, commodityLines.ostrich]);
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle, commodityLines.ostrich]);
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();
@@ -100,7 +100,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await animalsJourney.startNotification();
 
     await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.selectSpecies([commodityLines.ostrich]);
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.ostrich]);
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();
