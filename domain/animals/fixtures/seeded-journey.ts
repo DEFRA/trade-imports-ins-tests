@@ -1,5 +1,5 @@
 import type { FormFields } from '@adapters/http/frontend-form-client';
-import type { NotificationAnswers } from '@domain/animals/constants/journey-options';
+import { assertConsistentAnswers, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 
 // Each fact comes from the shared answers; this file only translates it into the form field the frontend takes.
 // `api-seed-parity.spec.ts` compares what the seed stores with what the browser journey stores.
@@ -115,6 +115,7 @@ export const seedSteps = async (
   stage: DraftStage,
   answers: NotificationAnswers,
 ): Promise<SeedStep[]> => {
+  assertConsistentAnswers(answers);
   if (answers.accompanyingDocument) {
     throw new Error('The seeded journey cannot upload an accompanying document: the form client sends no files.');
   }

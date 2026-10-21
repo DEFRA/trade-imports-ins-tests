@@ -11,8 +11,6 @@ import { type YesNoValue, yesNoValues } from '@domain/shared/constants/yes-no-va
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
-export const EAR_TAG_PREFIX = 'FR';
-export const PASSPORT_PREFIX = 'FR-BOV-2024-';
 export const PLACE_OF_ORIGIN_NAME = 'Origin Farm';
 export const CONSIGNOR_NAME = 'Astra Rosales';
 export const CONSIGNEE_NAME = 'British Livestock Ltd';
@@ -95,6 +93,17 @@ export type AllDataAnswersWithoutDocument = MandatoryAnswers &
 
 /** The origin page's fields, for callers that answer only that page. */
 export type OriginOptions = Partial<Pick<NotificationAnswers, 'countryCode' | 'requiresRegionCode' | 'regionCode' | 'internalReference'>>;
+
+/** Throws when the answers contradict each other: a region code is given exactly when the origin requires one. */
+export const assertConsistentAnswers = (answers: NotificationAnswers): void => {
+  const requiresRegionCode = answers.requiresRegionCode === yesNoValues.yes;
+  if (requiresRegionCode && !answers.regionCode) {
+    throw new Error('The answers require a region of origin code but give none.');
+  }
+  if (!requiresRegionCode && answers.regionCode) {
+    throw new Error(`The answers give the region of origin code "${answers.regionCode}" but do not require one.`);
+  }
+};
 
 export const MANDATORY_ANSWERS: MandatoryAnswers = {
   countryCode: countryCodes.eu.france,

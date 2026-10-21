@@ -4,6 +4,7 @@ import type { AnimalsPages, SharedPages } from '@page-objects';
 import {
   ALL_DATA_ANSWERS,
   MANDATORY_ANSWERS,
+  assertConsistentAnswers,
   type AccompanyingDocumentAnswer,
   type CphAnswer,
   type NotificationAnswers,
@@ -255,7 +256,7 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
-    await this.animalsPages.transitedCountries.addCountry('France');
+    await this.animalsPages.transitedCountries.addCountry(ALL_DATA_ANSWERS.transitedCountries[0].display);
     await this.animalsPages.transitedCountries.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transport details').click();
@@ -306,6 +307,7 @@ export class AnimalsJourney {
 
   async completeAnswerSections(overrides: Partial<NotificationAnswers> = {}): Promise<void> {
     const answers: NotificationAnswers = { ...MANDATORY_ANSWERS, ...overrides };
+    assertConsistentAnswers(answers);
     await this.answerOrigin(answers);
     await this.answerCommodity(answers);
     await this.answerAnimalIdentification(answers);
@@ -327,7 +329,7 @@ export class AnimalsJourney {
 
   async toConsignmentDetails(): Promise<void> {
     await this.toCommoditySelection();
-    await this.animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
+    await this.animalsPages.commoditySelection.selectSpecies([MANDATORY_ANSWERS.species.display]);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Commodity details').click();
@@ -382,7 +384,7 @@ export class AnimalsJourney {
 
   async toTransporter(): Promise<void> {
     await this.toTransitedCountries();
-    await this.animalsPages.transitedCountries.addCountry('France');
+    await this.animalsPages.transitedCountries.addCountry(ALL_DATA_ANSWERS.transitedCountries[0].display);
     await this.animalsPages.transitedCountries.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transport details').click();
@@ -450,7 +452,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies(['Bos taurus']);
+    await pages.commoditySelection.selectSpecies([MANDATORY_ANSWERS.species.display]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);
@@ -487,7 +489,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies(['Bos taurus']);
+    await pages.commoditySelection.selectSpecies([MANDATORY_ANSWERS.species.display]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);
@@ -504,11 +506,11 @@ export class AnimalsJourney {
     await pages.animalIdentification.earTag.fill('UK000000000001');
     await pages.animalIdentification.passportNumber.fill('PASSPORT-0001');
     await pages.animalIdentification.saveAndAddAnother.click();
-    await pages.animalIdentification.savedAnimalRow('Bos taurus', 1).waitFor(pageLoadWait);
+    await pages.animalIdentification.savedAnimalRow(MANDATORY_ANSWERS.species.display, 1).waitFor(pageLoadWait);
     await pages.animalIdentification.earTag.fill('UK000000000002');
     await pages.animalIdentification.passportNumber.fill('PASSPORT-0002');
     await pages.animalIdentification.saveAndFinish.click();
-    await pages.animalIdentification.savedAnimalRow('Bos taurus', 2).waitFor(pageLoadWait);
+    await pages.animalIdentification.savedAnimalRow(MANDATORY_ANSWERS.species.display, 2).waitFor(pageLoadWait);
     await pages.animalIdentification.saveAndContinue.click();
 
     await pages.additionalDetails.heading.waitFor(pageLoadWait);
@@ -526,7 +528,7 @@ export class AnimalsJourney {
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);
-    await pages.transporter.transporter('García Livestock Transport SL').check();
+    await pages.transporter.transporter(MANDATORY_ANSWERS.transporter.display).check();
     await pages.transporter.saveAndContinue.click();
 
     await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
