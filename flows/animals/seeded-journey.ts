@@ -52,8 +52,8 @@ export class AnimalsSeededJourney {
     return referenceNumber;
   }
 
-  private async postSeedStep(path: string, { form, answersWithPage }: SeedStep): Promise<void> {
-    if (answersWithPage) {
+  private async postSeedStep(path: string, { form, returnsHtml }: SeedStep): Promise<void> {
+    if (returnsHtml) {
       await this.forms.postFormReturningHtml(path, form);
     } else {
       await this.forms.postForm(path, form);

@@ -18,7 +18,7 @@ export type PartyIds = Record<PartyRole, string>;
 export type SeedStep = {
   slug: string;
   form: FormFields;
-  answersWithPage?: boolean;
+  returnsHtml?: boolean;
 };
 
 export type SeedDepth = 'unlocked' | 'draft' | 'readyToSubmit';
@@ -38,7 +38,7 @@ const originStep: SeedStep = {
 };
 
 const commoditySteps: SeedStep[] = [
-  { slug: 'commodities', form: { commoditySearch: commodityLines.cattle.searchTerm, action: 'search' }, answersWithPage: true },
+  { slug: 'commodities', form: { commoditySearch: commodityLines.cattle.searchTerm, action: 'search' }, returnsHtml: true },
   { slug: 'commodities', form: { species: speciesCheckboxValue(commodityLines.cattle) } },
   {
     slug: 'consignment-details',
