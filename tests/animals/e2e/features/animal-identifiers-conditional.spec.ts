@@ -22,7 +22,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Identification details').click();
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
-    await expect(pages.page.getByRole('heading', { name: 'Enter details for Felis catus' })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.domesticCat.latinName}` })).toBeVisible();
 
     await expect(animalsPages.animalIdentification.passportNumber).toBeVisible();
     await expect(pages.page.getByLabel('Tattoo')).toBeVisible();
@@ -47,7 +47,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await animalsPages.animalIdentification.saveAndAddAnother.click();
 
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
-    const unitRow = animalsPages.animalIdentification.savedAnimalRow('Felis catus', 1);
+    const unitRow = animalsPages.animalIdentification.savedAnimalRow(commodityLines.domesticCat.latinName, 1);
     await expect(animalsPages.animalIdentification.identifierColumn('Permanent address')).toBeVisible();
     await expect(unitRow.getByRole('cell', { name: 'UK123456789', exact: true })).toBeVisible();
     await expect(unitRow.getByRole('cell', { name: 'Pet Owner', exact: true })).toBeVisible();

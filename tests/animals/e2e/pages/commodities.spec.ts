@@ -64,8 +64,8 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.overview.task('What are you importing?').click();
 
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('2 selected');
-    await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Bos taurus');
-    await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Felis catus');
+    await expect(animalsPages.commoditySelection.selectionPanel).toContainText(commodityLines.cattle.latinName);
+    await expect(animalsPages.commoditySelection.selectionPanel).toContainText(commodityLines.domesticCat.latinName);
 
     await animalsPages.commoditySelection.search(commodityLines.cattle.searchTerm);
     await expect(animalsPages.commoditySelection.species(commodityLines.cattle)).toBeChecked();
@@ -77,7 +77,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('1 selected');
-    await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Bos taurus');
+    await expect(animalsPages.commoditySelection.selectionPanel).toContainText(commodityLines.cattle.latinName);
 
     await animalsPages.commoditySelection.clearAll.click();
     await expect(animalsPages.commoditySelection.selectionPanel).toHaveCount(0);
