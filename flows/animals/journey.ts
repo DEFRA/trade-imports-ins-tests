@@ -364,10 +364,6 @@ export class AnimalsJourney {
     await this.animalsPages.commercialTransporter.heading.waitFor(pageLoadWait);
   }
 
-  // The approved commercial register, which nothing links to now that the add
-  // route's commercial arm is the add-commercial form. It is reached by its own
-  // URL, through that arm so the transporter type is answered — which is what
-  // puts the commercial answer the register writes in scope.
   async toTransporterSelection(): Promise<void> {
     await this.toCommercialTransporter();
     await this.animalsPages.transporterSelection.open(this.animalsPages.commercialTransporter.referenceNumberFromUrl());
