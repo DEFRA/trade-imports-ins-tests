@@ -1,9 +1,7 @@
 import type { FormFields } from '@adapters/http/frontend-form-client';
 import { getRelativeAppDateText } from '@utils/date-utils';
+import { commodityLines, speciesCheckboxValue } from '@domain/animals/constants/commodity-lines';
 
-// Answers must stay in step with `flows/animals/journey.ts`; `api-seed-parity.spec.ts` compares the two.
-
-/** Names must match the records seeded by `e2e-address-book.ts`. */
 export const PARTY_NAMES = {
   placeOfOrigin: 'Origin Farm',
   consignor: 'Astra Rosales',
@@ -20,12 +18,10 @@ export type PartyIds = Record<PartyRole, string>;
 export type SeedStep = {
   slug: string;
   form: FormFields;
+  returnsHtml?: boolean;
 };
 
 export type SeedDepth = 'unlocked' | 'draft' | 'readyToSubmit';
-
-// The commodity picker's checkbox value is commodity|speciesId — 'Cow' is the commodity, 1148346 the species (Bos taurus).
-const COW_COMMODITY_LINE = 'Cow|1148346';
 
 const FIRST_LINE_INDEX = 0;
 
@@ -36,14 +32,14 @@ const originStep: SeedStep = {
   form: {
     countryOfOrigin: 'FR',
     regionOfOriginCodeRequirement: 'yes',
-    // The country prefix is filled in for the trader, so the box takes only what follows it.
     regionOfOriginCodeSuffix: '75',
     internalReferenceNumber: 'Imports456GB',
   },
 };
 
 const commoditySteps: SeedStep[] = [
-  { slug: 'commodities', form: { species: COW_COMMODITY_LINE } },
+  { slug: 'commodities', form: { commoditySearch: commodityLines.cattle.searchTerm, action: 'search' }, returnsHtml: true },
+  { slug: 'commodities', form: { species: speciesCheckboxValue(commodityLines.cattle) } },
   {
     slug: 'consignment-details',
     form: { [`numberOfAnimalsQuantity-${FIRST_LINE_INDEX}`]: '1', [`numberOfPackages-${FIRST_LINE_INDEX}`]: '5' },
@@ -62,7 +58,6 @@ const addressSteps = (parties: PartyIds): SeedStep[] => [
   { slug: 'place-of-origin/select', form: { party: parties.placeOfOrigin } },
   { slug: 'consignees/select', form: { party: parties.consignee } },
   { slug: 'importers/select', form: { party: parties.importer } },
-  // The empty hub post is what advances past the pickers; without it the seed stalls.
   { slug: 'addresses', form: {} },
   { slug: 'cph-number', form: { cphCounty: '12', cphParish: '345', cphHolding: '6789' } },
 ];

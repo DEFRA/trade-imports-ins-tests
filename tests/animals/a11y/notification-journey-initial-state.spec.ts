@@ -1,3 +1,4 @@
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
 
 // govuk-frontend's conditional-reveal radios set aria-expanded on the radio input
@@ -44,7 +45,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.overview.task('What are you importing?').click();
       await animalsPages.commoditySelection.heading.waitFor();
       await runA11yScan();
-      await animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
+      await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
       await animalsPages.commoditySelection.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Commodity details').click();

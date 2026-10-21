@@ -2,6 +2,7 @@ import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { defaultJourneyOptions, CONSIGNOR_NAME, CPH_NUMBER } from '@domain/animals/constants/journey-options';
 import { countryCodes } from '@domain/animals/constants/country-codes';
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
 import { fileUploadPaths } from '@resources/file-upload/paths';
@@ -66,15 +67,11 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       expect(data.$type).toBe('gbn-ag');
       expect(data.exchangedDocument.identifier).toBe(referenceNumber);
       expect(data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED');
-      // The journey uploads no document, so the event carries no document references at all.
       expect(data.exchangedDocument).not.toHaveProperty('referenceDocument');
       expect(data.specifiedConsignment.consignorParty?.name).toBe(CONSIGNOR_NAME);
       expect(data.specifiedConsignment.originCountry?.code?.value).toBe(defaultJourneyOptions.countryCode.value);
       expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(POINT_OF_ENTRY);
       expect(data.specifiedConsignment.includedConsignmentItem).toHaveLength(1);
-      // The journey answers the region, CPH, transport and animal questions, so each reaches the event.
-      // The journey picks a whole country, so the event leaves the subdivision out rather than
-      // sending it as null; the region of origin code has its own field.
       const originCountry = data.specifiedConsignment.originCountry;
       expect(originCountry?.regionOfOriginCode).toBe('FR-75');
       expect(originCountry).not.toHaveProperty('subordinateTradeCountrySubDivision');
@@ -90,19 +87,18 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       }
       const [movement] = data.specifiedConsignment.mainCarriageLogisticsTransportMovement ?? [];
       const [transportDocument] = movement.transportContractRelatedReferencedDocument ?? [];
-      expect(transportDocument.typeCode).toBe('730'); // road consignment note, as the journey travels by road
+      expect(transportDocument.typeCode).toBe('730');
       expect(transportDocument.identifier).toBe('CMR-2026-884721');
       const tradeLines = data.specifiedConsignment.includedConsignmentItem?.[0].includedTradeLineItem ?? [];
       expect(tradeLines).toHaveLength(1);
       const [line] = tradeLines;
-      expect(line.description).toEqual(['Cow']);
-      expect(line.commonName).toBe('Cow');
-      expect(line.scientificName).toBe('Bos taurus');
+      expect(line.description).toEqual([commodityLines.cattle.commodityCode]);
+      expect(line.commonName).toBe(commodityLines.cattle.commodityCode);
+      expect(line.scientificName).toBe(commodityLines.cattle.latinName);
       expect(line.specifiedLineTradeDelivery?.[0].productUnitQuantity.content).toBe(1);
       expect(line.physicalReferencedLogisticsPackage?.[0].itemQuantity).toBe(5);
       const animals = line.individualTradeProductInstance ?? [];
       expect(animals).toHaveLength(1);
-      // The journey leaves the passport unanswered, so only the ear tag is sent.
       expect(animals[0].identifier).toHaveLength(1);
       expect(animals[0].identifier?.[0].typeCode).toBe('EAR_TAG');
       expect(animals[0].identifier?.[0].content).toBe('UK123456789012');

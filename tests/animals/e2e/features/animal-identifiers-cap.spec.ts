@@ -1,3 +1,5 @@
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
+
 import { test, expect } from '@fixtures';
 
 test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () => {
@@ -9,9 +11,8 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     test.slow();
     await animalsJourney.startNotification();
 
-    // A cattle line with a declared count of 2 (M = 2).
     await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();
@@ -20,28 +21,26 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await animalsPages.consignmentDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    // Counter progression: 1 of 2, then Save and add another moves to 2 of 2
-    // with the first record in the card's table.
     await animalsPages.overview.task('Identification details').click();
-    await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 1 of 2' })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.cattle.latinName} 1 of 2` })).toBeVisible();
     await animalsPages.animalIdentification.earTag.fill('UK000000000001');
     await animalsPages.animalIdentification.saveAndAddAnother.click();
-    await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 2 of 2' })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.cattle.latinName} 2 of 2` })).toBeVisible();
     await expect(animalsPages.animalIdentification.identifierColumn('Animal')).toBeVisible();
     await expect(animalsPages.animalIdentification.identifierColumn('Ear tag')).toBeVisible();
     await expect(animalsPages.animalIdentification.identifierColumn('Passport')).toBeVisible();
     await expect(
-      animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 1).getByRole('cell', { name: 'UK000000000001', exact: true }),
+      animalsPages.animalIdentification
+        .savedAnimalRow(commodityLines.cattle.latinName, 1)
+        .getByRole('cell', { name: 'UK000000000001', exact: true }),
     ).toBeVisible();
 
-    // At N = M the maximum-reached state replaces the entry form; the saved
-    // records stay removable.
     // The second record is the last outstanding animal, so the in-card button
     // finishes the line instead of inviting another.
     await animalsPages.animalIdentification.earTag.fill('UK000000000002');
     await animalsPages.animalIdentification.saveAndFinish.click();
     await expect(
-      pages.page.getByText('You have entered details for all 2 Bos taurus animals', {
+      pages.page.getByText(`You have entered details for all 2 ${commodityLines.cattle.latinName} animals`, {
         exact: false,
       }),
     ).toBeVisible();
@@ -60,16 +59,19 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await animalsPages.consignmentDetails.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     const dropError = pages.page.getByRole('link', {
-      name: 'You have 2 identifier records for Bos taurus but entered 1 animal. Remove identifier records or keep the higher count.',
+      name: `You have 2 identifier records for ${commodityLines.cattle.latinName} but entered 1 animal. Remove identifier records or keep the higher count.`,
     });
     await expect(dropError).toBeVisible();
     await dropError.click();
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
-    await expect(animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 2)).toBeVisible();
+    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle.latinName, 2)).toBeVisible();
 
     // Remove frees a slot: the entry form reopens at 2 of 2.
-    await animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 2).getByRole('button', { name: 'Remove' }).click();
-    await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 2 of 2' })).toBeVisible();
+    await animalsPages.animalIdentification
+      .savedAnimalRow(commodityLines.cattle.latinName, 2)
+      .getByRole('button', { name: 'Remove' })
+      .click();
+    await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.cattle.latinName} 2 of 2` })).toBeVisible();
 
     // With one record left the drop no longer applies — a count of 1 saves.
     await animalsPages.animalIdentification.saveAndContinue.click();

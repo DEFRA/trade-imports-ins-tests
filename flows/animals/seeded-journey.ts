@@ -9,6 +9,7 @@ import {
   type PartyIds,
   type PartyRole,
   type SeedDepth,
+  type SeedStep,
 } from '@domain/animals/fixtures/seeded-journey';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { SET_BASES } from '@page-objects/shared/sets';
@@ -25,11 +26,6 @@ const concurrencyTokenIn = (html: string, slug: string): string => {
   return token;
 };
 
-/**
- * Seeds through the frontend's save-and-continue routes, never the backend: only the frontend
- * writes the notification document alongside the fulfilments blob. One post per page, because a
- * save replaces the whole record but a route accepts only its own page's fields.
- */
 export class AnimalsSeededJourney {
   private parties: PartyIds | undefined;
 
@@ -50,10 +46,18 @@ export class AnimalsSeededJourney {
 
   async createDraftNotification(depth: SeedDepth = 'readyToSubmit'): Promise<string> {
     const referenceNumber = await this.createEmptyNotification();
-    for (const { slug, form } of await seedSteps(() => this.partyIds(), depth)) {
-      await this.forms.postForm(`${CREATE_PATH}/${referenceNumber}/${slug}`, form);
+    for (const step of await seedSteps(() => this.partyIds(), depth)) {
+      await this.postSeedStep(`${CREATE_PATH}/${referenceNumber}/${step.slug}`, step);
     }
     return referenceNumber;
+  }
+
+  private async postSeedStep(path: string, { form, returnsHtml }: SeedStep): Promise<void> {
+    if (returnsHtml) {
+      await this.forms.postFormReturningHtml(path, form);
+    } else {
+      await this.forms.postForm(path, form);
+    }
   }
 
   async createSubmittedNotification(): Promise<string> {
@@ -62,7 +66,6 @@ export class AnimalsSeededJourney {
     const review = await this.forms.getPageHtml(`${CREATE_PATH}/${referenceNumber}/${declarationStep.reviewSlug}`);
     const concurrencyToken = concurrencyTokenIn(review, declarationStep.reviewSlug);
     const declaration = await this.forms.postFormReturningHtml(declarationPath, { ...declarationStep.review, concurrencyToken });
-    // redirectsTo is the assertion: a refused submission lands back on check-your-answers, not the confirmation.
     await this.forms.postForm(
       declarationPath,
       { ...declarationStep.declare, concurrencyToken: concurrencyTokenIn(declaration, declarationStep.slug) },
