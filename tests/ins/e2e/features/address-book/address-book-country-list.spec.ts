@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { countries } from '@domain/shared/fixtures/reference-data';
+import { countries } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const ALPHABETICAL_NAMES = [...countries.map(({ name }) => name), 'United Kingdom'].toSorted((left, right) =>

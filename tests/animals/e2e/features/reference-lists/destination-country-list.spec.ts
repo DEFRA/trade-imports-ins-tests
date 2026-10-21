@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { countryCodes } from '@domain/animals/constants/country-codes';
-import { destinationCountryNames } from '@domain/shared/fixtures/reference-data';
+import { destinationCountryNames } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Destination country list', () => {

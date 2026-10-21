@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { portByCode } from '@domain/shared/fixtures/reference-data';
+import { portByCode } from '@resources/reference-data/reference-data';
 import { POTATOES } from '@flows/plants/journey';
 import { getRelativeAppDateText } from '@utils/date-utils';
 

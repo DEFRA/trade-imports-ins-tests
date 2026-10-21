@@ -15,7 +15,7 @@ const OWN_RECORD = {
 
 /** A ready-to-submit notification whose consignor is a copy of the named record. */
 async function draftWithConsignor(animalsSeededJourney: AnimalsSeededJourney, animalsPages: AnimalsPages, name: string): Promise<string> {
-  const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+  const referenceNumber = await animalsSeededJourney.createDraftNotification();
   await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
   await animalsPages.addresses.changeParty('Consignor or exporter').click();
   await animalsPages.consignorSelection.select(name);
@@ -100,7 +100,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     animalsSeededJourney,
     animalsPages,
   }) => {
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
     await animalsPages.addresses.editPartyDetails('Place of origin').click();
 
@@ -132,7 +132,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     pages,
     animalsPages,
   }) => {
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
 
     // From the review page, back to the review page.
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
@@ -163,7 +163,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     animalsSeededJourney,
     animalsPages,
   }) => {
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
 
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
     await expect(animalsPages.addresses.changeParty('Consignor or exporter')).toBeVisible();
@@ -199,7 +199,7 @@ test.describe('Copied addresses are edited on the notification', () => {
   }) => {
     const contact = 'Animal and Plant Health Agency';
     const editedName = `APHA Weybridge ${Date.now()}`;
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
 
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
     await animalsPages.contactAddress.editCurrentContact.click();

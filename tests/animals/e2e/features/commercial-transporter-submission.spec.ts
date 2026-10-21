@@ -19,7 +19,7 @@ test.describe('Commercial transporter journeys', () => {
   }) => {
     // Everything up to transport is seeded through the API — only the
     // scenario under test (transit countries onward) is driven through the UI.
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('draft');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification('partial');
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.transitedCountries);
 
     await animalsPages.transitedCountries.addCountry('France');

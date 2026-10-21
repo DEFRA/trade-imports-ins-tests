@@ -1,8 +1,7 @@
+import { commodities } from '@domain/animals/constants/commodities';
+
 export const commoditySpecies = {
-  bisonBison: 'Bison bison',
-  bosSpp: 'Bos spp.',
-  bosTaurus: 'Bos taurus',
-  bubalusBubalis: 'Bubalus bubalis',
+  bosTaurus: { value: '1148346', display: 'Bos taurus', commodity: commodities.cow },
 } as const;
 
 export type CommoditySpecies = (typeof commoditySpecies)[keyof typeof commoditySpecies];
