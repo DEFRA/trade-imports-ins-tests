@@ -64,7 +64,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
       expect(notification.origin.requiresRegionCode).toBe('yes');
       expect(notification.origin.regionOfOriginCode).toBe(`${answers.countryCode.value}-${answers.regionCode}`);
       expect(notification.origin.internalReference).toBe(answers.internalReference);
-      expect(notification.commodity.name).toBe('Cow');
+      expect(notification.commodity.name).toBe(answers.species.commodity.display);
       expect(species.text).toBe(answers.species.display);
       expect(species.earTag).toBe(answers.earTag);
       expect(species.animalIdentifiers).toEqual([{ earTag: answers.earTag, passport: answers.passportNumber }]);

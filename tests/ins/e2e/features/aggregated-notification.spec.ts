@@ -1,7 +1,6 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
-import { commodityCodes } from '@domain/animals/constants/commodity-codes';
 import { type AggregatedNotificationDocument } from '@domain/ins/models/db/aggregated-notification-document';
 import { timeouts } from '@config/timeouts';
 import { getMongoDbUri } from '@config/service-base-urls';
@@ -62,7 +61,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(draftDoc.status).toBe('DRAFT');
       expect(draftDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
       // The journey selects the 'Bos taurus' species, which the frontend resolves to commodity.name 'Cow'.
-      expect(draftDoc.commodity).toBe(commodityCodes.cow);
+      expect(draftDoc.commodity).toBe(MANDATORY_ANSWERS.species.commodity.display);
       expect(draftDoc.arrivalDate).toBeInstanceOf(Date);
       expect(draftDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
       expect(draftDoc.lastUpdated).toBeInstanceOf(Date);
@@ -85,7 +84,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(submittedDoc.referenceNumber).toBe(referenceNumber);
       expect(submittedDoc.status).toBe('SUBMITTED');
       expect(submittedDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
-      expect(submittedDoc.commodity).toBe(commodityCodes.cow);
+      expect(submittedDoc.commodity).toBe(MANDATORY_ANSWERS.species.commodity.display);
       expect(submittedDoc.arrivalDate).toBeInstanceOf(Date);
       expect(submittedDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
       expect(submittedDoc.lastUpdated).toBeInstanceOf(Date);

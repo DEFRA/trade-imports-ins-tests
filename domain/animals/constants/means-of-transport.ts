@@ -6,7 +6,3 @@ export const meansOfTransport = {
 } as const;
 
 export type MeansOfTransport = (typeof meansOfTransport)[keyof typeof meansOfTransport];
-
-export function requiresTransitedCountries(meansOfTransport: MeansOfTransport): boolean {
-  return meansOfTransport.value === 'RAILWAY' || meansOfTransport.value === 'ROAD_VEHICLE';
-}

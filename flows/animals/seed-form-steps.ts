@@ -41,7 +41,8 @@ const originStep = (answers: NotificationAnswers): SeedStep => ({
 });
 
 const commoditySteps = (answers: NotificationAnswers): SeedStep[] => [
-  { slug: 'commodities', form: { species: answers.species.value } },
+  // The commodity picker's checkbox value is commodity|speciesId.
+  { slug: 'commodities', form: { species: `${answers.species.commodity.value}|${answers.species.value}` } },
   {
     slug: 'consignment-details',
     form: {
