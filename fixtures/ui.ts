@@ -22,7 +22,7 @@ import { NotificationApiClient } from '@adapters/http/notification-api-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { FrontendFormClient } from '@adapters/http/frontend-form-client';
 import { createWorkerAuthStates, type AuthStateFor } from '@fixtures/auth-state';
-import { createFrontendSeedContext } from '@fixtures/seed-context';
+import { createFrontendSeedContext, signInFrontendSeedState } from '@fixtures/seed-context';
 import { getCdpProxy } from '@config/cdp-proxy';
 import { baseUrlForDomain, domainFromSpecPath } from '@utils/playwright/domain-base-urls';
 import { sessionReuseEnabled } from '@utils/playwright/session-reuse';
@@ -34,7 +34,7 @@ const domainOf = ({ file, project }: TestInfo) => domainFromSpecPath(file, proje
 
 export interface AuthWorkerFixtures {
   authStateFor: AuthStateFor | undefined;
-  frontendSeedContext: APIRequestContext;
+  frontendSeedState: string;
 }
 
 export interface PageFixtures {
@@ -52,6 +52,7 @@ export interface PageFixtures {
   plantsNotificationActions: PlantsNotificationActions;
   notificationApi: NotificationApiClient;
   addressBookApi: AddressBookApiClient;
+  frontendSeedContext: APIRequestContext;
   frontendForms: FrontendFormClient;
   externalRequest: APIRequestContext;
 }
@@ -63,14 +64,17 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  frontendSeedContext: [
+  frontendSeedState: [
     async ({ browser, authStateFor }, use, workerInfo) => {
-      const context = await createFrontendSeedContext(browser, workerInfo, authStateFor);
-      await use(context);
-      await context.dispose();
+      await use(await signInFrontendSeedState(browser, workerInfo, authStateFor));
     },
     { scope: 'worker', timeout: SESSION_MINT_TIMEOUT_MS },
   ],
+  frontendSeedContext: async ({ frontendSeedState }, use, testInfo) => {
+    const context = await createFrontendSeedContext(frontendSeedState, testInfo.project.use);
+    await use(context);
+    await context.dispose();
+  },
   // The spec's directory picks its domain, so one project can run every domain's specs.
   // eslint-disable-next-line no-empty-pattern
   baseURL: async ({}, use, testInfo) => {
