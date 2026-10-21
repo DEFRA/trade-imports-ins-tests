@@ -1,3 +1,4 @@
+import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { IMPORT_REASON_TASK } from '@flows/animals/journey';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { fileUploadPaths } from '@resources/file-upload/paths';
@@ -64,7 +65,7 @@ test.describe('Overview task return', () => {
     await expectComplete('Additional details');
 
     await openTask('Arrival details', 'port-of-entry');
-    await animalsJourney.fillArrivalDetails({ means: 'Road Vehicle' });
+    await animalsJourney.fillArrivalDetails({ means: meansOfTransport.roadVehicle.display });
     await animalsPages.arrivalDetails.saveAndContinue.click();
     await expectOnOverview();
     await expect(animalsPages.transitedCountries.heading).toBeHidden();

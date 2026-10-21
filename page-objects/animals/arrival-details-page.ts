@@ -15,10 +15,6 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.page.getByLabel('Port of entry', { exact: true });
   }
 
-  get portOfEntryLabel(): Locator {
-    return this.page.locator('label[for="portOfEntry"]');
-  }
-
   get portOfEntryValue(): Locator {
     return this.page.locator('select#portOfEntry-select');
   }
@@ -35,6 +31,22 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
 
   get meansOfTransport(): Locator {
     return this.page.getByLabel('Means of transport to the port of entry', { exact: true });
+  }
+
+  get meansOfTransportOptions(): Locator {
+    return this.meansOfTransport.locator('option');
+  }
+
+  get transportIdentificationLeadIn(): Locator {
+    return this.fieldHint('transportIdentification').locator('p');
+  }
+
+  get transportIdentificationList(): Locator {
+    return this.fieldHint('transportIdentification').locator('ul');
+  }
+
+  get transportIdentificationItems(): Locator {
+    return this.fieldHint('transportIdentification').locator('li');
   }
 
   get transportIdentification(): Locator {

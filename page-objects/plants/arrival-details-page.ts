@@ -31,10 +31,6 @@ export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
     return this.page.locator('#arrivalTime');
   }
 
-  get arrivalTimeLabel(): Locator {
-    return this.page.locator('label[for="arrivalTime"]');
-  }
-
   get proposedPlaceOfLanding(): Locator {
     return this.page.locator('#proposedPlaceOfLanding');
   }

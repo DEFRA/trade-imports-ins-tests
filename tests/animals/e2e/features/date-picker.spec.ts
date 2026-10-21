@@ -6,29 +6,29 @@ test.describe('Date picker', { tag: '@duplicated-in-frontend' }, () => {
     animalsPages,
   }) => {
     await animalsJourney.toArrivalDetails();
-    const { arrivalDatePicker, portOfEntryLabel } = animalsPages.arrivalDetails;
+    const arrival = animalsPages.arrivalDetails;
 
-    await arrivalDatePicker.expectToggleBlue();
-    await arrivalDatePicker.open();
-    await arrivalDatePicker.expectCalendarEndsAbove(portOfEntryLabel);
+    await arrival.arrivalDatePicker.expectToggleBlue();
+    await arrival.arrivalDatePicker.open();
+    await arrival.arrivalDatePicker.expectCalendarEndsAbove(arrival.fieldLabel('portOfEntry'));
   });
 
   test('the exit date button is blue and its calendar ends above the port of exit question', async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toImportReason();
-    await animalsPages.importReason.reason('Temporary admission horses').check();
-    const { temporaryAdmissionExitDatePicker, temporaryAdmissionPortOfExitLabel } = animalsPages.importReason;
+    const importReason = animalsPages.importReason;
+    await importReason.reason('Temporary admission horses').check();
 
-    await temporaryAdmissionExitDatePicker.expectToggleBlue();
-    await temporaryAdmissionExitDatePicker.open();
-    await temporaryAdmissionExitDatePicker.expectCalendarEndsAbove(temporaryAdmissionPortOfExitLabel);
+    await importReason.temporaryAdmissionExitDatePicker.expectToggleBlue();
+    await importReason.temporaryAdmissionExitDatePicker.open();
+    await importReason.temporaryAdmissionExitDatePicker.expectCalendarEndsAbove(importReason.fieldLabel('temporaryAdmissionPortOfExit'));
   });
 
   test('the date of issue button is blue and its calendar ends above the attachment question', async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toAccompanyingDocuments();
-    const { dateOfIssuePicker, fileUploadLabel } = animalsPages.accompanyingDocuments;
+    const accompanyingDocuments = animalsPages.accompanyingDocuments;
 
-    await dateOfIssuePicker.expectToggleBlue();
-    await dateOfIssuePicker.open();
-    await dateOfIssuePicker.expectCalendarEndsAbove(fileUploadLabel);
+    await accompanyingDocuments.dateOfIssuePicker.expectToggleBlue();
+    await accompanyingDocuments.dateOfIssuePicker.open();
+    await accompanyingDocuments.dateOfIssuePicker.expectCalendarEndsAbove(accompanyingDocuments.fieldLabel('file'));
   });
 });

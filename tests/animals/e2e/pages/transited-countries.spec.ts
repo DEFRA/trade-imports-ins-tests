@@ -7,7 +7,7 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
 
   test('renders the country search and an empty list', async ({ animalsPages }) => {
     await expect(animalsPages.transitedCountries.heading).toBeVisible();
-    await expect(animalsPages.transitedCountries.countryField).toBeVisible();
+    await expect(animalsPages.transitedCountries.countryControl).toBeVisible();
     await expect(animalsPages.transitedCountries.addCountryButton).toBeVisible();
     await expect(animalsPages.transitedCountries.saveAndContinue).toBeVisible();
   });

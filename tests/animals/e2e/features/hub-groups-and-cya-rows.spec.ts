@@ -1,6 +1,7 @@
 import type { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
 import { ARRIVAL_DATE, IMPORT_REASON_TASK } from '@flows/animals/journey';
+import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 
 test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-frontend' }, () => {
@@ -25,16 +26,24 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(pages.page.locator('.govuk-button-group .govuk-button')).toHaveText(['Review and submit', 'Return to dashboard']);
 
     await expect(pages.page.locator('ul.app-task-list')).toHaveCount(6);
-    await expect(animalsPages.overview.taskTitlesInSection(0)).toHaveText([
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded('1. About the consignment')).toHaveText([
       'Where is this consignment coming from?',
       'What are you importing?',
       IMPORT_REASON_TASK,
     ]);
-    await expect(animalsPages.overview.taskTitlesInSection(1)).toHaveText(['Commodity details', 'Additional details']);
-    await expect(animalsPages.overview.taskTitlesInSection(2)).toHaveText(['Arrival details', 'Transport details']);
-    await expect(animalsPages.overview.taskTitlesInSection(3)).toHaveText(['Upload documents']);
-    await expect(animalsPages.overview.taskTitlesInSection(4)).toHaveText(['Roles and addresses']);
-    await expect(animalsPages.overview.taskTitlesInSection(5)).toHaveText(['Contact address for this consignment']);
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded('2. Description of the goods')).toHaveText([
+      'Commodity details',
+      'Additional details',
+    ]);
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded('3. Transport and arrival')).toHaveText([
+      'Arrival details',
+      'Transport details',
+    ]);
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded('4. Documents')).toHaveText(['Upload documents']);
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded('5. Consignment parties')).toHaveText(['Roles and addresses']);
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded('6. Contact address')).toHaveText([
+      'Contact address for this consignment',
+    ]);
   });
 
   test('after completing every section the check-your-answers page renders the answered rows', async ({
@@ -99,7 +108,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(value(arrivalDetails, 'Port of entry')).toHaveText(pointOfEntries.aberdeenHarbour.display);
     await expect(value(arrivalDetails, 'Arrival date at port of entry')).toHaveText(ARRIVAL_DATE);
-    await expect(value(arrivalDetails, 'Means of transport to the port of entry')).toHaveText('Road Vehicle');
+    await expect(value(arrivalDetails, 'Means of transport to the port of entry')).toHaveText(meansOfTransport.roadVehicle.display);
     await expect(value(arrivalDetails, 'Transport identification')).toHaveText('FR-892-LK');
     await expect(value(arrivalDetails, 'Transport document reference')).toHaveText('CMR-2026-884721');
 

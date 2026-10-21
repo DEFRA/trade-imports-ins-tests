@@ -2,6 +2,7 @@ import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import { defaultJourneyOptions, type JourneyOptions } from '@domain/animals/constants/journey-options';
+import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
@@ -222,7 +223,7 @@ export class AnimalsJourney {
   }
 
   async fillArrivalDetails({
-    means = 'Road Vehicle',
+    means = meansOfTransport.roadVehicle.display,
     port = PORT,
     transportId = 'FR-892-LK',
     documentReference = 'CMR-2026-884721',
@@ -511,7 +512,7 @@ export class AnimalsJourney {
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
       port: pointOfEntries.heathrowAirport.display,
-      means: 'Airplane',
+      means: meansOfTransport.airplane.display,
       transportId: 'BA0117',
       documentReference: 'AWB-2026-0001',
     });
@@ -571,7 +572,7 @@ export class AnimalsJourney {
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
       port: pointOfEntries.holyheadPort.display,
-      means: 'Vessel',
+      means: meansOfTransport.vessel.display,
       transportId: HORSE_TRANSPORT_ID,
       documentReference: 'BOL-2026-0001',
     });

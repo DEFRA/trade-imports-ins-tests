@@ -48,14 +48,6 @@ export class BasePage {
     return this.page.getByRole('link', { name: 'Dashboard', exact: true });
   }
 
-  /**
-   * `exact` is load-bearing, not decoration. Playwright matches an accessible
-   * name as a case-insensitive SUBSTRING unless you opt out, and the service's
-   * alpha phase banner links "give your feedback by email" on every page —
-   * "feed(back)". Without `exact` this resolves to two links and every click
-   * fails on strict mode. Reach for this getter rather than rolling the locator
-   * per spec, so the guard cannot be forgotten again.
-   */
   get linkBack(): Locator {
     return this.page.getByRole('link', { name: 'Back', exact: true });
   }
@@ -84,18 +76,10 @@ export class BasePage {
     await this.signInWhenRequested(true, options);
   }
 
-  /**
-   * organisationSbi is only needed for identities with more than one
-   * organisation — defra-id-stub shows its "Choose your organisation" picker
-   * after sign-in exclusively for those, so single-org identities never hit it.
-   */
   protected async signInWhenRequested(attemptSignIn: boolean, options?: { userId?: string; organisationSbi?: string }): Promise<void> {
     if (!attemptSignIn) return;
     const signInPage = new SignInPage(this.page);
-    // The OIDC chain is pure server 302s, so the caller's goto has already
-    // resolved: anywhere but the stub's sign-in form means this context is
-    // already authenticated — usually the worker's reused session.
-    if (!signInPage.expectedUrl.test(this.page.url())) {
+    if (this.isAlreadySignedIn(signInPage)) {
       this.requireDefaultIdentity(options);
       return;
     }
@@ -113,6 +97,10 @@ export class BasePage {
       }
     }
     await this.selectOrganisationIfPrompted(options?.organisationSbi);
+  }
+
+  private isAlreadySignedIn(signInPage: SignInPage): boolean {
+    return !signInPage.expectedUrl.test(this.page.url());
   }
 
   private async landedOnSignInError(signInPage: SignInPage): Promise<boolean> {
@@ -165,12 +153,17 @@ export class NotificationPage extends BasePage {
     super(page);
   }
 
-  /**
-   * The set this notification's pages belong to. Overridden by a subclass whose
-   * journey runs under another set's prefix.
-   */
+  /** The set this notification's pages belong to. */
   protected get setBase(): SetBase {
     return SET_BASES.liveAnimals;
+  }
+
+  fieldLabel(fieldId: string): Locator {
+    return this.page.locator(`label[for="${fieldId}"]`);
+  }
+
+  fieldHint(fieldId: string): Locator {
+    return this.page.locator(`#${fieldId}-hint`);
   }
 
   /** The status bar above every notification page's caption and heading. */
@@ -208,11 +201,6 @@ export class NotificationPage extends BasePage {
     return `${this.setBase}/notifications/${referenceNumber}${suffix}`;
   }
 
-  /**
-   * Anchored at the set base rather than at `/notifications`, so a URL under another
-   * set's prefix fails the match and throws here, naming the URL, instead of yielding
-   * a reference number that belongs to a different set.
-   */
   referenceNumberFromUrl(): string {
     const match = new URL(this.page.url()).pathname.match(new RegExp(`^${this.setBase}/notifications/([^/]+)`));
     if (!match) {
@@ -226,11 +214,7 @@ export class NotificationPage extends BasePage {
     return `${this.setBase}/notifications/${this.referenceNumberFromUrl()}${suffix}`;
   }
 
-  /**
-   * The service this notification's pages live on. Overridden by a subclass whose
-   * journey runs against another frontend, so the journey-URL helpers above and
-   * `open` below are reused rather than copied per service.
-   */
+  /** Opens a path on the service this notification's pages live on. */
   protected async navigateToService(path: string): Promise<void> {
     await this.navigateToFrontend(path);
   }

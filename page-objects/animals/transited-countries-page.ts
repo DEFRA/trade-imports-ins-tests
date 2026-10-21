@@ -17,12 +17,7 @@ export class AnimalsTransitedCountriesPage extends NotificationPage {
     });
   }
 
-  // The country is an accessible-autocomplete type-ahead enhancing a native
-  // <select>. With JavaScript the enhancement takes the select's id onto the
-  // enhanced input and renames the select "transitedCountry-select"; without
-  // JavaScript the select keeps the id and is the control. So `#transitedCountry`
-  // is whichever of the two the user actually types into.
-  get countryField(): Locator {
+  get countryControl(): Locator {
     return this.page.locator('#transitedCountry');
   }
 
@@ -42,6 +37,10 @@ export class AnimalsTransitedCountriesPage extends NotificationPage {
 
   removeCountry(name: string): Locator {
     return this.page.getByRole('button', { name: `Remove ${name}` });
+  }
+
+  get emptyListLine(): Locator {
+    return this.page.getByText('You have not added any countries yet.', { exact: true });
   }
 
   get addedCountries(): Locator {

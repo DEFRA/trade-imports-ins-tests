@@ -23,10 +23,6 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
     return this.page.locator('input[type="file"]');
   }
 
-  get fileUploadLabel(): Locator {
-    return this.page.locator('label[for="file"]');
-  }
-
   get dateOfIssuePicker(): DatePicker {
     return new DatePicker(this.page, 'accompanyingDocumentDateOfIssue');
   }

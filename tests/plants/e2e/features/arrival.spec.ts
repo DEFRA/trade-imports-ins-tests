@@ -38,6 +38,11 @@ const ARRIVING_AT = '14:30';
 
 const ABERDEEN_HARBOUR = portByCode('GB ABD').display;
 
+const PLACE_OF_LANDING_HINT = 'Select where the potatoes will enter Great Britain. Start typing to search by port or airport name or code.';
+const PLACE_OF_LANDING_PLACEHOLDER = 'Select a place of landing';
+
+const POTATO_DATE_HINT = 'For example, 27/3/2026. If the potatoes have already arrived, enter the date they arrived.';
+
 const POST_ARRIVAL_HINT =
   'You are making a post-arrival notification. It must be made no later than 4 days after the date of arrival. You will give the date it arrived and where it is now.';
 
@@ -260,15 +265,55 @@ test.describe('High-risk plants arrival section', () => {
     await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue(ABERDEEN_HARBOUR);
   });
 
+  test('a potato notification sets the date, time and place of landing labels in the medium GOV.UK label size', async ({
+    plantsPages,
+    plantsJourney,
+  }) => {
+    await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
+
+    for (const fieldId of ['arrivalDate', 'arrivalTime', 'proposedPlaceOfLanding']) {
+      await expect(plantsPages.arrivalDetails.fieldLabel(fieldId), fieldId).toHaveClass(/govuk-label--m/);
+    }
+  });
+
+  test('a potato notification hints the place of landing and shows Select a place of landing in its empty search box', async ({
+    plantsPages,
+    plantsJourney,
+  }) => {
+    await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
+
+    await expect(plantsPages.arrivalDetails.fieldHint('proposedPlaceOfLanding')).toHaveText(PLACE_OF_LANDING_HINT);
+    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveAttribute('placeholder', PLACE_OF_LANDING_PLACEHOLDER);
+    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue('');
+  });
+
+  test('the arrival date hint on a potato notification reads its worked example', async ({ plantsPages, plantsJourney }) => {
+    await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
+
+    await expect(plantsPages.arrivalDetails.fieldHint('arrivalDate')).toHaveText(POTATO_DATE_HINT);
+  });
+
+  for (const arrivalStatus of [NOT_YET_ARRIVED, ALREADY_ARRIVED]) {
+    test(`a plants notification sets the arrival date label in the medium GOV.UK label size when the answer is "${arrivalStatus}"`, async ({
+      plantsPages,
+      plantsJourney,
+    }) => {
+      await plantsJourney.toArrivalStatusOfNewPlantsNotification();
+      await plantsJourney.answerArrivalStatus(arrivalStatus);
+
+      await expect(plantsPages.arrivalDetails.fieldLabel('arrivalDate')).toHaveClass(/govuk-label--m/);
+    });
+  }
+
   test('the arrival date button is blue and its calendar ends above the expected time question, for a potato notification', async ({
     plantsPages,
     plantsJourney,
   }) => {
     await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
-    const { arrivalDatePicker, arrivalTimeLabel } = plantsPages.arrivalDetails;
+    const arrival = plantsPages.arrivalDetails;
 
-    await arrivalDatePicker.expectToggleBlue();
-    await arrivalDatePicker.open();
-    await arrivalDatePicker.expectCalendarEndsAbove(arrivalTimeLabel);
+    await arrival.arrivalDatePicker.expectToggleBlue();
+    await arrival.arrivalDatePicker.open();
+    await arrival.arrivalDatePicker.expectCalendarEndsAbove(arrival.fieldLabel('arrivalTime'));
   });
 });

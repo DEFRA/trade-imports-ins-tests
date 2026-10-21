@@ -18,8 +18,11 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.page.getByRole('link', { name, exact: true });
   }
 
-  taskTitlesInSection(sectionIndex: number): Locator {
-    return this.page.locator('ul.app-task-list').nth(sectionIndex).getByRole('link');
+  taskTitlesInSectionHeaded(heading: string): Locator {
+    return this.page
+      .getByRole('heading', { level: 3, name: heading, exact: true })
+      .locator('xpath=following-sibling::ul[contains(@class, "app-task-list")][1]')
+      .getByRole('link');
   }
 
   get taskStatuses(): Locator {

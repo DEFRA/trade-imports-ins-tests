@@ -51,10 +51,6 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return new DatePicker(this.page, 'temporaryAdmissionExitDate');
   }
 
-  get temporaryAdmissionPortOfExitLabel(): Locator {
-    return this.page.locator('label[for="temporaryAdmissionPortOfExit"]');
-  }
-
   async selectTransitPortOfExitByIndex(index: number): Promise<void> {
     await this.transitPortOfExit.chooseByIndex(index);
   }
