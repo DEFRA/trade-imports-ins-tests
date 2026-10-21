@@ -305,8 +305,7 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async completeAnswerSections(overrides: Partial<NotificationAnswers> = {}): Promise<void> {
-    const answers: NotificationAnswers = { ...MANDATORY_ANSWERS, ...overrides };
+  async completeAnswerSections(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     assertConsistentAnswers(answers);
     await this.answerOrigin(answers);
     await this.answerCommodity(answers);
@@ -420,28 +419,23 @@ export class AnimalsJourney {
     await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
   }
 
-  async toReview(overrides: Partial<NotificationAnswers> = {}): Promise<void> {
+  async toReview(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     if (!this.context.referenceNumber) await this.startNotification();
-    await this.completeAnswerSections(overrides);
+    await this.completeAnswerSections(answers);
     await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
-  async toDeclaration(overrides: Partial<NotificationAnswers> = {}): Promise<void> {
+  async toDeclaration(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.startNotification();
-    await this.completeAnswerSections(overrides);
+    await this.completeAnswerSections(answers);
     await this.fromOverviewToDeclaration();
   }
 
-  // Only the answers the frontend requires, plus any the caller adds.
-  async submitNotification(overrides: Partial<NotificationAnswers> = {}): Promise<void> {
-    await this.toDeclaration(overrides);
+  // Only the answers the frontend requires, unless the caller passes a fuller set.
+  async submitNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+    await this.toDeclaration(answers);
     await this.confirmDeclaration();
-  }
-
-  // Every answer the frontend takes for cattle, including a scanned accompanying document.
-  async submitAllDataNotification(overrides: Partial<NotificationAnswers> = {}): Promise<void> {
-    await this.submitNotification({ ...ALL_DATA_ANSWERS, ...overrides });
   }
 
   async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {

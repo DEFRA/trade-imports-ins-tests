@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { ALL_DATA_ANSWERS as answers, CPH_NUMBER } from '@domain/animals/constants/journey-options';
+import { ALL_DATA_ANSWERS as answers, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
@@ -35,7 +35,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
 
   test('records a NotificationSubmitted outbox event on UI submission', async ({ animalsJourney, journeyContext }) => {
     test.slow();
-    await animalsJourney.submitAllDataNotification();
+    await animalsJourney.submitNotification(answers);
     const referenceNumber = journeyContext.referenceNumber;
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();
@@ -131,6 +131,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
   }) => {
     test.slow();
     await animalsJourney.submitNotification({
+      ...MANDATORY_ANSWERS,
       countryCode: countryCodes.subdivisions.canaryIslands,
       requiresRegionCode: answers.requiresRegionCode,
       regionCode: answers.regionCode,
@@ -169,7 +170,10 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
   }) => {
     test.slow();
     const documentReference = `PWREF${Date.now()}`;
-    await animalsJourney.submitNotification({ accompanyingDocument: { ...answers.accompanyingDocument, reference: documentReference } });
+    await animalsJourney.submitNotification({
+      ...MANDATORY_ANSWERS,
+      accompanyingDocument: { ...answers.accompanyingDocument, reference: documentReference },
+    });
     const aggregateId = aggregateIdFor(journeyContext.referenceNumber);
     const client = new MongoDbClient();
 

@@ -44,7 +44,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
     const importer = await addressBookApi.findByName(answers.parties.importer);
     const contact = await addressBookApi.findByName(answers.contactAddress);
 
-    await animalsJourney.submitAllDataNotification();
+    await animalsJourney.submitNotification(answers);
     const referenceNumber = journeyContext.referenceNumber;
     const client = new MongoDbClient();
 
