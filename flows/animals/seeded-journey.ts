@@ -26,11 +26,6 @@ const concurrencyTokenIn = (html: string, slug: string): string => {
   return token;
 };
 
-/**
- * Seeds through the frontend's save-and-continue routes, never the backend: only the frontend
- * writes the notification document alongside the fulfilments blob. One post per page, because a
- * save replaces the whole record but a route accepts only its own page's fields.
- */
 export class AnimalsSeededJourney {
   private parties: PartyIds | undefined;
 
@@ -71,7 +66,6 @@ export class AnimalsSeededJourney {
     const review = await this.forms.getPageHtml(`${CREATE_PATH}/${referenceNumber}/${declarationStep.reviewSlug}`);
     const concurrencyToken = concurrencyTokenIn(review, declarationStep.reviewSlug);
     const declaration = await this.forms.postFormReturningHtml(declarationPath, { ...declarationStep.review, concurrencyToken });
-    // redirectsTo is the assertion: a refused submission lands back on check-your-answers, not the confirmation.
     await this.forms.postForm(
       declarationPath,
       { ...declarationStep.declare, concurrencyToken: concurrencyTokenIn(declaration, declarationStep.slug) },
