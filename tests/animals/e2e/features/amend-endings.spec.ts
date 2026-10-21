@@ -97,7 +97,7 @@ test.describe('Amendment page endings', () => {
   });
 
   test('outside an amendment the CPH number page keeps its single primary button', async ({ animalsPages, animalsSeededJourney }) => {
-    const reference = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const reference = await animalsSeededJourney.createDraftNotification();
 
     await animalsPages.cphNumber.open(reference);
     await expect(animalsPages.cphNumber.saveAndContinue).toBeVisible();

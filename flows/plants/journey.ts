@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { PlantsPages } from '@page-objects';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
-import { portByCode } from '@domain/shared/fixtures/reference-data';
+import { portByCode } from '@resources/reference-data/reference-data';
 
 /** One commodity line's answers, keyed by field label. The fields a line needs depend on its category. */
 export type CommodityLine = Record<string, string>;

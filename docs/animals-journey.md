@@ -16,13 +16,18 @@ Why the journey's steps are written the way they are. The code carries no commen
 
 ## Dates
 
-- `ARRIVAL_DATE` falls inside the arrival-date window (one week back to six months ahead) wherever the wall clock is, written in the unpadded d/m/yyyy the application renders. A check-your-answers assertion then compares against the application's shape, not the typed string it echoes back.
+- `ARRIVAL_DATE` (in `domain/animals/constants/journey-options.ts`) falls inside the arrival-date window (one week back to six months ahead) wherever the wall clock is, written in the unpadded d/m/yyyy the application renders. A check-your-answers assertion then compares against the application's shape, not the typed string it echoes back.
 - `TEMPORARY_ADMISSION_EXIT_DATE` falls after the arrival date, in the same format.
 
 ## Documents
 
 - `uploadDocumentAndWaitForScan` waits for the virus scan to finish so the submission carries the document.
-- `submitNotificationWithDocument` is the full journey with one accompanying document added, using that wait.
+- `answerAccompanyingDocument` adds the answers' accompanying document using that wait, and does nothing when the answers carry none.
+
+## Answer sets
+
+- `submitNotification` gives only the answers the frontend requires (`MANDATORY_ANSWERS`), unless the caller passes a fuller set such as `ALL_ANSWERS`.
+- The import reason's purpose is a conditional reveal under the reason, so both answers go in on one submit.
 
 ## Transport
 

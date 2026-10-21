@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { countryCodes } from '@domain/animals/constants/country-codes';
-import { countryAndSubdivisionNamesWithCountry } from '@domain/shared/fixtures/reference-data';
+import { countryAndSubdivisionNamesWithCountry } from '@resources/reference-data/reference-data';
 import { SELECT_ONE_PLACEHOLDER } from '@page-objects/animals/import-reason-page';
 import { IMPORT_REASON_TASK } from '@flows/animals/journey';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';

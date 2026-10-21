@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { countryAndSubdivisionNamesWithCountry } from '@domain/shared/fixtures/reference-data';
+import { countryAndSubdivisionNamesWithCountry } from '@resources/reference-data/reference-data';
 
 test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('filters as you type, submits the country code and persists it', async ({ animalsJourney, animalsPages }) => {

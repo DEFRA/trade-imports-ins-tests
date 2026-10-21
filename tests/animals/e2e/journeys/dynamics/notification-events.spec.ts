@@ -101,6 +101,8 @@ test.describe('PIMS Dynamics notification events', { tag: '@dynamics' }, () => {
     journeyContext,
     externalRequest,
   }) => {
+    // The backend already emits NotificationSubmissionDeleted, but the gateway's allow-list drops it, so adding
+    // that one entry (plus a forwarding test) is our only change, to be merged once PIMS can consume it.
     test.skip(true, 'The dynamics gateway does not forward NotificationSubmissionDeleted to PIMS Dynamics yet');
     // The delete journey plus the deletion's PIMS Dynamics poll.
     test.setTimeout(test.info().timeout + 5 * 60_000);
