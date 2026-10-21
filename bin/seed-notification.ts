@@ -22,7 +22,7 @@ import { createAuthState } from '@fixtures/auth-state';
 import { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { FrontendFormClient } from '@adapters/http/frontend-form-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
-import { ensureE2eAddressBook } from '@domain/shared/fixtures/e2e-address-book';
+import { ensureE2eAddressBook } from '@flows/shared/address-book-seed';
 import { JourneyContext } from '@flows/shared/journey-context';
 import { ALL_DATA_ANSWERS_WITHOUT_DOCUMENT, MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 

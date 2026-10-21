@@ -9,7 +9,7 @@ import {
   type PartyIds,
   type PartyNames,
   type PartyRole,
-} from '@domain/animals/fixtures/seeded-journey';
+} from '@flows/animals/seed-form-steps';
 import { MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { SET_BASES } from '@page-objects/shared/sets';

@@ -6,7 +6,7 @@ import { assertConsistentAnswers, type NotificationAnswers } from '@domain/anima
 
 export type PartyRole = 'placeOfOrigin' | 'consignor' | 'consignee' | 'importer' | 'placeOfDestination' | 'contact';
 
-/** The address-book records the answers name; each name must match a record seeded by `e2e-address-book.ts`. */
+/** The address-book records the answers name; each name must match a record seeded by `address-book-seed.ts`. */
 export type PartyNames = Record<PartyRole, string>;
 
 export type PartyIds = Record<PartyRole, string>;
