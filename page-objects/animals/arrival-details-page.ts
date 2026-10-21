@@ -1,5 +1,6 @@
 import { type Locator } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import { DatePicker } from '@page-objects/shared/date-picker';
 
 export class AnimalsArrivalDetailsPage extends NotificationPage {
   constructor(page: ConstructorParameters<typeof NotificationPage>[0]) {
@@ -10,32 +11,28 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Arrival details' });
   }
 
-  // Progressive enhancement swaps the native <select> for an
-  // accessible-autocomplete combobox that keeps the field's id and label.
   get portOfEntry(): Locator {
     return this.page.getByLabel('Port of entry', { exact: true });
   }
 
-  // The native <select> behind the enhancement — hidden and renamed with a
-  // "-select" suffix, it still submits the selected port code.
+  get portOfEntryLabel(): Locator {
+    return this.page.locator('label[for="portOfEntry"]');
+  }
+
   get portOfEntryValue(): Locator {
     return this.page.locator('select#portOfEntry-select');
   }
 
-  // Every port offered, skipping the empty placeholder option.
   get portOptions(): Locator {
     return this.portOfEntryValue.locator('option:not([value=""])');
   }
 
-  // Drive the type-ahead the way a user does: type to filter, then pick the
-  // matching option by its "{name} ({code})" label.
   async selectPort(label: string): Promise<void> {
     await this.portOfEntry.click();
     await this.portOfEntry.fill(label);
     await this.page.getByRole('option', { name: label, exact: true }).click();
   }
 
-  // Means of transport is a <select> labelled by its visible question text.
   get meansOfTransport(): Locator {
     return this.page.getByLabel('Means of transport to the port of entry', { exact: true });
   }
@@ -58,6 +55,10 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
 
   get datePicker(): Locator {
     return this.page.locator('[data-module="moj-date-picker"]');
+  }
+
+  get arrivalDatePicker(): DatePicker {
+    return new DatePicker(this.page, 'arrivalDateAtPort');
   }
 
   async fillArrivalDate(date: string): Promise<void> {

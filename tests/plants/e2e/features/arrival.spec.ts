@@ -259,4 +259,16 @@ test.describe('High-risk plants arrival section', () => {
     await expect(plantsPages.arrivalDetails.arrivalTime).toHaveValue(ARRIVING_AT);
     await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue(ABERDEEN_HARBOUR);
   });
+
+  test('the arrival date button is blue and its calendar ends above the expected time question, for a potato notification', async ({
+    plantsPages,
+    plantsJourney,
+  }) => {
+    await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
+    const { arrivalDatePicker, arrivalTimeLabel } = plantsPages.arrivalDetails;
+
+    await arrivalDatePicker.expectToggleBlue();
+    await arrivalDatePicker.open();
+    await arrivalDatePicker.expectCalendarEndsAbove(arrivalTimeLabel);
+  });
 });

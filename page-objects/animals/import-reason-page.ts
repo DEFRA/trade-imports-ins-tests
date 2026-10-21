@@ -1,5 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import { DatePicker } from '@page-objects/shared/date-picker';
 import { TypeAhead } from '@page-objects/shared/type-ahead';
 
 export class AnimalsImportReasonPage extends NotificationPage {
@@ -7,8 +8,6 @@ export class AnimalsImportReasonPage extends NotificationPage {
     super(page, 'import-reason');
   }
 
-  // The page is headed with its name; the question it asks stays as the radio
-  // group's visually hidden legend, so it is a group name, not a heading.
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Main reason for import', exact: true });
   }
@@ -25,20 +24,14 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.page.getByRole('radio', { name, exact: true });
   }
 
-  // The reveals are addressed by id, not by label: two reasons ask the
-  // destination country and two ask the port of exit, so each label is on the
-  // page twice and only the id tells the branches apart.
   get transitPortOfExit(): Locator {
     return this.page.locator('#transitPortOfExit');
   }
 
-  // The hidden select the type-ahead enhances: it carries the option list and
-  // the code the form submits.
   get transitPortOfExitValue(): Locator {
     return this.hiddenSelect('transitPortOfExit');
   }
 
-  // Every port offered, skipping the empty placeholder.
   get transitPortOfExitOptions(): Locator {
     return this.transitPortOfExitValue.locator('option:not([value=""])');
   }
@@ -51,7 +44,6 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.hiddenSelect('transitDestinationCountry');
   }
 
-  // Every country offered, skipping the empty placeholder.
   get transitDestinationCountryOptions(): Locator {
     return this.transitDestinationCountryValue.locator('option:not([value=""])');
   }
@@ -64,12 +56,10 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.hiddenSelect('transhipmentDestinationCountry');
   }
 
-  // Every country offered, skipping the empty placeholder.
   get transhipmentDestinationCountryOptions(): Locator {
     return this.transhipmentDestinationCountryValue.locator('option:not([value=""])');
   }
 
-  // A territory is coded by ISO 3166-2, the parent country code and a hyphen; a country's alpha-2 code has none.
   get transhipmentTerritoryOptions(): Locator {
     return this.transhipmentDestinationCountryValue.locator('option[value*="-"]');
   }
@@ -82,13 +72,20 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.hiddenSelect('temporaryAdmissionPortOfExit');
   }
 
-  // Every port offered, skipping the empty placeholder.
   get temporaryAdmissionPortOfExitOptions(): Locator {
     return this.temporaryAdmissionPortOfExitValue.locator('option:not([value=""])');
   }
 
   get temporaryAdmissionExitDate(): Locator {
     return this.page.locator('#temporaryAdmissionExitDate');
+  }
+
+  get temporaryAdmissionExitDatePicker(): DatePicker {
+    return new DatePicker(this.page, 'temporaryAdmissionExitDate');
+  }
+
+  get temporaryAdmissionPortOfExitLabel(): Locator {
+    return this.page.locator('label[for="temporaryAdmissionPortOfExit"]');
   }
 
   private hiddenSelect(fieldId: string): Locator {
