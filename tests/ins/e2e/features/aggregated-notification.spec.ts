@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { defaultJourneyOptions } from '@domain/animals/constants/journey-options';
+import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { commodityCodes } from '@domain/animals/constants/commodity-codes';
 import { type AggregatedNotificationDocument } from '@domain/ins/models/db/aggregated-notification-document';
 import { timeouts } from '@config/timeouts';
@@ -46,7 +46,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
               _id: aggregateId,
               status: 'DRAFT',
               referenceNumber: referenceNumber,
-              originCountry: defaultJourneyOptions.countryCode.value,
+              originCountry: MANDATORY_ANSWERS.countryCode.value,
               arrivalDate: { $exists: true },
             });
             return draftDoc;
@@ -60,10 +60,8 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(draftDoc._id).toBe(aggregateId);
       expect(draftDoc.referenceNumber).toBe(referenceNumber);
       expect(draftDoc.status).toBe('DRAFT');
-      expect(draftDoc.originCountry).toBe(defaultJourneyOptions.countryCode.value);
-      // animalsJourney.answerCommodity() always selects the 'Bos taurus' species, which the frontend
-      // resolves to commodity.name 'Cow' (see persistence-notification.spec.ts:75) — not
-      // defaultJourneyOptions.commodityCode, which answerCommodity() doesn't consume.
+      expect(draftDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
+      // The journey selects the 'Bos taurus' species, which the frontend resolves to commodity.name 'Cow'.
       expect(draftDoc.commodity).toBe(commodityCodes.cow);
       expect(draftDoc.arrivalDate).toBeInstanceOf(Date);
       expect(draftDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
@@ -86,7 +84,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(submittedDoc._id).toBe(aggregateId);
       expect(submittedDoc.referenceNumber).toBe(referenceNumber);
       expect(submittedDoc.status).toBe('SUBMITTED');
-      expect(submittedDoc.originCountry).toBe(defaultJourneyOptions.countryCode.value);
+      expect(submittedDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
       expect(submittedDoc.commodity).toBe(commodityCodes.cow);
       expect(submittedDoc.arrivalDate).toBeInstanceOf(Date);
       expect(submittedDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());

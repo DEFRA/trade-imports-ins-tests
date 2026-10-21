@@ -1,8 +1,6 @@
+// The value is the commodity picker's checkbox value, commodity|speciesId.
 export const commoditySpecies = {
-  bisonBison: 'Bison bison',
-  bosSpp: 'Bos spp.',
-  bosTaurus: 'Bos taurus',
-  bubalusBubalis: 'Bubalus bubalis',
+  bosTaurus: { value: 'Cow|1148346', display: 'Bos taurus' },
 } as const;
 
 export type CommoditySpecies = (typeof commoditySpecies)[keyof typeof commoditySpecies];
