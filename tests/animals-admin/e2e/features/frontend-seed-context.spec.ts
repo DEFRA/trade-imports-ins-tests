@@ -73,7 +73,7 @@ test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
       const consignor = await addressBookApi.findByName('Astra Rosales');
       const placeOfOrigin = await addressBookApi.findByName('Origin Farm');
 
-      const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+      const referenceNumber = await animalsSeededJourney.createDraftNotification();
 
       const client = new MongoDbClient();
       try {

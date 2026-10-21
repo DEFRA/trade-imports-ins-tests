@@ -7,9 +7,10 @@ import {
   declarationStep,
   seedSteps,
   type PartyIds,
+  type DraftStage,
   type PartyRole,
-  type SeedDepth,
 } from '@domain/animals/fixtures/seeded-journey';
+import { MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { SET_BASES } from '@page-objects/shared/sets';
 
@@ -48,16 +49,16 @@ export class AnimalsSeededJourney {
     return this.remember(referenceNumber);
   }
 
-  async createDraftNotification(depth: SeedDepth = 'readyToSubmit'): Promise<string> {
+  async createDraftNotification(stage: DraftStage = 'ready', answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
     const referenceNumber = await this.createEmptyNotification();
-    for (const { slug, form } of await seedSteps(() => this.partyIds(), depth)) {
+    for (const { slug, form } of await seedSteps(() => this.partyIds(), stage, answers)) {
       await this.forms.postForm(`${CREATE_PATH}/${referenceNumber}/${slug}`, form);
     }
     return referenceNumber;
   }
 
-  async createSubmittedNotification(): Promise<string> {
-    const referenceNumber = await this.createDraftNotification('readyToSubmit');
+  async createSubmittedNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
+    const referenceNumber = await this.createDraftNotification('ready', answers);
     const declarationPath = `${CREATE_PATH}/${referenceNumber}/${declarationStep.slug}`;
     const review = await this.forms.getPageHtml(`${CREATE_PATH}/${referenceNumber}/${declarationStep.reviewSlug}`);
     const concurrencyToken = concurrencyTokenIn(review, declarationStep.reviewSlug);

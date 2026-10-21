@@ -7,7 +7,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     animalsPages,
   }) => {
     test.slow();
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
 
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });

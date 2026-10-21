@@ -125,7 +125,7 @@ test.describe('Addresses are copied, not linked', () => {
       });
 
       // A complete notification, so any error on the review page could only come from the deletion.
-      const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+      const referenceNumber = await animalsSeededJourney.createDraftNotification();
       await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
       const consignorRow = animalsPages.addresses.partyRow('Consignor or exporter');
       await animalsPages.addresses.changeParty('Consignor or exporter').click();
@@ -189,7 +189,7 @@ test.describe('Addresses are copied, not linked', () => {
       email: 'unlisted@example.co.uk',
     });
 
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
     await animalsPages.addresses.changeParty('Consignor or exporter').click();
     await animalsPages.consignorSelection.select(name);
