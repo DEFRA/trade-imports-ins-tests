@@ -1,21 +1,61 @@
-import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 
 import { test, expect } from '@fixtures';
 
 const NO_MATCH_QUERY = 'zzz';
 
-const groupFor = ({ searchTerm, commodityCode, latinName }: CommodityLine) => ({
-  query: searchTerm,
-  commodityCode,
-  latinNames: [latinName],
-});
-
-const expectedGroups = [
-  { query: '0102', commodityCode: '0102', latinNames: ['Bos taurus', 'Bison bonasus', 'Bubalus bubalis'] },
-  { query: 'cattle', commodityCode: '0102', latinNames: ['Bos', 'Bos taurus', 'Bibos spp.'] },
-  groupFor(commodityLines.horse),
-  groupFor(commodityLines.domesticCat),
-  groupFor(commodityLines.ostrich),
+const expectedSearches = [
+  {
+    query: '0102',
+    groups: [
+      {
+        commodityCode: '0102',
+        latinNames: [
+          'Bos',
+          'Bubalus',
+          'Poephagus spp.',
+          'Bison bonasus',
+          'Bos taurus',
+          'Bibos spp.',
+          'Novibos spp.',
+          'Bos sp.',
+          'Bubalus bubalis',
+          'Elephas maximus',
+        ],
+      },
+    ],
+  },
+  {
+    query: 'cattle',
+    groups: [
+      { commodityCode: '0102', latinNames: ['Bos taurus', 'Bibos spp.', 'Bos', 'Novibos spp.', 'Bos sp.'] },
+      { commodityCode: '01061900', latinNames: ['Bos taurus'] },
+    ],
+  },
+  {
+    query: 'horse',
+    groups: [
+      {
+        commodityCode: '0101',
+        latinNames: ['Equus cabalus', 'Equus cabalus*asinus', 'Eq cabalus*asinus', 'Equus asinus', 'Equus zebra'],
+      },
+      { commodityCode: '01061900', latinNames: ['Equidae', 'Equus'] },
+    ],
+  },
+  {
+    query: 'domestic cat',
+    groups: [{ commodityCode: '01061900', latinNames: ['Felis catus'] }],
+  },
+  {
+    query: 'ostrich',
+    groups: [
+      {
+        commodityCode: '01063300',
+        latinNames: ['Struthio', 'Rhea', 'Casuarius', 'Casuariiformes, Rheiformes, Struthioniformes', 'Dromaius'],
+      },
+      { commodityCode: '01063980', latinNames: ['Struthio'] },
+    ],
+  },
 ];
 
 test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, () => {
@@ -37,12 +77,14 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
   });
 
   test('groups the matching species under their commodity code', async ({ animalsPages }) => {
-    for (const { query, commodityCode, latinNames } of expectedGroups) {
+    for (const { query, groups } of expectedSearches) {
       await animalsPages.commoditySelection.search(query);
-      const group = animalsPages.commoditySelection.commodityGroup(commodityCode);
-      await expect(group).toBeVisible();
-      for (const name of latinNames) {
-        await expect(group.getByRole('checkbox', { name, exact: true })).toBeVisible();
+      for (const { commodityCode, latinNames } of groups) {
+        const checkboxes = animalsPages.commoditySelection.commodityGroup(commodityCode).getByRole('checkbox');
+        await expect(checkboxes).toHaveCount(latinNames.length);
+        for (const [index, name] of latinNames.entries()) {
+          await expect(checkboxes.nth(index)).toHaveAccessibleName(name);
+        }
       }
     }
   });
