@@ -19,7 +19,6 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Search', exact: true });
   }
 
-  /** The panel listing what is already on the notification, headed with its count. */
   get selectionPanel(): Locator {
     return this.page.locator('#commodity-selection');
   }
@@ -28,8 +27,6 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Clear all' });
   }
 
-  /** The page lists nothing of its own accord — results only appear once a
-   * query of at least three characters has been submitted. */
   async search(query: string): Promise<void> {
     await this.searchBox.fill(query);
     await this.searchButton.click();
