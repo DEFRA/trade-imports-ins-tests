@@ -3,11 +3,11 @@ import { pageLoadWait } from '@config/timeouts';
 import type { FrontendFormClient } from '@adapters/http/frontend-form-client';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import {
-  PARTY_NAMES,
   declarationStep,
   seedSteps,
-  type PartyIds,
   type DraftStage,
+  type PartyIds,
+  type PartyNames,
   type PartyRole,
 } from '@domain/animals/fixtures/seeded-journey';
 import { MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
@@ -32,7 +32,7 @@ const concurrencyTokenIn = (html: string, slug: string): string => {
  * save replaces the whole record but a route accepts only its own page's fields.
  */
 export class AnimalsSeededJourney {
-  private parties: PartyIds | undefined;
+  private readonly partyIdByName = new Map<string, string>();
 
   constructor(
     private readonly forms: FrontendFormClient,
@@ -51,7 +51,7 @@ export class AnimalsSeededJourney {
 
   async createDraftNotification(stage: DraftStage = 'ready', answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
     const referenceNumber = await this.createEmptyNotification();
-    for (const { slug, form } of await seedSteps(() => this.partyIds(), stage, answers)) {
+    for (const { slug, form } of await seedSteps((names) => this.partyIds(names), stage, answers)) {
       await this.forms.postForm(`${CREATE_PATH}/${referenceNumber}/${slug}`, form);
     }
     return referenceNumber;
@@ -103,12 +103,18 @@ export class AnimalsSeededJourney {
     return targetPage;
   }
 
-  private async partyIds(): Promise<PartyIds> {
-    if (this.parties) return this.parties;
-    const roles = Object.keys(PARTY_NAMES) as PartyRole[];
-    const found = await Promise.all(roles.map((role) => this.addressBook.findByName(PARTY_NAMES[role])));
-    this.parties = Object.fromEntries(roles.map((role, index) => [role, found[index].id])) as PartyIds;
-    return this.parties;
+  private async partyIds(names: PartyNames): Promise<PartyIds> {
+    const roles = Object.keys(names) as PartyRole[];
+    const ids = await Promise.all(roles.map((role) => this.partyIdFor(names[role])));
+    return Object.fromEntries(roles.map((role, index) => [role, ids[index]])) as PartyIds;
+  }
+
+  private async partyIdFor(name: string): Promise<string> {
+    const known = this.partyIdByName.get(name);
+    if (known) return known;
+    const { id } = await this.addressBook.findByName(name);
+    this.partyIdByName.set(name, id);
+    return id;
   }
 
   private remember(referenceNumber: string): string {

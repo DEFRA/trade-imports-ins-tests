@@ -1,9 +1,11 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { ALL_DATA_ANSWERS_WITHOUT_DOCUMENT } from '@domain/animals/constants/journey-options';
+import { ALL_DATA_ANSWERS_WITHOUT_DOCUMENT, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { type NotificationDocument } from '@domain/animals/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
+
+const OTHER_CONSIGNOR_NAME = 'Alpine Dairy GmbH';
 
 test.describe('Seeded and browser-driven notifications match', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
@@ -17,6 +19,19 @@ test.describe('Seeded and browser-driven notifications match', { tag: '@mongodb'
     return storedNotification;
   };
 
+  const readBothStoredNotifications = async (browserReference: string | undefined, seededReference: string | undefined) => {
+    const client = new MongoDbClient();
+    try {
+      await client.connect();
+      return {
+        browserDoc: await readStoredNotification(client, browserReference),
+        seededDoc: await readStoredNotification(client, seededReference),
+      };
+    } finally {
+      await client.close();
+    }
+  };
+
   test('a seeded notification stores what the same mandatory-only journey stores through the browser', async ({
     animalsJourney,
     journeyContext,
@@ -27,18 +42,11 @@ test.describe('Seeded and browser-driven notifications match', { tag: '@mongodb'
     const browserReference = journeyContext.referenceNumber;
     const seededReference = await animalsSeededJourney.createSubmittedNotification();
 
-    const client = new MongoDbClient();
-    try {
-      await client.connect();
-      const browserDoc = await readStoredNotification(client, browserReference);
-      const seededDoc = await readStoredNotification(client, seededReference);
+    const { browserDoc, seededDoc } = await readBothStoredNotifications(browserReference, seededReference);
 
-      expect(seededDoc.status).toBe(browserDoc.status);
-      expect(seededDoc.notification).toEqual(browserDoc.notification);
-      expect(seededDoc.fulfilments).toEqual(browserDoc.fulfilments);
-    } finally {
-      await client.close();
-    }
+    expect(seededDoc.status).toBe(browserDoc.status);
+    expect(seededDoc.notification).toEqual(browserDoc.notification);
+    expect(seededDoc.fulfilments).toEqual(browserDoc.fulfilments);
   });
 
   test('a seeded notification stores what the same all-data-without-document journey stores through the browser', async ({
@@ -51,17 +59,28 @@ test.describe('Seeded and browser-driven notifications match', { tag: '@mongodb'
     const browserReference = journeyContext.referenceNumber;
     const seededReference = await animalsSeededJourney.createSubmittedNotification(ALL_DATA_ANSWERS_WITHOUT_DOCUMENT);
 
-    const client = new MongoDbClient();
-    try {
-      await client.connect();
-      const browserDoc = await readStoredNotification(client, browserReference);
-      const seededDoc = await readStoredNotification(client, seededReference);
+    const { browserDoc, seededDoc } = await readBothStoredNotifications(browserReference, seededReference);
 
-      expect(seededDoc.status).toBe(browserDoc.status);
-      expect(seededDoc.notification).toEqual(browserDoc.notification);
-      expect(seededDoc.fulfilments).toEqual(browserDoc.fulfilments);
-    } finally {
-      await client.close();
-    }
+    expect(seededDoc.status).toBe(browserDoc.status);
+    expect(seededDoc.notification).toEqual(browserDoc.notification);
+    expect(seededDoc.fulfilments).toEqual(browserDoc.fulfilments);
+  });
+
+  test('a seeded notification names the party the answers name, as the browser journey does', async ({
+    animalsJourney,
+    journeyContext,
+    animalsSeededJourney,
+  }) => {
+    test.slow();
+    const answers = { ...MANDATORY_ANSWERS, parties: { ...MANDATORY_ANSWERS.parties, consignor: OTHER_CONSIGNOR_NAME } };
+    await animalsJourney.submitNotification(answers);
+    const browserReference = journeyContext.referenceNumber;
+    const seededReference = await animalsSeededJourney.createSubmittedNotification(answers);
+
+    const { browserDoc, seededDoc } = await readBothStoredNotifications(browserReference, seededReference);
+
+    expect(browserDoc.notification.consignor?.name).toBe(OTHER_CONSIGNOR_NAME);
+    expect(seededDoc.notification.consignor?.name).toBe(OTHER_CONSIGNOR_NAME);
+    expect(seededDoc.notification).toEqual(browserDoc.notification);
   });
 });

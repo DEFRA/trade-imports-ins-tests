@@ -1,22 +1,20 @@
 import type { FormFields } from '@adapters/http/frontend-form-client';
-import { MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
+import type { NotificationAnswers } from '@domain/animals/constants/journey-options';
 
 // Each fact comes from the shared answers; this file only translates it into the form field the frontend takes.
 // `api-seed-parity.spec.ts` compares what the seed stores with what the browser journey stores.
 
-/** Names must match the records seeded by `e2e-address-book.ts`. */
-export const PARTY_NAMES = {
-  placeOfOrigin: MANDATORY_ANSWERS.parties.placeOfOrigin,
-  consignor: MANDATORY_ANSWERS.parties.consignor,
-  consignee: MANDATORY_ANSWERS.parties.consignee,
-  importer: MANDATORY_ANSWERS.parties.importer,
-  placeOfDestination: MANDATORY_ANSWERS.parties.placeOfDestination,
-  contact: MANDATORY_ANSWERS.contactAddress,
-} as const;
+export type PartyRole = 'placeOfOrigin' | 'consignor' | 'consignee' | 'importer' | 'placeOfDestination' | 'contact';
 
-export type PartyRole = keyof typeof PARTY_NAMES;
+/** The address-book records the answers name; each name must match a record seeded by `e2e-address-book.ts`. */
+export type PartyNames = Record<PartyRole, string>;
 
 export type PartyIds = Record<PartyRole, string>;
+
+export const partyNamesFrom = (answers: NotificationAnswers): PartyNames => ({
+  ...answers.parties,
+  contact: answers.contactAddress,
+});
 
 export type SeedStep = {
   slug: string;
@@ -113,7 +111,7 @@ const contactStep = (parties: PartyIds): SeedStep => ({
 });
 
 export const seedSteps = async (
-  resolveParties: () => Promise<PartyIds>,
+  resolveParties: (names: PartyNames) => Promise<PartyIds>,
   stage: DraftStage,
   answers: NotificationAnswers,
 ): Promise<SeedStep[]> => {
@@ -124,7 +122,7 @@ export const seedSteps = async (
   if (stage === 'unlocked') {
     return unlocked;
   }
-  const parties = await resolveParties();
+  const parties = await resolveParties(partyNamesFrom(answers));
   const throughArrival = [...unlocked, ...consignmentSteps(answers), ...addressSteps(parties, answers), arrivalStep(answers)];
   return stage === 'partial' ? throughArrival : [...throughArrival, ...transportSteps(answers), contactStep(parties)];
 };
