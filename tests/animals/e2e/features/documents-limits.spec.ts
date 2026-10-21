@@ -1,21 +1,12 @@
-import { copyFile, mkdir, stat, truncate } from 'node:fs/promises';
-import path from 'node:path';
 import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
+import { paddedPdf } from '@resources/file-upload/padded-pdf';
 import { MAX_FILE_SIZE_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-upload/constants';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 const issueDate = '03/01/2026';
 const maximumDocuments = 15;
 const maximumDocumentsMessage = `You can upload a maximum of ${maximumDocuments} files`;
-
-const paddedPdf = async (destination: string, bytes: number): Promise<string> => {
-  await mkdir(path.dirname(destination), { recursive: true });
-  await copyFile(fileUploadPaths.safeFile1kbPdf, destination);
-  await truncate(destination, bytes);
-  expect((await stat(destination)).size).toBe(bytes);
-  return destination;
-};
 
 test.describe('Documents limits', { tag: '@duplicated-in-frontend' }, () => {
   test('accepts a fifteenth document and rejects a sixteenth with the maximum-documents error', async ({
@@ -50,7 +41,7 @@ test.describe('Documents limits', { tag: '@duplicated-in-frontend' }, () => {
     await expect(animalsPages.accompanyingDocuments.documentRow(sixteenthReference)).toHaveCount(0);
   });
 
-  test('accepts a 10MB PDF and rejects the same real file at one byte over', async ({ animalsJourney, pages, animalsPages }, testInfo) => {
+  test('accepts a 50MB PDF and rejects the same real file at one byte over', async ({ animalsJourney, pages, animalsPages }, testInfo) => {
     test.slow();
     const exact = await paddedPdf(testInfo.outputPath('boundary-exact.pdf'), MAX_FILE_SIZE_BYTES);
     const over = await paddedPdf(testInfo.outputPath('boundary-over.pdf'), MAX_FILE_SIZE_BYTES + 1);

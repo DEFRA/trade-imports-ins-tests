@@ -1,11 +1,11 @@
 import { DECIMAL_BYTES_PER_MB } from '@utils/synthetic-file-writer';
 
-export const MAX_FILE_SIZE_BYTES = 10 * DECIMAL_BYTES_PER_MB;
+export const MAX_FILE_SIZE_BYTES = 50 * DECIMAL_BYTES_PER_MB;
 
 /**
- * Above the Hapi route payload cap (the file limit plus 1024 B of multipart headroom), so the
- * oversize rejection fires whether the browser check or the server catches it.
+ * Comfortably over the limit, so the rejection fires whether the browser's own check catches the
+ * file or the upload service refuses it on receipt.
  */
-export const ABOVE_PAYLOAD_CAP_BYTES = MAX_FILE_SIZE_BYTES + 200_000;
+export const ABOVE_MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_BYTES + 200_000;
 
-export const OVERSIZE_FILE_MESSAGE = 'The selected file must be smaller than 10MB';
+export const OVERSIZE_FILE_MESSAGE = 'The selected file must be smaller than 50MB';

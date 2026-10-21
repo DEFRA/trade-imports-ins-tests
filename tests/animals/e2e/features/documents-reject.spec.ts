@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { writeSyntheticFile } from '@utils/synthetic-file-writer';
-import { ABOVE_PAYLOAD_CAP_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-upload/constants';
+import { ABOVE_MAX_FILE_SIZE_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-upload/constants';
 
 const issueDate = '03/01/2026';
 
@@ -10,13 +10,14 @@ test.describe('Documents reject flows', { tag: '@duplicated-in-frontend' }, () =
     await animalsJourney.toAccompanyingDocuments();
 
     const oversize = await writeSyntheticFile(testInfo.outputPath('oversize'), 'oversize.pdf', {
-      bytes: ABOVE_PAYLOAD_CAP_BYTES,
+      bytes: ABOVE_MAX_FILE_SIZE_BYTES,
     });
     await animalsPages.accompanyingDocuments.fillDocument(`PW-BIG-${Date.now()}`, issueDate, oversize.filePath);
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
-    // The oversize message renders both client-side and server-side; either satisfies the reject.
+    // The browser refuses the pick; the upload service refuses it on receipt if that check did
+    // not run. Either path shows the same message.
     await expect(pages.page.getByText(OVERSIZE_FILE_MESSAGE).first()).toBeVisible();
     await expect(pages.page.getByText('You have not added any documents yet.')).toBeVisible();
   });
