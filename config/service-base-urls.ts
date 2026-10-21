@@ -22,8 +22,6 @@ export const getSqsEndpoint = (): string => getServiceBaseUrl('AWS_SQS_ENDPOINT'
 
 export const getDlqUrl = (): string => getServiceBaseUrl('NOTIFICATION_SQS_DLQ_URL');
 
-// The CDP ephemeral gateway authenticates every service behind it with this one
-// x-api-key, so it is not the backend's alone.
 export const getDeveloperApiKey = (): string | undefined => {
   const apiKey = process.env.DEVELOPER_API_KEY;
   if (isCdpLocal() && !apiKey) {
