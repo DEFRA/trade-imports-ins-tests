@@ -1,7 +1,7 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { AnimalsPages, SharedPages } from '@page-objects';
-import type { JourneyOptions } from '@domain/animals/constants/journey-options';
+import { defaultJourneyOptions, type JourneyOptions } from '@domain/animals/constants/journey-options';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
@@ -9,10 +9,10 @@ import { countryCodes } from '@domain/animals/constants/country-codes';
 
 export type AccompanyingDocumentAnswer = {
   reference: string;
-  /** As typed into the date field, d/m/yyyy. */
+  /** A date string in d/m/yyyy form. */
   issueDate: string;
   filePath: string;
-  /** The document-type code the select submits, e.g. VETERINARY_HEALTH_CERTIFICATE. */
+  /** A document-type code, e.g. VETERINARY_HEALTH_CERTIFICATE. */
   type: string;
 };
 
@@ -37,7 +37,9 @@ export const OPENING_RUN_TASKS = [
   'Contact address for this consignment',
 ] as const;
 
-const COUNTRY = 'France';
+type OriginOfImportOptions = JourneyOptions & { regionCode?: string };
+
+export const DEFAULT_REGION_CODE = '75';
 const PORT = pointOfEntries.aberdeenHarbour.display;
 export const ARRIVAL_DATE = getRelativeAppDateText({ monthOffset: 1 });
 export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffset: 2 });
@@ -90,12 +92,12 @@ export class AnimalsJourney {
     await this.createNotificationAtOrigin();
   }
 
-  async fillOriginOfImport(options: JourneyOptions = {}): Promise<void> {
-    await this.animalsPages.originOfImport.country.choose(options.countryCode?.display ?? COUNTRY);
+  async fillOriginOfImport(options: OriginOfImportOptions = {}): Promise<void> {
+    await this.animalsPages.originOfImport.country.choose(options.countryCode?.display ?? defaultJourneyOptions.countryCode.display);
     const requiresRegionCode = options.requiresRegionCode ?? 'No';
     await this.animalsPages.originOfImport.radioRequiresOriginCode(requiresRegionCode).check();
     if (requiresRegionCode === 'Yes') {
-      await this.animalsPages.originOfImport.regionCode.fill('75');
+      await this.animalsPages.originOfImport.regionCode.fill(options.regionCode ?? DEFAULT_REGION_CODE);
     }
     if (options.internalReference) {
       await this.animalsPages.originOfImport.internalReference.fill(options.internalReference);
@@ -106,7 +108,12 @@ export class AnimalsJourney {
     await this.animalsPages.originOfImport.saveAndContinue.click();
   }
 
-  async answerOrigin(options: JourneyOptions = {}): Promise<void> {
+  async answerOriginWithRegionCode(regionCode: string, options: OriginOfImportOptions = {}): Promise<void> {
+    await this.fillOriginOfImport({ ...options, requiresRegionCode: 'Yes', regionCode });
+    await this.saveOriginOfImport();
+  }
+
+  async answerOrigin(options: OriginOfImportOptions = {}): Promise<void> {
     await this.animalsPages.overview.task('Where is this consignment coming from?').click();
     await this.fillOriginOfImport(options);
     await this.saveOriginOfImport();
