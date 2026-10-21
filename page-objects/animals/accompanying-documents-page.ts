@@ -1,4 +1,4 @@
-import { type Locator, type Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { DatePicker } from '@page-objects/shared/date-picker';
 
@@ -33,6 +33,18 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
 
   get continueButton(): Locator {
     return this.page.getByRole('button', { name: 'Continue' });
+  }
+
+  get fileUploadCard(): Locator {
+    return this.page.getByRole('region', { name: 'File upload' });
+  }
+
+  get addedDocumentsTable(): Locator {
+    return this.fileUploadCard.getByRole('table', { name: 'Documents you have added' });
+  }
+
+  get addedDocumentRows(): Locator {
+    return this.addedDocumentsTable.locator('tbody tr');
   }
 
   documentRow(reference: string): Locator {
