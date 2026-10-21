@@ -23,10 +23,12 @@ export type ArrivalDetailsAnswer = {
   documentReference?: string;
 };
 
+export const IMPORT_REASON_TASK = 'Main import reason';
+
 export const OPENING_RUN_TASKS = [
   'Where is this consignment coming from?',
   'What are you importing?',
-  'Main reason for import',
+  IMPORT_REASON_TASK,
   'Commodity details',
   'Identification details',
   'Additional details',
@@ -157,7 +159,7 @@ export class AnimalsJourney {
   }
 
   async answerReasonAndAdditionalDetails(): Promise<void> {
-    await this.animalsPages.overview.task('Main reason for import').click();
+    await this.animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await this.animalsPages.importReason.reason('Internal market').check();
     await this.animalsPages.importReason.purpose('Breeding').check();
     await this.animalsPages.importReason.saveAndContinue.click();
@@ -325,7 +327,7 @@ export class AnimalsJourney {
   async toImportReason(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.animalsPages.overview.task('Main reason for import').click();
+    await this.animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await this.animalsPages.importReason.heading.waitFor(pageLoadWait);
   }
 

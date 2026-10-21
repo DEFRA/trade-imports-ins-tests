@@ -1,4 +1,5 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { IMPORT_REASON_TASK } from '@flows/animals/journey';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 
 // govuk-frontend's conditional-reveal radios set aria-expanded on the radio input
@@ -56,7 +57,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import reason', async () => {
-      await animalsPages.overview.task('Main reason for import').click();
+      await animalsPages.overview.task(IMPORT_REASON_TASK).click();
       await animalsPages.importReason.reason('Internal market').check();
       await animalsPages.importReason.purpose('Breeding').check();
       await runA11yScan({ exclude: conditionalReasonRadios });

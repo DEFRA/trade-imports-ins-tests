@@ -1,4 +1,5 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { IMPORT_REASON_TASK } from '@flows/animals/journey';
 
 // govuk-frontend's conditional-reveal radios set aria-expanded on the radio input
 // (radios.mjs), which axe's aria-allowed-attr rule rejects — an upstream
@@ -29,8 +30,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan({ exclude: conditionalRadioInput });
     });
 
-    // The entry guard holds the journey on origin until it is answered, so the
-    // overview is only reachable once origin has been saved.
     await test.step('Overview', async () => {
       const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
       await animalsJourney.fillOriginOfImport();
@@ -69,7 +68,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import reason', async () => {
-      await animalsPages.overview.task('Main reason for import').click();
+      await animalsPages.overview.task(IMPORT_REASON_TASK).click();
       await animalsPages.importReason.heading.waitFor();
       await runA11yScan({ exclude: conditionalReasonRadios });
       await animalsPages.importReason.reason('Internal market').check();

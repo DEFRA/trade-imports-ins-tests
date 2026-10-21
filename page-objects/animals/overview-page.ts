@@ -18,6 +18,10 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.page.getByRole('link', { name, exact: true });
   }
 
+  taskTitlesInSection(sectionIndex: number): Locator {
+    return this.page.locator('ul.app-task-list').nth(sectionIndex).getByRole('link');
+  }
+
   get taskStatuses(): Locator {
     return this.page.locator('.govuk-task-list__status');
   }

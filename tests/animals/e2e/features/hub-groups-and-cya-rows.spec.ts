@@ -1,16 +1,18 @@
 import type { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
-import { ARRIVAL_DATE } from '@flows/animals/journey';
+import { ARRIVAL_DATE, IMPORT_REASON_TASK } from '@flows/animals/journey';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 
 test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-frontend' }, () => {
-  test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({ animalsJourney, pages }) => {
+  test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({
+    animalsJourney,
+    animalsPages,
+    pages,
+  }) => {
     await animalsJourney.startNotification();
 
     await expect(pages.page.getByRole('heading', { level: 2, name: 'Notification tasklist' })).toBeVisible();
 
-    // The commodity-total labels are h3s too, so the section headings are read
-    // off their own class rather than off the level alone.
     await expect(pages.page.locator('h3.govuk-heading-m')).toHaveText([
       '1. About the consignment',
       '2. Description of the goods',
@@ -22,22 +24,17 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
 
     await expect(pages.page.locator('.govuk-button-group .govuk-button')).toHaveText(['Review and submit', 'Return to dashboard']);
 
-    const taskLists = pages.page.locator('ul.app-task-list');
-    await expect(taskLists).toHaveCount(6);
-    const expectListedTasks = async (list: Locator, tasks: string[]) => {
-      for (const task of tasks) await expect(list).toContainText(task);
-    };
-    await expectListedTasks(taskLists.nth(0), [
+    await expect(pages.page.locator('ul.app-task-list')).toHaveCount(6);
+    await expect(animalsPages.overview.taskTitlesInSection(0)).toHaveText([
       'Where is this consignment coming from?',
       'What are you importing?',
-      'Main reason for import',
+      IMPORT_REASON_TASK,
     ]);
-    await expectListedTasks(taskLists.nth(1), ['Additional details']);
-    await expect(taskLists.nth(1)).not.toContainText('Identification details');
-    await expectListedTasks(taskLists.nth(2), ['Arrival details', 'Transport details']);
-    await expectListedTasks(taskLists.nth(3), ['Upload documents']);
-    await expectListedTasks(taskLists.nth(4), ['Roles and addresses']);
-    await expectListedTasks(taskLists.nth(5), ['Contact address for this consignment']);
+    await expect(animalsPages.overview.taskTitlesInSection(1)).toHaveText(['Commodity details', 'Additional details']);
+    await expect(animalsPages.overview.taskTitlesInSection(2)).toHaveText(['Arrival details', 'Transport details']);
+    await expect(animalsPages.overview.taskTitlesInSection(3)).toHaveText(['Upload documents']);
+    await expect(animalsPages.overview.taskTitlesInSection(4)).toHaveText(['Roles and addresses']);
+    await expect(animalsPages.overview.taskTitlesInSection(5)).toHaveText(['Contact address for this consignment']);
   });
 
   test('after completing every section the check-your-answers page renders the answered rows', async ({
@@ -61,9 +58,18 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
     await expect(animalsPages.notificationView.changeLink('Change uploaded documents')).toBeVisible();
 
-    await expect(pages.page.getByRole('heading', { level: 3, name: 'Where is this consignment coming from?' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 3, name: 'Commodity details' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 3, name: 'Additional details' })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { level: 3 })).toHaveText([
+      'Where is this consignment coming from?',
+      'Main import reason',
+      'Commodity details',
+      'Additional details',
+      'Arrival details',
+      'Transit countries',
+      'Transport details',
+      'Upload documents',
+      'Roles and addresses',
+      'Contact address for this consignment',
+    ]);
 
     const importDetails = animalsPages.notificationView.summaryCard('Import details');
     await expect(value(importDetails, 'Country of origin')).toHaveText('France');

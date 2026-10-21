@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { IMPORT_REASON_TASK } from '@flows/animals/journey';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
 const PRIVATE_TRANSPORTER = {
@@ -14,14 +15,10 @@ const PRIVATE_TRANSPORTER = {
 test.describe('Security scan (frontend, conditional pages)', { tag: '@active' }, () => {
   test('routes the reason-gated and transporter-gated pages through the ZAP proxy', async ({ animalsJourney, animalsPages }) => {
     test.slow();
-    // Two reveal payloads the submission journey never sends, because its
-    // answers put them out of scope. Two reasons are needed, not one: transit
-    // reveals the port of exit and the destination country, and the temporary
-    // admission of horses reveals the exit date and the port of exit.
     await animalsJourney.startNotification();
     await animalsJourney.unlockSections();
 
-    await animalsPages.overview.task('Main reason for import').click();
+    await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await animalsPages.importReason.reason('Transit').check();
     await animalsPages.importReason.selectTransitPortOfExitByIndex(2);
     await animalsPages.importReason.selectTransitDestinationCountry('FR');
@@ -32,7 +29,7 @@ test.describe('Security scan (frontend, conditional pages)', { tag: '@active' },
     await animalsPages.additionalDetails.saveAndContinue.click();
     await animalsPages.overview.heading.waitFor();
 
-    await animalsPages.overview.task('Main reason for import').click();
+    await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await animalsPages.importReason.reason('Temporary admission horses').check();
     await animalsPages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
     await animalsPages.importReason.selectTemporaryAdmissionPortOfExitByIndex(2);
@@ -43,8 +40,6 @@ test.describe('Security scan (frontend, conditional pages)', { tag: '@active' },
     await animalsPages.additionalDetails.saveAndContinue.click();
     await animalsPages.overview.heading.waitFor();
 
-    // The private branch of the add route; the submission journey only ever
-    // takes the commercial one.
     await animalsJourney.reachTransporterFromHub();
     await animalsPages.transporter.addTransporter.click();
     await animalsPages.transporterAdd.heading.waitFor();
