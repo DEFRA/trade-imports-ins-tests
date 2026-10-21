@@ -24,6 +24,7 @@ import { FrontendFormClient } from '@adapters/http/frontend-form-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { ensureE2eAddressBook } from '@domain/shared/fixtures/e2e-address-book';
 import { JourneyContext } from '@flows/shared/journey-context';
+import { ALL_DATA_ANSWERS_WITHOUT_DOCUMENT, MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 
 dotenv.config({ quiet: true });
 
@@ -44,14 +45,32 @@ const parseState = (argv: readonly string[]): State => {
   return value;
 };
 
-const seed = async (state: State, journey: AnimalsSeededJourney): Promise<string> => {
-  if (state === 'draft') return journey.createDraftNotification();
-  if (state === 'amend') return journey.createAmendNotification();
-  return journey.createSubmittedNotification();
+const USAGE = `Usage: npm run --silent seed:notification -- [--state draft|submitted|amend] [--all-data]
+
+Seeds a notification through the frontend and prints its reference number.
+
+  --state     draft, submitted or amend (default submitted)
+  --all-data  answer every optional question too, bar the accompanying document
+              (default: only the answers the frontend requires)
+  --help      print this text`;
+
+const parseAnswers = (argv: readonly string[]): NotificationAnswers =>
+  argv.includes('--all-data') ? ALL_DATA_ANSWERS_WITHOUT_DOCUMENT : MANDATORY_ANSWERS;
+
+const seed = async (state: State, journey: AnimalsSeededJourney, answers: NotificationAnswers): Promise<string> => {
+  if (state === 'draft') return journey.createDraftNotification('ready', answers);
+  if (state === 'amend') return journey.createAmendNotification(answers);
+  return journey.createSubmittedNotification(answers);
 };
 
 const main = async (): Promise<void> => {
-  const state = parseState(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  if (argv.includes('--help')) {
+    console.log(USAGE);
+    return;
+  }
+  const state = parseState(argv);
+  const answers = parseAnswers(argv);
   const baseURL = process.env.TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL;
 
   const browser = await chromium.launch();
@@ -74,7 +93,7 @@ const main = async (): Promise<void> => {
       const forms = new FrontendFormClient(context);
       const journeyContext = new JourneyContext();
       const journey = new AnimalsSeededJourney(forms, addressBook, journeyContext);
-      const ref = await seed(state, journey);
+      const ref = await seed(state, journey, answers);
       console.log(ref);
     } finally {
       await context.dispose();

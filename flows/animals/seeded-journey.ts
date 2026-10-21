@@ -72,8 +72,8 @@ export class AnimalsSeededJourney {
     return referenceNumber;
   }
 
-  async createAmendNotification(): Promise<string> {
-    const referenceNumber = await this.createSubmittedNotification();
+  async createAmendNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
+    const referenceNumber = await this.createSubmittedNotification(answers);
     await this.amend(referenceNumber);
     return referenceNumber;
   }
