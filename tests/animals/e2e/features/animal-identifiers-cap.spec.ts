@@ -11,7 +11,6 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     test.slow();
     await animalsJourney.startNotification();
 
-    // A cattle line with a declared count of 2 (M = 2).
     await animalsPages.overview.task('What are you importing?').click();
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await animalsPages.commoditySelection.saveAndContinue.click();
@@ -22,8 +21,6 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await animalsPages.consignmentDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    // Counter progression: 1 of 2, then Save and add another moves to 2 of 2
-    // with the first record in the card's table.
     await animalsPages.overview.task('Identification details').click();
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 1 of 2' })).toBeVisible();
     await animalsPages.animalIdentification.earTag.fill('UK000000000001');
@@ -36,8 +33,6 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
       animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 1).getByRole('cell', { name: 'UK000000000001', exact: true }),
     ).toBeVisible();
 
-    // At N = M the maximum-reached state replaces the entry form; the saved
-    // records stay removable.
     // The second record is the last outstanding animal, so the in-card button
     // finishes the line instead of inviting another.
     await animalsPages.animalIdentification.earTag.fill('UK000000000002');
