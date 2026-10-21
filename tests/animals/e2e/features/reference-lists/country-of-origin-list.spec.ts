@@ -29,7 +29,7 @@ test.describe('Country of origin list', () => {
       await animalsPages.overview.task('Where is this consignment coming from?').click();
       const { country } = animalsPages.originOfImport;
 
-      await country.field.fill('Fra');
+      await country.search('Fra');
 
       await expect(country.suggestions).toHaveText(
         countryAndSubdivisionNamesWithCountry().filter((name) => name === 'France' || name.endsWith('(France)')),

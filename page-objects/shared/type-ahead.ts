@@ -52,6 +52,12 @@ export class TypeAhead {
     return this.option(name).locator('strong');
   }
 
+  async search(text: string): Promise<void> {
+    await expect(this.field).toHaveRole('combobox');
+    await this.field.click();
+    await this.field.fill(text);
+  }
+
   async choose(name: string): Promise<void> {
     await this.page.waitForLoadState('domcontentloaded');
     if ((await this.field.evaluate((element) => element.tagName)) === 'SELECT') {

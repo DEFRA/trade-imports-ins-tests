@@ -60,7 +60,7 @@ test.describe('High-risk plants origin section', () => {
   test('a country suggestion shows the letters typed in bold', async ({ plantsPages, plantsJourney }) => {
     await plantsJourney.toOriginOfNewNotification(POTATOES);
 
-    await plantsPages.origin.country.field.fill('fra');
+    await plantsPages.origin.country.search('fra');
 
     await expect(plantsPages.origin.country.boldLettersOf(FRANCE)).toHaveText(['Fra']);
   });
