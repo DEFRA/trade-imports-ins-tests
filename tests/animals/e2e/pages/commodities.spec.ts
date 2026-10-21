@@ -60,18 +60,13 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
-    // Saving returns to the overview. Reopen the selection from the row that
-    // owns it.
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('What are you importing?').click();
 
-    // Back on the page, both pairs are listed under the running count without
-    // any query — a choice made under an earlier query is never lost.
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('2 selected');
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Bos taurus');
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Felis catus');
 
-    // And each is ticked again when its own query brings it back on screen.
     await animalsPages.commoditySelection.search(commodityLines.cattle.searchTerm);
     await expect(animalsPages.commoditySelection.species(commodityLines.cattle)).toBeChecked();
     await animalsPages.commoditySelection.search(commodityLines.domesticCat.searchTerm);
@@ -80,7 +75,6 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
 
   test('counts what has been chosen and clears it on request', async ({ animalsPages }) => {
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
-    // The panel is written on the server, so it appears on the next render.
     await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('1 selected');
     await expect(animalsPages.commoditySelection.selectionPanel).toContainText('Bos taurus');
