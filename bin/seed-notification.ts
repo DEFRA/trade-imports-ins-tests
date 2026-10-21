@@ -24,7 +24,7 @@ import { FrontendFormClient } from '@adapters/http/frontend-form-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { ensureE2eAddressBook } from '@flows/shared/address-book-seed';
 import { JourneyContext } from '@flows/shared/journey-context';
-import { ALL_DATA_ANSWERS_WITHOUT_DOCUMENT, MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
+import { ALL_ANSWERS_WITHOUT_DOCUMENT, MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 
 dotenv.config({ quiet: true });
 
@@ -45,17 +45,17 @@ const parseState = (argv: readonly string[]): State => {
   return value;
 };
 
-const USAGE = `Usage: npm run --silent seed:notification -- [--state draft|submitted|amend] [--all-data]
+const USAGE = `Usage: npm run --silent seed:notification -- [--state draft|submitted|amend] [--all-answers]
 
 Seeds a notification through the frontend and prints its reference number.
 
-  --state     draft, submitted or amend (default submitted)
-  --all-data  answer every optional question too, bar the accompanying document
-              (default: only the answers the frontend requires)
-  --help      print this text`;
+  --state        draft, submitted or amend (default submitted)
+  --all-answers  answer every optional question too, bar the accompanying document
+                 (default: only the answers the frontend requires)
+  --help         print this text`;
 
 const parseAnswers = (argv: readonly string[]): NotificationAnswers =>
-  argv.includes('--all-data') ? ALL_DATA_ANSWERS_WITHOUT_DOCUMENT : MANDATORY_ANSWERS;
+  argv.includes('--all-answers') ? ALL_ANSWERS_WITHOUT_DOCUMENT : MANDATORY_ANSWERS;
 
 const seed = async (state: State, journey: AnimalsSeededJourney, answers: NotificationAnswers): Promise<string> => {
   if (state === 'draft') return journey.createDraftNotification('ready', answers);

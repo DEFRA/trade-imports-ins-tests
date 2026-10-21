@@ -3,7 +3,7 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type NotificationDocument } from '@domain/animals/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
-import { ALL_DATA_ANSWERS as answers, CPH_NUMBER } from '@domain/animals/constants/journey-options';
+import { ALL_ANSWERS as answers, CPH_NUMBER } from '@domain/animals/constants/journey-options';
 import { toIsoDate } from '@utils/date-utils';
 
 test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => {

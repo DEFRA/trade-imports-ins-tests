@@ -2,7 +2,7 @@ import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import {
-  ALL_DATA_ANSWERS,
+  ALL_ANSWERS,
   MANDATORY_ANSWERS,
   assertConsistentAnswers,
   type AccompanyingDocumentAnswer,
@@ -256,7 +256,7 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
-    await this.animalsPages.transitedCountries.addCountry(ALL_DATA_ANSWERS.transitedCountries[0].display);
+    await this.animalsPages.transitedCountries.addCountry(ALL_ANSWERS.transitedCountries[0].display);
     await this.animalsPages.transitedCountries.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transport details').click();
@@ -383,7 +383,7 @@ export class AnimalsJourney {
 
   async toTransporter(): Promise<void> {
     await this.toTransitedCountries();
-    await this.animalsPages.transitedCountries.addCountry(ALL_DATA_ANSWERS.transitedCountries[0].display);
+    await this.animalsPages.transitedCountries.addCountry(ALL_ANSWERS.transitedCountries[0].display);
     await this.animalsPages.transitedCountries.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transport details').click();

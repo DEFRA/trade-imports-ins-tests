@@ -1,6 +1,6 @@
 import type { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
-import { ALL_DATA_ANSWERS_WITHOUT_DOCUMENT, CPH_NUMBER } from '@domain/animals/constants/journey-options';
+import { ALL_ANSWERS_WITHOUT_DOCUMENT, CPH_NUMBER } from '@domain/animals/constants/journey-options';
 
 test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-frontend' }, () => {
   test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({ animalsJourney, pages }) => {
@@ -45,7 +45,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     animalsPages,
   }) => {
     test.slow();
-    const answers = ALL_DATA_ANSWERS_WITHOUT_DOCUMENT;
+    const answers = ALL_ANSWERS_WITHOUT_DOCUMENT;
     await animalsJourney.toReview(answers);
 
     const value = (card: Locator, key: string) =>

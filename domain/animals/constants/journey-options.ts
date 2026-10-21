@@ -86,9 +86,9 @@ export type OptionalAnswers = {
 
 export type NotificationAnswers = MandatoryAnswers & Partial<OptionalAnswers>;
 
-export type AllDataAnswers = MandatoryAnswers & OptionalAnswers;
+export type AllAnswers = MandatoryAnswers & OptionalAnswers;
 
-export type AllDataAnswersWithoutDocument = MandatoryAnswers &
+export type AllAnswersWithoutDocument = MandatoryAnswers &
   Omit<OptionalAnswers, 'accompanyingDocument'> & { accompanyingDocument?: undefined };
 
 /** The origin page's fields, for callers that answer only that page. */
@@ -133,7 +133,7 @@ export const MANDATORY_ANSWERS: MandatoryAnswers = {
 };
 
 /** Every answer, including an accompanying document. The UI journey uses this set, as a browser can upload a file. */
-export const ALL_DATA_ANSWERS: AllDataAnswers = {
+export const ALL_ANSWERS: AllAnswers = {
   ...MANDATORY_ANSWERS,
   requiresRegionCode: yesNoValues.yes,
   regionCode: '75',
@@ -150,7 +150,7 @@ export const ALL_DATA_ANSWERS: AllDataAnswers = {
 };
 
 /** Every answer except the accompanying document. The seeded journey uses this set, as its form client cannot upload a file. */
-export const ALL_DATA_ANSWERS_WITHOUT_DOCUMENT: AllDataAnswersWithoutDocument = {
-  ...ALL_DATA_ANSWERS,
+export const ALL_ANSWERS_WITHOUT_DOCUMENT: AllAnswersWithoutDocument = {
+  ...ALL_ANSWERS,
   accompanyingDocument: undefined,
 };
