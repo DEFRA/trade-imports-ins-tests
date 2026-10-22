@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
-import { paddedPdf } from '@resources/file-upload/padded-pdf';
+import { writePaddedPdf } from '@resources/file-upload/padded-pdf';
 import { MAX_FILE_SIZE_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-upload/constants';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
@@ -41,14 +41,18 @@ test.describe('Documents limits', { tag: '@duplicated-in-frontend' }, () => {
     await expect(animalsPages.accompanyingDocuments.documentRow(sixteenthReference)).toHaveCount(0);
   });
 
-  test('accepts a 50MB PDF and rejects the same real file at one byte over', async ({ animalsJourney, pages, animalsPages }, testInfo) => {
+  test('accepts a PDF at the maximum file size and rejects one a byte over it', async ({
+    animalsJourney,
+    pages,
+    animalsPages,
+  }, testInfo) => {
     test.slow();
-    const exact = await paddedPdf(testInfo.outputPath('boundary-exact.pdf'), MAX_FILE_SIZE_BYTES);
-    const over = await paddedPdf(testInfo.outputPath('boundary-over.pdf'), MAX_FILE_SIZE_BYTES + 1);
+    const fileAtTheCap = await writePaddedPdf(testInfo.outputPath('boundary-exact.pdf'), MAX_FILE_SIZE_BYTES);
+    const fileOneByteOver = await writePaddedPdf(testInfo.outputPath('boundary-over.pdf'), MAX_FILE_SIZE_BYTES + 1);
     await animalsJourney.toAccompanyingDocuments();
 
     const exactReference = `PWEXACT${Date.now()}`;
-    await animalsPages.accompanyingDocuments.fillDocument(exactReference, issueDate, exact);
+    await animalsPages.accompanyingDocuments.fillDocument(exactReference, issueDate, fileAtTheCap);
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     await expect(animalsPages.accompanyingDocuments.documentRow(exactReference)).toContainText('Check completed', {
@@ -57,7 +61,7 @@ test.describe('Documents limits', { tag: '@duplicated-in-frontend' }, () => {
     await expect(pages.page.locator('.govuk-error-summary')).toHaveCount(0);
 
     const overReference = `PWOVER${Date.now()}`;
-    await animalsPages.accompanyingDocuments.fillDocument(overReference, issueDate, over);
+    await animalsPages.accompanyingDocuments.fillDocument(overReference, issueDate, fileOneByteOver);
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
