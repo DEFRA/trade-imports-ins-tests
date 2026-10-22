@@ -1,11 +1,20 @@
 import { readFile } from 'node:fs/promises';
+import { type Locator, type Page } from '@playwright/test';
 import { test, expect } from '@fixtures';
 import { createAnimalsPages } from '@page-objects';
 import { writePaddedPdf } from '@resources/file-upload/padded-pdf';
 import { DOCUMENT_ISSUE_DATE, MAX_FILE_SIZE_BYTES } from '@resources/file-upload/constants';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
-test.describe('Documents at the full file size', { tag: '@compose' }, () => {
+const servedBytes = async (page: Page, row: Locator): Promise<Buffer> => {
+  const href = await row.getByRole('link', { name: /View file/ }).getAttribute('href');
+  expect(href).toBeTruthy();
+  const response = await page.request.get(new URL(href, page.url()).toString());
+  expect(response.status()).toBe(200);
+  return response.body();
+};
+
+test.describe('Documents at the full file size', () => {
   test('uploads a file at the full limit, scans it, and serves the same bytes back', async ({
     animalsJourney,
     animalsPages,
@@ -40,8 +49,10 @@ test.describe('Documents at the full file size', { tag: '@compose' }, () => {
 
     const firstReference = `PWTABA${Date.now()}`;
     const secondReference = `PWTABB${Date.now()}`;
+    // Different lengths, so a document serving back the other tab's bytes
+    // fails the comparison below instead of passing on identical padding.
     const firstFile = await writePaddedPdf(testInfo.outputPath('tab-a.pdf'), MAX_FILE_SIZE_BYTES);
-    const secondFile = await writePaddedPdf(testInfo.outputPath('tab-b.pdf'), MAX_FILE_SIZE_BYTES);
+    const secondFile = await writePaddedPdf(testInfo.outputPath('tab-b.pdf'), MAX_FILE_SIZE_BYTES - 1_000);
 
     const secondTab = await pages.page.context().newPage();
     await secondTab.goto(documentsUrl);
@@ -65,6 +76,13 @@ test.describe('Documents at the full file size', { tag: '@compose' }, () => {
     await expect(animalsPages.accompanyingDocuments.documentRow(firstReference)).toBeVisible();
     await expect(animalsPages.accompanyingDocuments.documentRow(secondReference)).toBeVisible();
     await expect(animalsPages.accompanyingDocuments.addedDocumentRows).toHaveCount(2);
+
+    expect(await servedBytes(pages.page, animalsPages.accompanyingDocuments.documentRow(firstReference))).toEqual(
+      await readFile(firstFile),
+    );
+    expect(await servedBytes(pages.page, animalsPages.accompanyingDocuments.documentRow(secondReference))).toEqual(
+      await readFile(secondFile),
+    );
 
     await secondTab.close();
   });
