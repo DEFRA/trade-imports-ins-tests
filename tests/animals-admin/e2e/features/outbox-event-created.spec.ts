@@ -40,7 +40,7 @@ test.describe('Notification created outbox event', { tag: '@mongodb' }, () => {
   test('writes a NotificationCreated event immediately on draft creation', async ({ animalsJourney, journeyContext }) => {
     test.slow();
     await animalsJourney.startNotification();
-    const referenceNumber = journeyContext.journeyId;
+    const referenceNumber = journeyContext.referenceNumber;
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();
 
@@ -82,7 +82,7 @@ test.describe('Notification created outbox event', { tag: '@mongodb' }, () => {
   }) => {
     test.slow();
     await animalsSeededJourney.createSubmittedNotification();
-    const sourceReferenceNumber = journeyContext.journeyId;
+    const sourceReferenceNumber = journeyContext.referenceNumber;
     await animalsNotificationActions.toNotificationView(sourceReferenceNumber);
     await animalsPages.notificationView.btnCopyAsNew.click();
     await animalsPages.overview.heading.waitFor();

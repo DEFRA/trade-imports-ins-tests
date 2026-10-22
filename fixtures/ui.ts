@@ -1,4 +1,4 @@
-import { test as base, expect, type APIRequestContext, type TestInfo } from '@playwright/test';
+import { test as base, expect, type APIRequestContext, type BrowserContext, type Page, type TestInfo } from '@playwright/test';
 import {
   createAnimalsAdminPages,
   createAnimalsPages,
@@ -11,7 +11,7 @@ import {
   type PlantsPages,
   type SharedPages,
 } from '@page-objects';
-import type { JourneyContext } from '@flows/shared/journey-context';
+import { JourneyContext } from '@flows/shared/journey-context';
 import { AnimalsJourney } from '@flows/animals/journey';
 import { AnimalsNotificationActions } from '@flows/animals/notification-actions';
 import { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
@@ -21,20 +21,25 @@ import { PlantsNotificationActions } from '@flows/plants/notification-actions';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { FrontendFormClient } from '@adapters/http/frontend-form-client';
-import { createWorkerAuthStates, type AuthStateFor } from '@fixtures/auth-state';
-import { createFrontendSeedContext, signInFrontendSeedState } from '@fixtures/seed-context';
+import { authCookieNameFor, createWorkerAuthStates, stripToAuthCookie, type AuthStateFor } from '@fixtures/auth-state';
+import { createFrontendSeedContext } from '@fixtures/seed-context';
 import { getCdpProxy } from '@config/cdp-proxy';
 import { baseUrlForDomain, domainFromSpecPath } from '@utils/playwright/domain-base-urls';
 import { sessionReuseEnabled } from '@utils/playwright/session-reuse';
 
-// Signing in takes longer than a test's own budget, so the fixtures that mint a session get theirs.
 const SESSION_MINT_TIMEOUT_MS = 120_000;
 
 const domainOf = ({ file, project }: TestInfo) => domainFromSpecPath(file, project.testDir);
 
 export interface AuthWorkerFixtures {
   authStateFor: AuthStateFor | undefined;
-  frontendSeedState: string;
+  frontendSeedContext: APIRequestContext;
+}
+
+export interface FreshSessionAfterSubmit<DomainPages> {
+  reference: string;
+  freshPages: DomainPages;
+  freshSharedPages: SharedPages;
 }
 
 export interface PageFixtures {
@@ -52,9 +57,11 @@ export interface PageFixtures {
   plantsNotificationActions: PlantsNotificationActions;
   notificationApi: NotificationApiClient;
   addressBookApi: AddressBookApiClient;
-  frontendSeedContext: APIRequestContext;
   frontendForms: FrontendFormClient;
   externalRequest: APIRequestContext;
+  openFreshSession: () => Promise<Page>;
+  submitAnimalsNotificationThenOpenFreshSession: () => Promise<FreshSessionAfterSubmit<AnimalsPages>>;
+  submitPlantsNotificationThenOpenFreshSession: () => Promise<FreshSessionAfterSubmit<PlantsPages>>;
 }
 
 export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
@@ -64,18 +71,14 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  frontendSeedState: [
+  frontendSeedContext: [
     async ({ browser, authStateFor }, use, workerInfo) => {
-      await use(await signInFrontendSeedState(browser, workerInfo, authStateFor));
+      const context = await createFrontendSeedContext(browser, workerInfo, authStateFor);
+      await use(context);
+      await context.dispose();
     },
     { scope: 'worker', timeout: SESSION_MINT_TIMEOUT_MS },
   ],
-  frontendSeedContext: async ({ frontendSeedState }, use, testInfo) => {
-    const context = await createFrontendSeedContext(frontendSeedState, testInfo.project.use);
-    await use(context);
-    await context.dispose();
-  },
-  // The spec's directory picks its domain, so one project can run every domain's specs.
   // eslint-disable-next-line no-empty-pattern
   baseURL: async ({}, use, testInfo) => {
     await use(baseUrlForDomain(domainOf(testInfo)));
@@ -102,14 +105,18 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
     await use(createPlantsPages(page));
   },
   // eslint-disable-next-line no-empty-pattern
-  journeyContext: async ({}, use) => {
-    await use({});
+  journeyContext: async ({}, use, testInfo) => {
+    const journeyContext = new JourneyContext();
+    await use(journeyContext);
+    for (const referenceNumber of journeyContext.referenceNumbers) {
+      testInfo.annotations.push({ type: 'Reference number', description: referenceNumber });
+    }
   },
   animalsJourney: async ({ animalsPages, pages, journeyContext }, use) => {
     await use(new AnimalsJourney(animalsPages, pages, journeyContext));
   },
-  animalsNotificationActions: async ({ animalsPages, pages }, use) => {
-    await use(new AnimalsNotificationActions(animalsPages, pages));
+  animalsNotificationActions: async ({ animalsPages, pages, journeyContext }, use) => {
+    await use(new AnimalsNotificationActions(animalsPages, pages, journeyContext));
   },
   animalsAdminNavigation: async ({ animalsAdminPages }, use) => {
     await use(new AnimalsAdminNavigation(animalsAdminPages));
@@ -129,7 +136,34 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   frontendForms: async ({ frontendSeedContext }, use) => {
     await use(new FrontendFormClient(frontendSeedContext));
   },
-  // Calls that leave CDP for the internet go through its proxy; the journey and service calls stay direct.
+  openFreshSession: async ({ browser, page, proxy, ignoreHTTPSErrors }, use, testInfo) => {
+    const domain = domainOf(testInfo);
+    const baseURL = baseUrlForDomain(domain);
+    const contexts: BrowserContext[] = [];
+    await use(async () => {
+      const storageState = stripToAuthCookie(await page.context().storageState(), baseURL, authCookieNameFor(domain, baseURL));
+      const context = await browser.newContext({ baseURL, proxy, ignoreHTTPSErrors, storageState });
+      contexts.push(context);
+      return context.newPage();
+    });
+    await Promise.all(contexts.map((context) => context.close()));
+  },
+  submitAnimalsNotificationThenOpenFreshSession: async ({ animalsJourney, journeyContext, openFreshSession }, use) => {
+    await use(async () => {
+      await animalsJourney.submitNotification();
+      const reference = journeyContext.referenceNumber;
+      const freshPage = await openFreshSession();
+      return { reference, freshPages: createAnimalsPages(freshPage), freshSharedPages: createSharedPages(freshPage) };
+    });
+  },
+  submitPlantsNotificationThenOpenFreshSession: async ({ plantsJourney, addressBookApi, openFreshSession }, use) => {
+    await use(async () => {
+      const { reference } = await plantsJourney.completeNotification(addressBookApi);
+      await plantsJourney.submitFromReview();
+      const freshPage = await openFreshSession();
+      return { reference, freshPages: createPlantsPages(freshPage), freshSharedPages: createSharedPages(freshPage) };
+    });
+  },
   externalRequest: async ({ playwright }, use) => {
     const context = await playwright.request.newContext({ proxy: getCdpProxy() });
     await use(context);

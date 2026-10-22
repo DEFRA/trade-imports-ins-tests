@@ -16,11 +16,11 @@ test.describe('Reference strip', { tag: '@duplicated-in-frontend' }, () => {
     // page's own URL by the time the user lands on it.
     await animalsPages.dashboard.btnCreateNewNotification.click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
-    const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
+    const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
     await expect(strip).toBeVisible();
     await expect(strip.locator('.govuk-tag')).toHaveText('Draft');
     await expect(strip).toContainText(GBN_REFERENCE);
-    await expect(strip).toContainText(journeyId);
+    await expect(strip).toContainText(referenceNumber);
     await expect(animalsPages.originOfImport.cancelAmend).toHaveCount(0);
 
     // The strip stays put once the first save has committed answers.
@@ -29,7 +29,7 @@ test.describe('Reference strip', { tag: '@duplicated-in-frontend' }, () => {
     await animalsPages.originOfImport.saveAndContinue.click();
 
     // The hub carries the strip: blue Draft tag + GBN-AG-shaped reference.
-    await animalsPages.overview.open(journeyId);
+    await animalsPages.overview.open(referenceNumber);
     await expect(strip).toBeVisible();
     await expect(strip.locator('.govuk-tag')).toHaveText('Draft');
     await expect(strip).toContainText(GBN_REFERENCE);
@@ -40,7 +40,7 @@ test.describe('Reference strip', { tag: '@duplicated-in-frontend' }, () => {
     await expect(strip).toContainText(GBN_REFERENCE);
 
     // Every post-origin task page inherits the strip from the shared layout.
-    await animalsPages.overview.open(journeyId);
+    await animalsPages.overview.open(referenceNumber);
     await animalsPages.overview.task('What are you importing?').click();
     await expect(animalsPages.commoditySelection.searchBox).toBeVisible();
     await expect(strip).toBeVisible();

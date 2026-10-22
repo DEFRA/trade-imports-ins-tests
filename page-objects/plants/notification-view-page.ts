@@ -12,6 +12,9 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
   get btnContinue(): Locator {
     return this.page.getByRole('button', { name: 'Continue', exact: true });
   }
+  get btnDelete(): Locator {
+    return this.page.getByRole('button', { name: 'Delete notification', exact: true });
+  }
   get changeLinks(): Locator {
     return this.page.getByRole('link', { name: /^Change/ });
   }

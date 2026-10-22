@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { countryByCode, originPageCountryNames, portLabel, portsOfEntry } from '@domain/shared/fixtures/reference-data';
+import { countryByCode, originPageCountryNames, portLabel, portsOfEntry } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { POTATOES } from '@flows/plants/journey';
 

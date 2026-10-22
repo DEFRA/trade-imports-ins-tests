@@ -64,19 +64,19 @@ test.describe('Authentication', { tag: '@auth' }, () => {
   });
 
   test.describe('Origin of the import (unauthenticated entry)', () => {
-    let journeyId: string;
+    let referenceNumber: string;
 
     test.beforeEach(async ({ pages, animalsPages }) => {
       await pages.signIn.signIn();
       await animalsPages.dashboard.btnCreateNewNotification.click();
-      journeyId = animalsPages.originOfImport.journeyIdFromUrl();
+      referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
       await animalsPages.originOfImport.selectCountry('France');
       await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
       await animalsPages.originOfImport.saveAndContinue.click();
       const journeyCookies = (await pages.page.context().cookies()).filter(({ name }) => name.startsWith('liveAnimals'));
       await pages.page.context().clearCookies();
       await pages.page.context().addCookies(journeyCookies);
-      await animalsPages.originOfImport.open(journeyId, false);
+      await animalsPages.originOfImport.open(referenceNumber, false);
     });
 
     test('lands on the sign in page when opening a page further in the journey', async ({ pages }) => {
@@ -86,7 +86,7 @@ test.describe('Authentication', { tag: '@auth' }, () => {
 
     test('allows signing into a page further in the journey', async ({ pages, animalsPages }) => {
       await pages.signIn.signIn();
-      await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/origin$`));
+      await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/origin$`));
       await expect(animalsPages.originOfImport.heading).toBeVisible();
     });
   });

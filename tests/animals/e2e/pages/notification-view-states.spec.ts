@@ -7,7 +7,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
   test.describe('DRAFT', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
       await animalsSeededJourney.createDraftNotification('unlocked');
-      await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
+      await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
     });
 
     test('renders the recorded answers in the numbered design sections', async ({ pages, animalsPages }) => {
@@ -26,7 +26,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
 
     test('shows the Draft strip with the notification reference', async ({ animalsPages, journeyContext }) => {
       await expect(animalsPages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Draft');
-      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.journeyId);
+      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.referenceNumber);
     });
 
     test('shows Change links for the recorded answers', async ({ animalsPages }) => {
@@ -53,8 +53,8 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
 
   test.describe('DRAFT ready to submit', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
-      await animalsSeededJourney.createDraftNotification('readyToSubmit');
-      await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
+      await animalsSeededJourney.createDraftNotification();
+      await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
     });
 
     test('shows no error summary once every section is answered', async ({ animalsPages }) => {
@@ -72,13 +72,13 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
   test.describe('SUBMITTED', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
       await animalsSeededJourney.createSubmittedNotification();
-      await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
+      await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
     });
 
     test('lands on the view page with the Submitted strip and reference', async ({ pages, animalsPages, journeyContext }) => {
-      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(journeyContext.journeyId)}$`));
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(journeyContext.referenceNumber)}$`));
       await expect(animalsPages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Submitted');
-      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.journeyId);
+      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.referenceNumber);
     });
 
     test('offers Copy as new and Delete on the read-only view', async ({ pages, animalsPages }) => {
@@ -88,7 +88,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('copies the submitted notification to a new draft', async ({ animalsPages, journeyContext }) => {
-      const originalReferenceNumber = journeyContext.journeyId;
+      const originalReferenceNumber = journeyContext.referenceNumber;
       await animalsPages.notificationView.btnCopyAsNew.click();
 
       await animalsPages.overview.heading.waitFor();

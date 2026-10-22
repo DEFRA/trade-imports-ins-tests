@@ -23,7 +23,7 @@ test.describe('Submitted addresses keep their copy', () => {
       email: 'freeze@example.co.uk',
     });
 
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
     await animalsPages.notificationView.changeLink('Change roles and addresses').click();
     await expect(animalsPages.addresses.heading).toBeVisible();
@@ -99,7 +99,7 @@ test.describe('Submitted addresses keep their copy', () => {
       email: 'delete-freeze@example.co.uk',
     });
 
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
     await animalsPages.notificationView.changeLink('Change roles and addresses').click();
     await animalsPages.addresses.changeParty('Place of origin').click();

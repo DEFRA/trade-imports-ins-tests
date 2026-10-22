@@ -1,26 +1,25 @@
 import { test, expect } from '@fixtures';
+import { REFERENCE_NUMBER_PATTERN, WHOLE_REFERENCE_NUMBER_PATTERN } from '@domain/animals/constants/reference-number-patterns';
 
-const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
-const WHOLE_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
 const DISPLAYED_DATE_PATTERN = /\d{1,2} \w+ \d{4}/;
 
 test.describe('Import notification service dashboard', () => {
   test('starts a journey at the origin page and lists the draft', async ({ animalsJourney, pages, animalsPages }) => {
-    const journeyId = await animalsJourney.startNotification();
+    const referenceNumber = await animalsJourney.startNotification();
 
-    await expect(pages.page).toHaveURL(animalsPages.overview.expectedUrl(journeyId));
+    await expect(pages.page).toHaveURL(animalsPages.overview.expectedUrl(referenceNumber));
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    const card = animalsPages.dashboard.notificationCard(journeyId);
+    const card = animalsPages.dashboard.notificationCard(referenceNumber);
     await expect(async () => {
       await animalsPages.dashboard.open();
-      await animalsPages.dashboard.searchForReference(journeyId);
+      await animalsPages.dashboard.searchForReference(referenceNumber);
       await expect(card).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 15_000 });
     await expect(card.getByText('Draft', { exact: true })).toBeVisible();
-    await expect(animalsPages.dashboard.resume(journeyId)).toBeVisible();
-    await expect(animalsPages.dashboard.copyAsNew(journeyId)).toBeVisible();
-    await expect(animalsPages.dashboard.delete(journeyId)).toBeVisible();
+    await expect(animalsPages.dashboard.resume(referenceNumber)).toBeVisible();
+    await expect(animalsPages.dashboard.copyAsNew(referenceNumber)).toBeVisible();
+    await expect(animalsPages.dashboard.delete(referenceNumber)).toBeVisible();
   });
 
   test.describe('dashboard basics', () => {
@@ -92,7 +91,7 @@ test.describe('Import notification service dashboard', () => {
       async ({ animalsPages, animalsJourney, journeyContext }) => {
         test.slow();
         await animalsJourney.submitNotification();
-        const originalReferenceNumber = journeyContext.journeyId;
+        const originalReferenceNumber = journeyContext.referenceNumber;
 
         await animalsPages.dashboard.open();
         await animalsPages.dashboard.searchForReference(originalReferenceNumber);

@@ -53,8 +53,8 @@ export class PlantsCommodityDetailsPage extends PlantsNotificationPage {
   }
 
   /** The page as it is reached to edit a saved line, which it names by index. */
-  editUrl(journeyId: string, index: number): string {
-    return `${this.expectedUrl(journeyId)}?index=${index}`;
+  editUrl(referenceNumber: string, index: number): string {
+    return `${this.expectedUrl(referenceNumber)}?index=${index}`;
   }
 
   /**

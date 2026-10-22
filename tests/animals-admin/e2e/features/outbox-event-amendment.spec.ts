@@ -38,9 +38,9 @@ test.describe('Notification amendment outbox event', { tag: '@mongodb' }, () => 
   }) => {
     test.slow();
     await animalsJourney.submitNotification();
-    await animalsNotificationActions.amendNotification(journeyContext.journeyId);
+    await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
 
-    const aggregateId = aggregateIdFor(journeyContext.journeyId);
+    const aggregateId = aggregateIdFor(journeyContext.referenceNumber);
     const client = new MongoDbClient();
 
     try {

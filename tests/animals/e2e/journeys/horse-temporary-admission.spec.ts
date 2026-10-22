@@ -12,15 +12,15 @@ test.describe('Horse by sea under temporary admission', () => {
   }) => {
     test.slow();
 
-    const journeyId = await animalsJourney.walkOpeningRunHorseBySea({
+    const referenceNumber = await animalsJourney.walkOpeningRunHorseBySea({
       reference: `SEADOC${Date.now()}`,
       issueDate: '03/01/2026',
       filePath: fileUploadPaths.safeFile1kbPdf,
       type: 'VETERINARY_HEALTH_CERTIFICATE',
     });
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/notification-view$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
 
-    await animalsPages.overview.open(journeyId);
+    await animalsPages.overview.open(referenceNumber);
     for (const task of OPENING_RUN_TASKS) {
       await expect(animalsPages.overview.taskStatus(task)).toHaveText('Complete');
     }

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { portByCode } from '@domain/shared/fixtures/reference-data';
+import { portByCode } from '@resources/reference-data/reference-data';
 import { COLD_START } from '@fixtures/auth-state';
 import { PLANTS_FOR_PLANTING, POTATOES, WOOD_AND_CUT_TREES, arrivalDate, nurseryAddress, type CommodityLine } from '@flows/plants/journey';
 

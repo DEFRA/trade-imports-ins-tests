@@ -13,13 +13,13 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
   });
 
   test('accepts and persists multiple transited countries', async ({ pages, animalsPages }) => {
-    const journeyId = animalsPages.transitedCountries.journeyIdFromUrl();
+    const referenceNumber = animalsPages.transitedCountries.referenceNumberFromUrl();
     await animalsPages.transitedCountries.addCountry('France');
     await animalsPages.transitedCountries.addCountry('Belgium');
     await animalsPages.transitedCountries.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
-    await animalsPages.transitedCountries.open(journeyId);
+    await animalsPages.transitedCountries.open(referenceNumber);
     await expect(animalsPages.transitedCountries.row('France')).toBeVisible();
     await expect(animalsPages.transitedCountries.row('Belgium')).toBeVisible();
   });
@@ -34,12 +34,12 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
   });
 
   test('transit countries are optional: continuing with none saves and returns to the overview', async ({ pages, animalsPages }) => {
-    const journeyId = animalsPages.transitedCountries.journeyIdFromUrl();
+    const referenceNumber = animalsPages.transitedCountries.referenceNumberFromUrl();
     await animalsPages.transitedCountries.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
-    await animalsPages.transitedCountries.open(journeyId);
+    await animalsPages.transitedCountries.open(referenceNumber);
     await expect(pages.page.getByText('You have not added any countries yet.')).toBeVisible();
     await expect(animalsPages.transitedCountries.addedCountries).toHaveCount(0);
   });

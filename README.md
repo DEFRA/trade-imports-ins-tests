@@ -182,6 +182,14 @@ holds only the `sid` auth cookie, and is never written unless a fresh context
 has proved it restores to a signed-in landing page. A spec that must start
 unauthenticated opts out with `test.use({ storageState: COLD_START })`.
 
+The fixtures that sign in have their own timeout, longer than a test's, because
+signing in takes longer than a test's own budget.
+
+A spec that needs the same user in a new browser session uses the
+`openFreshSession` fixture. It opens a page in a new browser context that keeps
+only the auth cookie of the test's own page, so the service holds none of the
+first session's journey state. The fixture closes every context it opened.
+
 `E2E_SESSION_REUSE=off` is the kill switch: every test signs in for itself
 again. The CDP config caps workers at 4 when reuse is off; against the
 docker-compose stack re-cap them yourself (e.g. `-- --workers=4`).
@@ -356,7 +364,7 @@ E2E tests run in GitHub Actions via the workspace's reusable workflow, which sta
 
 The `/.github/workflows/workspace-e2e-tests.yml` workflow triggers after `Publish Branch Image` completes and calls `DEFRA/trade-imports-workspace/.github/workflows/e2e-tests.yml@main` with the branch name, then reports the result back to the PR.
 
-A service tag (`config/service-tags.ts`, for example `@ins-backend`) marks a spec in another domain that the service's pull request should also run. `npm run lint` fails if a spec carries the tag of the domain it sits in.
+A service tag (`config/service-tags.ts`, for example `@ins-backend`) marks a spec in another domain that the service's pull request should also run. `npm run lint` fails if a spec carries the tag of a service whose pull request already runs the spec's domain by path, as `config/service-tags.ts` maps it.
 
 ### Scheduled security scan
 
@@ -392,6 +400,10 @@ suite with its domain name as `<domain>:<suite>`:
 `animals:a11y` or `plants:e2e`. A domain with no specs of a test type (for example
 `plants:a11y` today) fails with Playwright's "No tests found".
 
+Calls that leave CDP for the internet go through the CDP proxy
+(`localhost:3128`), which the `externalRequest` fixture uses. Journey and
+service calls stay direct.
+
 ### Dynamics checks
 
 `@dynamics` tests prove a submitted notification reaches a domain's Dynamics
@@ -408,8 +420,8 @@ app-config and secrets on CDP, `.env` locally; see `.env.example`):
 
 A missing setting fails the test at once, naming the variable, before any journey
 runs. The tests skip on the docker-compose stack, which has no PIMS Dynamics. On CDP their
-Dataverse calls go through the CDP proxy (`localhost:3128`), which must allow
-`login.microsoftonline.com` and the Dynamics host for this test suite.
+Dataverse calls go through the CDP proxy (see [Running Tests via CDP Portal](#running-tests-via-cdp-portal)),
+which must allow `login.microsoftonline.com` and the Dynamics host for this test suite.
 
 **The suite is for CDP.** Run `npm run test:dynamics` from a laptop only to debug it or
 write a new test: use the laptop-to-CDP `.env` (`CDP_LOCAL=true`, `PLAYWRIGHT_ENVIRONMENT`)

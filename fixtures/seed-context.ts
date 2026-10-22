@@ -4,28 +4,24 @@ import { getAnimalsFrontendBaseUrl } from '@config/service-base-urls';
 
 const FRONTEND_AUTH_TARGET = 'animals';
 
-type SeedContextOptions = Pick<WorkerInfo['project']['use'], 'proxy' | 'ignoreHTTPSErrors'>;
-
-export const signInFrontendSeedState = (
+export const createFrontendSeedContext = async (
   browser: Browser,
   workerInfo: WorkerInfo,
   authStateFor: AuthStateFor | undefined,
-): Promise<string> => {
+): Promise<APIRequestContext> => {
+  const baseURL = getAnimalsFrontendBaseUrl();
+  // Carried through or the security profile bypasses ZAP and CDP fails TLS.
   const { proxy, ignoreHTTPSErrors } = workerInfo.project.use;
 
-  return authStateFor
-    ? authStateFor(FRONTEND_AUTH_TARGET)
-    : createAuthState(browser, {
+  const storageState = authStateFor
+    ? await authStateFor(FRONTEND_AUTH_TARGET)
+    : await createAuthState(browser, {
         targetName: FRONTEND_AUTH_TARGET,
-        baseURL: getAnimalsFrontendBaseUrl(),
+        baseURL,
         workerIndex: workerInfo.workerIndex,
         proxy,
         ignoreHTTPSErrors,
       });
-};
 
-// Carry proxy and ignoreHTTPSErrors through, or the security profile bypasses ZAP and CDP fails TLS.
-export const createFrontendSeedContext = (
-  storageState: string,
-  { proxy, ignoreHTTPSErrors }: SeedContextOptions,
-): Promise<APIRequestContext> => request.newContext({ baseURL: getAnimalsFrontendBaseUrl(), storageState, proxy, ignoreHTTPSErrors });
+  return request.newContext({ baseURL, storageState, proxy, ignoreHTTPSErrors });
+};

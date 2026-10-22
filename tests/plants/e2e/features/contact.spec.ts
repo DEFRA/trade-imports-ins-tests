@@ -1,7 +1,7 @@
 import type { AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { portByCode } from '@domain/shared/fixtures/reference-data';
+import { portByCode } from '@resources/reference-data/reference-data';
 import type { PlantsPages } from '@page-objects';
 import { nurseryAddress, type PlantsJourney } from '@flows/plants/journey';
 

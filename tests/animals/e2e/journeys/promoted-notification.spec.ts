@@ -10,7 +10,9 @@ test(
     await animalsJourney.submitNotification();
 
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyContext.journeyId}/confirmation$`));
-    await expect(pages.page.locator('.govuk-panel')).toContainText(journeyContext.journeyId);
+    await expect(pages.page).toHaveURL(
+      new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyContext.referenceNumber}/confirmation$`),
+    );
+    await expect(pages.page.locator('.govuk-panel')).toContainText(journeyContext.referenceNumber);
   },
 );

@@ -9,12 +9,12 @@ test.describe('Security scan (frontend, lifecycle)', { tag: '@active' }, () => {
   }) => {
     test.slow();
     await animalsJourney.submitNotification();
-    const { journeyId } = journeyContext;
+    const { referenceNumber } = journeyContext;
 
-    await animalsNotificationActions.amendNotification(journeyId);
+    await animalsNotificationActions.amendNotification(referenceNumber);
     await expect(animalsPages.overview.statusTag).toHaveText('Amend');
 
-    await animalsNotificationActions.copyNotification(journeyId);
+    await animalsNotificationActions.copyNotification(referenceNumber);
     await expect(animalsPages.overview.heading).toBeVisible();
   });
 
@@ -26,12 +26,12 @@ test.describe('Security scan (frontend, lifecycle)', { tag: '@active' }, () => {
   }) => {
     test.slow();
     await animalsJourney.submitNotification();
-    const { journeyId } = journeyContext;
+    const { referenceNumber } = journeyContext;
 
-    await animalsNotificationActions.amendNotification(journeyId);
-    await animalsNotificationActions.cancelAmend(journeyId);
+    await animalsNotificationActions.amendNotification(referenceNumber);
+    await animalsNotificationActions.cancelAmend(referenceNumber);
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
 
-    await animalsNotificationActions.deleteNotification(journeyId);
+    await animalsNotificationActions.deleteNotification(referenceNumber);
   });
 });

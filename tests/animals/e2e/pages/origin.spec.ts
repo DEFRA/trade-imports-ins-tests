@@ -35,7 +35,7 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
    * The gap is held at the overview task row and again at the check page.
    */
   test('saves what the user has when submitted without a country', async ({ animalsPages }) => {
-    const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
+    const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
 
     await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
     await animalsPages.originOfImport.internalReference.fill(INTERNAL_REFERENCE);
@@ -44,7 +44,7 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await expect(animalsPages.originOfImport.errorSummary).toHaveCount(0);
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    await animalsPages.originOfImport.open(journeyId);
+    await animalsPages.originOfImport.open(referenceNumber);
     await expect(animalsPages.originOfImport.countrySelect).toHaveValue('');
     await expect(animalsPages.originOfImport.radioRequiresOriginCode('No')).toBeChecked();
     await expect(animalsPages.originOfImport.internalReference).toHaveValue(INTERNAL_REFERENCE);
@@ -59,7 +59,7 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
   });
 
   test('persists a region of origin code selection', async ({ animalsPages }) => {
-    const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
+    const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
 
     await animalsPages.originOfImport.selectCountry('France');
     await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
@@ -67,20 +67,20 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await animalsPages.originOfImport.saveAndContinue.click();
 
     // With a country chosen the opening run carries on to commodities, not the overview.
-    await animalsPages.originOfImport.open(journeyId);
+    await animalsPages.originOfImport.open(referenceNumber);
     await expect(animalsPages.originOfImport.radioRequiresOriginCode('Yes')).toBeChecked();
     await expect(animalsPages.originOfImport.regionCode).toHaveValue('75');
   });
 
   test('persists a country subdivision selection', async ({ animalsPages }) => {
-    const journeyId = animalsPages.originOfImport.journeyIdFromUrl();
+    const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
 
     await animalsPages.originOfImport.selectCountry('Canary Islands');
     await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
     await animalsPages.originOfImport.internalReference.fill(INTERNAL_REFERENCE);
     await animalsPages.originOfImport.saveAndContinue.click();
 
-    await animalsPages.originOfImport.open(journeyId);
+    await animalsPages.originOfImport.open(referenceNumber);
     await expect(animalsPages.originOfImport.countrySelect).toHaveValue('ES-CN');
     await expect(animalsPages.originOfImport.countryOfOrigin).toHaveValue('Canary Islands');
   });

@@ -9,7 +9,7 @@ Playwright end-to-end, accessibility and security suite for the trade imports se
 | `tests/<domain>` | The specs                                                                      |
 | `flows/<domain>` | Multi-page sequences: `journey.ts` `to*` methods and the actions built on them |
 | `page-objects`   | One class per page: locators and single-page actions                           |
-| `domain`         | Constants, models and fixtures shared by specs                                 |
+| `domain`         | Constants, models and types shared by specs                                    |
 | `fixtures`       | Playwright fixtures that hand specs their pages, flows and API clients         |
 
 ## Writing specs

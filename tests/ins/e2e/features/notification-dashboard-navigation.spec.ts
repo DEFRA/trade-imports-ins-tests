@@ -15,7 +15,7 @@ test.describe('INS dashboard notification navigation', { tag: ['@animals-backend
 
     // Given — a notification has been submitted in the animals journey
     await animalsJourney.toDeclaration();
-    const referenceNumber = journeyContext.journeyId;
+    const referenceNumber = journeyContext.referenceNumber;
     await animalsPages.declaration.confirmation.check();
     await animalsPages.declaration.continueButton.click();
     await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();

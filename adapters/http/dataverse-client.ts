@@ -5,6 +5,12 @@ import { entraIdTokenUrl, DATAVERSE_API_PATH, getDataverseCredentials, type Data
 /** Quote a string for an OData $filter: single quotes are doubled. */
 export const odataString = (value: string): string => `'${value.replaceAll("'", "''")}'`;
 
+const FORMATTED_VALUE_ANNOTATION = 'OData.Community.Display.V1.FormattedValue';
+
+/** The display text Dataverse returned beside a row's column: a lookup's name, an option set's label, a formatted date. */
+export const formattedValue = (row: object, column: string): string | undefined =>
+  (row as Record<string, string | undefined>)[`${column}@${FORMATTED_VALUE_ANNOTATION}`];
+
 interface EntraIdTokenResponse {
   access_token?: string;
   error_description?: string;
@@ -26,7 +32,7 @@ export class DataverseClient {
     this.rest = new RestClient(environmentUrl, request);
   }
 
-  /** Without `select`, Dataverse returns every column. */
+  /** Without `select`, Dataverse returns every column. Each row carries display text read by {@link formattedValue}. */
   async query<T>(entitySet: string, filter: string, select?: readonly string[]): Promise<T[]> {
     const { value } = await this.rest.get<{ value: T[] }>(
       `${DATAVERSE_API_PATH}/${entitySet}?$filter=${encodeURIComponent(filter)}${select ? `&$select=${select.join(',')}` : ''}`,
@@ -35,6 +41,7 @@ export class DataverseClient {
         Accept: 'application/json',
         'OData-MaxVersion': '4.0',
         'OData-Version': '4.0',
+        Prefer: `odata.include-annotations="${FORMATTED_VALUE_ANNOTATION}"`,
       },
     );
     return value;

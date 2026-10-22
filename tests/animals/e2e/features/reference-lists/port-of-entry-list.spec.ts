@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { portLabel, portsOfEntry } from '@domain/shared/fixtures/reference-data';
+import { portLabel, portsOfEntry } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Port of entry list', () => {
