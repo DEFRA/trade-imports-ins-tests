@@ -48,6 +48,6 @@ test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () 
     await saveArrivalWithMeans(meansOfTransport.roadVehicle.display);
     await animalsPages.overview.task('Transit countries').click();
     await expect(animalsPages.transitedCountries.heading).toBeVisible();
-    await expect(animalsPages.transitedCountries.emptyListLine).toBeVisible();
+    await animalsPages.transitedCountries.expectEmptyList();
   });
 });

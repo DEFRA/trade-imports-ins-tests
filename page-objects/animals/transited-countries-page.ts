@@ -1,9 +1,10 @@
 import { expect, type Locator, type Page } from '@playwright/test';
+import { EMPTY_TRANSIT_COUNTRIES_BODY_TEXT, EMPTY_TRANSIT_COUNTRIES_BUTTONS } from '@domain/animals/constants/transit-countries-page';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { TypeAhead } from '@page-objects/shared/type-ahead';
 
 export class AnimalsTransitedCountriesPage extends NotificationPage {
-  private readonly country: TypeAhead;
+  public readonly country: TypeAhead;
 
   constructor(page: Page) {
     super(page, 'transit-countries');
@@ -15,10 +16,6 @@ export class AnimalsTransitedCountriesPage extends NotificationPage {
       level: 1,
       name: 'Which countries will the consignment travel through?',
     });
-  }
-
-  get countryControl(): Locator {
-    return this.page.locator('#transitedCountry');
   }
 
   get addCountryButton(): Locator {
@@ -39,12 +36,29 @@ export class AnimalsTransitedCountriesPage extends NotificationPage {
     return this.page.getByRole('button', { name: `Remove ${name}` });
   }
 
-  get emptyListLine(): Locator {
-    return this.page.getByText('You have not added any countries yet.', { exact: true });
-  }
-
   get addedCountries(): Locator {
     return this.page.getByRole('row').filter({ has: this.page.getByRole('button', { name: /^Remove / }) });
+  }
+
+  get addedCountryNames(): Locator {
+    return this.addedCountries.locator('td:first-child');
+  }
+
+  get bodyParagraphs(): Locator {
+    return this.page.getByRole('main').getByRole('paragraph');
+  }
+
+  get formButtons(): Locator {
+    return this.page.locator('form').getByRole('button');
+  }
+
+  async expectEmptyList(): Promise<void> {
+    await expect(this.bodyParagraphs).toHaveText(EMPTY_TRANSIT_COUNTRIES_BODY_TEXT);
+    await expect(this.formButtons).toHaveText(EMPTY_TRANSIT_COUNTRIES_BUTTONS);
+  }
+
+  get statusRegion(): Locator {
+    return this.page.locator('#transit-countries-status');
   }
 
   get saveAndContinue(): Locator {
