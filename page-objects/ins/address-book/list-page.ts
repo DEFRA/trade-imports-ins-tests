@@ -1,5 +1,5 @@
 import { Locator } from '@playwright/test';
-import { BasePage } from '@page-objects/shared/base-page';
+import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
 
 export class InsAddressBookListPage extends BasePage {
   readonly expectedUrl = '/address-book';
@@ -28,8 +28,8 @@ export class InsAddressBookListPage extends BasePage {
     return this.page.getByRole('row', { name: new RegExp(name) });
   }
 
-  async open(attemptSignIn: boolean = true, options?: { userId?: string; organisationSbi?: string }): Promise<void> {
+  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.page.goto(this.expectedUrl);
-    await this.signInWhenRequested(attemptSignIn, options);
+    await this.signInWhenRequested(attemptSignIn, identity);
   }
 }

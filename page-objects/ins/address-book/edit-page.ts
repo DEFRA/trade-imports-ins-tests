@@ -1,4 +1,5 @@
 import { Locator } from '@playwright/test';
+import { type OpenOptions } from '@page-objects/shared/base-page';
 import { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 
 export class InsAddressBookEditPage extends InsAddressBookFormPage {
@@ -18,9 +19,9 @@ export class InsAddressBookEditPage extends InsAddressBookFormPage {
     return this.page.getByRole('button', { name: 'Cancel' });
   }
 
-  async open(addressId: string, attemptSignIn: boolean = true, options?: { userId?: string; organisationSbi?: string }): Promise<void> {
+  async open(addressId: string, { attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.page.goto(this.expectedUrl(addressId));
-    await this.signInWhenRequested(attemptSignIn, options);
+    await this.signInWhenRequested(attemptSignIn, identity);
   }
 
   async save(): Promise<void> {
