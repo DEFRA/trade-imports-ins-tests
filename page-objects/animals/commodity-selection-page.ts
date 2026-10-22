@@ -18,7 +18,6 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Search', exact: true });
   }
 
-  /** The panel listing what is already on the notification, headed with its count. */
   get selectionPanel(): Locator {
     return this.page.locator('#commodity-selection');
   }
@@ -27,8 +26,6 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Clear all' });
   }
 
-  /** The page lists nothing of its own accord — results only appear once a
-   * query of at least three characters has been submitted. */
   async search(query: string): Promise<void> {
     await this.searchBox.fill(query);
     await this.searchButton.click();
@@ -38,9 +35,6 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('checkbox', { name });
   }
 
-  /** A species has no tick box until its own query puts it in the results, so
-   * each name is searched for before it is ticked. Ticks made under an earlier
-   * query ride back with the form, so they survive the next search. */
   async selectSpecies(names: string[]): Promise<void> {
     for (const name of names) {
       await this.search(name);
