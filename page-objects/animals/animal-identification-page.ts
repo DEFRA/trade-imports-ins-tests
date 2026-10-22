@@ -1,7 +1,10 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import { SelectedCommoditiesTable } from '@page-objects/animals/selected-commodities-table';
 
 export class AnimalsAnimalIdentificationPage extends NotificationPage {
+  readonly selectedCommodities = new SelectedCommoditiesTable(this.page);
+
   constructor(page: Page) {
     super(page, 'commodities/identification');
   }
@@ -19,17 +22,25 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
   }
 
   get microchip(): Locator {
-    return this.page.getByLabel('Microchip number', { exact: true });
+    return this.page.getByLabel('Microchip', { exact: true });
   }
 
   get horseName(): Locator {
     return this.page.getByLabel('Horse name', { exact: true });
   }
 
-  // A saved animal is one row of the card's table, keyed by its species and
-  // number — "Bos taurus 1".
+  commodityHeading(heading: string): Locator {
+    return this.page.getByRole('heading', { level: 2, name: heading, exact: true });
+  }
+
+  speciesCard(species: string): Locator {
+    return this.page.getByRole('region', { name: species, exact: true });
+  }
+
   savedAnimalRow(species: string, number: number): Locator {
-    return this.page.getByRole('row').filter({ hasText: `${species} ${number}` });
+    return this.speciesCard(species)
+      .getByRole('row')
+      .filter({ hasText: `${species} ${number}` });
   }
 
   identifierColumn(name: string): Locator {
@@ -40,8 +51,6 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Save and add another' });
   }
 
-  // The in-card button names what is left on the line: it finishes the line on
-  // the last outstanding animal rather than inviting another.
   get saveAndFinish(): Locator {
     return this.page.getByRole('button', { name: 'Save and finish' });
   }

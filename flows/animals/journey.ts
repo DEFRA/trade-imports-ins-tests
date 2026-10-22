@@ -25,6 +25,11 @@ export type ArrivalDetailsAnswer = {
   documentReference?: string;
 };
 
+export type SpeciesAnimalCount = {
+  species: string;
+  animalCount: number;
+};
+
 export const IMPORT_REASON_TASK = 'Main import reason';
 
 export const OPENING_RUN_TASKS = [
@@ -126,6 +131,16 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Commodity details').click();
     await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
+  }
+
+  private async openIdentificationFromOverview(): Promise<void> {
+    await this.animalsPages.overview.task('Identification details').click();
+    await this.animalsPages.animalIdentification.heading.waitFor(pageLoadWait);
+  }
+
+  private async saveCountsAndReturnToOverview(): Promise<void> {
+    await this.animalsPages.consignmentDetails.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
   private async openCurrentOverview(): Promise<void> {
@@ -337,15 +352,22 @@ export class AnimalsJourney {
     await this.animalsPages.overview.task('What are you importing?').click();
     await this.chooseSpeciesAndOpenCommodityDetails([species]);
     await this.animalsPages.consignmentDetails.fillEveryAnimalCount('1');
-    await this.animalsPages.consignmentDetails.saveAndContinue.click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.saveCountsAndReturnToOverview();
   }
 
   async toAnimalIdentification(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.animalsPages.overview.task('Identification details').click();
-    await this.animalsPages.animalIdentification.heading.waitFor(pageLoadWait);
+    await this.openIdentificationFromOverview();
+  }
+
+  async toAnimalIdentificationWithCounts(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
+    await this.toConsignmentDetails(speciesCounts.map(({ species }) => species));
+    for (const { species, animalCount } of speciesCounts) {
+      await this.animalsPages.consignmentDetails.fillAnimalCountFor(species, animalCount);
+    }
+    await this.saveCountsAndReturnToOverview();
+    await this.openIdentificationFromOverview();
   }
 
   async toImportReason(): Promise<void> {

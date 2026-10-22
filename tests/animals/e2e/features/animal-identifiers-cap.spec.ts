@@ -1,28 +1,14 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () => {
-  test('the N-of-M counter caps records at the declared count, remove frees a slot, and a count drop is blocked with an error naming the species', async ({
+  test('the N-of-M counter caps identifier records at the declared count, the full card shows only its saved animals, Remove frees a slot, and a count drop is refused with an error naming the species that lands on its card under the Cow (0102) section', async ({
     animalsJourney,
     pages,
     animalsPages,
   }) => {
     test.slow();
-    await animalsJourney.startNotification();
+    await animalsJourney.toAnimalIdentificationWithCounts([{ species: 'Bos taurus', animalCount: 2 }]);
 
-    // A cattle line with a declared count of 2 (M = 2).
-    await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
-    await animalsPages.commoditySelection.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('Commodity details').click();
-    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
-    await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
-    await animalsPages.consignmentDetails.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-
-    // Counter progression: 1 of 2, then Save and add another moves to 2 of 2
-    // with the first record in the card's table.
-    await animalsPages.overview.task('Identification details').click();
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 1 of 2' })).toBeVisible();
     await animalsPages.animalIdentification.earTag.fill('UK000000000001');
     await animalsPages.animalIdentification.saveAndAddAnother.click();
@@ -34,24 +20,14 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
       animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 1).getByRole('cell', { name: 'UK000000000001', exact: true }),
     ).toBeVisible();
 
-    // At N = M the maximum-reached state replaces the entry form; the saved
-    // records stay removable.
-    // The second record is the last outstanding animal, so the in-card button
-    // finishes the line instead of inviting another.
     await animalsPages.animalIdentification.earTag.fill('UK000000000002');
     await animalsPages.animalIdentification.saveAndFinish.click();
-    await expect(
-      pages.page.getByText('You have entered details for all 2 Bos taurus animals', {
-        exact: false,
-      }),
-    ).toBeVisible();
-    await expect(animalsPages.animalIdentification.earTag).toHaveCount(0);
-    await expect(animalsPages.animalIdentification.saveAndAddAnother).toHaveCount(0);
+    const card = animalsPages.animalIdentification.speciesCard('Bos taurus');
+    await expect(animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 1)).toBeVisible();
+    await expect(animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 2)).toBeVisible();
+    await expect(card.getByRole('button')).toHaveText([/^Remove/, /^Remove/]);
+    await expect(card.getByRole('textbox')).toHaveCount(0);
 
-    // Count-drop guard: lowering the count below the record count blocks the
-    // details-page save with an error NAMING the species whose summary link
-    // goes straight to this species' identifier card — the records are never
-    // silently trimmed.
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();
@@ -65,13 +41,14 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await expect(dropError).toBeVisible();
     await dropError.click();
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/#identification-card-0$/);
+    await expect(animalsPages.animalIdentification.commodityHeading('Cow (0102)')).toBeVisible();
+    await expect(card.getByRole('heading', { name: 'Bos taurus', exact: true })).toBeVisible();
     await expect(animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 2)).toBeVisible();
 
-    // Remove frees a slot: the entry form reopens at 2 of 2.
     await animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 2).getByRole('button', { name: 'Remove' }).click();
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 2 of 2' })).toBeVisible();
 
-    // With one record left the drop no longer applies — a count of 1 saves.
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();
