@@ -1,42 +1,13 @@
 import { type Locator } from '@playwright/test';
+import { PlantsAddressBookPickerPage } from '@page-objects/plants/address-book-picker-page';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
 
-export class PlantsConsignorSelectPage extends PlantsNotificationPage {
+export class PlantsConsignorSelectPage extends PlantsAddressBookPickerPage {
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
-    super(page, 'consignors/select');
+    super(page, 'consignors/select', 'Current consignor');
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Consignor or exporter', exact: true });
-  }
-
-  address(name: string): Locator {
-    return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
-  }
-
-  selectedAddress(name: string): Locator {
-    return this.page.getByText(`Selected address: ${name}`, { exact: true });
-  }
-
-  async searchFor(term: string): Promise<void> {
-    await this.page.getByLabel('Search', { exact: true }).fill(term);
-    await this.page.getByRole('button', { name: 'Search', exact: true }).click();
-  }
-
-  /** The copy this notification holds, which may differ from any record in the list. */
-  get currentAddress(): Locator {
-    return this.page.getByRole('region', { name: 'Current consignor or exporter' });
-  }
-
-  get editCurrentAddress(): Locator {
-    return this.currentAddress.getByRole('link', { name: /^Edit details/ });
-  }
-
-  get btnSaveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue', exact: true });
-  }
-
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
+    return this.page.getByRole('heading', { level: 1, name: 'Consignor', exact: true });
   }
 }

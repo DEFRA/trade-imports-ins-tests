@@ -1,32 +1,36 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { AnimalsPages, SharedPages } from '@page-objects';
-import { defaultJourneyOptions, type JourneyOptions } from '@domain/animals/constants/journey-options';
+import {
+  ALL_ANSWERS,
+  MANDATORY_ANSWERS,
+  assertConsistentAnswers,
+  type AccompanyingDocumentAnswer,
+  type CphAnswer,
+  type NotificationAnswers,
+  type OriginOptions,
+  type PartyAnswers,
+} from '@domain/animals/constants/journey-options';
+import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 
-export type AccompanyingDocumentAnswer = {
-  reference: string;
-  /** A date string in d/m/yyyy form. */
-  issueDate: string;
-  filePath: string;
-  /** A document-type code, e.g. VETERINARY_HEALTH_CERTIFICATE. */
-  type: string;
-};
-
 export type ArrivalDetailsAnswer = {
+  date?: string;
   means?: string;
   port?: string;
   transportId?: string;
   documentReference?: string;
 };
 
+export const IMPORT_REASON_TASK = 'Main import reason';
+
 export const OPENING_RUN_TASKS = [
   'Where is this consignment coming from?',
   'What are you importing?',
-  'Main reason for import',
+  IMPORT_REASON_TASK,
   'Commodity details',
   'Identification details',
   'Additional details',
@@ -37,11 +41,7 @@ export const OPENING_RUN_TASKS = [
   'Contact address for this consignment',
 ] as const;
 
-type OriginOfImportOptions = JourneyOptions & { regionCode?: string };
-
-export const DEFAULT_REGION_CODE = '75';
-const PORT = pointOfEntries.aberdeenHarbour.display;
-export const ARRIVAL_DATE = getRelativeAppDateText({ monthOffset: 1 });
+export const DEFAULT_REGION_CODE = ALL_ANSWERS.regionCode;
 export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffset: 2 });
 export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
 export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
@@ -92,9 +92,9 @@ export class AnimalsJourney {
     await this.createNotificationAtOrigin();
   }
 
-  async fillOriginOfImport(options: OriginOfImportOptions = {}): Promise<void> {
-    await this.animalsPages.originOfImport.country.choose(options.countryCode?.display ?? defaultJourneyOptions.countryCode.display);
-    const requiresRegionCode = options.requiresRegionCode ?? 'No';
+  async fillOriginOfImport(options: OriginOptions = {}): Promise<void> {
+    await this.animalsPages.originOfImport.country.choose((options.countryCode ?? MANDATORY_ANSWERS.countryCode).display);
+    const requiresRegionCode = options.requiresRegionCode ?? MANDATORY_ANSWERS.requiresRegionCode;
     await this.animalsPages.originOfImport.radioRequiresOriginCode(requiresRegionCode).check();
     if (requiresRegionCode === 'Yes') {
       await this.animalsPages.originOfImport.regionCode.fill(options.regionCode ?? DEFAULT_REGION_CODE);
@@ -108,14 +108,14 @@ export class AnimalsJourney {
     await this.animalsPages.originOfImport.saveAndContinue.click();
   }
 
-  async answerOriginWithRegionCode(regionCode: string, options: OriginOfImportOptions = {}): Promise<void> {
+  async answerOriginWithRegionCode(regionCode: string, options: OriginOptions = {}): Promise<void> {
     await this.fillOriginOfImport({ ...options, requiresRegionCode: 'Yes', regionCode });
     await this.saveOriginOfImport();
   }
 
-  async answerOrigin(options: OriginOfImportOptions = {}): Promise<void> {
+  async answerOrigin(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Where is this consignment coming from?').click();
-    await this.fillOriginOfImport(options);
+    await this.fillOriginOfImport(answers);
     await this.saveOriginOfImport();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
@@ -140,31 +140,36 @@ export class AnimalsJourney {
     await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
   }
 
-  async answerCommodity(): Promise<void> {
+  async answerCommodity(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('What are you importing?').click();
-    await this.chooseSpeciesAndOpenCommodityDetails(['Bos taurus']);
-    await this.animalsPages.consignmentDetails.numberOfAnimals.fill('1');
-    await this.animalsPages.consignmentDetails.numberOfPackages.fill('5');
+    await this.chooseSpeciesAndOpenCommodityDetails([answers.species.display]);
+    await this.animalsPages.consignmentDetails.numberOfAnimals.fill(String(answers.noOfAnimals));
+    if (answers.noOfPackages !== undefined) {
+      await this.animalsPages.consignmentDetails.numberOfPackages.fill(String(answers.noOfPackages));
+    }
     await this.animalsPages.consignmentDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async answerAnimalIdentification(): Promise<void> {
+  async answerAnimalIdentification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Identification details').click();
-    await this.animalsPages.animalIdentification.earTag.fill('UK123456789012');
+    await this.animalsPages.animalIdentification.earTag.fill(answers.earTag);
+    if (answers.passportNumber !== undefined) {
+      await this.animalsPages.animalIdentification.passportNumber.fill(answers.passportNumber);
+    }
     await this.animalsPages.animalIdentification.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async answerReasonAndAdditionalDetails(): Promise<void> {
-    await this.animalsPages.overview.task('Main reason for import').click();
-    await this.animalsPages.importReason.reason('Internal market').check();
-    await this.animalsPages.importReason.purpose('Breeding').check();
+  async answerReasonAndAdditionalDetails(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+    await this.animalsPages.overview.task(IMPORT_REASON_TASK).click();
+    await this.animalsPages.importReason.reason(answers.importReason.display).check();
+    await this.animalsPages.importReason.purpose(answers.internalMarketPurpose.display).check();
     await this.animalsPages.importReason.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.openAdditionalDetailsFromOverview();
-    await this.animalsPages.additionalDetails.certifiedFor('Slaughter').check();
-    await this.animalsPages.additionalDetails.containsUnweanedAnimals('No').check();
+    await this.animalsPages.additionalDetails.certifiedFor(answers.certifiedFor.display).check();
+    await this.animalsPages.additionalDetails.containsUnweanedAnimals(answers.unweanedAnimals).check();
     await this.animalsPages.additionalDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
@@ -180,13 +185,13 @@ export class AnimalsJourney {
     await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
   }
 
-  async addFiveParties(): Promise<void> {
+  async addFiveParties(names: PartyAnswers = MANDATORY_ANSWERS.parties): Promise<void> {
     const parties = [
-      ['Consignor or exporter', 'Astra Rosales', 'consignorSelection'],
-      ['Place of destination', 'Tech Imports Ltd', 'destinationSelection'],
-      ['Place of origin', 'Origin Farm', 'placeOfOriginSelection'],
-      ['Consignee', 'British Livestock Ltd', 'consigneeSelection'],
-      ['Importer', 'Import Co UK', 'importerSelection'],
+      ['Consignor', names.consignor, 'consignorSelection'],
+      ['Place of destination', names.placeOfDestination, 'destinationSelection'],
+      ['Place of origin', names.placeOfOrigin, 'placeOfOriginSelection'],
+      ['Consignee', names.consignee, 'consigneeSelection'],
+      ['Importer', names.importer, 'importerSelection'],
     ] as const;
     for (const [role, name, picker] of parties) {
       await this.animalsPages.addresses.addParty(role).click();
@@ -203,29 +208,30 @@ export class AnimalsJourney {
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
   }
 
-  async addCphAndLeaveAddresses(): Promise<void> {
+  async addCphAndLeaveAddresses(cph: CphAnswer = MANDATORY_ANSWERS.cph): Promise<void> {
     await this.animalsPages.addresses.addCph.click();
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
-    await this.animalsPages.cphNumber.fillCphNumber();
+    await this.animalsPages.cphNumber.fillCphNumber(cph.county, cph.parish, cph.holding);
     await this.animalsPages.cphNumber.saveAndContinue.click();
     await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     await this.animalsPages.addresses.continueButton.click();
   }
 
-  async answerAddresses(): Promise<void> {
+  async answerAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Roles and addresses').click();
-    await this.addFiveParties();
-    await this.addCphAndLeaveAddresses();
+    await this.addFiveParties(answers.parties);
+    await this.addCphAndLeaveAddresses(answers.cph);
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
   async fillArrivalDetails({
-    means = 'Road Vehicle',
-    port = PORT,
-    transportId = 'FR-892-LK',
-    documentReference = 'CMR-2026-884721',
+    date = MANDATORY_ANSWERS.arrivalDate,
+    means = MANDATORY_ANSWERS.meansOfTransport.display,
+    port = MANDATORY_ANSWERS.pointOfEntry.display,
+    transportId = MANDATORY_ANSWERS.transportIdentification,
+    documentReference = MANDATORY_ANSWERS.transportDocumentReference,
   }: ArrivalDetailsAnswer = {}): Promise<void> {
-    await this.animalsPages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
+    await this.animalsPages.arrivalDetails.fillArrivalDate(date);
     await this.animalsPages.arrivalDetails.selectPort(port);
     await this.animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: means });
     await this.animalsPages.arrivalDetails.transportIdentification.fill(transportId);
@@ -241,8 +247,8 @@ export class AnimalsJourney {
       .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
   }
 
-  async chooseContactAddress(): Promise<void> {
-    await this.animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
+  async chooseContactAddress(name: string = MANDATORY_ANSWERS.contactAddress): Promise<void> {
+    await this.animalsPages.contactAddress.address(name).check();
     await this.animalsPages.contactAddress.saveAndContinue.click();
   }
 
@@ -254,45 +260,65 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
-    await this.animalsPages.transitedCountries.addCountry('France');
+    await this.animalsPages.transitedCountries.addCountry(ALL_ANSWERS.transitedCountries[0].display);
     await this.animalsPages.transitedCountries.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
   }
 
-  async answerTransport(): Promise<void> {
+  async answerTransport(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Arrival details').click();
-    await this.fillArrivalDetails();
+    await this.fillArrivalDetails({
+      date: answers.arrivalDate,
+      means: answers.meansOfTransport.display,
+      port: answers.pointOfEntry.display,
+      transportId: answers.transportIdentification,
+      documentReference: answers.transportDocumentReference,
+    });
     await this.animalsPages.arrivalDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    await this.animalsPages.overview.task('Transit countries').click();
-    await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
-    await this.animalsPages.transitedCountries.addCountry('France');
-    await this.animalsPages.transitedCountries.addCountry('Belgium');
-    await this.animalsPages.transitedCountries.saveAndContinue.click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    if (answers.transitedCountries) {
+      await this.animalsPages.overview.task('Transit countries').click();
+      await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
+      for (const country of answers.transitedCountries) {
+        await this.animalsPages.transitedCountries.addCountry(country.display);
+      }
+      await this.animalsPages.transitedCountries.saveAndContinue.click();
+      await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    }
     await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
-    await this.animalsPages.transporter.transporter('García Livestock Transport SL').check();
+    await this.animalsPages.transporter.transporter(answers.transporter.display).check();
     await this.animalsPages.transporter.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async answerContact(): Promise<void> {
+  async answerContact(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Contact address for this consignment').click();
-    await this.chooseContactAddress();
+    await this.chooseContactAddress(answers.contactAddress);
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async completeAnswerSections(origin: Pick<JourneyOptions, 'countryCode'> = {}): Promise<void> {
-    await this.answerOrigin({ requiresRegionCode: 'Yes', internalReference: 'Imports456GB', ...origin });
-    await this.answerCommodity();
-    await this.answerAnimalIdentification();
-    await this.answerReasonAndAdditionalDetails();
-    await this.answerAddresses();
-    await this.answerTransport();
-    await this.answerContact();
+  async answerAccompanyingDocument(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+    if (!answers.accompanyingDocument) return;
+    await this.animalsPages.overview.task('Upload documents').click();
+    await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
+    await this.uploadDocumentAndWaitForScan(answers.accompanyingDocument);
+    await this.animalsPages.overview.open(this.animalsPages.accompanyingDocuments.referenceNumberFromUrl());
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+  }
+
+  async completeAnswerSections(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+    assertConsistentAnswers(answers);
+    await this.answerOrigin(answers);
+    await this.answerCommodity(answers);
+    await this.answerAnimalIdentification(answers);
+    await this.answerReasonAndAdditionalDetails(answers);
+    await this.answerAddresses(answers);
+    await this.answerTransport(answers);
+    await this.answerContact(answers);
+    await this.answerAccompanyingDocument(answers);
   }
 
   async toCommoditySelection(): Promise<void> {
@@ -301,7 +327,7 @@ export class AnimalsJourney {
     await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
   }
 
-  async toConsignmentDetails(species: string[] = ['Bos taurus']): Promise<void> {
+  async toConsignmentDetails(species: string[] = [MANDATORY_ANSWERS.species.display]): Promise<void> {
     await this.toCommoditySelection();
     await this.chooseSpeciesAndOpenCommodityDetails(species);
   }
@@ -325,7 +351,7 @@ export class AnimalsJourney {
   async toImportReason(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.animalsPages.overview.task('Main reason for import').click();
+    await this.animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await this.animalsPages.importReason.heading.waitFor(pageLoadWait);
   }
 
@@ -373,7 +399,7 @@ export class AnimalsJourney {
 
   async toTransporter(): Promise<void> {
     await this.toTransitedCountries();
-    await this.animalsPages.transitedCountries.addCountry('France');
+    await this.animalsPages.transitedCountries.addCountry(ALL_ANSWERS.transitedCountries[0].display);
     await this.animalsPages.transitedCountries.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transport details').click();
@@ -402,33 +428,21 @@ export class AnimalsJourney {
     await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
   }
 
-  async toReview(): Promise<void> {
+  async toReview(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     if (!this.context.referenceNumber) await this.startNotification();
-    await this.completeAnswerSections();
+    await this.completeAnswerSections(answers);
     await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
-  async toDeclaration(origin: Pick<JourneyOptions, 'countryCode'> = {}): Promise<void> {
+  async toDeclaration(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.startNotification();
-    await this.completeAnswerSections(origin);
+    await this.completeAnswerSections(answers);
     await this.fromOverviewToDeclaration();
   }
 
-  async submitNotification(origin: Pick<JourneyOptions, 'countryCode'> = {}): Promise<void> {
-    await this.toDeclaration(origin);
-    await this.confirmDeclaration();
-  }
-
-  async submitNotificationWithDocument(document: AccompanyingDocumentAnswer): Promise<void> {
-    await this.startNotification();
-    await this.completeAnswerSections();
-    await this.animalsPages.overview.task('Upload documents').click();
-    await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await this.uploadDocumentAndWaitForScan(document);
-    await this.animalsPages.overview.open(this.animalsPages.accompanyingDocuments.referenceNumberFromUrl());
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    await this.fromOverviewToDeclaration();
+  async submitNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+    await this.toDeclaration(answers);
     await this.confirmDeclaration();
   }
 
@@ -440,7 +454,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies(['Bos taurus']);
+    await pages.commoditySelection.selectSpecies([MANDATORY_ANSWERS.species.display]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);
@@ -477,7 +491,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies(['Bos taurus']);
+    await pages.commoditySelection.selectSpecies([MANDATORY_ANSWERS.species.display]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);
@@ -494,11 +508,11 @@ export class AnimalsJourney {
     await pages.animalIdentification.earTag.fill('UK000000000001');
     await pages.animalIdentification.passportNumber.fill('PASSPORT-0001');
     await pages.animalIdentification.saveAndAddAnother.click();
-    await pages.animalIdentification.savedAnimalRow('Bos taurus', 1).waitFor(pageLoadWait);
+    await pages.animalIdentification.savedAnimalRow(MANDATORY_ANSWERS.species.display, 1).waitFor(pageLoadWait);
     await pages.animalIdentification.earTag.fill('UK000000000002');
     await pages.animalIdentification.passportNumber.fill('PASSPORT-0002');
     await pages.animalIdentification.saveAndFinish.click();
-    await pages.animalIdentification.savedAnimalRow('Bos taurus', 2).waitFor(pageLoadWait);
+    await pages.animalIdentification.savedAnimalRow(MANDATORY_ANSWERS.species.display, 2).waitFor(pageLoadWait);
     await pages.animalIdentification.saveAndContinue.click();
 
     await pages.additionalDetails.heading.waitFor(pageLoadWait);
@@ -509,14 +523,14 @@ export class AnimalsJourney {
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
       port: pointOfEntries.heathrowAirport.display,
-      means: 'Airplane',
+      means: meansOfTransport.airplane.display,
       transportId: 'BA0117',
       documentReference: 'AWB-2026-0001',
     });
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);
-    await pages.transporter.transporter('García Livestock Transport SL').check();
+    await pages.transporter.transporter(MANDATORY_ANSWERS.transporter.display).check();
     await pages.transporter.saveAndContinue.click();
 
     await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
@@ -569,7 +583,7 @@ export class AnimalsJourney {
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
       port: pointOfEntries.holyheadPort.display,
-      means: 'Vessel',
+      means: meansOfTransport.vessel.display,
       transportId: HORSE_TRANSPORT_ID,
       documentReference: 'BOL-2026-0001',
     });
@@ -594,15 +608,26 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
+  async toDeclarationOfCurrentNotification(): Promise<void> {
+    const { referenceNumber } = this.context;
+    if (!referenceNumber) throw new Error('No notification has been started');
+    await this.animalsPages.notificationView.open(referenceNumber);
+    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.continueFromReviewToDeclaration();
+  }
+
   async submitFromReview(): Promise<void> {
-    await this.animalsPages.notificationView.continueButton.click();
-    await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
+    await this.continueFromReviewToDeclaration();
     await this.confirmDeclaration();
   }
 
   private async fromOverviewToDeclaration(): Promise<void> {
     await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.continueFromReviewToDeclaration();
+  }
+
+  private async continueFromReviewToDeclaration(): Promise<void> {
     await this.animalsPages.notificationView.continueButton.click();
     await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
   }

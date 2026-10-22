@@ -2,28 +2,38 @@ import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, POTATOES, WOOD_AND_CUT_TREES, nurseryAddress } from '@flows/plants/journey';
 
-const CONSIGNOR = 'Consignor or exporter';
+const CONSIGNOR = 'Consignor';
 const NUMBERS = 'Identification numbers';
 
 test.describe('High-risk plants consignment parties section', () => {
   for (const type of [PLANTS_FOR_PLANTING, WOOD_AND_CUT_TREES]) {
-    test(`${type}: consignor is required, saves, and continues to scoped identification numbers`, async ({
+    test(`${type}: a blank consignor save moves on to identification numbers, leaving the consignor not yet started`, async ({
       pages,
       plantsPages,
       plantsJourney,
       addressBookApi,
     }) => {
-      const name = `Parties Nursery ${randomUUID()}`;
-      await addressBookApi.createAddress(nurseryAddress(name));
-      const reference = await plantsJourney.toDestinationOfNewNotification(type);
-      await plantsJourney.chooseDestination(name);
+      const { reference } = await plantsJourney.toConsignorOfNewNotification(addressBookApi, type);
       const consignor = plantsPages.consignorSelect;
-      const numbers = plantsPages.identificationNumbers;
 
       await expect(pages.page).toHaveURL(consignor.expectedUrl(reference));
       await expect(consignor.heading).toBeVisible();
       await consignor.btnSaveAndContinue.click();
-      await expect(consignor.errorSummary).toContainText('Select a consignor from the list');
+      await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrl(reference));
+      await plantsPages.overview.open(reference);
+      await expect(plantsPages.overview.taskRow(CONSIGNOR)).toContainText('Not yet started');
+    });
+
+    test(`${type}: a chosen consignor saves and the notification continues to scoped identification numbers`, async ({
+      pages,
+      plantsPages,
+      plantsJourney,
+      addressBookApi,
+    }) => {
+      const { reference, destinationName: name } = await plantsJourney.toConsignorOfNewNotification(addressBookApi, type);
+      const consignor = plantsPages.consignorSelect;
+      const numbers = plantsPages.identificationNumbers;
+
       await consignor.searchFor(name);
       await consignor.address(name).check();
       await consignor.btnSaveAndContinue.click();

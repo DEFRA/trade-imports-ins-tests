@@ -364,7 +364,7 @@ E2E tests run in GitHub Actions via the workspace's reusable workflow, which sta
 
 The `/.github/workflows/workspace-e2e-tests.yml` workflow triggers after `Publish Branch Image` completes and calls `DEFRA/trade-imports-workspace/.github/workflows/e2e-tests.yml@main` with the branch name, then reports the result back to the PR.
 
-A service tag (`config/service-tags.ts`, for example `@ins-backend`) marks a spec in another domain that the service's pull request should also run. `npm run lint` fails if a spec carries the tag of the domain it sits in.
+A service tag (`config/service-tags.ts`, for example `@ins-backend`) marks a spec in another domain that the service's pull request should also run. `npm run lint` fails if a spec carries the tag of a service whose pull request already runs the spec's domain by path, as `config/service-tags.ts` maps it.
 
 ### Scheduled security scan
 

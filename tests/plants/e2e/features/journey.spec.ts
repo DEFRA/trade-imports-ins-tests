@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { portByCode } from '@domain/shared/fixtures/reference-data';
+import { portByCode } from '@resources/reference-data/reference-data';
 import { COLD_START } from '@fixtures/auth-state';
 import { PLANTS_FOR_PLANTING, POTATOES, WOOD_AND_CUT_TREES, arrivalDate, nurseryAddress, type CommodityLine } from '@flows/plants/journey';
 
@@ -124,7 +124,7 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await expect(plantsPages.notificationView.card('Contact')).toContainText(address.name);
       await expect(plantsPages.notificationView.card('Contact')).toContainText(address.email);
       if (scenario.type !== POTATOES) {
-        await expect(plantsPages.notificationView.card('Consignor or exporter')).toContainText(address.name);
+        await expect(plantsPages.notificationView.card('Consignor')).toContainText(address.name);
       }
       await plantsPages.dashboard.open();
       await plantsPages.dashboard.searchForReference(reference);

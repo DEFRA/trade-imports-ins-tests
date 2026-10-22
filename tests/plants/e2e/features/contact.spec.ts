@@ -1,7 +1,7 @@
 import type { AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { portByCode } from '@domain/shared/fixtures/reference-data';
+import { portByCode } from '@resources/reference-data/reference-data';
 import type { PlantsPages } from '@page-objects';
 import { nurseryAddress, type PlantsJourney } from '@flows/plants/journey';
 
@@ -23,7 +23,6 @@ test.describe('High-risk plants contact', () => {
     async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
       const token = randomUUID();
       const records: AddressBookRecord[] = [];
-      // The book lists newest first, so the newer records fill page one and push the first onto page two.
       for (let index = 0; index <= PICKER_PAGE_SIZE; index++) {
         records.push(await addressBookApi.createAddress(nurseryAddress(`Contact ${token} ${index}`)));
       }
@@ -35,11 +34,11 @@ test.describe('High-risk plants contact', () => {
       await expect(contact.heading).toBeVisible();
 
       await contact.searchFor(token);
-      await expect(contact.resultsCaption).toHaveText('Showing 5 of 6 addresses');
+      await expect(contact.resultsSummary).toHaveText('Showing 5 out of 6 results');
       await expect(contact.address(target.name)).toHaveCount(0);
 
       await contact.pageLink(2).click();
-      await expect(contact.resultsCaption).toHaveText('Showing 1 of 6 addresses');
+      await expect(contact.resultsSummary).toHaveText('Showing 1 out of 6 results');
 
       await contact.address(target.name).check();
       await contact.btnSaveAndContinue.click();

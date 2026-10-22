@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
+import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 
 const insBaseUrl = (process.env.TRADE_IMPORTS_INS_FRONTEND_BASE_URL ?? 'http://localhost:3002').replace(/\/$/, '');
 const insAddUrlPattern = new RegExp(`^${insBaseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/address-book/add\\?`);
@@ -30,7 +31,7 @@ test.describe('Add an address from the journey via INS', () => {
       await animalsJourney.unlockSections();
 
       await animalsPages.overview.task('Roles and addresses').click();
-      await animalsPages.addresses.addParty('Consignor or exporter').click();
+      await animalsPages.addresses.addParty('Consignor').click();
 
       await animalsPages.consignorSelection.addNewAddress.click();
       await insPages.addressBookAdd.ensureSignedIn();
@@ -50,7 +51,10 @@ test.describe('Add an address from the journey via INS', () => {
 
       await animalsPages.consignorSelection.saveAndContinue.click();
       await expect(animalsPages.addresses.heading).toBeVisible();
-      await expect(animalsPages.addresses.partyRow('Consignor or exporter')).toContainText(farmName);
+      await expect(animalsPages.addresses.partyAddressLines('Consignor')).toHaveText(
+        AnimalsAddressesPage.expectedAddressText({ ...details, name: farmName }),
+        { useInnerText: true },
+      );
     },
   );
 
@@ -62,7 +66,7 @@ test.describe('Add an address from the journey via INS', () => {
       await animalsJourney.unlockSections();
 
       await animalsPages.overview.task('Roles and addresses').click();
-      await animalsPages.addresses.addParty('Consignor or exporter').click();
+      await animalsPages.addresses.addParty('Consignor').click();
 
       await animalsPages.consignorSelection.addNewAddress.click();
       await insPages.addressBookAdd.ensureSignedIn();
@@ -77,7 +81,7 @@ test.describe('Add an address from the journey via INS', () => {
 
       await animalsPages.consignorSelection.linkBack.click();
       await expect(animalsPages.addresses.heading).toBeVisible();
-      await expect(animalsPages.addresses.partyRow('Consignor or exporter')).toContainText('Not added yet');
+      await expect(animalsPages.addresses.partyLinks('Consignor')).toHaveText([AnimalsAddressesPage.addLinkName('Consignor')]);
     },
   );
 });

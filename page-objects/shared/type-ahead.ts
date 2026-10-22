@@ -32,6 +32,10 @@ export class TypeAhead {
     return this.page.locator(`select[name="${this.fieldId}"]`);
   }
 
+  get options(): Locator {
+    return this.select.locator('option');
+  }
+
   get selectableOptions(): Locator {
     return this.select.locator('option:not([value=""])');
   }
@@ -48,6 +52,12 @@ export class TypeAhead {
     return this.option(name).locator('strong');
   }
 
+  async search(text: string): Promise<void> {
+    await expect(this.field).toHaveRole('combobox');
+    await this.field.click();
+    await this.field.fill(text);
+  }
+
   async choose(name: string): Promise<void> {
     await this.page.waitForLoadState('domcontentloaded');
     if ((await this.field.evaluate((element) => element.tagName)) === 'SELECT') {
@@ -60,7 +70,7 @@ export class TypeAhead {
   }
 
   async chooseByIndex(index: number): Promise<void> {
-    await this.choose(await this.labelOf(this.select.locator('option').nth(index), `index ${index}`));
+    await this.choose(await this.labelOf(this.options.nth(index), `index ${index}`));
   }
 
   async chooseByValue(value: string): Promise<void> {

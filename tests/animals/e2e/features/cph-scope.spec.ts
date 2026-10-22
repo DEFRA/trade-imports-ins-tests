@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
 test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
-  test('the CPH page and addresses-hub row show only when a CPH-triggering commodity line exists', async ({
+  test('the CPH page and the CPH section of the addresses page show only when a CPH-triggering commodity line exists', async ({
     animalsJourney,
     animalsPages,
   }) => {
@@ -9,28 +9,29 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
 
     await animalsJourney.startNotification();
 
-    const { cphRow } = animalsPages.addresses;
+    const { cphSection, cphLinks, cphAddressLines } = animalsPages.addresses;
 
     await animalsJourney.addCommodityToCurrentNotification('Felis catus');
     await animalsJourney.toRolesAndAddressesOfCurrentNotification();
-    await expect(cphRow).toBeHidden();
+    await expect(cphSection).toBeHidden();
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
 
     await animalsJourney.addCommodityToCurrentNotification('Bos taurus');
     await animalsJourney.toRolesAndAddressesOfCurrentNotification();
-    await expect(cphRow).toBeVisible();
-    await expect(cphRow).toContainText('Not added yet');
+    await expect(cphSection).toBeVisible();
+    await expect(cphLinks).toHaveText(['Add a CPH number']);
 
     await animalsPages.addresses.addCph.click();
     await expect(animalsPages.cphNumber.heading).toBeVisible();
     await animalsPages.cphNumber.fillCphNumber();
     await animalsPages.cphNumber.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await expect(cphRow).toContainText('123456789');
+    await expect(cphAddressLines).toHaveText('123456789');
+    await expect(cphLinks).toHaveText([animalsPages.addresses.cphLinkNames.change]);
 
-    await cphRow.getByRole('link', { name: 'Change' }).click();
+    await animalsPages.addresses.changeCph.click();
     await expect(animalsPages.cphNumber.county).toHaveValue('12');
     await expect(animalsPages.cphNumber.parish).toHaveValue('345');
     await expect(animalsPages.cphNumber.holding).toHaveValue('6789');

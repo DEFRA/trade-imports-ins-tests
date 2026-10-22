@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { PlantsPages } from '@page-objects';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
-import { portByCode } from '@domain/shared/fixtures/reference-data';
+import { portByCode } from '@resources/reference-data/reference-data';
 
 /** One commodity line's answers, keyed by field label. The fields a line needs depend on its category. */
 export type CommodityLine = Record<string, string>;
@@ -184,6 +184,18 @@ export class PlantsJourney {
     return reference;
   }
 
+  /** Mints a record for the place of destination, answers everything before it and lands on the consignor page. */
+  async toConsignorOfNewNotification(
+    api: AddressBookApiClient,
+    commodityType: string,
+  ): Promise<{ reference: string; destinationName: string }> {
+    const destinationName = `Consignor Route Nursery ${randomUUID()}`;
+    await api.createAddress(nurseryAddress(destinationName));
+    const reference = await this.toDestinationOfNewNotification(commodityType);
+    await this.chooseDestination(destinationName);
+    return { reference, destinationName };
+  }
+
   async chooseDestination(addressName: string): Promise<void> {
     await this.plantsPages.placeOfDestination.searchFor(addressName);
     await this.plantsPages.placeOfDestination.address(addressName).check();
@@ -259,8 +271,18 @@ export class PlantsJourney {
     return { reference, address };
   }
 
-  async submitFromReview(): Promise<void> {
+  async toDeclarationFromReview(): Promise<void> {
     await this.plantsPages.notificationView.btnContinue.click();
+    await this.plantsPages.declaration.heading.waitFor();
+  }
+
+  async toDeclarationOf(reference: string): Promise<void> {
+    await this.plantsPages.notificationView.open(reference);
+    await this.toDeclarationFromReview();
+  }
+
+  async submitFromReview(): Promise<void> {
+    await this.toDeclarationFromReview();
     await this.plantsPages.declaration.checkbox.check();
     await this.plantsPages.declaration.btnContinue.click();
     await this.plantsPages.confirmation.heading.waitFor();

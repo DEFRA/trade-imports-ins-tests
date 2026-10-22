@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { POTATOES, PLANTS_FOR_PLANTING, potatoLine, arrivalDate } from '@flows/plants/journey';
 import type { PlantsPages, SharedPages } from '@page-objects';
-import { getRelativeServiceDisplayDate } from '@utils/date-utils';
+import { todayOrTomorrowServiceDisplayDatePattern } from '@utils/date-utils';
 
 async function expectReview(plantsPages: PlantsPages) {
   await expect(plantsPages.notificationView.heading).toBeVisible();
@@ -56,7 +56,7 @@ test.describe('High-risk plants check and submit section', () => {
       '2. Arrival and destination',
       '3. Consignment parties',
     ]);
-    await expect(plantsPages.notificationView.card('Consignor or exporter')).toHaveCount(0);
+    await expect(plantsPages.notificationView.card('Consignor')).toHaveCount(0);
     const contact = plantsPages.notificationView.card('Contact');
     await expect(contact).toContainText(address.name);
     await expect(contact).toContainText('4 Nursery Lane, Perth, Perthshire, PH1 5EX');
@@ -98,7 +98,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(plantsPages.overview.statusTag).toHaveText('Submitted');
     await expect(plantsPages.confirmation.notificationDate).toBeVisible();
     await expect(plantsPages.confirmation.content).toContainText(
-      new RegExp(`Date of notification[^0-9]{0,20}(${getRelativeServiceDisplayDate()}|${getRelativeServiceDisplayDate(1)})`),
+      new RegExp(`Date of notification[^0-9]{0,20}${todayOrTomorrowServiceDisplayDatePattern()}`),
     );
     await expect(plantsPages.confirmation.lateBanner).toHaveCount(0);
     await plantsPages.confirmation.viewNotification.click();
@@ -107,6 +107,55 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.dashboard.open();
     await plantsPages.dashboard.searchForReference(reference);
     await expect(plantsPages.dashboard.notificationCard(reference).getByText('Submitted', { exact: true })).toBeVisible();
+  });
+
+  test.describe('declaration of a draft', () => {
+    let reference: string;
+
+    test.beforeEach(async ({ plantsJourney, addressBookApi }) => {
+      ({ reference } = await plantsJourney.completeNotification(addressBookApi));
+      await plantsJourney.toDeclarationFromReview();
+    });
+
+    test('shows the confirmation as a small checkbox in a group whose legend is hidden from sight', async ({ plantsPages }) => {
+      const { content } = plantsPages.declaration;
+
+      await expect(content.confirmationGroup).toBeVisible();
+      await expect(content.confirmationLegend).toHaveClass(/govuk-visually-hidden/);
+      await expect(content.checkboxes).toHaveClass(/govuk-checkboxes--small/);
+    });
+
+    test('shows the date of declaration in bold', async ({ plantsPages }) => {
+      const { dateValue } = plantsPages.declaration.content;
+
+      await expect(dateValue).toHaveText(new RegExp(`^${todayOrTomorrowServiceDisplayDatePattern()}$`));
+      await expect(dateValue).toHaveCSS('font-weight', '700');
+    });
+
+    test('starts the declaration of a draft with the Declaration heading', async ({ plantsPages }) => {
+      await expect(plantsPages.declaration.content.firstContentElement).toHaveText('Declaration');
+    });
+
+    test('submits to the confirmation page once confirmed', async ({ pages, plantsPages }) => {
+      await plantsPages.declaration.checkbox.check();
+      await plantsPages.declaration.btnContinue.click();
+
+      await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrl(reference));
+    });
+  });
+
+  test('starts the declaration of an amendment with the Declaration heading', async ({
+    plantsPages,
+    plantsJourney,
+    plantsNotificationActions,
+    addressBookApi,
+  }) => {
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
+    await plantsJourney.submitFromReview();
+    await plantsNotificationActions.amendNotification(reference);
+    await plantsJourney.toDeclarationOf(reference);
+
+    await expect(plantsPages.declaration.content.firstContentElement).toHaveText('Declaration');
   });
 
   for (const { type, days, rule } of [
@@ -120,7 +169,6 @@ test.describe('High-risk plants check and submit section', () => {
     test(`${type}: late notifications are accepted and highlighted`, async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
       const { reference } = await plantsJourney.completeNotification(addressBookApi, { type, days });
       await expectReview(plantsPages);
-      // The warning's text opens with a visually hidden "Warning", so the message is matched as a substring.
       await expect(
         pages.page.getByText(`If you submit this notification today it will be late. ${rule} You can still submit it.`, { exact: false }),
       ).toBeVisible();

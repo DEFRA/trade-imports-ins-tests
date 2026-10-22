@@ -37,7 +37,7 @@ export function createPlantsPages(page: Page) {
     declaration: new PlantsDeclarationPage(page),
     confirmation: new PlantsConfirmationPage(page),
     deleteNotification: new PlantsDeleteNotificationPage(page),
-    consignorEdit: new PlantsPartyEditPage(page, 'consignors/edit', 'Consignor or exporter'),
+    consignorEdit: new PlantsPartyEditPage(page, 'consignors/edit', 'Consignor'),
     placeOfDestinationEdit: new PlantsPartyEditPage(page, 'destinations/edit', 'Place of destination'),
     contactAddressEdit: new PlantsPartyEditPage(page, 'consignment/contact/edit', 'Contact address'),
   };

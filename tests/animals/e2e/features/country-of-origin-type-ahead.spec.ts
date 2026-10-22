@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { countryAndSubdivisionNamesWithCountry } from '@domain/shared/fixtures/reference-data';
+import { countryAndSubdivisionNamesWithCountry } from '@resources/reference-data/reference-data';
 
 test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('filters as you type, submits the country code and persists it', async ({ animalsJourney, animalsPages }) => {
@@ -15,8 +15,7 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
     await expect(fallback.locator('option').first()).toHaveText('Select a country');
     await expect(fallback.locator('option')).toHaveCount(countryAndSubdivisionNamesWithCountry().length + 1);
 
-    await field.click();
-    await field.fill('Belg');
+    await animalsPages.originOfImport.country.search('Belg');
     await expect(animalsPages.originOfImport.country.option('Belgium')).toBeVisible();
 
     await animalsPages.originOfImport.country.choose('Belgium');
@@ -44,7 +43,7 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
     await animalsJourney.startNotification();
     await animalsPages.overview.task('Where is this consignment coming from?').click();
 
-    await animalsPages.originOfImport.country.field.fill('fra');
+    await animalsPages.originOfImport.country.search('fra');
 
     await expect(animalsPages.originOfImport.country.boldLettersOf('France')).toHaveText(['Fra']);
   });

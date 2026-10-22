@@ -12,7 +12,7 @@ test.describe('A notification that changed after the trader last saw it', () => 
     pages,
     animalsPages,
   }) => {
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
 
     // Another tab, or another user, edits the notification after check your answers rendered.
@@ -35,7 +35,7 @@ test.describe('A notification that changed after the trader last saw it', () => 
     pages,
     animalsPages,
   }) => {
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
     await animalsPages.notificationView.continueButton.click();
     await expect(animalsPages.declaration.heading).toBeVisible();

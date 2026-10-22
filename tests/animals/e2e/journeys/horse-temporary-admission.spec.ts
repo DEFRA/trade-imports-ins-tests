@@ -1,3 +1,4 @@
+import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { HORSE_TRANSPORT_ID, HORSE_TRANSPORTER, OPENING_RUN_TASKS, TEMPORARY_ADMISSION_EXIT_DATE } from '@flows/animals/journey';
@@ -48,7 +49,7 @@ test.describe('Horse by sea under temporary admission', () => {
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Port of entry')).toContainText('Holyhead Port');
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Means of transport to the port of entry')).toHaveText(
-      'Vessel',
+      meansOfTransport.vessel.display,
     );
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Transport identification')).toHaveText(HORSE_TRANSPORT_ID);
 
