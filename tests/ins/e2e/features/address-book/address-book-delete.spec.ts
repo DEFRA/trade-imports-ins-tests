@@ -49,10 +49,13 @@ test.describe('Address book delete', () => {
 
     // Then it summarises the address on separate lines, without the email or phone
     await expect(insPages.addressBookDelete.heading).toBeVisible();
-    await expect(insPages.addressBookDelete.terms).toHaveText(['Address']);
-    await expect(insPages.addressBookDelete.values).toHaveText(`${name} 5 Vanishing Way Unit 9 Carlisle Cumbria CA1 4DD United Kingdom`, {
-      useInnerText: true,
-    });
+    await expect(insPages.addressBookDelete.summaryListKeys).toHaveText(['Address']);
+    await expect(insPages.addressBookDelete.summaryListValues).toHaveText(
+      `${name} 5 Vanishing Way Unit 9 Carlisle Cumbria CA1 4DD United Kingdom`,
+      {
+        useInnerText: true,
+      },
+    );
     await expect(pages.page.getByText(baseAddress.email)).toHaveCount(0);
     await expect(pages.page.getByText(baseAddress.phone)).toHaveCount(0);
     await expect(insPages.addressBookDelete.confirmation).toBeVisible();
@@ -144,7 +147,7 @@ test.describe('Address book delete', () => {
     const name = `Delete Cross User Farm ${Date.now()}`;
     const created = await addressBookApi.createAddress({ name, ...baseAddress });
 
-    await insPages.addressBookDelete.open(created.id, true, { userId: users.andrew.crn });
+    await insPages.addressBookDelete.open(created.id, { userId: users.andrew.crn });
     await insPages.addressBookDelete.confirm();
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
     await expect(insPages.addressBookList.row(name)).toHaveCount(0);
@@ -154,7 +157,7 @@ test.describe('Address book delete', () => {
     try {
       const insPagesB = createInsPages(await contextB.newPage());
 
-      await insPagesB.addressBookList.open(true, {
+      await insPagesB.addressBookList.open({
         userId: users.sarah.crn,
         organisationSbi: users.sarah.organisations.gatwickAirport,
       });

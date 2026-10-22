@@ -30,7 +30,7 @@ test.describe('Address book view', () => {
     await insPages.addressBookView.open(full.id);
 
     // Then both rows are listed, marked optional
-    await expect(insPages.addressBookView.terms).toHaveText([
+    await expect(insPages.addressBookView.summaryListKeys).toHaveText([
       'Name or organisation name',
       'Address line 1',
       'Address line 2 (optional)',
@@ -46,7 +46,7 @@ test.describe('Address book view', () => {
     await insPages.addressBookView.open(bare.id);
 
     // Then neither row is shown
-    await expect(insPages.addressBookView.terms).toHaveText([
+    await expect(insPages.addressBookView.summaryListKeys).toHaveText([
       'Name or organisation name',
       'Address line 1',
       'Town or city',
