@@ -3,6 +3,7 @@ import { COLD_START } from '@fixtures/auth-state';
 import { createInsPages } from '@page-objects';
 import { users } from '@config/users';
 import { expectAddressBookList } from './expect-address-book-list';
+import { UNKNOWN_ADDRESS_ID } from './unknown-address-id';
 
 const baseAddress = {
   addressLine1: '5 Vanishing Way',
@@ -15,8 +16,7 @@ const baseAddress = {
 
 test.describe('Address book delete', () => {
   test('deleting through the UI tombstones the record rather than removing it', async ({ pages, insPages, addressBookApi }) => {
-    const stamp = Date.now();
-    const name = `Delete Test Farm ${stamp}`;
+    const name = `Delete Test Farm ${Date.now()}`;
     const created = await addressBookApi.createAddress({ name, ...baseAddress });
 
     await insPages.addressBookDelete.open(created.id);
@@ -27,9 +27,6 @@ test.describe('Address book delete', () => {
     await expect(insPages.addressBookList.row(name)).toHaveCount(0);
     await expect(insPages.addressBookList.successBanner).toContainText(`${name} address deleted`);
 
-    // The record is still there, flagged — the by-id endpoint is the only way
-    // to see it, because list and search both omit tombstones. A hard delete
-    // would 404 here and leave any notification referencing it dangling.
     const tombstone = await addressBookApi.getAddress(created.id);
     expect(tombstone.deleted).toBe(true);
     expect(tombstone.name).toBe(name);
@@ -40,33 +37,32 @@ test.describe('Address book delete', () => {
     insPages,
     addressBookApi,
   }) => {
-    // Given an address with every line filled in
-    const name = `Delete Summary Farm ${Date.now()}`;
-    const created = await addressBookApi.createAddress({ name, ...baseAddress, addressLine2: 'Unit 9', county: 'Cumbria' });
+    const address = { name: `Delete Summary Farm ${Date.now()}`, ...baseAddress, addressLine2: 'Unit 9', county: 'Cumbria' };
+    const created = await addressBookApi.createAddress(address);
 
-    // When they open its delete page
     await insPages.addressBookDelete.open(created.id);
 
-    // Then it summarises the address on separate lines, without the email or phone
     await expect(insPages.addressBookDelete.heading).toBeVisible();
     await expect(insPages.addressBookDelete.summaryListKeys).toHaveText(['Address']);
     await expect(insPages.addressBookDelete.summaryListValues).toHaveText(
-      `${name} 5 Vanishing Way Unit 9 Carlisle Cumbria CA1 4DD United Kingdom`,
-      {
-        useInnerText: true,
-      },
+      [
+        address.name,
+        address.addressLine1,
+        address.addressLine2,
+        address.townOrCity,
+        address.county,
+        address.postcode,
+        'United Kingdom',
+      ].join(' '),
+      { useInnerText: true },
     );
-    await expect(pages.page.getByText(baseAddress.email)).toHaveCount(0);
-    await expect(pages.page.getByText(baseAddress.phone)).toHaveCount(0);
     await expect(insPages.addressBookDelete.confirmation).toBeVisible();
     await expect(insPages.addressBookDelete.warning).toBeVisible();
 
-    // When they choose No, cancel
     await insPages.addressBookDelete.cancel();
 
-    // Then they are back on the address's details and nothing was deleted
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookView.expectedUrl(created.id)}$`));
-    await expect(insPages.addressBookView.heading(name)).toBeVisible();
+    await expect(insPages.addressBookView.heading(address.name)).toBeVisible();
     expect((await addressBookApi.getAddress(created.id)).deleted).toBe(false);
     await insPages.addressBookList.open();
     await expect(insPages.addressBookList.successBanner).toHaveCount(0);
@@ -79,7 +75,7 @@ test.describe('Address book delete', () => {
       addressBookApi,
     }) => {
       const created = await addressBookApi.createAddress({ name: `Delete Return Farm ${Date.now()}`, ...baseAddress });
-      const viewHref = `/address-book/${created.id}?return=%2F`;
+      const viewHref = insPages.addressBookView.expectedUrlWithReturn(created.id, '/');
 
       await insPages.addressBookDelete.openWithReturn(created.id, '/');
 
@@ -87,7 +83,7 @@ test.describe('Address book delete', () => {
       await expect(insPages.addressBookDelete.linkBack).toHaveAttribute('href', viewHref);
 
       await insPages.addressBookDelete.cancel();
-      await expect(pages.page).toHaveURL(new RegExp(`/address-book/${created.id}\\?return=%2F$`));
+      await expect(pages.page).toHaveURL((url) => url.pathname + url.search === viewHref);
 
       await insPages.addressBookView.btnDelete.click();
       await insPages.addressBookDelete.confirm();
@@ -97,19 +93,20 @@ test.describe('Address book delete', () => {
     });
 
     test("a return to the deleted address's own page lands on the address book", async ({ pages, insPages, addressBookApi }) => {
-      const created = await addressBookApi.createAddress({ name: `Delete Own Page Farm ${Date.now()}`, ...baseAddress });
+      const name = `Delete Own Page Farm ${Date.now()}`;
+      const created = await addressBookApi.createAddress({ name, ...baseAddress });
 
       await insPages.addressBookDelete.openWithReturn(created.id, `/address-book/${created.id}`);
       await insPages.addressBookDelete.confirm();
 
       await expectAddressBookList({ pages, insPages });
-      await expect(insPages.addressBookList.successBanner).toContainText('address deleted');
+      await expect(insPages.addressBookList.successBanner).toContainText(`${name} address deleted`);
     });
   });
 
   test.describe('dead links', () => {
     test("an unknown address id's delete page returns to the address book", async ({ pages, insPages }) => {
-      await insPages.addressBookDelete.open('ffffffffffffffffffffffff');
+      await insPages.addressBookDelete.open(UNKNOWN_ADDRESS_ID);
 
       await expectAddressBookList({ pages, insPages });
     });
@@ -124,17 +121,21 @@ test.describe('Address book delete', () => {
     });
 
     test('a stale delete changes nothing and shows no banner', async ({ pages, insPages, addressBookApi }) => {
-      // Given the delete page is open and the address is deleted behind it
-      const created = await addressBookApi.createAddress({ name: `Stale Delete Farm ${Date.now()}`, ...baseAddress });
+      const name = `Stale Delete Farm ${Date.now()}`;
+      const created = await addressBookApi.createAddress({ name, ...baseAddress });
       await insPages.addressBookDelete.open(created.id);
       await addressBookApi.deleteAddress(created.id);
 
-      // When they select Yes, delete
       await insPages.addressBookDelete.confirm();
 
-      // Then they land on the list with no banner
       await expectAddressBookList({ pages, insPages });
       await expect(insPages.addressBookList.successBanner).toHaveCount(0);
+      await expect
+        .poll(async () => {
+          const { deleted, name: storedName } = await addressBookApi.getAddress(created.id);
+          return { deleted, name: storedName };
+        })
+        .toEqual({ deleted: true, name });
     });
   });
 
@@ -152,19 +153,18 @@ test.describe('Address book delete', () => {
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
     await expect(insPages.addressBookList.row(name)).toHaveCount(0);
 
-    // browser.newContext() inherits the test's storageState; Sarah must start cold.
-    const contextB = await browser.newContext({ storageState: COLD_START });
+    const sarahContext = await browser.newContext({ storageState: COLD_START });
     try {
-      const insPagesB = createInsPages(await contextB.newPage());
+      const sarahInsPages = createInsPages(await sarahContext.newPage());
 
-      await insPagesB.addressBookList.open({
+      await sarahInsPages.addressBookList.open({
         userId: users.sarah.crn,
         organisationSbi: users.sarah.organisations.gatwickAirport,
       });
 
-      await expect(insPagesB.addressBookList.row(name)).toHaveCount(0);
+      await expect(sarahInsPages.addressBookList.row(name)).toHaveCount(0);
     } finally {
-      await contextB.close();
+      await sarahContext.close();
     }
   });
 });

@@ -2,6 +2,7 @@ import { test, expect } from '@fixtures';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 import { expectAddressBookList } from './expect-address-book-list';
+import { UNKNOWN_ADDRESS_ID } from './unknown-address-id';
 
 const OTHER_ORGANISATION_ID = 'e2e-dead-link-other-org';
 
@@ -84,14 +85,14 @@ test.describe('Address book view', () => {
 
   test.describe('dead links', () => {
     test('an unknown address id carrying an honoured return lands on it', async ({ insPages }) => {
-      await insPages.addressBookView.openWithReturn('ffffffffffffffffffffffff', '/');
+      await insPages.addressBookView.openWithReturn(UNKNOWN_ADDRESS_ID, '/');
 
       await expect(insPages.dashboard.heading).toBeVisible();
     });
 
     test('an unknown address id returns to the address book', async ({ pages, insPages }) => {
       // When they open the view page for an id nobody has
-      await insPages.addressBookView.open('ffffffffffffffffffffffff');
+      await insPages.addressBookView.open(UNKNOWN_ADDRESS_ID);
 
       // Then the address book is shown, with no Page not found
       await expectAddressBookList({ pages, insPages });
