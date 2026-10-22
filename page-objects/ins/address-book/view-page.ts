@@ -6,9 +6,8 @@ export class InsAddressBookViewPage extends InsAddressBookAddressPage {
     return `/address-book/${addressId}`;
   }
 
-  /** The page is headed by the address's own name. */
-  heading(name: string): Locator {
-    return this.page.getByRole('heading', { level: 1, name });
+  heading(addressName: string): Locator {
+    return this.page.getByRole('heading', { level: 1, name: addressName });
   }
 
   get btnEdit(): Locator {
