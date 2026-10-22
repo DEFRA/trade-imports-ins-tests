@@ -1,4 +1,11 @@
 import { test, expect } from '@fixtures';
+import type { AnimalsPages } from '@page-objects';
+
+const saveAndExpectCphOnAddresses = async (animalsPages: AnimalsPages, cph: string) => {
+  await animalsPages.cphNumber.saveAndContinue.click();
+  await expect(animalsPages.addresses.heading).toBeVisible();
+  await expect(animalsPages.addresses.cphAddressLines).toHaveText(cph);
+};
 
 test.describe('CPH number page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -32,5 +39,31 @@ test.describe('CPH number page', { tag: '@duplicated-in-frontend' }, () => {
     await animalsPages.cphNumber.saveAndContinue.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
+  });
+
+  test('keeps all nine digits typed straight through the county box and saves them', async ({ animalsPages }) => {
+    const { county } = animalsPages.cphNumber;
+
+    await county.click();
+    await county.pressSequentially('123456789');
+    await expect(county).toHaveValue('123456789');
+    await expect(county).toBeFocused();
+
+    await saveAndExpectCphOnAddresses(animalsPages, '123456789');
+  });
+});
+
+test.describe('CPH number page without JavaScript', { tag: '@duplicated-in-frontend' }, () => {
+  test.use({ javaScriptEnabled: false });
+
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toCphNumber();
+  });
+
+  test('saves a whole number with slashes inserted into the county box as nine digits', async ({ animalsPages }) => {
+    await animalsPages.cphNumber.county.fill('12/345/6789');
+    await expect(animalsPages.cphNumber.county).toHaveValue('12/345/6789');
+
+    await saveAndExpectCphOnAddresses(animalsPages, '123456789');
   });
 });
