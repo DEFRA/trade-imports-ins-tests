@@ -56,7 +56,7 @@ test.describe('High-risk plants check and submit section', () => {
       '2. Arrival and destination',
       '3. Consignment parties',
     ]);
-    await expect(plantsPages.notificationView.card('Consignor or exporter')).toHaveCount(0);
+    await expect(plantsPages.notificationView.card('Consignor')).toHaveCount(0);
     const contact = plantsPages.notificationView.card('Contact');
     await expect(contact).toContainText(address.name);
     await expect(contact).toContainText('4 Nursery Lane, Perth, Perthshire, PH1 5EX');

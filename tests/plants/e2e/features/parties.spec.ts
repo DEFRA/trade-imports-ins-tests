@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, POTATOES, WOOD_AND_CUT_TREES, nurseryAddress } from '@flows/plants/journey';
 
-const CONSIGNOR = 'Consignor or exporter';
+const CONSIGNOR = 'Consignor';
 const NUMBERS = 'Identification numbers';
 
 test.describe('High-risk plants consignment parties section', () => {

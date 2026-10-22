@@ -4,10 +4,10 @@ import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
 
 export class PlantsConsignorSelectPage extends PlantsAddressBookPickerPage {
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
-    super(page, 'consignors/select', 'Current consignor or exporter');
+    super(page, 'consignors/select', 'Current consignor');
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Consignor or exporter', exact: true });
+    return this.page.getByRole('heading', { level: 1, name: 'Consignor', exact: true });
   }
 }

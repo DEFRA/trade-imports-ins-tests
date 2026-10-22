@@ -15,7 +15,7 @@ const PARTY_ADD_CONTROL_CASES: Array<{
   picker: (animalsPages: AnimalsPages) => AnimalsPartyPickerPage;
 }> = [
   {
-    hubRole: 'Consignor or exporter',
+    hubRole: 'Consignor',
     description: 'This is the sender of the consignment.',
     picker: (animalsPages) => animalsPages.consignorSelection,
   },

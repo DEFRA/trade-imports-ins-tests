@@ -101,8 +101,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
     });
 
-    await test.step('Consignor or exporter selection', async () => {
-      await animalsPages.addresses.addParty('Consignor or exporter').click();
+    await test.step('Consignor selection', async () => {
+      await animalsPages.addresses.addParty('Consignor').click();
       await animalsPages.consignorSelection.heading.waitFor();
       await runA11yScan();
       await animalsPages.consignorSelection.select('Astra Rosales');

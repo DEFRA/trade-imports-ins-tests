@@ -187,7 +187,7 @@ export class AnimalsJourney {
 
   async addFiveParties(names: PartyAnswers = MANDATORY_ANSWERS.parties): Promise<void> {
     const parties = [
-      ['Consignor or exporter', names.consignor, 'consignorSelection'],
+      ['Consignor', names.consignor, 'consignorSelection'],
       ['Place of destination', names.placeOfDestination, 'destinationSelection'],
       ['Place of origin', names.placeOfOrigin, 'placeOfOriginSelection'],
       ['Consignee', names.consignee, 'consigneeSelection'],

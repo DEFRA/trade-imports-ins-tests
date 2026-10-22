@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 
 const FIVE_RESULTS_SUMMARY = /^Showing 5 out of \d+ results$/;
 
@@ -30,11 +31,10 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     // Pagination leg: create the target first, then five newer ones so
     // newest-first listing pushes the target off page one.
     const targetName = `Paged Consignor ${stamp}`;
+    const targetRecord = { name: targetName, addressLine1: '1 Later Page Lane', townOrCity: 'Carlisle', postcode: 'CA1 1AA' };
+    const targetAddressText = AnimalsAddressesPage.expectedAddressText({ ...targetRecord, country: 'United Kingdom' });
     await addressBookApi.createAddress({
-      name: targetName,
-      addressLine1: '1 Later Page Lane',
-      townOrCity: 'Carlisle',
-      postcode: 'CA1 1AA',
+      ...targetRecord,
       countryCode: 'GB',
       phone: '01228 555 0199',
       email: 'paged@example.co.uk',
@@ -55,8 +55,8 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await animalsJourney.unlockSections();
 
     await animalsPages.overview.task('Roles and addresses').click();
-    const consignorRow = animalsPages.addresses.partyRow('Consignor or exporter');
-    await animalsPages.addresses.addParty('Consignor or exporter').click();
+    const consignorAddressLines = animalsPages.addresses.partyAddressLines('Consignor');
+    await animalsPages.addresses.addParty('Consignor').click();
 
     await expect(animalsPages.consignorSelection.resultsHeading).toBeVisible();
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
@@ -99,29 +99,29 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await animalsPages.consignorSelection.party(targetName).check();
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await expect(consignorRow).toContainText(targetName);
+    await expect(consignorAddressLines).toHaveText(targetAddressText, { useInnerText: true });
 
-    await animalsPages.addresses.changeParty('Consignor or exporter').click();
+    await animalsPages.addresses.changeParty('Consignor').click();
+    await expect(animalsPages.consignorSelection.heading).toBeVisible();
     await expect(animalsPages.consignorSelection.selectedAddress).toHaveText(`Selected address: ${targetName}`);
     await expect(animalsPages.consignorSelection.party(targetName)).toHaveCount(0);
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await expect(consignorRow).toContainText(targetName);
+    await expect(consignorAddressLines).toHaveText(targetAddressText, { useInnerText: true });
   });
 
-  test('saving with nothing ticked returns to the roles and addresses page with the consignor not added yet', async ({
+  test('saving with nothing ticked returns to the roles and addresses page with the consignor section offering only its add link', async ({
     animalsJourney,
     animalsPages,
   }) => {
     await animalsJourney.startNotification();
     await animalsJourney.unlockSections();
     await animalsPages.overview.task('Roles and addresses').click();
-    const consignorRow = animalsPages.addresses.partyRow('Consignor or exporter');
-    await animalsPages.addresses.addParty('Consignor or exporter').click();
+    await animalsPages.addresses.addParty('Consignor').click();
 
     await animalsPages.consignorSelection.saveAndContinue.click();
 
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await expect(consignorRow).toContainText('Not added yet');
+    await expect(animalsPages.addresses.partyLinks('Consignor')).toHaveText([AnimalsAddressesPage.addLinkName('Consignor')]);
   });
 });
