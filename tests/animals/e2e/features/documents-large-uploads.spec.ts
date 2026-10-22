@@ -2,10 +2,8 @@ import { readFile } from 'node:fs/promises';
 import { test, expect } from '@fixtures';
 import { createAnimalsPages } from '@page-objects';
 import { writePaddedPdf } from '@resources/file-upload/padded-pdf';
-import { MAX_FILE_SIZE_BYTES } from '@resources/file-upload/constants';
+import { DOCUMENT_ISSUE_DATE, MAX_FILE_SIZE_BYTES } from '@resources/file-upload/constants';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
-
-const issueDate = '03/01/2026';
 
 test.describe('Documents at the full file size', { tag: '@compose' }, () => {
   test('uploads a file at the full limit, scans it, and serves the same bytes back', async ({
@@ -18,7 +16,7 @@ test.describe('Documents at the full file size', { tag: '@compose' }, () => {
 
     const large = await writePaddedPdf(testInfo.outputPath('at-the-limit.pdf'), MAX_FILE_SIZE_BYTES);
     const reference = `PWBIG${Date.now()}`;
-    await animalsPages.accompanyingDocuments.fillDocument(reference, issueDate, large);
+    await animalsPages.accompanyingDocuments.fillDocument(reference, DOCUMENT_ISSUE_DATE, large);
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     const row = animalsPages.accompanyingDocuments.documentRow(reference);
@@ -50,8 +48,8 @@ test.describe('Documents at the full file size', { tag: '@compose' }, () => {
     const secondTabPages = createAnimalsPages(secondTab).accompanyingDocuments;
     await expect(secondTabPages.heading).toBeVisible();
 
-    await animalsPages.accompanyingDocuments.fillDocument(firstReference, issueDate, firstFile);
-    await secondTabPages.fillDocument(secondReference, issueDate, secondFile);
+    await animalsPages.accompanyingDocuments.fillDocument(firstReference, DOCUMENT_ISSUE_DATE, firstFile);
+    await secondTabPages.fillDocument(secondReference, DOCUMENT_ISSUE_DATE, secondFile);
 
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
     await secondTabPages.saveAndAddAnother.click();
@@ -66,7 +64,7 @@ test.describe('Documents at the full file size', { tag: '@compose' }, () => {
     await pages.page.reload();
     await expect(animalsPages.accompanyingDocuments.documentRow(firstReference)).toBeVisible();
     await expect(animalsPages.accompanyingDocuments.documentRow(secondReference)).toBeVisible();
-    await expect(pages.page.locator('#documents-added tbody tr')).toHaveCount(2);
+    await expect(animalsPages.accompanyingDocuments.addedDocumentRows).toHaveCount(2);
 
     await secondTab.close();
   });
