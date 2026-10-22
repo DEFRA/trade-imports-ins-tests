@@ -2,6 +2,7 @@ import { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
 import { formattedValue } from '@adapters/http/dataverse-client';
 import { animalsDynamics } from '@config/animals-dynamics';
 import { ALL_ANSWERS, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { test, expect } from '@fixtures';
 import { annotateDuration } from '@utils/playwright/annotate-duration';
 import { skipIfComposeEnvironment } from '@utils/playwright/environment';
@@ -205,5 +206,36 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     // a per-animal identifier table, which this test does not query, so the passport number may be there. If so, this
     // assertion belongs against that table and is not waiting on a fix. Ask the PIMS team where it lands.
     expect.soft(row.defraimp_identificationofanimalstext, 'passport number').toContain(answers.passportNumber);
+  });
+
+  test('answering yes to unweaned animals is stored in PIMS Dynamics', async ({ animalsJourney, journeyContext, externalRequest }) => {
+    test.fixme(true, 'The backend converts a yes answer to false, so PIMS Dynamics shows no unweaned animals');
+    const dynamics = new AnimalsDynamicsClient(externalRequest);
+    const answers = { ...MANDATORY_ANSWERS, unweanedAnimals: yesNoValues.yes };
+    await animalsJourney.submitNotification(answers);
+    const referenceNumber = journeyContext.referenceNumber;
+
+    await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
+      expect
+        .poll(
+          () => dynamics.findNotifications(referenceNumber),
+          animalsDynamics.pollOptions(`Expected exactly one notification for ${referenceNumber}`),
+        )
+        .toHaveLength(1),
+    );
+    const [row] = await dynamics.findNotifications(referenceNumber);
+
+    // [FROM v0.1.0: NOT IN MESSAGE]
+    // specifiedConsignment.isOrHasUnweanedAnimals. The owner is the backend.
+    // The column asserted here is a guess. The mapping doc pairs this answer with a PIMS field called "Include
+    // Non-Ablacted Animals", and we do not know what that means or whether it is the same thing.
+    // The frontend stores the answer as the text 'yes' or 'no'. The backend turns that text into the event's true or
+    // false with Boolean.valueOf, which is true only for the text "true", so a yes reaches both messages as false. A
+    // check of the outbox event confirmed this: a notification answered yes produced an event with false. The backend's
+    // own unit test feeds the text "true", which the frontend never saves, and PIMS defaults this column to false, so
+    // the mandatory test's no answer proves nothing.
+    // The mapping doc says the field may be removed from the schema, because PIMS says it is not relevant for the EU
+    // journey, pending PO confirmation.
+    expect.soft(row.defraimp_commoditiesincludenonablactedanimals, 'unweaned animals').toBe(true);
   });
 });
