@@ -4,8 +4,6 @@ import { requireBaseUrl } from '@page-objects/shared/base-page';
 import { expectAddressBookList } from './expect-address-book-list';
 import { UNKNOWN_ADDRESS_ID } from './unknown-address-id';
 
-const OTHER_ORGANISATION_ID = 'e2e-dead-link-other-org';
-
 const baseAddress = {
   addressLine1: '4 View Lane',
   townOrCity: 'Carlisle',
@@ -16,21 +14,16 @@ const baseAddress = {
 };
 
 test.describe('Address book view', () => {
-  test('shows address line 2 and County (optional) only when the address has them', async ({ insPages, addressBookApi }) => {
-    // Given one address with line 2 and county, and one with neither
-    const stamp = Date.now();
-    const full = await addressBookApi.createAddress({
-      name: `View Full Farm ${stamp}`,
+  test('shows Address line 2 (optional) and County (optional) when the address has them', async ({ insPages, addressBookApi }) => {
+    const addressWithOptionalFields = await addressBookApi.createAddress({
+      name: `View Full Farm ${Date.now()}`,
       ...baseAddress,
       addressLine2: 'Unit 4',
       county: 'Cumbria',
     });
-    const bare = await addressBookApi.createAddress({ name: `View Bare Farm ${stamp}`, ...baseAddress });
 
-    // When they open the address that has them
-    await insPages.addressBookView.open(full.id);
+    await insPages.addressBookView.open(addressWithOptionalFields.id);
 
-    // Then both rows are listed, marked optional
     await expect(insPages.addressBookView.summaryListKeys).toHaveText([
       'Name or organisation name',
       'Address line 1',
@@ -42,11 +35,13 @@ test.describe('Address book view', () => {
       'Email address',
       'Phone number',
     ]);
+  });
 
-    // When they open the address that has neither
-    await insPages.addressBookView.open(bare.id);
+  test('shows neither Address line 2 nor County when the address has neither', async ({ insPages, addressBookApi }) => {
+    const addressWithoutOptionalFields = await addressBookApi.createAddress({ name: `View Bare Farm ${Date.now()}`, ...baseAddress });
 
-    // Then neither row is shown
+    await insPages.addressBookView.open(addressWithoutOptionalFields.id);
+
     await expect(insPages.addressBookView.summaryListKeys).toHaveText([
       'Name or organisation name',
       'Address line 1',
@@ -84,17 +79,15 @@ test.describe('Address book view', () => {
   });
 
   test.describe('dead links', () => {
-    test('an unknown address id carrying an honoured return lands on it', async ({ insPages }) => {
+    test('an unknown address id carrying an INS return goes back to that return', async ({ insPages }) => {
       await insPages.addressBookView.openWithReturn(UNKNOWN_ADDRESS_ID, '/');
 
       await expect(insPages.dashboard.heading).toBeVisible();
     });
 
     test('an unknown address id returns to the address book', async ({ pages, insPages }) => {
-      // When they open the view page for an id nobody has
       await insPages.addressBookView.open(UNKNOWN_ADDRESS_ID);
 
-      // Then the address book is shown, with no Page not found
       await expectAddressBookList({ pages, insPages });
     });
 
@@ -105,29 +98,25 @@ test.describe('Address book view', () => {
     });
 
     test("another organisation's address returns to the address book", async ({ pages, insPages, request }) => {
-      // Given an address in another organisation's book
-      const other = new AddressBookApiClient(request, OTHER_ORGANISATION_ID);
+      const otherOrganisationId = 'e2e-dead-link-other-org';
+      const otherOrganisationAddressBookApi = new AddressBookApiClient(request, otherOrganisationId);
       const name = `Other Org Farm ${Date.now()}`;
-      const created = await other.createAddress({ name, ...baseAddress });
+      const created = await otherOrganisationAddressBookApi.createAddress({ name, ...baseAddress });
 
       try {
-        // When this user opens its id
         await insPages.addressBookView.open(created.id);
 
-        // Then the address book is shown and none of its details are
         await expectAddressBookList({ pages, insPages });
         await expect(pages.page.getByText(name)).toHaveCount(0);
       } finally {
-        await other.deleteAddress(created.id);
+        await otherOrganisationAddressBookApi.deleteAddress(created.id);
       }
     });
 
     test('a deleted address returns to the address book', async ({ pages, insPages, addressBookApi }) => {
-      // Given an address that has since been deleted
       const created = await addressBookApi.createAddress({ name: `Deleted Farm ${Date.now()}`, ...baseAddress });
       await addressBookApi.deleteAddress(created.id);
 
-      // When they open its page
       await insPages.addressBookView.open(created.id);
 
       await expectAddressBookList({ pages, insPages });
