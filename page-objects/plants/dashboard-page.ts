@@ -54,6 +54,10 @@ export class PlantsDashboardPage extends BasePage {
     return this.notificationCard(reference).getByRole('link', { name: `${text} (${reference})`, exact: true });
   }
 
+  view(reference: string): Locator {
+    return this.cardAction(reference, 'View');
+  }
+
   resume(reference: string): Locator {
     return this.cardAction(reference, 'Resume');
   }

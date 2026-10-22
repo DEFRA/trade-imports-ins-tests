@@ -1,3 +1,4 @@
+import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { OPENING_RUN_TASKS } from '@flows/animals/journey';
@@ -53,6 +54,25 @@ test.describe('Opening run', () => {
 
     await animalsJourney.submitFromReview();
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
+  });
+
+  test('following Back from the main import reason and choosing Save and continue carries the run on to the main import reason, not the overview', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.toOriginOfImport();
+    await animalsJourney.fillOriginOfImport();
+    await animalsJourney.saveOriginOfImport();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+    await animalsPages.commoditySelection.selectSpecies([MANDATORY_ANSWERS.species.display]);
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
+
+    await animalsPages.importReason.linkBack.click();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
   });
 
   test('ends the opening run on the review page, naming what is outstanding, when the notification is incomplete', async ({

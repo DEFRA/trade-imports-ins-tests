@@ -258,6 +258,31 @@ test.describe('High-risk plants check and submit section', () => {
     });
   }
 
+  test("Back from a submitted notification's view opens the notification list", async ({ plantsPages, plantsJourney, addressBookApi }) => {
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
+    await plantsJourney.submitFromReview();
+    await plantsPages.dashboard.open();
+    await plantsPages.dashboard.searchForReference(reference);
+    await plantsPages.dashboard.view(reference).click();
+    await assertReadOnly(plantsPages);
+    await plantsPages.notificationView.linkBack.click();
+    await expect(plantsPages.dashboard.heading).toBeVisible();
+  });
+
+  test('Back from an amendment review opens the overview', async ({
+    plantsPages,
+    plantsJourney,
+    plantsNotificationActions,
+    addressBookApi,
+  }) => {
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
+    await plantsJourney.submitFromReview();
+    await plantsNotificationActions.amendNotification(reference);
+    await plantsPages.overview.reviewTaskLink.click();
+    await plantsPages.notificationView.linkBack.click();
+    await expect(plantsPages.overview.heading).toBeVisible();
+  });
+
   test('a submitted notification can be deleted from CYA', async ({
     plantsPages,
     plantsJourney,

@@ -50,6 +50,22 @@ test.describe('High-risk plants origin section', () => {
     await expect(plantsPages.origin.country.field).toHaveValue(FRANCE);
   });
 
+  test('following Back from origin to the commodities list and choosing Save and continue returns to origin, not the overview', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
+    const reference = await plantsJourney.toOriginOfNewNotification(POTATOES);
+
+    await plantsPages.origin.linkBack.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrl(reference));
+
+    await plantsPages.commodities.btnSaveAndContinue.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
+  });
+
   test('the country search box shows its placeholder and no hint', async ({ plantsPages, plantsJourney }) => {
     await plantsJourney.toOriginOfNewNotification(POTATOES);
 
