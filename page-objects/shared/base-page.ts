@@ -21,6 +21,8 @@ export function requireBaseUrl(
   return baseUrl;
 }
 
+export type OpenOptions = { attemptSignIn?: boolean; userId?: string; organisationSbi?: string };
+
 export class BasePage {
   constructor(protected readonly page: Page) {}
 

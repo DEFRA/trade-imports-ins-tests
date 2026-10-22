@@ -7,7 +7,7 @@ test.describe('Address book cross-user visibility', () => {
   test('an address added by one user is visible to another user in the same organisation', async ({ browser, pages, insPages }) => {
     const createdName = `Cross User Farm ${Date.now()}`;
 
-    await insPages.addressBookAdd.open(true, { userId: users.andrew.crn });
+    await insPages.addressBookAdd.open({ userId: users.andrew.crn });
     await insPages.addressBookAdd.fill({
       name: createdName,
       addressLine1: '2 Test Lane',
@@ -25,7 +25,7 @@ test.describe('Address book cross-user visibility', () => {
     try {
       const insPagesB = createInsPages(await contextB.newPage());
 
-      await insPagesB.addressBookList.open(true, {
+      await insPagesB.addressBookList.open({
         userId: users.sarah.crn,
         organisationSbi: users.sarah.organisations.gatwickAirport,
       });
