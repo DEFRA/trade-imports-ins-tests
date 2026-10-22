@@ -4,20 +4,12 @@ import { createInsPages } from '@page-objects';
 import { users } from '@config/users';
 import { expectAddressBookList } from './expect-address-book-list';
 import { UNKNOWN_ADDRESS_ID } from './unknown-address-id';
-
-const baseAddress = {
-  addressLine1: '5 Vanishing Way',
-  townOrCity: 'Carlisle',
-  postcode: 'CA1 4DD',
-  countryCode: 'GB',
-  phone: '01228 555 0105',
-  email: 'delete@example.co.uk',
-};
+import { traderAddress } from './trader-address';
 
 test.describe('Address book delete', () => {
   test('deleting through the UI tombstones the record rather than removing it', async ({ pages, insPages, addressBookApi }) => {
     const name = `Delete Test Farm ${Date.now()}`;
-    const created = await addressBookApi.createAddress({ name, ...baseAddress });
+    const created = await addressBookApi.createAddress(traderAddress(name));
 
     await insPages.addressBookDelete.open(created.id);
     await expect(insPages.addressBookDelete.heading).toBeVisible();
@@ -37,7 +29,7 @@ test.describe('Address book delete', () => {
     insPages,
     addressBookApi,
   }) => {
-    const address = { name: `Delete Summary Farm ${Date.now()}`, ...baseAddress, addressLine2: 'Unit 9', county: 'Cumbria' };
+    const address = { ...traderAddress(`Delete Summary Farm ${Date.now()}`), addressLine2: 'Unit 9', county: 'Cumbria' };
     const created = await addressBookApi.createAddress(address);
 
     await insPages.addressBookDelete.open(created.id);
@@ -74,7 +66,7 @@ test.describe('Address book delete', () => {
       insPages,
       addressBookApi,
     }) => {
-      const created = await addressBookApi.createAddress({ name: `Delete Return Farm ${Date.now()}`, ...baseAddress });
+      const created = await addressBookApi.createAddress(traderAddress(`Delete Return Farm ${Date.now()}`));
       const viewHref = insPages.addressBookView.expectedUrlWithReturn(created.id, '/');
 
       await insPages.addressBookDelete.openWithReturn(created.id, '/');
@@ -94,7 +86,7 @@ test.describe('Address book delete', () => {
 
     test("a return to the deleted address's own page lands on the address book", async ({ pages, insPages, addressBookApi }) => {
       const name = `Delete Own Page Farm ${Date.now()}`;
-      const created = await addressBookApi.createAddress({ name, ...baseAddress });
+      const created = await addressBookApi.createAddress(traderAddress(name));
 
       await insPages.addressBookDelete.openWithReturn(created.id, `/address-book/${created.id}`);
       await insPages.addressBookDelete.confirm();
@@ -112,7 +104,7 @@ test.describe('Address book delete', () => {
     });
 
     test("a deleted address's delete page returns to the address book", async ({ pages, insPages, addressBookApi }) => {
-      const created = await addressBookApi.createAddress({ name: `Deleted Delete Farm ${Date.now()}`, ...baseAddress });
+      const created = await addressBookApi.createAddress(traderAddress(`Deleted Delete Farm ${Date.now()}`));
       await addressBookApi.deleteAddress(created.id);
 
       await insPages.addressBookDelete.open(created.id);
@@ -122,7 +114,7 @@ test.describe('Address book delete', () => {
 
     test('a stale delete changes nothing and shows no banner', async ({ pages, insPages, addressBookApi }) => {
       const name = `Stale Delete Farm ${Date.now()}`;
-      const created = await addressBookApi.createAddress({ name, ...baseAddress });
+      const created = await addressBookApi.createAddress(traderAddress(name));
       await insPages.addressBookDelete.open(created.id);
       await addressBookApi.deleteAddress(created.id);
 
@@ -146,7 +138,7 @@ test.describe('Address book delete', () => {
     addressBookApi,
   }) => {
     const name = `Delete Cross User Farm ${Date.now()}`;
-    const created = await addressBookApi.createAddress({ name, ...baseAddress });
+    const created = await addressBookApi.createAddress(traderAddress(name));
 
     await insPages.addressBookDelete.open(created.id, { userId: users.andrew.crn });
     await insPages.addressBookDelete.confirm();

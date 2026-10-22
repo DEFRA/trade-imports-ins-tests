@@ -3,21 +3,12 @@ import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 import { expectAddressBookList } from './expect-address-book-list';
 import { UNKNOWN_ADDRESS_ID } from './unknown-address-id';
-
-const baseAddress = {
-  addressLine1: '4 View Lane',
-  townOrCity: 'Carlisle',
-  postcode: 'CA1 3CC',
-  countryCode: 'GB',
-  phone: '01228 555 0107',
-  email: 'view@example.co.uk',
-};
+import { traderAddress } from './trader-address';
 
 test.describe('Address book view', () => {
   test('shows Address line 2 (optional) and County (optional) when the address has them', async ({ insPages, addressBookApi }) => {
     const addressWithOptionalFields = await addressBookApi.createAddress({
-      name: `View Full Farm ${Date.now()}`,
-      ...baseAddress,
+      ...traderAddress(`View Full Farm ${Date.now()}`),
       addressLine2: 'Unit 4',
       county: 'Cumbria',
     });
@@ -38,7 +29,7 @@ test.describe('Address book view', () => {
   });
 
   test('shows neither Address line 2 nor County when the address has neither', async ({ insPages, addressBookApi }) => {
-    const addressWithoutOptionalFields = await addressBookApi.createAddress({ name: `View Bare Farm ${Date.now()}`, ...baseAddress });
+    const addressWithoutOptionalFields = await addressBookApi.createAddress(traderAddress(`View Bare Farm ${Date.now()}`));
 
     await insPages.addressBookView.open(addressWithoutOptionalFields.id);
 
@@ -55,7 +46,7 @@ test.describe('Address book view', () => {
 
   test.describe('return', () => {
     test('Back follows an INS return, and Edit and Delete carry it on', async ({ insPages, addressBookApi }) => {
-      const created = await addressBookApi.createAddress({ name: `View Return Farm ${Date.now()}`, ...baseAddress });
+      const created = await addressBookApi.createAddress(traderAddress(`View Return Farm ${Date.now()}`));
 
       await insPages.addressBookView.openWithReturn(created.id, '/');
 
@@ -68,7 +59,7 @@ test.describe('Address book view', () => {
     });
 
     test('a return on another frontend is ignored', async ({ pages, insPages, addressBookApi }) => {
-      const created = await addressBookApi.createAddress({ name: `View Plants Return Farm ${Date.now()}`, ...baseAddress });
+      const created = await addressBookApi.createAddress(traderAddress(`View Plants Return Farm ${Date.now()}`));
       const plantsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL')).origin;
 
       await insPages.addressBookView.openWithReturn(created.id, `${plantsOrigin}/high-risk-plants`);
@@ -101,7 +92,7 @@ test.describe('Address book view', () => {
       const otherOrganisationId = 'e2e-dead-link-other-org';
       const otherOrganisationAddressBookApi = new AddressBookApiClient(request, otherOrganisationId);
       const name = `Other Org Farm ${Date.now()}`;
-      const created = await otherOrganisationAddressBookApi.createAddress({ name, ...baseAddress });
+      const created = await otherOrganisationAddressBookApi.createAddress(traderAddress(name));
 
       try {
         await insPages.addressBookView.open(created.id);
@@ -114,7 +105,7 @@ test.describe('Address book view', () => {
     });
 
     test('a deleted address returns to the address book', async ({ pages, insPages, addressBookApi }) => {
-      const created = await addressBookApi.createAddress({ name: `Deleted Farm ${Date.now()}`, ...baseAddress });
+      const created = await addressBookApi.createAddress(traderAddress(`Deleted Farm ${Date.now()}`));
       await addressBookApi.deleteAddress(created.id);
 
       await insPages.addressBookView.open(created.id);
