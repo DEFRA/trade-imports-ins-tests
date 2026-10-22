@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { countryAndSubdivisionNamesWithCountry } from '@resources/reference-data/reference-data';
+import { SEARCH_BOX_ASSISTIVE_DESCRIPTION } from '@page-objects/shared/type-ahead';
 
 test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('filters as you type, submits the country code and persists it', async ({ animalsJourney, animalsPages }) => {
@@ -36,7 +37,8 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
     await animalsPages.overview.task('Where is this consignment coming from?').click();
 
     await expect(animalsPages.originOfImport.country.field).toHaveAttribute('placeholder', 'Search for a country');
-    await animalsPages.originOfImport.country.expectNoHint();
+    await expect(animalsPages.originOfImport.country.field).toHaveAccessibleDescription(SEARCH_BOX_ASSISTIVE_DESCRIPTION);
+    await expect(animalsPages.originOfImport.country.hint).toHaveCount(0);
   });
 
   test('shows the letters typed in bold in a country suggestion', async ({ animalsJourney, animalsPages }) => {
@@ -59,7 +61,8 @@ test.describe('Country of origin without JavaScript', { tag: '@duplicated-in-fro
     const { country } = animalsPages.originOfImport;
     const { select } = country;
 
-    await country.expectNoHint();
+    await expect(country.field).toHaveAccessibleDescription('');
+    await expect(country.hint).toHaveCount(0);
     await expect(select.locator('option').first()).toHaveText('Select a country');
 
     await select.selectOption({ label: 'Belgium' });

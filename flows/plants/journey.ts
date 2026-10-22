@@ -172,7 +172,7 @@ export class PlantsJourney {
     if (commodityType === POTATOES) {
       reference = await this.toArrivalDetailsOfNewPotatoNotification();
       await this.plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-      await this.plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
+      await this.plantsPages.arrivalDetails.placeOfLanding.choose(portByCode('GB ABD').display);
     } else {
       reference = await this.toOriginOfNewNotification(commodityType);
       await this.toArrivalStatus('Germany');
@@ -188,12 +188,13 @@ export class PlantsJourney {
   async toConsignorOfNewNotification(
     api: AddressBookApiClient,
     commodityType: string,
-  ): Promise<{ reference: string; destinationName: string }> {
-    const destinationName = `Consignor Route Nursery ${randomUUID()}`;
-    await api.createAddress(nurseryAddress(destinationName));
+  ): Promise<{ reference: string; addressName: string }> {
+    const addressName = `Consignor Route Nursery ${randomUUID()}`;
+    await api.createAddress(nurseryAddress(addressName));
     const reference = await this.toDestinationOfNewNotification(commodityType);
-    await this.chooseDestination(destinationName);
-    return { reference, destinationName };
+    await this.chooseDestination(addressName);
+    await this.plantsPages.consignorSelect.heading.waitFor();
+    return { reference, addressName };
   }
 
   async chooseDestination(addressName: string): Promise<void> {

@@ -1,10 +1,8 @@
-import type { BrowserContext } from '@playwright/test';
 import { test, expect } from '@fixtures';
-import { createAnimalsPages } from '@page-objects/animals';
-import type { AnimalsTransitedCountriesPage } from '@page-objects/animals/transited-countries-page';
 import { TRANSIT_COUNTRY_SEARCH_PLACEHOLDER, TRANSIT_COUNTRY_SELECT_TEXT } from '@domain/animals/constants/transit-countries-page';
 import { countriesOrigin } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
+import { expectEmptyTransitList } from '@utils/transit-countries-assertions';
 
 test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -16,7 +14,7 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
 
     await expect(transitedCountries.heading).toBeVisible();
     await expect(transitedCountries.country.field).toBeVisible();
-    await transitedCountries.expectEmptyList();
+    await expectEmptyTransitList(transitedCountries);
   });
 
   test('the empty search box reads "Search for a country"', async ({ animalsPages }) => {
@@ -59,7 +57,7 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
     await animalsPages.transitedCountries.open(referenceNumber);
-    await animalsPages.transitedCountries.expectEmptyList();
+    await expectEmptyTransitList(animalsPages.transitedCountries);
     await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText([]);
   });
 
@@ -71,33 +69,24 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
 });
 
 test.describe('Transited countries page without JavaScript', { tag: '@duplicated-in-frontend' }, () => {
-  let withoutJavaScript: BrowserContext;
-  let transitedCountries: AnimalsTransitedCountriesPage;
+  test.use({ javaScriptEnabled: false });
 
-  test.beforeEach(async ({ animalsJourney, pages, browser }) => {
+  test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toTransitedCountries();
-    withoutJavaScript = await browser.newContext({
-      javaScriptEnabled: false,
-      storageState: await pages.page.context().storageState(),
-    });
-    const plainPage = await withoutJavaScript.newPage();
-    await plainPage.goto(pages.page.url());
-    transitedCountries = createAnimalsPages(plainPage).transitedCountries;
   });
 
-  test.afterEach(async () => {
-    await withoutJavaScript.close();
-  });
-
-  test('the select opens on "Select a country" followed by every origin country', async () => {
+  test('the select opens on "Select a country" followed by every origin country', async ({ animalsPages }) => {
     skipUnlessComposeEnvironment("the list is the stub's MDM fixture, which only the compose stack is sure to serve");
 
-    await expect(transitedCountries.country.options).toHaveText([TRANSIT_COUNTRY_SELECT_TEXT, ...countriesOrigin.map(({ name }) => name)]);
+    await expect(animalsPages.transitedCountries.country.options).toHaveText([
+      TRANSIT_COUNTRY_SELECT_TEXT,
+      ...countriesOrigin.map(({ name }) => name),
+    ]);
   });
 
-  test('choosing France and pressing Add country lists it', async () => {
-    await transitedCountries.addCountry('France');
+  test('choosing France and pressing Add country lists it', async ({ animalsPages }) => {
+    await animalsPages.transitedCountries.addCountry('France');
 
-    await expect(transitedCountries.addedCountryNames).toHaveText(['France']);
+    await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText(['France']);
   });
 });

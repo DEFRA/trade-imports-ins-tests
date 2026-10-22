@@ -68,7 +68,7 @@ test.describe('High-risk plants full happy-path journeys', () => {
       if (scenario.type === POTATOES) {
         await plantsJourney.toArrivalDetails(scenario.country);
         await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-        await plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
+        await plantsPages.arrivalDetails.placeOfLanding.choose(portByCode('GB ABD').display);
       } else {
         await plantsJourney.toArrivalStatus(scenario.country);
         await plantsJourney.answerArrivalStatus('No, it has not arrived yet');

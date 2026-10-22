@@ -83,7 +83,7 @@ export class AnimalsAddressesPage extends NotificationPage {
     return { change: `Change ${CPH_SECTION_HEADING.toLowerCase()}` };
   }
 
-  get cphAddressLines(): Locator {
+  get cphNumberText(): Locator {
     return this.cphSection.locator('.govuk-inset-text');
   }
 

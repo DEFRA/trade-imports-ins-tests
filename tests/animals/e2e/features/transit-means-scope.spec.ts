@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
+import { expectEmptyTransitList } from '@utils/transit-countries-assertions';
 
 const TRANSPORT_AND_ARRIVAL_HEADING = '3. Transport and arrival';
 const TASKS_WITHOUT_TRANSIT_COUNTRIES = ['Arrival details', 'Transport details'];
@@ -48,6 +49,6 @@ test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () 
     await saveArrivalWithMeans(meansOfTransport.roadVehicle.display);
     await animalsPages.overview.task('Transit countries').click();
     await expect(animalsPages.transitedCountries.heading).toBeVisible();
-    await animalsPages.transitedCountries.expectEmptyList();
+    await expectEmptyTransitList(animalsPages.transitedCountries);
   });
 });

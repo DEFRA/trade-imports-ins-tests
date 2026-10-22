@@ -1,5 +1,6 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
+import type { Locator } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import {
   ALL_ANSWERS,
@@ -11,7 +12,9 @@ import {
   type OriginOptions,
   type PartyAnswers,
 } from '@domain/animals/constants/journey-options';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
+import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
@@ -24,8 +27,6 @@ export type ArrivalDetailsAnswer = {
   transportId?: string;
   documentReference?: string;
 };
-
-export const IMPORT_REASON_TASK = 'Main import reason';
 
 export const OPENING_RUN_TASKS = [
   'Where is this consignment coming from?',
@@ -41,7 +42,6 @@ export const OPENING_RUN_TASKS = [
   'Contact address for this consignment',
 ] as const;
 
-export const DEFAULT_REGION_CODE = ALL_ANSWERS.regionCode;
 export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffset: 2 });
 export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
 export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
@@ -108,7 +108,7 @@ export class AnimalsJourney {
     await this.animalsPages.originOfImport.saveAndContinue.click();
   }
 
-  async answerOriginWithRegionCode(regionCode: string, options: OriginOptions = {}): Promise<void> {
+  async fillAndSaveOriginWithRegionCode(regionCode: string, options: OriginOptions = {}): Promise<void> {
     await this.fillOriginOfImport({ ...options, requiresRegionCode: 'Yes', regionCode });
     await this.saveOriginOfImport();
   }
@@ -232,7 +232,7 @@ export class AnimalsJourney {
     documentReference = MANDATORY_ANSWERS.transportDocumentReference,
   }: ArrivalDetailsAnswer = {}): Promise<void> {
     await this.animalsPages.arrivalDetails.fillArrivalDate(date);
-    await this.animalsPages.arrivalDetails.selectPort(port);
+    await this.animalsPages.arrivalDetails.portOfEntry.choose(port);
     await this.animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: means });
     await this.animalsPages.arrivalDetails.transportIdentification.fill(transportId);
     await this.animalsPages.arrivalDetails.transportDocumentReference.fill(documentReference);
@@ -245,6 +245,12 @@ export class AnimalsJourney {
       .documentRow(document.reference)
       .filter({ hasText: 'Check completed' })
       .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
+  }
+
+  async uploadScannedDocument(): Promise<Locator> {
+    const reference = `PW${Date.now()}`;
+    await this.uploadDocumentAndWaitForScan({ ...ALL_ANSWERS.accompanyingDocument, reference });
+    return this.animalsPages.accompanyingDocuments.documentRow(reference);
   }
 
   async chooseContactAddress(name: string = MANDATORY_ANSWERS.contactAddress): Promise<void> {

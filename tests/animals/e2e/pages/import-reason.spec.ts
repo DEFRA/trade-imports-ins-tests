@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { SELECT_ONE_PLACEHOLDER } from '@page-objects/animals/import-reason-page';
+import { SELECT_ONE_PLACEHOLDER } from '@domain/animals/constants/import-reason-page';
 
 test.describe('Import reason page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {

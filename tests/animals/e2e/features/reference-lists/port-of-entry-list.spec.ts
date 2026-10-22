@@ -13,6 +13,6 @@ test.describe('Port of entry list', () => {
   }) => {
     await animalsJourney.toArrivalDetails();
 
-    await expect(animalsPages.arrivalDetails.portOptions).toHaveText(portsOfEntry.map(portLabel));
+    await expect(animalsPages.arrivalDetails.portOfEntry.selectableOptions).toHaveText(portsOfEntry.map(portLabel));
   });
 });

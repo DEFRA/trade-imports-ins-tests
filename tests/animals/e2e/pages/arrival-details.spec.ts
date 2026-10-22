@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { SELECT_ONE_PLACEHOLDER } from '@domain/animals/constants/import-reason-page';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { getRelativeAppDateText, getRelativeDatePickerValue } from '@utils/date-utils';
 
@@ -21,7 +22,7 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
 
   test('renders the page controls', async ({ animalsPages }) => {
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
-    await expect(animalsPages.arrivalDetails.portOfEntry).toBeVisible();
+    await expect(animalsPages.arrivalDetails.portOfEntry.field).toBeVisible();
     await expect(animalsPages.arrivalDetails.meansOfTransport).toBeVisible();
     await expect(animalsPages.arrivalDetails.transportIdentification).toBeVisible();
     await expect(animalsPages.arrivalDetails.transportDocumentReference).toBeVisible();
@@ -46,14 +47,14 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
     await expect(animalsPages.arrivalDetails.fieldHint('portOfEntry')).toHaveText(
       'Select where the transporter will enter with the consignment. Start typing to search by port or airport name or code.',
     );
-    await expect(animalsPages.arrivalDetails.portOfEntry).toHaveAttribute('placeholder', SELECT_A_PORT);
-    await expect(animalsPages.arrivalDetails.portOfEntry).toHaveValue('');
-    await expect(animalsPages.arrivalDetails.portOfEntryValue.locator('option[value=""]')).toHaveText(SELECT_A_PORT);
+    await expect(animalsPages.arrivalDetails.portOfEntry.field).toHaveAttribute('placeholder', SELECT_A_PORT);
+    await expect(animalsPages.arrivalDetails.portOfEntry.field).toHaveValue('');
+    await expect(animalsPages.arrivalDetails.portOfEntry.select.locator('option[value=""]')).toHaveText(SELECT_A_PORT);
   });
 
   test('offers Select one, then Air, Rail, Road and Sea as the means of transport', async ({ animalsPages }) => {
     await expect(animalsPages.arrivalDetails.meansOfTransportOptions).toHaveText([
-      'Select one',
+      SELECT_ONE_PLACEHOLDER,
       meansOfTransport.airplane.display,
       meansOfTransport.railway.display,
       meansOfTransport.roadVehicle.display,
@@ -76,7 +77,7 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
   });
 
   test('leaves the arrival details unanswered on load', async ({ animalsPages }) => {
-    await expect(animalsPages.arrivalDetails.portOfEntry).toBeVisible();
+    await expect(animalsPages.arrivalDetails.portOfEntry.field).toBeVisible();
     await expect(animalsPages.arrivalDetails.meansOfTransport).toBeVisible();
     await expect(animalsPages.arrivalDetails.meansOfTransport).toHaveValue('');
   });
@@ -99,8 +100,8 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
   });
 
   test('restricts the date picker to one week back and six months ahead', async ({ animalsPages }) => {
-    await expect(animalsPages.arrivalDetails.datePicker).toHaveAttribute('data-min-date', EARLIEST_ALLOWED);
-    await expect(animalsPages.arrivalDetails.datePicker).toHaveAttribute('data-max-date', LATEST_ALLOWED);
+    await expect(animalsPages.arrivalDetails.arrivalDatePicker.root).toHaveAttribute('data-min-date', EARLIEST_ALLOWED);
+    await expect(animalsPages.arrivalDetails.arrivalDatePicker.root).toHaveAttribute('data-max-date', LATEST_ALLOWED);
   });
 
   test('rejects a typed arrival date outside the allowed window', async ({ animalsJourney, pages, animalsPages }) => {

@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { countryCodes } from '@domain/animals/constants/country-codes';
-import { DEFAULT_REGION_CODE } from '@flows/animals/journey';
+import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
 
 const FRANCE_REGION_CODE = `${countryCodes.eu.france.value}-${DEFAULT_REGION_CODE}`;
 const IMPORT_DETAILS_CARD = 'Import details';
@@ -91,7 +91,7 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
   test('persists a region of origin code selection', async ({ animalsPages, animalsJourney }) => {
     const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
 
-    await animalsJourney.answerOriginWithRegionCode(DEFAULT_REGION_CODE);
+    await animalsJourney.fillAndSaveOriginWithRegionCode(DEFAULT_REGION_CODE);
 
     await animalsPages.originOfImport.open(referenceNumber);
     await expect(animalsPages.originOfImport.radioRequiresOriginCode('Yes')).toBeChecked();
@@ -101,7 +101,7 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
   test('answering No clears a saved region of origin code', async ({ animalsPages, animalsJourney }) => {
     const { originOfImport, notificationView } = animalsPages;
     const referenceNumber = originOfImport.referenceNumberFromUrl();
-    await animalsJourney.answerOriginWithRegionCode(DEFAULT_REGION_CODE);
+    await animalsJourney.fillAndSaveOriginWithRegionCode(DEFAULT_REGION_CODE);
 
     await originOfImport.open(referenceNumber);
     await originOfImport.radioRequiresOriginCode('No').check();
@@ -124,7 +124,7 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
     const { value, display } = countryCodes.subdivisions.canaryIslands;
 
-    await animalsJourney.answerOriginWithRegionCode('12', {
+    await animalsJourney.fillAndSaveOriginWithRegionCode('12', {
       countryCode: countryCodes.subdivisions.canaryIslands,
       internalReference: INTERNAL_REFERENCE,
     });
@@ -205,7 +205,7 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
       test.beforeEach(async ({ animalsPages, animalsJourney }) => {
         const { originOfImport } = animalsPages;
         const referenceNumber = originOfImport.referenceNumberFromUrl();
-        await animalsJourney.answerOriginWithRegionCode(DEFAULT_REGION_CODE);
+        await animalsJourney.fillAndSaveOriginWithRegionCode(DEFAULT_REGION_CODE);
         await originOfImport.open(referenceNumber);
       });
 
@@ -251,25 +251,28 @@ test.describe('Origin of the import page without JavaScript', { tag: '@duplicate
     await originOfImport.radioRequiresOriginCode('Yes').check();
 
     await expect(originOfImport.regionCode).toBeVisible();
-    await originOfImport.expectRegionCodePrefixPresentButHidden();
+    await expect(originOfImport.regionCodePrefix).toHaveCount(1);
+    await expect(originOfImport.regionCodePrefix).toBeHidden();
   });
 
   test('hides the region code prefix when the page is shown again after a save', async ({ animalsPages, animalsJourney }) => {
     const { originOfImport } = animalsPages;
     const referenceNumber = originOfImport.referenceNumberFromUrl();
-    await animalsJourney.answerOriginWithRegionCode(DEFAULT_REGION_CODE);
+    await animalsJourney.fillAndSaveOriginWithRegionCode(DEFAULT_REGION_CODE);
     await originOfImport.open(referenceNumber);
 
     await expect(originOfImport.regionCode).toHaveValue(DEFAULT_REGION_CODE);
-    await originOfImport.expectRegionCodePrefixPresentButHidden();
+    await expect(originOfImport.regionCodePrefix).toHaveCount(1);
+    await expect(originOfImport.regionCodePrefix).toBeHidden();
   });
 
   test('hides the region code prefix on a refused page', async ({ animalsPages, animalsJourney }) => {
     const { originOfImport } = animalsPages;
-    await animalsJourney.answerOriginWithRegionCode('');
+    await animalsJourney.fillAndSaveOriginWithRegionCode('');
 
     await expect(originOfImport.errorSummary).toBeVisible();
-    await originOfImport.expectRegionCodePrefixPresentButHidden();
+    await expect(originOfImport.regionCodePrefix).toHaveCount(1);
+    await expect(originOfImport.regionCodePrefix).toBeHidden();
   });
 
   for (const typed of [DEFAULT_REGION_CODE, FRANCE_REGION_CODE]) {
@@ -277,7 +280,7 @@ test.describe('Origin of the import page without JavaScript', { tag: '@duplicate
       const { originOfImport, notificationView } = animalsPages;
       const referenceNumber = originOfImport.referenceNumberFromUrl();
 
-      await animalsJourney.answerOriginWithRegionCode(typed);
+      await animalsJourney.fillAndSaveOriginWithRegionCode(typed);
 
       await notificationView.open(referenceNumber);
       await expect(notificationView.summaryValue(notificationView.summaryCard(IMPORT_DETAILS_CARD), REGION_OF_ORIGIN_CODE_ROW)).toHaveText(
@@ -289,7 +292,7 @@ test.describe('Origin of the import page without JavaScript', { tag: '@duplicate
   test('refuses a region code longer than 5 characters after the country code', async ({ animalsPages, animalsJourney }) => {
     const { originOfImport } = animalsPages;
     await originOfImport.removeRegionCodeMaxlength();
-    await animalsJourney.answerOriginWithRegionCode('FR-ABCDEF');
+    await animalsJourney.fillAndSaveOriginWithRegionCode('FR-ABCDEF');
 
     await expect(originOfImport.errorSummary).toBeVisible();
     await expect(originOfImport.regionCodeMaxLengthErrorLink).toBeVisible();

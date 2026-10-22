@@ -1,5 +1,4 @@
 import { test, expect } from '@fixtures';
-import { createAnimalsPages } from '@page-objects/animals';
 
 const COMMERCIAL_TRANSPORTER = 'García Livestock Transport SL';
 const PRIVATE_TRANSPORTER = 'Aberdeen Livestock Ltd';
@@ -75,25 +74,16 @@ test.describe('Transporter list page', { tag: '@duplicated-in-frontend' }, () =>
 });
 
 test.describe('Transporter list search without JavaScript', { tag: '@duplicated-in-frontend' }, () => {
-  test('narrows the list on the server when the Search button is pressed', async ({ animalsJourney, pages, browser }) => {
+  test.use({ javaScriptEnabled: false });
+
+  test('narrows the list on the server when the Search button is pressed', async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toTransporter();
-    const withoutJavaScript = await browser.newContext({
-      javaScriptEnabled: false,
-      storageState: await pages.page.context().storageState(),
-    });
-    try {
-      const plainPage = await withoutJavaScript.newPage();
-      await plainPage.goto(pages.page.url());
-      const plainTransporter = createAnimalsPages(plainPage).transporter;
 
-      await plainTransporter.searchBox.fill('aberdeen');
-      await plainTransporter.searchButton.click();
+    await animalsPages.transporter.searchBox.fill('aberdeen');
+    await animalsPages.transporter.searchButton.click();
 
-      await expect(plainTransporter.listedTransporters).toHaveCount(1);
-      await expect(plainTransporter.transporter(PRIVATE_TRANSPORTER)).toBeVisible();
-      await expect(plainTransporter.searchBox).toHaveValue('aberdeen');
-    } finally {
-      await withoutJavaScript.close();
-    }
+    await expect(animalsPages.transporter.listedTransporters).toHaveCount(1);
+    await expect(animalsPages.transporter.transporter(PRIVATE_TRANSPORTER)).toBeVisible();
+    await expect(animalsPages.transporter.searchBox).toHaveValue('aberdeen');
   });
 });

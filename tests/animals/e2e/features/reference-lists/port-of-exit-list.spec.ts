@@ -1,9 +1,8 @@
 import { test, expect } from '@fixtures';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { portLabel, portsOfEntry } from '@resources/reference-data/reference-data';
-import { SELECT_ONE_PLACEHOLDER } from '@page-objects/animals/import-reason-page';
+import { IMPORT_REASON_TASK, SELECT_ONE_PLACEHOLDER } from '@domain/animals/constants/import-reason-page';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
-import { IMPORT_REASON_TASK } from '@flows/animals/journey';
 
 test.describe('Port of exit list', () => {
   test.beforeEach(() => {

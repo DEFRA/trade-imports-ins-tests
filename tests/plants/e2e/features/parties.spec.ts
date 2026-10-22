@@ -30,7 +30,7 @@ test.describe('High-risk plants consignment parties section', () => {
       plantsJourney,
       addressBookApi,
     }) => {
-      const { reference, destinationName: name } = await plantsJourney.toConsignorOfNewNotification(addressBookApi, type);
+      const { reference, addressName: name } = await plantsJourney.toConsignorOfNewNotification(addressBookApi, type);
       const consignor = plantsPages.consignorSelect;
       const numbers = plantsPages.identificationNumbers;
 

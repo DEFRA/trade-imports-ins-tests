@@ -3,8 +3,6 @@ import { NotificationPage } from '@page-objects/shared/base-page';
 import { DatePicker } from '@page-objects/shared/date-picker';
 import { TypeAhead } from '@page-objects/shared/type-ahead';
 
-export const SELECT_ONE_PLACEHOLDER = 'Select one';
-
 export class AnimalsImportReasonPage extends NotificationPage {
   readonly transitPortOfExit: TypeAhead;
   readonly transitDestinationCountry: TypeAhead;

@@ -1,8 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
-
-export const SEARCH_HINT = 'You can search by common name (for example, cattle), commodity code (0102), or Latin name (Bos taurus).';
-export const SELECT_COMMODITY_ERROR = 'Select a commodity';
+import { SEARCH_HINT } from '@domain/animals/constants/commodity-selection-page';
 
 export class AnimalsCommoditySelectionPage extends NotificationPage {
   constructor(page: Page) {

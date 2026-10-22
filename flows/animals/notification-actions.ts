@@ -34,10 +34,7 @@ export class AnimalsNotificationActions {
   async amendCountryOfOriginAndResubmit(referenceNumber: string, country: CountryCode): Promise<void> {
     await this.amendNotification(referenceNumber);
     await this.animalsPages.overview.reviewAndSubmitButton.click();
-    await this.animalsPages.notificationView.changeLink('Change import details').click();
-    await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
-    await this.animalsPages.originOfImport.country.choose(country.display);
-    await this.animalsPages.originOfImport.saveAndReturn.click();
+    await this.changeCountryOfOrigin(country.display);
     await this.animalsPages.notificationView.continueButton.click();
     await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
     await this.animalsPages.declaration.confirmation.check();

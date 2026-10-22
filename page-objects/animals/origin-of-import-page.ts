@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { TypeAhead } from '@page-objects/shared/type-ahead';
 import type { YesNoValue } from '@domain/shared/constants/yes-no-values';
@@ -29,11 +29,6 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
 
   get regionCodePrefix(): Locator {
     return this.regionCodeConditional.locator('.govuk-input__prefix');
-  }
-
-  async expectRegionCodePrefixPresentButHidden(): Promise<void> {
-    await expect(this.regionCodePrefix).toHaveCount(1);
-    await expect(this.regionCodePrefix).toBeHidden();
   }
 
   get regionCodeLabel(): Locator {

@@ -4,7 +4,7 @@ import { DatePicker } from '@page-objects/shared/date-picker';
 import { TypeAhead } from '@page-objects/shared/type-ahead';
 
 export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
-  private readonly placeOfLanding: TypeAhead;
+  public readonly placeOfLanding: TypeAhead;
 
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
     super(page, 'arrival-details');
@@ -29,18 +29,6 @@ export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
 
   get arrivalTime(): Locator {
     return this.page.locator('#arrivalTime');
-  }
-
-  get proposedPlaceOfLanding(): Locator {
-    return this.page.locator('#proposedPlaceOfLanding');
-  }
-
-  get placeOfLandingOptions(): Locator {
-    return this.page.locator('select[name="proposedPlaceOfLanding"] option:not([value=""])');
-  }
-
-  async selectPlaceOfLanding(name: string): Promise<void> {
-    await this.placeOfLanding.choose(name);
   }
 
   get btnSaveAndContinue(): Locator {

@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, POTATOES, WOOD_AND_CUT_TREES } from '@flows/plants/journey';
+import { SEARCH_BOX_ASSISTIVE_DESCRIPTION } from '@page-objects/shared/type-ahead';
 
 const WARE_POTATOES = 'Ware potatoes';
 const CONIFER_WOOD_WITHOUT_BARK = 'Conifer wood without bark (from Italy, France, Portugal or Spain)';
@@ -70,7 +71,8 @@ test.describe('High-risk plants origin section', () => {
     await plantsJourney.toOriginOfNewNotification(POTATOES);
 
     await expect(plantsPages.origin.country.field).toHaveAttribute('placeholder', 'Search for a country');
-    await plantsPages.origin.country.expectNoHint();
+    await expect(plantsPages.origin.country.field).toHaveAccessibleDescription(SEARCH_BOX_ASSISTIVE_DESCRIPTION);
+    await expect(plantsPages.origin.country.hint).toHaveCount(0);
   });
 
   test('a country suggestion shows the letters typed in bold', async ({ plantsPages, plantsJourney }) => {
@@ -195,7 +197,8 @@ test.describe('High-risk plants origin section without JavaScript', () => {
     const reference = await plantsJourney.toOriginOfNewNotification(POTATOES);
     const { select } = plantsPages.origin.country;
 
-    await plantsPages.origin.country.expectNoHint();
+    await expect(plantsPages.origin.country.field).toHaveAccessibleDescription('');
+    await expect(plantsPages.origin.country.hint).toHaveCount(0);
     await expect(select.locator('option').first()).toHaveText('Select a country');
 
     await select.selectOption({ label: FRANCE });

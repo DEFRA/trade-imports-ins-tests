@@ -24,6 +24,6 @@ test.describe('Plants reference lists', () => {
     await plantsJourney.toOriginOfNewNotification(POTATOES);
     await plantsJourney.toArrivalDetails(countryByCode('FR').display);
 
-    await expect(plantsPages.arrivalDetails.placeOfLandingOptions).toHaveText(portsOfEntry.map(portLabel));
+    await expect(plantsPages.arrivalDetails.placeOfLanding.selectableOptions).toHaveText(portsOfEntry.map(portLabel));
   });
 });
