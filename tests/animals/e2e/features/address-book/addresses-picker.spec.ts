@@ -1,5 +1,7 @@
 import { test, expect } from '@fixtures';
 
+const FIVE_RESULTS_SUMMARY = /^Showing 5 out of \d+ results$/;
+
 test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-book'] }, () => {
   test('the picker searches and pages the address book, and the row selected on a later page is the one that saves', async ({
     animalsJourney,
@@ -56,11 +58,10 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     const consignorRow = animalsPages.addresses.partyRow('Consignor or exporter');
     await animalsPages.addresses.addParty('Consignor or exporter').click();
 
-    const showingFive = /Showing 5 of \d+ addresses/;
-    await expect(page.getByText(showingFive)).toBeVisible();
+    await expect(animalsPages.consignorSelection.resultsHeading).toBeVisible();
+    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
+    await expect(animalsPages.consignorSelection.resultsGroup.getByRole('radio')).toHaveCount(5);
 
-    // View details expands the row in place (no navigation, so nothing typed or
-    // ticked is lost) and shows the rest of the record.
     await animalsPages.consignorSelection.search.fill('Tech Imports Ltd');
     await animalsPages.consignorSelection.searchButton.click();
     const detailedRow = page.locator('tr', { hasText: 'Tech Imports Ltd' });
@@ -70,22 +71,16 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(rowDetails.locator('.govuk-details__text')).toBeVisible();
     await expect(rowDetails).toContainText('London');
 
-    // Search is a server round-trip over the whole book and narrows it to a
-    // single page of results. Searching this run's own token keeps the count
-    // exact however many records earlier runs left behind.
     await animalsPages.consignorSelection.search.fill(searchToken);
     await animalsPages.consignorSelection.searchButton.click();
-    await expect(page.getByText('Showing 2 of 2 addresses')).toBeVisible();
+    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText('Showing 2 out of 2 results');
     await expect(animalsPages.consignorSelection.party(searchMatches[1])).toBeVisible();
     await expect(page.getByRole('link', { name: 'Page 2' })).toHaveCount(0);
 
-    // Clearing the search restores the whole book and its pagination.
     await animalsPages.consignorSelection.search.fill('');
     await animalsPages.consignorSelection.searchButton.click();
-    await expect(page.getByText(showingFive)).toBeVisible();
+    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
 
-    // Target was pushed off page one by the five newer creates — step Next
-    // until it appears, then select it (cross-page selection without JS).
     await expect(animalsPages.consignorSelection.party(targetName)).toHaveCount(0);
     const target = animalsPages.consignorSelection.party(targetName);
     const nextLink = page.getByRole('link', { name: /Next/ });
@@ -106,14 +101,27 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(consignorRow).toContainText(targetName);
 
-    // Re-entering opens on page one, where the chosen record is not rendered —
-    // the picker still knows it (carried, not re-ticked), and a save from this
-    // page keeps it. That is the no-JS selection-across-pagination guarantee.
     await animalsPages.addresses.changeParty('Consignor or exporter').click();
     await expect(animalsPages.consignorSelection.selectedAddress).toHaveText(`Selected address: ${targetName}`);
     await expect(animalsPages.consignorSelection.party(targetName)).toHaveCount(0);
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(consignorRow).toContainText(targetName);
+  });
+
+  test('saving with nothing ticked returns to the roles and addresses page with the consignor not added yet', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.startNotification();
+    await animalsJourney.unlockSections();
+    await animalsPages.overview.task('Roles and addresses').click();
+    const consignorRow = animalsPages.addresses.partyRow('Consignor or exporter');
+    await animalsPages.addresses.addParty('Consignor or exporter').click();
+
+    await animalsPages.consignorSelection.saveAndContinue.click();
+
+    await expect(animalsPages.addresses.heading).toBeVisible();
+    await expect(consignorRow).toContainText('Not added yet');
   });
 });

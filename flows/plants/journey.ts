@@ -184,6 +184,18 @@ export class PlantsJourney {
     return reference;
   }
 
+  /** Mints a record for the place of destination, answers everything before it and lands on the consignor page. */
+  async toConsignorOfNewNotification(
+    api: AddressBookApiClient,
+    commodityType: string,
+  ): Promise<{ reference: string; destinationName: string }> {
+    const destinationName = `Consignor Route Nursery ${randomUUID()}`;
+    await api.createAddress(nurseryAddress(destinationName));
+    const reference = await this.toDestinationOfNewNotification(commodityType);
+    await this.chooseDestination(destinationName);
+    return { reference, destinationName };
+  }
+
   async chooseDestination(addressName: string): Promise<void> {
     await this.plantsPages.placeOfDestination.searchFor(addressName);
     await this.plantsPages.placeOfDestination.address(addressName).check();
