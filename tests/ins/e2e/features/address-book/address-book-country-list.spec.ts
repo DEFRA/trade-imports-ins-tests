@@ -19,7 +19,7 @@ test.describe('Address book country list', () => {
     await expect(insPages.addressBookAdd.countryOptions).toHaveText(ALPHABETICAL_NAMES);
   });
 
-  test("the edit form's Country select lists the same countries in the same order", async ({ insPages, addressBookApi }) => {
+  test("the edit form's Country select offers the same alphabetical list with no blank option", async ({ insPages, addressBookApi }) => {
     const created = await addressBookApi.createAddress({
       name: `Country Order Farm ${Date.now()}`,
       addressLine1: '7 Order Lane',
@@ -32,6 +32,6 @@ test.describe('Address book country list', () => {
 
     await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.countryOptions).toHaveText(ALPHABETICAL_NAMES);
+    await expect(insPages.addressBookEdit.countryOptionsIncludingPlaceholder).toHaveText(ALPHABETICAL_NAMES);
   });
 });

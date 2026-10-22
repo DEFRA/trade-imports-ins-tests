@@ -36,6 +36,11 @@ export abstract class InsAddressBookFormPage extends BasePage {
     return this.page.getByRole('main').getByRole('textbox');
   }
 
+  /** The label of every field on the form, in page order. */
+  get fieldLabels(): Locator {
+    return this.page.getByRole('main').locator('form label');
+  }
+
   get countryOptionsIncludingPlaceholder(): Locator {
     return this.selectCountry.getByRole('option');
   }

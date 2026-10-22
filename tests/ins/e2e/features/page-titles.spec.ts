@@ -32,6 +32,14 @@ test.describe('INS page titles', { tag: '@duplicated-in-frontend' }, () => {
     await expect(pages.page).toHaveTitle('Delete this address? - Import notification service - GOV.UK');
   });
 
+  test('the edit page is titled Edit address and contact details', async ({ pages, insPages, addressBookApi }) => {
+    const created = await addressBookApi.createAddress(traderAddress(`Edit Title Farm ${Date.now()}`));
+
+    await insPages.addressBookEdit.open(created.id);
+
+    await expect(pages.page).toHaveTitle('Edit address and contact details - Import notification service - GOV.UK');
+  });
+
   test('a page showing errors opens its title with Error:', async ({ pages, insPages }) => {
     await insPages.addressBookAdd.open();
 
