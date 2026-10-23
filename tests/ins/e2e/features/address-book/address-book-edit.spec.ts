@@ -2,18 +2,7 @@ import { test, expect } from '@fixtures';
 import { expectAddressBookList } from './expect-address-book-list';
 import { expectOtherOrganisationAddressReturnsToList } from './expect-other-organisation-address-returns-to-list';
 import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
-import { traderAddress, traderAddressInUnofferedCountry, UNOFFERED_COUNTRY_CODE } from './trader-address';
-
-const baseAddress = {
-  addressLine1: '3 Change Lane',
-  addressLine2: 'Unit 9',
-  townOrCity: 'Carlisle',
-  county: 'Cumbria',
-  postcode: 'CA1 3CC',
-  countryCode: 'GB',
-  phone: '01228 555 0104',
-  email: 'edit@example.co.uk',
-};
+import { addressWithLineTwoAndCounty, traderAddress, traderAddressInUnofferedCountry, UNOFFERED_COUNTRY_CODE } from './trader-address';
 
 const FIELD_LABELS_IN_ORDER = [
   'Name or organisation',
@@ -34,21 +23,22 @@ test.describe('Address book edit', () => {
     addressBookApi,
   }) => {
     const originalName = `Edit Test Farm ${Date.now()}`;
-    const created = await addressBookApi.createAddress({ name: originalName, ...baseAddress });
+    const original = addressWithLineTwoAndCounty(originalName);
+    const created = await addressBookApi.createAddress(original);
 
     const renamed = `${originalName} Renamed`;
     const detailsWithOptionalFieldsBlank = {
       name: renamed,
-      addressLine1: baseAddress.addressLine1,
-      townOrCity: baseAddress.townOrCity,
-      postcode: baseAddress.postcode,
+      addressLine1: original.addressLine1,
+      townOrCity: original.townOrCity,
+      postcode: original.postcode,
       country: 'United Kingdom',
-      phone: baseAddress.phone,
-      email: baseAddress.email,
+      phone: original.phone,
+      email: original.email,
     };
     await insPages.addressBookEdit.open(created.id);
     await expect(insPages.addressBookEdit.heading).toBeVisible();
-    await expect(insPages.addressBookEdit.inputCounty).toHaveValue(baseAddress.county);
+    await expect(insPages.addressBookEdit.inputCounty).toHaveValue(original.county);
 
     await insPages.addressBookEdit.fill(detailsWithOptionalFieldsBlank);
     await insPages.addressBookEdit.save();
@@ -60,13 +50,13 @@ test.describe('Address book edit', () => {
     expect(stored.name).toBe(renamed);
     expect(stored.addressLine2 ?? '').toBe('');
     expect(stored.county ?? '').toBe('');
-    expect(stored.townOrCity).toBe(baseAddress.townOrCity);
+    expect(stored.townOrCity).toBe(original.townOrCity);
     expect(stored.deleted).toBe(false);
   });
 
   test('the address book links the new name to the edited address', async ({ insPages, addressBookApi }) => {
     const stamp = Date.now();
-    const created = await addressBookApi.createAddress({ name: `Edit Listing Farm ${stamp}`, ...baseAddress });
+    const created = await addressBookApi.createAddress(addressWithLineTwoAndCounty(`Edit Listing Farm ${stamp}`));
 
     const renamed = `Relisted Holding ${stamp}`;
     await insPages.addressBookEdit.open(created.id);
@@ -80,7 +70,8 @@ test.describe('Address book edit', () => {
     insPages,
     addressBookApi,
   }) => {
-    const created = await addressBookApi.createAddress({ name: `Edit Layout Farm ${Date.now()}`, ...baseAddress });
+    const address = addressWithLineTwoAndCounty(`Edit Layout Farm ${Date.now()}`);
+    const created = await addressBookApi.createAddress(address);
 
     await insPages.addressBookEdit.open(created.id);
 
@@ -89,7 +80,7 @@ test.describe('Address book edit', () => {
     for (const [index, name] of textboxNamesInOrder.entries()) {
       await expect(insPages.addressBookEdit.textboxes.nth(index)).toHaveAccessibleName(name);
     }
-    await expect(insPages.addressBookEdit.selectCountry).toHaveValue(baseAddress.countryCode);
+    await expect(insPages.addressBookEdit.selectCountry).toHaveValue(address.countryCode);
   });
 
   test('asks only for the address and contact fields', async ({ insPages, addressBookApi }) => {
