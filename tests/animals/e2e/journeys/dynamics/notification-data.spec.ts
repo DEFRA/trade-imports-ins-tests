@@ -21,6 +21,13 @@ const toIsoDate = (dayMonthYear: string): string => {
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 };
 
+/** PIMS Dynamics' labels for the countries the parties' address-book records are in. */
+const PIMS_COUNTRY_LABELS: Record<string, string> = {
+  CH: 'Switzerland',
+  GB: 'United Kingdom of Great Britain and Northern Ireland',
+  IE: 'Republic of Ireland',
+};
+
 /** The whole row, so a run shows the real lookups, option-set labels, dates and values to assert against. */
 const attachRow = (row: AnimalsDynamicsImporterNotification): Promise<void> =>
   test.info().attach('pims-row.json', { body: JSON.stringify(row, null, 2), contentType: 'application/json' });
@@ -37,10 +44,16 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     animalsJourney,
     journeyContext,
     externalRequest,
+    addressBookApi,
   }) => {
     // Built first: a missing ANIMALS_DYNAMICS_URL / DATAVERSE_* secret fails here, before the journey.
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     const answers = MANDATORY_ANSWERS;
+    const consignor = await addressBookApi.findByName(answers.parties.consignor);
+    const destination = await addressBookApi.findByName(answers.parties.placeOfDestination);
+    const placeOfOrigin = await addressBookApi.findByName(answers.parties.placeOfOrigin);
+    const consignee = await addressBookApi.findByName(answers.parties.consignee);
+    const importer = await addressBookApi.findByName(answers.parties.importer);
     await animalsJourney.submitNotification(answers);
     const referenceNumber = journeyContext.referenceNumber;
 
@@ -72,10 +85,50 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     // (gaps spec).
     expect.soft(row.defraimp_commoditiesincludenonablactedanimals, 'unweaned animals').toBe(false);
     expect.soft(row.defraimp_consignorcompanyname, 'consignor').toBe(answers.parties.consignor);
+    expect.soft(row.defraimp_consignoraddressaddressline1, 'consignor address line 1').toBe(consignor.addressLine1);
+    expect.soft(row.defraimp_consignoraddresscity, 'consignor city').toBe(consignor.townOrCity);
+    expect
+      .soft(formattedValue(row, '_defraimp_consignoraddresscountryid_value'), 'consignor country')
+      .toBe(PIMS_COUNTRY_LABELS[consignor.countryCode]);
+    // consignor.postcode: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
+    // consignor.phone: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
+    // consignor.email: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
     expect.soft(row.defraimp_placeofdestinationcompanyname, 'place of destination').toBe(answers.parties.placeOfDestination);
+    expect.soft(row.defraimp_placeofdestinationaddressaddressline1, 'place of destination address line 1').toBe(destination.addressLine1);
+    expect.soft(row.defraimp_placeofdestinationaddresscity, 'place of destination city').toBe(destination.townOrCity);
+    expect
+      .soft(formattedValue(row, '_defraimp_placeofdestinationcountryid_value'), 'place of destination country')
+      .toBe(PIMS_COUNTRY_LABELS[destination.countryCode]);
+    // destination.postcode: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
+    // destination.phone: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
+    // destination.email: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
     expect.soft(row.defraimp_placeoforigincompanyname, 'place of origin').toBe(answers.parties.placeOfOrigin);
+    expect.soft(row.defraimp_placeoforiginaddressline1, 'place of origin address line 1').toBe(placeOfOrigin.addressLine1);
+    expect.soft(row.defraimp_placeoforigincity, 'place of origin city').toBe(placeOfOrigin.townOrCity);
+    expect
+      .soft(formattedValue(row, '_defraimp_placeoforigincountryid_value'), 'place of origin country')
+      .toBe(PIMS_COUNTRY_LABELS[placeOfOrigin.countryCode]);
+    // placeOfOrigin.postcode: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
+    // placeOfOrigin.phone: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
+    // placeOfOrigin.email: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
     expect.soft(row.defraimp_consigneecompanyname, 'consignee').toBe(answers.parties.consignee);
+    expect.soft(row.defraimp_consigneeaddressaddressline1, 'consignee address line 1').toBe(consignee.addressLine1);
+    expect.soft(row.defraimp_consigneeaddresscity, 'consignee city').toBe(consignee.townOrCity);
+    expect
+      .soft(formattedValue(row, '_defraimp_consigneeaddresscountryid_value'), 'consignee country')
+      .toBe(PIMS_COUNTRY_LABELS[consignee.countryCode]);
+    // consignee.postcode: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
+    // consignee.phone: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
+    // consignee.email: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
     expect.soft(row.defraimp_importercompanyname, 'importer').toBe(answers.parties.importer);
+    expect.soft(row.defraimp_importeraddressaddressline1, 'importer address line 1').toBe(importer.addressLine1);
+    expect.soft(row.defraimp_importeraddresscity, 'importer city').toBe(importer.townOrCity);
+    expect
+      .soft(formattedValue(row, '_defraimp_importeraddresscountryid_value'), 'importer country')
+      .toBe(PIMS_COUNTRY_LABELS[importer.countryCode]);
+    // importer.postcode: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
+    // importer.phone: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
+    // importer.email: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
     // answers.cph: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
     expect.soft(row.defraimp_arrivaldate?.slice(0, 10), 'arrival date').toBe(toIsoDate(answers.arrivalDate));
     expect.soft(row.defraimp_portofentry, 'point of entry').toBe(answers.pointOfEntry.value);

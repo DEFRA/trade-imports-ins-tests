@@ -60,10 +60,21 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     test.setTimeout(test.info().timeout + animalsDynamics.arrivalTimeoutMs);
   });
 
-  test('mandatory answers PIMS Dynamics does not store yet', async ({ animalsJourney, journeyContext, externalRequest }) => {
+  test('mandatory answers PIMS Dynamics does not store yet', async ({
+    animalsJourney,
+    journeyContext,
+    externalRequest,
+    addressBookApi,
+  }) => {
     test.fixme(true, 'PIMS Dynamics leaves these mandatory answers empty; the likely cause of each is in the comments');
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     const answers = MANDATORY_ANSWERS;
+    const consignor = await addressBookApi.findByName(answers.parties.consignor);
+    const destination = await addressBookApi.findByName(answers.parties.placeOfDestination);
+    const placeOfOrigin = await addressBookApi.findByName(answers.parties.placeOfOrigin);
+    const consignee = await addressBookApi.findByName(answers.parties.consignee);
+    const importer = await addressBookApi.findByName(answers.parties.importer);
+    const contact = await addressBookApi.findByName(answers.contactAddress);
     await animalsJourney.submitNotification(answers);
     const referenceNumber = journeyContext.referenceNumber;
 
@@ -83,10 +94,12 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     // [FROM v0.3.0]
     // exchangedDocument.issuer.postalAddress. The schema has no separate contact-address field, so the contact address
     // shares this slot with the Responsible Person for Load, which PIMS stores in its person-responsible columns. The
-    // column asserted here is a guess.
+    // column asserted here is a guess, expected to hold the record's address line one, city and postcode.
     // The backend puts a null issuer in the event today. The planned v0.3.0 message is meant to carry it, but that schema
     // does not exist yet, and neither published schema defines the issuer.
-    expect.soft(row.defraimp_personresponsibleaddress, 'contact address').toContain(answers.contactAddress);
+    for (const part of [contact.addressLine1, contact.townOrCity, contact.postcode]) {
+      expect.soft(row.defraimp_personresponsibleaddress, `contact address ${part}`).toContain(part);
+    }
 
     // [FROM v0.2.0]
     // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].scientificName and commonName.
@@ -95,6 +108,26 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     // them, so PIMS can only fill the columns once it reads v0.2.0.
     expect.soft(row.defraimp_commodityspeciesname, 'species name').toBe(answers.species.display);
     expect.soft(row.defraimp_commodityspeciescommonname, 'species common name').toBe(answers.species.commodity.display);
+    // Each party's postalAddress.postcodeCode, and its definedContact[].telephoneUniversalCommunication and
+    // emailURIUniversalCommunication.
+    // The event carries them. The v0.1.0 message never included them (PIMS has only each party's address lines, city and
+    // country today), and the v0.2.0 message carries them, so PIMS can only fill the columns once it reads v0.2.0. The
+    // phone column asserted here is a guess: the row also has an international phone code and number, and a UK telephone.
+    expect.soft(row.defraimp_consignoraddresspostalzipcode, 'consignor postcode').toBe(consignor.postcode);
+    expect.soft(row.defraimp_consignoraddresstelephone, 'consignor phone').toBe(consignor.phone);
+    expect.soft(row.defraimp_consignoraddressemail, 'consignor email').toBe(consignor.email);
+    expect.soft(row.defraimp_placeofdestinationaddresspostalzipcode, 'place of destination postcode').toBe(destination.postcode);
+    expect.soft(row.defraimp_placeofdestinationaddresstelephone, 'place of destination phone').toBe(destination.phone);
+    expect.soft(row.defraimp_placeofdestinationaddressemail, 'place of destination email').toBe(destination.email);
+    expect.soft(row.defraimp_placeoforiginpostcode, 'place of origin postcode').toBe(placeOfOrigin.postcode);
+    expect.soft(row.defraimp_placeoforiginphone, 'place of origin phone').toBe(placeOfOrigin.phone);
+    expect.soft(row.defraimp_placeoforiginemail, 'place of origin email').toBe(placeOfOrigin.email);
+    expect.soft(row.defraimp_consigneeaddresspostalzipcode, 'consignee postcode').toBe(consignee.postcode);
+    expect.soft(row.defraimp_consigneeaddresstelephone, 'consignee phone').toBe(consignee.phone);
+    expect.soft(row.defraimp_consigneeaddressemail, 'consignee email').toBe(consignee.email);
+    expect.soft(row.defraimp_importeraddresspostalzipcode, 'importer postcode').toBe(importer.postcode);
+    expect.soft(row.defraimp_importeraddresstelephone, 'importer phone').toBe(importer.phone);
+    expect.soft(row.defraimp_importeraddressemail, 'importer email').toBe(importer.email);
     // specifiedConsignment.finalDestinationLocation.identifier, the CPH number.
     // The event carries it. The v0.1.0 message never included a destination location (of its locations, the gateway's
     // v0.1.0 mapper copies only the port of entry), and the v0.2.0 message carries it, so PIMS can only fill the column
