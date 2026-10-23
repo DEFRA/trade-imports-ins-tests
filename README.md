@@ -137,6 +137,13 @@ those settings:
 `@a11y` tests use the same configs; per-test timeout is longer in
 `fixtures/a11y.ts`.
 
+The animals journey scans leave out govuk-frontend's conditional-reveal radios
+(`govukConditionalRevealRadioOnOrigin` and
+`govukConditionalRevealRadiosOnReason`). govuk-frontend sets `aria-expanded` on
+each radio that opens a conditional reveal (`radios.mjs`), and axe's
+`aria-allowed-attr` rule rejects it. That is a disagreement between
+govuk-frontend and axe, not a service defect.
+
 The CDP config sets a 60s test timeout and a 15s expect timeout, against
 Playwright's 30s and 5s defaults that the docker-compose config keeps. Each CDP
 page load is a real network hop, so CDP needs a longer budget than the local

@@ -2,14 +2,9 @@ import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 
-// govuk-frontend's conditional-reveal radios set aria-expanded on the radio input
-// (radios.mjs), which axe's aria-allowed-attr rule rejects — an upstream
-// disagreement, not a service defect. Exclude just that input from origin scans.
-const conditionalRadioInput = '#regionOfOriginCodeRequirement';
+const govukConditionalRevealRadioOnOrigin = '#regionOfOriginCodeRequirement';
 
-// The same upstream disagreement on the reason page, where four of the five
-// reasons open a conditional reveal, so four radios carry aria-expanded.
-const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
+const govukConditionalRevealRadiosOnReason = 'input[name="reasonForImport"][aria-controls]';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -25,7 +20,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Origin of import', async () => {
       await animalsPages.overview.task('Where is this consignment coming from?').click();
       await animalsJourney.fillOriginOfImport({ requiresRegionCode: 'Yes', internalReference: 'Imports456GB' });
-      await runA11yScan({ exclude: conditionalRadioInput });
+      await runA11yScan({ exclude: govukConditionalRevealRadioOnOrigin });
       await animalsJourney.saveOriginOfImport();
       await animalsPages.overview.heading.waitFor();
     });
@@ -60,7 +55,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.overview.task('Main reason for import').click();
       await animalsPages.importReason.reason('Internal market').check();
       await animalsPages.importReason.purpose('Breeding').check();
-      await runA11yScan({ exclude: conditionalReasonRadios });
+      await runA11yScan({ exclude: govukConditionalRevealRadiosOnReason });
       await animalsPages.importReason.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Additional details').click();
