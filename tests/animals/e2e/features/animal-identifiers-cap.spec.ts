@@ -9,17 +9,8 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     animalsPages,
   }) => {
     test.slow();
-    await animalsJourney.startNotification();
-
-    await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
-    await animalsPages.commoditySelection.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('Commodity details').click();
-    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
-    await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
-    await animalsPages.consignmentDetails.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
+    const referenceNumber = await animalsJourney.startNotification();
+    await animalsJourney.addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber, [commodityLines.cattle], '2');
 
     await animalsPages.overview.task('Identification details').click();
     await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.cattle.latinName} 1 of 2` })).toBeVisible();
