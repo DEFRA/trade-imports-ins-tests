@@ -5,14 +5,16 @@ import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { commodityLines, speciesCardTitle } from '@domain/animals/constants/commodity-lines';
 
 test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-frontend' }, () => {
-  test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({ animalsJourney, pages }) => {
+  test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({
+    animalsJourney,
+    pages,
+    animalsPages,
+  }) => {
     await animalsJourney.startNotification();
 
     await expect(pages.page.getByRole('heading', { level: 2, name: 'Notification tasklist' })).toBeVisible();
 
-    // The commodity-total labels are h3s too, so the section headings are read
-    // off their own class rather than off the level alone.
-    await expect(pages.page.locator('h3.govuk-heading-m')).toHaveText([
+    await expect(animalsPages.overview.numberedSectionHeadings).toHaveText([
       '1. About the consignment',
       '2. Description of the goods',
       '3. Transport and arrival',
