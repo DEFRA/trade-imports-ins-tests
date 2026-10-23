@@ -8,18 +8,8 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     pages,
     animalsPages,
   }) => {
-    await animalsJourney.startNotification();
-
-    await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.domesticCat]);
-    await animalsPages.commoditySelection.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('Commodity details').click();
-    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
-
-    await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
-    await animalsPages.consignmentDetails.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
+    const referenceNumber = await animalsJourney.startNotification();
+    await animalsJourney.addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber, [commodityLines.domesticCat], '2');
     await animalsPages.overview.task('Identification details').click();
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
     await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.domesticCat.latinName}` })).toBeVisible();
@@ -58,18 +48,8 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     pages,
     animalsPages,
   }) => {
-    await animalsJourney.startNotification();
-
-    await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle, commodityLines.ostrich]);
-    await animalsPages.commoditySelection.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('Commodity details').click();
-    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
-
-    await animalsPages.consignmentDetails.fillEveryAnimalCount('1');
-    await animalsPages.consignmentDetails.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
+    const referenceNumber = await animalsJourney.startNotification();
+    await animalsJourney.addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber, [commodityLines.cattle, commodityLines.ostrich], '1');
     await animalsPages.overview.task('Identification details').click();
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
 
@@ -85,20 +65,9 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     pages,
     animalsPages,
   }) => {
-    await animalsJourney.startNotification();
+    const referenceNumber = await animalsJourney.startNotification();
+    await animalsJourney.addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber, [commodityLines.ostrich], '2');
 
-    await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.ostrich]);
-    await animalsPages.commoditySelection.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('Commodity details').click();
-    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
-
-    await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
-    await animalsPages.consignmentDetails.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-
-    const referenceNumber = animalsPages.overview.referenceNumberFromUrl();
     await animalsPages.animalIdentification.open(referenceNumber);
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.animalIdentification.heading).toHaveCount(0);
