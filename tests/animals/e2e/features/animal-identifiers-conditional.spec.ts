@@ -3,7 +3,7 @@ import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { test, expect } from '@fixtures';
 
 test.describe('Animal identifiers — conditional identifier surface', { tag: '@duplicated-in-frontend' }, () => {
-  test('a unit form shows only the identifier types the commodity requires, plus the permanent address for cats and dogs', async ({
+  test("a domestic cat's unit form asks for passport, tattoo and a permanent address, and refuses a partial address", async ({
     animalsJourney,
     pages,
     animalsPages,
