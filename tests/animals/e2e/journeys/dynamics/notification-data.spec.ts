@@ -40,7 +40,7 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     test.setTimeout(test.info().timeout + animalsDynamics.arrivalTimeoutMs);
   });
 
-  test('a notification submitted with only the mandatory answers is stored in PIMS Dynamics with each of them and no optional ones', async ({
+  test('a notification submitted with only the mandatory answers is stored in PIMS Dynamics', async ({
     animalsJourney,
     journeyContext,
     externalRequest,
@@ -136,6 +136,12 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     // answers.transportIdentification: [FROM v0.1.0: NOT MAPPED?] see 'mandatory answers PIMS Dynamics does not store yet' test.
     // answers.transportDocumentReference: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
     expect.soft(row.defraimp_transportercompanyname, 'transporter').toBe(answers.transporter.display);
+    // The rest of the transporter comes from its reference record, not the answers, so only its presence is asserted.
+    expect.soft(row.defraimp_transporterapprovalnumber, 'transporter approval number').not.toBeNull();
+    expect.soft(row.defraimp_transportertype, 'transporter type').not.toBeNull();
+    expect.soft(row.defraimp_transporteraddressaddressline1, 'transporter address line 1').not.toBeNull();
+    expect.soft(row.defraimp_transporteraddressaddressline2, 'transporter address line 2').not.toBeNull();
+    expect.soft(formattedValue(row, '_defraimp_transporteraddresscountryid_value'), 'transporter country').toBeDefined();
     // answers.contactAddress: [FROM v0.3.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
 
     // The optional answers left blank, only in columns that neither PIMS nor the gateway can fill in by default.
@@ -145,7 +151,7 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     expect.soft(row.defraimp_routetransitingstates, 'transited countries').toBeNull();
   });
 
-  test('a notification submitted with every answer is stored in PIMS Dynamics with each optional one', async ({
+  test('a notification submitted with every answer is stored in PIMS Dynamics with its optional answers', async ({
     animalsJourney,
     journeyContext,
     externalRequest,
