@@ -12,11 +12,7 @@ interface CommoditySearchResponse {
   groups: { code: string; species: CommoditySpecies[] }[];
 }
 
-/**
- * Direct HTTP access to reference-data's commodity search: the same rows the
- * frontend's picker lists, so a spec can expect what MDM says about a species
- * rather than a copy of it that goes stale.
- */
+/** Direct HTTP access to reference-data's commodity search. */
 export class ReferenceDataApiClient {
   private readonly rest: RestClient;
 

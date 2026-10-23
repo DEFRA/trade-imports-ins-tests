@@ -183,7 +183,10 @@ The stack's MDM stub answers only the searches saved from MDM, so each line's
 `searchTerm` is a saved term whose first page of results lists that line; the
 first page is the frontend's 100 results. The
 frontend saves only a species its search showed, so a seeded journey posts the
-search before it posts the chosen species.
+search before it posts the chosen species. A spec that needs what MDM says
+about a species, such as its common name, reads it from reference-data's
+commodity search through `ReferenceDataApiClient`, rather than from a copy of
+it that goes stale.
 
 ### Authenticated session reuse
 
