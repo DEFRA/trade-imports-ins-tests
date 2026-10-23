@@ -1,9 +1,5 @@
-import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
+import { test, expect, WCAG_STANDARD, govukConditionalRevealRadioOnOrigin } from '@fixtures/a11y';
 import { getRelativeDatePickerValue } from '@utils/date-utils';
-
-// govuk-frontend's conditional-reveal radios set aria-expanded on the radio input,
-// which axe's aria-allowed-attr rule rejects.
-const conditionalRadioInput = '#regionOfOriginCodeRequirement';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -25,7 +21,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
       await animalsPages.originOfImport.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
-      await runA11yScan({ exclude: conditionalRadioInput });
+      await runA11yScan({ exclude: govukConditionalRevealRadioOnOrigin });
       await animalsJourney.fillOriginOfImport();
       await animalsJourney.saveOriginOfImport();
       await animalsPages.overview.heading.waitFor();

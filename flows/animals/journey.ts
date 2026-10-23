@@ -1,6 +1,7 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { AnimalsPages, SharedPages } from '@page-objects';
+import type { PartyRole } from '@page-objects/animals/addresses-page';
 import type { JourneyOptions } from '@domain/animals/constants/journey-options';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { getRelativeAppDateText } from '@utils/date-utils';
@@ -21,6 +22,12 @@ export type ArrivalDetailsAnswer = {
   transportId?: string;
   documentReference?: string;
 };
+
+type PartyAnswer = [
+  role: PartyRole,
+  name: string,
+  picker: 'consignorSelection' | 'destinationSelection' | 'placeOfOriginSelection' | 'consigneeSelection' | 'importerSelection',
+];
 
 export const OPENING_RUN_TASKS = [
   'Where is this consignment coming from?',
@@ -170,13 +177,20 @@ export class AnimalsJourney {
   }
 
   async addFiveParties(): Promise<void> {
-    const parties = [
-      ['Consignor or exporter', 'Astra Rosales', 'consignorSelection'],
+    await this.addParties([['Consignor or exporter', 'Astra Rosales', 'consignorSelection']]);
+    await this.addRemainingParties();
+  }
+
+  async addRemainingParties(): Promise<void> {
+    await this.addParties([
       ['Place of destination', 'Tech Imports Ltd', 'destinationSelection'],
       ['Place of origin', 'Origin Farm', 'placeOfOriginSelection'],
       ['Consignee', 'British Livestock Ltd', 'consigneeSelection'],
       ['Importer', 'Import Co UK', 'importerSelection'],
-    ] as const;
+    ]);
+  }
+
+  private async addParties(parties: PartyAnswer[]): Promise<void> {
     for (const [role, name, picker] of parties) {
       await this.animalsPages.addresses.addParty(role).click();
       await this.animalsPages[picker].select(name);

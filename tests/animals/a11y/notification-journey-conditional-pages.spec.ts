@@ -1,4 +1,4 @@
-import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { test, WCAG_STANDARD, govukConditionalRevealRadiosOnReason } from '@fixtures/a11y';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
 const PRIVATE_TRANSPORTER = {
@@ -10,11 +10,6 @@ const PRIVATE_TRANSPORTER = {
   telephoneNumber: '+33 3 22 55 01 44',
   emailAddress: 'jean.dupont@example.fr',
 };
-
-// Same behaviour from the govuk-frontend npm package's radios.mjs, excluded
-// elsewhere in this suite (e.g. notification-journey-filled-state.spec.ts) —
-// component code we don't own, not a defect in this service.
-const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('the reason-gated and private transporter pages have no accessibility violations', async ({
@@ -31,7 +26,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importReason.reason('Transit').check();
       await animalsPages.importReason.selectTransitPortOfExitByIndex(2);
       await animalsPages.importReason.selectTransitDestinationCountry('FR');
-      await runA11yScan({ exclude: conditionalReasonRadios });
+      await runA11yScan({ exclude: govukConditionalRevealRadiosOnReason });
       await animalsPages.importReason.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Additional details').click();
@@ -45,7 +40,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importReason.reason('Temporary admission horses').check();
       await animalsPages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
       await animalsPages.importReason.selectTemporaryAdmissionPortOfExitByIndex(2);
-      await runA11yScan({ exclude: conditionalReasonRadios });
+      await runA11yScan({ exclude: govukConditionalRevealRadiosOnReason });
       await animalsPages.importReason.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Additional details').click();

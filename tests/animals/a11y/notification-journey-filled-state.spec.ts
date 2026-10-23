@@ -1,10 +1,6 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
-import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { test, WCAG_STANDARD, govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@fixtures/a11y';
 import { fileUploadPaths } from '@resources/file-upload/paths';
-
-const govukConditionalRevealRadioOnOrigin = '#regionOfOriginCodeRequirement';
-
-const govukConditionalRevealRadiosOnReason = 'input[name="reasonForImport"][aria-controls]';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -90,22 +86,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Remaining addresses', async () => {
-      await animalsPages.addresses.addParty('Place of destination').click();
-      await animalsPages.destinationSelection.select('Tech Imports Ltd');
-      await animalsPages.destinationSelection.saveAndContinue.click();
-      await animalsPages.addresses.heading.waitFor();
-      await animalsPages.addresses.addParty('Place of origin').click();
-      await animalsPages.placeOfOriginSelection.select('Origin Farm');
-      await animalsPages.placeOfOriginSelection.saveAndContinue.click();
-      await animalsPages.addresses.heading.waitFor();
-      await animalsPages.addresses.addParty('Consignee').click();
-      await animalsPages.consigneeSelection.select('British Livestock Ltd');
-      await animalsPages.consigneeSelection.saveAndContinue.click();
-      await animalsPages.addresses.heading.waitFor();
-      await animalsPages.addresses.addParty('Importer').click();
-      await animalsPages.importerSelection.select('Import Co UK');
-      await animalsPages.importerSelection.saveAndContinue.click();
-      await animalsPages.addresses.heading.waitFor();
+      await animalsJourney.addRemainingParties();
     });
 
     await test.step('Consignment addresses with all parties added', async () => {

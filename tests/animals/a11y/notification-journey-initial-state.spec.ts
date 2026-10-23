@@ -1,14 +1,5 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
-import { test, WCAG_STANDARD } from '@fixtures/a11y';
-
-// govuk-frontend's conditional-reveal radios set aria-expanded on the radio input
-// (radios.mjs), which axe's aria-allowed-attr rule rejects — an upstream
-// disagreement, not a service defect. Exclude just that input from origin scans.
-const conditionalRadioInput = '#regionOfOriginCodeRequirement';
-
-// The same upstream disagreement on the reason page, where four of the five
-// reasons open a conditional reveal, so four radios carry aria-expanded.
-const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
+import { test, WCAG_STANDARD, govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@fixtures/a11y';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -27,7 +18,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Origin of import', async () => {
       await animalsPages.dashboard.btnCreateNewNotification.click();
       await animalsPages.originOfImport.heading.waitFor();
-      await runA11yScan({ exclude: conditionalRadioInput });
+      await runA11yScan({ exclude: govukConditionalRevealRadioOnOrigin });
     });
 
     // The entry guard holds the journey on origin until it is answered, so the
@@ -72,7 +63,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Import reason', async () => {
       await animalsPages.overview.task('Main reason for import').click();
       await animalsPages.importReason.heading.waitFor();
-      await runA11yScan({ exclude: conditionalReasonRadios });
+      await runA11yScan({ exclude: govukConditionalRevealRadiosOnReason });
       await animalsPages.importReason.reason('Internal market').check();
       await animalsPages.importReason.purpose('Breeding').check();
       await animalsPages.importReason.saveAndContinue.click();
@@ -113,22 +104,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Remaining addresses and CPH number', async () => {
-      await animalsPages.addresses.addParty('Place of destination').click();
-      await animalsPages.destinationSelection.select('Tech Imports Ltd');
-      await animalsPages.destinationSelection.saveAndContinue.click();
-      await animalsPages.addresses.heading.waitFor();
-      await animalsPages.addresses.addParty('Place of origin').click();
-      await animalsPages.placeOfOriginSelection.select('Origin Farm');
-      await animalsPages.placeOfOriginSelection.saveAndContinue.click();
-      await animalsPages.addresses.heading.waitFor();
-      await animalsPages.addresses.addParty('Consignee').click();
-      await animalsPages.consigneeSelection.select('British Livestock Ltd');
-      await animalsPages.consigneeSelection.saveAndContinue.click();
-      await animalsPages.addresses.heading.waitFor();
-      await animalsPages.addresses.addParty('Importer').click();
-      await animalsPages.importerSelection.select('Import Co UK');
-      await animalsPages.importerSelection.saveAndContinue.click();
-      await animalsPages.addresses.heading.waitFor();
+      await animalsJourney.addRemainingParties();
       await animalsPages.addresses.addCph.click();
     });
 
