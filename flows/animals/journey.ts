@@ -112,13 +112,17 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async answerCommodity(): Promise<void> {
+  private async chooseCommodityLinesAndOpenDetails(lines: CommodityLine[]): Promise<void> {
     await this.animalsPages.overview.task('What are you importing?').click();
-    await this.animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
+    await this.animalsPages.commoditySelection.searchAndCheckSpecies(lines);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Commodity details').click();
     await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
+  }
+
+  async answerCommodity(): Promise<void> {
+    await this.chooseCommodityLinesAndOpenDetails([commodityLines.cattle]);
     await this.animalsPages.consignmentDetails.numberOfAnimals.fill('1');
     await this.animalsPages.consignmentDetails.numberOfPackages.fill('5');
     await this.animalsPages.consignmentDetails.saveAndContinue.click();
@@ -127,12 +131,7 @@ export class AnimalsJourney {
 
   async addCommodityLine(referenceNumber: string, line: CommodityLine): Promise<void> {
     await this.animalsPages.overview.open(referenceNumber);
-    await this.animalsPages.overview.task('What are you importing?').click();
-    await this.animalsPages.commoditySelection.searchAndCheckSpecies([line]);
-    await this.animalsPages.commoditySelection.saveAndContinue.click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    await this.animalsPages.overview.task('Commodity details').click();
-    await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await this.chooseCommodityLinesAndOpenDetails([line]);
     await this.animalsPages.consignmentDetails.fillEveryAnimalCount('1');
     await this.animalsPages.consignmentDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
@@ -292,12 +291,8 @@ export class AnimalsJourney {
   }
 
   async toConsignmentDetails(): Promise<void> {
-    await this.toCommoditySelection();
-    await this.animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
-    await this.animalsPages.commoditySelection.saveAndContinue.click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    await this.animalsPages.overview.task('Commodity details').click();
-    await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await this.startNotification();
+    await this.chooseCommodityLinesAndOpenDetails([commodityLines.cattle]);
   }
 
   async toAnimalIdentification(): Promise<void> {
