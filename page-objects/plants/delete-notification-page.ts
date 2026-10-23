@@ -15,7 +15,7 @@ export class PlantsDeleteNotificationPage extends PlantsNotificationPage {
     return this.page.getByText('This cannot be undone.');
   }
 
-  get btnConfirm(): Locator {
+  get confirmDelete(): Locator {
     return deleteNotificationConfirm(this.page);
   }
 

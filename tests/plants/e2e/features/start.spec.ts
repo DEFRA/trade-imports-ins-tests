@@ -130,7 +130,7 @@ test.describe('High-risk plants start section', () => {
     await plantsJourney.returnToDashboard();
     await plantsJourney.deleteFromDashboard(reference);
 
-    await plantsPages.deleteNotification.btnConfirm.click();
+    await plantsPages.deleteNotification.confirmDelete.click();
 
     await expect(pages.page).toHaveURL(`${plantsPages.dashboard.expectedUrl}?deleted=1`);
     await expect(plantsPages.dashboard.deletedBanner).toContainText('Notification deleted');

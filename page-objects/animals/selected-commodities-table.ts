@@ -11,7 +11,19 @@ export class SelectedCommoditiesTable {
     return this.table.getByRole('row').filter({ has: this.page.getByRole('cell', { name: commonName, exact: true }) });
   }
 
+  codeCell(row: Locator): Locator {
+    return row.getByRole('cell').nth(0);
+  }
+
+  commonNameCell(row: Locator): Locator {
+    return row.getByRole('cell').nth(1);
+  }
+
   speciesCell(row: Locator): Locator {
     return row.getByRole('cell').nth(2);
+  }
+
+  animalCountCell(row: Locator): Locator {
+    return row.getByRole('cell').nth(3);
   }
 }

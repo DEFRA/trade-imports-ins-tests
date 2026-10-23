@@ -37,16 +37,18 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
   });
 
   test('summarises cattle in one row listing both species with their total, and the cat on its own row', async ({ animalsPages }) => {
-    const cowRow = animalsPages.animalIdentification.selectedCommodities.rowFor('Cow');
-    await expect(cowRow.getByRole('cell').nth(0)).toHaveText('0102');
-    await expect(cowRow.getByRole('cell').nth(2)).toContainText('Bos taurus');
-    await expect(cowRow.getByRole('cell').nth(2)).toContainText('Bison bison');
-    await expect(cowRow.getByRole('cell').nth(3)).toHaveText('4');
+    const { selectedCommodities } = animalsPages.animalIdentification;
+    const cowRow = selectedCommodities.rowFor('Cow');
+    await expect(selectedCommodities.codeCell(cowRow)).toHaveText('0102');
+    await expect(selectedCommodities.commonNameCell(cowRow)).toHaveText('Cow');
+    await expect(selectedCommodities.speciesCell(cowRow)).toHaveText('Bison bison, Bos taurus', { useInnerText: true });
+    await expect(selectedCommodities.animalCountCell(cowRow)).toHaveText('4');
 
-    const catRow = animalsPages.animalIdentification.selectedCommodities.rowFor('Cat');
-    await expect(catRow.getByRole('cell').nth(0)).toHaveText('01061900');
-    await expect(catRow.getByRole('cell').nth(2)).toHaveText('Felis catus');
-    await expect(catRow.getByRole('cell').nth(3)).toHaveText('2');
+    const catRow = selectedCommodities.rowFor('Cat');
+    await expect(selectedCommodities.codeCell(catRow)).toHaveText('01061900');
+    await expect(selectedCommodities.commonNameCell(catRow)).toHaveText('Cat');
+    await expect(selectedCommodities.speciesCell(catRow)).toHaveText('Felis catus');
+    await expect(selectedCommodities.animalCountCell(catRow)).toHaveText('2');
   });
 
   test('holds the cattle species cards under the Cow (0102) section and the cat card under its own section, each in the order the species are listed for selection', async ({

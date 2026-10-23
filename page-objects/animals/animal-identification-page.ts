@@ -37,6 +37,10 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
     return this.page.getByRole('region', { name: species, exact: true });
   }
 
+  savedAnimalsRows(species: string): Locator {
+    return this.speciesCard(species).getByRole('table').locator('tbody').getByRole('row');
+  }
+
   savedAnimalRow(species: string, number: number): Locator {
     return this.speciesCard(species)
       .getByRole('row')

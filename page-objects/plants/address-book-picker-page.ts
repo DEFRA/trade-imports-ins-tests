@@ -23,11 +23,11 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
     return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
   }
 
-  get search(): Locator {
+  get searchBox(): Locator {
     return pickerSearchBox(this.page);
   }
 
-  get btnSearch(): Locator {
+  get searchButton(): Locator {
     return pickerSearchButton(this.page);
   }
 
@@ -64,7 +64,7 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
   }
 
   async searchFor(term: string): Promise<void> {
-    await this.search.fill(term);
-    await this.btnSearch.click();
+    await this.searchBox.fill(term);
+    await this.searchButton.click();
   }
 }

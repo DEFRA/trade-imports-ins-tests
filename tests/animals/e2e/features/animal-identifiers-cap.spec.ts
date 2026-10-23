@@ -27,6 +27,10 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await expect(animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 2)).toBeVisible();
     await expect(card.getByRole('button')).toHaveText([/^Remove/, /^Remove/]);
     await expect(card.getByRole('textbox')).toHaveCount(0);
+    await expect(card.getByRole('paragraph')).toHaveCount(0);
+    await expect(card.getByRole('heading')).toHaveText(['Bos taurus']);
+    await expect(card.getByRole('link')).toHaveText([/^Change number of animals/]);
+    await expect(animalsPages.animalIdentification.savedAnimalsRows('Bos taurus')).toHaveCount(2);
 
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();

@@ -11,7 +11,7 @@ export class AnimalsDeleteNotificationPage extends NotificationPage {
     return deleteNotificationHeading(this.page);
   }
 
-  get btnConfirm(): Locator {
+  get confirmDelete(): Locator {
     return deleteNotificationConfirm(this.page);
   }
 }

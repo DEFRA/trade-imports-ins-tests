@@ -154,10 +154,14 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  private async openCurrentOverview(): Promise<void> {
+  private currentReferenceNumber(): string {
     const { referenceNumber } = this.context;
     if (!referenceNumber) throw new Error('No notification has been started');
-    await this.animalsPages.overview.open(referenceNumber);
+    return referenceNumber;
+  }
+
+  private async openCurrentOverview(): Promise<void> {
+    await this.animalsPages.overview.open(this.currentReferenceNumber());
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -655,9 +659,7 @@ export class AnimalsJourney {
   }
 
   async toDeclarationOfCurrentNotification(): Promise<void> {
-    const { referenceNumber } = this.context;
-    if (!referenceNumber) throw new Error('No notification has been started');
-    await this.animalsPages.notificationView.open(referenceNumber);
+    await this.animalsPages.notificationView.open(this.currentReferenceNumber());
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
     await this.continueFromReviewToDeclaration();
   }

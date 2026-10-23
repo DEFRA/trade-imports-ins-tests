@@ -64,7 +64,7 @@ export class AnimalsNotificationActions {
     await this.animalsPages.dashboard.searchFor(referenceNumber);
     await this.animalsPages.dashboard.delete(referenceNumber).click();
     await this.animalsPages.deleteNotification.heading.waitFor(pageLoadWait);
-    await this.animalsPages.deleteNotification.btnConfirm.click();
+    await this.animalsPages.deleteNotification.confirmDelete.click();
     await this.animalsPages.dashboard.deletedBanner.waitFor(pageLoadWait);
   }
 }

@@ -8,7 +8,7 @@ test.describe('Notification delete', { tag: '@duplicated-in-frontend' }, () => {
 
     await animalsPages.deleteNotification.open(referenceNumber);
     await animalsPages.deleteNotification.heading.waitFor();
-    await animalsPages.deleteNotification.btnConfirm.click();
+    await animalsPages.deleteNotification.confirmDelete.click();
     await expect(animalsPages.dashboard.deletedBanner).toBeVisible();
   });
 

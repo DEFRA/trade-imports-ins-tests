@@ -1,6 +1,6 @@
-# The animals journey (`flows/animals/journey.ts`)
+# Animals test flows and page objects
 
-Why the journey's steps are written the way they are. The code carries no comments, so the reasons live here.
+Why the animals flows and page objects are written the way they are. The code carries no comments, so the reasons live here. Sections without a file name are steps of `flows/animals/journey.ts`.
 
 ## Starting a notification
 
@@ -46,11 +46,16 @@ Why the journey's steps are written the way they are. The code carries no commen
 
 ## Notification view
 
+### Cancelling an amendment (`flows/animals/notification-actions.ts`)
+
 - `cancelAmend` waits on `?cancelled=1` rather than the view's heading, because the error page has the same heading.
+
+### Party rows (`page-objects/animals/notification-view-page.ts`)
+
 - `partyRow` selects the summary-list row whose accessible term is the role directly, rather than climbing to it, so no XPath parent-axis hop is needed.
 - `editPartyDetails` is the row's own link to edit the address copied onto the notification. The card keeps the one Change link that re-picks from the address book.
 - `partyError` reads the first definition of the row. A summary list has no error state of its own, so an outstanding role carries its message in the row's value cell, ahead of the actions cell.
 
-## Choosing species
+## Choosing species (`page-objects/animals/commodity-selection-page.ts`)
 
 - `selectSpecies` searches for each species before ticking it, because a species has no tick box until its own search lists it.
