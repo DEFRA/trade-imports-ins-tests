@@ -26,8 +26,10 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
     return this.page.getByLabel('Horse name', { exact: true });
   }
 
-  // A saved animal is one row of the card's table, keyed by its species and
-  // number — "Bos taurus 1".
+  get panelHeadings(): Locator {
+    return this.page.getByRole('heading', { level: 3, name: /^Enter details for / });
+  }
+
   savedAnimalRow(species: string, number: number): Locator {
     return this.page.getByRole('row').filter({ hasText: `${species} ${number}` });
   }
@@ -40,8 +42,6 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Save and add another' });
   }
 
-  // The in-card button names what is left on the line: it finishes the line on
-  // the last outstanding animal rather than inviting another.
   get saveAndFinish(): Locator {
     return this.page.getByRole('button', { name: 'Save and finish' });
   }
