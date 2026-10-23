@@ -23,12 +23,12 @@ test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, ()
       await animalsPages.additionalDetails.heading.waitFor();
     };
 
-    await animalsJourney.addCommodityLine(referenceNumber, commodityLines.domesticCat);
+    await animalsJourney.addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber, [commodityLines.domesticCat], '1');
     await openAdditionalDetails();
     await expect(certifiedFor).toBeVisible();
     await expect(unweaned).toBeHidden();
 
-    await animalsJourney.addCommodityLine(referenceNumber, commodityLines.cattle);
+    await animalsJourney.addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber, [commodityLines.cattle], '1');
     await openAdditionalDetails();
     await expect(certifiedFor).toBeVisible();
     await expect(unweaned).toBeVisible();

@@ -19,14 +19,14 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
       await expect(animalsPages.addresses.heading).toBeVisible();
     };
 
-    await animalsJourney.addCommodityLine(referenceNumber, commodityLines.domesticCat);
+    await animalsJourney.addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber, [commodityLines.domesticCat], '1');
     await openAddresses();
     await expect(cphRow).toBeHidden();
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
 
-    await animalsJourney.addCommodityLine(referenceNumber, commodityLines.cattle);
+    await animalsJourney.addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber, [commodityLines.cattle], '1');
     await openAddresses();
     await expect(cphRow).toBeVisible();
     await expect(cphRow).toContainText('Not added yet');

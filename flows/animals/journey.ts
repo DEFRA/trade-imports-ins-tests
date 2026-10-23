@@ -129,10 +129,10 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async addCommodityLine(referenceNumber: string, line: CommodityLine): Promise<void> {
+  async addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber: string, lines: CommodityLine[], animalCount: string): Promise<void> {
     await this.animalsPages.overview.open(referenceNumber);
-    await this.chooseCommodityLinesAndOpenDetails([line]);
-    await this.animalsPages.consignmentDetails.fillEveryAnimalCount('1');
+    await this.chooseCommodityLinesAndOpenDetails(lines);
+    await this.animalsPages.consignmentDetails.fillEveryAnimalCount(animalCount);
     await this.animalsPages.consignmentDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
