@@ -35,8 +35,6 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
         .getByRole('cell', { name: 'UK000000000001', exact: true }),
     ).toBeVisible();
 
-    // The second record is the last outstanding animal, so the in-card button
-    // finishes the line instead of inviting another.
     await animalsPages.animalIdentification.earTag.fill('UK000000000002');
     await animalsPages.animalIdentification.saveAndFinish.click();
     await expect(
@@ -47,10 +45,6 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await expect(animalsPages.animalIdentification.earTag).toHaveCount(0);
     await expect(animalsPages.animalIdentification.saveAndAddAnother).toHaveCount(0);
 
-    // Count-drop guard: lowering the count below the record count blocks the
-    // details-page save with an error NAMING the species whose summary link
-    // goes straight to this species' identifier card — the records are never
-    // silently trimmed.
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();
@@ -66,14 +60,12 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
     await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle.latinName, 2)).toBeVisible();
 
-    // Remove frees a slot: the entry form reopens at 2 of 2.
     await animalsPages.animalIdentification
       .savedAnimalRow(commodityLines.cattle.latinName, 2)
       .getByRole('button', { name: 'Remove' })
       .click();
     await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.cattle.latinName} 2 of 2` })).toBeVisible();
 
-    // With one record left the drop no longer applies — a count of 1 saves.
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();
