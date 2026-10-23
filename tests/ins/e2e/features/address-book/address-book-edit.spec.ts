@@ -15,19 +15,8 @@ const baseAddress = {
   email: 'edit@example.co.uk',
 };
 
-const TEXTBOX_NAMES_IN_ORDER = [
-  'Name or organisation name',
-  'Address line 1',
-  'Address line 2 (optional)',
-  'Town or city',
-  'County (optional)',
-  'Postcode or Zip code',
-  'Email address',
-  'Phone number',
-];
-
 const FIELD_LABELS_IN_ORDER = [
-  'Name or organisation name',
+  'Name or organisation',
   'Address line 1',
   'Address line 2 (optional)',
   'Town or city',
@@ -96,7 +85,8 @@ test.describe('Address book edit', () => {
     await insPages.addressBookEdit.open(created.id);
 
     await expect(insPages.addressBookEdit.heading).toBeVisible();
-    for (const [index, name] of TEXTBOX_NAMES_IN_ORDER.entries()) {
+    const textboxNamesInOrder = FIELD_LABELS_IN_ORDER.filter((label) => label !== 'Country');
+    for (const [index, name] of textboxNamesInOrder.entries()) {
       await expect(insPages.addressBookEdit.textboxes.nth(index)).toHaveAccessibleName(name);
     }
     await expect(insPages.addressBookEdit.selectCountry).toHaveValue(baseAddress.countryCode);

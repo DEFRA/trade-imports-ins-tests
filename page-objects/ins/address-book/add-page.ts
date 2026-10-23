@@ -7,8 +7,6 @@ export type NewAddressDetails = AddressDetails;
 export class InsAddressBookAddPage extends InsAddressBookFormPage {
   readonly expectedUrl = '/address-book/add';
 
-  protected override readonly nameLabel = 'Name or organisation';
-
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Add address details' });
   }

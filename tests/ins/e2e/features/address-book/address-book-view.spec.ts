@@ -16,7 +16,7 @@ test.describe('Address book view', () => {
     await insPages.addressBookView.open(addressWithOptionalFields.id);
 
     await expect(insPages.addressBookView.summaryListKeys).toHaveText([
-      'Name or organisation name',
+      'Name or organisation',
       'Address line 1',
       'Address line 2 (optional)',
       'Town or city',
@@ -34,7 +34,7 @@ test.describe('Address book view', () => {
     await insPages.addressBookView.open(addressWithoutOptionalFields.id);
 
     await expect(insPages.addressBookView.summaryListKeys).toHaveText([
-      'Name or organisation name',
+      'Name or organisation',
       'Address line 1',
       'Town or city',
       'Postcode or Zip code',

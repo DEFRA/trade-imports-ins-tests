@@ -4,7 +4,7 @@ import type { InsAddressBookFormPage } from '@page-objects/ins/address-book/form
 import { traderAddressInUnofferedCountry } from './trader-address';
 
 const MESSAGES = {
-  name: 'Enter a name or organisation name',
+  name: 'Enter a name or organisation',
   postcode: 'Enter a postcode or Zip code',
   country: 'Select a country',
   phone: 'Enter a phone number',
