@@ -18,10 +18,10 @@ test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () =
   });
 
   test('lists the selected commodity with its code, common name and species', async ({ animalsPages }) => {
-    const table = animalsPages.consignmentDetails.selectedCommodities;
+    const table = animalsPages.consignmentDetails.selectedCommodities.table;
 
     await expect(table.getByRole('columnheader')).toHaveText(['Commodity code', 'Common name', 'Species', 'Actions']);
-    await expect(animalsPages.consignmentDetails.selectedCommodityRow('0102').getByRole('cell')).toHaveText([
+    await expect(animalsPages.consignmentDetails.selectedCommodities.rowFor('Cow').getByRole('cell')).toHaveText([
       '0102',
       'Cow',
       'Bos taurus',
@@ -64,7 +64,9 @@ test.describe('Commodity details page with two species of one commodity', { tag:
   });
 
   test("lists both species' Latin names, one per line, in the commodity's Species cell", async ({ animalsPages }) => {
-    const speciesCell = animalsPages.consignmentDetails.speciesCell(animalsPages.consignmentDetails.selectedCommodityRow('0102'));
+    const speciesCell = animalsPages.consignmentDetails.selectedCommodities.speciesCell(
+      animalsPages.consignmentDetails.selectedCommodities.rowFor('Cow'),
+    );
 
     expect(await speciesCell.evaluate((el) => (el as HTMLElement).innerText)).toBe('Bison bison,\nBos taurus');
   });

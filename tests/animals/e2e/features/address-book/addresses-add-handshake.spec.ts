@@ -45,7 +45,7 @@ test.describe('Add an address from the journey via INS', () => {
       });
 
       await expect(animalsPages.consignorSelection.heading).toBeVisible();
-      await animalsPages.consignorSelection.search.fill(farmName);
+      await animalsPages.consignorSelection.searchBox.fill(farmName);
       await animalsPages.consignorSelection.searchButton.click();
       await expect(animalsPages.consignorSelection.party(farmName)).toBeChecked();
 

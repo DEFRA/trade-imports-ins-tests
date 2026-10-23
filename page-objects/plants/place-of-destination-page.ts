@@ -18,8 +18,4 @@ export class PlantsPlaceOfDestinationPage extends PlantsAddressBookPickerPage {
   descriptionNamed(text: string): Locator {
     return this.page.getByText(text, { exact: true });
   }
-
-  get linkCancel(): Locator {
-    return this.page.getByRole('link', { name: 'Cancel and return to overview', exact: true });
-  }
 }

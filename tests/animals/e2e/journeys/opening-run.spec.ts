@@ -1,7 +1,6 @@
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { SET_BASES } from '@page-objects/shared/sets';
-import { fileUploadPaths } from '@resources/file-upload/paths';
-import { OPENING_RUN_TASKS } from '@flows/animals/journey';
+import { OPENING_RUN_TASKS, certificateDocument } from '@flows/animals/journey';
 
 import { test, expect } from '@fixtures';
 
@@ -13,24 +12,17 @@ test.describe('Opening run', () => {
   }) => {
     test.slow();
 
-    const referenceNumber = await animalsJourney.walkOpeningRunCattleByAir({
-      reference: `AWBDOC${Date.now()}`,
-      issueDate: '03/01/2026',
-      filePath: fileUploadPaths.safeFile1kbPdf,
-      type: 'VETERINARY_HEALTH_CERTIFICATE',
-    });
+    const referenceNumber = await animalsJourney.walkOpeningRunCattleByAir(certificateDocument('AWBDOC'));
     await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
 
     await animalsPages.overview.open(referenceNumber);
-    for (const task of OPENING_RUN_TASKS) {
-      await expect(animalsPages.overview.taskStatus(task)).toHaveText('Complete');
-    }
-    await expect(animalsPages.overview.taskStatuses).toHaveCount(OPENING_RUN_TASKS.length);
+    await expect(animalsPages.overview.taskNames).toHaveText(OPENING_RUN_TASKS);
+    await expect(animalsPages.overview.taskStatuses).toHaveText(OPENING_RUN_TASKS.map(() => 'Complete'));
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
 
     const importDetails = animalsPages.notificationView.summaryCard('Import details');
-    await expect(animalsPages.notificationView.summaryValue(importDetails, 'Region of origin code')).toHaveText('FR-75');
+    await expect(animalsPages.notificationView.regionOfOriginCode).toHaveText('FR-75');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Internal reference number')).toHaveText('CATTLE-2026-01');
 
     const speciesCard = animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus');

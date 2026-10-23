@@ -76,7 +76,7 @@ test.describe('Authentication', { tag: '@auth' }, () => {
       const journeyCookies = (await pages.page.context().cookies()).filter(({ name }) => name.startsWith('liveAnimals'));
       await pages.page.context().clearCookies();
       await pages.page.context().addCookies(journeyCookies);
-      await animalsPages.originOfImport.open(referenceNumber, false);
+      await animalsPages.originOfImport.open(referenceNumber, { attemptSignIn: false });
     });
 
     test('lands on the sign in page when opening a page further in the journey', async ({ pages }) => {

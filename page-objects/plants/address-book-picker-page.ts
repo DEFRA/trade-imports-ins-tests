@@ -4,7 +4,6 @@ import {
   pickerNoMatchesMessage,
   pickerResultsHeading,
   pickerResultsSummary,
-  pickerSaveAndContinue,
   pickerSearchBox,
   pickerSearchButton,
   pickerSearchRow,
@@ -25,7 +24,7 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
     return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
   }
 
-  get search(): Locator {
+  get searchBox(): Locator {
     return pickerSearchBox(this.page);
   }
 
@@ -33,7 +32,7 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
     return pickerSearchRow(this.page);
   }
 
-  get btnSearch(): Locator {
+  get searchButton(): Locator {
     return pickerSearchButton(this.page);
   }
 
@@ -69,12 +68,8 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
     return this.page.getByRole('link', { name: `Page ${number}`, exact: true });
   }
 
-  get btnSaveAndContinue(): Locator {
-    return pickerSaveAndContinue(this.page);
-  }
-
   async searchFor(term: string): Promise<void> {
-    await this.search.fill(term);
-    await this.btnSearch.click();
+    await this.searchBox.fill(term);
+    await this.searchButton.click();
   }
 }

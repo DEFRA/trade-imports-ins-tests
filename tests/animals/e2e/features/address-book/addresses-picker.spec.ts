@@ -62,7 +62,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
     await expect(animalsPages.consignorSelection.resultsGroup.getByRole('radio')).toHaveCount(5);
 
-    await animalsPages.consignorSelection.search.fill('Tech Imports Ltd');
+    await animalsPages.consignorSelection.searchBox.fill('Tech Imports Ltd');
     await animalsPages.consignorSelection.searchButton.click();
     const detailedRow = page.locator('tr', { hasText: 'Tech Imports Ltd' });
     const rowDetails = detailedRow.locator('details');
@@ -71,13 +71,13 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(rowDetails.locator('.govuk-details__text')).toBeVisible();
     await expect(rowDetails).toContainText('London');
 
-    await animalsPages.consignorSelection.search.fill(searchToken);
+    await animalsPages.consignorSelection.searchBox.fill(searchToken);
     await animalsPages.consignorSelection.searchButton.click();
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText('Showing 2 out of 2 results');
     await expect(animalsPages.consignorSelection.party(searchMatches[1])).toBeVisible();
     await expect(page.getByRole('link', { name: 'Page 2' })).toHaveCount(0);
 
-    await animalsPages.consignorSelection.search.fill('');
+    await animalsPages.consignorSelection.searchBox.fill('');
     await animalsPages.consignorSelection.searchButton.click();
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
 

@@ -34,7 +34,7 @@ export class PlantsNotificationActions {
     await this.toNotificationView(referenceNumber);
     await this.plantsPages.notificationView.btnDelete.click();
     await this.plantsPages.deleteNotification.heading.waitFor(pageLoadWait);
-    await this.plantsPages.deleteNotification.btnConfirm.click();
+    await this.plantsPages.deleteNotification.confirmDelete.click();
     await this.plantsPages.dashboard.deletedBanner.waitFor(pageLoadWait);
   }
 }

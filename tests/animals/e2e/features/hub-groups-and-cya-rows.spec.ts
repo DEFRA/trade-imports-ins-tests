@@ -83,7 +83,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     const importDetails = animalsPages.notificationView.summaryCard('Import details');
     await expect(value(importDetails, 'Country of origin')).toHaveText(answers.countryCode.display);
     await expect(value(importDetails, 'Region of origin code required')).toHaveText('Yes');
-    await expect(value(importDetails, 'Region of origin code')).toHaveText(`${answers.countryCode.value}-${answers.regionCode}`);
+    await expect(animalsPages.notificationView.regionOfOriginCode).toHaveText(`${answers.countryCode.value}-${answers.regionCode}`);
     await expect(value(importDetails, 'Internal reference number')).toHaveText(answers.internalReference);
 
     const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional animal details');

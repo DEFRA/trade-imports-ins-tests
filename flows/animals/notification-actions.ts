@@ -39,7 +39,7 @@ export class AnimalsNotificationActions {
     await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
     await this.animalsPages.declaration.confirmation.check();
     await this.animalsPages.declaration.continueButton.click();
-    await this.pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor(pageLoadWait);
+    await this.animalsPages.confirmation.heading.waitFor(pageLoadWait);
   }
 
   /** Copies a notification from its dashboard card, landing on the copy's overview. */
@@ -51,10 +51,6 @@ export class AnimalsNotificationActions {
     this.context.recordReferenceNumber(this.animalsPages.overview.referenceNumberFromUrl());
   }
 
-  /**
-   * Discards an in-progress amendment, restoring the submitted version. Waits on
-   * `?cancelled=1` rather than the view's heading, which the error page also has.
-   */
   async cancelAmend(referenceNumber: string): Promise<void> {
     await this.toNotificationView(referenceNumber);
     await this.animalsPages.notificationView.cancelAmend.click();
@@ -67,8 +63,8 @@ export class AnimalsNotificationActions {
     await this.animalsPages.dashboard.open();
     await this.animalsPages.dashboard.searchFor(referenceNumber);
     await this.animalsPages.dashboard.delete(referenceNumber).click();
-    await this.pages.page.getByRole('heading', { name: 'Delete this notification?' }).waitFor(pageLoadWait);
-    await this.pages.page.getByRole('button', { name: 'Yes, delete notification' }).click();
-    await this.pages.page.getByText('The notification has been deleted.').waitFor(pageLoadWait);
+    await this.animalsPages.deleteNotification.heading.waitFor(pageLoadWait);
+    await this.animalsPages.deleteNotification.confirmDelete.click();
+    await this.animalsPages.dashboard.deletedBanner.waitFor(pageLoadWait);
   }
 }

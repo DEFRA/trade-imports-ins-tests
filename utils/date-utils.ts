@@ -175,3 +175,8 @@ export function toIsoDate(input: DateInput): string {
 
   return `${year}-${month}-${day}`;
 }
+
+/** A regular-expression group matching today's or tomorrow's service display date, for a date stamped near midnight. */
+export function todayOrTomorrowServiceDisplayDatePattern(): string {
+  return `(${getRelativeServiceDisplayDate()}|${getRelativeServiceDisplayDate(1)})`;
+}

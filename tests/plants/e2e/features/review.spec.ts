@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { POTATOES, PLANTS_FOR_PLANTING, potatoLine, arrivalDate } from '@flows/plants/journey';
 import type { PlantsPages, SharedPages } from '@page-objects';
-import { getRelativeServiceDisplayDate } from '@utils/date-utils';
+import { todayOrTomorrowServiceDisplayDatePattern } from '@utils/date-utils';
 
 async function expectReview(plantsPages: PlantsPages) {
   await expect(plantsPages.notificationView.heading).toBeVisible();
@@ -37,7 +37,7 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.consignmentContactSelect.open(reference);
     await plantsPages.consignmentContactSelect.searchFor(address.name);
     await plantsPages.consignmentContactSelect.address(address.name).check();
-    await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
+    await plantsPages.consignmentContactSelect.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
     await plantsPages.overview.taskRowLink('Check and submit').click();
     await expectReview(plantsPages);
@@ -65,13 +65,13 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.notificationView.change('Change country of origin (Import details)').click();
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
     await plantsPages.origin.country.choose('Germany');
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsPages.origin.saveAndContinue.click();
     await expect(plantsPages.notificationView.heading).toBeVisible();
     await expect(plantsPages.notificationView.card('Import details')).toContainText('Germany');
     await plantsPages.notificationView.change('Change Commodity 1 (Commodity 1)').click();
     await plantsPages.commodityDetails.field('Quantity').fill('300');
-    await plantsPages.commodityDetails.btnSaveAndContinue.click();
-    await plantsPages.commodities.btnSaveAndContinue.click();
+    await plantsPages.commodityDetails.saveAndContinue.click();
+    await plantsPages.commodities.saveAndContinue.click();
     await expect(plantsPages.notificationView.heading).toBeVisible();
     await pages.page.reload();
     await expect(plantsPages.notificationView.card('Commodity 1')).toContainText('300');
@@ -98,7 +98,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(plantsPages.overview.statusTag).toHaveText('Submitted');
     await expect(plantsPages.confirmation.notificationDate).toBeVisible();
     await expect(plantsPages.confirmation.content).toContainText(
-      new RegExp(`Date of notification[^0-9]{0,20}(${getRelativeServiceDisplayDate()}|${getRelativeServiceDisplayDate(1)})`),
+      new RegExp(`Date of notification[^0-9]{0,20}${todayOrTomorrowServiceDisplayDatePattern()}`),
     );
     await expect(plantsPages.confirmation.lateBanner).toHaveCount(0);
     await plantsPages.confirmation.viewNotification.click();
@@ -107,6 +107,55 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.dashboard.open();
     await plantsPages.dashboard.searchForReference(reference);
     await expect(plantsPages.dashboard.notificationCard(reference).getByText('Submitted', { exact: true })).toBeVisible();
+  });
+
+  test.describe('declaration of a draft', () => {
+    let reference: string;
+
+    test.beforeEach(async ({ plantsJourney, addressBookApi }) => {
+      ({ reference } = await plantsJourney.completeNotification(addressBookApi));
+      await plantsJourney.toDeclarationFromReview();
+    });
+
+    test('shows the confirmation as a small checkbox in a group whose legend is hidden from sight', async ({ plantsPages }) => {
+      const { content } = plantsPages.declaration;
+
+      await expect(content.confirmationGroup).toBeVisible();
+      await expect(content.confirmationLegend).toHaveClass(/govuk-visually-hidden/);
+      await expect(content.checkboxes).toHaveClass(/govuk-checkboxes--small/);
+    });
+
+    test('shows the date of declaration in bold', async ({ plantsPages }) => {
+      const { dateValue } = plantsPages.declaration.content;
+
+      await expect(dateValue).toHaveText(new RegExp(`^${todayOrTomorrowServiceDisplayDatePattern()}$`));
+      await expect(dateValue).toHaveCSS('font-weight', '700');
+    });
+
+    test('starts the declaration of a draft with the Declaration heading', async ({ plantsPages }) => {
+      await expect(plantsPages.declaration.content.firstContentElement).toHaveText('Declaration');
+    });
+
+    test('submits to the confirmation page once confirmed', async ({ pages, plantsPages }) => {
+      await plantsPages.declaration.checkbox.check();
+      await plantsPages.declaration.btnContinue.click();
+
+      await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrl(reference));
+    });
+  });
+
+  test('starts the declaration of an amendment with the Declaration heading', async ({
+    plantsPages,
+    plantsJourney,
+    plantsNotificationActions,
+    addressBookApi,
+  }) => {
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
+    await plantsJourney.submitFromReview();
+    await plantsNotificationActions.amendNotification(reference);
+    await plantsJourney.toDeclarationOf(reference);
+
+    await expect(plantsPages.declaration.content.firstContentElement).toHaveText('Declaration');
   });
 
   for (const { type, days, rule } of [
@@ -120,7 +169,6 @@ test.describe('High-risk plants check and submit section', () => {
     test(`${type}: late notifications are accepted and highlighted`, async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
       const { reference } = await plantsJourney.completeNotification(addressBookApi, { type, days });
       await expectReview(plantsPages);
-      // The warning's text opens with a visually hidden "Warning", so the message is matched as a substring.
       await expect(
         pages.page.getByText(`If you submit this notification today it will be late. ${rule} You can still submit it.`, { exact: false }),
       ).toBeVisible();
@@ -226,7 +274,7 @@ test.describe('High-risk plants check and submit section', () => {
       await expectAmending(pages, plantsPages, reference);
       await plantsPages.identificationNumbers.open(reference);
       await plantsPages.identificationNumbers.producer.fill('DiscardMe99');
-      await plantsPages.identificationNumbers.btnSaveAndContinue.click();
+      await plantsPages.identificationNumbers.saveAndContinue.click();
       await plantsPages.dashboard.open();
       await plantsPages.dashboard.searchForReference(reference);
       await expect(plantsPages.dashboard.statusTag(reference)).toHaveText('Amend');
@@ -317,7 +365,7 @@ test.describe('High-risk plants check and submit section', () => {
       await plantsPages.arrivalDetails.open(reference);
       const amendedDate = arrivalDate(initiallyLate ? 7 : 0);
       await plantsPages.arrivalDetails.arrivalDate.fill(amendedDate);
-      await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+      await plantsPages.arrivalDetails.saveAndContinue.click();
       await plantsPages.notificationView.open(reference);
       await plantsJourney.submitFromReview();
       await expect(plantsPages.confirmation.lateBanner).toHaveCount(initiallyLate ? 1 : 0);
@@ -344,7 +392,7 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.overview.taskRowLink('Identification numbers').click();
     await expect(plantsPages.identificationNumbers.heading).toBeVisible();
     await expect(plantsPages.identificationNumbers.saveAndReturn).toBeVisible();
-    await expect(plantsPages.identificationNumbers.btnSaveAndContinue).toBeVisible();
+    await expect(plantsPages.identificationNumbers.saveAndContinue).toBeVisible();
     await expect(plantsPages.identificationNumbers.saveAndReturnToOverview).toBeVisible();
     await expect(plantsPages.identificationNumbers.cancelAndReturnToOverview).toHaveCount(0);
 
@@ -396,7 +444,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expectAmending(pages, plantsPages, reference);
 
     await plantsPages.arrivalStatus.open(reference);
-    await plantsPages.arrivalStatus.btnSaveAndContinue.click();
+    await plantsPages.arrivalStatus.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
     await expect(plantsPages.arrivalDetails.linkBack).toHaveAttribute('href', plantsPages.overview.expectedUrl(reference));
 
@@ -418,7 +466,7 @@ test.describe('High-risk plants check and submit section', () => {
 
     await plantsPages.consignorSelect.open(reference);
     await expect(plantsPages.consignorSelect.saveAndReturn).toBeVisible();
-    await expect(plantsPages.consignorSelect.btnSaveAndContinue).toBeVisible();
+    await expect(plantsPages.consignorSelect.saveAndContinue).toBeVisible();
     await expect(plantsPages.consignorSelect.saveAndReturnToOverview).toHaveCount(0);
     await expect(plantsPages.consignorSelect.cancelAndReturnToOverview).toHaveCount(0);
     await plantsPages.consignorSelect.saveAndReturn.click();
@@ -426,12 +474,12 @@ test.describe('High-risk plants check and submit section', () => {
 
     await plantsPages.placeOfDestination.open(reference);
     await expect(plantsPages.placeOfDestination.saveAndReturn).toBeVisible();
-    await expect(plantsPages.placeOfDestination.btnSaveAndContinue).toBeVisible();
+    await expect(plantsPages.placeOfDestination.saveAndContinue).toBeVisible();
     await expect(plantsPages.placeOfDestination.saveAndReturnToOverview).toHaveCount(0);
 
     await plantsPages.consignmentContactSelect.open(reference);
     await expect(plantsPages.consignmentContactSelect.saveAndReturn).toBeVisible();
-    await expect(plantsPages.consignmentContactSelect.btnSaveAndContinue).toBeVisible();
+    await expect(plantsPages.consignmentContactSelect.saveAndContinue).toBeVisible();
     await expect(plantsPages.consignmentContactSelect.saveAndReturnToOverview).toHaveCount(0);
   });
 

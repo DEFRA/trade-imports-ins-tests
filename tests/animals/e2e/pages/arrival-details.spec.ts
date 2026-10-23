@@ -1,12 +1,11 @@
 import { test, expect } from '@fixtures';
-import { SELECT_ONE_PLACEHOLDER } from '@domain/animals/constants/import-reason-page';
-import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
+import { MEANS_OF_TRANSPORT_SELECT_TEXT, meansOfTransport } from '@domain/animals/constants/means-of-transport';
+import { PORT_OF_ENTRY_SEARCH_PLACEHOLDER, PORT_OF_ENTRY_SELECT_TEXT } from '@domain/animals/constants/point-of-entries';
 import { getRelativeAppDateText, getRelativeDatePickerValue } from '@utils/date-utils';
 
 const EARLIEST_ALLOWED = getRelativeAppDateText({ dayOffset: -7 });
 const LATEST_ALLOWED = getRelativeAppDateText({ monthOffset: 6 });
 const OUT_OF_RANGE_MESSAGE = `Arrival date at port of entry must be between ${EARLIEST_ALLOWED} and ${LATEST_ALLOWED}`;
-const SELECT_A_PORT = 'Select a port';
 
 test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -34,14 +33,14 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
     await expect(animalsPages.arrivalDetails.fieldHint('portOfEntry')).toHaveText(
       'Select where the transporter will enter with the consignment. Start typing to search by port or airport name or code.',
     );
-    await expect(animalsPages.arrivalDetails.portOfEntry.field).toHaveAttribute('placeholder', SELECT_A_PORT);
+    await expect(animalsPages.arrivalDetails.portOfEntry.field).toHaveAttribute('placeholder', PORT_OF_ENTRY_SEARCH_PLACEHOLDER);
     await expect(animalsPages.arrivalDetails.portOfEntry.field).toHaveValue('');
-    await expect(animalsPages.arrivalDetails.portOfEntry.select.locator('option[value=""]')).toHaveText(SELECT_A_PORT);
+    await expect(animalsPages.arrivalDetails.portOfEntry.select.locator('option[value=""]')).toHaveText(PORT_OF_ENTRY_SELECT_TEXT);
   });
 
   test('offers Select one, then Air, Rail, Road and Sea as the means of transport', async ({ animalsPages }) => {
     await expect(animalsPages.arrivalDetails.meansOfTransportOptions).toHaveText([
-      SELECT_ONE_PLACEHOLDER,
+      MEANS_OF_TRANSPORT_SELECT_TEXT,
       meansOfTransport.airplane.display,
       meansOfTransport.railway.display,
       meansOfTransport.roadVehicle.display,

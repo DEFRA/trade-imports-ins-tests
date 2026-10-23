@@ -256,6 +256,8 @@ should also run the spec, whatever test type or domain the spec is in (see
 `npm run lint` runs `lint:suite-tags` to keep the two in step: a test under `a11y/` must carry
 `@a11y`, one under `security/` must carry `@active`, and one under `e2e/` neither.
 
+`@duplicated-in-frontend` marks an end-to-end spec whose behaviour the frontend's own FIT suite also proves, so a reader knows the check exists in both places.
+
 ## Local Testing
 
 ### Local workspace stack
@@ -331,6 +333,10 @@ If it is not set, Playwright's default applies (50% of cores on CI).
 Visual regression tests (tagged `@visual`) guard rendered composition — layout, spacing, colour, and typography as the user sees the page. They compare screenshots against committed baseline images and fail if any pixels differ outside the masked regions.
 
 Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. Each platform requires its own baseline — update both when visual changes are intentional.
+
+Visual specs run headless whatever the project setting, because headed mode uses OS font rendering, which produces pixel differences against a headless baseline.
+
+The origin of import baseline masks the whole status strip, not the notification reference alone. The strip renders from the first request and the reference inside it is minted per run, so an unmasked strip never matches the baseline twice. Masking the full-width strip keeps the masked box a fixed size, which the reference alone is not. The strip's own content is covered by `tests/animals/e2e/features/reference-strip.spec.ts`.
 
 Run against the stack with `npm run test:docker-compose:visual` (or
 `test:docker-compose:animals:visual` for `animals` alone). `animals` and `plants` have `@visual` specs.

@@ -6,3 +6,5 @@ export const meansOfTransport = {
 } as const;
 
 export type MeansOfTransport = (typeof meansOfTransport)[keyof typeof meansOfTransport];
+
+export const MEANS_OF_TRANSPORT_SELECT_TEXT = 'Select one';

@@ -1,13 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 
-export const SEARCH_BOX_ASSISTIVE_DESCRIPTION =
-  'When autocomplete results are available use up and down arrows to review and enter to select. Touch device users, explore by touch or with swipe gestures.';
-
-/**
- * A type-ahead that enhances a native select, addressed by the select's id.
- * With JavaScript the id sits on the search box; without it the select keeps
- * the id and is the control.
- */
+/** A type-ahead that enhances a native select, addressed by the select's id. */
 export class TypeAhead {
   constructor(
     private readonly page: Page,
@@ -32,10 +25,6 @@ export class TypeAhead {
 
   get options(): Locator {
     return this.select.locator('option');
-  }
-
-  get selectableOptions(): Locator {
-    return this.select.locator('option:not([value=""])');
   }
 
   get suggestions(): Locator {

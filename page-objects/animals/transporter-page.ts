@@ -30,8 +30,4 @@ export class AnimalsTransporterPage extends NotificationPage {
   get addTransporter(): Locator {
     return this.page.getByRole('button', { name: 'Add a transporter' });
   }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
-  }
 }

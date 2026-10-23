@@ -16,6 +16,7 @@ import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
+import { fileUploadPaths } from '@resources/file-upload/paths';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
@@ -26,6 +27,11 @@ export type ArrivalDetailsAnswer = {
   port?: string;
   transportId?: string;
   documentReference?: string;
+};
+
+export type SpeciesAnimalCount = {
+  species: string;
+  animalCount: number;
 };
 
 export const OPENING_RUN_TASKS = [
@@ -43,8 +49,18 @@ export const OPENING_RUN_TASKS = [
 ] as const;
 
 export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffset: 2 });
+
 export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
 export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
+
+const timestampedReference = (referencePrefix: string): string => `${referencePrefix}${Date.now()}`;
+
+export const certificateDocument = (referencePrefix: string): AccompanyingDocumentAnswer => ({
+  reference: timestampedReference(referencePrefix),
+  issueDate: '03/01/2026',
+  filePath: fileUploadPaths.safeFile1kbPdf,
+  type: 'VETERINARY_HEALTH_CERTIFICATE',
+});
 
 export class AnimalsJourney {
   constructor(
@@ -128,10 +144,24 @@ export class AnimalsJourney {
     await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
   }
 
-  private async openCurrentOverview(): Promise<void> {
+  private async openIdentificationFromOverview(): Promise<void> {
+    await this.animalsPages.overview.task('Identification details').click();
+    await this.animalsPages.animalIdentification.heading.waitFor(pageLoadWait);
+  }
+
+  private async saveCountsAndReturnToOverview(): Promise<void> {
+    await this.animalsPages.consignmentDetails.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+  }
+
+  private currentReferenceNumber(): string {
     const { referenceNumber } = this.context;
     if (!referenceNumber) throw new Error('No notification has been started');
-    await this.animalsPages.overview.open(referenceNumber);
+    return referenceNumber;
+  }
+
+  private async openCurrentOverview(): Promise<void> {
+    await this.animalsPages.overview.open(this.currentReferenceNumber());
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -211,7 +241,7 @@ export class AnimalsJourney {
   async addCphAndLeaveAddresses(cph: CphAnswer = MANDATORY_ANSWERS.cph): Promise<void> {
     await this.animalsPages.addresses.addCph.click();
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
-    await this.animalsPages.cphNumber.fillCphNumber(cph.county, cph.parish, cph.holding);
+    await this.animalsPages.cphNumber.fillCphNumber(cph);
     await this.animalsPages.cphNumber.saveAndContinue.click();
     await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     await this.animalsPages.addresses.continueButton.click();
@@ -248,7 +278,7 @@ export class AnimalsJourney {
   }
 
   async uploadScannedDocument(): Promise<Locator> {
-    const reference = `PW${Date.now()}`;
+    const reference = timestampedReference('PW');
     await this.uploadDocumentAndWaitForScan({ ...ALL_ANSWERS.accompanyingDocument, reference });
     return this.animalsPages.accompanyingDocuments.documentRow(reference);
   }
@@ -271,6 +301,13 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
+  }
+
+  async chooseTransporterType(type: 'Commercial' | 'Private'): Promise<void> {
+    await this.animalsPages.transporter.addTransporter.click();
+    await this.animalsPages.transporterAdd.heading.waitFor(pageLoadWait);
+    await this.animalsPages.transporterAdd.transporterType(type).check();
+    await this.animalsPages.transporterAdd.saveAndContinue.click();
   }
 
   async answerTransport(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
@@ -343,15 +380,22 @@ export class AnimalsJourney {
     await this.animalsPages.overview.task('What are you importing?').click();
     await this.chooseSpeciesAndOpenCommodityDetails([species]);
     await this.animalsPages.consignmentDetails.fillEveryAnimalCount('1');
-    await this.animalsPages.consignmentDetails.saveAndContinue.click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.saveCountsAndReturnToOverview();
   }
 
   async toAnimalIdentification(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.animalsPages.overview.task('Identification details').click();
-    await this.animalsPages.animalIdentification.heading.waitFor(pageLoadWait);
+    await this.openIdentificationFromOverview();
+  }
+
+  async toAnimalIdentificationWithCounts(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
+    await this.toConsignmentDetails(speciesCounts.map(({ species }) => species));
+    for (const { species, animalCount } of speciesCounts) {
+      await this.animalsPages.consignmentDetails.fillAnimalCountFor(species, animalCount);
+    }
+    await this.saveCountsAndReturnToOverview();
+    await this.openIdentificationFromOverview();
   }
 
   async toImportReason(): Promise<void> {
@@ -614,15 +658,24 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
+  async toDeclarationOfCurrentNotification(): Promise<void> {
+    await this.animalsPages.notificationView.open(this.currentReferenceNumber());
+    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.continueFromReviewToDeclaration();
+  }
+
   async submitFromReview(): Promise<void> {
-    await this.animalsPages.notificationView.continueButton.click();
-    await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
+    await this.continueFromReviewToDeclaration();
     await this.confirmDeclaration();
   }
 
   private async fromOverviewToDeclaration(): Promise<void> {
     await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.continueFromReviewToDeclaration();
+  }
+
+  private async continueFromReviewToDeclaration(): Promise<void> {
     await this.animalsPages.notificationView.continueButton.click();
     await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
   }
@@ -630,6 +683,6 @@ export class AnimalsJourney {
   private async confirmDeclaration(): Promise<void> {
     await this.animalsPages.declaration.confirmation.check();
     await this.animalsPages.declaration.continueButton.click();
-    await this.pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor(pageLoadWait);
+    await this.animalsPages.confirmation.heading.waitFor(pageLoadWait);
   }
 }

@@ -21,7 +21,8 @@ export function requireBaseUrl(
   return baseUrl;
 }
 
-export type OpenOptions = { attemptSignIn?: boolean; userId?: string; organisationSbi?: string };
+export type SignInIdentity = { userId?: string; organisationSbi?: string };
+export type OpenOptions = SignInIdentity & { attemptSignIn?: boolean };
 
 export class BasePage {
   constructor(protected readonly page: Page) {}
@@ -74,11 +75,11 @@ export class BasePage {
     await this.page.goto(`${baseUrl}${path}`);
   }
 
-  async completeSignInIfRequested(options?: { userId?: string; organisationSbi?: string }): Promise<void> {
+  async completeSignInIfRequested(options?: SignInIdentity): Promise<void> {
     await this.signInWhenRequested(true, options);
   }
 
-  protected async signInWhenRequested(attemptSignIn: boolean, options?: { userId?: string; organisationSbi?: string }): Promise<void> {
+  protected async signInWhenRequested(attemptSignIn: boolean, options?: SignInIdentity): Promise<void> {
     if (!attemptSignIn) return;
     const signInPage = new SignInPage(this.page);
     if (this.isAlreadySignedIn(signInPage)) {
@@ -119,7 +120,7 @@ export class BasePage {
     return signInPage.heading.isVisible();
   }
 
-  private requireDefaultIdentity(options?: { userId?: string; organisationSbi?: string }): void {
+  private requireDefaultIdentity(options?: SignInIdentity): void {
     if (options?.userId && options.userId !== defaultUser.crn) {
       throw new Error(
         `Already signed in as the default user, so cannot sign in as ${options.userId}. ` +
@@ -164,7 +165,6 @@ export class NotificationPage extends BasePage {
     return this.page.locator(`#${fieldId}-hint`);
   }
 
-  /** The status bar above every notification page's caption and heading. */
   get journeyStrip(): Locator {
     return this.page.locator('.app-journey-strip');
   }
@@ -173,13 +173,20 @@ export class NotificationPage extends BasePage {
     return this.journeyStrip.locator('.govuk-tag');
   }
 
-  /** Shown in the status bar only while the notification is being amended. */
   get cancelAmend(): Locator {
     return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
   }
 
   get errorSummaryLinks(): Locator {
     return this.page.getByRole('alert').getByRole('link');
+  }
+
+  get saveAndContinue(): Locator {
+    return this.page.getByRole('button', { name: 'Save and continue', exact: true });
+  }
+
+  get buttonGroup(): Locator {
+    return this.page.locator('.govuk-button-group');
   }
 
   get saveAndReturn(): Locator {
@@ -217,8 +224,8 @@ export class NotificationPage extends BasePage {
     await this.navigateToFrontend(path);
   }
 
-  async open(referenceNumber: string, attemptSignIn: boolean = true): Promise<void> {
+  async open(referenceNumber: string, { attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.navigateToService(this.expectedUrl(referenceNumber));
-    await this.signInWhenRequested(attemptSignIn);
+    await this.signInWhenRequested(attemptSignIn, identity);
   }
 }

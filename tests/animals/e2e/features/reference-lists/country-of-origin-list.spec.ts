@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { countryAndSubdivisionNamesWithCountry } from '@resources/reference-data/reference-data';
+import { ORIGIN_COUNTRY_SELECT_TEXT } from '@domain/animals/constants/origin-page';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Country of origin list', () => {
@@ -18,7 +19,10 @@ test.describe('Country of origin list', () => {
         await animalsJourney.startNotification();
         await animalsPages.overview.task('Where is this consignment coming from?').click();
 
-        await expect(animalsPages.originOfImport.country.selectableOptions).toHaveText(countryAndSubdivisionNamesWithCountry());
+        await expect(animalsPages.originOfImport.country.options).toHaveText([
+          ORIGIN_COUNTRY_SELECT_TEXT,
+          ...countryAndSubdivisionNamesWithCountry(),
+        ]);
       });
     });
   }

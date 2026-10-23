@@ -54,8 +54,4 @@ export class AnimalsTransitedCountriesPage extends NotificationPage {
   get statusRegion(): Locator {
     return this.page.locator('#transit-countries-status');
   }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
-  }
 }

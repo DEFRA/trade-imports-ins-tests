@@ -3,8 +3,6 @@ import { countryCodes } from '@domain/animals/constants/country-codes';
 import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
 
 const FRANCE_REGION_CODE = `${countryCodes.eu.france.value}-${DEFAULT_REGION_CODE}`;
-const IMPORT_DETAILS_CARD = 'Import details';
-const REGION_OF_ORIGIN_CODE_ROW = 'Region of origin code';
 const INTERNAL_REFERENCE = 'Imports456GB';
 const REGION_HINT =
   'Check the health certificate for a region of origin code. You can add the code later if you do not have the certificate now.';
@@ -98,9 +96,7 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await originOfImport.saveAndContinue.click();
 
     await notificationView.open(referenceNumber);
-    await expect(notificationView.summaryValue(notificationView.summaryCard(IMPORT_DETAILS_CARD), REGION_OF_ORIGIN_CODE_ROW)).toHaveText(
-      'Not applicable',
-    );
+    await expect(notificationView.regionOfOriginCode).toHaveText('Not applicable');
 
     await originOfImport.open(referenceNumber);
     await originOfImport.radioRequiresOriginCode('Yes').check();
@@ -273,9 +269,7 @@ test.describe('Origin of the import page without JavaScript', { tag: '@duplicate
       await animalsJourney.fillAndSaveOriginWithRegionCode(typed);
 
       await notificationView.open(referenceNumber);
-      await expect(notificationView.summaryValue(notificationView.summaryCard(IMPORT_DETAILS_CARD), REGION_OF_ORIGIN_CODE_ROW)).toHaveText(
-        FRANCE_REGION_CODE,
-      );
+      await expect(notificationView.regionOfOriginCode).toHaveText(FRANCE_REGION_CODE);
     });
   }
 

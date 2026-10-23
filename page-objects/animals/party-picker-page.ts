@@ -4,7 +4,6 @@ import {
   pickerResultsGroup,
   pickerResultsHeading,
   pickerResultsSummary,
-  pickerSaveAndContinue,
   pickerSearchBox,
   pickerSearchButton,
   pickerSearchRow,
@@ -55,7 +54,7 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return this.page.getByText('Selected address:');
   }
 
-  get search(): Locator {
+  get searchBox(): Locator {
     return pickerSearchBox(this.page);
   }
 
@@ -67,16 +66,12 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return pickerSearchButton(this.page);
   }
 
-  get saveAndContinue(): Locator {
-    return pickerSaveAndContinue(this.page);
-  }
-
   get addNewAddress(): Locator {
     return this.page.getByRole('button', { name: 'Add a new address' });
   }
 
   async select(name: string): Promise<void> {
-    await this.search.fill(name);
+    await this.searchBox.fill(name);
     await this.searchButton.click();
     await this.party(name).check();
   }

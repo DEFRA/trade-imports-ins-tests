@@ -31,14 +31,6 @@ export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
     return this.page.locator('#arrivalTime');
   }
 
-  get btnSaveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue', exact: true });
-  }
-
-  get linkCancel(): Locator {
-    return this.page.getByRole('link', { name: 'Cancel and return to overview', exact: true });
-  }
-
   get errorSummary(): Locator {
     return this.page.locator('.govuk-error-summary');
   }

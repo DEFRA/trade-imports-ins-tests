@@ -7,10 +7,12 @@ import { AnimalsArrivalDetailsPage } from '@page-objects/animals/arrival-details
 import { AnimalsCommercialTransporterPage } from '@page-objects/animals/commercial-transporter-page';
 import { AnimalsCommoditySelectionPage } from '@page-objects/animals/commodity-selection-page';
 import { AnimalsConsignmentDetailsPage } from '@page-objects/animals/consignment-details-page';
+import { AnimalsConfirmationPage } from '@page-objects/animals/confirmation-page';
 import { AnimalsContactAddressPage } from '@page-objects/animals/contact-address-page';
 import { AnimalsCphNumberPage } from '@page-objects/animals/cph-number-page';
 import { AnimalsDashboardPage } from '@page-objects/animals/dashboard-page';
 import { AnimalsDeclarationPage } from '@page-objects/animals/declaration-page';
+import { AnimalsDeleteNotificationPage } from '@page-objects/animals/delete-notification-page';
 import { AnimalsImportReasonPage } from '@page-objects/animals/import-reason-page';
 import { AnimalsNotificationCancelAmendPage } from '@page-objects/animals/notification-cancel-amend-page';
 import { AnimalsNotificationViewPage } from '@page-objects/animals/notification-view-page';
@@ -58,6 +60,8 @@ export function createAnimalsPages(page: Page) {
     contactAddressEdit: new AnimalsPartyEditPage(page, 'consignment/contact/edit', 'Contact address for consignment'),
     notificationView: new AnimalsNotificationViewPage(page),
     declaration: new AnimalsDeclarationPage(page),
+    confirmation: new AnimalsConfirmationPage(page),
+    deleteNotification: new AnimalsDeleteNotificationPage(page),
     notificationCancelAmend: new AnimalsNotificationCancelAmendPage(page),
   };
 }

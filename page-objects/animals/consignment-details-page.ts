@@ -1,7 +1,10 @@
 import { type Locator } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import { SelectedCommoditiesTable } from '@page-objects/animals/selected-commodities-table';
 
 export class AnimalsConsignmentDetailsPage extends NotificationPage {
+  readonly selectedCommodities = new SelectedCommoditiesTable(this.page);
+
   constructor(page: ConstructorParameters<typeof NotificationPage>[0]) {
     super(page, 'consignment-details');
   }
@@ -16,10 +19,6 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
 
   get numberOfPackages(): Locator {
     return this.page.getByLabel('Number of packages (when required)');
-  }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
   get errorSummary(): Locator {
@@ -38,16 +37,13 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.caption.locator('xpath=following-sibling::*[1]');
   }
 
-  get selectedCommodities(): Locator {
-    return this.page.getByRole('table', { name: 'Selected commodities' });
-  }
-
-  selectedCommodityRow(commodityCode: string): Locator {
-    return this.selectedCommodities.getByRole('row').filter({ has: this.page.getByRole('cell', { name: commodityCode, exact: true }) });
-  }
-
-  speciesCell(row: Locator): Locator {
-    return row.getByRole('cell').nth(2);
+  async fillAnimalCountFor(species: string, count: number): Promise<void> {
+    const speciesHeadings = await this.page.getByRole('heading', { level: 3 }).allTextContents();
+    const index = speciesHeadings.indexOf(species);
+    if (index === -1) {
+      throw new Error(`No "${species}" heading among: ${speciesHeadings.join(', ')}`);
+    }
+    await this.numberOfAnimals.nth(index).fill(String(count));
   }
 
   async fillEveryAnimalCount(count: string): Promise<void> {

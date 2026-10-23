@@ -48,7 +48,7 @@ test.describe('High-risk plants destination section', () => {
   }) => {
     const reference = await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
 
-    await plantsPages.placeOfDestination.btnSaveAndContinue.click();
+    await plantsPages.placeOfDestination.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrl(reference));
     await expect(plantsPages.consignorSelect.heading).toBeVisible();
@@ -109,7 +109,7 @@ test.describe('High-risk plants destination section', () => {
     await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText('Showing 1 out of 6 results');
 
     await plantsPages.placeOfDestination.address(target).check();
-    await plantsPages.placeOfDestination.btnSaveAndContinue.click();
+    await plantsPages.placeOfDestination.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrl(reference));
 

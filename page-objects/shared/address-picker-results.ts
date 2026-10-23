@@ -30,7 +30,3 @@ export function pickerSearchRow(page: Page): Locator {
 export function pickerSearchButton(page: Page): Locator {
   return page.getByRole('button', { name: 'Search', exact: true });
 }
-
-export function pickerSaveAndContinue(page: Page): Locator {
-  return page.getByRole('button', { name: 'Save and continue', exact: true });
-}

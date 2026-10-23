@@ -35,10 +35,6 @@ export class PlantsCommoditiesPage extends PlantsNotificationPage {
     return this.page.getByRole('button', { name: 'Add another commodity', exact: true });
   }
 
-  get btnSaveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue', exact: true });
-  }
-
   /**
    * The row actions name their line by its position on the page, not by the
    * index the href carries: the visually hidden suffix that tells one Change

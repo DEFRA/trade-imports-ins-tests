@@ -6,7 +6,7 @@ const PORT_OPTION = pointOfEntries.aberdeenHarbour.display;
 const PORT_CODE = pointOfEntries.aberdeenHarbour.value;
 
 test.describe('Port of entry type-ahead', { tag: '@duplicated-in-frontend' }, () => {
-  test('enhances the select, filters by name or code, submits and persists the code', async ({ animalsJourney, pages, animalsPages }) => {
+  test('enhances the select, filters by name or code, submits and persists the code', async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toArrivalDetails();
     const referenceNumber = animalsPages.arrivalDetails.referenceNumberFromUrl();
 
@@ -15,16 +15,12 @@ test.describe('Port of entry type-ahead', { tag: '@duplicated-in-frontend' }, ()
     await expect(combobox).toHaveRole('combobox');
     await expect(combobox).toHaveAccessibleName('Port of entry');
 
-    // Focusing shows the whole list (showAllValues) before any typing.
     await combobox.click();
-    await expect(pages.page.getByRole('option', { name: PORT_OPTION, exact: true })).toBeVisible();
+    await expect(animalsPages.arrivalDetails.portOfEntry.option(PORT_OPTION)).toBeVisible();
 
-    // Filtering by the port code works because the code is part of the label.
     await combobox.fill('gb abd');
-    await expect(pages.page.getByRole('option', { name: PORT_OPTION, exact: true })).toBeVisible();
+    await expect(animalsPages.arrivalDetails.portOfEntry.option(PORT_OPTION)).toBeVisible();
 
-    // Selecting the option puts the label in the field and the code in the
-    // native select that submits.
     await animalsPages.arrivalDetails.portOfEntry.choose(PORT_OPTION);
     await expect(combobox).toHaveValue(PORT_OPTION);
     await animalsPages.arrivalDetails.fillArrivalDate(getRelativeDatePickerValue({ monthOffset: 1 }));

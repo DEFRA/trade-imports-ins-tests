@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { SELECT_ONE_PLACEHOLDER } from '@domain/animals/constants/import-reason-page';
+import { IMPORT_REASON_SEARCH_PLACEHOLDER, IMPORT_REASON_SELECT_TEXT } from '@domain/animals/constants/import-reason-page';
 
 test.describe('Import reason page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -53,14 +53,14 @@ test.describe('Import reason page', { tag: '@duplicated-in-frontend' }, () => {
     const { importReason } = animalsPages;
 
     await importReason.reason('Transhipment or onward travel').check();
-    await expect(importReason.transhipmentDestinationCountry.field).toHaveAttribute('placeholder', SELECT_ONE_PLACEHOLDER);
+    await expect(importReason.transhipmentDestinationCountry.field).toHaveAttribute('placeholder', IMPORT_REASON_SEARCH_PLACEHOLDER);
 
     await importReason.reason('Transit').check();
-    await expect(importReason.transitPortOfExit.field).toHaveAttribute('placeholder', SELECT_ONE_PLACEHOLDER);
-    await expect(importReason.transitDestinationCountry.field).toHaveAttribute('placeholder', SELECT_ONE_PLACEHOLDER);
+    await expect(importReason.transitPortOfExit.field).toHaveAttribute('placeholder', IMPORT_REASON_SEARCH_PLACEHOLDER);
+    await expect(importReason.transitDestinationCountry.field).toHaveAttribute('placeholder', IMPORT_REASON_SEARCH_PLACEHOLDER);
 
     await importReason.reason('Temporary admission horses').check();
-    await expect(importReason.temporaryAdmissionPortOfExit.field).toHaveAttribute('placeholder', SELECT_ONE_PLACEHOLDER);
+    await expect(importReason.temporaryAdmissionPortOfExit.field).toHaveAttribute('placeholder', IMPORT_REASON_SEARCH_PLACEHOLDER);
   });
 });
 
@@ -71,9 +71,9 @@ test.describe('Import reason page without JavaScript', { tag: '@duplicated-in-fr
     await animalsJourney.toImportReason();
     const { importReason } = animalsPages;
 
-    await expect(importReason.transhipmentDestinationCountry.options.first()).toHaveText(SELECT_ONE_PLACEHOLDER);
-    await expect(importReason.transitPortOfExit.options.first()).toHaveText(SELECT_ONE_PLACEHOLDER);
-    await expect(importReason.transitDestinationCountry.options.first()).toHaveText(SELECT_ONE_PLACEHOLDER);
-    await expect(importReason.temporaryAdmissionPortOfExit.options.first()).toHaveText(SELECT_ONE_PLACEHOLDER);
+    await expect(importReason.transhipmentDestinationCountry.options.first()).toHaveText(IMPORT_REASON_SELECT_TEXT);
+    await expect(importReason.transitPortOfExit.options.first()).toHaveText(IMPORT_REASON_SELECT_TEXT);
+    await expect(importReason.transitDestinationCountry.options.first()).toHaveText(IMPORT_REASON_SELECT_TEXT);
+    await expect(importReason.temporaryAdmissionPortOfExit.options.first()).toHaveText(IMPORT_REASON_SELECT_TEXT);
   });
 });
