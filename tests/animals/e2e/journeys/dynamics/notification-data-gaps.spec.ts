@@ -10,12 +10,11 @@ import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 // This is a temporary spec file. It holds the end-to-end checks that cannot pass yet, and it is deleted once every
 // assertion has moved to notification-data.spec.ts.
 //
-// The answers notification-data.spec.ts cannot assert yet, because PIMS Dynamics leaves their columns empty. There is one
-// test for the mandatory answers, one for the optional ones, and one for answering yes to unweaned animals. Each is
-// skipped and holds the assertions we expect, grouped by cause in the order of the legend below, and in journey order
-// within each group. When a column fills, move its assertion to its placeholder in notification-data.spec.ts, which
-// keeps the answers in journey order, and delete the skip once the test is empty. The expected texts for choices from a
-// fixed list are the journey's display text until the values PIMS accepts are agreed.
+// Assertions notification-data.spec.ts cannot make yet, because PIMS Dynamics leaves their columns empty: one skipped
+// test each for the mandatory answers, the optional answers and a yes to unweaned animals. Assertions are grouped by
+// cause (legend order below), then in journey order. When a column fills, move its assertion to its placeholder in
+// notification-data.spec.ts, and delete the skip once the test is empty. Expected texts for fixed-list choices are the
+// journey's display text until the values PIMS accepts are agreed.
 //
 // Each group of assertions is headed by the likely cause of its gap. Each assertion has the GBN-AG path it comes from
 // above it. An answer travels like this, and can be lost at any step:
