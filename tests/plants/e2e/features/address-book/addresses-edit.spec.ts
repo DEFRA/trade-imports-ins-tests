@@ -29,8 +29,8 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(plantsPages.consignmentContactSelect.editCurrentAddress).toBeVisible();
 
     await plantsPages.notificationView.open(reference);
-    await expect(plantsPages.notificationView.changeAddress('Consignor or exporter')).toBeVisible();
-    await expect(plantsPages.notificationView.editDetails('Consignor or exporter')).toBeVisible();
+    await expect(plantsPages.notificationView.changeAddress('Consignor')).toBeVisible();
+    await expect(plantsPages.notificationView.editDetails('Consignor')).toBeVisible();
     await expect(plantsPages.notificationView.changeAddress('Where is the consignment now?')).toBeVisible();
     await expect(plantsPages.notificationView.editDetails('Where is the consignment now?')).toBeVisible();
     await expect(plantsPages.notificationView.changeAddress('Contact')).toBeVisible();

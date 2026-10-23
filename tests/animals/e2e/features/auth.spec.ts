@@ -70,13 +70,13 @@ test.describe('Authentication', { tag: '@auth' }, () => {
       await pages.signIn.signIn();
       await animalsPages.dashboard.btnCreateNewNotification.click();
       referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
-      await animalsPages.originOfImport.selectCountry('France');
+      await animalsPages.originOfImport.country.choose('France');
       await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
       await animalsPages.originOfImport.saveAndContinue.click();
       const journeyCookies = (await pages.page.context().cookies()).filter(({ name }) => name.startsWith('liveAnimals'));
       await pages.page.context().clearCookies();
       await pages.page.context().addCookies(journeyCookies);
-      await animalsPages.originOfImport.open(referenceNumber, false);
+      await animalsPages.originOfImport.open(referenceNumber, { attemptSignIn: false });
     });
 
     test('lands on the sign in page when opening a page further in the journey', async ({ pages }) => {

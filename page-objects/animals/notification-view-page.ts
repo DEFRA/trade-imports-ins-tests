@@ -1,6 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { pageLoadWait } from '@config/timeouts';
-import { NotificationPage } from '@page-objects/shared/base-page';
+import { NotificationPage, type OpenOptions } from '@page-objects/shared/base-page';
 
 export class AnimalsNotificationViewPage extends NotificationPage {
   constructor(page: Page) {
@@ -41,33 +41,30 @@ export class AnimalsNotificationViewPage extends NotificationPage {
       .locator('.govuk-summary-list__value');
   }
 
+  get regionOfOriginCode(): Locator {
+    return this.summaryValue(this.summaryCard('Import details'), 'Region of origin code');
+  }
+
   get errorSummary(): Locator {
     return this.page.locator('.govuk-error-summary');
   }
 
-  /** The summary-list row whose accessible term is the role, selected directly
-   * rather than climbing to it, so no XPath parent-axis hop is needed. */
   partyRow(card: string, role: string): Locator {
     return this.summaryCard(card)
       .locator('.govuk-summary-list__row')
       .filter({ has: this.page.getByRole('term').and(this.page.getByText(role, { exact: true })) });
   }
 
-  /** The row's own link to edit the address copied onto this notification —
-   * the card keeps the one Change link that re-picks from the book. */
   editPartyDetails(card: string, role: string): Locator {
     return this.partyRow(card, role).getByRole('link', { name: 'Edit details' });
   }
 
-  /** A summary list has no error state of its own, so an outstanding role
-   * carries its message in the row's value cell — the first definition of the
-   * row, ahead of the actions cell. */
   partyError(card: string, role: string): Locator {
     return this.partyRow(card, role).getByRole('definition').first();
   }
 
-  async open(referenceNumber: string, attemptSignIn: boolean = true): Promise<void> {
-    await super.open(referenceNumber, attemptSignIn);
+  async open(referenceNumber: string, { attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
+    await super.open(referenceNumber, { attemptSignIn, ...identity });
     if (attemptSignIn) await this.heading.waitFor(pageLoadWait);
   }
 }

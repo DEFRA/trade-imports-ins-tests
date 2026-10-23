@@ -1,13 +1,6 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
-
-// govuk-frontend's conditional-reveal radios set aria-expanded on the radio input
-// (radios.mjs), which axe's aria-allowed-attr rule rejects — an upstream
-// disagreement, not a service defect. Exclude just that input from origin scans.
-const conditionalRadioInput = '#regionOfOriginCodeRequirement';
-
-// The same upstream disagreement on the reason page, where four of the five
-// reasons open a conditional reveal, so four radios carry aria-expanded.
-const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
+import { conditionalRadioInput, conditionalReasonRadios } from '@utils/a11y-exclusions';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -29,8 +22,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan({ exclude: conditionalRadioInput });
     });
 
-    // The entry guard holds the journey on origin until it is answered, so the
-    // overview is only reachable once origin has been saved.
     await test.step('Overview', async () => {
       const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
       await animalsJourney.fillOriginOfImport();
@@ -69,7 +60,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import reason', async () => {
-      await animalsPages.overview.task('Main reason for import').click();
+      await animalsPages.overview.task(IMPORT_REASON_TASK).click();
       await animalsPages.importReason.heading.waitFor();
       await runA11yScan({ exclude: conditionalReasonRadios });
       await animalsPages.importReason.reason('Internal market').check();
@@ -102,8 +93,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
     });
 
-    await test.step('Consignor or exporter selection', async () => {
-      await animalsPages.addresses.addParty('Consignor or exporter').click();
+    await test.step('Consignor selection', async () => {
+      await animalsPages.addresses.addParty('Consignor').click();
       await animalsPages.consignorSelection.heading.waitFor();
       await runA11yScan();
       await animalsPages.consignorSelection.select('Astra Rosales');

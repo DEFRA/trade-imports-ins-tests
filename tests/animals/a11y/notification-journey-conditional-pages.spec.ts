@@ -1,4 +1,6 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
+import { conditionalReasonRadios } from '@utils/a11y-exclusions';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
 const PRIVATE_TRANSPORTER = {
@@ -11,11 +13,6 @@ const PRIVATE_TRANSPORTER = {
   emailAddress: 'jean.dupont@example.fr',
 };
 
-// Same behaviour from the govuk-frontend npm package's radios.mjs, excluded
-// elsewhere in this suite (e.g. notification-journey-filled-state.spec.ts) —
-// component code we don't own, not a defect in this service.
-const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
-
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('the reason-gated and private transporter pages have no accessibility violations', async ({
     animalsJourney,
@@ -27,7 +24,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await animalsJourney.unlockSections();
 
     await test.step('Import reason: Transit', async () => {
-      await animalsPages.overview.task('Main reason for import').click();
+      await animalsPages.overview.task(IMPORT_REASON_TASK).click();
       await animalsPages.importReason.reason('Transit').check();
       await animalsPages.importReason.selectTransitPortOfExitByIndex(2);
       await animalsPages.importReason.selectTransitDestinationCountry('FR');
@@ -41,7 +38,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import reason: Temporary admission of horses', async () => {
-      await animalsPages.overview.task('Main reason for import').click();
+      await animalsPages.overview.task(IMPORT_REASON_TASK).click();
       await animalsPages.importReason.reason('Temporary admission horses').check();
       await animalsPages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
       await animalsPages.importReason.selectTemporaryAdmissionPortOfExitByIndex(2);

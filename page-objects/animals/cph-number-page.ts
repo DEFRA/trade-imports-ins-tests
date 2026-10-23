@@ -1,6 +1,8 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 
+type CphNumberParts = { county?: string; parish?: string; holding?: string };
+
 export class AnimalsCphNumberPage extends NotificationPage {
   constructor(page: Page) {
     super(page, 'cph-number');
@@ -22,13 +24,9 @@ export class AnimalsCphNumberPage extends NotificationPage {
     return this.page.getByLabel('Holding number', { exact: true });
   }
 
-  async fillCphNumber(county = '12', parish = '345', holding = '6789'): Promise<void> {
+  async fillCphNumber({ county = '12', parish = '345', holding = '6789' }: CphNumberParts = {}): Promise<void> {
     await this.county.fill(county);
     await this.parish.fill(parish);
     await this.holding.fill(holding);
-  }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
   }
 }

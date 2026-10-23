@@ -21,7 +21,8 @@ export function requireBaseUrl(
   return baseUrl;
 }
 
-export type OpenOptions = { attemptSignIn?: boolean; userId?: string; organisationSbi?: string };
+export type SignInIdentity = { userId?: string; organisationSbi?: string };
+export type OpenOptions = SignInIdentity & { attemptSignIn?: boolean };
 
 export class BasePage {
   constructor(protected readonly page: Page) {}
@@ -50,14 +51,6 @@ export class BasePage {
     return this.page.getByRole('link', { name: 'Dashboard', exact: true });
   }
 
-  /**
-   * `exact` is load-bearing, not decoration. Playwright matches an accessible
-   * name as a case-insensitive SUBSTRING unless you opt out, and the service's
-   * alpha phase banner links "give your feedback by email" on every page —
-   * "feed(back)". Without `exact` this resolves to two links and every click
-   * fails on strict mode. Reach for this getter rather than rolling the locator
-   * per spec, so the guard cannot be forgotten again.
-   */
   get linkBack(): Locator {
     return this.page.getByRole('link', { name: 'Back', exact: true });
   }
@@ -82,22 +75,14 @@ export class BasePage {
     await this.page.goto(`${baseUrl}${path}`);
   }
 
-  async completeSignInIfRequested(options?: { userId?: string; organisationSbi?: string }): Promise<void> {
+  async completeSignInIfRequested(options?: SignInIdentity): Promise<void> {
     await this.signInWhenRequested(true, options);
   }
 
-  /**
-   * organisationSbi is only needed for identities with more than one
-   * organisation — defra-id-stub shows its "Choose your organisation" picker
-   * after sign-in exclusively for those, so single-org identities never hit it.
-   */
-  protected async signInWhenRequested(attemptSignIn: boolean, options?: { userId?: string; organisationSbi?: string }): Promise<void> {
+  protected async signInWhenRequested(attemptSignIn: boolean, options?: SignInIdentity): Promise<void> {
     if (!attemptSignIn) return;
     const signInPage = new SignInPage(this.page);
-    // The OIDC chain is pure server 302s, so the caller's goto has already
-    // resolved: anywhere but the stub's sign-in form means this context is
-    // already authenticated — usually the worker's reused session.
-    if (!signInPage.expectedUrl.test(this.page.url())) {
+    if (this.isAlreadySignedIn(signInPage)) {
       this.requireDefaultIdentity(options);
       return;
     }
@@ -117,6 +102,10 @@ export class BasePage {
     await this.selectOrganisationIfPrompted(options?.organisationSbi);
   }
 
+  private isAlreadySignedIn(signInPage: SignInPage): boolean {
+    return !signInPage.expectedUrl.test(this.page.url());
+  }
+
   private async landedOnSignInError(signInPage: SignInPage): Promise<boolean> {
     const signInError = this.page.getByRole('heading', { level: 1, name: SIGN_IN_ERROR_HEADING });
     const landingHeading = this.page.getByRole('heading', { level: 1 }).filter({ hasNotText: signInPage.headingName });
@@ -131,7 +120,7 @@ export class BasePage {
     return signInPage.heading.isVisible();
   }
 
-  private requireDefaultIdentity(options?: { userId?: string; organisationSbi?: string }): void {
+  private requireDefaultIdentity(options?: SignInIdentity): void {
     if (options?.userId && options.userId !== defaultUser.crn) {
       throw new Error(
         `Already signed in as the default user, so cannot sign in as ${options.userId}. ` +
@@ -167,15 +156,15 @@ export class NotificationPage extends BasePage {
     super(page);
   }
 
-  /**
-   * The set this notification's pages belong to. Overridden by a subclass whose
-   * journey runs under another set's prefix.
-   */
+  /** The set this notification's pages belong to. */
   protected get setBase(): SetBase {
     return SET_BASES.liveAnimals;
   }
 
-  /** The status bar above every notification page's caption and heading. */
+  fieldHint(fieldId: string): Locator {
+    return this.page.locator(`#${fieldId}-hint`);
+  }
+
   get journeyStrip(): Locator {
     return this.page.locator('.app-journey-strip');
   }
@@ -184,9 +173,20 @@ export class NotificationPage extends BasePage {
     return this.journeyStrip.locator('.govuk-tag');
   }
 
-  /** Shown in the status bar only while the notification is being amended. */
   get cancelAmend(): Locator {
     return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
+  }
+
+  get errorSummaryLinks(): Locator {
+    return this.page.getByRole('alert').getByRole('link');
+  }
+
+  get saveAndContinue(): Locator {
+    return this.page.getByRole('button', { name: 'Save and continue', exact: true });
+  }
+
+  get buttonGroup(): Locator {
+    return this.page.locator('.govuk-button-group');
   }
 
   get saveAndReturn(): Locator {
@@ -206,11 +206,6 @@ export class NotificationPage extends BasePage {
     return `${this.setBase}/notifications/${referenceNumber}${suffix}`;
   }
 
-  /**
-   * Anchored at the set base rather than at `/notifications`, so a URL under another
-   * set's prefix fails the match and throws here, naming the URL, instead of yielding
-   * a reference number that belongs to a different set.
-   */
   referenceNumberFromUrl(): string {
     const match = new URL(this.page.url()).pathname.match(new RegExp(`^${this.setBase}/notifications/([^/]+)`));
     if (!match) {
@@ -224,17 +219,13 @@ export class NotificationPage extends BasePage {
     return `${this.setBase}/notifications/${this.referenceNumberFromUrl()}${suffix}`;
   }
 
-  /**
-   * The service this notification's pages live on. Overridden by a subclass whose
-   * journey runs against another frontend, so the journey-URL helpers above and
-   * `open` below are reused rather than copied per service.
-   */
+  /** Opens a path on the service this notification's pages live on. */
   protected async navigateToService(path: string): Promise<void> {
     await this.navigateToFrontend(path);
   }
 
-  async open(referenceNumber: string, attemptSignIn: boolean = true): Promise<void> {
+  async open(referenceNumber: string, { attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.navigateToService(this.expectedUrl(referenceNumber));
-    await this.signInWhenRequested(attemptSignIn);
+    await this.signInWhenRequested(attemptSignIn, identity);
   }
 }

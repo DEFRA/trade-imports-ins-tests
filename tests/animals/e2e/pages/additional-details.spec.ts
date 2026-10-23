@@ -7,6 +7,9 @@ test.describe('Additional details page', { tag: '@duplicated-in-frontend' }, () 
 
   test('renders the page controls', async ({ animalsPages }) => {
     await expect(animalsPages.additionalDetails.heading).toBeVisible();
+    await expect(animalsPages.additionalDetails.certificationQuestion).toHaveAccessibleDescription(
+      'You can find this information on the ITAHC.',
+    );
     await expect(animalsPages.additionalDetails.certifiedFor('Slaughter')).toBeVisible();
     await expect(animalsPages.additionalDetails.containsUnweanedAnimals('No')).toBeVisible();
     await expect(animalsPages.additionalDetails.saveAndContinue).toBeVisible();
@@ -17,11 +20,11 @@ test.describe('Additional details page', { tag: '@duplicated-in-frontend' }, () 
     await expect(animalsPages.additionalDetails.containsUnweanedAnimals('No')).not.toBeChecked();
   });
 
-  test('accepts valid additional details', async ({ pages, animalsPages }) => {
+  test('accepts valid additional details and returns to the overview', async ({ animalsPages }) => {
     await animalsPages.additionalDetails.certifiedFor('Slaughter').check();
     await animalsPages.additionalDetails.containsUnweanedAnimals('No').check();
     await animalsPages.additionalDetails.saveAndContinue.click();
 
-    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+    await expect(animalsPages.overview.heading).toBeVisible();
   });
 });

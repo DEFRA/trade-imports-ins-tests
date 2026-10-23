@@ -1,9 +1,14 @@
 import type { Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
+import { DeclarationContent } from '@page-objects/shared/declaration-content';
 
 export class PlantsDeclarationPage extends PlantsNotificationPage {
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
     super(page, 'declaration');
+  }
+
+  get content(): DeclarationContent {
+    return new DeclarationContent(this.page);
   }
 
   get heading(): Locator {

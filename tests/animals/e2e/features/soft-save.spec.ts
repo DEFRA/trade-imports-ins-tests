@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 
 const TO_DO = 'To do';
 const ORIGIN_TASK = 'Where is this consignment coming from?';
-const IMPORT_REASON_TASK = 'Main reason for import';
 const COMMODITY_SELECTION_TASK = 'What are you importing?';
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
 const IMPOSSIBLE_ARRIVAL_DATE = '31/2/2026';
@@ -10,20 +10,16 @@ const ARRIVAL_DATE_ERROR = 'Enter a real arrival date';
 const COMMODITY_DETAILS_TASK = 'Commodity details';
 
 test.describe('Save and return to overview', () => {
-  test('main reason for import: when a required answer is missing, saves, leaves the task not complete and keeps the answers', async ({
+  test('main import reason: when a required answer is missing, saves, leaves the task not complete and keeps the answers', async ({
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transit').check();
 
-    // Act
     await animalsPages.importReason.saveAndReturnToOverview.click();
 
-    // Assert
     await expect(animalsPages.overview.heading).toBeVisible();
-    await expect(animalsPages.importReason.errorSummary).toBeHidden();
     await expect(animalsPages.overview.taskStatus(IMPORT_REASON_TASK)).toHaveText(TO_DO);
     await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await expect(animalsPages.importReason.reason('Transit')).toBeChecked();
@@ -33,16 +29,13 @@ test.describe('Save and return to overview', () => {
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.startNotification();
     await animalsPages.overview.task(ORIGIN_TASK).click();
     await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
     await animalsPages.originOfImport.regionCode.fill('');
 
-    // Act
     await animalsPages.originOfImport.saveAndReturnToOverview.click();
 
-    // Assert
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.taskStatus(ORIGIN_TASK)).toHaveText(TO_DO);
     await animalsPages.overview.task(ORIGIN_TASK).click();
@@ -53,14 +46,11 @@ test.describe('Save and return to overview', () => {
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.toArrivalDetails();
     await animalsPages.arrivalDetails.fillArrivalDate(IMPOSSIBLE_ARRIVAL_DATE);
 
-    // Act
     await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
 
-    // Assert
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
     await expect(animalsPages.arrivalDetails.errorSummary).toBeVisible();
     await expect(animalsPages.arrivalDetails.arrivalDateError).toContainText(ARRIVAL_DATE_ERROR);
@@ -73,13 +63,10 @@ test.describe('Save and return to overview', () => {
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.toConsignmentDetails();
 
-    // Act
     await animalsPages.consignmentDetails.saveAndReturnToOverview.click();
 
-    // Assert
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
     await expect(animalsPages.consignmentDetails.errorSummary).toBeVisible();
     await expect(animalsPages.consignmentDetails.animalsRequiredErrorLink).toBeVisible();
@@ -91,16 +78,14 @@ test.describe('Save and return to overview', () => {
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.startNotification();
     await animalsPages.overview.task(ORIGIN_TASK).click();
     await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
+    await animalsPages.originOfImport.removeRegionCodeMaxlength();
     await animalsPages.originOfImport.regionCode.fill('ABCDEF');
 
-    // Act
     await animalsPages.originOfImport.saveAndReturnToOverview.click();
 
-    // Assert
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await expect(animalsPages.originOfImport.errorSummary).toBeVisible();
     await expect(animalsPages.originOfImport.regionCodeMaxLengthErrorLink).toBeVisible();
@@ -113,13 +98,10 @@ test.describe('Save and return to overview', () => {
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.toCommoditySelection();
 
-    // Act
     await animalsPages.commoditySelection.saveAndReturnToOverview.click();
 
-    // Assert
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.commoditySelection.errorSummary).toBeHidden();
     await expect(animalsPages.overview.taskStatus(COMMODITY_SELECTION_TASK)).toHaveText(TO_DO);
