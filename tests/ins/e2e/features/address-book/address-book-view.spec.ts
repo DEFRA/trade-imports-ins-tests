@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
-import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
+import { expectOtherOrganisationAddressReturnsToList } from './expect-other-organisation-address-returns-to-list';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 import { expectAddressBookList } from './expect-address-book-list';
-import { UNKNOWN_ADDRESS_ID } from './unknown-address-id';
+import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
 import { traderAddress } from './trader-address';
 
 test.describe('Address book view', () => {
@@ -16,7 +16,7 @@ test.describe('Address book view', () => {
     await insPages.addressBookView.open(addressWithOptionalFields.id);
 
     await expect(insPages.addressBookView.summaryListKeys).toHaveText([
-      'Name or organisation name',
+      'Name or organisation',
       'Address line 1',
       'Address line 2 (optional)',
       'Town or city',
@@ -34,7 +34,7 @@ test.describe('Address book view', () => {
     await insPages.addressBookView.open(addressWithoutOptionalFields.id);
 
     await expect(insPages.addressBookView.summaryListKeys).toHaveText([
-      'Name or organisation name',
+      'Name or organisation',
       'Address line 1',
       'Town or city',
       'Postcode or Zip code',
@@ -83,25 +83,15 @@ test.describe('Address book view', () => {
     });
 
     test('a malformed address id returns to the address book', async ({ pages, insPages }) => {
-      await insPages.addressBookView.open('not-a-valid-id');
+      await insPages.addressBookView.open(MALFORMED_ADDRESS_ID);
 
       await expectAddressBookList({ pages, insPages });
     });
 
     test("another organisation's address returns to the address book", async ({ pages, insPages, request }) => {
-      const otherOrganisationId = 'e2e-dead-link-other-org';
-      const otherOrganisationAddressBookApi = new AddressBookApiClient(request, otherOrganisationId);
-      const name = `Other Org Farm ${Date.now()}`;
-      const created = await otherOrganisationAddressBookApi.createAddress(traderAddress(name));
-
-      try {
-        await insPages.addressBookView.open(created.id);
-
-        await expectAddressBookList({ pages, insPages });
-        await expect(pages.page.getByText(name)).toHaveCount(0);
-      } finally {
-        await otherOrganisationAddressBookApi.deleteAddress(created.id);
-      }
+      await expectOtherOrganisationAddressReturnsToList({ pages, insPages, request }, (addressId) =>
+        insPages.addressBookView.open(addressId),
+      );
     });
 
     test('a deleted address returns to the address book', async ({ pages, insPages, addressBookApi }) => {

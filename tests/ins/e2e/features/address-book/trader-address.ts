@@ -1,3 +1,5 @@
+export const UNOFFERED_COUNTRY_CODE = 'XX';
+
 export const traderAddress = (name: string) => ({
   name,
   addressLine1: '1 Trader Lane',
@@ -6,4 +8,9 @@ export const traderAddress = (name: string) => ({
   countryCode: 'GB',
   phone: '01228 555 0105',
   email: 'trader@example.co.uk',
+});
+
+export const traderAddressInUnofferedCountry = (name: string) => ({
+  ...traderAddress(name),
+  countryCode: UNOFFERED_COUNTRY_CODE,
 });

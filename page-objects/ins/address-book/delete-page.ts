@@ -15,7 +15,7 @@ export class InsAddressBookDeletePage extends InsAddressBookAddressPage {
   }
 
   get warning(): Locator {
-    return this.page.getByText('This action cannot be undone.');
+    return this.page.getByText('Deletions are permanent and you cannot undo this.');
   }
 
   get btnConfirm(): Locator {

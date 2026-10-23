@@ -2,6 +2,7 @@ import { test, expect } from '@fixtures';
 import { COLD_START } from '@fixtures/auth-state';
 import { createInsPages } from '@page-objects';
 import { users } from '@config/users';
+import { urlWithReturn } from '@page-objects/ins/address-book/url-with-return';
 import { expectAddressBookList } from './expect-address-book-list';
 import { UNKNOWN_ADDRESS_ID } from './unknown-address-id';
 import { traderAddress } from './trader-address';
@@ -67,7 +68,7 @@ test.describe('Address book delete', () => {
       addressBookApi,
     }) => {
       const created = await addressBookApi.createAddress(traderAddress(`Delete Return Farm ${Date.now()}`));
-      const viewHref = insPages.addressBookView.expectedUrlWithReturn(created.id, '/');
+      const viewHref = urlWithReturn(insPages.addressBookView.expectedUrl(created.id), '/');
 
       await insPages.addressBookDelete.openWithReturn(created.id, '/');
 
