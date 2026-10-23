@@ -30,8 +30,8 @@ export class ReferenceDataApiClient {
 
   /** The line's species as its own search lists it. Throws when the search does not list it. */
   async findSpecies(line: CommodityLine): Promise<CommoditySpecies> {
-    const search = encodeURIComponent(line.searchTerm);
-    const response = await this.rest.get<CommoditySearchResponse>(`/commodities?search=${search}&size=${PICKER_PAGE_SIZE}`);
+    const query = encodeURIComponent(line.searchTerm);
+    const response = await this.rest.get<CommoditySearchResponse>(`/commodities?q=${query}&size=${PICKER_PAGE_SIZE}`);
     const species = response.groups
       .find((group) => group.code === line.commodityCode)
       ?.species.find((candidate) => candidate.latinName === line.latinName);
