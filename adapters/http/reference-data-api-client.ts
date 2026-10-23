@@ -8,8 +8,13 @@ interface CommoditySpecies {
   commonName: string | null;
 }
 
+interface CommodityGroup {
+  code: string;
+  species: CommoditySpecies[];
+}
+
 interface CommoditySearchResponse {
-  groups: { code: string; species: CommoditySpecies[] }[];
+  groups: CommodityGroup[];
 }
 
 /** Direct HTTP access to reference-data's commodity search. */
@@ -29,11 +34,17 @@ export class ReferenceDataApiClient {
     return commonName;
   }
 
-  private async findSpecies(line: CommodityLine): Promise<CommoditySpecies> {
+  /** The commodity groups, each with its species in order, on the first page of results for the search term. */
+  async listGroups(searchTerm: string): Promise<CommodityGroup[]> {
     const firstPageSize = 100;
-    const query = encodeURIComponent(line.searchTerm);
+    const query = encodeURIComponent(searchTerm);
     const response = await this.rest.get<CommoditySearchResponse>(`/commodities?q=${query}&size=${firstPageSize}`);
-    const species = response.groups
+    return response.groups;
+  }
+
+  private async findSpecies(line: CommodityLine): Promise<CommoditySpecies> {
+    const groups = await this.listGroups(line.searchTerm);
+    const species = groups
       .find((group) => group.code === line.commodityCode)
       ?.species.find((candidate) => candidate.latinName === line.latinName);
     if (!species) {

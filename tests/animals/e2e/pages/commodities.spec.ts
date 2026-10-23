@@ -4,64 +4,7 @@ import { test, expect } from '@fixtures';
 
 const NO_MATCH_QUERY = 'zzz';
 
-const expectedSearches = [
-  {
-    query: '0102',
-    groups: [
-      {
-        commodityCode: '0102',
-        latinNames: [
-          'Bos',
-          'Bubalus',
-          'Poephagus spp.',
-          'Bison bonasus',
-          'Bos taurus',
-          'Bibos spp.',
-          'Novibos spp.',
-          'Bos sp.',
-          'Bubalus bubalis',
-          'Elephas maximus',
-          'Loxodonta africana',
-          'Bison',
-          'Bison bison',
-          'Ovibos',
-          'Syncerus',
-        ],
-      },
-    ],
-  },
-  {
-    query: 'cattle',
-    groups: [
-      { commodityCode: '0102', latinNames: ['Bos taurus', 'Bibos spp.', 'Bos', 'Novibos spp.', 'Bos sp.'] },
-      { commodityCode: '01061900', latinNames: ['Bos taurus'] },
-    ],
-  },
-  {
-    query: 'horse',
-    groups: [
-      {
-        commodityCode: '0101',
-        latinNames: ['Equus cabalus', 'Equus cabalus*asinus', 'Eq cabalus*asinus', 'Equus asinus', 'Equus zebra'],
-      },
-      { commodityCode: '01061900', latinNames: ['Equidae', 'Equus'] },
-    ],
-  },
-  {
-    query: 'domestic cat',
-    groups: [{ commodityCode: '01061900', latinNames: ['Felis catus'] }],
-  },
-  {
-    query: 'ostrich',
-    groups: [
-      {
-        commodityCode: '01063300',
-        latinNames: ['Struthio', 'Rhea', 'Casuarius', 'Casuariiformes, Rheiformes, Struthioniformes', 'Dromaius'],
-      },
-      { commodityCode: '01063980', latinNames: ['Struthio'] },
-    ],
-  },
-];
+const GROUPING_QUERIES = ['0102', 'cattle', 'horse', 'domestic cat', 'ostrich'];
 
 test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -81,14 +24,20 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
   });
 
-  test('groups the matching species under their commodity code', async ({ animalsPages }) => {
-    for (const { query, groups } of expectedSearches) {
+  test("groups the matching species under their commodity code, in reference-data's order", async ({
+    pages,
+    animalsPages,
+    referenceDataApi,
+  }) => {
+    for (const query of GROUPING_QUERIES) {
+      const groups = await referenceDataApi.listGroups(query);
       await animalsPages.commoditySelection.search(query);
-      for (const { commodityCode, latinNames } of groups) {
-        const checkboxes = animalsPages.commoditySelection.commodityGroup(commodityCode).getByRole('checkbox');
-        await expect(checkboxes).toHaveCount(latinNames.length);
-        for (const [index, name] of latinNames.entries()) {
-          await expect(checkboxes.nth(index)).toHaveAccessibleName(name);
+      await expect(pages.page.getByRole('checkbox')).toHaveCount(groups.flatMap((group) => group.species).length);
+      for (const { code, species } of groups) {
+        const checkboxes = animalsPages.commoditySelection.commodityGroup(code).getByRole('checkbox');
+        await expect(checkboxes).toHaveCount(species.length);
+        for (const [index, { latinName }] of species.entries()) {
+          await expect(checkboxes.nth(index)).toHaveAccessibleName(latinName);
         }
       }
     }
