@@ -49,10 +49,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
   }) => {
     test.slow();
     await animalsJourney.toReview();
-    const { commonName } = await referenceDataApi.findSpecies(commodityLines.cattle);
-    if (!commonName) {
-      throw new Error(`Reference data gives ${commodityLines.cattle.latinName} no common name to assert on.`);
-    }
+    const commonName = await referenceDataApi.findCommonName(commodityLines.cattle);
 
     const value = (card: Locator, key: string) =>
       card.locator('.govuk-summary-list__row', { has: pages.page.getByText(key, { exact: true }) }).locator('.govuk-summary-list__value');

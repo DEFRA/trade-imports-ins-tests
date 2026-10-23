@@ -20,8 +20,16 @@ export class ReferenceDataApiClient {
     this.rest = new RestClient(baseUrl, request, apiKey);
   }
 
-  /** The line's species as its own search lists it. Throws when the search does not list it. */
-  async findSpecies(line: CommodityLine): Promise<CommoditySpecies> {
+  /** The common name the line's own search gives its species. Throws when the search does not list the species or gives it no common name. */
+  async findCommonName(line: CommodityLine): Promise<string> {
+    const { commonName } = await this.findSpecies(line);
+    if (!commonName) {
+      throw new Error(`Searching "${line.searchTerm}" gives ${line.latinName} under ${line.commodityCode} no common name`);
+    }
+    return commonName;
+  }
+
+  private async findSpecies(line: CommodityLine): Promise<CommoditySpecies> {
     const firstPageSize = 100;
     const query = encodeURIComponent(line.searchTerm);
     const response = await this.rest.get<CommoditySearchResponse>(`/commodities?q=${query}&size=${firstPageSize}`);
