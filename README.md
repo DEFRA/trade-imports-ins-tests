@@ -188,6 +188,12 @@ about a species, such as its common name, reads it from reference-data's
 commodity search through `ReferenceDataApiClient`, rather than from a copy of
 it that goes stale.
 
+A notification's commodity name carries its first line's CN code until
+EUDPA-669 brings the real commodity name. So the outbox spec expects
+`commodityLines.cattle.commodityCode` as the trade line's description and
+common name, and the aggregated notification spec expects it as the
+commodity.
+
 ### Authenticated session reuse
 
 Each worker signs in once per domain and its tests restore that session
