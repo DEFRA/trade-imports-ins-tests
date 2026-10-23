@@ -31,10 +31,9 @@ import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 //   column      a field on the PIMS record (owned by PIMS)
 //   option set  a column's own fixed choices in PIMS, each with a number and a label (owned by PIMS)
 //
-// Assumed, until the PIMS team confirms it: PIMS reads one message version at a time, and in the TST environment
-// today that is v0.1.0. When it switches to v0.2.0 it stops reading v0.1.0. Each message version carries every
-// answer of the one before it, so an answer tagged FROM v0.1.0 is still carried after the switch. The tags are a
-// ladder of what has to happen before PIMS can fill the column:
+// PIMS reads v0.1.0 in the TST environment today (highly likely, not yet confirmed). Each message version carries every
+// answer of the one before it, so an answer tagged FROM v0.1.0 is still carried after PIMS moves to v0.2.0. The tags are
+// a ladder of what has to happen before PIMS can fill the column:
 //
 //   [NOT IN SCHEMA]                     no message version defines it, planned or published
 //   [FROM v0.3.0]                       first carried by the v0.3.0 message, which is planned and not published yet
@@ -91,27 +90,22 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     // None yet.
 
     // [FROM v0.3.0]
-    // exchangedDocument.issuer.postalAddress. The schema has no separate contact-address field, so the contact address
-    // shares this slot with the Responsible Person for Load, which PIMS stores in its person-responsible columns. The
-    // column asserted here is a guess, expected to hold the record's address line one, city and postcode.
-    // The backend puts a null issuer in the event today. The planned v0.3.0 message is meant to carry it, but that schema
-    // does not exist yet, and neither published schema defines the issuer.
+    // exchangedDocument.issuer.postalAddress, a slot shared with the Responsible Person for Load, which PIMS stores in its
+    // person-responsible columns (the column asserted is a guess). The backend sends a null issuer and neither published
+    // schema defines it; the planned v0.3.0 message is meant to carry it.
     for (const part of [contact.addressLine1, contact.townOrCity, contact.postcode]) {
       expect.soft(row.defraimp_personresponsibleaddress, `contact address ${part}`).toContain(part);
     }
 
     // [FROM v0.2.0]
     // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].scientificName and commonName.
-    // The event carries both. The v0.1.0 message never included the species names (the gateway's v0.1.0 mapper copies
-    // only the classification, quantities, packages and identifiers of a trade line), and the v0.2.0 message carries
-    // them, so PIMS can only fill the columns once it reads v0.2.0.
+    // The event carries both. Only the v0.2.0 message does; the gateway's v0.1.0 mapper omits the species names.
     expect.soft(row.defraimp_commodityspeciesname, 'species name').toBe(answers.species.display);
     expect.soft(row.defraimp_commodityspeciescommonname, 'species common name').toBe(answers.species.commodity.display);
     // Each party's postalAddress.postcodeCode, and its definedContact[].telephoneUniversalCommunication and
     // emailURIUniversalCommunication.
-    // The event carries them. The v0.1.0 message never included them (PIMS has only each party's address lines, city and
-    // country today), and the v0.2.0 message carries them, so PIMS can only fill the columns once it reads v0.2.0. The
-    // phone column asserted here is a guess: the row also has an international phone code and number, and a UK telephone.
+    // The event carries them. Only the v0.2.0 message does. The phone column is a guess: the row also has an international
+    // phone code and number, and a UK telephone.
     expect.soft(row.defraimp_consignoraddresspostalzipcode, 'consignor postcode').toBe(consignor.postcode);
     expect.soft(row.defraimp_consignoraddresstelephone, 'consignor phone').toBe(consignor.phone);
     expect.soft(row.defraimp_consignoraddressemail, 'consignor email').toBe(consignor.email);
@@ -128,52 +122,44 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     expect.soft(row.defraimp_importeraddresstelephone, 'importer phone').toBe(importer.phone);
     expect.soft(row.defraimp_importeraddressemail, 'importer email').toBe(importer.email);
     // specifiedConsignment.finalDestinationLocation.identifier, the CPH number.
-    // The event carries it. The v0.1.0 message never included a destination location (of its locations, the gateway's
-    // v0.1.0 mapper copies only the port of entry), and the v0.2.0 message carries it, so PIMS can only fill the column
-    // once it reads v0.2.0.
+    // The event carries it. Only the v0.2.0 message does; the gateway's v0.1.0 mapper copies only the port of entry location.
     expect.soft(row.defraimp_cphnumber, 'CPH number').toBe(CPH_NUMBER);
     // specifiedConsignment.mainCarriageLogisticsTransportMovement[].transportContractRelatedReferencedDocument[], the transport document.
-    // The event carries it. The v0.1.0 message never included the movement's documents (the gateway's v0.1.0 mapper
-    // copies only the mode, the transport means name and the arrival time), and the v0.2.0 message carries them, so
-    // PIMS can only fill the column once it reads v0.2.0.
+    // The event carries it. Only the v0.2.0 message does; the gateway's v0.1.0 mapper omits the movement's documents.
     expect.soft(row.defraimp_meansoftransporttoentrypointdocument, 'transport document reference').toBe(answers.transportDocumentReference);
 
     // [FROM v0.1.0: NOT IN MESSAGE]
     // exchangedDocument.firstSignatoryAuthentication.includedClause[] where identifier is INTERNAL_MARKET_PURPOSE.
-    // The backend never puts this clause in the event today (it compares the reason against the wrong key and leaves the
-    // content null), although both published schemas allow it. A backend fix puts it in the event; no new schema
-    // version is needed.
+    // The backend never puts this clause in the event (it compares the reason against the wrong key and leaves the content
+    // null), though both published schemas allow it. A backend fix is enough.
     expect
       .soft(formattedValue(row, 'defraimp_commoditiesinternalmarketpurpose'), 'internal market purpose')
       .toBe(answers.internalMarketPurpose.display);
 
     // [FROM v0.1.0: OPTION NOT MATCHED?]
     // The same clauses where identifier is PURPOSE, the reason for import.
-    // The event carries the frontend's key (e.g. internalMarket) and both messages pass it on. The column appears to
-    // have an option set and stays empty, so the option set may have no entry for our key. The planned v0.3.0 value
-    // lists are meant to settle the keys we send; PIMS then has to match them to its option set.
+    // The event carries the frontend's key (e.g. internalMarket) and both messages pass it on, but the column stays empty,
+    // so its option set may have no entry for the key. The planned v0.3.0 value lists are meant to settle the keys.
     expect.soft(formattedValue(row, 'defraimp_purposeofconsignment'), 'reason for import').toBe(answers.importReason.display);
     // The same clauses where identifier is GOODS_CERTIFIED_AS, certified for.
-    // The event carries the frontend's key (e.g. slaughter) and both messages pass it on, and
-    // defraimp_commoditiesanimalscertifiedas is empty too. The same planned v0.3.0 value lists apply.
+    // As above, with the key (e.g. slaughter); defraimp_commoditiesanimalscertifiedas is empty too.
     expect.soft(formattedValue(row, 'defraimp_commoditiescertifiedfor'), 'certified for').toBe(answers.certifiedFor.display);
 
     // [FROM v0.1.0: NOT MAPPED?]
     // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].specifiedLineTradeDelivery[].productUnitQuantity.content,
     // the number of animals.
     // The event carries it and both messages pass it on, but the column is empty. PIMS may not map it, or may store it
-    // per species elsewhere. No planned change covers it, so ask the PIMS team where it lands.
+    // per species elsewhere. Ask the PIMS team.
     expect.soft(row.defraimp_commoditiesnumberofanimals, 'number of animals').toBe(answers.noOfAnimals);
     // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].individualTradeProductInstance[].identifier[]
     // where typeCode is EAR_TAG, the ear tag.
-    // The event carries it and both messages pass it on, but the row's identification text column is empty. PIMS confirmed
-    // a per-animal identifier table, which this test does not query, so the ear tag may be there. If so, this assertion
-    // belongs against that table and is not waiting on a fix. Ask the PIMS team where it lands.
+    // The event carries it and both messages pass it on, but the identification text column is empty. PIMS has a
+    // per-animal identifier table this test does not query, so the ear tag may be there. Ask the PIMS team.
     expect.soft(row.defraimp_identificationofanimalstext, 'ear tag').toContain(answers.earTag);
     // specifiedConsignment.mainCarriageLogisticsTransportMovement[].usedLogisticsTransportMeans.name, the transport
-    // identification. The event leaves the movement's own identifier null.
-    // Both messages pass the name on, but the column is empty. No planned change covers it, so ask the PIMS team where
-    // it lands. The v0.1.0 schema says the identification will move to the movement's identifier in a later version.
+    // identification (the movement's own identifier is null in the event).
+    // Both messages pass the name on, but the column is empty. Ask the PIMS team; the v0.1.0 schema says the
+    // identification will move to the movement's identifier later.
     expect.soft(row.defraimp_meansoftransporttoentrypointid, 'transport identification').toBe(answers.transportIdentification);
   });
 
@@ -200,28 +186,23 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     // None yet.
 
     // [FROM v0.3.0]
-    // specifiedConsignment.originCountry.regionOfOriginCode, the region of origin code. Whether the origin needs one is a
-    // journey flag with no column.
-    // The event carries it, but the gateway's messages copy only the country code and the subdivision, and neither
-    // published schema defines the region of origin code. The planned v0.3.0 message is meant to carry it, but that
-    // schema does not exist yet. The column asserted here is a guess, and whether it holds the code with or without its
-    // country prefix is unconfirmed.
+    // specifiedConsignment.originCountry.regionOfOriginCode, the region of origin code (whether one is needed is a journey
+    // flag with no column).
+    // The event carries it, but the gateway copies only the country code and subdivision, and neither published schema
+    // defines it; the planned v0.3.0 message is meant to carry it. The column is a guess, and whether it holds the country
+    // prefix is unconfirmed.
     expect.soft(row.defraimp_commoditiesregionoforigin, 'region of origin code').toContain(answers.regionCode);
 
     // [FROM v0.2.0]
     // specifiedConsignment.transitTradeCountry[], the transited countries.
-    // The event carries them. The v0.1.0 message never included transit countries (the gateway's v0.1.0 consignment
-    // mapper has no field for them), and the v0.2.0 message carries them, so PIMS can only fill the column once it
-    // reads v0.2.0. Whether the column holds country codes or names, and its separator, is unconfirmed.
+    // The event carries them. Only the v0.2.0 message does. Whether the column holds codes or names, and its separator, is
+    // unconfirmed.
     for (const country of answers.transitedCountries) {
       expect.soft(row.defraimp_routetransitingstates, `transited country ${country.display}`).toContain(country.value);
     }
     // exchangedDocument.referenceDocument[], the accompanying document's reference, issue date and type.
-    // The event carries it. The v0.1.0 message never included reference documents (the gateway's v0.1.0 mapper copies
-    // only the document identifier, trader id, status, version, issue time and clauses), and the v0.2.0 message carries
-    // them, so PIMS can only store it once it reads v0.2.0. PIMS confirmed a related-documents table, which this test
-    // does not query, so there is no assertion yet. The document's URL is a consumer-side concern the schema does not
-    // carry.
+    // The event carries it. Only the v0.2.0 message does. PIMS has a related-documents table this test does not query, so
+    // there is no assertion yet.
 
     // [FROM v0.1.0: NOT IN MESSAGE]
     // None yet.
@@ -233,13 +214,12 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].physicalReferencedLogisticsPackage[].itemQuantity,
     // the number of packages.
     // The event carries it and both messages pass it on, but the column is empty. PIMS may not map it, or may store it
-    // per species elsewhere. No planned change covers it, so ask the PIMS team where it lands.
+    // per species elsewhere. Ask the PIMS team.
     expect.soft(row.defraimp_commoditiesnumberofpackages, 'number of packages').toBe(answers.noOfPackages);
     // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].individualTradeProductInstance[].identifier[]
     // where typeCode is PASSPORT, the passport number.
-    // The event carries it and both messages pass it on, but the row's identification text column is empty. PIMS confirmed
-    // a per-animal identifier table, which this test does not query, so the passport number may be there. If so, this
-    // assertion belongs against that table and is not waiting on a fix. Ask the PIMS team where it lands.
+    // The event carries it and both messages pass it on, but the identification text column is empty. PIMS has a
+    // per-animal identifier table this test does not query, so the passport number may be there. Ask the PIMS team.
     expect.soft(row.defraimp_identificationofanimalstext, 'passport number').toContain(answers.passportNumber);
   });
 
@@ -262,15 +242,11 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
 
     // [FROM v0.1.0: NOT IN MESSAGE]
     // specifiedConsignment.isOrHasUnweanedAnimals. The owner is the backend.
-    // The column asserted here is a guess. The mapping doc pairs this answer with a PIMS field called "Include
-    // Non-Ablacted Animals", and we do not know what that means or whether it is the same thing.
-    // The frontend stores the answer as the text 'yes' or 'no'. The backend turns that text into the event's true or
-    // false with Boolean.valueOf, which is true only for the text "true", so a yes reaches both messages as false. A
-    // check of the outbox event confirmed this: a notification answered yes produced an event with false. The backend's
-    // own unit test feeds the text "true", which the frontend never saves, and PIMS defaults this column to false, so
-    // the mandatory test's no answer proves nothing.
-    // The mapping doc says the field may be removed from the schema, because PIMS says it is not relevant for the EU
-    // journey, pending PO confirmation.
+    // The PIMS field is "Include Non-Ablacted Animals". The mapping doc says it may be removed from the schema, because
+    // PIMS says it is not relevant for the EU journey, pending PO confirmation.
+    // The frontend stores 'yes' or 'no', and the backend's Boolean.valueOf is true only for "true", so a yes reaches both
+    // messages as false (confirmed on the outbox event). Remove the skip when the backend fix is released. PIMS defaults
+    // this column to false, so the mandatory test's no answer proves nothing.
     expect.soft(row.defraimp_commoditiesincludenonablactedanimals, 'unweaned animals').toBe(true);
   });
 });

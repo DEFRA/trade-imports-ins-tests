@@ -80,9 +80,8 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     // answers.importReason: [FROM v0.1.0: OPTION NOT MATCHED?] see 'mandatory answers PIMS Dynamics does not store yet' test.
     // answers.internalMarketPurpose: [FROM v0.1.0: NOT IN MESSAGE] see 'mandatory answers PIMS Dynamics does not store yet' test.
     // answers.certifiedFor: [FROM v0.1.0: OPTION NOT MATCHED?] see 'mandatory answers PIMS Dynamics does not store yet' test.
-    // answers.unweanedAnimals: the column is a guess (see the gaps spec), and PIMS also defaults it to false, so a no
-    // answer proves nothing. A yes answer is asserted in 'answering yes to unweaned animals is stored in PIMS Dynamics'
-    // (gaps spec).
+    // answers.unweanedAnimals: PIMS defaults the column to false, so a no answer proves nothing. A yes answer is asserted
+    // in 'answering yes to unweaned animals is stored in PIMS Dynamics' (gaps spec).
     expect.soft(row.defraimp_commoditiesincludenonablactedanimals, 'unweaned animals').toBe(false);
     expect.soft(row.defraimp_consignorcompanyname, 'consignor').toBe(answers.parties.consignor);
     expect.soft(row.defraimp_consignoraddressaddressline1, 'consignor address line 1').toBe(consignor.addressLine1);
