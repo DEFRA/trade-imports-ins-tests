@@ -180,7 +180,8 @@ by its CN commodity code and Latin name. The commodity page labels each tick
 box with the Latin name alone, under a heading of the code, and one Latin name
 can sit under several codes (`Bos taurus` is under four), so a line needs both.
 The stack's MDM stub answers only the searches saved from MDM, so each line's
-`searchTerm` is a saved term whose first page of results lists that line. The
+`searchTerm` is a saved term whose first page of results lists that line; the
+first page is the frontend's 100 results. The
 frontend saves only a species its search showed, so a seeded journey posts the
 search before it posts the chosen species.
 

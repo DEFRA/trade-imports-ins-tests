@@ -12,10 +12,6 @@ interface CommoditySearchResponse {
   groups: { code: string; species: CommoditySpecies[] }[];
 }
 
-// The page size the frontend's commodity search asks for, so a line found here
-// is one the picker shows too.
-const PICKER_PAGE_SIZE = 10;
-
 /**
  * Direct HTTP access to reference-data's commodity search: the same rows the
  * frontend's picker lists, so a spec can expect what MDM says about a species
@@ -30,8 +26,9 @@ export class ReferenceDataApiClient {
 
   /** The line's species as its own search lists it. Throws when the search does not list it. */
   async findSpecies(line: CommodityLine): Promise<CommoditySpecies> {
+    const firstPageSize = 100;
     const query = encodeURIComponent(line.searchTerm);
-    const response = await this.rest.get<CommoditySearchResponse>(`/commodities?q=${query}&size=${PICKER_PAGE_SIZE}`);
+    const response = await this.rest.get<CommoditySearchResponse>(`/commodities?q=${query}&size=${firstPageSize}`);
     const species = response.groups
       .find((group) => group.code === line.commodityCode)
       ?.species.find((candidate) => candidate.latinName === line.latinName);
