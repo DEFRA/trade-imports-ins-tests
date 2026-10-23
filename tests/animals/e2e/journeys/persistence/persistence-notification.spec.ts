@@ -101,7 +101,6 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
       expect(notification.transport.transitedCountries).toEqual(['FR', 'BE']);
       expect(notification.transport.transporter?.name).toBe('García Livestock Transport SL');
       expect(notification.transport.transporter?.type).toBe('Commercial');
-      // Read from the raw document: a timezone drift would cancel itself out on a round trip through the API.
       const [day, month, year] = ARRIVAL_DATE.split('/');
       expect(notification.transport.arrivalDate).toBe(toIsoDate({ day, month, year }));
     } finally {
