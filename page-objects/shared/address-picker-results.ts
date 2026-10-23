@@ -23,6 +23,10 @@ export function pickerSearchBox(page: Page): Locator {
   return page.getByLabel('Search', { exact: true });
 }
 
+export function pickerSearchRow(page: Page): Locator {
+  return pickerSearchBox(page).locator('xpath=ancestor::*[contains(@class,"govuk-form-group")][1]');
+}
+
 export function pickerSearchButton(page: Page): Locator {
   return page.getByRole('button', { name: 'Search', exact: true });
 }

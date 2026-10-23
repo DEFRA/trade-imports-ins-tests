@@ -7,6 +7,7 @@ import {
   pickerSaveAndContinue,
   pickerSearchBox,
   pickerSearchButton,
+  pickerSearchRow,
 } from '@page-objects/shared/address-picker-results';
 
 export class AnimalsPartyPickerPage extends NotificationPage {
@@ -56,6 +57,10 @@ export class AnimalsPartyPickerPage extends NotificationPage {
 
   get search(): Locator {
     return pickerSearchBox(this.page);
+  }
+
+  get searchRow(): Locator {
+    return pickerSearchRow(this.page);
   }
 
   get searchButton(): Locator {

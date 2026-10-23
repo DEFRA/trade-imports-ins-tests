@@ -7,6 +7,7 @@ import {
   pickerSaveAndContinue,
   pickerSearchBox,
   pickerSearchButton,
+  pickerSearchRow,
 } from '@page-objects/shared/address-picker-results';
 
 export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage {
@@ -26,6 +27,10 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
 
   get search(): Locator {
     return pickerSearchBox(this.page);
+  }
+
+  get searchRow(): Locator {
+    return pickerSearchRow(this.page);
   }
 
   get btnSearch(): Locator {
