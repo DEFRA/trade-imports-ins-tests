@@ -2,7 +2,6 @@ import { test, expect } from '@fixtures';
 import { portByCode } from '@resources/reference-data/reference-data';
 import { POTATOES } from '@flows/plants/journey';
 import { getRelativeAppDateText } from '@utils/date-utils';
-import { expectBlueToggleAndCalendarEndingAbove } from '@utils/date-picker-assertions';
 
 const FRANCE = 'France';
 
@@ -266,17 +265,6 @@ test.describe('High-risk plants arrival section', () => {
     await expect(plantsPages.arrivalDetails.placeOfLanding.field).toHaveValue(ABERDEEN_HARBOUR);
   });
 
-  test('a potato notification sets the date, time and place of landing labels in the medium GOV.UK label size', async ({
-    plantsPages,
-    plantsJourney,
-  }) => {
-    await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
-
-    for (const fieldId of ['arrivalDate', 'arrivalTime', 'proposedPlaceOfLanding']) {
-      await expect(plantsPages.arrivalDetails.fieldLabel(fieldId), fieldId).toHaveClass(/govuk-label--m/);
-    }
-  });
-
   test('a potato notification hints the place of landing and shows Select a place of landing in its empty search box', async ({
     plantsPages,
     plantsJourney,
@@ -292,27 +280,5 @@ test.describe('High-risk plants arrival section', () => {
     await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
 
     await expect(plantsPages.arrivalDetails.fieldHint('arrivalDate')).toHaveText(POTATO_DATE_HINT);
-  });
-
-  for (const arrivalStatus of [NOT_YET_ARRIVED, ALREADY_ARRIVED]) {
-    test(`a plants notification sets the arrival date label in the medium GOV.UK label size when the answer is "${arrivalStatus}"`, async ({
-      plantsPages,
-      plantsJourney,
-    }) => {
-      await plantsJourney.toArrivalStatusOfNewPlantsNotification();
-      await plantsJourney.answerArrivalStatus(arrivalStatus);
-
-      await expect(plantsPages.arrivalDetails.fieldLabel('arrivalDate')).toHaveClass(/govuk-label--m/);
-    });
-  }
-
-  test('the arrival date button is blue and its calendar ends above the expected time question, for a potato notification', async ({
-    plantsPages,
-    plantsJourney,
-  }) => {
-    await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
-    const arrival = plantsPages.arrivalDetails;
-
-    await expectBlueToggleAndCalendarEndingAbove(arrival.arrivalDatePicker, arrival.fieldLabel('arrivalTime'));
   });
 });

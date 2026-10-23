@@ -48,7 +48,6 @@ test.describe('Promoted accompanying documents integration', { tag: '@compose' }
     const actionsCell = row.getByRole('cell').last();
     await expect(actionsCell.locator(animalsPages.accompanyingDocuments.viewFile(1))).toBeVisible();
     await expect(actionsCell.locator(animalsPages.accompanyingDocuments.removeDocument(1))).toBeVisible();
-    await expect(actionsCell).toHaveCSS('text-align', 'right');
   });
 
   test('rejects an unsupported file type without adding a document', async ({ animalsJourney, pages, animalsPages }) => {

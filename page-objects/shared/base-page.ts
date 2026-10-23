@@ -160,10 +160,6 @@ export class NotificationPage extends BasePage {
     return SET_BASES.liveAnimals;
   }
 
-  fieldLabel(fieldId: string): Locator {
-    return this.page.locator(`label[for="${fieldId}"]`);
-  }
-
   fieldHint(fieldId: string): Locator {
     return this.page.locator(`#${fieldId}-hint`);
   }

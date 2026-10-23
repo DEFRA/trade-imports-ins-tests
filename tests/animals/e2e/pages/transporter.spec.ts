@@ -59,13 +59,6 @@ test.describe('Transporter list page', { tag: '@duplicated-in-frontend' }, () =>
     await expect(animalsPages.transporter.transporter(COMMERCIAL_TRANSPORTER)).toBeChecked();
   });
 
-  test('puts Add a transporter before the table', async ({ animalsPages }) => {
-    const addBox = await animalsPages.transporter.addTransporter.boundingBox();
-    const tableBox = await animalsPages.transporter.table.boundingBox();
-
-    expect(addBox.y).toBeLessThan(tableBox.y);
-  });
-
   test('Add a transporter opens the transporter type question', async ({ animalsPages }) => {
     await animalsPages.transporter.addTransporter.click();
 

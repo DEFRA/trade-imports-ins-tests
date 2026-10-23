@@ -31,10 +31,6 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
     return this.regionCodeConditional.locator('.govuk-input__prefix');
   }
 
-  get regionCodeLabel(): Locator {
-    return this.regionCodeConditional.getByText('Enter the region of origin code', { exact: true });
-  }
-
   get regionRequirementGroup(): Locator {
     return this.page.getByRole('group', { name: 'Does the consignment have a region of origin code?' });
   }

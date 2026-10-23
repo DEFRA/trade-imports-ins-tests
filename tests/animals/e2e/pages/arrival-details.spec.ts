@@ -6,13 +6,6 @@ import { getRelativeAppDateText, getRelativeDatePickerValue } from '@utils/date-
 const EARLIEST_ALLOWED = getRelativeAppDateText({ dayOffset: -7 });
 const LATEST_ALLOWED = getRelativeAppDateText({ monthOffset: 6 });
 const OUT_OF_RANGE_MESSAGE = `Arrival date at port of entry must be between ${EARLIEST_ALLOWED} and ${LATEST_ALLOWED}`;
-const QUESTION_FIELD_IDS = [
-  'arrivalDateAtPort',
-  'portOfEntry',
-  'meansOfTransport',
-  'transportIdentification',
-  'transportDocumentReference',
-];
 const SELECT_A_PORT = 'Select a port';
 
 test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => {
@@ -27,12 +20,6 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
     await expect(animalsPages.arrivalDetails.transportIdentification).toBeVisible();
     await expect(animalsPages.arrivalDetails.transportDocumentReference).toBeVisible();
     await expect(animalsPages.arrivalDetails.saveAndContinue).toBeVisible();
-  });
-
-  test('sets every question label in the medium GOV.UK label size', async ({ animalsPages }) => {
-    for (const fieldId of QUESTION_FIELD_IDS) {
-      await expect(animalsPages.arrivalDetails.fieldLabel(fieldId), fieldId).toHaveClass(/govuk-label--m/);
-    }
   });
 
   test('gives the arrival date hint a fixed example', async ({ animalsPages }) => {
@@ -66,8 +53,6 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
     animalsPages,
   }) => {
     await expect(animalsPages.arrivalDetails.transportIdentificationLeadIn).toHaveText('Enter one of the following:');
-    await expect(animalsPages.arrivalDetails.transportIdentificationLeadIn).toHaveClass(/govuk-hint/);
-    await expect(animalsPages.arrivalDetails.transportIdentificationList).toHaveClass(/govuk-hint/);
     await expect(animalsPages.arrivalDetails.transportIdentificationItems).toHaveText([
       'flight number',
       'train number',

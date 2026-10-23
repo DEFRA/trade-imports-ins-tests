@@ -35,16 +35,6 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await expect(internalReference).toHaveAccessibleDescription(INTERNAL_REFERENCE_HINT);
   });
 
-  test('gives the revealed region code label the small label class and the internal reference box the full-width input class', async ({
-    animalsPages,
-  }) => {
-    const { regionCodeLabel, internalReference } = animalsPages.originOfImport;
-    await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
-
-    await expect(regionCodeLabel).toHaveAttribute('class', 'govuk-label govuk-label--s');
-    await expect(internalReference).toHaveAttribute('class', 'govuk-input');
-  });
-
   test('the region code box stops typing at five characters, with autocomplete and spellcheck off', async ({ animalsPages }) => {
     const { regionCode } = animalsPages.originOfImport;
     await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();

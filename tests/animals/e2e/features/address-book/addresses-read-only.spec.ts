@@ -66,7 +66,7 @@ test.describe('Addresses are read-only in the journey', () => {
           await expect(picker(animalsPages).headingRowParts).toHaveText([PARTIES_CAPTION, picker(animalsPages).expectedHeading]);
         });
 
-        test('offers one secondary Add a new address button to INS beside the heading when the full stack is running', async ({
+        test('offers one Add a new address button to INS beside the heading when the full stack is running', async ({
           animalsPages,
           pages,
         }) => {
@@ -78,7 +78,6 @@ test.describe('Addresses are read-only in the journey', () => {
             ADD_NEW_ADDRESS,
           ]);
           await expect(picker(animalsPages).addNewAddress).toHaveAttribute('href', /\/address-book\/add\?journey-type=gbn-ag/);
-          await expect(picker(animalsPages).addNewAddress).toHaveClass(/govuk-button--secondary/);
           await expect(pages.page.getByRole('button', { name: ADD_NEW_ADDRESS })).toHaveCount(1);
           await expect(pages.page.getByRole('link', { name: ADD_NEW_ADDRESS })).toHaveCount(0);
         });

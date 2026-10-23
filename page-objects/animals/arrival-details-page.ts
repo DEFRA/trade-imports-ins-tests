@@ -28,10 +28,6 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.fieldHint('transportIdentification').locator('p');
   }
 
-  get transportIdentificationList(): Locator {
-    return this.fieldHint('transportIdentification').locator('ul');
-  }
-
   get transportIdentificationItems(): Locator {
     return this.fieldHint('transportIdentification').locator('li');
   }

@@ -23,10 +23,6 @@ export class AnimalsTransporterPage extends NotificationPage {
     return pickerSearchButton(this.page);
   }
 
-  get table(): Locator {
-    return this.page.getByRole('table');
-  }
-
   get listedTransporters(): Locator {
     return this.page.getByRole('row').filter({ has: this.page.getByRole('radio') });
   }
