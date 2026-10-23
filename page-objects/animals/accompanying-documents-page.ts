@@ -57,6 +57,14 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
     return this.page.locator('.govuk-error-message');
   }
 
+  // The reason the add control is shut, which the control names through
+  // aria-describedby. Distinct from fileFieldError: this one is about the
+  // notification being full or the upload service being unreachable, not
+  // about the file in the input.
+  get addDocumentError(): Locator {
+    return this.page.locator('#add-document-error');
+  }
+
   get refreshStatus(): Locator {
     return this.page.getByRole('link', { name: /Refresh/ });
   }

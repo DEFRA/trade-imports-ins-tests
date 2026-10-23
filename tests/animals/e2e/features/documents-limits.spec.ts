@@ -8,11 +8,7 @@ const maximumDocuments = 15;
 const maximumDocumentsMessage = `You can upload a maximum of ${maximumDocuments} files`;
 
 test.describe('Documents limits', { tag: '@duplicated-in-frontend' }, () => {
-  test('accepts a fifteenth document and rejects a sixteenth with the maximum-documents error', async ({
-    animalsJourney,
-    pages,
-    animalsPages,
-  }) => {
+  test('accepts a fifteenth document and then shuts the add control, naming the cap', async ({ animalsPages, animalsJourney }) => {
     test.setTimeout(120_000);
     await animalsJourney.toAccompanyingDocuments();
 
@@ -26,18 +22,18 @@ test.describe('Documents limits', { tag: '@duplicated-in-frontend' }, () => {
     }
 
     await expect(animalsPages.accompanyingDocuments.addedDocumentRows).toHaveCount(maximumDocuments);
-    await expect(animalsPages.accompanyingDocuments.saveAndAddAnother).toBeVisible();
     await expect(animalsPages.accompanyingDocuments.errorSummary).toHaveCount(0);
 
-    const sixteenthReference = `PWCAP${Date.now()}16`;
-    await animalsPages.accompanyingDocuments.fillDocument(sixteenthReference, DOCUMENT_ISSUE_DATE, fileUploadPaths.safeFile1kbPdf);
-    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
-
-    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
-    await expect(pages.page.getByRole('link', { name: maximumDocumentsMessage })).toBeVisible();
-    await expect(animalsPages.accompanyingDocuments.fileFieldError).toHaveCount(0);
-    await expect(animalsPages.accompanyingDocuments.addedDocumentRows).toHaveCount(maximumDocuments);
-    await expect(animalsPages.accompanyingDocuments.documentRow(sixteenthReference)).toHaveCount(0);
+    // The control keeps its place in the tab order so the error summary can
+    // reach it, so it is still on the page — but shut, and carrying no
+    // formaction, so a sixteenth file is never sent to be scanned and stored
+    // only to be turned away by the claim.
+    const addControl = animalsPages.accompanyingDocuments.saveAndAddAnother;
+    await expect(addControl).toBeVisible();
+    await expect(addControl).toHaveAttribute('aria-disabled', 'true');
+    await expect(addControl).toHaveAttribute('aria-describedby', 'add-document-error');
+    await expect(addControl).not.toHaveAttribute('formaction', /./);
+    await expect(animalsPages.accompanyingDocuments.addDocumentError).toHaveText(`Error: ${maximumDocumentsMessage}`);
   });
 
   test('accepts a PDF at the maximum file size and rejects one a byte over it', async ({
