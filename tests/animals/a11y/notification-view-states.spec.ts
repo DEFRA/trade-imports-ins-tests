@@ -1,5 +1,3 @@
-import { SET_BASES } from '@page-objects/shared/sets';
-
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
@@ -24,8 +22,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import notification submitted (confirmation)', async () => {
-      await animalsPages.notificationView.navigateToFrontend(`${SET_BASES.liveAnimals}/notifications/${submittedReference}/confirmation`);
-      await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
+      await animalsPages.confirmation.open(submittedReference);
+      await animalsPages.confirmation.heading.waitFor();
       await runA11yScan();
     });
   });

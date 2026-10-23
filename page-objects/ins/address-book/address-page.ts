@@ -1,12 +1,9 @@
 import { Locator } from '@playwright/test';
 import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
+import { urlWithReturn } from '@page-objects/ins/address-book/url-with-return';
 
 export abstract class InsAddressBookAddressPage extends BasePage {
   abstract expectedUrl(addressId: string): string;
-
-  expectedUrlWithReturn(addressId: string, returnTo: string): string {
-    return `${this.expectedUrl(addressId)}?return=${encodeURIComponent(returnTo)}`;
-  }
 
   get summaryListKeys(): Locator {
     return this.page.getByRole('term');
@@ -22,7 +19,7 @@ export abstract class InsAddressBookAddressPage extends BasePage {
   }
 
   async openWithReturn(addressId: string, returnTo: string): Promise<void> {
-    await this.navigateToInsFrontend(this.expectedUrlWithReturn(addressId, returnTo));
+    await this.navigateToInsFrontend(urlWithReturn(this.expectedUrl(addressId), returnTo));
     await this.completeSignInIfRequested();
   }
 }

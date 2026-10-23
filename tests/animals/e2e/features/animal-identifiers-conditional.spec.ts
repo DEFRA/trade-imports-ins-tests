@@ -6,30 +6,9 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     pages,
     animalsPages,
   }) => {
-    await animalsJourney.startNotification();
+    await animalsJourney.toAnimalIdentificationWithCounts([{ species: 'Felis catus', animalCount: 2 }]);
+    await expect(pages.page.getByRole('heading', { name: 'Enter details for Felis catus 1 of 2' })).toBeVisible();
 
-    // Batch-create a Cats commodity line. The animal count is save-blocking,
-    // and a count of 2 keeps the identifier form open after the first record
-    // is committed — at the declared count the maximum-reached state replaces
-    // it, which is the cap spec's subject, not this one's.
-    await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.selectSpecies(['Felis catus']);
-    await animalsPages.commoditySelection.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('Commodity details').click();
-    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
-
-    await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
-    await animalsPages.consignmentDetails.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('Identification details').click();
-    await expect(animalsPages.animalIdentification.heading).toBeVisible();
-    await expect(pages.page.getByRole('heading', { name: 'Enter details for Felis catus' })).toBeVisible();
-
-    // Cats gate passport + tattoo + permanent address on; ear tag + horse name
-    // are hidden, because they belong to other commodities. Nothing offers a
-    // free-text identifier: the page asks for the commodity's own types or it
-    // asks for nothing.
     await expect(animalsPages.animalIdentification.passportNumber).toBeVisible();
     await expect(pages.page.getByLabel('Tattoo')).toBeVisible();
     await expect(animalsPages.animalIdentification.earTag).toBeHidden();
@@ -37,21 +16,14 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
     await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
     await expect(pages.page.getByLabel('Name or organisation name')).toBeVisible();
-    // The permanent address block asks for eight fields and no country — an
-    // address APHA can inspect is a Great Britain address, so there is nothing
-    // to choose.
     await expect(pages.page.getByLabel('Country')).toHaveCount(0);
 
-    // A partial permanent address blocks the add — the fieldGroup mandates apply
-    // once any part of the record is provided.
     await animalsPages.animalIdentification.passportNumber.fill('UK123456789');
     await pages.page.getByLabel('Name or organisation name').fill('Pet Owner');
     await animalsPages.animalIdentification.saveAndAddAnother.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(pages.page.getByRole('link', { name: 'Enter address line 1' })).toBeVisible();
 
-    // Completing the mandatory address fields commits the unit with its
-    // { name, address } permanent address and keeps the surface open.
     await pages.page.getByLabel('Address line 1').fill('1 Farm Lane');
     await pages.page.getByLabel('Town or city').fill('Skipton');
     await pages.page.getByLabel('Postcode or Zip code').fill('BD23 1UD');
@@ -66,35 +38,18 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await expect(unitRow.getByRole('cell', { name: 'Pet Owner', exact: true })).toBeVisible();
   });
 
-  test('a commodity with no identifier type of its own gets no panel, while the lines that have one keep theirs', async ({
+  test('a commodity with no identifier type of its own gets no card, while the lines that have one keep theirs', async ({
     animalsJourney,
     pages,
     animalsPages,
   }) => {
-    await animalsJourney.startNotification();
+    await animalsJourney.toAnimalIdentificationWithCounts([
+      { species: 'Bos taurus', animalCount: 1 },
+      { species: 'Salmo salar', animalCount: 1 },
+    ]);
 
-    // Cow carries an ear tag; Fish is on none of the identifier allowlists, so
-    // it has nothing to be asked. One consignment holding both separates the
-    // two: the page still exists for the Cow line and says nothing at all
-    // about the Fish one.
-    await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.selectSpecies(['Bos taurus', 'Salmo salar']);
-    await animalsPages.commoditySelection.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('Commodity details').click();
-    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
-
-    // The count is save-blocking on every line the page shows, so both are filled.
-    await animalsPages.consignmentDetails.fillEveryAnimalCount('1');
-    await animalsPages.consignmentDetails.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('Identification details').click();
-    await expect(animalsPages.animalIdentification.heading).toBeVisible();
-
-    await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus' })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 1 of 1' })).toBeVisible();
     await expect(animalsPages.animalIdentification.earTag).toBeVisible();
-    // No panel for the Fish line, and no free-text stand-in for the identifier
-    // it does not have.
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Salmo salar' })).toHaveCount(0);
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
     await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
@@ -105,24 +60,11 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     pages,
     animalsPages,
   }) => {
-    await animalsJourney.startNotification();
-
-    await animalsPages.overview.task('What are you importing?').click();
-    await animalsPages.commoditySelection.selectSpecies(['Salmo salar']);
-    await animalsPages.commoditySelection.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('Commodity details').click();
-    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
-
+    await animalsJourney.toConsignmentDetails(['Salmo salar']);
     await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
     await animalsPages.consignmentDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    // Nothing on this consignment carries an identifier, so the page does not
-    // exist for this person: the request carries on to the next step of the
-    // journey rather than rendering. Reached from the hub, that next step is
-    // the hub — the point being that the page itself is never shown, and no
-    // free-text stand-in is offered anywhere.
     const referenceNumber = animalsPages.overview.referenceNumberFromUrl();
     await animalsPages.animalIdentification.open(referenceNumber);
     await expect(animalsPages.overview.heading).toBeVisible();

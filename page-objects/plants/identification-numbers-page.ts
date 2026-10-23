@@ -26,10 +26,6 @@ export class PlantsIdentificationNumbersPage extends PlantsNotificationPage {
     return this.page.getByLabel('Consignment number (optional)', { exact: true });
   }
 
-  get btnSaveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue', exact: true });
-  }
-
   get errorSummary(): Locator {
     return this.page.locator('.govuk-error-summary');
   }

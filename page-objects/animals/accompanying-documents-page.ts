@@ -1,5 +1,8 @@
-import { type Locator, type Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import { DatePicker } from '@page-objects/shared/date-picker';
+
+export const EMPTY_DOCUMENT_LIST_CARD_TEXT = /Save and add another\s*$/;
 
 export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
   constructor(page: Page) {
@@ -18,11 +21,12 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
     return this.page.getByLabel('Document type');
   }
 
-  // The JavaScript-enhanced file upload hides the input inside a drop zone and
-  // puts a button in front of it carrying the field's id, so the label now
-  // names the button. The file still goes to the input behind it.
   get fileUpload(): Locator {
     return this.page.locator('input[type="file"]');
+  }
+
+  get dateOfIssuePicker(): DatePicker {
+    return new DatePicker(this.page, 'accompanyingDocumentDateOfIssue');
   }
 
   get saveAndAddAnother(): Locator {
@@ -31,6 +35,18 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
 
   get continueButton(): Locator {
     return this.page.getByRole('button', { name: 'Continue' });
+  }
+
+  get fileUploadCard(): Locator {
+    return this.page.getByRole('region', { name: 'File upload' });
+  }
+
+  get addedDocumentsTable(): Locator {
+    return this.fileUploadCard.getByRole('table', { name: 'Documents you have added' });
+  }
+
+  get addedDocumentRows(): Locator {
+    return this.addedDocumentsTable.locator('tbody tr');
   }
 
   documentRow(reference: string): Locator {
@@ -43,10 +59,6 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
 
   viewFile(index: number): Locator {
     return this.page.getByRole('link', { name: `View file for document ${index}` });
-  }
-
-  get addedDocumentRows(): Locator {
-    return this.page.locator('#documents-added tbody tr');
   }
 
   get errorSummary(): Locator {

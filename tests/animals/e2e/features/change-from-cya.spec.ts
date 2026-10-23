@@ -15,7 +15,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.notificationView.changeLink('Change import details').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
-    await animalsPages.originOfImport.selectCountry('Belgium');
+    await animalsPages.originOfImport.country.choose('Belgium');
     await animalsPages.originOfImport.saveAndContinue.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/notification-view$/);

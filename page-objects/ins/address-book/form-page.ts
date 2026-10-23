@@ -13,18 +13,9 @@ export type AddressDetails = {
   phone: string;
 };
 
-/**
- * The Standard Address Block form, shared by add and edit — both render the
- * same fields against the same schema, so only the URL, the heading, the name
- * label ('Name or organisation' on add, 'Name or organisation name' on edit)
- * and the submit button differ. Optional fields are filled with the empty
- * string when omitted so that editing can clear a value that is already stored.
- */
 export abstract class InsAddressBookFormPage extends BasePage {
-  protected readonly nameLabel: string = 'Name or organisation name';
-
   get inputName(): Locator {
-    return this.page.getByLabel(this.nameLabel, { exact: true });
+    return this.page.getByLabel('Name or organisation', { exact: true });
   }
 
   sectionHeading(name: 'Address' | 'Contact details'): Locator {
@@ -34,6 +25,11 @@ export abstract class InsAddressBookFormPage extends BasePage {
   /** The form's text inputs in page order, used to pin where each field sits. */
   get textboxes(): Locator {
     return this.page.getByRole('main').getByRole('textbox');
+  }
+
+  /** The label of every field on the form, in page order. */
+  get fieldLabels(): Locator {
+    return this.page.getByRole('main').locator('form label');
   }
 
   get countryOptionsIncludingPlaceholder(): Locator {

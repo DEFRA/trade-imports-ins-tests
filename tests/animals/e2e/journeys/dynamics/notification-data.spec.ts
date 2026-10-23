@@ -30,7 +30,7 @@ const PIMS_COUNTRY_LABELS: Record<string, string> = {
 
 /** The whole row, so a run shows the real lookups, option-set labels, dates and values to assert against. */
 const attachRow = (row: AnimalsDynamicsImporterNotification): Promise<void> =>
-  test.info().attach('pims-row.json', { body: JSON.stringify(row, null, 2), contentType: 'application/json' });
+  test.info().attach('pims-dynamics-row.json', { body: JSON.stringify(row, null, 2), contentType: 'application/json' });
 
 test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
   test.beforeEach(() => {

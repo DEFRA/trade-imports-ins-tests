@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { EMPTY_DOCUMENT_LIST_CARD_TEXT } from '@page-objects/animals/accompanying-documents-page';
 import { writeSyntheticFile } from '@utils/synthetic-file-writer';
 import { ABOVE_MAX_FILE_SIZE_BYTES, DOCUMENT_ISSUE_DATE, OVERSIZE_FILE_MESSAGE } from '@resources/file-upload/constants';
 
@@ -17,6 +18,7 @@ test.describe('Documents reject flows', { tag: '@duplicated-in-frontend' }, () =
     // The browser refuses the pick; the upload service refuses it on receipt if that check did
     // not run. Either path shows the same message.
     await expect(pages.page.getByText(OVERSIZE_FILE_MESSAGE).first()).toBeVisible();
-    await expect(pages.page.getByText('You have not added any documents yet.')).toBeVisible();
+    await expect(animalsPages.accompanyingDocuments.addedDocumentsTable).toHaveCount(0);
+    await expect(animalsPages.accompanyingDocuments.fileUploadCard).toHaveText(EMPTY_DOCUMENT_LIST_CARD_TEXT);
   });
 });

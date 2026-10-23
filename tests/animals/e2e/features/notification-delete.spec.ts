@@ -1,17 +1,15 @@
-import { SET_BASES } from '@page-objects/shared/sets';
-
 import { test, expect } from '@fixtures';
 
 test.describe('Notification delete', { tag: '@duplicated-in-frontend' }, () => {
-  test('deletes a draft notification', async ({ animalsJourney, journeyContext, pages }) => {
+  test('deletes a draft notification', async ({ animalsJourney, animalsPages, journeyContext }) => {
     test.slow();
     await animalsJourney.startNotification();
     const { referenceNumber } = journeyContext;
 
-    await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/delete`);
-    await pages.page.getByRole('heading', { name: 'Delete this notification?' }).waitFor();
-    await pages.page.getByRole('button', { name: 'Yes, delete notification' }).click();
-    await expect(pages.page.getByText('The notification has been deleted.')).toBeVisible();
+    await animalsPages.deleteNotification.open(referenceNumber);
+    await animalsPages.deleteNotification.heading.waitFor();
+    await animalsPages.deleteNotification.confirmDelete.click();
+    await expect(animalsPages.dashboard.deletedBanner).toBeVisible();
   });
 
   test(

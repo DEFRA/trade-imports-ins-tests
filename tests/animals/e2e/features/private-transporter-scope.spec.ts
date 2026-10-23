@@ -1,6 +1,5 @@
 import { test, expect } from '@fixtures';
 
-// Canned private-transporter record (mirrors the frontend happy-path fixture).
 const transporter = {
   name: 'Jean Dupont',
   address: {
@@ -22,63 +21,40 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
     await animalsJourney.startNotification();
     await animalsJourney.unlockSections();
 
-    const openTransporters = () => animalsJourney.reachTransporterFromHub();
-
-    // The type question sits behind "Add a transporter" now, so every branch is
-    // reached through the add route rather than off the list itself.
-    const chooseType = async (type: 'Commercial' | 'Private') => {
-      await animalsPages.transporter.addTransporter.click();
-      await animalsPages.transporterAdd.heading.waitFor();
-      await animalsPages.transporterAdd.transporterType(type).check();
-      await animalsPages.transporterAdd.saveAndContinue.click();
-    };
-
-    // Private transporter: the details page opens. A PARTIAL fill blocks the
-    // save — the fieldGroup's mandates apply once the record is provided —
-    // naming the missing mandatory fields.
-    await openTransporters();
-    await chooseType('Private');
+    await animalsJourney.reachTransporterFromHub();
+    await animalsJourney.chooseTransporterType('Private');
     await expect(animalsPages.privateTransporter.heading).toBeVisible();
-    await pages.page.getByLabel('Name or organisation name').fill(transporter.name);
-    await pages.page.getByRole('button', { name: 'Save and continue' }).click();
+    await animalsPages.privateTransporter.name.fill(transporter.name);
+    await animalsPages.privateTransporter.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(pages.page.getByRole('link', { name: 'Enter address line 1' })).toBeVisible();
 
-    // Completing the mandatory fields commits the whole group as one
-    // { name, address } object and finishes the section.
-    await pages.page.getByLabel('Address line 1').fill(transporter.address.addressLine1);
-    await pages.page.getByLabel('Town or city').fill(transporter.address.townOrCity);
-    await pages.page.getByLabel('Postcode or Zip code').fill(transporter.address.postalOrZipCode);
-    await pages.page.getByLabel('Country').selectOption(transporter.address.country);
-    await pages.page.getByLabel('Phone number').fill(transporter.address.telephoneNumber);
-    await pages.page.getByLabel('Email address').fill(transporter.address.emailAddress);
-    await pages.page.getByRole('button', { name: 'Save and continue' }).click();
+    await animalsPages.privateTransporter.addressLine1.fill(transporter.address.addressLine1);
+    await animalsPages.privateTransporter.townOrCity.fill(transporter.address.townOrCity);
+    await animalsPages.privateTransporter.postcode.fill(transporter.address.postalOrZipCode);
+    await animalsPages.privateTransporter.country.selectOption(transporter.address.country);
+    await animalsPages.privateTransporter.phone.fill(transporter.address.telephoneNumber);
+    await animalsPages.privateTransporter.email.fill(transporter.address.emailAddress);
+    await animalsPages.privateTransporter.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    // The record persists: walking back in flattens the saved object into
-    // the form fields.
-    await openTransporters();
-    await chooseType('Private');
+    await animalsJourney.reachTransporterFromHub();
+    await animalsJourney.chooseTransporterType('Private');
     await expect(animalsPages.privateTransporter.heading).toBeVisible();
-    await expect(pages.page.getByLabel('Name or organisation name')).toHaveValue(transporter.name);
-    await expect(pages.page.getByLabel('Country')).toHaveValue(transporter.address.country);
-    await pages.page.getByRole('button', { name: 'Save and continue' }).click();
+    await expect(animalsPages.privateTransporter.name).toHaveValue(transporter.name);
+    await expect(animalsPages.privateTransporter.country).toHaveValue(transporter.address.country);
+    await animalsPages.privateTransporter.saveAndContinue.click();
 
-    // Commercial transporter: the private details page is no longer owed —
-    // saving the type walks to the add-commercial form instead; a blank save
-    // there returns to the hub.
-    await openTransporters();
-    await chooseType('Commercial');
+    await animalsJourney.reachTransporterFromHub();
+    await animalsJourney.chooseTransporterType('Commercial');
     await expect(animalsPages.commercialTransporter.heading).toBeVisible();
     await animalsPages.commercialTransporter.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    // Back to private: leaving scope wiped the saved details — the form
-    // renders empty.
-    await openTransporters();
-    await chooseType('Private');
+    await animalsJourney.reachTransporterFromHub();
+    await animalsJourney.chooseTransporterType('Private');
     await expect(animalsPages.privateTransporter.heading).toBeVisible();
-    await expect(pages.page.getByLabel('Name or organisation name')).toHaveValue('');
-    await expect(pages.page.getByLabel('Country')).toHaveValue('');
+    await expect(animalsPages.privateTransporter.name).toHaveValue('');
+    await expect(animalsPages.privateTransporter.country).toHaveValue('');
   });
 });

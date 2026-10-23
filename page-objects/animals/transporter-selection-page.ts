@@ -16,8 +16,4 @@ export class AnimalsTransporterSelectionPage extends NotificationPage {
   transporter(name: string): Locator {
     return this.page.getByRole('radio', { name });
   }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
-  }
 }

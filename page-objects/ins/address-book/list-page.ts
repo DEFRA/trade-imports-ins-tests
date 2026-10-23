@@ -28,6 +28,10 @@ export class InsAddressBookListPage extends BasePage {
     return this.page.getByRole('row', { name: new RegExp(name) });
   }
 
+  viewLink(name: string): Locator {
+    return this.page.getByRole('link', { name: `View ${name}`, exact: true });
+  }
+
   async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.page.goto(this.expectedUrl);
     await this.signInWhenRequested(attemptSignIn, identity);
