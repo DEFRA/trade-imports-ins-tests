@@ -9,6 +9,13 @@ test.describe('Arrival date picker (visual regression)', { tag: '@visual' }, () 
     await animalsJourney.toArrivalDetails();
   });
 
+  test('shows the Choose date button at rest', async ({ animalsPages }) => {
+    const picker = animalsPages.arrivalDetails.arrivalDatePicker;
+    await expect(picker.toggle).toBeVisible();
+
+    await expect(picker.root).toHaveScreenshot('arrival-date-picker-button-at-rest.png');
+  });
+
   test('shows the Choose date button under the mouse', async ({ animalsPages }) => {
     const picker = animalsPages.arrivalDetails.arrivalDatePicker;
     await picker.toggle.hover();
