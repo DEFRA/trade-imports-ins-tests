@@ -11,6 +11,8 @@ import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_SUBMITTED = 'uk.gov.defra.imports.notification.NotificationSubmitted';
 const POINT_OF_ENTRY = 'GB ABD';
+const SUBDIVISION_FUNCTION_TYPE_CODE = '106';
+const VETERINARY_CERTIFICATE_TYPE_CODE = '853';
 const EXPECTED_ACTOR: OutboxEventActor = {
   id: users.andrew.crn,
   source: 'dynamics-contact',
@@ -132,16 +134,14 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
 
       const doc = await collection.findOne({ aggregateId, eventType: NOTIFICATION_SUBMITTED });
       const originCountry = doc?.data.specifiedConsignment.originCountry;
-      // The country is the subdivision's parent; the subdivision is the '106' entry, named by its MDM list.
       expect(originCountry?.code?.value).toBe('ES');
       expect(originCountry?.subordinateTradeCountrySubDivision).toEqual([
         {
           identifier: 'ES-CN',
           urlId: 'https://refdata.tbc.defra.gov.uk/country_subdivisions',
-          functionTypeCode: { content: '106' },
+          functionTypeCode: { content: SUBDIVISION_FUNCTION_TYPE_CODE },
         },
       ]);
-      // The journey answers the region of origin code under the parent country's prefix.
       expect(originCountry?.regionOfOriginCode).toBe('ES-75');
     } finally {
       await client.close();
@@ -156,7 +156,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
     const documentReference = `PWREF${Date.now()}`;
     await animalsJourney.submitNotificationWithDocument({
       reference: documentReference,
-      issueDate: '03/01/2026', // the same input the persistence round-trip proves lands as 3 January
+      issueDate: '03/01/2026',
       filePath: fileUploadPaths.safeFile1kbPdf,
       type: 'VETERINARY_HEALTH_CERTIFICATE',
     });
@@ -173,7 +173,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       const doc = await collection.findOne({ aggregateId, eventType: NOTIFICATION_SUBMITTED });
       expect(doc?.data.exchangedDocument.referenceDocument).toEqual([
         {
-          typeCode: '853', // veterinary certificate, copied into the GBN-AG list from UNTDID 1001
+          typeCode: VETERINARY_CERTIFICATE_TYPE_CODE,
           urlId: 'https://refdata.tbc.defra.gov.uk/gbn-ag-document-types',
           identifier: documentReference,
           issueDateTime: '2026-01-03',
