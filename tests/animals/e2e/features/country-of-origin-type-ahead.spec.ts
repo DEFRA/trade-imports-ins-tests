@@ -1,5 +1,7 @@
 import { test, expect } from '@fixtures';
 import { countryAndSubdivisionNamesWithCountry } from '@resources/reference-data/reference-data';
+import { ORIGIN_COUNTRY_SEARCH_PLACEHOLDER, ORIGIN_COUNTRY_SELECT_TEXT } from '@domain/animals/constants/origin-page';
+import { SEARCH_BOX_ASSISTIVE_DESCRIPTION } from '@domain/shared/constants/type-ahead';
 
 test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test('filters as you type, submits the country code and persists it', async ({ animalsJourney, animalsPages }) => {
@@ -12,7 +14,7 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
     await expect(field).toHaveAccessibleName('Country of origin');
 
     const fallback = animalsPages.originOfImport.country.select;
-    await expect(fallback.locator('option').first()).toHaveText('Select a country');
+    await expect(fallback.locator('option').first()).toHaveText(ORIGIN_COUNTRY_SELECT_TEXT);
     await expect(fallback.locator('option')).toHaveCount(countryAndSubdivisionNamesWithCountry().length + 1);
 
     await animalsPages.originOfImport.country.search('Belg');
@@ -35,8 +37,9 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
     await animalsJourney.startNotification();
     await animalsPages.overview.task('Where is this consignment coming from?').click();
 
-    await expect(animalsPages.originOfImport.country.field).toHaveAttribute('placeholder', 'Search for a country');
-    await animalsPages.originOfImport.country.expectNoHint();
+    await expect(animalsPages.originOfImport.country.field).toHaveAttribute('placeholder', ORIGIN_COUNTRY_SEARCH_PLACEHOLDER);
+    await expect(animalsPages.originOfImport.country.field).toHaveAccessibleDescription(SEARCH_BOX_ASSISTIVE_DESCRIPTION);
+    await expect(animalsPages.originOfImport.country.hint).toHaveCount(0);
   });
 
   test('shows the letters typed in bold in a country suggestion', async ({ animalsJourney, animalsPages }) => {
@@ -59,8 +62,9 @@ test.describe('Country of origin without JavaScript', { tag: '@duplicated-in-fro
     const { country } = animalsPages.originOfImport;
     const { select } = country;
 
-    await country.expectNoHint();
-    await expect(select.locator('option').first()).toHaveText('Select a country');
+    await expect(country.field).toHaveAccessibleDescription('');
+    await expect(country.hint).toHaveCount(0);
+    await expect(select.locator('option').first()).toHaveText(ORIGIN_COUNTRY_SELECT_TEXT);
 
     await select.selectOption({ label: 'Belgium' });
     await animalsPages.originOfImport.radioRequiresOriginCode('No').check();

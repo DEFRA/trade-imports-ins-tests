@@ -54,8 +54,4 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
   get saveAndFinish(): Locator {
     return this.page.getByRole('button', { name: 'Save and finish' });
   }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
-  }
 }

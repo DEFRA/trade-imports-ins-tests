@@ -1,5 +1,7 @@
 import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, POTATOES, WOOD_AND_CUT_TREES } from '@flows/plants/journey';
+import { ORIGIN_COUNTRY_SEARCH_PLACEHOLDER, ORIGIN_COUNTRY_SELECT_TEXT } from '@domain/plants/constants/origin-page';
+import { SEARCH_BOX_ASSISTIVE_DESCRIPTION } from '@domain/shared/constants/type-ahead';
 
 const WARE_POTATOES = 'Ware potatoes';
 const CONIFER_WOOD_WITHOUT_BARK = 'Conifer wood without bark (from Italy, France, Portugal or Spain)';
@@ -50,11 +52,28 @@ test.describe('High-risk plants origin section', () => {
     await expect(plantsPages.origin.country.field).toHaveValue(FRANCE);
   });
 
+  test('following Back from origin to the commodities list and choosing Save and continue returns to origin, not the overview', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
+    const reference = await plantsJourney.toOriginOfNewNotification(POTATOES);
+
+    await plantsPages.origin.linkBack.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrl(reference));
+
+    await plantsPages.commodities.saveAndContinue.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
+  });
+
   test('the country search box shows its placeholder and no hint', async ({ plantsPages, plantsJourney }) => {
     await plantsJourney.toOriginOfNewNotification(POTATOES);
 
-    await expect(plantsPages.origin.country.field).toHaveAttribute('placeholder', 'Search for a country');
-    await plantsPages.origin.country.expectNoHint();
+    await expect(plantsPages.origin.country.field).toHaveAttribute('placeholder', ORIGIN_COUNTRY_SEARCH_PLACEHOLDER);
+    await expect(plantsPages.origin.country.field).toHaveAccessibleDescription(SEARCH_BOX_ASSISTIVE_DESCRIPTION);
+    await expect(plantsPages.origin.country.hint).toHaveCount(0);
   });
 
   test('a country suggestion shows the letters typed in bold', async ({ plantsPages, plantsJourney }) => {
@@ -71,7 +90,7 @@ test.describe('High-risk plants origin section', () => {
     await expect(plantsPages.origin.guidance).toHaveCount(0);
 
     await plantsPages.origin.country.choose(NORWAY);
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsPages.origin.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
   });
@@ -82,13 +101,13 @@ test.describe('High-risk plants origin section', () => {
     await expect(plantsPages.origin.guidance).toHaveText(WARE_POTATO_GUIDANCE);
 
     await plantsPages.origin.country.choose(FRANCE);
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsPages.origin.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
     await expect(plantsPages.origin.errorSummary).toContainText(WARE_POTATO_ERROR);
 
     await plantsPages.origin.country.choose(SPAIN);
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsPages.origin.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
   });
@@ -101,13 +120,13 @@ test.describe('High-risk plants origin section', () => {
     const reference = await plantsJourney.toOriginOfNewNotification(WOOD_AND_CUT_TREES, coniferWoodWithoutBarkLine);
 
     await plantsPages.origin.country.choose(GERMANY);
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsPages.origin.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
     await expect(plantsPages.origin.errorSummary).toContainText(CONIFER_WOOD_ERROR);
 
     await plantsPages.origin.country.choose(ITALY);
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsPages.origin.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
     await expect(plantsPages.arrivalStatus.heading).toBeVisible();
@@ -117,13 +136,13 @@ test.describe('High-risk plants origin section', () => {
     const reference = await plantsJourney.toOriginOfNewNotification(PLANTS_FOR_PLANTING);
 
     await plantsPages.origin.country.choose(NORWAY);
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsPages.origin.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
     await expect(plantsPages.origin.errorSummary).toContainText(EU_MEMBER_STATE_ERROR);
 
     await plantsPages.origin.country.choose(GERMANY);
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsPages.origin.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
     await expect(plantsPages.arrivalStatus.heading).toBeVisible();
@@ -144,7 +163,7 @@ test.describe('High-risk plants origin section', () => {
     await expect(plantsPages.origin.guidance).toHaveText(WARE_POTATO_GUIDANCE);
     await expect(plantsPages.origin.country.field).toHaveValue(FRANCE);
 
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsPages.origin.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
     await expect(plantsPages.origin.errorSummary).toContainText(WARE_POTATO_ERROR);
@@ -153,7 +172,7 @@ test.describe('High-risk plants origin section', () => {
   test('the required error names the consignment, not the animal', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.toOriginOfNewNotification(POTATOES);
 
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsPages.origin.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
     await expect(plantsPages.origin.errorSummary).toContainText(COUNTRY_REQUIRED_ERROR);
@@ -179,11 +198,12 @@ test.describe('High-risk plants origin section without JavaScript', () => {
     const reference = await plantsJourney.toOriginOfNewNotification(POTATOES);
     const { select } = plantsPages.origin.country;
 
-    await plantsPages.origin.country.expectNoHint();
-    await expect(select.locator('option').first()).toHaveText('Select a country');
+    await expect(plantsPages.origin.country.field).toHaveAccessibleDescription('');
+    await expect(plantsPages.origin.country.hint).toHaveCount(0);
+    await expect(select.locator('option').first()).toHaveText(ORIGIN_COUNTRY_SELECT_TEXT);
 
     await select.selectOption({ label: FRANCE });
-    await plantsPages.origin.btnSaveAndContinue.click();
+    await plantsPages.origin.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
 
     await plantsPages.origin.open(reference);

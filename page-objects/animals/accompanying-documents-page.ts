@@ -2,6 +2,8 @@ import type { Locator, Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { DatePicker } from '@page-objects/shared/date-picker';
 
+export const EMPTY_DOCUMENT_LIST_CARD_TEXT = /Save and add another\s*$/;
+
 export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
   constructor(page: Page) {
     super(page, 'accompanying-documents');

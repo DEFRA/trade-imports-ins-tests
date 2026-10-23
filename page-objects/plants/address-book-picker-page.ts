@@ -4,7 +4,6 @@ import {
   pickerNoMatchesMessage,
   pickerResultsHeading,
   pickerResultsSummary,
-  pickerSaveAndContinue,
   pickerSearchBox,
   pickerSearchButton,
 } from '@page-objects/shared/address-picker-results';
@@ -62,10 +61,6 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
 
   pageLink(number: number): Locator {
     return this.page.getByRole('link', { name: `Page ${number}`, exact: true });
-  }
-
-  get btnSaveAndContinue(): Locator {
-    return pickerSaveAndContinue(this.page);
   }
 
   async searchFor(term: string): Promise<void> {

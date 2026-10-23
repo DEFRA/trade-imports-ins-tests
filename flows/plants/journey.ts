@@ -101,30 +101,30 @@ export class PlantsJourney {
 
   /** Leaves the commodity-type page for the Overview by Cancel, which saves nothing. */
   async toOverview(): Promise<void> {
-    await this.plantsPages.commodityType.linkCancel.click();
+    await this.plantsPages.commodityType.cancelAndReturnToOverview.click();
     await this.plantsPages.overview.heading.waitFor();
   }
 
   /** Answers the commodity type and lands on the commodity-details page. */
   async chooseCommodityType(label: string): Promise<void> {
     await this.plantsPages.commodityType.commodityType(label).check();
-    await this.plantsPages.commodityType.btnSaveAndContinue.click();
+    await this.plantsPages.commodityType.saveAndContinue.click();
     await this.plantsPages.commodityDetails.heading.waitFor();
   }
 
   async changeCommodityType(reference: string, label: string): Promise<void> {
     await this.plantsPages.commodityType.open(reference);
     await this.plantsPages.commodityType.commodityType(label).check();
-    await this.plantsPages.commodityType.btnSaveAndContinue.click();
+    await this.plantsPages.commodityType.saveAndContinue.click();
   }
 
   /** Adds one line from the commodity-details page and lands on the commodities list. */
   async addCommodityLine(category: string, values: CommodityLine): Promise<void> {
     await this.plantsPages.commodityDetails.category(category).check();
     await this.plantsPages.commodityDetails.btnContinue.click();
-    await this.plantsPages.commodityDetails.btnSaveAndContinue.waitFor();
+    await this.plantsPages.commodityDetails.saveAndContinue.waitFor();
     await this.fillCommodityLine(values);
-    await this.plantsPages.commodityDetails.btnSaveAndContinue.click();
+    await this.plantsPages.commodityDetails.saveAndContinue.click();
     await this.plantsPages.commodities.heading.waitFor();
   }
 
@@ -136,7 +136,7 @@ export class PlantsJourney {
 
   /** Continues from the commodities list to origin. Works only while the opening run is still open. */
   async toOrigin(): Promise<void> {
-    await this.plantsPages.commodities.btnSaveAndContinue.click();
+    await this.plantsPages.commodities.saveAndContinue.click();
     await this.plantsPages.origin.heading.waitFor();
   }
 
@@ -172,14 +172,14 @@ export class PlantsJourney {
     if (commodityType === POTATOES) {
       reference = await this.toArrivalDetailsOfNewPotatoNotification();
       await this.plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-      await this.plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
+      await this.plantsPages.arrivalDetails.placeOfLanding.choose(portByCode('GB ABD').display);
     } else {
       reference = await this.toOriginOfNewNotification(commodityType);
       await this.toArrivalStatus('Germany');
       await this.answerArrivalStatus(arrivalStatus);
     }
     await this.plantsPages.arrivalDetails.arrivalDate.fill(arrivalDate(days));
-    await this.plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await this.plantsPages.arrivalDetails.saveAndContinue.click();
     await this.plantsPages.placeOfDestination.heading.waitFor();
     return reference;
   }
@@ -188,38 +188,39 @@ export class PlantsJourney {
   async toConsignorOfNewNotification(
     api: AddressBookApiClient,
     commodityType: string,
-  ): Promise<{ reference: string; destinationName: string }> {
-    const destinationName = `Consignor Route Nursery ${randomUUID()}`;
-    await api.createAddress(nurseryAddress(destinationName));
+  ): Promise<{ reference: string; addressName: string }> {
+    const addressName = `Consignor Route Nursery ${randomUUID()}`;
+    await api.createAddress(nurseryAddress(addressName));
     const reference = await this.toDestinationOfNewNotification(commodityType);
-    await this.chooseDestination(destinationName);
-    return { reference, destinationName };
+    await this.chooseDestination(addressName);
+    await this.plantsPages.consignorSelect.heading.waitFor();
+    return { reference, addressName };
   }
 
   async chooseDestination(addressName: string): Promise<void> {
     await this.plantsPages.placeOfDestination.searchFor(addressName);
     await this.plantsPages.placeOfDestination.address(addressName).check();
-    await this.plantsPages.placeOfDestination.btnSaveAndContinue.click();
+    await this.plantsPages.placeOfDestination.saveAndContinue.click();
   }
 
   /** Names the country and lands on the arrival-status question. Not for potatoes, which skip it: use `toArrivalDetails`. */
   async toArrivalStatus(country: string): Promise<void> {
     await this.plantsPages.origin.country.choose(country);
-    await this.plantsPages.origin.btnSaveAndContinue.click();
+    await this.plantsPages.origin.saveAndContinue.click();
     await this.plantsPages.arrivalStatus.heading.waitFor();
   }
 
   /** Names the country on a potato notification and lands on the arrival details. */
   async toArrivalDetails(country: string): Promise<void> {
     await this.plantsPages.origin.country.choose(country);
-    await this.plantsPages.origin.btnSaveAndContinue.click();
+    await this.plantsPages.origin.saveAndContinue.click();
     await this.plantsPages.arrivalDetails.heading.waitFor();
   }
 
   /** Answers the arrival-status question and lands on the arrival details. */
   async answerArrivalStatus(label: string): Promise<void> {
     await this.plantsPages.arrivalStatus.arrivalStatus(label).check();
-    await this.plantsPages.arrivalStatus.btnSaveAndContinue.click();
+    await this.plantsPages.arrivalStatus.saveAndContinue.click();
     await this.plantsPages.arrivalDetails.heading.waitFor();
   }
 
@@ -255,18 +256,18 @@ export class PlantsJourney {
     if (type === PLANTS_FOR_PLANTING) {
       await this.plantsPages.consignorSelect.searchFor(address.name);
       await this.plantsPages.consignorSelect.address(address.name).check();
-      await this.plantsPages.consignorSelect.btnSaveAndContinue.click();
+      await this.plantsPages.consignorSelect.saveAndContinue.click();
       await this.plantsPages.identificationNumbers.supplier.fill('S123');
     } else {
       await this.plantsPages.identificationNumbers.producer.fill('P123');
       await this.plantsPages.identificationNumbers.crop.fill('C123');
     }
-    await this.plantsPages.identificationNumbers.btnSaveAndContinue.click();
+    await this.plantsPages.identificationNumbers.saveAndContinue.click();
     if (contact) {
       await this.plantsPages.consignmentContactSelect.searchFor(address.name);
       await this.plantsPages.consignmentContactSelect.address(address.name).check();
     }
-    await this.plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
+    await this.plantsPages.consignmentContactSelect.saveAndContinue.click();
     await this.plantsPages.notificationView.heading.waitFor();
     return { reference, address };
   }

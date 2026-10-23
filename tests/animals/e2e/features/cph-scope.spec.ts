@@ -9,7 +9,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
 
     await animalsJourney.startNotification();
 
-    const { cphSection, cphLinks, cphAddressLines } = animalsPages.addresses;
+    const { cphSection, cphLinks, cphNumberText } = animalsPages.addresses;
 
     await animalsJourney.addCommodityToCurrentNotification('Felis catus');
     await animalsJourney.toRolesAndAddressesOfCurrentNotification();
@@ -28,7 +28,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await animalsPages.cphNumber.fillCphNumber();
     await animalsPages.cphNumber.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await expect(cphAddressLines).toHaveText('123456789');
+    await expect(cphNumberText).toHaveText('123456789');
     await expect(cphLinks).toHaveText([animalsPages.addresses.cphLinkNames.change]);
 
     await animalsPages.addresses.changeCph.click();

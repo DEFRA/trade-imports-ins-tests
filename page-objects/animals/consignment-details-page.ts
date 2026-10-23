@@ -21,10 +21,6 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.page.getByLabel('Number of packages (when required)');
   }
 
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
-  }
-
   get errorSummary(): Locator {
     return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
   }

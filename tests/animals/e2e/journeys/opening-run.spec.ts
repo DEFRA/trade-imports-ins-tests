@@ -1,6 +1,6 @@
+import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { SET_BASES } from '@page-objects/shared/sets';
-import { fileUploadPaths } from '@resources/file-upload/paths';
-import { OPENING_RUN_TASKS } from '@flows/animals/journey';
+import { OPENING_RUN_TASKS, certificateDocument } from '@flows/animals/journey';
 
 import { test, expect } from '@fixtures';
 
@@ -12,24 +12,16 @@ test.describe('Opening run', () => {
   }) => {
     test.slow();
 
-    const referenceNumber = await animalsJourney.walkOpeningRunCattleByAir({
-      reference: `AWBDOC${Date.now()}`,
-      issueDate: '03/01/2026',
-      filePath: fileUploadPaths.safeFile1kbPdf,
-      type: 'VETERINARY_HEALTH_CERTIFICATE',
-    });
+    const referenceNumber = await animalsJourney.walkOpeningRunCattleByAir(certificateDocument('AWBDOC'));
     await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
 
     await animalsPages.overview.open(referenceNumber);
-    for (const task of OPENING_RUN_TASKS) {
-      await expect(animalsPages.overview.taskStatus(task)).toHaveText('Complete');
-    }
-    await expect(animalsPages.overview.taskStatuses).toHaveCount(OPENING_RUN_TASKS.length);
+    await animalsPages.overview.expectEveryTaskComplete(OPENING_RUN_TASKS);
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
 
     const importDetails = animalsPages.notificationView.summaryCard('Import details');
-    await expect(animalsPages.notificationView.summaryValue(importDetails, 'Region of origin code')).toHaveText('FR-75');
+    await expect(animalsPages.notificationView.regionOfOriginCode).toHaveText('FR-75');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Internal reference number')).toHaveText('CATTLE-2026-01');
 
     const speciesCard = animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus');
@@ -53,6 +45,25 @@ test.describe('Opening run', () => {
 
     await animalsJourney.submitFromReview();
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
+  });
+
+  test('following Back from the main import reason and choosing Save and continue carries the run on to the main import reason, not the overview', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.toOriginOfImport();
+    await animalsJourney.fillOriginOfImport();
+    await animalsJourney.saveOriginOfImport();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+    await animalsPages.commoditySelection.selectSpecies([MANDATORY_ANSWERS.species.display]);
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
+
+    await animalsPages.importReason.linkBack.click();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
   });
 
   test('ends the opening run on the review page, naming what is outstanding, when the notification is incomplete', async ({

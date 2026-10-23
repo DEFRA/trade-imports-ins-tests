@@ -1,7 +1,9 @@
 import { test, expect } from '@fixtures';
 import { portByCode } from '@resources/reference-data/reference-data';
 import { POTATOES } from '@flows/plants/journey';
+import { PLACE_OF_LANDING_SEARCH_PLACEHOLDER } from '@domain/plants/constants/arrival-details-page';
 import { getRelativeAppDateText } from '@utils/date-utils';
+import { expectBlueToggleAndCalendarEndingAbove } from '@utils/date-picker-assertions';
 
 const FRANCE = 'France';
 
@@ -39,7 +41,6 @@ const ARRIVING_AT = '14:30';
 const ABERDEEN_HARBOUR = portByCode('GB ABD').display;
 
 const PLACE_OF_LANDING_HINT = 'Select where the potatoes will enter Great Britain. Start typing to search by port or airport name or code.';
-const PLACE_OF_LANDING_PLACEHOLDER = 'Select a place of landing';
 
 const POTATO_DATE_HINT = 'For example, 27/3/2026. If the potatoes have already arrived, enter the date they arrived.';
 
@@ -68,7 +69,7 @@ test.describe('High-risk plants arrival section', () => {
   test('the question must be answered before the notification moves on', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
 
-    await plantsPages.arrivalStatus.btnSaveAndContinue.click();
+    await plantsPages.arrivalStatus.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
     await expect(plantsPages.arrivalStatus.errorSummary).toContainText(ARRIVAL_STATUS_ERROR);
@@ -82,7 +83,7 @@ test.describe('High-risk plants arrival section', () => {
     const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
 
     await plantsPages.arrivalStatus.arrivalStatus(ALREADY_ARRIVED).check();
-    await plantsPages.arrivalStatus.btnSaveAndContinue.click();
+    await plantsPages.arrivalStatus.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
 
@@ -97,14 +98,14 @@ test.describe('High-risk plants arrival section', () => {
     await expect(plantsPages.arrivalDetails.dateQuestionLabelled(PRE_ARRIVAL_DATE_LABEL)).toBeVisible();
 
     await expect(plantsPages.arrivalDetails.arrivalTime).toHaveCount(0);
-    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveCount(0);
+    await expect(plantsPages.arrivalDetails.placeOfLanding.field).toHaveCount(0);
   });
 
   test('the arrival date must be given before the notification moves on', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
 
-    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
     await expect(plantsPages.arrivalDetails.errorSummary).toContainText(ARRIVAL_DATE_ERROR);
@@ -120,7 +121,7 @@ test.describe('High-risk plants arrival section', () => {
 
     await expect(plantsPages.arrivalDetails.dateQuestionLabelled(POST_ARRIVAL_DATE_LABEL)).toBeVisible();
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVED_ON);
-    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
     await expect(plantsPages.placeOfDestination.headingNamed(POST_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
@@ -140,12 +141,12 @@ test.describe('High-risk plants arrival section', () => {
     const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVED_ON);
-    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
 
     await plantsPages.arrivalStatus.open(reference);
     await plantsPages.arrivalStatus.arrivalStatus(NOT_YET_ARRIVED).check();
-    await plantsPages.arrivalStatus.btnSaveAndContinue.click();
+    await plantsPages.arrivalStatus.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
     await expect(plantsPages.arrivalDetails.dateQuestionLabelled(PRE_ARRIVAL_DATE_LABEL)).toBeVisible();
@@ -157,7 +158,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsJourney.answerArrivalStatus(NOT_YET_ARRIVED);
 
     await plantsPages.arrivalDetails.arrivalDate.fill(NOT_A_REAL_DATE);
-    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
     await expect(plantsPages.arrivalDetails.errorSummary).toContainText(REAL_ARRIVAL_DATE_ERROR);
@@ -205,7 +206,7 @@ test.describe('High-risk plants arrival section', () => {
 
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVING_ON);
     await plantsPages.arrivalDetails.arrivalTime.fill(NOT_ON_THE_CLOCK);
-    await plantsPages.arrivalDetails.selectPlaceOfLanding(ABERDEEN_HARBOUR);
+    await plantsPages.arrivalDetails.placeOfLanding.choose(ABERDEEN_HARBOUR);
     await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
@@ -215,7 +216,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsPages.overview.taskRowLink(ARRIVAL_TASK_ROW).click();
     await expect(plantsPages.arrivalDetails.arrivalTime).toHaveValue('');
     await expect(plantsPages.arrivalDetails.arrivalDate).toHaveValue('');
-    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue('');
+    await expect(plantsPages.arrivalDetails.placeOfLanding.field).toHaveValue('');
   });
 
   test('save and return to overview: when a date is typed, saves it and shows it again on return', async ({
@@ -242,7 +243,7 @@ test.describe('High-risk plants arrival section', () => {
   }) => {
     const reference = await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
 
-    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.saveAndContinue.click();
 
     await expect(plantsPages.arrivalDetails.errorSummary).toContainText(ARRIVAL_DATE_ERROR);
     await expect(plantsPages.arrivalDetails.errorSummary).toContainText(ARRIVAL_TIME_ERROR);
@@ -250,8 +251,8 @@ test.describe('High-risk plants arrival section', () => {
 
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVING_ON);
     await plantsPages.arrivalDetails.arrivalTime.fill(ARRIVING_AT);
-    await plantsPages.arrivalDetails.selectPlaceOfLanding(ABERDEEN_HARBOUR);
-    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.placeOfLanding.choose(ABERDEEN_HARBOUR);
+    await plantsPages.arrivalDetails.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
     await expect(plantsPages.placeOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
@@ -262,7 +263,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsPages.arrivalDetails.open(reference);
     await expect(plantsPages.arrivalDetails.arrivalDate).toHaveValue(ARRIVING_ON);
     await expect(plantsPages.arrivalDetails.arrivalTime).toHaveValue(ARRIVING_AT);
-    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue(ABERDEEN_HARBOUR);
+    await expect(plantsPages.arrivalDetails.placeOfLanding.field).toHaveValue(ABERDEEN_HARBOUR);
   });
 
   test('a potato notification sets the date, time and place of landing labels in the medium GOV.UK label size', async ({
@@ -283,8 +284,8 @@ test.describe('High-risk plants arrival section', () => {
     await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
 
     await expect(plantsPages.arrivalDetails.fieldHint('proposedPlaceOfLanding')).toHaveText(PLACE_OF_LANDING_HINT);
-    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveAttribute('placeholder', PLACE_OF_LANDING_PLACEHOLDER);
-    await expect(plantsPages.arrivalDetails.proposedPlaceOfLanding).toHaveValue('');
+    await expect(plantsPages.arrivalDetails.placeOfLanding.field).toHaveAttribute('placeholder', PLACE_OF_LANDING_SEARCH_PLACEHOLDER);
+    await expect(plantsPages.arrivalDetails.placeOfLanding.field).toHaveValue('');
   });
 
   test('the arrival date hint on a potato notification reads its worked example', async ({ plantsPages, plantsJourney }) => {
@@ -312,8 +313,6 @@ test.describe('High-risk plants arrival section', () => {
     await plantsJourney.toArrivalDetailsOfNewPotatoNotification();
     const arrival = plantsPages.arrivalDetails;
 
-    await arrival.arrivalDatePicker.expectToggleBlue();
-    await arrival.arrivalDatePicker.open();
-    await arrival.arrivalDatePicker.expectCalendarEndsAbove(arrival.fieldLabel('arrivalTime'));
+    await expectBlueToggleAndCalendarEndingAbove(arrival.arrivalDatePicker, arrival.fieldLabel('arrivalTime'));
   });
 });

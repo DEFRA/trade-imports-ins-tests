@@ -31,7 +31,7 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
     return this.regionCodeConditional.locator('.govuk-input__prefix');
   }
 
-  async expectRegionCodePrefixPresentButHidden(): Promise<void> {
+  async expectRegionCodePrefixHidden(): Promise<void> {
     await expect(this.regionCodePrefix).toHaveCount(1);
     await expect(this.regionCodePrefix).toBeHidden();
   }
@@ -50,10 +50,6 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
 
   get internalReference(): Locator {
     return this.page.getByLabel('Your internal reference for this consignment (optional)');
-  }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
   get errorSummary(): Locator {

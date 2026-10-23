@@ -1,8 +1,7 @@
 import { test, expect } from '@fixtures';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { countryAndSubdivisionNamesWithCountry } from '@resources/reference-data/reference-data';
-import { SELECT_ONE_PLACEHOLDER } from '@page-objects/animals/import-reason-page';
-import { IMPORT_REASON_TASK } from '@flows/animals/journey';
+import { IMPORT_REASON_TASK, IMPORT_REASON_SELECT_TEXT } from '@domain/animals/constants/import-reason-page';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Destination country list', () => {
@@ -19,7 +18,7 @@ test.describe('Destination country list', () => {
 
     await expect(animalsPages.importReason.transhipmentDestinationCountry.select).toHaveValue('');
     await expect(animalsPages.importReason.transhipmentDestinationCountry.options).toHaveText([
-      SELECT_ONE_PLACEHOLDER,
+      IMPORT_REASON_SELECT_TEXT,
       ...countryAndSubdivisionNamesWithCountry(),
     ]);
   });
@@ -33,7 +32,7 @@ test.describe('Destination country list', () => {
 
     await expect(animalsPages.importReason.transitDestinationCountry.select).toHaveValue('');
     await expect(animalsPages.importReason.transitDestinationCountry.options).toHaveText([
-      SELECT_ONE_PLACEHOLDER,
+      IMPORT_REASON_SELECT_TEXT,
       ...countryAndSubdivisionNamesWithCountry(),
     ]);
   });

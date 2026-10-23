@@ -44,10 +44,6 @@ export class PlantsCommodityDetailsPage extends PlantsNotificationPage {
     return this.page.getByRole('button', { name: 'Continue', exact: true });
   }
 
-  get btnSaveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue', exact: true });
-  }
-
   get btnSaveAndAddAnother(): Locator {
     return this.page.getByRole('button', { name: 'Save and add another', exact: true });
   }

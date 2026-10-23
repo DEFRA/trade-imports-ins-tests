@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { IMPORT_REASON_TASK } from '@flows/animals/journey';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 
 const TO_DO = 'To do';
 const ORIGIN_TASK = 'Where is this consignment coming from?';

@@ -24,8 +24,4 @@ export class AnimalsAdditionalDetailsPage extends NotificationPage {
       .getByRole('group', { name: 'Does the consignment contain any unweaned animals?' })
       .getByRole('radio', { name: value, exact: true });
   }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
-  }
 }

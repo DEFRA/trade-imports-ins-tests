@@ -1,15 +1,7 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
-import { IMPORT_REASON_TASK } from '@flows/animals/journey';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
+import { conditionalRadioInput, conditionalReasonRadios } from '@utils/a11y-exclusions';
 import { fileUploadPaths } from '@resources/file-upload/paths';
-
-// govuk-frontend's conditional-reveal radios set aria-expanded on the radio input
-// (radios.mjs), which axe's aria-allowed-attr rule rejects — an upstream
-// disagreement, not a service defect. Exclude just that input from origin scans.
-const conditionalRadioInput = '#regionOfOriginCodeRequirement';
-
-// The same upstream disagreement on the reason page, where four of the five
-// reasons open a conditional reveal, so four radios carry aria-expanded.
-const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {

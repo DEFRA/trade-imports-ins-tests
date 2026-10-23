@@ -1,24 +1,27 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, () => {
-  test('the unweaned-animals question shows only when a triggering commodity line exists', async ({ animalsJourney, pages }) => {
+  test('the unweaned-animals question shows only when a triggering commodity line exists', async ({
+    animalsJourney,
+    animalsPages,
+    pages,
+  }) => {
     test.slow();
 
     await animalsJourney.startNotification();
 
-    const certifiedFor = pages.page.getByRole('group', { name: 'What are the animals certified for?' });
     const unweaned = pages.page.getByRole('group', {
       name: 'Does the consignment contain any unweaned animals?',
     });
 
     await animalsJourney.addCommodityToCurrentNotification('Felis catus');
     await animalsJourney.toAdditionalDetailsOfCurrentNotification();
-    await expect(certifiedFor).toBeVisible();
+    await expect(animalsPages.additionalDetails.certificationQuestion).toBeVisible();
     await expect(unweaned).toBeHidden();
 
     await animalsJourney.addCommodityToCurrentNotification('Bos taurus');
     await animalsJourney.toAdditionalDetailsOfCurrentNotification();
-    await expect(certifiedFor).toBeVisible();
+    await expect(animalsPages.additionalDetails.certificationQuestion).toBeVisible();
     await expect(unweaned).toBeVisible();
   });
 

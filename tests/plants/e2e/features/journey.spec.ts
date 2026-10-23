@@ -47,7 +47,6 @@ const scenarios: { name: string; type: string; category: string; country: string
   },
 ];
 
-// These full walks include sign-in even when worker session reuse is enabled.
 test.use({ storageState: COLD_START });
 
 test.describe('High-risk plants full happy-path journeys', () => {
@@ -68,18 +67,18 @@ test.describe('High-risk plants full happy-path journeys', () => {
       if (scenario.type === POTATOES) {
         await plantsJourney.toArrivalDetails(scenario.country);
         await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-        await plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
+        await plantsPages.arrivalDetails.placeOfLanding.choose(portByCode('GB ABD').display);
       } else {
         await plantsJourney.toArrivalStatus(scenario.country);
         await plantsJourney.answerArrivalStatus('No, it has not arrived yet');
       }
       await plantsPages.arrivalDetails.arrivalDate.fill(expectedArrival);
-      await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+      await plantsPages.arrivalDetails.saveAndContinue.click();
       await plantsJourney.chooseDestination(address.name);
       if (scenario.type !== POTATOES) {
         await plantsPages.consignorSelect.searchFor(address.name);
         await plantsPages.consignorSelect.address(address.name).check();
-        await plantsPages.consignorSelect.btnSaveAndContinue.click();
+        await plantsPages.consignorSelect.saveAndContinue.click();
       }
       if (scenario.type === POTATOES) {
         await plantsPages.identificationNumbers.producer.fill('P123');
@@ -88,10 +87,10 @@ test.describe('High-risk plants full happy-path journeys', () => {
         await plantsPages.identificationNumbers.supplier.fill('DE-12345');
       }
       await plantsPages.identificationNumbers.consignment.fill('JOURNEY_123');
-      await plantsPages.identificationNumbers.btnSaveAndContinue.click();
+      await plantsPages.identificationNumbers.saveAndContinue.click();
       await plantsPages.consignmentContactSelect.searchFor(address.name);
       await plantsPages.consignmentContactSelect.address(address.name).check();
-      await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
+      await plantsPages.consignmentContactSelect.saveAndContinue.click();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
       await expect(plantsPages.notificationView.heading).toBeVisible();
       await plantsPages.notificationView.btnContinue.click();

@@ -1,5 +1,6 @@
 import { type Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
+import { deleteNotificationConfirm, deleteNotificationHeading } from '@page-objects/shared/delete-notification';
 
 export class PlantsDeleteNotificationPage extends PlantsNotificationPage {
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
@@ -7,7 +8,7 @@ export class PlantsDeleteNotificationPage extends PlantsNotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Delete this notification?' });
+    return deleteNotificationHeading(this.page);
   }
 
   get body(): Locator {
@@ -15,7 +16,7 @@ export class PlantsDeleteNotificationPage extends PlantsNotificationPage {
   }
 
   get btnConfirm(): Locator {
-    return this.page.getByRole('button', { name: 'Yes, delete notification', exact: true });
+    return deleteNotificationConfirm(this.page);
   }
 
   /** A govukButton with an href, so it is a link that reports role="button". */

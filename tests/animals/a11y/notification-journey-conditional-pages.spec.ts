@@ -1,5 +1,6 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
-import { IMPORT_REASON_TASK } from '@flows/animals/journey';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
+import { conditionalReasonRadios } from '@utils/a11y-exclusions';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
 const PRIVATE_TRANSPORTER = {
@@ -11,11 +12,6 @@ const PRIVATE_TRANSPORTER = {
   telephoneNumber: '+33 3 22 55 01 44',
   emailAddress: 'jean.dupont@example.fr',
 };
-
-// Same behaviour from the govuk-frontend npm package's radios.mjs, excluded
-// elsewhere in this suite (e.g. notification-journey-filled-state.spec.ts) —
-// component code we don't own, not a defect in this service.
-const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('the reason-gated and private transporter pages have no accessibility violations', async ({

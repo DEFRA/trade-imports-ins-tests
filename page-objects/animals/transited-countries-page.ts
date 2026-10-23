@@ -1,5 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test';
-import { EMPTY_TRANSIT_COUNTRIES_BODY_TEXT, EMPTY_TRANSIT_COUNTRIES_BUTTONS } from '@domain/animals/constants/transit-countries-page';
+import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { TypeAhead } from '@page-objects/shared/type-ahead';
 
@@ -25,7 +24,7 @@ export class AnimalsTransitedCountriesPage extends NotificationPage {
   async addCountry(name: string): Promise<void> {
     await this.country.choose(name);
     await this.addCountryButton.click();
-    await expect(this.row(name)).toBeVisible();
+    await this.row(name).waitFor();
   }
 
   row(name: string): Locator {
@@ -52,16 +51,7 @@ export class AnimalsTransitedCountriesPage extends NotificationPage {
     return this.page.locator('form').getByRole('button');
   }
 
-  async expectEmptyList(): Promise<void> {
-    await expect(this.bodyParagraphs).toHaveText(EMPTY_TRANSIT_COUNTRIES_BODY_TEXT);
-    await expect(this.formButtons).toHaveText(EMPTY_TRANSIT_COUNTRIES_BUTTONS);
-  }
-
   get statusRegion(): Locator {
     return this.page.locator('#transit-countries-status');
-  }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
   }
 }

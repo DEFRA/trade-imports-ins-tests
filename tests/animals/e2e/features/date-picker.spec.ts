@@ -1,4 +1,5 @@
 import { test } from '@fixtures';
+import { expectBlueToggleAndCalendarEndingAbove } from '@utils/date-picker-assertions';
 
 test.describe('Date picker', { tag: '@duplicated-in-frontend' }, () => {
   test('the arrival date button is blue and its calendar ends above the port of entry question', async ({
@@ -8,9 +9,7 @@ test.describe('Date picker', { tag: '@duplicated-in-frontend' }, () => {
     await animalsJourney.toArrivalDetails();
     const arrival = animalsPages.arrivalDetails;
 
-    await arrival.arrivalDatePicker.expectToggleBlue();
-    await arrival.arrivalDatePicker.open();
-    await arrival.arrivalDatePicker.expectCalendarEndsAbove(arrival.fieldLabel('portOfEntry'));
+    await expectBlueToggleAndCalendarEndingAbove(arrival.arrivalDatePicker, arrival.fieldLabel('portOfEntry'));
   });
 
   test('the exit date button is blue and its calendar ends above the port of exit question', async ({ animalsJourney, animalsPages }) => {
@@ -18,17 +17,16 @@ test.describe('Date picker', { tag: '@duplicated-in-frontend' }, () => {
     const importReason = animalsPages.importReason;
     await importReason.reason('Temporary admission horses').check();
 
-    await importReason.temporaryAdmissionExitDatePicker.expectToggleBlue();
-    await importReason.temporaryAdmissionExitDatePicker.open();
-    await importReason.temporaryAdmissionExitDatePicker.expectCalendarEndsAbove(importReason.fieldLabel('temporaryAdmissionPortOfExit'));
+    await expectBlueToggleAndCalendarEndingAbove(
+      importReason.temporaryAdmissionExitDatePicker,
+      importReason.fieldLabel('temporaryAdmissionPortOfExit'),
+    );
   });
 
   test('the date of issue button is blue and its calendar ends above the attachment question', async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toAccompanyingDocuments();
     const accompanyingDocuments = animalsPages.accompanyingDocuments;
 
-    await accompanyingDocuments.dateOfIssuePicker.expectToggleBlue();
-    await accompanyingDocuments.dateOfIssuePicker.open();
-    await accompanyingDocuments.dateOfIssuePicker.expectCalendarEndsAbove(accompanyingDocuments.fieldLabel('file'));
+    await expectBlueToggleAndCalendarEndingAbove(accompanyingDocuments.dateOfIssuePicker, accompanyingDocuments.fieldLabel('file'));
   });
 });

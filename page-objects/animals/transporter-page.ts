@@ -1,5 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import { pickerSearchBox, pickerSearchButton } from '@page-objects/shared/address-picker-results';
 
 export class AnimalsTransporterPage extends NotificationPage {
   constructor(page: Page) {
@@ -15,11 +16,11 @@ export class AnimalsTransporterPage extends NotificationPage {
   }
 
   get searchBox(): Locator {
-    return this.page.getByLabel('Search', { exact: true });
+    return pickerSearchBox(this.page);
   }
 
   get searchButton(): Locator {
-    return this.page.getByRole('button', { name: 'Search', exact: true });
+    return pickerSearchButton(this.page);
   }
 
   get table(): Locator {
@@ -32,9 +33,5 @@ export class AnimalsTransporterPage extends NotificationPage {
 
   get addTransporter(): Locator {
     return this.page.getByRole('button', { name: 'Add a transporter' });
-  }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
   }
 }

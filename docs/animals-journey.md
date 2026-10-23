@@ -32,6 +32,7 @@ Why the journey's steps are written the way they are. The code carries no commen
 ## Transport
 
 - `reachTransporterFromHub` goes back to the transporter list from the hub within a journey that is already unlocked. The page saves through unfilled. Arrival details are filled on the way because the default means, Road, keeps transited countries in scope, and transit countries are answered next.
+- `chooseTransporterType` adds a transporter of the given type from the transporter list.
 - `toCommercialTransporter` follows the add route's commercial arm: the list first, then the transporter type question, then the form for a commercial transporter that is not on the list.
 - `toTransporterSelection` reaches the approved commercial register by its own URL, because nothing links to it now that the commercial arm is the add-commercial form. It goes through that arm first so the transporter type is answered, which puts the commercial answer the register writes in scope.
 
@@ -42,3 +43,14 @@ Why the journey's steps are written the way they are. The code carries no commen
 ## Addresses
 
 - `addCphAndLeaveAddresses` runs from the addresses page: it answers the CPH number and then leaves the page.
+
+## Notification view
+
+- `cancelAmend` waits on `?cancelled=1` rather than the view's heading, because the error page has the same heading.
+- `partyRow` selects the summary-list row whose accessible term is the role directly, rather than climbing to it, so no XPath parent-axis hop is needed.
+- `editPartyDetails` is the row's own link to edit the address copied onto the notification. The card keeps the one Change link that re-picks from the address book.
+- `partyError` reads the first definition of the row. A summary list has no error state of its own, so an outstanding role carries its message in the row's value cell, ahead of the actions cell.
+
+## Choosing species
+
+- `selectSpecies` searches for each species before ticking it, because a species has no tick box until its own search lists it.

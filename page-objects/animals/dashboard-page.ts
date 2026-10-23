@@ -49,6 +49,10 @@ export class AnimalsDashboardPage extends BasePage {
     return this.page.locator('.notification-list__results');
   }
 
+  get deletedBanner(): Locator {
+    return this.page.getByText('The notification has been deleted.');
+  }
+
   readonly amendRefusedMessage = AMEND_REFUSED_MESSAGE;
 
   get amendRefusedBanner(): Locator {

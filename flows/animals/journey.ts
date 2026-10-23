@@ -1,5 +1,6 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
+import type { Locator } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import {
   ALL_ANSWERS,
@@ -11,8 +12,11 @@ import {
   type OriginOptions,
   type PartyAnswers,
 } from '@domain/animals/constants/journey-options';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
+import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
+import { fileUploadPaths } from '@resources/file-upload/paths';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
@@ -30,8 +34,6 @@ export type SpeciesAnimalCount = {
   animalCount: number;
 };
 
-export const IMPORT_REASON_TASK = 'Main import reason';
-
 export const OPENING_RUN_TASKS = [
   'Where is this consignment coming from?',
   'What are you importing?',
@@ -46,10 +48,19 @@ export const OPENING_RUN_TASKS = [
   'Contact address for this consignment',
 ] as const;
 
-export const DEFAULT_REGION_CODE = ALL_ANSWERS.regionCode;
 export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffset: 2 });
+
 export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
 export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
+
+const timestampedReference = (referencePrefix: string): string => `${referencePrefix}${Date.now()}`;
+
+export const certificateDocument = (referencePrefix: string): AccompanyingDocumentAnswer => ({
+  reference: timestampedReference(referencePrefix),
+  issueDate: '03/01/2026',
+  filePath: fileUploadPaths.safeFile1kbPdf,
+  type: 'VETERINARY_HEALTH_CERTIFICATE',
+});
 
 export class AnimalsJourney {
   constructor(
@@ -113,7 +124,7 @@ export class AnimalsJourney {
     await this.animalsPages.originOfImport.saveAndContinue.click();
   }
 
-  async answerOriginWithRegionCode(regionCode: string, options: OriginOptions = {}): Promise<void> {
+  async fillAndSaveOriginWithRegionCode(regionCode: string, options: OriginOptions = {}): Promise<void> {
     await this.fillOriginOfImport({ ...options, requiresRegionCode: 'Yes', regionCode });
     await this.saveOriginOfImport();
   }
@@ -226,7 +237,7 @@ export class AnimalsJourney {
   async addCphAndLeaveAddresses(cph: CphAnswer = MANDATORY_ANSWERS.cph): Promise<void> {
     await this.animalsPages.addresses.addCph.click();
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
-    await this.animalsPages.cphNumber.fillCphNumber(cph.county, cph.parish, cph.holding);
+    await this.animalsPages.cphNumber.fillCphNumber(cph);
     await this.animalsPages.cphNumber.saveAndContinue.click();
     await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     await this.animalsPages.addresses.continueButton.click();
@@ -247,7 +258,7 @@ export class AnimalsJourney {
     documentReference = MANDATORY_ANSWERS.transportDocumentReference,
   }: ArrivalDetailsAnswer = {}): Promise<void> {
     await this.animalsPages.arrivalDetails.fillArrivalDate(date);
-    await this.animalsPages.arrivalDetails.selectPort(port);
+    await this.animalsPages.arrivalDetails.portOfEntry.choose(port);
     await this.animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: means });
     await this.animalsPages.arrivalDetails.transportIdentification.fill(transportId);
     await this.animalsPages.arrivalDetails.transportDocumentReference.fill(documentReference);
@@ -260,6 +271,12 @@ export class AnimalsJourney {
       .documentRow(document.reference)
       .filter({ hasText: 'Check completed' })
       .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
+  }
+
+  async uploadScannedDocument(): Promise<Locator> {
+    const reference = timestampedReference('PW');
+    await this.uploadDocumentAndWaitForScan({ ...ALL_ANSWERS.accompanyingDocument, reference });
+    return this.animalsPages.accompanyingDocuments.documentRow(reference);
   }
 
   async chooseContactAddress(name: string = MANDATORY_ANSWERS.contactAddress): Promise<void> {
@@ -280,6 +297,13 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
+  }
+
+  async chooseTransporterType(type: 'Commercial' | 'Private'): Promise<void> {
+    await this.animalsPages.transporter.addTransporter.click();
+    await this.animalsPages.transporterAdd.heading.waitFor(pageLoadWait);
+    await this.animalsPages.transporterAdd.transporterType(type).check();
+    await this.animalsPages.transporterAdd.saveAndContinue.click();
   }
 
   async answerTransport(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
@@ -657,6 +681,6 @@ export class AnimalsJourney {
   private async confirmDeclaration(): Promise<void> {
     await this.animalsPages.declaration.confirmation.check();
     await this.animalsPages.declaration.continueButton.click();
-    await this.pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor(pageLoadWait);
+    await this.animalsPages.confirmation.heading.waitFor(pageLoadWait);
   }
 }

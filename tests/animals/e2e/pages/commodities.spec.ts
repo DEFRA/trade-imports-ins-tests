@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { SEARCH_HINT, SELECT_COMMODITY_ERROR } from '@page-objects/animals/commodity-selection-page';
+import { SEARCH_HINT, SELECT_COMMODITY_ERROR } from '@domain/animals/constants/commodity-selection-page';
 
 const expectedGroups = [
   ['Cow (0102)', '0102', ['Bison bison', 'Bos spp.', 'Bos taurus', 'Bubalus bubalis']],

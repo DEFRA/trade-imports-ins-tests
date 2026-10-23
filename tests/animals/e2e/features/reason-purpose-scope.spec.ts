@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { IMPORT_REASON_TASK } from '@flows/animals/journey';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 
 test.describe('Reason and purpose scope', { tag: '@duplicated-in-frontend' }, () => {
   test('purpose is owed only for the internal market and is wiped when the reason changes', async ({

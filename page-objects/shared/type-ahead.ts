@@ -1,13 +1,6 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 
-const SEARCH_BOX_ASSISTIVE_DESCRIPTION =
-  'When autocomplete results are available use up and down arrows to review and enter to select. Touch device users, explore by touch or with swipe gestures.';
-
-/**
- * A type-ahead that enhances a native select, addressed by the select's id.
- * With JavaScript the id sits on the search box; without it the select keeps
- * the id and is the control.
- */
+/** A type-ahead that enhances a native select, addressed by the select's id. */
 export class TypeAhead {
   constructor(
     private readonly page: Page,
@@ -22,10 +15,8 @@ export class TypeAhead {
     return this.field.locator('xpath=ancestor::*[contains(@class,"govuk-form-group")][1]');
   }
 
-  async expectNoHint(): Promise<void> {
-    const isSearchBox = (await this.field.evaluate((element) => element.tagName)) === 'INPUT';
-    await expect(this.field).toHaveAccessibleDescription(isSearchBox ? SEARCH_BOX_ASSISTIVE_DESCRIPTION : '');
-    await expect(this.formGroup.locator('.govuk-hint')).toHaveCount(0);
+  get hint(): Locator {
+    return this.formGroup.locator('.govuk-hint');
   }
 
   get select(): Locator {
@@ -34,10 +25,6 @@ export class TypeAhead {
 
   get options(): Locator {
     return this.select.locator('option');
-  }
-
-  get selectableOptions(): Locator {
-    return this.select.locator('option:not([value=""])');
   }
 
   get suggestions(): Locator {
@@ -53,7 +40,7 @@ export class TypeAhead {
   }
 
   async search(text: string): Promise<void> {
-    await expect(this.field).toHaveRole('combobox');
+    await this.page.getByRole('combobox').and(this.field).waitFor();
     await this.field.click();
     await this.field.fill(text);
   }

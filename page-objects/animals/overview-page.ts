@@ -1,4 +1,4 @@
-import { type Locator } from '@playwright/test';
+import { expect, type Locator } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 
 export class AnimalsOverviewPage extends NotificationPage {
@@ -25,8 +25,17 @@ export class AnimalsOverviewPage extends NotificationPage {
       .getByRole('link');
   }
 
+  get taskNames(): Locator {
+    return this.page.locator('.govuk-task-list__link');
+  }
+
   get taskStatuses(): Locator {
     return this.page.locator('.govuk-task-list__status');
+  }
+
+  async expectEveryTaskComplete(taskNames: readonly string[]): Promise<void> {
+    await expect(this.taskNames).toHaveText(taskNames);
+    await expect(this.taskStatuses).toHaveText(taskNames.map(() => 'Complete'));
   }
 
   taskStatus(name: string): Locator {

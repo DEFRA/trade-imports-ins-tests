@@ -3,8 +3,6 @@ import { NotificationPage } from '@page-objects/shared/base-page';
 import { DatePicker } from '@page-objects/shared/date-picker';
 import { TypeAhead } from '@page-objects/shared/type-ahead';
 
-export const SELECT_ONE_PLACEHOLDER = 'Select one';
-
 export class AnimalsImportReasonPage extends NotificationPage {
   readonly transitPortOfExit: TypeAhead;
   readonly transitDestinationCountry: TypeAhead;
@@ -69,10 +67,6 @@ export class AnimalsImportReasonPage extends NotificationPage {
 
   async selectTemporaryAdmissionPortOfExit(value: string): Promise<void> {
     await this.temporaryAdmissionPortOfExit.chooseByValue(value);
-  }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
   get errorSummary(): Locator {
