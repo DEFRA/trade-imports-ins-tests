@@ -1,20 +1,13 @@
 import { readFile } from 'node:fs/promises';
 import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
-import { fileUploadTimeouts } from '@config/file-upload-timeouts';
+import { EMPTY_DOCUMENT_LIST_CARD_TEXT } from '@page-objects/animals/accompanying-documents-page';
 
 test.describe('Promoted accompanying documents integration', { tag: '@compose' }, () => {
-  test('uploads, scans, downloads and removes a document through the real uploader', async ({ animalsJourney, pages, animalsPages }) => {
+  test('uploads, scans, downloads and removes a document', async ({ animalsJourney, pages, animalsPages }) => {
     test.slow();
     await animalsJourney.toAccompanyingDocuments();
-    const reference = `PW${Date.now()}`;
-
-    await animalsPages.accompanyingDocuments.fillDocument(reference, '03/01/2026', fileUploadPaths.safeFile1kbPdf);
-    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
-
-    const row = animalsPages.accompanyingDocuments.documentRow(reference);
-    await expect(row).toBeVisible();
-    await expect(row).toContainText('Check completed', { timeout: fileUploadTimeouts.virusScanComplete });
+    const row = await animalsJourney.uploadScannedDocument();
 
     const viewLink = animalsPages.accompanyingDocuments.viewFile(1);
     const href = await viewLink.getAttribute('href');
@@ -31,9 +24,30 @@ test.describe('Promoted accompanying documents integration', { tag: '@compose' }
 
     await animalsPages.accompanyingDocuments.removeDocument(1).click();
     await expect(row).toHaveCount(0);
-    await expect(pages.page.getByText('You have not added any documents yet.')).toBeVisible();
+    await expect(animalsPages.accompanyingDocuments.addedDocumentsTable).toHaveCount(0);
+    await expect(animalsPages.accompanyingDocuments.fileUploadCard).toHaveText(EMPTY_DOCUMENT_LIST_CARD_TEXT);
 
     expect(downloaded).toEqual(uploaded);
+  });
+
+  test('lists an added document under five headings with View file and Remove at the end of the row', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    test.slow();
+    await animalsJourney.toAccompanyingDocuments();
+    const row = await animalsJourney.uploadScannedDocument();
+
+    await expect(animalsPages.accompanyingDocuments.addedDocumentsTable.getByRole('columnheader')).toHaveText([
+      'Document reference',
+      'Document type',
+      'Date of issue',
+      'Status',
+      'Action',
+    ]);
+    const actionsCell = row.getByRole('cell').last();
+    await expect(actionsCell.locator(animalsPages.accompanyingDocuments.viewFile(1))).toBeVisible();
+    await expect(actionsCell.locator(animalsPages.accompanyingDocuments.removeDocument(1))).toBeVisible();
   });
 
   test('rejects an unsupported file type without adding a document', async ({ animalsJourney, pages, animalsPages }) => {
@@ -42,6 +56,7 @@ test.describe('Promoted accompanying documents integration', { tag: '@compose' }
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
-    await expect(pages.page.getByText('You have not added any documents yet.')).toBeVisible();
+    await expect(animalsPages.accompanyingDocuments.addedDocumentsTable).toHaveCount(0);
+    await expect(animalsPages.accompanyingDocuments.fileUploadCard).toHaveText(EMPTY_DOCUMENT_LIST_CARD_TEXT);
   });
 });

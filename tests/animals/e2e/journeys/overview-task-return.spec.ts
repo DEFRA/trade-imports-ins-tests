@@ -1,3 +1,5 @@
+import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 
@@ -48,13 +50,12 @@ test.describe('Overview task return', () => {
     await expectOnOverview();
     await expectComplete('Identification details');
 
-    await openTask('Main reason for import', 'import-reason');
+    await openTask(IMPORT_REASON_TASK, 'import-reason');
     await animalsPages.importReason.reason('Internal market').check();
     await animalsPages.importReason.purpose('Breeding').check();
     await animalsPages.importReason.saveAndContinue.click();
     await expectOnOverview();
-    await expect(animalsPages.additionalDetails.heading).toBeHidden();
-    await expectComplete('Main reason for import');
+    await expectComplete(IMPORT_REASON_TASK);
 
     await openTask('Additional details', 'additional-details');
     await animalsPages.additionalDetails.certifiedFor('Slaughter').check();
@@ -64,7 +65,7 @@ test.describe('Overview task return', () => {
     await expectComplete('Additional details');
 
     await openTask('Arrival details', 'port-of-entry');
-    await animalsJourney.fillArrivalDetails({ means: 'Road Vehicle' });
+    await animalsJourney.fillArrivalDetails({ means: meansOfTransport.roadVehicle.display });
     await animalsPages.arrivalDetails.saveAndContinue.click();
     await expectOnOverview();
     await expect(animalsPages.transitedCountries.heading).toBeHidden();

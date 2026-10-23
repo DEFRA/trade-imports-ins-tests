@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 
 test.describe('Reason and purpose scope', { tag: '@duplicated-in-frontend' }, () => {
   test('purpose is owed only for the internal market and is wiped when the reason changes', async ({
@@ -9,12 +10,9 @@ test.describe('Reason and purpose scope', { tag: '@duplicated-in-frontend' }, ()
     await animalsJourney.startNotification();
     await animalsJourney.unlockSections();
 
-    const reasonRow = pages.page.locator('.govuk-task-list__item', { hasText: 'Main reason for import' });
+    const reasonRow = pages.page.locator('.govuk-task-list__item', { hasText: IMPORT_REASON_TASK });
 
-    // Internal market: the purpose reveals under the reason, so reason + purpose
-    // go in on one submit and the additional details, opened from their own
-    // task, complete the row.
-    await animalsPages.overview.task('Main reason for import').click();
+    await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await animalsPages.importReason.reason('Internal market').check();
     await animalsPages.importReason.purpose('Breeding').check();
     await animalsPages.importReason.saveAndContinue.click();
@@ -25,10 +23,7 @@ test.describe('Reason and purpose scope', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.additionalDetails.saveAndContinue.click();
     await expect(reasonRow).toContainText('Complete');
 
-    // Transit: the purpose is no longer owed, but the reason-gated exit details
-    // (port of exit + destination country) come into scope and reveal under the
-    // reason, so the walk answers them on the same submit.
-    await animalsPages.overview.task('Main reason for import').click();
+    await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await animalsPages.importReason.reason('Transit').check();
     await animalsPages.importReason.selectTransitPortOfExitByIndex(2);
     await animalsPages.importReason.selectTransitDestinationCountry('FR');
@@ -40,21 +35,15 @@ test.describe('Reason and purpose scope', { tag: '@duplicated-in-frontend' }, ()
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(reasonRow).toContainText('Complete');
 
-    // Back to the internal market: leaving scope wiped the saved purpose, so no
-    // purpose radio is pre-selected and the task is owed again. The assertion is
-    // scoped to the purpose radios — the reason radio is checked on this page.
-    await animalsPages.overview.task('Main reason for import').click();
+    await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await animalsPages.importReason.reason('Internal market').check();
     await expect(pages.page.locator('input[name="purposeInInternalMarket"]:checked')).toHaveCount(0);
 
-    // The purpose is owed again, and it is now enforced where it is asked: a
-    // blank save returns the page with the error rather than walking on.
     await animalsPages.importReason.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(pages.page.getByRole('link', { name: 'Select a purpose in the internal market' })).toBeVisible();
-    await expect(animalsPages.additionalDetails.heading).toHaveCount(0);
+    await expect(animalsPages.importReason.heading).toBeVisible();
 
-    // Answering the newly owed purpose completes the row again.
     await animalsPages.importReason.reason('Internal market').check();
     await animalsPages.importReason.purpose('Breeding').check();
     await animalsPages.importReason.saveAndContinue.click();

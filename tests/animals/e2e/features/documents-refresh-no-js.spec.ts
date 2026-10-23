@@ -15,7 +15,7 @@ test.describe('Documents scan refresh without JavaScript', { tag: '@duplicated-i
     await animalsPages.overview.task('Where is this consignment coming from?').click();
     await pages.page.getByLabel('Country of origin').selectOption('FR');
     await pages.page.getByRole('radio', { name: 'No' }).check();
-    await pages.page.getByRole('button', { name: 'Save and continue' }).click();
+    await animalsPages.originOfImport.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsJourney.answerCommodity();

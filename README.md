@@ -256,6 +256,8 @@ should also run the spec, whatever test type or domain the spec is in (see
 `npm run lint` runs `lint:suite-tags` to keep the two in step: a test under `a11y/` must carry
 `@a11y`, one under `security/` must carry `@active`, and one under `e2e/` neither.
 
+`@duplicated-in-frontend` marks an end-to-end spec whose behaviour the frontend's own FIT suite also proves, so a reader knows the check exists in both places.
+
 ## Local Testing
 
 ### Local workspace stack
@@ -332,20 +334,39 @@ Visual regression tests (tagged `@visual`) guard rendered composition — layout
 
 Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. Each platform requires its own baseline — update both when visual changes are intentional.
 
+Visual specs run headless whatever the project setting, because headed mode uses OS font rendering, which produces pixel differences against a headless baseline.
+
+The origin of import baseline masks the whole status strip, not the notification reference alone. The strip renders from the first request and the reference inside it is minted per run, so an unmasked strip never matches the baseline twice. Masking the full-width strip keeps the masked box a fixed size, which the reference alone is not. The strip's own content is covered by `tests/animals/e2e/features/reference-strip.spec.ts`.
+
 Run against the stack with `npm run test:docker-compose:visual` (or
-`test:docker-compose:animals:visual` — only `animals` has `@visual` specs today).
+`test:docker-compose:animals:visual` for `animals` alone). `animals` and `plants` have `@visual` specs.
 
 Regenerate the E2E baseline against the stack frontend with
 `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
 `npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
-used by CI. Both commands run the `animals` domain's `@visual` suite and write the
+used by CI. Both commands run every `@visual` spec and write the
 updated snapshot into the working tree for commit. Narrow to one spec (or title via
-`--grep`) by passing Playwright args after the command:
+`--grep`) by passing Playwright args after the command, and add
+`--update-snapshots=missing` to write only new baselines:
 
 ```bash
 npm run test:visual:update:macos -- tests/animals/e2e/visual/origin-of-import.visual.spec.ts
 ./bin/update-visual-baselines-linux.sh tests/animals/e2e/visual/origin-of-import.visual.spec.ts
 ```
+
+Visual specs set `headless: true`, because headed mode uses the host's font rendering and
+never matches a headless baseline.
+
+Every full-page screenshot of a notification page masks the whole status strip. It renders
+from the first request and holds the notification reference, which is minted per run. The
+whole strip is masked, not the reference alone, so the masked box stays a fixed size. The
+strip's own content is covered by `tests/animals/e2e/features/reference-strip.spec.ts`.
+
+A calendar screenshot depends on today's date twice: the browser's today picks the month and
+the highlighted day, and the server's today sets each picker's `data-min-date` and
+`data-max-date`. `freezeDatePickersAt` (`utils/frozen-date-picker.ts`) stops the browser clock
+on a fixed day and moves the served bounds by the same number of days, so the calendar looks
+as it would if that day were today.
 
 ## Security Testing
 

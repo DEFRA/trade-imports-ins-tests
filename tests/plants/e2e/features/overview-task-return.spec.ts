@@ -17,7 +17,7 @@ test.describe('High-risk plants overview task return', () => {
     const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
     await plantsJourney.answerArrivalStatus(NOT_YET_ARRIVED);
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVING_ON);
-    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
 
@@ -29,10 +29,10 @@ test.describe('High-risk plants overview task return', () => {
     await plantsPages.overview.taskRowLink(ARRIVAL_TASK_ROW).click();
     await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
 
-    await plantsPages.arrivalStatus.btnSaveAndContinue.click();
+    await plantsPages.arrivalStatus.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
 
-    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
     await expect(plantsPages.overview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Completed');
   });
@@ -54,10 +54,10 @@ test.describe('High-risk plants overview task return', () => {
     await plantsPages.overview.taskRowLink(COMMODITIES_TASK_ROW).click();
     await expect(pages.page).toHaveURL(plantsPages.commodityType.expectedUrl(reference));
 
-    await plantsPages.commodityType.btnSaveAndContinue.click();
+    await plantsPages.commodityType.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrl(reference));
 
-    await plantsPages.commodities.btnSaveAndContinue.click();
+    await plantsPages.commodities.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
   });
 });

@@ -85,7 +85,7 @@ test.describe('High-risk plants commodity section', () => {
     await plantsPages.commodityDetails.field('Quantity').fill('40');
     await plantsPages.commodityDetails.field('Size of the trees').fill('4.5');
     await plantsPages.commodityDetails.field('Phytosanitary treatments applied').fill('Kiln dried (KD)');
-    await plantsPages.commodityDetails.btnSaveAndContinue.click();
+    await plantsPages.commodityDetails.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrl(reference));
     await expect(plantsPages.commodities.lineRows.first()).toContainText(CUT_CONIFEROUS_TREES);
@@ -105,7 +105,7 @@ test.describe('High-risk plants commodity section', () => {
     await expect(pages.page).toHaveURL(plantsPages.commodityDetails.editUrl(reference, 0));
     await expect(plantsPages.commodityDetails.field('Variety')).toHaveValue(MARIS_PIPER);
 
-    await plantsPages.commodityDetails.btnSaveAndContinue.click();
+    await plantsPages.commodityDetails.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrl(reference));
 
     await plantsPages.commodities.btnRemove(1).click();
@@ -124,7 +124,7 @@ test.describe('High-risk plants commodity section', () => {
     await expect(plantsPages.commodityType.linesWarning).toBeVisible();
 
     await plantsPages.commodityType.commodityType(WOOD_AND_CUT_TREES).check();
-    await plantsPages.commodityType.btnSaveAndContinue.click();
+    await plantsPages.commodityType.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.commodities.removedUrl(reference, 1));
     await expect(plantsPages.commodities.removedBanner).toContainText(`We removed 1 commodity that is not ${WOOD_AND_CUT_TREES}`);
@@ -140,7 +140,7 @@ test.describe('High-risk plants commodity section', () => {
 
     await expect(pages.page).toHaveURL(plantsPages.commodities.removedUrl(reference, 1));
 
-    await plantsPages.commodities.btnSaveAndContinue.click();
+    await plantsPages.commodities.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.commodities.removedUrl(reference, 1));
     await expect(plantsPages.commodities.errorSummary).toContainText('Add at least one commodity');
@@ -151,7 +151,7 @@ test.describe('High-risk plants commodity section', () => {
     await plantsJourney.chooseCommodityType(POTATOES);
     await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine(MARIS_PIPER, '250'));
 
-    await plantsPages.commodities.btnSaveAndContinue.click();
+    await plantsPages.commodities.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
 

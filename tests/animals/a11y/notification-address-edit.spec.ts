@@ -14,7 +14,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Edit address details, filled with the copy', async () => {
-      await animalsPages.addresses.editPartyDetails('Consignor or exporter').click();
+      await animalsPages.addresses.editPartyDetails('Consignor').click();
       await animalsPages.consignorEdit.heading.waitFor();
       await runA11yScan();
     });

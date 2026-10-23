@@ -1,5 +1,6 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
+import type { Locator } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import {
   ALL_ANSWERS,
@@ -11,7 +12,11 @@ import {
   type OriginOptions,
   type PartyAnswers,
 } from '@domain/animals/constants/journey-options';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
+import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
+import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
+import { fileUploadPaths } from '@resources/file-upload/paths';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
@@ -24,12 +29,15 @@ export type ArrivalDetailsAnswer = {
   documentReference?: string;
 };
 
-// The overview's task rows once a full opening run has answered everything,
-// in the order the overview lists them.
+export type SpeciesAnimalCount = {
+  species: string;
+  animalCount: number;
+};
+
 export const OPENING_RUN_TASKS = [
   'Where is this consignment coming from?',
   'What are you importing?',
-  'Main reason for import',
+  IMPORT_REASON_TASK,
   'Commodity details',
   'Identification details',
   'Additional details',
@@ -40,10 +48,19 @@ export const OPENING_RUN_TASKS = [
   'Contact address for this consignment',
 ] as const;
 
-// After the arrival date, in the app's own d/m/yyyy.
 export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffset: 2 });
+
 export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
 export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
+
+const timestampedReference = (referencePrefix: string): string => `${referencePrefix}${Date.now()}`;
+
+export const certificateDocument = (referencePrefix: string): AccompanyingDocumentAnswer => ({
+  reference: timestampedReference(referencePrefix),
+  issueDate: '03/01/2026',
+  filePath: fileUploadPaths.safeFile1kbPdf,
+  type: 'VETERINARY_HEALTH_CERTIFICATE',
+});
 
 export class AnimalsJourney {
   constructor(
@@ -70,23 +87,16 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
-  // Origin answered — most other tasks are gated behind it, so callers that
-  // want a usable task list reach the overview this way, not via startNotificationAtOrigin().
   async startNotification(): Promise<string> {
     const referenceNumber = await this.createNotificationAtOrigin();
     await this.fillOriginOfImport();
     await this.saveOriginOfImport();
-    // Wait for the save to land before navigating away. Opening the overview
-    // regardless hides a failed save — the run then dies several steps later on
-    // a task stuck at "Not yet started", pointing at the wrong page entirely.
     await this.animalsPages.originOfImport.heading.waitFor({ ...pageLoadWait, state: 'hidden' });
     await this.animalsPages.overview.open(referenceNumber);
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     return referenceNumber;
   }
 
-  // Origin unanswered — the entry guard is satisfied by the opening-run
-  // marker set at creation, not by answering origin itself.
   async startNotificationAtOrigin(): Promise<string> {
     const referenceNumber = await this.createNotificationAtOrigin();
     await this.animalsPages.overview.open(referenceNumber);
@@ -94,17 +104,16 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
-  // Origin unanswered, as a brand-new notification first shows it.
   async toOriginOfImport(): Promise<void> {
     await this.createNotificationAtOrigin();
   }
 
   async fillOriginOfImport(options: OriginOptions = {}): Promise<void> {
-    await this.animalsPages.originOfImport.selectCountry((options.countryCode ?? MANDATORY_ANSWERS.countryCode).display);
+    await this.animalsPages.originOfImport.country.choose((options.countryCode ?? MANDATORY_ANSWERS.countryCode).display);
     const requiresRegionCode = options.requiresRegionCode ?? MANDATORY_ANSWERS.requiresRegionCode;
     await this.animalsPages.originOfImport.radioRequiresOriginCode(requiresRegionCode).check();
     if (requiresRegionCode === 'Yes') {
-      await this.animalsPages.originOfImport.regionCode.fill(options.regionCode ?? '75');
+      await this.animalsPages.originOfImport.regionCode.fill(options.regionCode ?? DEFAULT_REGION_CODE);
     }
     if (options.internalReference) {
       await this.animalsPages.originOfImport.internalReference.fill(options.internalReference);
@@ -115,6 +124,11 @@ export class AnimalsJourney {
     await this.animalsPages.originOfImport.saveAndContinue.click();
   }
 
+  async fillAndSaveOriginWithRegionCode(regionCode: string, options: OriginOptions = {}): Promise<void> {
+    await this.fillOriginOfImport({ ...options, requiresRegionCode: 'Yes', regionCode });
+    await this.saveOriginOfImport();
+  }
+
   async answerOrigin(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Where is this consignment coming from?').click();
     await this.fillOriginOfImport(answers);
@@ -122,13 +136,43 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async answerCommodity(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
-    await this.animalsPages.overview.task('What are you importing?').click();
-    await this.animalsPages.commoditySelection.selectSpecies([answers.species.display]);
+  private async chooseSpeciesAndOpenCommodityDetails(species: string[]): Promise<void> {
+    await this.animalsPages.commoditySelection.selectSpecies(species);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Commodity details').click();
     await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
+  }
+
+  private async openIdentificationFromOverview(): Promise<void> {
+    await this.animalsPages.overview.task('Identification details').click();
+    await this.animalsPages.animalIdentification.heading.waitFor(pageLoadWait);
+  }
+
+  private async saveCountsAndReturnToOverview(): Promise<void> {
+    await this.animalsPages.consignmentDetails.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+  }
+
+  private currentReferenceNumber(): string {
+    const { referenceNumber } = this.context;
+    if (!referenceNumber) throw new Error('No notification has been started');
+    return referenceNumber;
+  }
+
+  private async openCurrentOverview(): Promise<void> {
+    await this.animalsPages.overview.open(this.currentReferenceNumber());
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+  }
+
+  private async openAdditionalDetailsFromOverview(): Promise<void> {
+    await this.animalsPages.overview.task('Additional details').click();
+    await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
+  }
+
+  async answerCommodity(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+    await this.animalsPages.overview.task('What are you importing?').click();
+    await this.chooseSpeciesAndOpenCommodityDetails([answers.species.display]);
     await this.animalsPages.consignmentDetails.numberOfAnimals.fill(String(answers.noOfAnimals));
     if (answers.noOfPackages !== undefined) {
       await this.animalsPages.consignmentDetails.numberOfPackages.fill(String(answers.noOfPackages));
@@ -148,15 +192,12 @@ export class AnimalsJourney {
   }
 
   async answerReasonAndAdditionalDetails(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
-    await this.animalsPages.overview.task('Main reason for import').click();
+    await this.animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await this.animalsPages.importReason.reason(answers.importReason.display).check();
-    // The purpose is a conditional reveal under the reason, so both answers go
-    // in on the one submit.
     await this.animalsPages.importReason.purpose(answers.internalMarketPurpose.display).check();
     await this.animalsPages.importReason.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    await this.animalsPages.overview.task('Additional details').click();
-    await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
+    await this.openAdditionalDetailsFromOverview();
     await this.animalsPages.additionalDetails.certifiedFor(answers.certifiedFor.display).check();
     await this.animalsPages.additionalDetails.containsUnweanedAnimals(answers.unweanedAnimals).check();
     await this.animalsPages.additionalDetails.saveAndContinue.click();
@@ -176,7 +217,7 @@ export class AnimalsJourney {
 
   async addFiveParties(names: PartyAnswers = MANDATORY_ANSWERS.parties): Promise<void> {
     const parties = [
-      ['Consignor or exporter', names.consignor, 'consignorSelection'],
+      ['Consignor', names.consignor, 'consignorSelection'],
       ['Place of destination', names.placeOfDestination, 'destinationSelection'],
       ['Place of origin', names.placeOfOrigin, 'placeOfOriginSelection'],
       ['Consignee', names.consignee, 'consigneeSelection'],
@@ -197,11 +238,10 @@ export class AnimalsJourney {
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
   }
 
-  // From the addresses page: answer the CPH number, then leave the page.
   async addCphAndLeaveAddresses(cph: CphAnswer = MANDATORY_ANSWERS.cph): Promise<void> {
     await this.animalsPages.addresses.addCph.click();
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
-    await this.animalsPages.cphNumber.fillCphNumber(cph.county, cph.parish, cph.holding);
+    await this.animalsPages.cphNumber.fillCphNumber(cph);
     await this.animalsPages.cphNumber.saveAndContinue.click();
     await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     await this.animalsPages.addresses.continueButton.click();
@@ -222,14 +262,12 @@ export class AnimalsJourney {
     documentReference = MANDATORY_ANSWERS.transportDocumentReference,
   }: ArrivalDetailsAnswer = {}): Promise<void> {
     await this.animalsPages.arrivalDetails.fillArrivalDate(date);
-    await this.animalsPages.arrivalDetails.selectPort(port);
+    await this.animalsPages.arrivalDetails.portOfEntry.choose(port);
     await this.animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: means });
     await this.animalsPages.arrivalDetails.transportIdentification.fill(transportId);
     await this.animalsPages.arrivalDetails.transportDocumentReference.fill(documentReference);
   }
 
-  // On the documents page: add one document and wait for its virus scan, so
-  // the submission carries it.
   async uploadDocumentAndWaitForScan(document: AccompanyingDocumentAnswer): Promise<void> {
     await this.animalsPages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
     await this.animalsPages.accompanyingDocuments.saveAndAddAnother.click();
@@ -239,15 +277,17 @@ export class AnimalsJourney {
       .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
   }
 
+  async uploadScannedDocument(): Promise<Locator> {
+    const reference = timestampedReference('PW');
+    await this.uploadDocumentAndWaitForScan({ ...ALL_ANSWERS.accompanyingDocument, reference });
+    return this.animalsPages.accompanyingDocuments.documentRow(reference);
+  }
+
   async chooseContactAddress(name: string = MANDATORY_ANSWERS.contactAddress): Promise<void> {
     await this.animalsPages.contactAddress.address(name).check();
     await this.animalsPages.contactAddress.saveAndContinue.click();
   }
 
-  // Re-navigate from the hub to the transporter list page within an already
-  // unlocked journey. The page itself saves through unfilled; it is filled
-  // because a road vehicle keeps transited countries in scope, which is
-  // answered on the way.
   async reachTransporterFromHub(): Promise<void> {
     await this.animalsPages.overview.task('Arrival details').click();
     await this.animalsPages.arrivalDetails.heading.waitFor(pageLoadWait);
@@ -261,6 +301,13 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
+  }
+
+  async chooseTransporterType(type: 'Commercial' | 'Private'): Promise<void> {
+    await this.animalsPages.transporter.addTransporter.click();
+    await this.animalsPages.transporterAdd.heading.waitFor(pageLoadWait);
+    await this.animalsPages.transporterAdd.transporterType(type).check();
+    await this.animalsPages.transporterAdd.saveAndContinue.click();
   }
 
   async answerTransport(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
@@ -317,35 +364,44 @@ export class AnimalsJourney {
     await this.answerAccompanyingDocument(answers);
   }
 
-  // Reach helpers — land on a page UNFILLED so a per-page spec can drive it.
-  // The commodity section (and everything downstream) is gated behind origin,
-  // so any reach past origin runs unlockSections first.
   async toCommoditySelection(): Promise<void> {
     await this.startNotification();
     await this.animalsPages.overview.task('What are you importing?').click();
     await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
   }
 
-  async toConsignmentDetails(): Promise<void> {
+  async toConsignmentDetails(species: string[] = [MANDATORY_ANSWERS.species.display]): Promise<void> {
     await this.toCommoditySelection();
-    await this.animalsPages.commoditySelection.selectSpecies([MANDATORY_ANSWERS.species.display]);
-    await this.animalsPages.commoditySelection.saveAndContinue.click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    await this.animalsPages.overview.task('Commodity details').click();
-    await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await this.chooseSpeciesAndOpenCommodityDetails(species);
+  }
+
+  async addCommodityToCurrentNotification(species: string): Promise<void> {
+    await this.openCurrentOverview();
+    await this.animalsPages.overview.task('What are you importing?').click();
+    await this.chooseSpeciesAndOpenCommodityDetails([species]);
+    await this.animalsPages.consignmentDetails.fillEveryAnimalCount('1');
+    await this.saveCountsAndReturnToOverview();
   }
 
   async toAnimalIdentification(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.animalsPages.overview.task('Identification details').click();
-    await this.animalsPages.animalIdentification.heading.waitFor(pageLoadWait);
+    await this.openIdentificationFromOverview();
+  }
+
+  async toAnimalIdentificationWithCounts(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
+    await this.toConsignmentDetails(speciesCounts.map(({ species }) => species));
+    for (const { species, animalCount } of speciesCounts) {
+      await this.animalsPages.consignmentDetails.fillAnimalCountFor(species, animalCount);
+    }
+    await this.saveCountsAndReturnToOverview();
+    await this.openIdentificationFromOverview();
   }
 
   async toImportReason(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.animalsPages.overview.task('Main reason for import').click();
+    await this.animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await this.animalsPages.importReason.heading.waitFor(pageLoadWait);
   }
 
@@ -355,8 +411,18 @@ export class AnimalsJourney {
     await this.animalsPages.importReason.purpose('Breeding').check();
     await this.animalsPages.importReason.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    await this.animalsPages.overview.task('Additional details').click();
-    await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
+    await this.openAdditionalDetailsFromOverview();
+  }
+
+  async toAdditionalDetailsOfCurrentNotification(): Promise<void> {
+    await this.openCurrentOverview();
+    await this.openAdditionalDetailsFromOverview();
+  }
+
+  async toRolesAndAddressesOfCurrentNotification(): Promise<void> {
+    await this.openCurrentOverview();
+    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
   }
 
   async toCphNumber(): Promise<void> {
@@ -390,9 +456,6 @@ export class AnimalsJourney {
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
   }
 
-  // The commercial arm of the add route: the list first, then the type
-  // question, and then the form for a commercial transporter that is not on
-  // the list.
   async toCommercialTransporter(): Promise<void> {
     await this.toTransporter();
     await this.animalsPages.transporter.addTransporter.click();
@@ -402,10 +465,6 @@ export class AnimalsJourney {
     await this.animalsPages.commercialTransporter.heading.waitFor(pageLoadWait);
   }
 
-  // The approved commercial register, which nothing links to now that the add
-  // route's commercial arm is the add-commercial form. It is reached by its own
-  // URL, through that arm so the transporter type is answered — which is what
-  // puts the commercial answer the register writes in scope.
   async toTransporterSelection(): Promise<void> {
     await this.toCommercialTransporter();
     await this.animalsPages.transporterSelection.open(this.animalsPages.commercialTransporter.referenceNumberFromUrl());
@@ -432,7 +491,6 @@ export class AnimalsJourney {
     await this.fromOverviewToDeclaration();
   }
 
-  // Only the answers the frontend requires, unless the caller passes a fuller set.
   async submitNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.toDeclaration(answers);
     await this.confirmDeclaration();
@@ -515,7 +573,7 @@ export class AnimalsJourney {
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
       port: pointOfEntries.heathrowAirport.display,
-      means: 'Airplane',
+      means: meansOfTransport.airplane.display,
       transportId: 'BA0117',
       documentReference: 'AWB-2026-0001',
     });
@@ -575,7 +633,7 @@ export class AnimalsJourney {
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails({
       port: pointOfEntries.holyheadPort.display,
-      means: 'Vessel',
+      means: meansOfTransport.vessel.display,
       transportId: HORSE_TRANSPORT_ID,
       documentReference: 'BOL-2026-0001',
     });
@@ -600,15 +658,24 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
+  async toDeclarationOfCurrentNotification(): Promise<void> {
+    await this.animalsPages.notificationView.open(this.currentReferenceNumber());
+    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.continueFromReviewToDeclaration();
+  }
+
   async submitFromReview(): Promise<void> {
-    await this.animalsPages.notificationView.continueButton.click();
-    await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
+    await this.continueFromReviewToDeclaration();
     await this.confirmDeclaration();
   }
 
   private async fromOverviewToDeclaration(): Promise<void> {
     await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.continueFromReviewToDeclaration();
+  }
+
+  private async continueFromReviewToDeclaration(): Promise<void> {
     await this.animalsPages.notificationView.continueButton.click();
     await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
   }
@@ -616,6 +683,6 @@ export class AnimalsJourney {
   private async confirmDeclaration(): Promise<void> {
     await this.animalsPages.declaration.confirmation.check();
     await this.animalsPages.declaration.continueButton.click();
-    await this.pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor(pageLoadWait);
+    await this.animalsPages.confirmation.heading.waitFor(pageLoadWait);
   }
 }
