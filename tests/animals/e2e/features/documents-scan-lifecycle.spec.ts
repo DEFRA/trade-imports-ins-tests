@@ -12,7 +12,7 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     await animalsJourney.toAccompanyingDocuments();
   });
 
-  test('infected upload: accepted while scanning, then Rejected with error summary and no view link', async ({
+  test('infected upload: accepted while scanning, then Virus found with error summary and no view link', async ({
     pages,
     animalsPages,
   }, testInfo) => {
@@ -24,9 +24,9 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     const row = animalsPages.accompanyingDocuments.documentRow(reference);
-    await firstScanStatus(row, 'Rejected');
+    await firstScanStatus(row, 'Virus found');
 
-    await expect(row).toContainText('Rejected', { timeout: fileUploadTimeouts.virusScanComplete });
+    await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(
       pages.page.getByText(`${eicar.fileName} cannot be used. Remove it and try again with a different file.`).first(),
