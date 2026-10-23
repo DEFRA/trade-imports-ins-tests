@@ -21,9 +21,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan({ exclude: govukConditionalRevealRadioOnOrigin });
     });
 
-    // The entry guard holds the journey on origin until it is answered, so the
-    // overview is only reachable once origin has been saved.
-    await test.step('Overview', async () => {
+    await test.step('Overview after origin is saved', async () => {
       const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
       await animalsJourney.fillOriginOfImport();
       await animalsJourney.saveOriginOfImport();
