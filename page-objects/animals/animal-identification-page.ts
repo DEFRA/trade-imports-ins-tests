@@ -31,7 +31,7 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
   }
 
   savedAnimalRow(species: string, number: number): Locator {
-    return this.page.getByRole('row').filter({ hasText: `${species} ${number}` });
+    return this.page.getByRole('row').filter({ has: this.page.getByRole('cell', { name: `${species} ${number}`, exact: true }) });
   }
 
   identifierColumn(name: string): Locator {
