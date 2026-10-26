@@ -12,7 +12,7 @@ set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLAYWRIGHT_IMAGE="${PLAYWRIGHT_IMAGE:-mcr.microsoft.com/playwright:v1.63.0-jammy}"
+PLAYWRIGHT_IMAGE="${PLAYWRIGHT_IMAGE:-mcr.microsoft.com/playwright:v1.64.1-jammy}"
 # Run as the invoking user's UID:GID so bind-mounted reports and snapshots are host-owned, not root.
 CONTAINER_USER="${CONTAINER_USER:-$(id -u):$(id -g)}"
 NODE_MODULES_VOLUME="${NODE_MODULES_VOLUME:-trade-imports-ins-tests-container-nm}"

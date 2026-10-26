@@ -1,6 +1,7 @@
 import { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
 import { formattedValue } from '@adapters/http/dataverse-client';
 import { animalsDynamics } from '@config/animals-dynamics';
+import { defaultUser } from '@config/users';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
 import { test, expect } from '@fixtures';
@@ -10,7 +11,9 @@ import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 const SUBMISSION_COLUMNS = [
   'defraimp_name',
   'defraimp_status',
+  'defraimp_version',
   'defraimp_submissiondate',
+  'defraimp_submittedbydisplayname',
 ] as const satisfies readonly (keyof AnimalsDynamicsImporterNotification)[];
 
 const AMENDMENT_COLUMNS = [
@@ -53,6 +56,8 @@ test.describe('PIMS Dynamics notification events', { tag: '@dynamics' }, () => {
     const [row] = await dynamics.findNotificationsScopedToColumns(referenceNumber, SUBMISSION_COLUMNS);
     expect.soft(row.defraimp_name).toBe(referenceNumber);
     expect.soft(formattedValue(row, 'defraimp_status')).toBe('Submitted');
+    expect.soft(row.defraimp_version).toBe(1);
+    expect.soft(row.defraimp_submittedbydisplayname).toBe(defaultUser.displayName);
     expect.soft(row.defraimp_submissiondate).not.toBeNull();
     expect
       .soft(Math.abs(Date.parse(row.defraimp_submissiondate ?? '') - submittedAt))
@@ -101,7 +106,9 @@ test.describe('PIMS Dynamics notification events', { tag: '@dynamics' }, () => {
     journeyContext,
     externalRequest,
   }) => {
-    test.skip(true, 'The dynamics gateway does not forward NotificationSubmissionDeleted to PIMS Dynamics yet');
+    // The backend already emits NotificationSubmissionDeleted, but the gateway's allow-list drops it, so adding
+    // that one entry (plus a forwarding test) is our only change, to be merged once PIMS can consume it.
+    test.fixme(true, 'The dynamics gateway does not forward NotificationSubmissionDeleted to PIMS Dynamics yet');
     // The delete journey plus the deletion's PIMS Dynamics poll.
     test.setTimeout(test.info().timeout + 5 * 60_000);
     const dynamics = new AnimalsDynamicsClient(externalRequest);

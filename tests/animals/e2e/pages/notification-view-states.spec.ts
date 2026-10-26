@@ -54,7 +54,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
 
   test.describe('DRAFT ready to submit', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
-      await animalsSeededJourney.createDraftNotification('readyToSubmit');
+      await animalsSeededJourney.createDraftNotification();
       await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
     });
 

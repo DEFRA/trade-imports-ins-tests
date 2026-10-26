@@ -31,13 +31,19 @@ export function countryByCode(code: string): { value: string; display: string } 
   return { value: country.code, display: country.name };
 }
 
-/** A country subdivision, which the origin page offers by its own name alongside the countries. */
+function subdivisionNamedWithCountry(subDivision: CapturedSubDivision, country: CapturedCountry): string {
+  return `${subDivision.name} (${country.name})`;
+}
+
+/** A country subdivision, whose display is "<subdivision> (<country>)". */
 export function subdivisionByCode(code: string): { value: string; display: string } {
-  const subDivision = countriesOrigin.flatMap((country) => country.subDivisions).find((candidate) => candidate.code === code);
-  if (!subDivision) {
-    throw new Error(`Subdivision ${code} is not in the captured origin list`);
+  for (const country of countriesOrigin) {
+    const subDivision = country.subDivisions.find((candidate) => candidate.code === code);
+    if (subDivision) {
+      return { value: subDivision.code, display: subdivisionNamedWithCountry(subDivision, country) };
+    }
   }
-  return { value: subDivision.code, display: subDivision.name };
+  throw new Error(`Subdivision ${code} is not in the captured origin list`);
 }
 
 function countryNamesWithSubdivisions(subdivisionName: (subDivision: CapturedSubDivision, country: CapturedCountry) => string): string[] {
@@ -46,17 +52,17 @@ function countryNamesWithSubdivisions(subdivisionName: (subDivision: CapturedSub
     .sort((first, second) => first.localeCompare(second));
 }
 
-/** The origin page lists each origin country and each of its subdivisions, sorted by name. */
-export function originPageCountryNames(): string[] {
+/** Each origin country and each of its subdivisions by its own name, sorted by name. */
+export function countryAndSubdivisionNames(): string[] {
   return countryNamesWithSubdivisions((subDivision) => subDivision.name);
 }
 
-/** A destination country select lists each origin country and each territory named "<territory> (<country>)", sorted by name. */
-export function destinationCountryNames(): string[] {
-  return countryNamesWithSubdivisions((subDivision, country) => `${subDivision.name} (${country.name})`);
+/** Each origin country and each of its subdivisions named "<subdivision> (<country>)", sorted by name. */
+export function countryAndSubdivisionNamesWithCountry(): string[] {
+  return countryNamesWithSubdivisions(subdivisionNamedWithCountry);
 }
 
-/** Every port select and review row reads '<name> - <code>'. */
+/** The label of a port, '<name> - <code>'. */
 export function portLabel(port: CapturedPort): string {
   return `${port.name} - ${port.code}`;
 }

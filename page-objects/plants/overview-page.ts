@@ -37,6 +37,10 @@ export class PlantsOverviewPage extends PlantsNotificationPage {
     return this.page.getByRole('link', { name: title, exact: true });
   }
 
+  get reviewTaskLink(): Locator {
+    return this.taskRowLink('Check and submit');
+  }
+
   taskRow(title: string): Locator {
     return this.page.getByRole('listitem').filter({ has: this.taskRowLink(title) });
   }

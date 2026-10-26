@@ -4,6 +4,7 @@ import { type NotificationDocument } from '@domain/animals/models/db/notificatio
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { CREATE_PATH } from '@flows/animals/seeded-journey';
+import { CPH_NUMBER, MANDATORY_ANSWERS as answers } from '@domain/animals/constants/journey-options';
 
 const CREATED_AT_ORIGIN = new RegExp(`^${CREATE_PATH}/([^/]+)/origin$`);
 
@@ -70,10 +71,10 @@ test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
     'seeds a complete journey into every section of the notification document',
     { tag: '@animals-frontend' },
     async ({ animalsSeededJourney, addressBookApi }) => {
-      const consignor = await addressBookApi.findByName('Astra Rosales');
-      const placeOfOrigin = await addressBookApi.findByName('Origin Farm');
+      const consignor = await addressBookApi.findByName(answers.parties.consignor);
+      const placeOfOrigin = await addressBookApi.findByName(answers.parties.placeOfOrigin);
 
-      const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+      const referenceNumber = await animalsSeededJourney.createDraftNotification();
 
       const client = new MongoDbClient();
       try {
@@ -87,21 +88,21 @@ test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
         const [species] = complement.species;
 
         expect(doc.status).toBe('DRAFT');
-        expect(notification.origin.countryCode).toBe('FR');
-        expect(species.earTag).toBe('UK123456789012');
-        expect(complement.totalNoOfAnimals).toBe(1);
-        expect(notification.reasonForImport).toBe('internalMarket');
-        expect(notification.additionalDetails.unweanedAnimals).toBe('no');
+        expect(notification.origin.countryCode).toBe(answers.countryCode.value);
+        expect(species.earTag).toBe(answers.earTag);
+        expect(complement.totalNoOfAnimals).toBe(answers.noOfAnimals);
+        expect(notification.reasonForImport).toBe(answers.importReason.value);
+        expect(notification.additionalDetails.unweanedAnimals).toBe(answers.unweanedAnimals.toLowerCase());
         // Each party is a copy of the record picked, with no link back to the book.
         expect(notification.consignor).not.toHaveProperty('addressId');
         expect(notification.consignor?.name).toBe(consignor.name);
         expect(notification.placeOfOrigin?.name).toBe(placeOfOrigin.name);
         expect(notification.placeOfOrigin?.address?.postcode).toBe(placeOfOrigin.postcode);
-        expect(notification.cphNumber).toBe('123456789');
-        expect(notification.transport.portOfEntry).toBe('GB ABD');
+        expect(notification.cphNumber).toBe(CPH_NUMBER);
+        expect(notification.transport.portOfEntry).toBe(answers.pointOfEntry.value);
         expect(notification.transport.arrivalDate).toBeDefined();
         expect(notification.transport.transporter?.approvalNumber).toBe('ES-T2-45001294');
-        expect(notification.consignment?.name).toBe('Animal and Plant Health Agency');
+        expect(notification.consignment?.name).toBe(answers.contactAddress);
       } finally {
         await client.close();
       }

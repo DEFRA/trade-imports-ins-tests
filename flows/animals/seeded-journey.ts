@@ -3,14 +3,15 @@ import { pageLoadWait } from '@config/timeouts';
 import type { FrontendFormClient } from '@adapters/http/frontend-form-client';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import {
-  PARTY_NAMES,
   declarationStep,
   seedSteps,
+  type DraftStage,
   type PartyIds,
+  type PartyNames,
   type PartyRole,
-  type SeedDepth,
   type SeedStep,
-} from '@domain/animals/fixtures/seeded-journey';
+} from '@flows/animals/seed-form-steps';
+import { MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { SET_BASES } from '@page-objects/shared/sets';
 
@@ -27,7 +28,7 @@ const concurrencyTokenIn = (html: string, slug: string): string => {
 };
 
 export class AnimalsSeededJourney {
-  private parties: PartyIds | undefined;
+  private readonly partyIdByName = new Map<string, string>();
 
   constructor(
     private readonly forms: FrontendFormClient,
@@ -44,9 +45,9 @@ export class AnimalsSeededJourney {
     return this.remember(referenceNumber);
   }
 
-  async createDraftNotification(depth: SeedDepth = 'readyToSubmit'): Promise<string> {
+  async createDraftNotification(stage: DraftStage = 'ready', answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
     const referenceNumber = await this.createEmptyNotification();
-    for (const step of await seedSteps(() => this.partyIds(), depth)) {
+    for (const step of await seedSteps((names) => this.partyIds(names), stage, answers)) {
       await this.postSeedStep(`${CREATE_PATH}/${referenceNumber}/${step.slug}`, step);
     }
     return referenceNumber;
@@ -60,8 +61,8 @@ export class AnimalsSeededJourney {
     }
   }
 
-  async createSubmittedNotification(): Promise<string> {
-    const referenceNumber = await this.createDraftNotification('readyToSubmit');
+  async createSubmittedNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
+    const referenceNumber = await this.createDraftNotification('ready', answers);
     const declarationPath = `${CREATE_PATH}/${referenceNumber}/${declarationStep.slug}`;
     const review = await this.forms.getPageHtml(`${CREATE_PATH}/${referenceNumber}/${declarationStep.reviewSlug}`);
     const concurrencyToken = concurrencyTokenIn(review, declarationStep.reviewSlug);
@@ -74,8 +75,8 @@ export class AnimalsSeededJourney {
     return referenceNumber;
   }
 
-  async createAmendNotification(): Promise<string> {
-    const referenceNumber = await this.createSubmittedNotification();
+  async createAmendNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
+    const referenceNumber = await this.createSubmittedNotification(answers);
     await this.amend(referenceNumber);
     return referenceNumber;
   }
@@ -105,12 +106,18 @@ export class AnimalsSeededJourney {
     return targetPage;
   }
 
-  private async partyIds(): Promise<PartyIds> {
-    if (this.parties) return this.parties;
-    const roles = Object.keys(PARTY_NAMES) as PartyRole[];
-    const found = await Promise.all(roles.map((role) => this.addressBook.findByName(PARTY_NAMES[role])));
-    this.parties = Object.fromEntries(roles.map((role, index) => [role, found[index].id])) as PartyIds;
-    return this.parties;
+  private async partyIds(names: PartyNames): Promise<PartyIds> {
+    const roles = Object.keys(names) as PartyRole[];
+    const ids = await Promise.all(roles.map((role) => this.partyIdFor(names[role])));
+    return Object.fromEntries(roles.map((role, index) => [role, ids[index]])) as PartyIds;
+  }
+
+  private async partyIdFor(name: string): Promise<string> {
+    const known = this.partyIdByName.get(name);
+    if (known) return known;
+    const { id } = await this.addressBook.findByName(name);
+    this.partyIdByName.set(name, id);
+    return id;
   }
 
   private remember(referenceNumber: string): string {

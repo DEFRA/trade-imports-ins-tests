@@ -35,7 +35,7 @@ test.describe('Documents limits', { tag: '@duplicated-in-frontend' }, () => {
       });
     }
 
-    await expect(pages.page.locator('#documents-added tbody tr')).toHaveCount(maximumDocuments);
+    await expect(animalsPages.accompanyingDocuments.addedDocumentRows).toHaveCount(maximumDocuments);
     await expect(animalsPages.accompanyingDocuments.saveAndAddAnother).toBeVisible();
     await expect(pages.page.locator('.govuk-error-summary')).toHaveCount(0);
 
@@ -44,9 +44,9 @@ test.describe('Documents limits', { tag: '@duplicated-in-frontend' }, () => {
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
-    await expect(pages.page.getByRole('link', { name: maximumDocumentsMessage })).toBeVisible();
-    await expect(pages.page.locator('.govuk-error-message')).toHaveCount(0);
-    await expect(pages.page.locator('#documents-added tbody tr')).toHaveCount(maximumDocuments);
+    await expect(pages.page.getByRole('link', { name: maximumDocumentsMessage })).toHaveAttribute('href', '#file');
+    await expect(pages.page.locator('.govuk-error-message')).toHaveText(`Error: ${maximumDocumentsMessage}`);
+    await expect(animalsPages.accompanyingDocuments.addedDocumentRows).toHaveCount(maximumDocuments);
     await expect(animalsPages.accompanyingDocuments.documentRow(sixteenthReference)).toHaveCount(0);
   });
 
@@ -72,7 +72,7 @@ test.describe('Documents limits', { tag: '@duplicated-in-frontend' }, () => {
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(pages.page.getByRole('link', { name: OVERSIZE_FILE_MESSAGE })).toBeVisible();
     await expect(pages.page.locator('.govuk-error-message')).toHaveText(`Error: ${OVERSIZE_FILE_MESSAGE}`);
-    await expect(pages.page.locator('#documents-added tbody tr')).toHaveCount(1);
+    await expect(animalsPages.accompanyingDocuments.addedDocumentRows).toHaveCount(1);
     await expect(animalsPages.accompanyingDocuments.documentRow(overReference)).toHaveCount(0);
   });
 });

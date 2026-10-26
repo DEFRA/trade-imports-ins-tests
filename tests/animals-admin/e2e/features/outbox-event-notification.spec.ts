@@ -1,16 +1,13 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { defaultJourneyOptions, CONSIGNOR_NAME, CPH_NUMBER } from '@domain/animals/constants/journey-options';
+import { ALL_ANSWERS as answers, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { countryCodes } from '@domain/animals/constants/country-codes';
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
-import { fileUploadPaths } from '@resources/file-upload/paths';
 import { users } from '@config/users';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_SUBMITTED = 'uk.gov.defra.imports.notification.NotificationSubmitted';
-const POINT_OF_ENTRY = 'GB ABD';
 const SUBDIVISION_FUNCTION_TYPE_CODE = '106';
 const VETERINARY_CERTIFICATE_TYPE_CODE = '853';
 const EXPECTED_ACTOR: OutboxEventActor = {
@@ -40,7 +37,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
 
   test('records a NotificationSubmitted outbox event on UI submission', async ({ animalsJourney, journeyContext }) => {
     test.slow();
-    await animalsJourney.submitNotification();
+    await animalsJourney.submitNotification(answers);
     const referenceNumber = journeyContext.referenceNumber;
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();
@@ -69,20 +66,27 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       expect(data.$type).toBe('gbn-ag');
       expect(data.exchangedDocument.identifier).toBe(referenceNumber);
       expect(data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED');
-      expect(data.exchangedDocument).not.toHaveProperty('referenceDocument');
-      expect(data.specifiedConsignment.consignorParty?.name).toBe(CONSIGNOR_NAME);
-      expect(data.specifiedConsignment.originCountry?.code?.value).toBe(defaultJourneyOptions.countryCode.value);
-      expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(POINT_OF_ENTRY);
+      expect(data.exchangedDocument.referenceDocument).toEqual([
+        {
+          typeCode: VETERINARY_CERTIFICATE_TYPE_CODE,
+          urlId: 'https://refdata.tbc.defra.gov.uk/gbn-ag-document-types',
+          identifier: answers.accompanyingDocument.reference,
+          issueDateTime: '2026-01-03',
+        },
+      ]);
+      expect(data.specifiedConsignment.consignorParty?.name).toBe(answers.parties.consignor);
+      expect(data.specifiedConsignment.originCountry?.code?.value).toBe(answers.countryCode.value);
+      expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(answers.pointOfEntry.value);
       expect(data.specifiedConsignment.includedConsignmentItem).toHaveLength(1);
       const originCountry = data.specifiedConsignment.originCountry;
-      expect(originCountry?.regionOfOriginCode).toBe('FR-75');
+      expect(originCountry?.regionOfOriginCode).toBe(`${answers.countryCode.value}-${answers.regionCode}`);
       expect(originCountry).not.toHaveProperty('subordinateTradeCountrySubDivision');
       expect(data.specifiedConsignment.finalDestinationLocation?.identifier).toBe(CPH_NUMBER);
       expect(data.specifiedConsignment.finalDestinationLocation?.urlId).toBe('https://refdata.tbc.defra.gov.uk/cph_number');
       const transitCountries = data.specifiedConsignment.transitTradeCountry ?? [];
       expect(transitCountries).toHaveLength(2);
-      expect(transitCountries[0].code?.value).toBe('FR');
-      expect(transitCountries[1].code?.value).toBe('BE');
+      expect(transitCountries[0].code?.value).toBe(answers.transitedCountries[0].value);
+      expect(transitCountries[1].code?.value).toBe(answers.transitedCountries[1].value);
       for (const transitCountry of transitCountries) {
         expect(transitCountry).not.toHaveProperty('subordinateTradeCountrySubDivision');
         expect(transitCountry).not.toHaveProperty('regionOfOriginCode');
@@ -90,20 +94,24 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       const [movement] = data.specifiedConsignment.mainCarriageLogisticsTransportMovement ?? [];
       const [transportDocument] = movement.transportContractRelatedReferencedDocument ?? [];
       expect(transportDocument.typeCode).toBe('730');
-      expect(transportDocument.identifier).toBe('CMR-2026-884721');
+      expect(transportDocument.identifier).toBe(answers.transportDocumentReference);
       const tradeLines = data.specifiedConsignment.includedConsignmentItem?.[0].includedTradeLineItem ?? [];
       expect(tradeLines).toHaveLength(1);
       const [line] = tradeLines;
-      expect(line.description).toEqual([commodityLines.cattle.commodityCode]);
-      expect(line.commonName).toBe(commodityLines.cattle.commodityCode);
-      expect(line.scientificName).toBe(commodityLines.cattle.latinName);
-      expect(line.specifiedLineTradeDelivery?.[0].productUnitQuantity.content).toBe(1);
-      expect(line.physicalReferencedLogisticsPackage?.[0].itemQuantity).toBe(5);
+      expect(line.description).toEqual([answers.species.commodityCode]);
+      expect(line.commonName).toBe(answers.species.commodityCode);
+      expect(line.scientificName).toBe(answers.species.latinName);
+      expect(line.specifiedLineTradeDelivery?.[0].productUnitQuantity.content).toBe(answers.noOfAnimals);
+      expect(line.physicalReferencedLogisticsPackage?.[0].itemQuantity).toBe(answers.noOfPackages);
       const animals = line.individualTradeProductInstance ?? [];
       expect(animals).toHaveLength(1);
-      expect(animals[0].identifier).toHaveLength(1);
-      expect(animals[0].identifier?.[0].typeCode).toBe('EAR_TAG');
-      expect(animals[0].identifier?.[0].content).toBe('UK123456789012');
+      expect(animals[0].identifier).toHaveLength(2);
+      expect(animals[0].identifier).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ typeCode: 'EAR_TAG', content: answers.earTag }),
+          expect.objectContaining({ typeCode: 'PASSPORT', content: answers.passportNumber }),
+        ]),
+      );
       expect(actorWithNullableFields(doc.actor)).toEqual(EXPECTED_ACTOR);
       expect(statusChanges).toHaveLength(2);
       expect(statusChanges[0].status).toBe('DRAFT');
@@ -121,7 +129,12 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
     journeyContext,
   }) => {
     test.slow();
-    await animalsJourney.submitNotification({ countryCode: countryCodes.subdivisions.canaryIslands });
+    await animalsJourney.submitNotification({
+      ...MANDATORY_ANSWERS,
+      countryCode: countryCodes.subdivisions.canaryIslands,
+      requiresRegionCode: answers.requiresRegionCode,
+      regionCode: answers.regionCode,
+    });
     const aggregateId = aggregateIdFor(journeyContext.referenceNumber);
     const client = new MongoDbClient();
 
@@ -142,7 +155,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
           functionTypeCode: { content: SUBDIVISION_FUNCTION_TYPE_CODE },
         },
       ]);
-      expect(originCountry?.regionOfOriginCode).toBe('ES-75');
+      expect(originCountry?.regionOfOriginCode).toBe(`ES-${answers.regionCode}`);
     } finally {
       await client.close();
     }
@@ -154,11 +167,9 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
   }) => {
     test.slow();
     const documentReference = `PWREF${Date.now()}`;
-    await animalsJourney.submitNotificationWithDocument({
-      reference: documentReference,
-      issueDate: '03/01/2026',
-      filePath: fileUploadPaths.safeFile1kbPdf,
-      type: 'VETERINARY_HEALTH_CERTIFICATE',
+    await animalsJourney.submitNotification({
+      ...MANDATORY_ANSWERS,
+      accompanyingDocument: { ...answers.accompanyingDocument, reference: documentReference },
     });
     const aggregateId = aggregateIdFor(journeyContext.referenceNumber);
     const client = new MongoDbClient();

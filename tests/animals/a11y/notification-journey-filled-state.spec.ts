@@ -1,5 +1,7 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
-import { test, WCAG_STANDARD, govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@fixtures/a11y';
+import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
+import { govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
@@ -48,7 +50,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import reason', async () => {
-      await animalsPages.overview.task('Main reason for import').click();
+      await animalsPages.overview.task(IMPORT_REASON_TASK).click();
       await animalsPages.importReason.reason('Internal market').check();
       await animalsPages.importReason.purpose('Breeding').check();
       await runA11yScan({ exclude: govukConditionalRevealRadiosOnReason });
@@ -75,10 +77,10 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.overview.heading.waitFor();
     });
 
-    await test.step('Consignor or exporter selection', async () => {
+    await test.step('Consignor selection', async () => {
       await animalsPages.overview.task('Roles and addresses').click();
       await animalsPages.addresses.heading.waitFor();
-      await animalsPages.addresses.addParty('Consignor or exporter').click();
+      await animalsPages.addresses.addParty('Consignor').click();
       await animalsPages.consignorSelection.select('Astra Rosales');
       await runA11yScan();
       await animalsPages.consignorSelection.saveAndContinue.click();

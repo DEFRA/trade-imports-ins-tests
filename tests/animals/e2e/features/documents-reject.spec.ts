@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { EMPTY_DOCUMENT_LIST_CARD_TEXT } from '@page-objects/animals/accompanying-documents-page';
 import { writeSyntheticFile } from '@utils/synthetic-file-writer';
 import { ABOVE_PAYLOAD_CAP_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-upload/constants';
 
@@ -16,8 +17,8 @@ test.describe('Documents reject flows', { tag: '@duplicated-in-frontend' }, () =
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
-    // The oversize message renders both client-side and server-side; either satisfies the reject.
     await expect(pages.page.getByText(OVERSIZE_FILE_MESSAGE).first()).toBeVisible();
-    await expect(pages.page.getByText('You have not added any documents yet.')).toBeVisible();
+    await expect(animalsPages.accompanyingDocuments.addedDocumentsTable).toHaveCount(0);
+    await expect(animalsPages.accompanyingDocuments.fileUploadCard).toHaveText(EMPTY_DOCUMENT_LIST_CARD_TEXT);
   });
 });

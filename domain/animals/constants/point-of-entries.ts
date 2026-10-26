@@ -1,4 +1,4 @@
-import { portByCode } from '@domain/shared/fixtures/reference-data';
+import { portByCode } from '@resources/reference-data/reference-data';
 
 export const pointOfEntries = {
   aberdeen: portByCode('GB DYC'),
@@ -10,3 +10,6 @@ export const pointOfEntries = {
 } as const;
 
 export type PointOfEntry = (typeof pointOfEntries)[keyof typeof pointOfEntries];
+
+export const PORT_OF_ENTRY_SELECT_TEXT = 'Select a port';
+export const PORT_OF_ENTRY_SEARCH_PLACEHOLDER = 'Select a port';

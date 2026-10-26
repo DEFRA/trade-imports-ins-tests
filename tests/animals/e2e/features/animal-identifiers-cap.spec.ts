@@ -3,17 +3,15 @@ import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { test, expect } from '@fixtures';
 
 test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () => {
-  test('the N-of-M counter caps records at the declared count, remove frees a slot, and a count drop is blocked with an error naming the species', async ({
+  test('the N-of-M counter caps identifier records at the declared count, the full card shows only its saved animals, Remove frees a slot, and a count drop is refused with an error naming the species that lands on its card under the 0102 section', async ({
     animalsJourney,
     pages,
     animalsPages,
   }) => {
     test.slow();
-    const referenceNumber = await animalsJourney.startNotification();
-    await animalsJourney.addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber, [commodityLines.cattle], '2');
+    await animalsJourney.toAnimalIdentificationWithCounts([{ species: commodityLines.cattle, animalCount: 2 }]);
 
-    await animalsPages.overview.task('Identification details').click();
-    await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.cattle.latinName} 1 of 2` })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 1 of 2' })).toBeVisible();
     await animalsPages.animalIdentification.earTag.fill('UK000000000001');
     await animalsPages.animalIdentification.saveAndAddAnother.click();
     await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.cattle.latinName} 2 of 2` })).toBeVisible();
@@ -28,13 +26,15 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
 
     await animalsPages.animalIdentification.earTag.fill('UK000000000002');
     await animalsPages.animalIdentification.saveAndFinish.click();
-    await expect(
-      pages.page.getByText(`You have entered details for all 2 ${commodityLines.cattle.latinName} animals`, {
-        exact: false,
-      }),
-    ).toBeVisible();
-    await expect(animalsPages.animalIdentification.earTag).toHaveCount(0);
-    await expect(animalsPages.animalIdentification.saveAndAddAnother).toHaveCount(0);
+    const card = animalsPages.animalIdentification.speciesCard(commodityLines.cattle.latinName);
+    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle.latinName, 1)).toBeVisible();
+    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle.latinName, 2)).toBeVisible();
+    await expect(card.getByRole('button')).toHaveText([/^Remove/, /^Remove/]);
+    await expect(card.getByRole('textbox')).toHaveCount(0);
+    await expect(card.getByRole('paragraph')).toHaveCount(0);
+    await expect(card.getByRole('heading')).toHaveText([commodityLines.cattle.latinName]);
+    await expect(card.getByRole('link')).toHaveText([/^Change number of animals/]);
+    await expect(animalsPages.animalIdentification.savedAnimalsRows(commodityLines.cattle.latinName)).toHaveCount(2);
 
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
@@ -49,13 +49,16 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await expect(dropError).toBeVisible();
     await dropError.click();
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/#identification-card-0$/);
+    await expect(animalsPages.animalIdentification.commodityHeading(commodityLines.cattle.commodityCode)).toBeVisible();
+    await expect(card.getByRole('heading', { name: commodityLines.cattle.latinName, exact: true })).toBeVisible();
     await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle.latinName, 2)).toBeVisible();
 
     await animalsPages.animalIdentification
       .savedAnimalRow(commodityLines.cattle.latinName, 2)
       .getByRole('button', { name: 'Remove' })
       .click();
-    await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.cattle.latinName} 2 of 2` })).toBeVisible();
+    await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 2 of 2' })).toBeVisible();
 
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();

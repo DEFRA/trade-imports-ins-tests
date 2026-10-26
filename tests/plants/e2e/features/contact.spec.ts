@@ -1,7 +1,7 @@
 import type { AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { portByCode } from '@domain/shared/fixtures/reference-data';
+import { portByCode } from '@resources/reference-data/reference-data';
 import type { PlantsPages } from '@page-objects';
 import { nurseryAddress, type PlantsJourney } from '@flows/plants/journey';
 
@@ -23,7 +23,6 @@ test.describe('High-risk plants contact', () => {
     async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
       const token = randomUUID();
       const records: AddressBookRecord[] = [];
-      // The book lists newest first, so the newer records fill page one and push the first onto page two.
       for (let index = 0; index <= PICKER_PAGE_SIZE; index++) {
         records.push(await addressBookApi.createAddress(nurseryAddress(`Contact ${token} ${index}`)));
       }
@@ -35,14 +34,14 @@ test.describe('High-risk plants contact', () => {
       await expect(contact.heading).toBeVisible();
 
       await contact.searchFor(token);
-      await expect(contact.resultsCaption).toHaveText('Showing 5 of 6 addresses');
+      await expect(contact.resultsSummary).toHaveText('Showing 5 out of 6 results');
       await expect(contact.address(target.name)).toHaveCount(0);
 
       await contact.pageLink(2).click();
-      await expect(contact.resultsCaption).toHaveText('Showing 1 of 6 addresses');
+      await expect(contact.resultsSummary).toHaveText('Showing 1 out of 6 results');
 
       await contact.address(target.name).check();
-      await contact.btnSaveAndContinue.click();
+      await contact.saveAndContinue.click();
       await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
       await expect(plantsPages.overview.taskRow(CONTACT)).toContainText('Completed');
       const review = pages.page.getByRole('listitem').filter({ hasText: 'Check and submit' });
@@ -65,20 +64,20 @@ test.describe('High-risk plants contact', () => {
     const reference = await openContact(plantsPages, plantsJourney);
     await plantsPages.consignmentContactSelect.searchFor(address.name);
     await plantsPages.consignmentContactSelect.address(address.name).check();
-    await plantsPages.consignmentContactSelect.btnSaveAndContinue.click();
+    await plantsPages.consignmentContactSelect.saveAndContinue.click();
     await plantsPages.arrivalDetails.open(reference);
     await plantsPages.arrivalDetails.dateQuestionLabelled('Expected date of arrival').fill('27/3/2027');
     await plantsPages.arrivalDetails.arrivalTime.fill('14:30');
-    await plantsPages.arrivalDetails.selectPlaceOfLanding(portByCode('GB ABD').display);
-    await plantsPages.arrivalDetails.btnSaveAndContinue.click();
+    await plantsPages.arrivalDetails.placeOfLanding.choose(portByCode('GB ABD').display);
+    await plantsPages.arrivalDetails.saveAndContinue.click();
     await plantsPages.placeOfDestination.open(reference);
     await plantsPages.placeOfDestination.searchFor(address.name);
     await plantsPages.placeOfDestination.address(address.name).check();
-    await plantsPages.placeOfDestination.btnSaveAndContinue.click();
+    await plantsPages.placeOfDestination.saveAndContinue.click();
     await plantsPages.identificationNumbers.open(reference);
     await plantsPages.identificationNumbers.producer.fill('P123');
     await plantsPages.identificationNumbers.crop.fill('C123');
-    await plantsPages.identificationNumbers.btnSaveAndContinue.click();
+    await plantsPages.identificationNumbers.saveAndContinue.click();
     await plantsPages.overview.open(reference);
     await pages.page.getByRole('link', { name: 'Check and submit', exact: true }).click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
@@ -103,7 +102,7 @@ test.describe('High-risk plants contact', () => {
     test(`blank contact permits save and ${action} and leaves the row incomplete`, async ({ pages, plantsPages, plantsJourney }) => {
       const reference = await openContact(plantsPages, plantsJourney);
       const contact = plantsPages.consignmentContactSelect;
-      const button = action === 'continue' ? contact.btnSaveAndContinue : contact.saveAndReturnToOverview;
+      const button = action === 'continue' ? contact.saveAndContinue : contact.saveAndReturnToOverview;
       await button.click();
       await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
       await expect(plantsPages.overview.taskRow(CONTACT)).toContainText('Not yet started');

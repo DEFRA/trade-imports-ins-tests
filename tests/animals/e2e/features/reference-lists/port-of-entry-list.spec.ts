@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
-import { portLabel, portsOfEntry } from '@domain/shared/fixtures/reference-data';
+import { portLabel, portsOfEntry } from '@resources/reference-data/reference-data';
+import { PORT_OF_ENTRY_SELECT_TEXT } from '@domain/animals/constants/point-of-entries';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Port of entry list', () => {
@@ -13,6 +14,6 @@ test.describe('Port of entry list', () => {
   }) => {
     await animalsJourney.toArrivalDetails();
 
-    await expect(animalsPages.arrivalDetails.portOptions).toHaveText(portsOfEntry.map(portLabel));
+    await expect(animalsPages.arrivalDetails.portOfEntry.options).toHaveText([PORT_OF_ENTRY_SELECT_TEXT, ...portsOfEntry.map(portLabel)]);
   });
 });

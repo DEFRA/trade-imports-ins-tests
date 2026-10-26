@@ -6,6 +6,7 @@ export type CommodityLine = {
 
 export const commodityLines = {
   cattle: { searchTerm: 'Bos taurus', commodityCode: '0102', latinName: 'Bos taurus' },
+  bison: { searchTerm: 'Bison bison', commodityCode: '0102', latinName: 'Bison bison' },
   horse: { searchTerm: 'horse', commodityCode: '0101', latinName: 'Equus cabalus' },
   domesticCat: { searchTerm: 'domestic cat', commodityCode: '01061900', latinName: 'Felis catus' },
   ostrich: { searchTerm: 'ostrich', commodityCode: '01063300', latinName: 'Struthio' },

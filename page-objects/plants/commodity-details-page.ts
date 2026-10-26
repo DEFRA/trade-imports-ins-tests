@@ -1,5 +1,6 @@
 import { type Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
+import { TypeAhead } from '@page-objects/shared/type-ahead';
 
 /**
  * One commodity line, added or edited.
@@ -10,8 +11,11 @@ import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
  * continue" after it.
  */
 export class PlantsCommodityDetailsPage extends PlantsNotificationPage {
+  private readonly genusTypeAhead: TypeAhead;
+
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
     super(page, 'commodities/details');
+    this.genusTypeAhead = new TypeAhead(page, 'genus');
   }
 
   get heading(): Locator {
@@ -40,10 +44,6 @@ export class PlantsCommodityDetailsPage extends PlantsNotificationPage {
     return this.page.getByRole('button', { name: 'Continue', exact: true });
   }
 
-  get btnSaveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue', exact: true });
-  }
-
   get btnSaveAndAddAnother(): Locator {
     return this.page.getByRole('button', { name: 'Save and add another', exact: true });
   }
@@ -57,28 +57,7 @@ export class PlantsCommodityDetailsPage extends PlantsNotificationPage {
     return `${this.expectedUrl(referenceNumber)}?index=${index}`;
   }
 
-  /**
-   * Genus is an accessible-autocomplete type-ahead enhancing a native <select>.
-   * With JavaScript the enhancement takes the select's id onto the enhanced
-   * input; without it the select keeps the id and is the control. So `#genus`
-   * is whichever of the two the trader actually uses.
-   */
-  get genus(): Locator {
-    return this.page.locator('#genus');
-  }
-
   async selectGenus(label: string): Promise<void> {
-    // The enhancement is a module script, so it has run by DOMContentLoaded.
-    // Waiting for that settles which element the id resolves to before the probe
-    // reads it. With JavaScript off the event has already fired, so this is free.
-    await this.page.waitForLoadState('domcontentloaded');
-    const field = this.genus;
-    if ((await field.evaluate((el) => el.tagName)) === 'SELECT') {
-      await field.selectOption({ label });
-      return;
-    }
-    await field.click();
-    await field.fill(label);
-    await this.page.getByRole('option', { name: label, exact: true }).click();
+    await this.genusTypeAhead.choose(label);
   }
 }

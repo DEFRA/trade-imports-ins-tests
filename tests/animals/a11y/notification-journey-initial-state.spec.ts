@@ -1,5 +1,7 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
-import { test, WCAG_STANDARD, govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@fixtures/a11y';
+import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
+import { govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -21,7 +23,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan({ exclude: govukConditionalRevealRadioOnOrigin });
     });
 
-    await test.step('Overview after origin is saved', async () => {
+    await test.step('Overview', async () => {
       const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
       await animalsJourney.fillOriginOfImport();
       await animalsJourney.saveOriginOfImport();
@@ -59,7 +61,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import reason', async () => {
-      await animalsPages.overview.task('Main reason for import').click();
+      await animalsPages.overview.task(IMPORT_REASON_TASK).click();
       await animalsPages.importReason.heading.waitFor();
       await runA11yScan({ exclude: govukConditionalRevealRadiosOnReason });
       await animalsPages.importReason.reason('Internal market').check();
@@ -92,8 +94,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
     });
 
-    await test.step('Consignor or exporter selection', async () => {
-      await animalsPages.addresses.addParty('Consignor or exporter').click();
+    await test.step('Consignor selection', async () => {
+      await animalsPages.addresses.addParty('Consignor').click();
       await animalsPages.consignorSelection.heading.waitFor();
       await runA11yScan();
       await animalsPages.consignorSelection.select('Astra Rosales');

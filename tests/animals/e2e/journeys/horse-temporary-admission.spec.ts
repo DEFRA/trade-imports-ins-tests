@@ -1,7 +1,13 @@
 import { commodityLines, speciesCardTitle } from '@domain/animals/constants/commodity-lines';
+import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { SET_BASES } from '@page-objects/shared/sets';
-import { fileUploadPaths } from '@resources/file-upload/paths';
-import { HORSE_TRANSPORT_ID, HORSE_TRANSPORTER, OPENING_RUN_TASKS, TEMPORARY_ADMISSION_EXIT_DATE } from '@flows/animals/journey';
+import {
+  HORSE_TRANSPORT_ID,
+  HORSE_TRANSPORTER,
+  OPENING_RUN_TASKS,
+  TEMPORARY_ADMISSION_EXIT_DATE,
+  certificateDocument,
+} from '@flows/animals/journey';
 
 import { test, expect } from '@fixtures';
 
@@ -13,19 +19,12 @@ test.describe('Horse by sea under temporary admission', () => {
   }) => {
     test.slow();
 
-    const referenceNumber = await animalsJourney.walkOpeningRunHorseBySea({
-      reference: `SEADOC${Date.now()}`,
-      issueDate: '03/01/2026',
-      filePath: fileUploadPaths.safeFile1kbPdf,
-      type: 'VETERINARY_HEALTH_CERTIFICATE',
-    });
+    const referenceNumber = await animalsJourney.walkOpeningRunHorseBySea(certificateDocument('SEADOC'));
     await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
 
     await animalsPages.overview.open(referenceNumber);
-    for (const task of OPENING_RUN_TASKS) {
-      await expect(animalsPages.overview.taskStatus(task)).toHaveText('Complete');
-    }
-    await expect(animalsPages.overview.taskStatuses).toHaveCount(OPENING_RUN_TASKS.length);
+    await expect(animalsPages.overview.taskNames).toHaveText(OPENING_RUN_TASKS);
+    await expect(animalsPages.overview.taskStatuses).toHaveText(OPENING_RUN_TASKS.map(() => 'Complete'));
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
 
@@ -49,7 +48,7 @@ test.describe('Horse by sea under temporary admission', () => {
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Port of entry')).toContainText('Holyhead Port');
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Means of transport to the port of entry')).toHaveText(
-      'Vessel',
+      meansOfTransport.vessel.display,
     );
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Transport identification')).toHaveText(HORSE_TRANSPORT_ID);
 

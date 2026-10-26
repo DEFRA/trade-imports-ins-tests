@@ -11,7 +11,6 @@ export type PrivateTransporterDetails = {
   emailAddress: string;
 };
 
-/** Keyed-in transporter details, owed only when the transporter type is Private. */
 export class AnimalsPrivateTransporterPage extends NotificationPage {
   constructor(page: Page) {
     super(page, 'transporters/add/private');
@@ -21,17 +20,41 @@ export class AnimalsPrivateTransporterPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Add private transporter' });
   }
 
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
+  get name(): Locator {
+    return this.page.getByLabel('Name or organisation name');
+  }
+
+  get addressLine1(): Locator {
+    return this.page.getByLabel('Address line 1');
+  }
+
+  get townOrCity(): Locator {
+    return this.page.getByLabel('Town or city');
+  }
+
+  get postcode(): Locator {
+    return this.page.getByLabel('Postcode or Zip code');
+  }
+
+  get country(): Locator {
+    return this.page.getByLabel('Country');
+  }
+
+  get phone(): Locator {
+    return this.page.getByLabel('Phone number');
+  }
+
+  get email(): Locator {
+    return this.page.getByLabel('Email address');
   }
 
   async fill(details: PrivateTransporterDetails): Promise<void> {
-    await this.page.getByLabel('Name or organisation name').fill(details.name);
-    await this.page.getByLabel('Address line 1').fill(details.addressLine1);
-    await this.page.getByLabel('Town or city').fill(details.townOrCity);
-    await this.page.getByLabel('Postcode or Zip code').fill(details.postalOrZipCode);
-    await this.page.getByLabel('Country').selectOption(details.country);
-    await this.page.getByLabel('Phone number').fill(details.telephoneNumber);
-    await this.page.getByLabel('Email address').fill(details.emailAddress);
+    await this.name.fill(details.name);
+    await this.addressLine1.fill(details.addressLine1);
+    await this.townOrCity.fill(details.townOrCity);
+    await this.postcode.fill(details.postalOrZipCode);
+    await this.country.selectOption(details.country);
+    await this.phone.fill(details.telephoneNumber);
+    await this.email.fill(details.emailAddress);
   }
 }

@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 
 test.describe('Addresses are copied, not linked', () => {
   test(
@@ -12,11 +13,9 @@ test.describe('Addresses are copied, not linked', () => {
       const stamp = Date.now();
       const originalName = `Copied Farm ${stamp}`;
       const renamed = `Renamed Holding ${stamp}`;
+      const seeded = { name: originalName, addressLine1: '3 Copy Lane', townOrCity: 'Carlisle', postcode: 'CA1 1AA' };
       const address = await addressBookApi.createAddress({
-        name: originalName,
-        addressLine1: '3 Copy Lane',
-        townOrCity: 'Carlisle',
-        postcode: 'CA1 1AA',
+        ...seeded,
         countryCode: 'GB',
         phone: '01228 555 0102',
         email: 'copied@example.co.uk',
@@ -26,13 +25,14 @@ test.describe('Addresses are copied, not linked', () => {
       await animalsJourney.unlockSections();
 
       await animalsPages.overview.task('Roles and addresses').click();
-      const consignorRow = animalsPages.addresses.partyRow('Consignor or exporter');
-      await animalsPages.addresses.addParty('Consignor or exporter').click();
+      const consignorAddressLines = animalsPages.addresses.partyAddressLines('Consignor');
+      const chosenAddressText = AnimalsAddressesPage.expectedAddressText({ ...seeded, country: 'United Kingdom' });
+      await animalsPages.addresses.addParty('Consignor').click();
       // Newly created, so it is at the back of the book — search rather than page.
       await animalsPages.consignorSelection.select(originalName);
       await animalsPages.consignorSelection.saveAndContinue.click();
       await expect(animalsPages.addresses.heading).toBeVisible();
-      await expect(consignorRow).toContainText(originalName);
+      await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
 
       // Edit the record in the address book, with the journey none the wiser.
       await addressBookApi.updateAddress(address.id, {
@@ -45,10 +45,8 @@ test.describe('Addresses are copied, not linked', () => {
         email: 'copied@example.co.uk',
       });
 
-      // The summary row still names the address as it was chosen.
       await pages.page.reload();
-      await expect(consignorRow).toContainText(originalName);
-      await expect(consignorRow).not.toContainText(renamed);
+      await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
 
       // The full details on check-your-answers are still the ones copied at selection.
       const referenceNumber = animalsPages.addresses.referenceNumberFromUrl();
@@ -87,7 +85,7 @@ test.describe('Addresses are copied, not linked', () => {
     await animalsJourney.unlockSections();
 
     await animalsPages.overview.task('Roles and addresses').click();
-    await animalsPages.addresses.addParty('Consignor or exporter').click();
+    await animalsPages.addresses.addParty('Consignor').click();
     await animalsPages.consignorSelection.select(record.name);
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
@@ -114,25 +112,24 @@ test.describe('Addresses are copied, not linked', () => {
       // soft-deletes behind the journey's back.
       const stamp = Date.now();
       const name = `Doomed Farm ${stamp}`;
+      const seeded = { name, addressLine1: '7 Gone Street', townOrCity: 'Carlisle', postcode: 'CA1 2BB' };
       const address = await addressBookApi.createAddress({
-        name,
-        addressLine1: '7 Gone Street',
-        townOrCity: 'Carlisle',
-        postcode: 'CA1 2BB',
+        ...seeded,
         countryCode: 'GB',
         phone: '01228 555 0103',
         email: 'doomed@example.co.uk',
       });
 
       // A complete notification, so any error on the review page could only come from the deletion.
-      const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+      const referenceNumber = await animalsSeededJourney.createDraftNotification();
       await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
-      const consignorRow = animalsPages.addresses.partyRow('Consignor or exporter');
-      await animalsPages.addresses.changeParty('Consignor or exporter').click();
+      const consignorAddressLines = animalsPages.addresses.partyAddressLines('Consignor');
+      const chosenAddressText = AnimalsAddressesPage.expectedAddressText({ ...seeded, country: 'United Kingdom' });
+      await animalsPages.addresses.changeParty('Consignor').click();
       await animalsPages.consignorSelection.select(name);
       await animalsPages.consignorSelection.saveAndContinue.click();
       await expect(animalsPages.addresses.heading).toBeVisible();
-      await expect(consignorRow).toContainText(name);
+      await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
 
       // Soft-delete behind the journey's back. List/search omit tombstones; get
       // by id still returns deleted:true so the deletion is detectable.
@@ -140,11 +137,10 @@ test.describe('Addresses are copied, not linked', () => {
       const tombstone = await addressBookApi.getAddress(address.id);
       expect(tombstone.deleted).toBe(true);
 
-      // The row still shows the address as it was chosen, and nothing is in error.
       await pages.page.reload();
-      await expect(consignorRow).toContainText(name);
-      await expect(consignorRow).not.toContainText('Not added yet');
-      await expect(animalsPages.addresses.addParty('Consignor or exporter')).toHaveCount(0);
+      await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
+      const { change, editDetails } = AnimalsAddressesPage.partyLinkNames('Consignor');
+      await expect(animalsPages.addresses.partyLinks('Consignor')).toHaveText([change, editDetails]);
 
       await animalsPages.notificationView.open(referenceNumber);
       const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
@@ -156,9 +152,9 @@ test.describe('Addresses are copied, not linked', () => {
 
       // The picker neither pre-selects nor offers the deleted record.
       await animalsPages.addresses.open(referenceNumber);
-      await animalsPages.addresses.changeParty('Consignor or exporter').click();
+      await animalsPages.addresses.changeParty('Consignor').click();
       await expect(animalsPages.consignorSelection.selectedAddress).toHaveCount(0);
-      await animalsPages.consignorSelection.search.fill(name);
+      await animalsPages.consignorSelection.searchBox.fill(name);
       await animalsPages.consignorSelection.searchButton.click();
       await expect(animalsPages.consignorSelection.party(name)).toHaveCount(0);
     },
@@ -189,9 +185,9 @@ test.describe('Addresses are copied, not linked', () => {
       email: 'unlisted@example.co.uk',
     });
 
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
-    await animalsPages.addresses.changeParty('Consignor or exporter').click();
+    await animalsPages.addresses.changeParty('Consignor').click();
     await animalsPages.consignorSelection.select(name);
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();

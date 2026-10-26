@@ -77,7 +77,7 @@ test.describe('High-risk plants start section', () => {
     // consignor row is conditional and is hidden entirely while it is NA.
     await expect(plantsPages.overview.taskRowByTitle('Identification numbers')).toContainText('Cannot start yet');
     await expect(plantsPages.overview.taskRowLink('Identification numbers')).toHaveCount(0);
-    await expect(plantsPages.overview.taskRowByTitle('Consignor or exporter')).toHaveCount(0);
+    await expect(plantsPages.overview.taskRowByTitle('Consignor')).toHaveCount(0);
 
     // Check and submit is blocked until every other row is complete, so on a
     // notification with nothing answered it is blocked and carries no link.
@@ -130,7 +130,7 @@ test.describe('High-risk plants start section', () => {
     await plantsJourney.returnToDashboard();
     await plantsJourney.deleteFromDashboard(reference);
 
-    await plantsPages.deleteNotification.btnConfirm.click();
+    await plantsPages.deleteNotification.confirmDelete.click();
 
     await expect(pages.page).toHaveURL(`${plantsPages.dashboard.expectedUrl}?deleted=1`);
     await expect(plantsPages.dashboard.deletedBanner).toContainText('Notification deleted');

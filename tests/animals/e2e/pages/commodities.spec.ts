@@ -1,10 +1,13 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
 
 import { test, expect } from '@fixtures';
+import { SEARCH_HINT, SELECT_COMMODITY_ERROR } from '@domain/animals/constants/commodity-selection-page';
 
 const NO_MATCH_QUERY = 'zzz';
 
 const GROUPING_QUERIES = ['0102', 'cattle', 'horse', 'domestic cat', 'ostrich'];
+
+const SEARCH_BOX_DESCRIPTION_WITH_ERROR = `${SEARCH_HINT} Error: ${SELECT_COMMODITY_ERROR}`;
 
 test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -15,8 +18,21 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await expect(animalsPages.commoditySelection.searchBox).toBeVisible();
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
-    await expect(animalsPages.commoditySelection.selectionPanel).toHaveCount(0);
+    await expect(animalsPages.commoditySelection.selectedSummary).toHaveCount(0);
     await expect(animalsPages.commoditySelection.saveAndContinue).toBeVisible();
+  });
+
+  test('shows the ITAHC inset and the search hint', async ({ animalsPages }) => {
+    await expect(animalsPages.commoditySelection.itahcInset).toBeVisible();
+    await expect(animalsPages.commoditySelection.searchHint).toBeVisible();
+  });
+
+  test('explains commodity codes and links out to the Trade Tariff tool', async ({ animalsPages }) => {
+    await animalsPages.commoditySelection.commodityCodeHelp.click();
+
+    await expect(animalsPages.commoditySelection.tradeTariffLink).toBeVisible();
+    await expect(animalsPages.commoditySelection.tradeTariffLink).toHaveAttribute('href', 'https://www.gov.uk/trade-tariff');
+    await expect(animalsPages.commoditySelection.tradeTariffLink).toHaveAttribute('target', '_blank');
   });
 
   test('lists nothing for a query shorter than three characters', async ({ pages, animalsPages }) => {
@@ -59,9 +75,9 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('What are you importing?').click();
 
-    await expect(animalsPages.commoditySelection.selectionPanel).toContainText('2 selected');
-    await expect(animalsPages.commoditySelection.selectionPanel).toContainText(commodityLines.cattle.latinName);
-    await expect(animalsPages.commoditySelection.selectionPanel).toContainText(commodityLines.domesticCat.latinName);
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('2 selected');
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(commodityLines.cattle.latinName);
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(commodityLines.domesticCat.latinName);
 
     await animalsPages.commoditySelection.search(commodityLines.cattle.searchTerm);
     await expect(animalsPages.commoditySelection.species(commodityLines.cattle)).toBeChecked();
@@ -72,16 +88,53 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
   test('counts what has been chosen and clears it on request', async ({ animalsPages }) => {
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
-    await expect(animalsPages.commoditySelection.selectionPanel).toContainText('1 selected');
-    await expect(animalsPages.commoditySelection.selectionPanel).toContainText(commodityLines.cattle.latinName);
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('1 selected');
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(commodityLines.cattle.latinName);
 
     await animalsPages.commoditySelection.clearAll.click();
-    await expect(animalsPages.commoditySelection.selectionPanel).toHaveCount(0);
+    await expect(animalsPages.commoditySelection.selectedSummary).toHaveCount(0);
   });
 
-  test('shows an error summary when submitted empty', async ({ pages, animalsPages }) => {
+  test('shows an error on the search box when submitted empty', async ({ animalsPages }) => {
     await animalsPages.commoditySelection.saveAndContinue.click();
-    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
-    await expect(pages.page.getByRole('link', { name: 'Select a commodity' })).toBeVisible();
+
+    await expect(animalsPages.commoditySelection.errorSummary).toBeVisible();
+    await expect(animalsPages.commoditySelection.errorSummaryLinks).toHaveText([SELECT_COMMODITY_ERROR]);
+    await expect(animalsPages.commoditySelection.searchBox).toHaveAccessibleDescription(SEARCH_BOX_DESCRIPTION_WITH_ERROR);
+    await animalsPages.commoditySelection.errorSummaryLinks.click();
+    await expect(animalsPages.commoditySelection.searchBox).toBeFocused();
+  });
+
+  test('with results listed, keeps the "Select a commodity" error on the search box', async ({ animalsPages }) => {
+    await animalsPages.commoditySelection.search('Bos');
+    await animalsPages.commoditySelection.saveAndContinue.click();
+
+    await expect(animalsPages.commoditySelection.errorSummaryLinks).toHaveText([SELECT_COMMODITY_ERROR]);
+    await expect(animalsPages.commoditySelection.searchBox).toHaveAccessibleDescription(SEARCH_BOX_DESCRIPTION_WITH_ERROR);
+    await expect(animalsPages.commoditySelection.commodityGroup(commodityLines.cattle.commodityCode)).toBeVisible();
+    await animalsPages.commoditySelection.errorSummaryLinks.click();
+    await expect(animalsPages.commoditySelection.searchBox).toBeFocused();
+  });
+
+  test.describe('after a saved selection is cleared with save and return to overview', () => {
+    test.beforeEach(async ({ animalsPages }) => {
+      await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
+      await animalsPages.commoditySelection.saveAndContinue.click();
+      await expect(animalsPages.overview.heading).toBeVisible();
+      await animalsPages.overview.task('What are you importing?').click();
+      await animalsPages.commoditySelection.clearAll.click();
+      await animalsPages.commoditySelection.saveAndReturnToOverview.click();
+      await expect(animalsPages.overview.heading).toBeVisible();
+    });
+
+    test('shows the commodity task as To do', async ({ animalsPages }) => {
+      await expect(animalsPages.overview.taskStatus('What are you importing?')).toHaveText('To do');
+    });
+
+    test('refuses save and continue with "Select a commodity" on reopening the page', async ({ animalsPages }) => {
+      await animalsPages.overview.task('What are you importing?').click();
+      await animalsPages.commoditySelection.saveAndContinue.click();
+      await expect(animalsPages.commoditySelection.errorSummaryLinks).toHaveText([SELECT_COMMODITY_ERROR]);
+    });
   });
 });

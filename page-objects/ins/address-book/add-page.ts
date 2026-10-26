@@ -1,12 +1,11 @@
 import { Locator } from '@playwright/test';
+import { type OpenOptions, type SignInIdentity } from '@page-objects/shared/base-page';
 import { type AddressDetails, InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 
 export type NewAddressDetails = AddressDetails;
 
 export class InsAddressBookAddPage extends InsAddressBookFormPage {
   readonly expectedUrl = '/address-book/add';
-
-  protected override readonly nameLabel = 'Name or organisation';
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Add address details' });
@@ -28,13 +27,13 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
     return this.page.getByRole('button', { name: 'Cancel and return to address page' });
   }
 
-  async open(attemptSignIn: boolean = true, options?: { userId?: string; organisationSbi?: string }): Promise<void> {
+  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.page.goto(this.expectedUrl);
-    await this.signInWhenRequested(attemptSignIn, options);
+    await this.signInWhenRequested(attemptSignIn, identity);
   }
 
   /** Complete OIDC when a cross-app link lands on INS without an existing session. */
-  async ensureSignedIn(options?: { userId?: string; organisationSbi?: string }): Promise<void> {
+  async ensureSignedIn(options?: SignInIdentity): Promise<void> {
     await this.signInWhenRequested(true, options);
   }
 

@@ -8,11 +8,8 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     pages,
     animalsPages,
   }) => {
-    const referenceNumber = await animalsJourney.startNotification();
-    await animalsJourney.addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber, [commodityLines.domesticCat], '2');
-    await animalsPages.overview.task('Identification details').click();
-    await expect(animalsPages.animalIdentification.heading).toBeVisible();
-    await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.domesticCat.latinName}` })).toBeVisible();
+    await animalsJourney.toAnimalIdentificationWithCounts([{ species: commodityLines.domesticCat, animalCount: 2 }]);
+    await expect(pages.page.getByRole('heading', { name: 'Enter details for Felis catus 1 of 2' })).toBeVisible();
 
     await expect(animalsPages.animalIdentification.passportNumber).toBeVisible();
     await expect(pages.page.getByLabel('Tattoo')).toBeVisible();
@@ -43,20 +40,19 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await expect(unitRow.getByRole('cell', { name: 'Pet Owner', exact: true })).toBeVisible();
   });
 
-  test('a commodity with no identifier type of its own gets no panel, while the lines that have one keep theirs', async ({
+  test('a commodity with no identifier type of its own gets no card, while the lines that have one keep theirs', async ({
     animalsJourney,
     pages,
     animalsPages,
   }) => {
-    const referenceNumber = await animalsJourney.startNotification();
-    await animalsJourney.addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber, [commodityLines.cattle, commodityLines.ostrich], '1');
-    await animalsPages.overview.task('Identification details').click();
-    await expect(animalsPages.animalIdentification.heading).toBeVisible();
-
-    await expect(animalsPages.animalIdentification.panelHeadings).toHaveText([
-      `Enter details for ${commodityLines.cattle.latinName} 1 of 1`,
+    await animalsJourney.toAnimalIdentificationWithCounts([
+      { species: commodityLines.cattle, animalCount: 1 },
+      { species: commodityLines.ostrich, animalCount: 1 },
     ]);
+
+    await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 1 of 1' })).toBeVisible();
     await expect(animalsPages.animalIdentification.earTag).toBeVisible();
+    await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.ostrich.latinName}` })).toHaveCount(0);
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
     await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
   });
@@ -66,9 +62,12 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     pages,
     animalsPages,
   }) => {
-    const referenceNumber = await animalsJourney.startNotification();
-    await animalsJourney.addCommodityLinesAndAnswerEveryAnimalCount(referenceNumber, [commodityLines.ostrich], '2');
+    await animalsJourney.toConsignmentDetails([commodityLines.ostrich]);
+    await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
+    await animalsPages.consignmentDetails.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
 
+    const referenceNumber = animalsPages.overview.referenceNumberFromUrl();
     await animalsPages.animalIdentification.open(referenceNumber);
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.animalIdentification.heading).toHaveCount(0);

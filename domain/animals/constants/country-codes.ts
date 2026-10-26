@@ -1,4 +1,4 @@
-import { countryByCode, subdivisionByCode } from '@domain/shared/fixtures/reference-data';
+import { countryByCode, subdivisionByCode } from '@resources/reference-data/reference-data';
 
 export const countryCodes = {
   subdivisions: {

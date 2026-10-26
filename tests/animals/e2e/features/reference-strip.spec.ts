@@ -24,7 +24,7 @@ test.describe('Reference strip', { tag: '@duplicated-in-frontend' }, () => {
     await expect(animalsPages.originOfImport.cancelAmend).toHaveCount(0);
 
     // The strip stays put once the first save has committed answers.
-    await animalsPages.originOfImport.selectCountry('France');
+    await animalsPages.originOfImport.country.choose('France');
     await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
     await animalsPages.originOfImport.saveAndContinue.click();
 

@@ -41,7 +41,7 @@ async function expectFieldsGroupedUnderSections(form: InsAddressBookFormPage): P
 }
 
 test.describe('The add-details form for an address entered by hand', () => {
-  test('the add-details step groups its fields under Address and Contact details, with Name or organisation first and County between Town or city and Postcode, while the edit page keeps Name or organisation name', async ({
+  test('the add-details step groups its fields under Address and Contact details, with Name or organisation first and County between Town or city and Postcode, and the edit page labels the name the same', async ({
     insPages,
     addressBookApi,
   }) => {
@@ -55,14 +55,14 @@ test.describe('The add-details form for an address entered by hand', () => {
     const created = await addressBookApi.createAddress({ name: `Form Label Farm ${Date.now()}`, ...baseAddress });
     await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.inputName).toHaveAccessibleName('Name or organisation name');
+    await expect(insPages.addressBookEdit.inputName).toHaveAccessibleName('Name or organisation');
   });
 
-  test('the Country select opens on its blank first option, Select one, with nothing pre-selected', async ({ insPages }) => {
+  test('the Country select opens on its blank first option, Select a country, with nothing pre-selected', async ({ insPages }) => {
     await insPages.addressBookAdd.open();
 
     await expect(insPages.addressBookAdd.selectCountry).toHaveValue('');
-    await expect(insPages.addressBookAdd.countryOptionsIncludingPlaceholder.first()).toHaveText('Select one');
+    await expect(insPages.addressBookAdd.countryOptionsIncludingPlaceholder.first()).toHaveText('Select a country');
   });
 
   test('Add a new address on the address book opens the add-details form, whose Back link returns to the address book', async ({
@@ -105,7 +105,7 @@ test.describe('The add-details form for an address entered by hand', () => {
     expect(await addressBookApi.listAddresses(name)).toHaveLength(0);
   });
 
-  test('the edit page groups its fields under Address and Contact details and keeps Name or organisation name', async ({
+  test('the edit page groups its fields under Address and Contact details and labels the name Name or organisation', async ({
     insPages,
     addressBookApi,
   }) => {

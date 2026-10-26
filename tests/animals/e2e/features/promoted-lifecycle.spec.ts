@@ -64,4 +64,36 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.statusTag).toHaveText('Amend');
   });
+
+  test("Back from a submitted notification's view opens the notification list", async ({
+    animalsJourney,
+    journeyContext,
+    animalsPages,
+  }) => {
+    test.slow();
+    await animalsJourney.submitNotification();
+
+    await animalsPages.dashboard.open();
+    await animalsPages.dashboard.searchForReference(journeyContext.referenceNumber);
+    await animalsPages.dashboard.view(journeyContext.referenceNumber).click();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await animalsPages.notificationView.linkBack.click();
+    await expect(animalsPages.dashboard.heading).toBeVisible();
+  });
+
+  test('Back from an amendment review opens the overview', async ({
+    animalsJourney,
+    journeyContext,
+    animalsPages,
+    animalsNotificationActions,
+  }) => {
+    test.slow();
+    await animalsJourney.submitNotification();
+
+    await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
+    await animalsPages.overview.reviewAndSubmitButton.click();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await animalsPages.notificationView.linkBack.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+  });
 });

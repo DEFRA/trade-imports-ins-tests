@@ -7,7 +7,6 @@ const AMEND = 'Amend';
 
 test.describe('Amendment page endings', () => {
   test('a page opened from Overview while amending ends with Save and return and Save and continue, then Save and return to overview on its own line, with no cancel link, and Back goes to Overview', async ({
-    pages,
     animalsPages,
     animalsSeededJourney,
   }) => {
@@ -16,10 +15,10 @@ test.describe('Amendment page endings', () => {
     await animalsPages.overview.task(ARRIVAL_DETAILS_TASK).click();
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
 
-    const buttonGroup = pages.page.locator('.govuk-button-group');
-    await expect(buttonGroup.getByRole('button', { name: 'Save and return', exact: true })).toBeVisible();
-    await expect(buttonGroup.getByRole('button', { name: 'Save and continue', exact: true })).toBeVisible();
-    await expect(buttonGroup.getByRole('button', { name: 'Save and return to overview', exact: true })).toHaveCount(0);
+    const { arrivalDetails } = animalsPages;
+    await expect(arrivalDetails.buttonGroup.filter({ has: arrivalDetails.saveAndReturn })).toBeVisible();
+    await expect(arrivalDetails.buttonGroup.filter({ has: arrivalDetails.saveAndContinue })).toBeVisible();
+    await expect(arrivalDetails.buttonGroup.getByRole('button')).toHaveCount(2);
     await expect(animalsPages.arrivalDetails.saveAndReturnToOverview).toBeVisible();
     await expect(animalsPages.arrivalDetails.cancelAndReturnToOverview).toHaveCount(0);
     await expect(animalsPages.arrivalDetails.cancelAmend).toBeVisible();
@@ -97,7 +96,7 @@ test.describe('Amendment page endings', () => {
   });
 
   test('outside an amendment the CPH number page keeps its single primary button', async ({ animalsPages, animalsSeededJourney }) => {
-    const reference = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const reference = await animalsSeededJourney.createDraftNotification();
 
     await animalsPages.cphNumber.open(reference);
     await expect(animalsPages.cphNumber.saveAndContinue).toBeVisible();

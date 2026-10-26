@@ -52,10 +52,6 @@ export const scanViewports = {
 export const waitForViewportSettle = (page: Page): Promise<void> =>
   page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
 
-export const govukConditionalRevealRadioOnOrigin = '#regionOfOriginCodeRequirement';
-
-export const govukConditionalRevealRadiosOnReason = 'input[name="reasonForImport"][aria-controls]';
-
 // Accessibility tests click through several pages and run axe scans on
 // each, so they need more headroom than the default per-test timeout.
 const A11Y_SCAN_TIMEOUT_MS = 5 * 60 * 1000;
