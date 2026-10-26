@@ -6,7 +6,7 @@ const SUBMIT_METHODS = [
   { submitWith: 'enter', how: 'Enter in the Search field' },
 ] as const;
 
-const expectSearchListsTheMatch = async (
+const addAddressAndExpectSearchToListIt = async (
   { insPages, addressBookApi }: Pick<PageFixtures, 'insPages' | 'addressBookApi'>,
   name: string,
   submitWith: 'button' | 'enter',
@@ -35,7 +35,7 @@ test.describe('Address book list', () => {
 
   for (const { submitWith, how } of SUBMIT_METHODS) {
     test(`a search submitted with ${how} lists the address it matches`, async ({ insPages, addressBookApi }) => {
-      await expectSearchListsTheMatch({ insPages, addressBookApi }, `Searchable${submitWith}${Date.now()}`, submitWith);
+      await addAddressAndExpectSearchToListIt({ insPages, addressBookApi }, `Searchable${submitWith}${Date.now()}`, submitWith);
     });
   }
 
@@ -127,7 +127,7 @@ test.describe('Address book list without JavaScript', () => {
 
   for (const { submitWith, how } of SUBMIT_METHODS) {
     test(`a search submitted with ${how} lists the address it matches`, async ({ insPages, addressBookApi }) => {
-      await expectSearchListsTheMatch({ insPages, addressBookApi }, `Scriptless${submitWith}${Date.now()}`, submitWith);
+      await addAddressAndExpectSearchToListIt({ insPages, addressBookApi }, `Scriptless${submitWith}${Date.now()}`, submitWith);
     });
   }
 });
