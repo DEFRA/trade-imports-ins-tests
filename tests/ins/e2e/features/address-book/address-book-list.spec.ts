@@ -126,7 +126,7 @@ test.describe('Address book list without JavaScript', () => {
   });
 
   for (const { submitWith, how } of SUBMIT_METHODS) {
-    test(`a search submitted with ${how} lists the address it matches`, async ({ insPages, addressBookApi }) => {
+    test(`a search submitted with ${how} and JavaScript is off lists the address it matches`, async ({ insPages, addressBookApi }) => {
       await addAddressAndExpectSearchToListIt({ insPages, addressBookApi }, `Scriptless${submitWith}${Date.now()}`, submitWith);
     });
   }
