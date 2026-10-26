@@ -29,7 +29,7 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(
-      pages.page.getByText(`${eicar.fileName} contains a virus. Remove it and try again with a different file.`).first(),
+      pages.page.getByText(`${eicar.fileName} cannot be used. Remove it and try again with a different file.`).first(),
     ).toBeVisible();
     await expect(animalsPages.accompanyingDocuments.viewFile(1)).toHaveCount(0);
   });
