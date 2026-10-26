@@ -91,7 +91,10 @@ test.describe('Address book edit', () => {
     await expect(insPages.addressBookEdit.fieldLabels).toHaveText(FIELD_LABELS_IN_ORDER);
   });
 
-  test('Cancel after a refused save reopens the edit page with no errors', async ({ insPages, addressBookApi }) => {
+  test('after a refused save and Cancel, the edit page opens again with no errors and the stored name', async ({
+    insPages,
+    addressBookApi,
+  }) => {
     const name = `Edit Refused Farm ${Date.now()}`;
     const created = await addressBookApi.createAddress(traderAddress(name));
     await insPages.addressBookEdit.open(created.id);
