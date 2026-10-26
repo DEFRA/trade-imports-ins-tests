@@ -56,7 +56,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     const answers = ALL_ANSWERS_WITHOUT_DOCUMENT;
     await animalsJourney.toReview(answers);
     const commonName = await referenceDataApi.findCommonName(answers.species);
-    await animalsJourney.toReview(answers);
 
     const value = (card: Locator, key: string) =>
       card.locator('.govuk-summary-list__row', { has: pages.page.getByText(key, { exact: true }) }).locator('.govuk-summary-list__value');

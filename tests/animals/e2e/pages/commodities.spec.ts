@@ -106,7 +106,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
   });
 
   test('with results listed, keeps the "Select a commodity" error on the search box', async ({ animalsPages }) => {
-    await animalsPages.commoditySelection.search('Bos');
+    await animalsPages.commoditySelection.search(commodityLines.cattle.searchTerm);
     await animalsPages.commoditySelection.saveAndContinue.click();
 
     await expect(animalsPages.commoditySelection.errorSummaryLinks).toHaveText([SELECT_COMMODITY_ERROR]);
