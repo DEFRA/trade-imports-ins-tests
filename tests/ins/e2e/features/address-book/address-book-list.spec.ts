@@ -19,7 +19,7 @@ const addAddressAndExpectSearchToListIt = async (
   await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
   await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
   await expect(insPages.addressBookList.row(name)).toBeVisible();
-  await expect(insPages.addressBookList.mainLinks).toHaveText([`View ${name}`]);
+  await expect(insPages.addressBookList.mainLinks).toHaveText(['Clear search', `View ${name}`]);
 };
 
 test.describe('Address book list', () => {
@@ -39,7 +39,9 @@ test.describe('Address book list', () => {
     });
   }
 
-  test('a search matching nothing shows Showing 0 of 0, the column headers, no rows and no links', async ({ insPages }) => {
+  test('a search matching nothing shows Showing 0 of 0, the column headers, no rows and Clear search as the only link', async ({
+    insPages,
+  }) => {
     await insPages.addressBookList.open();
 
     await insPages.addressBookList.search(`NoMatch${Date.now()}`, { submitWith: 'button' });
@@ -47,7 +49,7 @@ test.describe('Address book list', () => {
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 0 of 0');
     await expect(insPages.addressBookList.columnHeaders).toHaveText(['Name', 'Address', 'Country', 'Action']);
     await expect(insPages.addressBookList.bodyRows).toHaveCount(0);
-    await expect(insPages.addressBookList.mainLinks).toHaveText([]);
+    await expect(insPages.addressBookList.mainLinks).toHaveText(['Clear search']);
   });
 
   test('a multi-word name shows its first word then the rest on two lines, and a one-word name on one line', async ({
