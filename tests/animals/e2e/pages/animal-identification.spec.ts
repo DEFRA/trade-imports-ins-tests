@@ -37,17 +37,11 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     ]);
   });
 
-  test('summarises cattle in one row listing both species with their total, and the cat on its own row', async ({
-    animalsPages,
-    referenceDataApi,
-  }) => {
+  test('summarises cattle in one row listing both species with their total, and the cat on its own row', async ({ animalsPages }) => {
     const { selectedCommodities } = animalsPages.animalIdentification;
     const { cattle, bison, domesticCat } = commodityLines;
     const cattleRow = selectedCommodities.rowFor(cattle);
     await expect(selectedCommodities.codeCell(cattleRow)).toHaveText(cattle.commodityCode);
-    await expect(selectedCommodities.commonNameCell(cattleRow)).toHaveText(
-      [await referenceDataApi.findCommonName(bison), await referenceDataApi.findCommonName(cattle)].join(', '),
-    );
     await expect(selectedCommodities.speciesCell(cattleRow)).toHaveText(`${bison.latinName}, ${cattle.latinName}`, {
       useInnerText: true,
     });
@@ -55,7 +49,6 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
 
     const catRow = selectedCommodities.rowFor(domesticCat);
     await expect(selectedCommodities.codeCell(catRow)).toHaveText(domesticCat.commodityCode);
-    await expect(selectedCommodities.commonNameCell(catRow)).toHaveText(await referenceDataApi.findCommonName(domesticCat));
     await expect(selectedCommodities.speciesCell(catRow)).toHaveText(domesticCat.latinName);
     await expect(selectedCommodities.animalCountCell(catRow)).toHaveText('2');
   });

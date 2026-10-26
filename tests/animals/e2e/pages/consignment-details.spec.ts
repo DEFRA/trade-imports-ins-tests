@@ -18,14 +18,13 @@ test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () =
     await expect(animalsPages.consignmentDetails.headingBelowCaption).toHaveText('Commodity details');
   });
 
-  test('lists the selected commodity with its code, common name and species', async ({ animalsPages, referenceDataApi }) => {
+  test('lists the selected commodity with its code and species', async ({ animalsPages }) => {
     const table = animalsPages.consignmentDetails.selectedCommodities.table;
     const { cattle } = commodityLines;
 
-    await expect(table.getByRole('columnheader')).toHaveText(['Commodity code', 'Common name', 'Species', 'Actions']);
+    await expect(table.getByRole('columnheader')).toHaveText(['Commodity code', 'Species', 'Actions']);
     await expect(animalsPages.consignmentDetails.selectedCommodities.rowFor(cattle).getByRole('cell')).toHaveText([
       cattle.commodityCode,
-      await referenceDataApi.findCommonName(cattle),
       cattle.latinName,
       `Remove ${cattle.commodityCode} ${cattle.latinName}`,
     ]);

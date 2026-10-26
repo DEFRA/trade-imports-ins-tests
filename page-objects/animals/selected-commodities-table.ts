@@ -19,15 +19,11 @@ export class SelectedCommoditiesTable {
     return row.getByRole('cell').nth(0);
   }
 
-  commonNameCell(row: Locator): Locator {
+  speciesCell(row: Locator): Locator {
     return row.getByRole('cell').nth(1);
   }
 
-  speciesCell(row: Locator): Locator {
-    return row.getByRole('cell').nth(2);
-  }
-
   animalCountCell(row: Locator): Locator {
-    return row.getByRole('cell').nth(3);
+    return row.getByRole('cell').nth(2);
   }
 }
