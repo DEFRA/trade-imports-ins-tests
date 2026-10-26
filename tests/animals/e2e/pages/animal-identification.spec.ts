@@ -88,4 +88,33 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Felis catus 1 of 2' })).toBeVisible();
     await expect(felisCatus.getByLabel('Passport', { exact: true })).toHaveValue('');
   });
+
+  test('returns from a summary row Change to Identification details listing the commodity added there', async ({ animalsPages }) => {
+    await animalsPages.animalIdentification.selectedCommodities.changeLinkFor('Cow').click();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('3 selected');
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('Bos taurus');
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('Bison bison');
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('Felis catus');
+
+    await animalsPages.commoditySelection.selectSpecies(['Canis lupus familiaris']);
+    await animalsPages.commoditySelection.saveAndContinue.click();
+
+    await expect(animalsPages.animalIdentification.heading).toBeVisible();
+    await expect(animalsPages.animalIdentification.selectedCommodities.bodyRows).toContainText(['Cow', 'Cat', 'Dog']);
+  });
+
+  test('returns from a summary row Change to Identification details listing only the commodities left after one is deselected', async ({
+    animalsPages,
+  }) => {
+    await animalsPages.animalIdentification.selectedCommodities.changeLinkFor('Cat').click();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+
+    await animalsPages.commoditySelection.search('Felis catus');
+    await animalsPages.commoditySelection.species('Felis catus').uncheck();
+    await animalsPages.commoditySelection.saveAndContinue.click();
+
+    await expect(animalsPages.animalIdentification.heading).toBeVisible();
+    await expect(animalsPages.animalIdentification.selectedCommodities.bodyRows).toContainText(['Cow']);
+  });
 });
