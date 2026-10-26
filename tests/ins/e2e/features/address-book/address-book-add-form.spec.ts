@@ -1,17 +1,7 @@
 import { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
 import { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
-
-const baseAddress = {
-  addressLine1: '5 Form Lane',
-  addressLine2: 'Unit 2',
-  townOrCity: 'Carlisle',
-  county: 'Cumbria',
-  postcode: 'CA1 4DD',
-  countryCode: 'GB',
-  phone: '01228 555 0120',
-  email: 'form@example.co.uk',
-};
+import { addressWithLineTwoAndCounty } from './trader-address';
 
 const FIELD_NAMES_IN_ORDER = [
   'Name or organisation',
@@ -52,7 +42,7 @@ test.describe('The add-details form for an address entered by hand', () => {
       await expect(insPages.addressBookAdd.textboxes.nth(index)).toHaveAccessibleName(name);
     }
 
-    const created = await addressBookApi.createAddress({ name: `Form Label Farm ${Date.now()}`, ...baseAddress });
+    const created = await addressBookApi.createAddress(addressWithLineTwoAndCounty(`Form Label Farm ${Date.now()}`));
     await insPages.addressBookEdit.open(created.id);
 
     await expect(insPages.addressBookEdit.inputName).toHaveAccessibleName('Name or organisation');
@@ -110,7 +100,7 @@ test.describe('The add-details form for an address entered by hand', () => {
     addressBookApi,
   }) => {
     const name = `Form Edit Farm ${Date.now()}`;
-    const created = await addressBookApi.createAddress({ name, ...baseAddress });
+    const created = await addressBookApi.createAddress(addressWithLineTwoAndCounty(name));
 
     await insPages.addressBookEdit.open(created.id);
 

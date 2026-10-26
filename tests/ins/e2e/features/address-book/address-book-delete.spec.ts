@@ -5,7 +5,7 @@ import { users } from '@config/users';
 import { urlWithReturn } from '@page-objects/ins/address-book/url-with-return';
 import { expectAddressBookList } from './expect-address-book-list';
 import { UNKNOWN_ADDRESS_ID } from './unknown-address-id';
-import { traderAddress } from './trader-address';
+import { addressWithLineTwoAndCounty, traderAddress } from './trader-address';
 
 test.describe('Address book delete', () => {
   test('deleting through the UI tombstones the record rather than removing it', async ({ pages, insPages, addressBookApi }) => {
@@ -30,7 +30,7 @@ test.describe('Address book delete', () => {
     insPages,
     addressBookApi,
   }) => {
-    const address = { ...traderAddress(`Delete Summary Farm ${Date.now()}`), addressLine2: 'Unit 9', county: 'Cumbria' };
+    const address = addressWithLineTwoAndCounty(`Delete Summary Farm ${Date.now()}`);
     const created = await addressBookApi.createAddress(address);
 
     await insPages.addressBookDelete.open(created.id);

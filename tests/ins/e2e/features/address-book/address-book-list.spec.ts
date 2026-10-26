@@ -84,7 +84,7 @@ test.describe('Address book list', () => {
 
     await insPages.addressBookList.search(String(stamp), { submitWith: 'button' });
 
-    await expect(insPages.addressBookList.addressCell(fiveLineName)).toHaveText(/^3 Change Lane,\nUnit 9,\nCarlisle,\nCumbria,\nCA1 3CC$/, {
+    await expect(insPages.addressBookList.addressCell(fiveLineName)).toHaveText(/^1 Trader Lane,\nUnit 9,\nCarlisle,\nCumbria,\nCA1 3CC$/, {
       useInnerText: true,
     });
     await expect(insPages.addressBookList.addressCell(threeLineName)).toHaveText(/^1 Trader Lane,\nCarlisle,\nCA1 3CC$/, {
