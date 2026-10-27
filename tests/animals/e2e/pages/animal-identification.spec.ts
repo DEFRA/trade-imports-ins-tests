@@ -78,6 +78,18 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await expect(bisonBison.getByLabel('Ear tag', { exact: true })).toHaveValue('');
   });
 
+  test('saves the card typed in when Enter is pressed in its field and stays on Identification details', async ({ animalsPages }) => {
+    const bosTaurus = animalsPages.animalIdentification.speciesCard('Bos taurus');
+    const earTag = bosTaurus.getByLabel('Ear tag', { exact: true });
+    await earTag.fill('UK000000000001');
+    await earTag.press('Enter');
+
+    await expect(animalsPages.animalIdentification.heading).toBeVisible();
+    await expect(animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 1)).toContainText('UK000000000001');
+    await expect(bosTaurus.getByRole('heading', { name: 'Enter details for Bos taurus 2 of 2' })).toBeVisible();
+    await expect(earTag).toHaveValue('');
+  });
+
   test('leaves a species of more than one animal unsaved when Save and continue is pressed', async ({ pages, animalsPages }) => {
     await animalsPages.animalIdentification.speciesCard('Felis catus').getByLabel('Passport', { exact: true }).fill('UK123456789');
     await animalsPages.animalIdentification.saveAndContinue.click();
@@ -87,5 +99,34 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     const felisCatus = animalsPages.animalIdentification.speciesCard('Felis catus');
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Felis catus 1 of 2' })).toBeVisible();
     await expect(felisCatus.getByLabel('Passport', { exact: true })).toHaveValue('');
+  });
+
+  test('returns from a summary row Change to Identification details listing the commodity added there', async ({ animalsPages }) => {
+    await animalsPages.animalIdentification.selectedCommodities.changeLinkFor('Cow').click();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('3 selected');
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('Bos taurus');
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('Bison bison');
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('Felis catus');
+
+    await animalsPages.commoditySelection.selectSpecies(['Canis lupus familiaris']);
+    await animalsPages.commoditySelection.saveAndContinue.click();
+
+    await expect(animalsPages.animalIdentification.heading).toBeVisible();
+    await expect(animalsPages.animalIdentification.selectedCommodities.bodyRows).toContainText(['Cow', 'Cat', 'Dog']);
+  });
+
+  test('returns from a summary row Change to Identification details listing only the commodities left after one is deselected', async ({
+    animalsPages,
+  }) => {
+    await animalsPages.animalIdentification.selectedCommodities.changeLinkFor('Cat').click();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+
+    await animalsPages.commoditySelection.search('Felis catus');
+    await animalsPages.commoditySelection.species('Felis catus').uncheck();
+    await animalsPages.commoditySelection.saveAndContinue.click();
+
+    await expect(animalsPages.animalIdentification.heading).toBeVisible();
+    await expect(animalsPages.animalIdentification.selectedCommodities.bodyRows).toContainText(['Cow']);
   });
 });
