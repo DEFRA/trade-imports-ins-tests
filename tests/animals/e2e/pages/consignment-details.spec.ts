@@ -71,3 +71,23 @@ test.describe('Commodity details page with two species of one commodity', { tag:
     expect(await speciesCell.evaluate((el) => (el as HTMLElement).innerText)).toBe('Bison bison,\nBos taurus');
   });
 });
+
+test.describe('Commodity details page after counts are saved', { tag: '@duplicated-in-frontend' }, () => {
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toConsignmentDetailsWithSavedCounts({ animals: '2', packages: '5' });
+  });
+
+  test('returns from Add another commodity to Commodity details with the saved counts still filled in', async ({ animalsPages }) => {
+    await animalsPages.consignmentDetails.addAnotherCommodity.click();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+
+    await animalsPages.commoditySelection.selectSpecies(['Felis catus']);
+    await animalsPages.commoditySelection.saveAndContinue.click();
+
+    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
+    await expect(await animalsPages.consignmentDetails.numberOfAnimalsFor('Bos taurus')).toHaveValue('2');
+    await expect(await animalsPages.consignmentDetails.numberOfPackagesFor('Bos taurus')).toHaveValue('5');
+    await expect(await animalsPages.consignmentDetails.numberOfAnimalsFor('Felis catus')).toHaveValue('');
+    await expect(await animalsPages.consignmentDetails.numberOfPackagesFor('Felis catus')).toHaveValue('');
+  });
+});

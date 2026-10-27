@@ -140,6 +140,10 @@ export class AnimalsJourney {
     await this.animalsPages.commoditySelection.selectSpecies(species);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.openCommodityDetailsFromOverview();
+  }
+
+  private async openCommodityDetailsFromOverview(): Promise<void> {
     await this.animalsPages.overview.task('Commodity details').click();
     await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
   }
@@ -377,6 +381,14 @@ export class AnimalsJourney {
   async toConsignmentDetails(species: string[] = [MANDATORY_ANSWERS.species.display]): Promise<void> {
     await this.toCommoditySelection();
     await this.chooseSpeciesAndOpenCommodityDetails(species);
+  }
+
+  async toConsignmentDetailsWithSavedCounts(counts: { animals: string; packages: string }): Promise<void> {
+    await this.toConsignmentDetails();
+    await this.animalsPages.consignmentDetails.numberOfAnimals.fill(counts.animals);
+    await this.animalsPages.consignmentDetails.numberOfPackages.fill(counts.packages);
+    await this.saveCountsAndReturnToOverview();
+    await this.openCommodityDetailsFromOverview();
   }
 
   async addCommodityToCurrentNotification(species: string): Promise<void> {
