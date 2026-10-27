@@ -29,6 +29,30 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
     return this.page.getByLabel('Horse name', { exact: true });
   }
 
+  get permanentAddressName(): Locator {
+    return this.page.getByLabel('Name or organisation name', { exact: true });
+  }
+
+  get permanentAddressLine1(): Locator {
+    return this.page.getByLabel('Address line 1', { exact: true });
+  }
+
+  get permanentAddressTownOrCity(): Locator {
+    return this.page.getByLabel('Town or city', { exact: true });
+  }
+
+  get permanentAddressPostcode(): Locator {
+    return this.page.getByLabel('Postcode or Zip code', { exact: true });
+  }
+
+  get permanentAddressPhone(): Locator {
+    return this.page.getByLabel('Phone number', { exact: true });
+  }
+
+  get permanentAddressEmail(): Locator {
+    return this.page.getByLabel('Email address', { exact: true });
+  }
+
   commodityHeading(heading: string): Locator {
     return this.page.getByRole('heading', { level: 2, name: heading, exact: true });
   }
