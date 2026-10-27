@@ -277,8 +277,12 @@ export class AnimalsJourney {
   async uploadDocumentAndWaitForScan(document: AccompanyingDocumentAnswer): Promise<void> {
     await this.animalsPages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
     await this.animalsPages.accompanyingDocuments.saveAndAddAnother.click();
+    await this.waitForDocumentScanComplete(document.reference);
+  }
+
+  async waitForDocumentScanComplete(reference: string): Promise<void> {
     await this.animalsPages.accompanyingDocuments
-      .documentRow(document.reference)
+      .documentRow(reference)
       .filter({ hasText: 'Check completed' })
       .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
   }

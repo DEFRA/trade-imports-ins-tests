@@ -1,4 +1,4 @@
-import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { conditionalReasonRadios } from '@utils/a11y-exclusions';
 import { getRelativeAppDateText } from '@utils/date-utils';
@@ -16,6 +16,7 @@ const PRIVATE_TRANSPORTER = {
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('the reason-gated and private transporter pages have no accessibility violations', async ({
     animalsJourney,
+    pages,
     animalsPages,
     runA11yScan,
   }) => {
@@ -59,16 +60,47 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsPages.transporterAdd.saveAndContinue.click();
       await animalsPages.privateTransporter.heading.waitFor();
+      await runA11yScan();
+      await animalsPages.privateTransporter.name.fill(PRIVATE_TRANSPORTER.name);
+      await animalsPages.privateTransporter.saveAndContinue.click();
+      await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
+      await runA11yScan();
       await animalsPages.privateTransporter.fill(PRIVATE_TRANSPORTER);
       await runA11yScan();
     });
   });
 
-  test('the approved commercial transporter register has no accessibility violations', async ({ animalsJourney, runA11yScan }) => {
-    test.slow();
-    // Nothing links here now that the add route's commercial arm is the
-    // add-commercial form (see journey.ts), so no other page reaches it.
-    await animalsJourney.toTransporterSelection();
-    await runA11yScan();
+  test('commodity details with two species and the horse and cat identifier sets have no accessibility violations', async ({
+    animalsJourney,
+    animalsPages,
+    runA11yScan,
+  }) => {
+    const horse = animalsPages.animalIdentification.speciesCard('Equus caballus');
+    const cat = animalsPages.animalIdentification.speciesCard('Felis catus');
+
+    await test.step('Commodity details with two species', async () => {
+      await animalsJourney.toConsignmentDetails(['Equus caballus', 'Felis catus']);
+      await runA11yScan();
+      await animalsPages.consignmentDetails.fillAnimalCountFor('Equus caballus', 1);
+      await animalsPages.consignmentDetails.fillAnimalCountFor('Felis catus', 1);
+      await animalsPages.consignmentDetails.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Identification details').click();
+    });
+
+    await test.step('Identification details for the horse and cat identifier sets', async () => {
+      await animalsPages.animalIdentification.heading.waitFor();
+      await runA11yScan();
+    });
+
+    await test.step('Identification details for the horse and cat identifier sets, filled in', async () => {
+      await horse.getByLabel('Microchip', { exact: true }).fill('985112345678901');
+      await horse.getByLabel('Passport', { exact: true }).fill('HORSE-PASSPORT-1');
+      await horse.getByLabel('Horse name', { exact: true }).fill('Bramble');
+      await cat.getByLabel('Microchip', { exact: true }).fill('985112345678902');
+      await cat.getByLabel('Passport', { exact: true }).fill('CAT-PASSPORT-1');
+      await cat.getByLabel('Tattoo', { exact: true }).fill('TATTOO-1');
+      await runA11yScan();
+    });
   });
 });
