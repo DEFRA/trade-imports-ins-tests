@@ -121,8 +121,8 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
     await expect(animalsPages.animalIdentification.selectedCommodities.bodyRows).toContainText([
       commodityLines.cattle.commodityCode,
-      commodityLines.domesticCat.latinName,
       commodityLines.domesticDog.latinName,
+      commodityLines.domesticCat.latinName,
     ]);
   });
 
