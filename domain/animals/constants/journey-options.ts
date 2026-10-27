@@ -1,6 +1,6 @@
 import { type CountryCode, countryCodes } from '@domain/animals/constants/country-codes';
 import { type CertificationPurpose, certificationPurposes } from '@domain/animals/constants/certification-purposes';
-import { type CommoditySpecies, commoditySpecies } from '@domain/animals/constants/commodity-species';
+import { type CommodityLine, commodityLines } from '@domain/animals/constants/commodity-lines';
 import { documentTypes } from '@domain/animals/constants/document-types';
 import { type ImportReason, importReasons } from '@domain/animals/constants/import-reasons';
 import { type InternalMarketPurpose, internalMarketPurposes } from '@domain/animals/constants/internal-market-purposes';
@@ -54,7 +54,7 @@ export type PartyAnswers = {
 export type MandatoryAnswers = {
   countryCode: CountryCode;
   requiresRegionCode: YesNoValue;
-  species: CommoditySpecies;
+  species: CommodityLine;
   noOfAnimals: number;
   earTag: string;
   importReason: ImportReason;
@@ -108,7 +108,7 @@ export const assertConsistentAnswers = (answers: NotificationAnswers): void => {
 export const MANDATORY_ANSWERS: MandatoryAnswers = {
   countryCode: countryCodes.eu.france,
   requiresRegionCode: yesNoValues.no,
-  species: commoditySpecies.bosTaurus,
+  species: commodityLines.cattle,
   noOfAnimals: 1,
   earTag: 'UK123456789012',
   importReason: importReasons.internalMarket,

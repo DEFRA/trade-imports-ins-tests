@@ -29,6 +29,13 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
     return this.page.getByLabel('Horse name', { exact: true });
   }
 
+  enterDetailsCounterHeading(latinName: string, current: number, total: number): Locator {
+    return this.page.getByRole('heading', {
+      name: `Enter details for ${latinName} ${current} of ${total}`,
+      exact: true,
+    });
+  }
+
   get permanentAddressName(): Locator {
     return this.page.getByLabel('Name or organisation name', { exact: true });
   }
@@ -68,7 +75,7 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
   savedAnimalRow(species: string, number: number): Locator {
     return this.speciesCard(species)
       .getByRole('row')
-      .filter({ hasText: `${species} ${number}` });
+      .filter({ has: this.page.getByRole('cell', { name: `${species} ${number}`, exact: true }) });
   }
 
   identifierColumn(name: string): Locator {
