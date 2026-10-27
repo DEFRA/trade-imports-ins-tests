@@ -8,11 +8,19 @@ export class SelectedCommoditiesTable {
     return this.page.getByRole('table', { name: 'Selected commodities' });
   }
 
+  get bodyRows(): Locator {
+    return this.table.locator('tbody').getByRole('row');
+  }
+
   rowFor(line: CommodityLine): Locator {
     return this.table
       .getByRole('row')
       .filter({ has: this.page.getByRole('cell', { name: line.commodityCode, exact: true }) })
       .filter({ hasText: line.latinName });
+  }
+
+  changeLinkFor(line: CommodityLine): Locator {
+    return this.rowFor(line).getByRole('link', { name: new RegExp(`^Change\\s+${line.commodityCode}\\b`) });
   }
 
   codeCell(row: Locator): Locator {

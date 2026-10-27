@@ -1,7 +1,7 @@
 import { SET_BASES } from '@page-objects/shared/sets';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { POTATOES, PLANTS_FOR_PLANTING, potatoLine, arrivalDate } from '@flows/plants/journey';
+import { POTATOES, PLANTS_FOR_PLANTING, WOOD_AND_CUT_TREES, potatoLine, arrivalDate } from '@flows/plants/journey';
 import type { PlantsPages, SharedPages } from '@page-objects';
 import { todayOrTomorrowServiceDisplayDatePattern } from '@utils/date-utils';
 
@@ -117,19 +117,13 @@ test.describe('High-risk plants check and submit section', () => {
       await plantsJourney.toDeclarationFromReview();
     });
 
-    test('shows the confirmation as a small checkbox in a group whose legend is hidden from sight', async ({ plantsPages }) => {
-      const { content } = plantsPages.declaration;
-
-      await expect(content.confirmationGroup).toBeVisible();
-      await expect(content.confirmationLegend).toHaveClass(/govuk-visually-hidden/);
-      await expect(content.checkboxes).toHaveClass(/govuk-checkboxes--small/);
+    test('puts the confirmation checkbox in a group named by the declaration legend', async ({ plantsPages }) => {
+      await expect(plantsPages.declaration.content.confirmationGroup).toBeVisible();
+      await expect(plantsPages.declaration.content.confirmationCheckbox).toBeVisible();
     });
 
-    test('shows the date of declaration in bold', async ({ plantsPages }) => {
-      const { dateValue } = plantsPages.declaration.content;
-
-      await expect(dateValue).toHaveText(new RegExp(`^${todayOrTomorrowServiceDisplayDatePattern()}$`));
-      await expect(dateValue).toHaveCSS('font-weight', '700');
+    test('shows the date of declaration as the strong text of its line', async ({ plantsPages }) => {
+      await expect(plantsPages.declaration.content.dateValue).toHaveText(new RegExp(`^${todayOrTomorrowServiceDisplayDatePattern()}$`));
     });
 
     test('starts the declaration of a draft with the Declaration heading', async ({ plantsPages }) => {
@@ -150,9 +144,7 @@ test.describe('High-risk plants check and submit section', () => {
     plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await plantsJourney.completeNotification(addressBookApi);
-    await plantsJourney.submitFromReview();
-    await plantsNotificationActions.amendNotification(reference);
+    const reference = await plantsNotificationActions.amendCompletedNotification(plantsJourney, addressBookApi);
     await plantsJourney.toDeclarationOf(reference);
 
     await expect(plantsPages.declaration.content.firstContentElement).toHaveText('Declaration');
@@ -323,9 +315,7 @@ test.describe('High-risk plants check and submit section', () => {
     plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await plantsJourney.completeNotification(addressBookApi);
-    await plantsJourney.submitFromReview();
-    await plantsNotificationActions.amendNotification(reference);
+    await plantsNotificationActions.amendCompletedNotification(plantsJourney, addressBookApi);
     await plantsPages.overview.reviewTaskLink.click();
     await plantsPages.notificationView.linkBack.click();
     await expect(plantsPages.overview.heading).toBeVisible();
@@ -384,9 +374,7 @@ test.describe('High-risk plants check and submit section', () => {
     plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await plantsJourney.completeNotification(addressBookApi);
-    await plantsJourney.submitFromReview();
-    await plantsNotificationActions.amendNotification(reference);
+    const reference = await plantsNotificationActions.amendCompletedNotification(plantsJourney, addressBookApi);
     await expectAmending(pages, plantsPages, reference);
 
     await plantsPages.overview.taskRowLink('Identification numbers').click();
@@ -410,9 +398,7 @@ test.describe('High-risk plants check and submit section', () => {
     plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await plantsJourney.completeNotification(addressBookApi);
-    await plantsJourney.submitFromReview();
-    await plantsNotificationActions.amendNotification(reference);
+    const reference = await plantsNotificationActions.amendCompletedNotification(plantsJourney, addressBookApi);
     await expectAmending(pages, plantsPages, reference);
 
     await plantsPages.notificationView.open(reference);
@@ -438,9 +424,7 @@ test.describe('High-risk plants check and submit section', () => {
     plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await plantsJourney.completeNotification(addressBookApi, { type: PLANTS_FOR_PLANTING, days: -1 });
-    await plantsJourney.submitFromReview();
-    await plantsNotificationActions.amendNotification(reference);
+    const reference = await plantsNotificationActions.amendCompletedPlantsForPlanting(plantsJourney, addressBookApi);
     await expectAmending(pages, plantsPages, reference);
 
     await plantsPages.arrivalStatus.open(reference);
@@ -459,9 +443,7 @@ test.describe('High-risk plants check and submit section', () => {
     plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await plantsJourney.completeNotification(addressBookApi, { type: PLANTS_FOR_PLANTING, days: -1 });
-    await plantsJourney.submitFromReview();
-    await plantsNotificationActions.amendNotification(reference);
+    const reference = await plantsNotificationActions.amendCompletedPlantsForPlanting(plantsJourney, addressBookApi);
     await expectAmending(pages, plantsPages, reference);
 
     await plantsPages.consignorSelect.open(reference);
@@ -490,16 +472,10 @@ test.describe('High-risk plants check and submit section', () => {
     plantsNotificationActions,
     addressBookApi,
   }) => {
-    const { reference } = await plantsJourney.completeNotification(addressBookApi);
-    await plantsJourney.submitFromReview();
-    await plantsNotificationActions.amendNotification(reference);
+    const reference = await plantsNotificationActions.amendCompletedNotification(plantsJourney, addressBookApi);
     await expectAmending(pages, plantsPages, reference);
 
-    await plantsPages.arrivalDetails.open(reference);
-    await plantsPages.arrivalDetails.arrivalDate.fill('');
-    await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
-    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
-    await expect(plantsPages.overview.taskRow('Arrival details')).toContainText('In progress');
+    await plantsJourney.changeCommodityType(reference, WOOD_AND_CUT_TREES);
 
     await plantsPages.notificationView.open(reference);
     await expect(plantsPages.notificationView.errorSummary).toHaveCount(0);

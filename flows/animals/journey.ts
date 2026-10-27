@@ -60,6 +60,8 @@ export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffse
 
 export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
 export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
+export const PERMANENT_ADDRESS_PASSPORT_NUMBER = 'UK123456789';
+export const PERMANENT_ADDRESS_NAME = 'Pet Owner';
 
 const timestampedReference = (referencePrefix: string): string => `${referencePrefix}${Date.now()}`;
 
@@ -148,6 +150,10 @@ export class AnimalsJourney {
     await this.animalsPages.commoditySelection.searchAndCheckSpecies(lines);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.openCommodityDetailsFromOverview();
+  }
+
+  private async openCommodityDetailsFromOverview(): Promise<void> {
     await this.animalsPages.overview.task('Commodity details').click();
     await this.animalsPages.consignmentDetails.heading.waitFor(pageLoadWait);
   }
@@ -313,6 +319,10 @@ export class AnimalsJourney {
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
     await this.animalsPages.transitedCountries.addCountry(ALL_ANSWERS.transitedCountries[0].display);
     await this.animalsPages.transitedCountries.saveAndContinue.click();
+    await this.openTransporterFromOverview();
+  }
+
+  async openTransporterFromOverview(): Promise<void> {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
@@ -390,6 +400,18 @@ export class AnimalsJourney {
     await this.chooseCommodityLinesAndOpenDetails(lines);
   }
 
+  async toOverviewWithSavedCounts(counts: { animals: string; packages: string }): Promise<void> {
+    await this.toConsignmentDetails();
+    await this.animalsPages.consignmentDetails.numberOfAnimals.fill(counts.animals);
+    await this.animalsPages.consignmentDetails.numberOfPackages.fill(counts.packages);
+    await this.saveCountsAndReturnToOverview();
+  }
+
+  async toConsignmentDetailsWithSavedCounts(counts: { animals: string; packages: string }): Promise<void> {
+    await this.toOverviewWithSavedCounts(counts);
+    await this.openCommodityDetailsFromOverview();
+  }
+
   async addCommodityToCurrentNotification(line: CommodityLine): Promise<void> {
     await this.openCurrentOverview();
     await this.animalsPages.overview.task('What are you importing?').click();
@@ -411,6 +433,18 @@ export class AnimalsJourney {
     }
     await this.saveCountsAndReturnToOverview();
     await this.openIdentificationFromOverview();
+  }
+
+  async saveAnimalWithPermanentAddress(): Promise<void> {
+    const identification = this.animalsPages.animalIdentification;
+    await identification.passportNumber.fill(PERMANENT_ADDRESS_PASSPORT_NUMBER);
+    await identification.permanentAddressName.fill(PERMANENT_ADDRESS_NAME);
+    await identification.permanentAddressLine1.fill('1 Farm Lane');
+    await identification.permanentAddressTownOrCity.fill('Skipton');
+    await identification.permanentAddressPostcode.fill('BD23 1UD');
+    await identification.permanentAddressPhone.fill('+44 1756 555 0192');
+    await identification.permanentAddressEmail.fill('owner@example.co.uk');
+    await identification.saveAndAddAnother.click();
   }
 
   async toImportReason(): Promise<void> {
