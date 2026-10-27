@@ -78,6 +78,18 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await expect(bisonBison.getByLabel('Ear tag', { exact: true })).toHaveValue('');
   });
 
+  test('saves the card typed in when Enter is pressed in its field and stays on Identification details', async ({ animalsPages }) => {
+    const bosTaurus = animalsPages.animalIdentification.speciesCard('Bos taurus');
+    const earTag = bosTaurus.getByLabel('Ear tag', { exact: true });
+    await earTag.fill('UK000000000001');
+    await earTag.press('Enter');
+
+    await expect(animalsPages.animalIdentification.heading).toBeVisible();
+    await expect(animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 1)).toContainText('UK000000000001');
+    await expect(bosTaurus.getByRole('heading', { name: 'Enter details for Bos taurus 2 of 2' })).toBeVisible();
+    await expect(earTag).toHaveValue('');
+  });
+
   test('leaves a species of more than one animal unsaved when Save and continue is pressed', async ({ pages, animalsPages }) => {
     await animalsPages.animalIdentification.speciesCard('Felis catus').getByLabel('Passport', { exact: true }).fill('UK123456789');
     await animalsPages.animalIdentification.saveAndContinue.click();
