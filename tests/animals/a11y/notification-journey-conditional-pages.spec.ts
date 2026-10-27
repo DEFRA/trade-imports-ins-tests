@@ -1,6 +1,7 @@
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
-import { conditionalReasonRadios } from '@utils/a11y-exclusions';
+import { govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
 const PRIVATE_TRANSPORTER = {
@@ -29,7 +30,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importReason.reason('Transit').check();
       await animalsPages.importReason.selectTransitPortOfExitByIndex(2);
       await animalsPages.importReason.selectTransitDestinationCountry('FR');
-      await runA11yScan({ exclude: conditionalReasonRadios });
+      await runA11yScan({ exclude: govukConditionalRevealRadiosOnReason });
       await animalsPages.importReason.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Additional details').click();
@@ -43,7 +44,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importReason.reason('Temporary admission horses').check();
       await animalsPages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
       await animalsPages.importReason.selectTemporaryAdmissionPortOfExitByIndex(2);
-      await runA11yScan({ exclude: conditionalReasonRadios });
+      await runA11yScan({ exclude: govukConditionalRevealRadiosOnReason });
       await animalsPages.importReason.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Additional details').click();
@@ -75,14 +76,15 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     animalsPages,
     runA11yScan,
   }) => {
-    const horse = animalsPages.animalIdentification.speciesCard('Equus caballus');
-    const cat = animalsPages.animalIdentification.speciesCard('Felis catus');
+    const { horse: horseLine, domesticCat } = commodityLines;
+    const horse = animalsPages.animalIdentification.speciesCard(horseLine.latinName);
+    const cat = animalsPages.animalIdentification.speciesCard(domesticCat.latinName);
 
     await test.step('Commodity details with two species', async () => {
-      await animalsJourney.toConsignmentDetails(['Equus caballus', 'Felis catus']);
+      await animalsJourney.toConsignmentDetails([horseLine, domesticCat]);
       await runA11yScan();
-      await animalsPages.consignmentDetails.fillAnimalCountFor('Equus caballus', 1);
-      await animalsPages.consignmentDetails.fillAnimalCountFor('Felis catus', 1);
+      await animalsPages.consignmentDetails.fillAnimalCountFor(horseLine.latinName, 1);
+      await animalsPages.consignmentDetails.fillAnimalCountFor(domesticCat.latinName, 1);
       await animalsPages.consignmentDetails.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Identification details').click();

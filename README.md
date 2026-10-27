@@ -137,6 +137,13 @@ those settings:
 `@a11y` tests use the same configs; per-test timeout is longer in
 `fixtures/a11y.ts`.
 
+The animals journey scans leave out govuk-frontend's conditional-reveal radios
+(`govukConditionalRevealRadioOnOrigin` and
+`govukConditionalRevealRadiosOnReason` in `fixtures/a11y.ts`). govuk-frontend sets `aria-expanded` on
+each radio that opens a conditional reveal (`radios.mjs`), and axe's
+`aria-allowed-attr` rule rejects it. That is a disagreement between
+govuk-frontend and axe, not a service defect.
+
 The CDP config sets a 60s test timeout and a 15s expect timeout, against
 Playwright's 30s and 5s defaults that the docker-compose config keeps. Each CDP
 page load is a real network hop, so CDP needs a longer budget than the local
@@ -172,6 +179,27 @@ suffix) so a search finds only this run's record. A spec deletes an address
 only when the deletion is what it tests. Where expiry is on, the shared journey
 addresses seeded in `globalSetup` expire too; the next run's
 `ensureE2eAddressBook` creates them again.
+
+### Commodity lines in the animals specs
+
+`domain/animals/constants/commodity-lines.ts` names each line a spec chooses
+by its CN commodity code and Latin name. The commodity page labels each tick
+box with the Latin name alone, under a heading of the code, and one Latin name
+can sit under several codes (`Bos taurus` is under four), so a line needs both.
+The stack's MDM stub answers only the searches saved from MDM, so each line's
+`searchTerm` is a saved term whose first page of results lists that line; the
+first page is the frontend's 100 results. The
+frontend saves only a species its search showed, so a seeded journey posts the
+search before it posts the chosen species. A spec that needs what MDM says
+about a species, such as its common name, reads it from reference-data's
+commodity search through `ReferenceDataApiClient`, rather than from a copy of
+it that goes stale.
+
+A notification's commodity name carries its first line's CN code until
+EUDPA-669 brings the real commodity name. So the outbox spec expects
+`commodityLines.cattle.commodityCode` as the trade line's description and
+common name, and the aggregated notification spec expects it as the
+commodity.
 
 ### Authenticated session reuse
 

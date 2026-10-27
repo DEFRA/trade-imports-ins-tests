@@ -2,6 +2,7 @@ import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { Locator } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
+import type { PartyRole } from '@page-objects/animals/addresses-page';
 import {
   ALL_ANSWERS,
   MANDATORY_ANSWERS,
@@ -20,6 +21,7 @@ import { fileUploadPaths } from '@resources/file-upload/paths';
 import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
+import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 
 export type ArrivalDetailsAnswer = {
   date?: string;
@@ -29,8 +31,14 @@ export type ArrivalDetailsAnswer = {
   documentReference?: string;
 };
 
+type PartyAnswer = [
+  role: PartyRole,
+  name: string,
+  picker: 'consignorSelection' | 'destinationSelection' | 'placeOfOriginSelection' | 'consigneeSelection' | 'importerSelection',
+];
+
 export type SpeciesAnimalCount = {
-  species: string;
+  species: CommodityLine;
   animalCount: number;
 };
 
@@ -138,8 +146,8 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  private async chooseSpeciesAndOpenCommodityDetails(species: string[]): Promise<void> {
-    await this.animalsPages.commoditySelection.selectSpecies(species);
+  private async chooseCommodityLinesAndOpenDetails(lines: CommodityLine[]): Promise<void> {
+    await this.animalsPages.commoditySelection.searchAndCheckSpecies(lines);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.openCommodityDetailsFromOverview();
@@ -178,7 +186,7 @@ export class AnimalsJourney {
 
   async answerCommodity(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('What are you importing?').click();
-    await this.chooseSpeciesAndOpenCommodityDetails([answers.species.display]);
+    await this.chooseCommodityLinesAndOpenDetails([answers.species]);
     await this.animalsPages.consignmentDetails.numberOfAnimals.fill(String(answers.noOfAnimals));
     if (answers.noOfPackages !== undefined) {
       await this.animalsPages.consignmentDetails.numberOfPackages.fill(String(answers.noOfPackages));
@@ -222,13 +230,20 @@ export class AnimalsJourney {
   }
 
   async addFiveParties(names: PartyAnswers = MANDATORY_ANSWERS.parties): Promise<void> {
-    const parties = [
-      ['Consignor', names.consignor, 'consignorSelection'],
+    await this.addParties([['Consignor', names.consignor, 'consignorSelection']]);
+    await this.addRemainingParties(names);
+  }
+
+  async addRemainingParties(names: PartyAnswers = MANDATORY_ANSWERS.parties): Promise<void> {
+    await this.addParties([
       ['Place of destination', names.placeOfDestination, 'destinationSelection'],
       ['Place of origin', names.placeOfOrigin, 'placeOfOriginSelection'],
       ['Consignee', names.consignee, 'consigneeSelection'],
       ['Importer', names.importer, 'importerSelection'],
-    ] as const;
+    ]);
+  }
+
+  private async addParties(parties: PartyAnswer[]): Promise<void> {
     for (const [role, name, picker] of parties) {
       await this.animalsPages.addresses.addParty(role).click();
       await this.animalsPages[picker].select(name);
@@ -384,9 +399,9 @@ export class AnimalsJourney {
     await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
   }
 
-  async toConsignmentDetails(species: string[] = [MANDATORY_ANSWERS.species.display]): Promise<void> {
+  async toConsignmentDetails(lines: CommodityLine[] = [MANDATORY_ANSWERS.species]): Promise<void> {
     await this.toCommoditySelection();
-    await this.chooseSpeciesAndOpenCommodityDetails(species);
+    await this.chooseCommodityLinesAndOpenDetails(lines);
   }
 
   async toOverviewWithSavedCounts(counts: { animals: string; packages: string }): Promise<void> {
@@ -401,10 +416,10 @@ export class AnimalsJourney {
     await this.openCommodityDetailsFromOverview();
   }
 
-  async addCommodityToCurrentNotification(species: string): Promise<void> {
+  async addCommodityToCurrentNotification(line: CommodityLine): Promise<void> {
     await this.openCurrentOverview();
     await this.animalsPages.overview.task('What are you importing?').click();
-    await this.chooseSpeciesAndOpenCommodityDetails([species]);
+    await this.chooseCommodityLinesAndOpenDetails([line]);
     await this.animalsPages.consignmentDetails.fillEveryAnimalCount('1');
     await this.saveCountsAndReturnToOverview();
   }
@@ -418,7 +433,7 @@ export class AnimalsJourney {
   async toAnimalIdentificationWithCounts(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
     await this.toConsignmentDetails(speciesCounts.map(({ species }) => species));
     for (const { species, animalCount } of speciesCounts) {
-      await this.animalsPages.consignmentDetails.fillAnimalCountFor(species, animalCount);
+      await this.animalsPages.consignmentDetails.fillAnimalCountFor(species.latinName, animalCount);
     }
     await this.saveCountsAndReturnToOverview();
     await this.openIdentificationFromOverview();
@@ -542,7 +557,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies([MANDATORY_ANSWERS.species.display]);
+    await pages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.species]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);
@@ -579,7 +594,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies([MANDATORY_ANSWERS.species.display]);
+    await pages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.species]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);
@@ -596,11 +611,11 @@ export class AnimalsJourney {
     await pages.animalIdentification.earTag.fill('UK000000000001');
     await pages.animalIdentification.passportNumber.fill('PASSPORT-0001');
     await pages.animalIdentification.saveAndAddAnother.click();
-    await pages.animalIdentification.savedAnimalRow(MANDATORY_ANSWERS.species.display, 1).waitFor(pageLoadWait);
+    await pages.animalIdentification.savedAnimalRow(MANDATORY_ANSWERS.species.latinName, 1).waitFor(pageLoadWait);
     await pages.animalIdentification.earTag.fill('UK000000000002');
     await pages.animalIdentification.passportNumber.fill('PASSPORT-0002');
     await pages.animalIdentification.saveAndFinish.click();
-    await pages.animalIdentification.savedAnimalRow(MANDATORY_ANSWERS.species.display, 2).waitFor(pageLoadWait);
+    await pages.animalIdentification.savedAnimalRow(MANDATORY_ANSWERS.species.latinName, 2).waitFor(pageLoadWait);
     await pages.animalIdentification.saveAndContinue.click();
 
     await pages.additionalDetails.heading.waitFor(pageLoadWait);
@@ -644,7 +659,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.selectSpecies(['Equus caballus']);
+    await pages.commoditySelection.searchAndCheckSpecies([commodityLines.horse]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);

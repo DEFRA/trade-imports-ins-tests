@@ -1,10 +1,12 @@
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
+
 import { test, expect } from '@fixtures/visual';
 
 test.use({ headless: true });
 
 test.describe('Identification card (visual regression)', { tag: '@visual' }, () => {
   test.beforeEach(async ({ page, animalsJourney }) => {
-    await animalsJourney.toAnimalIdentificationWithCounts([{ species: 'Felis catus', animalCount: 2 }]);
+    await animalsJourney.toAnimalIdentificationWithCounts([{ species: commodityLines.domesticCat, animalCount: 2 }]);
     await animalsJourney.saveAnimalWithPermanentAddress();
     await expect(page.getByRole('heading', { name: 'Enter details for Felis catus 2 of 2' })).toBeVisible();
   });

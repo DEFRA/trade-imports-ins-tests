@@ -1,7 +1,8 @@
 import path from 'node:path';
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
-import { conditionalRadioInput, conditionalReasonRadios } from '@utils/a11y-exclusions';
+import { govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
 import { getRelativeDatePickerValue } from '@utils/date-utils';
 import { writeEicarPdfFile } from '@utils/eicar-file-writer';
 import { fileUploadPaths } from '@resources/file-upload/paths';
@@ -31,7 +32,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
       await animalsPages.originOfImport.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
-      await runA11yScan({ exclude: conditionalRadioInput });
+      await runA11yScan({ exclude: govukConditionalRevealRadioOnOrigin });
       await animalsJourney.fillOriginOfImport();
       await animalsJourney.saveOriginOfImport();
       await animalsPages.overview.heading.waitFor();
@@ -43,7 +44,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.commoditySelection.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
-      await animalsPages.commoditySelection.selectSpecies(['Bos taurus']);
+      await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
       await animalsPages.commoditySelection.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Commodity details').click();
@@ -78,7 +79,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importReason.reason('Internal market').check();
       await animalsPages.importReason.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
-      await runA11yScan({ exclude: conditionalReasonRadios });
+      await runA11yScan({ exclude: govukConditionalRevealRadiosOnReason });
       await animalsPages.importReason.purpose('Breeding').check();
       await animalsPages.importReason.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
