@@ -4,7 +4,7 @@ import { type NotificationDocument } from '@domain/animals/models/db/notificatio
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { ALL_ANSWERS as answers, CPH_NUMBER } from '@domain/animals/constants/journey-options';
-import { toIsoDate } from '@utils/date-utils';
+import { parseAppDateText, toIsoDate } from '@utils/date-utils';
 
 test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
@@ -100,8 +100,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
       expect(notification.transport.transitedCountries).toEqual(answers.transitedCountries.map(({ value }) => value));
       expect(notification.transport.transporter?.name).toBe(answers.transporter.display);
       expect(notification.transport.transporter?.type).toBe('Commercial');
-      const [day, month, year] = answers.arrivalDate.split('/');
-      expect(notification.transport.arrivalDate).toBe(toIsoDate({ day, month, year }));
+      expect(notification.transport.arrivalDate).toBe(toIsoDate(parseAppDateText(answers.arrivalDate)));
     } finally {
       await client.close();
     }

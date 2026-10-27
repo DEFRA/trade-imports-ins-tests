@@ -176,6 +176,23 @@ export function toIsoDate(input: DateInput): string {
   return `${year}-${month}-${day}`;
 }
 
+/** Splits app date text in the `d/m/yyyy` shape, such as an answer typed into a date field, into its parts. */
+export function parseAppDateText(text: string): DateInput {
+  const [day, month, year] = text.split('/');
+  return { day, month, year };
+}
+
+const SHORT_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * Formats a DateInput the way the INS dashboard renders a calendar date, `d MMM yyyy`
+ * (`10 Sep 2026`). The month table is fixed because `Intl`'s en-GB short month for
+ * September is `Sept`.
+ */
+export function toShortDisplayDate(input: DateInput): string {
+  return `${Number(input.day)} ${SHORT_MONTH_NAMES[Number(input.month) - 1]} ${input.year}`;
+}
+
 /** A regular-expression group matching today's or tomorrow's service display date, for a date stamped near midnight. */
 export function todayOrTomorrowServiceDisplayDatePattern(): string {
   return `(${getRelativeServiceDisplayDate()}|${getRelativeServiceDisplayDate(1)})`;
