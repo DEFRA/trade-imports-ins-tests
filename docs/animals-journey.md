@@ -12,7 +12,6 @@ Why the animals flows and page objects are written the way they are. The code ca
 ## Reaching a page unfilled
 
 - The `to*` steps land on a page without filling it, so a per-page spec can drive it.
-- The journey's only section gate is the review's, so `unlockSections` answers the commodity and the commodity details rather than passing a gate.
 
 ## Dates
 

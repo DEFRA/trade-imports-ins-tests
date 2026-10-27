@@ -29,7 +29,7 @@ test.describe('Amendment page endings', () => {
     await expect(animalsPages.overview.heading).toBeVisible();
   });
 
-  test('Upload documents opened from Overview while amending has a Back link to the review, however the page was opened', async ({
+  test('Upload documents opened from Overview while amending has a Back link to the review', async ({
     animalsPages,
     animalsSeededJourney,
   }) => {
