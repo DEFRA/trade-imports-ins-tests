@@ -52,6 +52,8 @@ export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffse
 
 export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
 export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
+export const PERMANENT_ADDRESS_PASSPORT_NUMBER = 'UK123456789';
+export const PERMANENT_ADDRESS_NAME = 'Pet Owner';
 
 const timestampedReference = (referencePrefix: string): string => `${referencePrefix}${Date.now()}`;
 
@@ -383,11 +385,15 @@ export class AnimalsJourney {
     await this.chooseSpeciesAndOpenCommodityDetails(species);
   }
 
-  async toConsignmentDetailsWithSavedCounts(counts: { animals: string; packages: string }): Promise<void> {
+  async toOverviewWithSavedCounts(counts: { animals: string; packages: string }): Promise<void> {
     await this.toConsignmentDetails();
     await this.animalsPages.consignmentDetails.numberOfAnimals.fill(counts.animals);
     await this.animalsPages.consignmentDetails.numberOfPackages.fill(counts.packages);
     await this.saveCountsAndReturnToOverview();
+  }
+
+  async toConsignmentDetailsWithSavedCounts(counts: { animals: string; packages: string }): Promise<void> {
+    await this.toOverviewWithSavedCounts(counts);
     await this.openCommodityDetailsFromOverview();
   }
 
@@ -412,6 +418,18 @@ export class AnimalsJourney {
     }
     await this.saveCountsAndReturnToOverview();
     await this.openIdentificationFromOverview();
+  }
+
+  async saveAnimalWithPermanentAddress(): Promise<void> {
+    const identification = this.animalsPages.animalIdentification;
+    await identification.passportNumber.fill(PERMANENT_ADDRESS_PASSPORT_NUMBER);
+    await identification.permanentAddressName.fill(PERMANENT_ADDRESS_NAME);
+    await identification.permanentAddressLine1.fill('1 Farm Lane');
+    await identification.permanentAddressTownOrCity.fill('Skipton');
+    await identification.permanentAddressPostcode.fill('BD23 1UD');
+    await identification.permanentAddressPhone.fill('+44 1756 555 0192');
+    await identification.permanentAddressEmail.fill('owner@example.co.uk');
+    await identification.saveAndAddAnother.click();
   }
 
   async toImportReason(): Promise<void> {
