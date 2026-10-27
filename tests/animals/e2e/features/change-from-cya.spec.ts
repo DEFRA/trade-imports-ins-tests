@@ -32,4 +32,29 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(certifiedForRow).toContainText('Exhibition');
   });
+
+  test('the documents Change link opens the page with a Back link to the review, which stays after the page refuses a part-filled document', async ({
+    animalsSeededJourney,
+    pages,
+    animalsPages,
+  }) => {
+    test.slow();
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const reviewUrl = animalsPages.notificationView.expectedUrl(referenceNumber);
+
+    await animalsPages.notificationView.changeLink('Change uploaded documents').click();
+    await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/\/accompanying-documents\?change=1$/);
+    await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);
+
+    await animalsPages.accompanyingDocuments.documentReference.fill('GBHC1234567890');
+    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
+
+    await expect(animalsPages.accompanyingDocuments.errorSummary).toContainText('Upload a document');
+    await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);
+
+    await animalsPages.accompanyingDocuments.linkBack.click();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+  });
 });
