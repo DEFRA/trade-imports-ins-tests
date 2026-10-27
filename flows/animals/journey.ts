@@ -416,7 +416,7 @@ export class AnimalsJourney {
     await this.openCurrentOverview();
     await this.animalsPages.overview.task('What are you importing?').click();
     await this.chooseCommodityLinesAndOpenDetails([line]);
-    await this.animalsPages.consignmentDetails.fillEveryAnimalCount('1');
+    await this.animalsPages.consignmentDetails.fillAnimalCountFor(line.latinName, 1);
     await this.saveCountsAndReturnToOverview();
   }
 

@@ -82,38 +82,38 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
   });
 
   test('saves the card typed in when Enter is pressed in its field and stays on Identification details', async ({ animalsPages }) => {
-    const bosTaurus = animalsPages.animalIdentification.speciesCard('Bos taurus');
+    const { cattle } = commodityLines;
+    const bosTaurus = animalsPages.animalIdentification.speciesCard(cattle.latinName);
     const earTag = bosTaurus.getByLabel('Ear tag', { exact: true });
     await earTag.fill('UK000000000001');
     await earTag.press('Enter');
 
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
-    await expect(animalsPages.animalIdentification.savedAnimalRow('Bos taurus', 1)).toContainText('UK000000000001');
-    await expect(bosTaurus.getByRole('heading', { name: 'Enter details for Bos taurus 2 of 2' })).toBeVisible();
+    await expect(animalsPages.animalIdentification.savedAnimalRow(cattle.latinName, 1)).toContainText('UK000000000001');
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(cattle.latinName, 2, 2)).toBeVisible();
     await expect(earTag).toHaveValue('');
   });
 
-  test('leaves a species of more than one animal unsaved when Save and continue is pressed', async ({ pages, animalsPages }) => {
-    await animalsPages.animalIdentification
-      .speciesCard(commodityLines.domesticCat.latinName)
-      .getByLabel('Passport', { exact: true })
-      .fill('UK123456789');
+  test('leaves a species of more than one animal unsaved when Save and continue is pressed', async ({ animalsPages }) => {
+    const { domesticCat } = commodityLines;
+    await animalsPages.animalIdentification.speciesCard(domesticCat.latinName).getByLabel('Passport', { exact: true }).fill('UK123456789');
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.overview.task('Identification details').click();
-    const felisCatus = animalsPages.animalIdentification.speciesCard(commodityLines.domesticCat.latinName);
-    await expect(pages.page.getByRole('heading', { name: 'Enter details for Felis catus 1 of 2' })).toBeVisible();
+    const felisCatus = animalsPages.animalIdentification.speciesCard(domesticCat.latinName);
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(domesticCat.latinName, 1, 2)).toBeVisible();
     await expect(felisCatus.getByLabel('Passport', { exact: true })).toHaveValue('');
   });
 
   test('returns from a summary row Change to Identification details listing the commodity added there', async ({ animalsPages }) => {
-    await animalsPages.animalIdentification.selectedCommodities.changeLinkFor(commodityLines.cattle).click();
+    const { cattle, bison, domesticCat } = commodityLines;
+    await animalsPages.animalIdentification.selectedCommodities.changeLinkFor(cattle).click();
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText('3 selected');
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('Bos taurus');
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('Bison bison');
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('Felis catus');
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(cattle.latinName);
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(bison.latinName);
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(domesticCat.latinName);
 
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.domesticDog]);
     await animalsPages.commoditySelection.saveAndContinue.click();

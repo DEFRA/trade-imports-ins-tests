@@ -47,6 +47,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
   }) => {
     for (const query of GROUPING_QUERIES) {
       const groups = await referenceDataApi.listGroups(query);
+      expect(groups.length).toBeGreaterThan(0);
       await animalsPages.commoditySelection.search(query);
       await expect(pages.page.getByRole('checkbox')).toHaveCount(groups.flatMap((group) => group.species).length);
       for (const { code, species } of groups) {
@@ -135,7 +136,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     test('keeps the saved selection when the page is reopened', async ({ animalsPages }) => {
       const referenceNumber = animalsPages.commoditySelection.referenceNumberFromUrl();
       await animalsPages.overview.openTaskAfterReopening(referenceNumber, 'What are you importing?');
-      await expect(animalsPages.commoditySelection.selectedSummary).toContainText('Bos taurus');
+      await expect(animalsPages.commoditySelection.selectedSummary).toContainText(commodityLines.cattle.latinName);
     });
   });
 });

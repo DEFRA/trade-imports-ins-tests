@@ -29,8 +29,11 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
     return this.page.getByLabel('Horse name', { exact: true });
   }
 
-  get panelHeadings(): Locator {
-    return this.page.getByRole('heading', { level: 4, name: /^Enter details for / });
+  enterDetailsCounterHeading(latinName: string, current: number, total: number): Locator {
+    return this.page.getByRole('heading', {
+      name: `Enter details for ${latinName} ${current} of ${total}`,
+      exact: true,
+    });
   }
 
   get permanentAddressName(): Locator {

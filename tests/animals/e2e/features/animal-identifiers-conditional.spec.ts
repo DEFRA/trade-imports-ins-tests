@@ -10,7 +10,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     animalsPages,
   }) => {
     await animalsJourney.toAnimalIdentificationWithCounts([{ species: commodityLines.domesticCat, animalCount: 2 }]);
-    await expect(pages.page.getByRole('heading', { name: 'Enter details for Felis catus 1 of 2' })).toBeVisible();
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.domesticCat.latinName, 1, 2)).toBeVisible();
 
     await expect(animalsPages.animalIdentification.passportNumber).toBeVisible();
     await expect(pages.page.getByLabel('Tattoo')).toBeVisible();
@@ -46,7 +46,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
       { species: commodityLines.ostrich, animalCount: 1 },
     ]);
 
-    await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 1 of 1' })).toBeVisible();
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle.latinName, 1, 1)).toBeVisible();
     await expect(animalsPages.animalIdentification.earTag).toBeVisible();
     await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.ostrich.latinName}` })).toHaveCount(0);
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);

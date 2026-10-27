@@ -11,10 +11,10 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     test.slow();
     await animalsJourney.toAnimalIdentificationWithCounts([{ species: commodityLines.cattle, animalCount: 2 }]);
 
-    await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 1 of 2' })).toBeVisible();
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle.latinName, 1, 2)).toBeVisible();
     await animalsPages.animalIdentification.earTag.fill('UK000000000001');
     await animalsPages.animalIdentification.saveAndAddAnother.click();
-    await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.cattle.latinName} 2 of 2` })).toBeVisible();
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle.latinName, 2, 2)).toBeVisible();
     await expect(animalsPages.animalIdentification.identifierColumn('Animal')).toBeVisible();
     await expect(animalsPages.animalIdentification.identifierColumn('Ear tag')).toBeVisible();
     await expect(animalsPages.animalIdentification.identifierColumn('Passport')).toBeVisible();
@@ -58,7 +58,7 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
       .savedAnimalRow(commodityLines.cattle.latinName, 2)
       .getByRole('button', { name: 'Remove' })
       .click();
-    await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 2 of 2' })).toBeVisible();
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle.latinName, 2, 2)).toBeVisible();
 
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
