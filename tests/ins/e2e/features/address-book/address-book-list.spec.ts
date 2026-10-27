@@ -1,6 +1,7 @@
 import { test, expect, type PageFixtures } from '@fixtures';
-import { expectNoMatchesListed } from './expect-address-book-list';
-import { addressWithLineTwoAndCounty, traderAddress } from './trader-address';
+import { expectAddressBookList, expectNoMatchesListed } from './expect-address-book-list';
+import { type AddressDetails } from '@page-objects/ins/address-book/form-page';
+import { addFormAddress, addressWithLineTwoAndCounty, traderAddress } from './trader-address';
 
 const SUBMIT_METHODS = [
   { submitWith: 'button', how: 'the Search button' },
@@ -11,6 +12,8 @@ const SEARCHED_ADDRESS_FIELDS = [
   { field: 'addressLine2', label: 'address line 2' },
   { field: 'county', label: 'county' },
 ] as const;
+
+const LINE_TWO_AND_COUNTY_ADDRESS_CELL = /^1 Trader Lane,\nUnit 9,\nCarlisle,\nCumbria,\nCA1 3CC$/;
 
 const addAddressAndExpectSearchToListIt = async (
   { insPages, addressBookApi }: Pick<PageFixtures, 'insPages' | 'addressBookApi'>,
@@ -26,6 +29,13 @@ const addAddressAndExpectSearchToListIt = async (
   await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
   await expect(insPages.addressBookList.row(name)).toBeVisible();
   await expect(insPages.addressBookList.mainLinks).toHaveText(['Clear search', `View ${name}`]);
+};
+
+const addAddressThroughForm = async ({ insPages }: Pick<PageFixtures, 'insPages'>, details: AddressDetails) => {
+  await insPages.addressBookList.open();
+  await insPages.addressBookList.btnAddNewAddress.click();
+  await insPages.addressBookAdd.fill(details);
+  await insPages.addressBookAdd.save();
 };
 
 test.describe('Address book list', () => {
@@ -146,12 +156,64 @@ test.describe('Address book list', () => {
 
     await insPages.addressBookList.search(`Lines ${stamp}`, { submitWith: 'button' });
 
-    await expect(insPages.addressBookList.addressCell(fiveLineName)).toHaveText(/^1 Trader Lane,\nUnit 9,\nCarlisle,\nCumbria,\nCA1 3CC$/, {
+    await expect(insPages.addressBookList.addressCell(fiveLineName)).toHaveText(LINE_TWO_AND_COUNTY_ADDRESS_CELL, {
       useInnerText: true,
     });
     await expect(insPages.addressBookList.addressCell(threeLineName)).toHaveText(/^1 Trader Lane,\nCarlisle,\nCA1 3CC$/, {
       useInnerText: true,
     });
+  });
+
+  test('an address added through the form lands on the list with its success banner, its address and country, and a View link to its own page', async ({
+    pages,
+    insPages,
+  }) => {
+    const name = `Added Farm ${Date.now()}`;
+
+    await addAddressThroughForm({ insPages }, addFormAddress(name, 'France'));
+
+    await expectAddressBookList({ pages, insPages });
+    await expect(
+      insPages.addressBookList.successBanner.getByText(`${name} address added to your address book`, { exact: true }),
+    ).toBeVisible();
+    await expect(insPages.addressBookList.addressCell(name)).toHaveText(LINE_TWO_AND_COUNTY_ADDRESS_CELL, {
+      useInnerText: true,
+    });
+    await expect(insPages.addressBookList.countryCell(name)).toHaveText('France');
+    await insPages.addressBookList.viewLink(name).click();
+    await expect(insPages.addressBookView.heading(name)).toBeVisible();
+  });
+
+  test('an address added through the form is the first row of the list it lands on, and is listed ahead of an older address', async ({
+    insPages,
+    addressBookApi,
+  }) => {
+    const stamp = Date.now();
+    const olderName = `Newest first ${stamp} older`;
+    const newerName = `Newest first ${stamp} newer`;
+    await addressBookApi.createAddress(traderAddress(olderName));
+
+    await addAddressThroughForm({ insPages }, addFormAddress(newerName, 'France'));
+    await expect(insPages.addressBookList.viewLinks.first()).toHaveText(`View ${newerName}`);
+    await insPages.addressBookList.search(`Newest first ${stamp}`, { submitWith: 'button' });
+
+    await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-2 of 2');
+    await expect(insPages.addressBookList.viewLinks).toHaveText([`View ${newerName}`, `View ${olderName}`]);
+  });
+
+  test('an address added through the form is found by a search on its name, part of its address and part of its country name', async ({
+    insPages,
+  }) => {
+    const stamp = Date.now();
+    const name = `Findable Farm ${stamp}`;
+    const details = { ...addFormAddress(name, 'France'), addressLine1: `${stamp} Drover Lane` };
+    await addAddressThroughForm({ insPages }, details);
+
+    for (const term of [name, `${stamp} drover`, 'fran']) {
+      await insPages.addressBookList.search(term, { submitWith: 'button' });
+
+      await expect(insPages.addressBookList.row(name)).toBeVisible();
+    }
   });
 
   test('the success banner after an edit is still showing 10 seconds later, and a reload shows no banner', async ({

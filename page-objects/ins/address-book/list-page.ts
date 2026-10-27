@@ -64,6 +64,14 @@ export class InsAddressBookListPage extends BasePage {
     return this.row(name).getByRole('cell').nth(1);
   }
 
+  countryCell(name: string): Locator {
+    return this.row(name).getByRole('cell').nth(2);
+  }
+
+  get viewLinks(): Locator {
+    return this.mainLinks.filter({ hasText: /^View / });
+  }
+
   pageLink(pageNumber: number): Locator {
     return this.page.getByRole('link', { name: `Page ${pageNumber}`, exact: true });
   }
