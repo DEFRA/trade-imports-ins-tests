@@ -72,6 +72,9 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.accompanyingDocuments.heading.waitFor();
       await animalsPages.accompanyingDocuments.fillDocument('InternalReference123', '03/01/2026', fileUploadPaths.safeFile1kbPdf);
       await runA11yScan();
+      await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
+      await animalsJourney.waitForDocumentScanComplete('InternalReference123');
+      await runA11yScan();
       await animalsPages.overview.open(animalsPages.accompanyingDocuments.referenceNumberFromUrl());
       await animalsPages.overview.heading.waitFor();
     });
