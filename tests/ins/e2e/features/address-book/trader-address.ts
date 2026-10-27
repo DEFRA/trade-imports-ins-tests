@@ -15,8 +15,8 @@ export const traderAddressInUnofferedCountry = (name: string) => ({
   countryCode: UNOFFERED_COUNTRY_CODE,
 });
 
-export const addressWithLineTwoAndCounty = (name: string) => ({
+export const addressWithLineTwoAndCounty = (name: string, { addressLine2 = 'Unit 9', county = 'Cumbria' } = {}) => ({
   ...traderAddress(name),
-  addressLine2: 'Unit 9',
-  county: 'Cumbria',
+  addressLine2,
+  county,
 });

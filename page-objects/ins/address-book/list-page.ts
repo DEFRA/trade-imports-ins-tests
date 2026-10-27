@@ -64,6 +64,10 @@ export class InsAddressBookListPage extends BasePage {
     return this.row(name).getByRole('cell').nth(1);
   }
 
+  pageLink(pageNumber: number): Locator {
+    return this.page.getByRole('link', { name: `Page ${pageNumber}`, exact: true });
+  }
+
   viewLink(name: string): Locator {
     return this.page.getByRole('link', { name: `View ${name}`, exact: true });
   }

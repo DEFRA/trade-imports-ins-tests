@@ -1,9 +1,15 @@
 import { test, expect, type PageFixtures } from '@fixtures';
+import { expectNoMatchesListed } from './expect-address-book-list';
 import { addressWithLineTwoAndCounty, traderAddress } from './trader-address';
 
 const SUBMIT_METHODS = [
   { submitWith: 'button', how: 'the Search button' },
   { submitWith: 'enter', how: 'Enter in the Search field' },
+] as const;
+
+const SEARCHED_ADDRESS_FIELDS = [
+  { field: 'addressLine2', label: 'address line 2' },
+  { field: 'county', label: 'county' },
 ] as const;
 
 const addAddressAndExpectSearchToListIt = async (
@@ -46,11 +52,64 @@ test.describe('Address book list', () => {
 
     await insPages.addressBookList.search(`NoMatch${Date.now()}`, { submitWith: 'button' });
 
-    await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 0 of 0');
-    await expect(insPages.addressBookList.columnHeaders).toHaveText(['Name', 'Address', 'Country', 'Action']);
-    await expect(insPages.addressBookList.bodyRows).toHaveCount(0);
-    await expect(insPages.addressBookList.mainLinks).toHaveText(['Clear search']);
+    await expectNoMatchesListed(insPages.addressBookList);
   });
+
+  test('an address is found, viewed, kept on No, cancel, deleted on Yes, delete and left out of search, through links alone', async ({
+    insPages,
+    addressBookApi,
+  }) => {
+    const name = `Walk Through Farm ${Date.now()}`;
+    await addressBookApi.createAddress(traderAddress(name));
+
+    await insPages.dashboard.open();
+    await insPages.dashboard.linkAddressBook.click();
+    await insPages.addressBookList.search(name, { submitWith: 'button' });
+    await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
+    await insPages.addressBookList.viewLink(name).click();
+    await expect(insPages.addressBookView.heading(name)).toBeVisible();
+    await insPages.addressBookView.btnDelete.click();
+    await expect(insPages.addressBookDelete.heading).toBeVisible();
+    await insPages.addressBookDelete.cancel();
+    await expect(insPages.addressBookView.heading(name)).toBeVisible();
+    await insPages.addressBookView.btnDelete.click();
+    await insPages.addressBookDelete.confirm();
+
+    await expect(insPages.addressBookList.successBanner).toContainText(`${name} address deleted`);
+    await insPages.addressBookList.search(name, { submitWith: 'button' });
+    await expectNoMatchesListed(insPages.addressBookList);
+  });
+
+  test('lists 8 addresses a page and the rest on the next page', async ({ insPages, addressBookApi }) => {
+    const stamp = Date.now();
+    await Promise.all(
+      Array.from({ length: 9 }, (_, index) => addressBookApi.createAddress(traderAddress(`Paged Farm ${stamp} number ${index}`))),
+    );
+    await insPages.addressBookList.open();
+
+    await insPages.addressBookList.search(`Paged Farm ${stamp}`, { submitWith: 'button' });
+
+    await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-8 of 9');
+    await expect(insPages.addressBookList.bodyRows).toHaveCount(8);
+    await insPages.addressBookList.pageLink(2).click();
+    await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 9-9 of 9');
+    await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
+  });
+
+  for (const { field, label } of SEARCHED_ADDRESS_FIELDS) {
+    test(`a search finds an address by a lower-case word inside its ${label}`, async ({ insPages, addressBookApi }) => {
+      const stamp = Date.now();
+      const name = `${label} Farm ${stamp}`;
+      const fieldValue = `Searchable${field}${stamp}`;
+      await addressBookApi.createAddress(addressWithLineTwoAndCounty(name, { [field]: fieldValue }));
+      await insPages.addressBookList.open();
+
+      await insPages.addressBookList.search(fieldValue.toLowerCase(), { submitWith: 'button' });
+
+      await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
+      await expect(insPages.addressBookList.row(name)).toBeVisible();
+    });
+  }
 
   test('a multi-word name shows its first word then the rest on two lines, and a one-word name on one line', async ({
     insPages,
@@ -63,11 +122,12 @@ test.describe('Address book list', () => {
     await addressBookApi.createAddress(traderAddress(oneWordName));
     await insPages.addressBookList.open();
 
-    await insPages.addressBookList.search(String(stamp), { submitWith: 'button' });
+    await insPages.addressBookList.search(multiWordName, { submitWith: 'button' });
 
     await expect(insPages.addressBookList.nameCell(multiWordName)).toHaveText(new RegExp(`^Green\\nvalley farm ${stamp}$`), {
       useInnerText: true,
     });
+    await insPages.addressBookList.search(oneWordName, { submitWith: 'button' });
     await expect(insPages.addressBookList.nameCell(oneWordName)).toHaveText(new RegExp(`^Hollin${stamp}$`), {
       useInnerText: true,
     });
@@ -78,13 +138,13 @@ test.describe('Address book list', () => {
     addressBookApi,
   }) => {
     const stamp = Date.now();
-    const fiveLineName = `Fiveline${stamp}`;
-    const threeLineName = `Threeline${stamp}`;
+    const fiveLineName = `Lines ${stamp} fiveline`;
+    const threeLineName = `Lines ${stamp} threeline`;
     await addressBookApi.createAddress(addressWithLineTwoAndCounty(fiveLineName));
     await addressBookApi.createAddress(traderAddress(threeLineName));
     await insPages.addressBookList.open();
 
-    await insPages.addressBookList.search(String(stamp), { submitWith: 'button' });
+    await insPages.addressBookList.search(`Lines ${stamp}`, { submitWith: 'button' });
 
     await expect(insPages.addressBookList.addressCell(fiveLineName)).toHaveText(/^1 Trader Lane,\nUnit 9,\nCarlisle,\nCumbria,\nCA1 3CC$/, {
       useInnerText: true,
