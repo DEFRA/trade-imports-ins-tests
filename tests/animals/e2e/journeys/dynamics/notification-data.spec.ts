@@ -168,7 +168,6 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     journeyContext,
     externalRequest,
   }) => {
-    test.fail(true, 'The accompanying document page is temporarily broken; a fix is being investigated');
     // The accompanying document is uploaded and virus-scanned before the journey can submit.
     test.setTimeout(test.info().timeout + 2 * 60_000);
     const dynamics = new AnimalsDynamicsClient(externalRequest);
