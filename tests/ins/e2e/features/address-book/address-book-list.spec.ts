@@ -1,7 +1,7 @@
 import { test, expect, type PageFixtures } from '@fixtures';
 import { expectAddressBookList, expectNoMatchesListed } from './expect-address-book-list';
 import { type AddressDetails } from '@page-objects/ins/address-book/form-page';
-import { addFormAddressWithLineTwoAndCounty, addressWithLineTwoAndCounty, traderAddress } from './trader-address';
+import { addFormAddressWithLineTwoAndCounty, addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
 
 const SUBMIT_METHODS = [
   { submitWith: 'button', how: 'the Search button' },

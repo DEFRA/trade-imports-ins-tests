@@ -2,7 +2,12 @@ import { test, expect } from '@fixtures';
 import { expectAddressBookList } from './expect-address-book-list';
 import { expectOtherOrganisationAddressReturnsToList } from './expect-other-organisation-address-returns-to-list';
 import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
-import { addressWithLineTwoAndCounty, traderAddress, traderAddressInUnofferedCountry, UNOFFERED_COUNTRY_CODE } from './trader-address';
+import {
+  addressWithLineTwoAndCounty,
+  traderAddress,
+  traderAddressInUnofferedCountry,
+  UNOFFERED_COUNTRY_CODE,
+} from '@domain/ins/constants/trader-address';
 
 const FIELD_LABELS_IN_ORDER = [
   'Name or organisation',
