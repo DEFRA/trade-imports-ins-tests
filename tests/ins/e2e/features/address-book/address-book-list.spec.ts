@@ -1,7 +1,7 @@
 import { test, expect, type PageFixtures } from '@fixtures';
 import { expectAddressBookList, expectNoMatchesListed } from './expect-address-book-list';
 import { type AddressDetails } from '@page-objects/ins/address-book/form-page';
-import { addFormAddress, addressWithLineTwoAndCounty, traderAddress } from './trader-address';
+import { addFormAddressWithLineTwoAndCounty, addressWithLineTwoAndCounty, traderAddress } from './trader-address';
 
 const SUBMIT_METHODS = [
   { submitWith: 'button', how: 'the Search button' },
@@ -170,7 +170,7 @@ test.describe('Address book list', () => {
   }) => {
     const name = `Added Farm ${Date.now()}`;
 
-    await addAddressThroughForm({ insPages }, addFormAddress(name, 'France'));
+    await addAddressThroughForm({ insPages }, addFormAddressWithLineTwoAndCounty(name, 'France'));
 
     await expectAddressBookList({ pages, insPages });
     await expect(
@@ -193,7 +193,7 @@ test.describe('Address book list', () => {
     const newerName = `Newest first ${stamp} newer`;
     await addressBookApi.createAddress(traderAddress(olderName));
 
-    await addAddressThroughForm({ insPages }, addFormAddress(newerName, 'France'));
+    await addAddressThroughForm({ insPages }, addFormAddressWithLineTwoAndCounty(newerName, 'France'));
     await expect(insPages.addressBookList.successBanner).toContainText(`${newerName} address added to your address book`);
     await insPages.addressBookList.search(`Newest first ${stamp}`, { submitWith: 'button' });
 
@@ -206,7 +206,7 @@ test.describe('Address book list', () => {
   }) => {
     const stamp = Date.now();
     const name = `Findable Farm ${stamp}`;
-    const details = { ...addFormAddress(name, 'France'), addressLine1: `${stamp} Drover Lane` };
+    const details = { ...addFormAddressWithLineTwoAndCounty(name, 'France'), addressLine1: `${stamp} Drover Lane` };
     await addAddressThroughForm({ insPages }, details);
 
     for (const term of [name, `${stamp} drover`, 'fran']) {

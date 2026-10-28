@@ -23,7 +23,7 @@ export const addressWithLineTwoAndCounty = (name: string, { addressLine2 = 'Unit
   county,
 });
 
-export const addFormAddress = (name: string, country: string): AddressDetails => {
+export const addFormAddressWithLineTwoAndCounty = (name: string, country: string): AddressDetails => {
   const { addressLine1, addressLine2, townOrCity, county, postcode, email, phone } = addressWithLineTwoAndCounty(name);
   return { name, addressLine1, addressLine2, townOrCity, county, postcode, country, email, phone };
 };
