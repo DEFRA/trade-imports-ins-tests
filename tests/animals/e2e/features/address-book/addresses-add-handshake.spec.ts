@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
+import { FIELD_LABELS_IN_ORDER } from '@page-objects/ins/address-book/form-page';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 
 const insBaseUrl = (process.env.TRADE_IMPORTS_INS_FRONTEND_BASE_URL ?? 'http://localhost:3002').replace(/\/$/, '');
@@ -27,7 +28,7 @@ test.describe('Add an address from the journey via INS', () => {
         email: `handshake-${stamp}@example.co.uk`,
       };
 
-      const referenceNumber = await animalsJourney.toInsAddAddressFromConsignorPicker();
+      const referenceNumber = await animalsJourney.toInsAddAddressFromConsignorPicker(insPages.addressBookAdd);
       await expect(pages.page).toHaveURL(insAddUrlPattern);
 
       await insPages.addressBookAdd.fill(details);
@@ -51,10 +52,10 @@ test.describe('Add an address from the journey via INS', () => {
   );
 
   test(
-    'the INS add page reached from the consignor picker shows the Draft status and notification reference, the caption, the section headings and the autocomplete hints',
+    'the INS add page reached from the consignor picker shows the design page frame, the journey status, the field labels and autocomplete hints',
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, pages, insPages }) => {
-      const referenceNumber = await animalsJourney.toInsAddAddressFromConsignorPicker();
+      const referenceNumber = await animalsJourney.toInsAddAddressFromConsignorPicker(insPages.addressBookAdd);
       const addPage = insPages.addressBookAdd;
 
       await expect(pages.page).toHaveTitle('Add address and contact details - Import notification service - GOV.UK');
@@ -64,6 +65,7 @@ test.describe('Add an address from the journey via INS', () => {
       await expect(addPage.notificationReference).toHaveText(referenceNumber);
       await expect(addPage.sectionHeading('Address')).toBeVisible();
       await expect(addPage.sectionHeading('Contact details')).toBeVisible();
+      await expect(addPage.fieldLabels).toHaveText(FIELD_LABELS_IN_ORDER);
       await expect(addPage.inputName).toHaveAttribute('autocomplete', 'organization');
       await expect(addPage.inputAddressLine1).toHaveAttribute('autocomplete', 'address-line1');
       await expect(addPage.inputAddressLine2).toHaveAttribute('autocomplete', 'address-line2');
@@ -78,7 +80,7 @@ test.describe('Add an address from the journey via INS', () => {
     'cancelling INS add returns to the picker without saving an address',
     { tag: '@ins-frontend' },
     async ({ animalsJourney, pages, animalsPages, insPages }) => {
-      const referenceNumber = await animalsJourney.toInsAddAddressFromConsignorPicker();
+      const referenceNumber = await animalsJourney.toInsAddAddressFromConsignorPicker(insPages.addressBookAdd);
 
       await insPages.addressBookAdd.btnCancelFromJourney.click();
       await expect(pages.page).toHaveURL((url) => url.pathname === animalsPages.consignorSelection.expectedUrl(referenceNumber), {

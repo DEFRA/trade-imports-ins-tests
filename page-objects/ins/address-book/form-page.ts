@@ -13,6 +13,18 @@ export type AddressDetails = {
   phone: string;
 };
 
+export const FIELD_LABELS_IN_ORDER = [
+  'Name or organisation',
+  'Address line 1',
+  'Address line 2 (optional)',
+  'Town or city',
+  'County (optional)',
+  'Postcode or Zip code',
+  'Country',
+  'Email address',
+  'Phone number',
+];
+
 export abstract class InsAddressBookFormPage extends BasePage {
   get inputName(): Locator {
     return this.page.getByLabel('Name or organisation', { exact: true });

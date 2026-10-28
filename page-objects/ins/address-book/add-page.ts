@@ -15,12 +15,16 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
     return this.page.getByText('Add new address', { exact: true });
   }
 
+  get journeyStrip(): Locator {
+    return this.page.getByRole('main').locator('.app-journey-strip');
+  }
+
   get statusTag(): Locator {
-    return this.page.getByRole('main').locator('.govuk-tag');
+    return this.journeyStrip.locator('.govuk-tag');
   }
 
   get notificationReference(): Locator {
-    return this.page.getByRole('main').locator('.app-journey-strip .govuk-body');
+    return this.journeyStrip.locator('.govuk-body');
   }
 
   get btnSaveAndContinue(): Locator {
