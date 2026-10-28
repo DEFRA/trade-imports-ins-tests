@@ -218,13 +218,9 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async unlockSections(): Promise<void> {
-    await this.answerCommodity();
-  }
-
   async toAccompanyingDocuments(): Promise<void> {
     await this.startNotification();
-    await this.unlockSections();
+    await this.answerCommodity();
     await this.animalsPages.overview.task('Upload documents').click();
     await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
   }
@@ -426,7 +422,7 @@ export class AnimalsJourney {
 
   async toAnimalIdentification(): Promise<void> {
     await this.startNotification();
-    await this.unlockSections();
+    await this.answerCommodity();
     await this.openIdentificationFromOverview();
   }
 
@@ -453,7 +449,7 @@ export class AnimalsJourney {
 
   async toImportReason(): Promise<void> {
     await this.startNotification();
-    await this.unlockSections();
+    await this.answerCommodity();
     await this.animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await this.animalsPages.importReason.heading.waitFor(pageLoadWait);
   }
@@ -480,13 +476,13 @@ export class AnimalsJourney {
 
   async toCphNumber(): Promise<void> {
     await this.startNotification();
-    await this.unlockSections();
+    await this.answerCommodity();
     await this.fillAddressesAndOpenCph();
   }
 
   async toArrivalDetails(): Promise<void> {
     await this.startNotification();
-    await this.unlockSections();
+    await this.answerCommodity();
     await this.animalsPages.overview.task('Arrival details').click();
     await this.animalsPages.arrivalDetails.heading.waitFor(pageLoadWait);
   }
@@ -526,7 +522,7 @@ export class AnimalsJourney {
 
   async toContactAddress(): Promise<void> {
     await this.startNotification();
-    await this.unlockSections();
+    await this.answerCommodity();
     await this.animalsPages.overview.task('Contact address for this consignment').click();
     await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
   }

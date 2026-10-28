@@ -23,7 +23,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   }) => {
     test.slow();
     await animalsJourney.startNotification();
-    await animalsJourney.unlockSections();
+    await animalsJourney.answerCommodity();
 
     await test.step('Import reason: Transit', async () => {
       await animalsPages.overview.task(IMPORT_REASON_TASK).click();
