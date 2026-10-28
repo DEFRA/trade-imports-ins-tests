@@ -124,7 +124,6 @@ export function getRelativeAppDateText({
 }: Pick<RelativeDateTimeOptions, 'dayOffset' | 'monthOffset'> = {}): string {
   const { year, month, day } = todayInServiceZone();
   const targetMonth = month - 1 + monthOffset;
-  // Day 0 of the following month is the last day of the target month.
   const lastDayOfTargetMonth = new Date(Date.UTC(year, targetMonth + 1, 0)).getUTCDate();
   const clamped = new Date(Date.UTC(year, targetMonth, Math.min(day, lastDayOfTargetMonth)));
   clamped.setUTCDate(clamped.getUTCDate() + dayOffset);
