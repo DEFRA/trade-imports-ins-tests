@@ -176,6 +176,9 @@ test.describe('Address book list', () => {
     await expect(
       insPages.addressBookList.successBanner.getByText(`${name} address added to your address book`, { exact: true }),
     ).toBeVisible();
+    await insPages.addressBookList.search(name, { submitWith: 'button' });
+
+    await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
     await expect(insPages.addressBookList.addressCell(name)).toHaveText(LINE_TWO_AND_COUNTY_ADDRESS_CELL, {
       useInnerText: true,
     });
