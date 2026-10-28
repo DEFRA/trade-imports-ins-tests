@@ -8,10 +8,6 @@ export class InsDashboardPage extends BasePage {
     return this.page.getByRole('heading', { level: 1, name: 'Dashboard', exact: true });
   }
 
-  get linkAddressBook(): Locator {
-    return this.page.getByRole('link', { name: 'Address book', exact: true });
-  }
-
   get inputReferenceSearch(): Locator {
     return this.page.getByLabel('Search by notification reference');
   }
