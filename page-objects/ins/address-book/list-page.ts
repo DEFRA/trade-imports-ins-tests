@@ -33,7 +33,7 @@ export class InsAddressBookListPage extends BasePage {
   }
 
   get resultsLine(): Locator {
-    return this.page.getByText(/Showing \d/);
+    return this.page.getByTestId('address-book-results-label');
   }
 
   get columnHeaders(): Locator {
