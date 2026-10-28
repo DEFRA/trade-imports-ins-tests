@@ -1,3 +1,5 @@
+import { type AddressDetails } from '@page-objects/ins/address-book/form-page';
+
 export const UNOFFERED_COUNTRY_CODE = 'XX';
 
 export const traderAddress = (name: string) => ({
@@ -14,3 +16,14 @@ export const traderAddressInUnofferedCountry = (name: string) => ({
   ...traderAddress(name),
   countryCode: UNOFFERED_COUNTRY_CODE,
 });
+
+export const addressWithLineTwoAndCounty = (name: string, { addressLine2 = 'Unit 9', county = 'Cumbria' } = {}) => ({
+  ...traderAddress(name),
+  addressLine2,
+  county,
+});
+
+export const addFormAddressWithLineTwoAndCounty = (name: string, country: string): AddressDetails => {
+  const { addressLine1, addressLine2, townOrCity, county, postcode, email, phone } = addressWithLineTwoAndCounty(name);
+  return { name, addressLine1, addressLine2, townOrCity, county, postcode, country, email, phone };
+};
