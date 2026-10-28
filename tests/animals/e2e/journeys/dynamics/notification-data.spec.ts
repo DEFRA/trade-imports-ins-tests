@@ -5,6 +5,7 @@ import { defaultUser } from '@config/users';
 import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
 import { test, expect } from '@fixtures';
+import { parseAppDateText, toIsoDate } from '@utils/date-utils';
 import { annotateDuration } from '@utils/playwright/annotate-duration';
 import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 
@@ -15,12 +16,6 @@ import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 // Traces record APIRequestContext calls with their headers and form bodies: the bearer token and client secret.
 // Top level because Playwright rejects test.use({ trace }) inside a describe group.
 test.use({ trace: 'off' });
-
-/** The journey types the date as d/m/yyyy; PIMS Dynamics returns an ISO date. */
-const toIsoDate = (dayMonthYear: string): string => {
-  const [day, month, year] = dayMonthYear.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-};
 
 /** PIMS Dynamics' labels for the countries the parties' address-book records are in. */
 const PIMS_COUNTRY_LABELS: Record<string, string> = {
@@ -140,7 +135,7 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     // importer.phone: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
     // importer.email: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
     // answers.cph: [FROM v0.2.0] see 'mandatory answers PIMS Dynamics does not store yet' test.
-    expect.soft(row.defraimp_arrivaldate?.slice(0, 10), 'arrival date').toBe(toIsoDate(answers.arrivalDate));
+    expect.soft(row.defraimp_arrivaldate?.slice(0, 10), 'arrival date').toBe(toIsoDate(parseAppDateText(answers.arrivalDate)));
     expect.soft(row.defraimp_portofentry, 'point of entry').toBe(answers.pointOfEntry.value);
     expect
       .soft(row.defraimp_meansoftransporttoentrypointtype, 'means of transport')
