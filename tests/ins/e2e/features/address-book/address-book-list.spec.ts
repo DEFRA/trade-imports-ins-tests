@@ -65,7 +65,7 @@ test.describe('Address book list', () => {
     await expectNoMatchesListed(insPages.addressBookList);
   });
 
-  test('an address is found, viewed, kept on No, cancel, deleted on Yes, delete and left out of search, through links alone', async ({
+  test('an address is found from the dashboard, viewed, kept on No, cancel, then deleted on Yes, delete and no longer found by search', async ({
     insPages,
     addressBookApi,
   }) => {
