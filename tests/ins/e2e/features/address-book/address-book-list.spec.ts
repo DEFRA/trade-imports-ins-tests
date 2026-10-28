@@ -184,7 +184,7 @@ test.describe('Address book list', () => {
     await expect(insPages.addressBookView.heading(name)).toBeVisible();
   });
 
-  test('an address added through the form is the first row of the list it lands on, and is listed ahead of an older address', async ({
+  test('an address added through the form lands on the list with its success banner, and is listed ahead of an older address', async ({
     insPages,
     addressBookApi,
   }) => {
@@ -194,7 +194,7 @@ test.describe('Address book list', () => {
     await addressBookApi.createAddress(traderAddress(olderName));
 
     await addAddressThroughForm({ insPages }, addFormAddress(newerName, 'France'));
-    await expect(insPages.addressBookList.viewLinks.first()).toHaveText(`View ${newerName}`);
+    await expect(insPages.addressBookList.successBanner).toContainText(`${newerName} address added to your address book`);
     await insPages.addressBookList.search(`Newest first ${stamp}`, { submitWith: 'button' });
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-2 of 2');
