@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { DOCUMENT_ISSUE_DATE } from '@resources/file-upload/constants';
+import { timeouts } from '@config/timeouts';
 
 for (const [mode, javaScriptEnabled] of [
   ['with JavaScript', true],
@@ -15,14 +16,18 @@ for (const [mode, javaScriptEnabled] of [
       const firstReference = `PWBACKA${Date.now()}`;
       const secondReference = `PWBACKB${Date.now()}`;
 
+      const addControl = animalsPages.accompanyingDocuments.saveAndAddAnother;
+
       await animalsPages.accompanyingDocuments.fillDocument(firstReference, DOCUMENT_ISSUE_DATE, fileUploadPaths.safeFile1kbPdf);
+      const uploadPathOnFirstVisit = await addControl.getAttribute('formaction');
       await animalsPages.accompanyingDocuments.saveAndReturnToOverview.click();
       await expect(animalsPages.overview.heading).toBeVisible();
 
       await pages.page.goBack();
       await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
+      await expect.poll(() => addControl.getAttribute('formaction'), { timeout: timeouts.long }).not.toBe(uploadPathOnFirstVisit);
       await animalsPages.accompanyingDocuments.fillDocument(secondReference, DOCUMENT_ISSUE_DATE, fileUploadPaths.safeFile1kbPdf);
-      await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
+      await addControl.click();
 
       await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
       await expect(animalsPages.accompanyingDocuments.documentRow(firstReference)).toBeVisible();
