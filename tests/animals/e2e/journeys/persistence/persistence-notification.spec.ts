@@ -108,5 +108,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
     await animalsPages.notificationView.open(referenceNumber);
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.changeLink(/^Change/)).toHaveCount(0);
+    await expect(animalsPages.notificationView.continueButton).toHaveCount(0);
   });
 });
