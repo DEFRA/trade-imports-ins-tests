@@ -95,7 +95,7 @@ test.describe('The add-details form for an address entered by hand', () => {
     expect(await addressBookApi.listAddresses(name)).toHaveLength(0);
   });
 
-  test('the edit page groups its fields under Address and Contact details and labels the name Name or organisation', async ({
+  test('the edit page groups its fields under Address and Contact details and opens with the saved name', async ({
     insPages,
     addressBookApi,
   }) => {
