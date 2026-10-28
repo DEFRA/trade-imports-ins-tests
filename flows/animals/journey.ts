@@ -1,7 +1,7 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { Locator } from '@playwright/test';
-import type { AnimalsPages, SharedPages } from '@page-objects';
+import type { AnimalsPages, InsPages, SharedPages } from '@page-objects';
 import type { PartyRole } from '@page-objects/animals/addresses-page';
 import {
   ALL_ANSWERS,
@@ -75,6 +75,7 @@ export const certificateDocument = (referencePrefix: string): AccompanyingDocume
 export class AnimalsJourney {
   constructor(
     private readonly animalsPages: AnimalsPages,
+    private readonly insPages: InsPages,
     private readonly pages: SharedPages,
     private readonly context: JourneyContext,
   ) {}
@@ -525,6 +526,17 @@ export class AnimalsJourney {
     await this.answerCommodity();
     await this.animalsPages.overview.task('Contact address for this consignment').click();
     await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
+  }
+
+  async toInsAddAddressFromConsignorPicker(): Promise<string> {
+    const referenceNumber = await this.startNotification();
+    await this.answerCommodity();
+    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.addresses.addParty('Consignor').click();
+    await this.animalsPages.consignorSelection.addNewAddress.click();
+    await this.insPages.addressBookAdd.completeSignInIfRequested();
+    await this.insPages.addressBookAdd.heading.waitFor(pageLoadWait);
+    return referenceNumber;
   }
 
   async toReview(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {

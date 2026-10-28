@@ -27,16 +27,8 @@ test.describe('Add an address from the journey via INS', () => {
         email: `handshake-${stamp}@example.co.uk`,
       };
 
-      const referenceNumber = await animalsJourney.startNotification();
-      await animalsJourney.answerCommodity();
-
-      await animalsPages.overview.task('Roles and addresses').click();
-      await animalsPages.addresses.addParty('Consignor').click();
-
-      await animalsPages.consignorSelection.addNewAddress.click();
-      await insPages.addressBookAdd.ensureSignedIn();
+      const referenceNumber = await animalsJourney.toInsAddAddressFromConsignorPicker();
       await expect(pages.page).toHaveURL(insAddUrlPattern);
-      await expect(insPages.addressBookAdd.heading).toBeVisible();
 
       await insPages.addressBookAdd.fill(details);
       await insPages.addressBookAdd.save();
@@ -59,18 +51,34 @@ test.describe('Add an address from the journey via INS', () => {
   );
 
   test(
+    'the INS add page reached from the consignor picker shows the Draft status and notification reference, the caption, the section headings and the autocomplete hints',
+    { tag: ['@address-book', '@ins-frontend'] },
+    async ({ animalsJourney, pages, insPages }) => {
+      const referenceNumber = await animalsJourney.toInsAddAddressFromConsignorPicker();
+      const addPage = insPages.addressBookAdd;
+
+      await expect(pages.page).toHaveTitle('Add address and contact details - Import notification service - GOV.UK');
+      await expect(addPage.heading).toBeVisible();
+      await expect(addPage.caption).toBeVisible();
+      await expect(addPage.statusTag).toHaveText('Draft');
+      await expect(addPage.notificationReference).toHaveText(referenceNumber);
+      await expect(addPage.sectionHeading('Address')).toBeVisible();
+      await expect(addPage.sectionHeading('Contact details')).toBeVisible();
+      await expect(addPage.inputName).toHaveAttribute('autocomplete', 'organization');
+      await expect(addPage.inputAddressLine1).toHaveAttribute('autocomplete', 'address-line1');
+      await expect(addPage.inputAddressLine2).toHaveAttribute('autocomplete', 'address-line2');
+      await expect(addPage.inputTownOrCity).toHaveAttribute('autocomplete', 'address-level2');
+      await expect(addPage.inputPostcode).toHaveAttribute('autocomplete', 'postal-code');
+      await expect(addPage.inputEmail).toHaveAttribute('autocomplete', 'email');
+      await expect(addPage.inputPhone).toHaveAttribute('autocomplete', 'tel');
+    },
+  );
+
+  test(
     'cancelling INS add returns to the picker without saving an address',
     { tag: '@ins-frontend' },
     async ({ animalsJourney, pages, animalsPages, insPages }) => {
-      const referenceNumber = await animalsJourney.startNotification();
-      await animalsJourney.answerCommodity();
-
-      await animalsPages.overview.task('Roles and addresses').click();
-      await animalsPages.addresses.addParty('Consignor').click();
-
-      await animalsPages.consignorSelection.addNewAddress.click();
-      await insPages.addressBookAdd.ensureSignedIn();
-      await expect(insPages.addressBookAdd.heading).toBeVisible();
+      const referenceNumber = await animalsJourney.toInsAddAddressFromConsignorPicker();
 
       await insPages.addressBookAdd.btnCancelFromJourney.click();
       await expect(pages.page).toHaveURL((url) => url.pathname === animalsPages.consignorSelection.expectedUrl(referenceNumber), {

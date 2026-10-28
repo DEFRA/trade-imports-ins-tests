@@ -1,5 +1,5 @@
 import { Locator } from '@playwright/test';
-import { type OpenOptions, type SignInIdentity } from '@page-objects/shared/base-page';
+import { type OpenOptions } from '@page-objects/shared/base-page';
 import { type AddressDetails, InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 
 export type NewAddressDetails = AddressDetails;
@@ -8,7 +8,19 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
   readonly expectedUrl = '/address-book/add';
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Add address details' });
+    return this.page.getByRole('heading', { level: 1, name: 'Add address and contact details' });
+  }
+
+  get caption(): Locator {
+    return this.page.getByText('Add new address', { exact: true });
+  }
+
+  get statusTag(): Locator {
+    return this.page.getByRole('main').locator('.govuk-tag');
+  }
+
+  get notificationReference(): Locator {
+    return this.page.getByRole('main').locator('.app-journey-strip .govuk-body');
   }
 
   get btnSaveAndContinue(): Locator {
@@ -30,11 +42,6 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
   async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.page.goto(this.expectedUrl);
     await this.signInWhenRequested(attemptSignIn, identity);
-  }
-
-  /** Complete OIDC when a cross-app link lands on INS without an existing session. */
-  async ensureSignedIn(options?: SignInIdentity): Promise<void> {
-    await this.signInWhenRequested(true, options);
   }
 
   async save(): Promise<void> {
