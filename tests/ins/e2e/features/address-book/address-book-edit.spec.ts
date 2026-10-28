@@ -3,7 +3,12 @@ import { FIELD_LABELS_IN_ORDER } from '@page-objects/ins/address-book/form-page'
 import { expectAddressBookList } from './expect-address-book-list';
 import { expectOtherOrganisationAddressReturnsToList } from './expect-other-organisation-address-returns-to-list';
 import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
-import { addressWithLineTwoAndCounty, traderAddress, traderAddressInUnofferedCountry, UNOFFERED_COUNTRY_CODE } from './trader-address';
+import {
+  addressWithLineTwoAndCounty,
+  traderAddress,
+  traderAddressInUnofferedCountry,
+  UNOFFERED_COUNTRY_CODE,
+} from '@domain/ins/constants/trader-address';
 
 test.describe('Address book edit', () => {
   test('an edit replaces the whole record, clearing the optional fields left blank, and the list confirms it by name', async ({

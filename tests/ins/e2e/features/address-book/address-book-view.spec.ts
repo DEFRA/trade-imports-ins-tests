@@ -3,7 +3,7 @@ import { expectOtherOrganisationAddressReturnsToList } from './expect-other-orga
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 import { expectAddressBookList } from './expect-address-book-list';
 import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
-import { addressWithLineTwoAndCounty, traderAddress } from './trader-address';
+import { addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
 
 test.describe('Address book view', () => {
   test('shows Address line 2 (optional) and County (optional) when the address has them', async ({ insPages, addressBookApi }) => {
