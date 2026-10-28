@@ -94,8 +94,7 @@ export function getRelativeDateInput(options: RelativeDateTimeOptions = {}): Dat
 }
 
 /**
- * Gets a date-picker value relative to now, in the `dd/mm/yyyy` shape the
- * arrival-date and date-of-issue inputs accept.
+ * Gets a date relative to now as `dd/mm/yyyy`, e.g. `05/09/2026`.
  */
 export function getRelativeDatePickerValue(options: RelativeDateTimeOptions = {}): string {
   const { day, month, year } = getRelativeDateInput(options);
@@ -116,11 +115,9 @@ function todayInServiceZone(): { year: number; month: number; day: number } {
 }
 
 /**
- * Gets a date relative to today in the `d/m/yyyy` shape the app itself renders —
- * no leading zeros, and month arithmetic clamped to the last day of the target
- * month. Anchored on the Europe/London civil day, matching the frontend's
- * `arrivalWindow`. Use this when asserting against app output such as the date
- * picker's `data-min-date`.
+ * Gets the Europe/London civil date `monthOffset` months then `dayOffset` days
+ * from today as `d/m/yyyy`, e.g. `5/9/2026`. A month offset clamps the day to the
+ * last day of the target month.
  */
 export function getRelativeAppDateText({
   dayOffset = 0,
@@ -151,11 +148,8 @@ export function toDisplayDate(
 }
 
 /**
- * Gets the service-zone civil date `dayOffset` days from today, formatted the
- * way the app renders long dates (`10 September 2026`). The frontend builds
- * this with `toLocaleDateString('en-GB', { day: 'numeric', month: 'long',
- * year: 'numeric', timeZone: 'Europe/London' })`, so anchor on the
- * Europe/London civil day and format the resulting UTC instant in UTC.
+ * Gets the Europe/London civil date `dayOffset` days from today as `d MMMM yyyy`,
+ * e.g. `10 September 2026`.
  */
 export function getRelativeServiceDisplayDate(dayOffset = 0): string {
   const { year, month, day } = todayInServiceZone();
@@ -164,9 +158,7 @@ export function getRelativeServiceDisplayDate(dayOffset = 0): string {
 }
 
 /**
- * Converts a DateInput into the `YYYY-MM-DD` string the animals backend stores
- * for a date-only field. Built from the parts, never through a `Date`, so the
- * machine's timezone cannot move the day.
+ * Formats a DateInput as `YYYY-MM-DD` from its parts, without a `Date`, e.g. `2026-09-05`.
  */
 export function toIsoDate(input: DateInput): string {
   const year = String(input.year).padStart(4, '0');
@@ -176,7 +168,7 @@ export function toIsoDate(input: DateInput): string {
   return `${year}-${month}-${day}`;
 }
 
-/** Splits app date text in the `d/m/yyyy` shape, such as an answer typed into a date field, into its parts. */
+/** Splits `d/m/yyyy` text into a DateInput, e.g. `5/9/2026` to `{ day: '5', month: '9', year: '2026' }`. */
 export function parseAppDateText(text: string): DateInput {
   const [day, month, year] = text.split('/');
   return { day, month, year };
@@ -185,9 +177,7 @@ export function parseAppDateText(text: string): DateInput {
 const SHORT_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /**
- * Formats a DateInput the way the INS dashboard renders a calendar date, `d MMM yyyy`
- * (`10 Sep 2026`). The month table is fixed because `Intl`'s en-GB short month for
- * September is `Sept`.
+ * Formats a DateInput as `d MMM yyyy`, e.g. `10 Sep 2026`.
  */
 export function toShortDisplayDate(input: DateInput): string {
   return `${Number(input.day)} ${SHORT_MONTH_NAMES[Number(input.month) - 1]} ${input.year}`;
