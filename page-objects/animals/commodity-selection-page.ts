@@ -58,6 +58,10 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('group', { name: code, exact: true });
   }
 
+  get resultGroups(): Locator {
+    return this.page.getByRole('group').filter({ has: this.page.getByRole('checkbox') });
+  }
+
   species(line: CommodityLine): Locator {
     return this.commodityGroup(line.commodityCode).getByRole('checkbox', { name: line.latinName, exact: true });
   }
