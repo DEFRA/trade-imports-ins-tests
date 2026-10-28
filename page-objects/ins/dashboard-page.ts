@@ -24,11 +24,6 @@ export class InsDashboardPage extends BasePage {
     return this.page.getByRole('row', { name: new RegExp(referenceNumber) });
   }
 
-  /**
-   * The action cell's accessible name is "View" plus a visually-hidden reference
-   * number (`notification-dashboard-helper.js`/`buildTableRows`), so match loosely
-   * across the two text nodes rather than a single exact string.
-   */
   viewLink(referenceNumber: string): Locator {
     return this.page.getByRole('link', { name: new RegExp(`View.*${referenceNumber}`, 's') });
   }
