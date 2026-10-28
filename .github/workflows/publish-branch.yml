@@ -12,8 +12,9 @@ permissions:
 
 jobs:
   publish:
-    uses: DEFRA/trade-imports-workspace/.github/workflows/publish-branch.yml@main
+    uses: DEFRA/trade-imports-workspace/.github/workflows/publish-branch.yml@chore/EUDPA-749-branch-image-layer-cache
     with:
       image-name: trade-imports-ins-tests
       run-mode: job
+      layer-cache-write-only: true
     secrets: inherit
