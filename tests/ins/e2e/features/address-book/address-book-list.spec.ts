@@ -110,11 +110,11 @@ test.describe('Address book list', () => {
     test(`a search finds an address by a lower-case word inside its ${label}`, async ({ insPages, addressBookApi }) => {
       const stamp = Date.now();
       const name = `${label} Farm ${stamp}`;
-      const fieldValue = `Searchable${field}${stamp}`;
-      await addressBookApi.createAddress(addressWithLineTwoAndCounty(name, { [field]: fieldValue }));
+      const searchedWord = `Searchable${field}${stamp}`;
+      await addressBookApi.createAddress(addressWithLineTwoAndCounty(name, { [field]: `North ${searchedWord} Side` }));
       await insPages.addressBookList.open();
 
-      await insPages.addressBookList.search(fieldValue.toLowerCase(), { submitWith: 'button' });
+      await insPages.addressBookList.search(searchedWord.toLowerCase(), { submitWith: 'button' });
 
       await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
       await expect(insPages.addressBookList.row(name)).toBeVisible();
