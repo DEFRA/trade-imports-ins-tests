@@ -12,21 +12,21 @@ for (const [mode, javaScriptEnabled] of [
     test('adds a second document after the browser back button returns to the page', async ({ animalsJourney, animalsPages, pages }) => {
       test.slow();
       await animalsJourney.toAccompanyingDocuments();
-      const first = `PWBACKA${Date.now()}`;
-      const second = `PWBACKB${Date.now()}`;
+      const firstReference = `PWBACKA${Date.now()}`;
+      const secondReference = `PWBACKB${Date.now()}`;
 
-      await animalsPages.accompanyingDocuments.fillDocument(first, DOCUMENT_ISSUE_DATE, fileUploadPaths.safeFile1kbPdf);
+      await animalsPages.accompanyingDocuments.fillDocument(firstReference, DOCUMENT_ISSUE_DATE, fileUploadPaths.safeFile1kbPdf);
       await animalsPages.accompanyingDocuments.saveAndReturnToOverview.click();
       await expect(animalsPages.overview.heading).toBeVisible();
 
       await pages.page.goBack();
       await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
-      await animalsPages.accompanyingDocuments.fillDocument(second, DOCUMENT_ISSUE_DATE, fileUploadPaths.safeFile1kbPdf);
+      await animalsPages.accompanyingDocuments.fillDocument(secondReference, DOCUMENT_ISSUE_DATE, fileUploadPaths.safeFile1kbPdf);
       await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
       await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
-      await expect(animalsPages.accompanyingDocuments.documentRow(first)).toBeVisible();
-      await expect(animalsPages.accompanyingDocuments.documentRow(second)).toBeVisible();
+      await expect(animalsPages.accompanyingDocuments.documentRow(firstReference)).toBeVisible();
+      await expect(animalsPages.accompanyingDocuments.documentRow(secondReference)).toBeVisible();
       await expect(animalsPages.accompanyingDocuments.addedDocumentRows).toHaveCount(2);
     });
   });
