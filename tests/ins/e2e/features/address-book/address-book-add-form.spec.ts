@@ -1,7 +1,7 @@
 import { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
 import { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
-import { addressWithLineTwoAndCounty } from './trader-address';
+import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 
 const FIELD_NAMES_IN_ORDER = [
   'Name or organisation',

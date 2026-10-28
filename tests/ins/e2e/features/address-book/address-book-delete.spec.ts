@@ -5,7 +5,7 @@ import { users } from '@config/users';
 import { urlWithReturn } from '@page-objects/ins/address-book/url-with-return';
 import { expectAddressBookList, expectNoMatchesListed } from './expect-address-book-list';
 import { UNKNOWN_ADDRESS_ID } from './unknown-address-id';
-import { addressWithLineTwoAndCounty, traderAddress } from './trader-address';
+import { addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
 
 test.describe('Address book delete', () => {
   test('deleting through the UI tombstones the record rather than removing it', async ({ pages, insPages, addressBookApi }) => {
