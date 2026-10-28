@@ -101,9 +101,8 @@ export function getRelativeDatePickerValue(options: RelativeDateTimeOptions = {}
   return `${day}/${month}/${year}`;
 }
 
-const SERVICE_TIME_ZONE = 'Europe/London';
-
 function todayInServiceZone(): { year: number; month: number; day: number } {
+  const SERVICE_TIME_ZONE = 'Europe/London';
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: SERVICE_TIME_ZONE,
     year: 'numeric',
@@ -174,12 +173,11 @@ export function parseAppDateText(text: string): DateInput {
   return { day, month, year };
 }
 
-const SHORT_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
 /**
  * Formats a DateInput as `d MMM yyyy`, e.g. `10 Sep 2026`.
  */
 export function toShortDisplayDate(input: DateInput): string {
+  const SHORT_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   return `${Number(input.day)} ${SHORT_MONTH_NAMES[Number(input.month) - 1]} ${input.year}`;
 }
 
