@@ -20,7 +20,6 @@ async function expectAbove(upper: Locator, lower: Locator): Promise<void> {
   expect(upperBox.y).toBeLessThan(lowerBox.y);
 }
 
-// Address heading, then Name down to Country; Contact details heading, then Email and Phone.
 async function expectFieldsGroupedUnderSections(form: InsAddressBookFormPage): Promise<void> {
   await expect(form.sectionHeading('Address')).toBeVisible();
   await expect(form.sectionHeading('Contact details')).toBeVisible();
