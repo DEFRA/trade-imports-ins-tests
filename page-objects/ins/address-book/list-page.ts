@@ -52,6 +52,14 @@ export class InsAddressBookListPage extends BasePage {
     return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
   }
 
+  get pagination(): Locator {
+    return this.page.locator('.govuk-pagination');
+  }
+
+  get linkNextPage(): Locator {
+    return this.pagination.getByRole('link', { name: 'Next page', exact: true });
+  }
+
   row(name: string): Locator {
     return this.page.getByRole('row', { name });
   }

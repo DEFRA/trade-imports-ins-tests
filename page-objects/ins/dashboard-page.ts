@@ -1,4 +1,5 @@
 import { type Locator } from '@playwright/test';
+import type { DashboardSortValue } from '@domain/ins/constants/dashboard-sort-values';
 import { BasePage } from '@page-objects/shared/base-page';
 
 export class InsDashboardPage extends BasePage {
@@ -20,6 +21,26 @@ export class InsDashboardPage extends BasePage {
     return this.page.getByTestId('dashboard-no-results');
   }
 
+  get dropdownSort(): Locator {
+    return this.page.getByLabel('Sort by');
+  }
+
+  get btnUpdateSort(): Locator {
+    return this.page.getByRole('button', { name: 'Update sort' });
+  }
+
+  get resultsLabel(): Locator {
+    return this.page.getByTestId('dashboard-results-label');
+  }
+
+  get pagination(): Locator {
+    return this.page.locator('.govuk-pagination');
+  }
+
+  get linkNextPage(): Locator {
+    return this.pagination.getByRole('link', { name: 'Next page', exact: true });
+  }
+
   row(referenceNumber: string): Locator {
     return this.page.getByRole('row', { name: new RegExp(referenceNumber) });
   }
@@ -31,6 +52,11 @@ export class InsDashboardPage extends BasePage {
   async searchForReference(referenceNumber: string): Promise<void> {
     await this.inputReferenceSearch.fill(referenceNumber);
     await this.btnSearch.click();
+  }
+
+  async sortBy(sortByValue: DashboardSortValue): Promise<void> {
+    await this.dropdownSort.selectOption({ label: sortByValue });
+    await this.btnUpdateSort.click();
   }
 
   async open(attemptSignIn: boolean = true): Promise<void> {
