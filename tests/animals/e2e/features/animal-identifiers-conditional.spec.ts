@@ -48,9 +48,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
 
     await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle.latinName, 1, 1)).toBeVisible();
     await expect(animalsPages.animalIdentification.earTag).toBeVisible();
-    await expect(animalsPages.animalIdentification.enterDetailsHeadings).toHaveText([
-      `Enter details for ${commodityLines.cattle.latinName} 1 of 1`,
-    ]);
+    await expect(animalsPages.animalIdentification.speciesCardTitles).toHaveText([commodityLines.cattle.latinName]);
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
     await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
   });

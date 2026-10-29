@@ -50,10 +50,10 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
       expect(groups.length).toBeGreaterThan(0);
       await animalsPages.commoditySelection.search(query);
       await expect(pages.page.getByRole('checkbox')).toHaveCount(groups.flatMap((group) => group.species).length);
-      const resultGroups = animalsPages.commoditySelection.resultGroups;
-      await expect(resultGroups).toHaveCount(groups.length);
+      const commodityGroups = animalsPages.commoditySelection.commodityGroups;
+      await expect(commodityGroups).toHaveCount(groups.length);
       for (const [index, { code }] of groups.entries()) {
-        await expect(resultGroups.nth(index)).toHaveAccessibleName(code);
+        await expect(commodityGroups.nth(index)).toHaveAccessibleName(code);
       }
       for (const { code, species } of groups) {
         const checkboxes = animalsPages.commoditySelection.commodityGroup(code).getByRole('checkbox');
