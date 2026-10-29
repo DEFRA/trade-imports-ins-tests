@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { addFormCountryNames } from '@resources/reference-data/reference-data';
+import { addressFormCountryNames } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Address book country list', () => {
@@ -12,7 +12,7 @@ test.describe('Address book country list', () => {
   }) => {
     await insPages.addressBookAdd.open();
 
-    await expect(insPages.addressBookAdd.countryOptionsIncludingPlaceholder).toHaveText(['Select a country', ...addFormCountryNames]);
+    await expect(insPages.addressBookAdd.countryOptionsIncludingPlaceholder).toHaveText(['Select a country', ...addressFormCountryNames]);
   });
 
   test("the edit form's Country select offers the same alphabetical list with no blank option", async ({ insPages, addressBookApi }) => {
@@ -28,6 +28,6 @@ test.describe('Address book country list', () => {
 
     await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.countryOptionsIncludingPlaceholder).toHaveText(addFormCountryNames);
+    await expect(insPages.addressBookEdit.countryOptionsIncludingPlaceholder).toHaveText(addressFormCountryNames);
   });
 });

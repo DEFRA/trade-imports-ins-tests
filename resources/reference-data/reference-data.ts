@@ -63,7 +63,7 @@ export function countryAndSubdivisionNamesWithCountry(): string[] {
 }
 
 /** Every captured unfiltered country by name, plus United Kingdom, in alphabetical order. */
-export const addFormCountryNames: string[] = [...countries.map(({ name }) => name), 'United Kingdom'].toSorted((first, second) =>
+export const addressFormCountryNames: string[] = [...countries.map(({ name }) => name), 'United Kingdom'].toSorted((first, second) =>
   first.localeCompare(second, 'en'),
 );
 

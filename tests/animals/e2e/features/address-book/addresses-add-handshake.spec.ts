@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { addFormCountryNames } from '@resources/reference-data/reference-data';
+import { addressFormCountryNames } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
 import { FIELD_LABELS_IN_ORDER } from '@page-objects/ins/address-book/form-page';
@@ -115,7 +115,7 @@ test.describe('Add an address from the journey via INS', () => {
 
         await expect(addPage.selectCountry).toHaveJSProperty('tagName', 'SELECT');
         await expect(addPage.selectCountry).toHaveValue('');
-        await expect(addPage.countryOptionsIncludingPlaceholder).toHaveText(['Select a country', ...addFormCountryNames]);
+        await expect(addPage.countryOptionsIncludingPlaceholder).toHaveText(['Select a country', ...addressFormCountryNames]);
       },
     );
   }
