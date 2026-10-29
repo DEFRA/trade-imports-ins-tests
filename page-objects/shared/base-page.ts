@@ -51,6 +51,10 @@ export class BasePage {
     return this.page.getByRole('link', { name: 'Dashboard', exact: true });
   }
 
+  get successBanner(): Locator {
+    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
+  }
+
   get linkBack(): Locator {
     return this.page.getByRole('link', { name: 'Back', exact: true });
   }

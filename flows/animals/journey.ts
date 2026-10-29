@@ -2,8 +2,9 @@ import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { Locator } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
-import type { InsAddressBookAddPage, NewAddressDetails } from '@page-objects/ins/address-book/add-page';
+import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
 import type { PartyRole } from '@page-objects/animals/addresses-page';
+import type { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
 import {
   ALL_ANSWERS,
   MANDATORY_ANSWERS,
@@ -535,29 +536,21 @@ export class AnimalsJourney {
     await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
   }
 
+  partyPicker(role: PartyRole): AnimalsPartyPickerPage {
+    return this.animalsPages[PARTY_PICKERS[role]];
+  }
+
   async toInsAddAddressFromPicker(addressBookAdd: InsAddressBookAddPage, role: PartyRole): Promise<string> {
     const referenceNumber = await this.startNotification();
     await this.answerCommodity();
     await this.animalsPages.overview.task('Roles and addresses').click();
     await this.animalsPages.addresses.addParty(role).click();
-    await this.animalsPages[PARTY_PICKERS[role]].addNewAddress.click();
+    const picker = this.partyPicker(role);
+    await picker.heading.waitFor(pageLoadWait);
+    await picker.addNewAddress.click();
     await addressBookAdd.completeSignInIfRequested();
     await addressBookAdd.heading.waitFor(pageLoadWait);
     return referenceNumber;
-  }
-
-  async saveInsAddressAndPickIt(
-    addressBookAdd: InsAddressBookAddPage,
-    role: PartyRole,
-    details: NewAddressDetails,
-    referenceNumber: string,
-  ): Promise<void> {
-    const picker = this.animalsPages[PARTY_PICKERS[role]];
-    await addressBookAdd.fill(details);
-    await addressBookAdd.save();
-    await this.pages.page.waitForURL((url) => url.pathname === picker.expectedUrl(referenceNumber), { timeout: 15_000 });
-    await picker.searchBox.fill(details.name);
-    await picker.searchButton.click();
   }
 
   async toReview(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {

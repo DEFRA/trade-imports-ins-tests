@@ -28,13 +28,13 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
     await animalsAdminNavigation.toOutboxEvents(referenceNumber);
     await expect.poll(() => animalsAdminPages.outboxEvents.tableRows.count(), { timeout: timeouts.short }).toBeGreaterThan(0);
     await animalsAdminPages.outboxEvents.btnReplay.click();
-    await expect(animalsAdminPages.outboxEvents.bannerSuccess).toBeVisible();
+    await expect(animalsAdminPages.outboxEvents.successBanner).toBeVisible();
 
     await animalsAdminPages.notifications.open();
     await animalsAdminPages.notifications.inputReferenceNumber.fill(referenceNumber);
     await animalsAdminPages.notifications.deleteByReferenceNumber();
     await animalsAdminPages.notifications.btnConfirm.click();
-    await expect(animalsAdminPages.notifications.alertSuccess).toBeVisible();
+    await expect(animalsAdminPages.notifications.successBanner).toBeVisible();
 
     const eventId = await seedDlqMessage(sqs);
     await animalsAdminNavigation.toDlqEvents();
@@ -48,7 +48,7 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
 
     await animalsAdminPages.dlqEvents.btnDeleteAll.click();
     await animalsAdminPages.dlqEvents.btnConfirmDeleteAll.click();
-    await expect(animalsAdminPages.dlqEvents.bannerSuccess).toBeVisible();
+    await expect(animalsAdminPages.dlqEvents.successBanner).toBeVisible();
 
     // No assertion: this goto exists only to put the static /about page through the ZAP proxy.
     await pages.page.goto('/about');

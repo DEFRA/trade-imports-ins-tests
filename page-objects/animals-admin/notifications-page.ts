@@ -36,10 +36,6 @@ export class AnimalsAdminNotificationsPage extends BasePage {
     return this.page.getByRole('button', { name: 'Cancel' });
   }
 
-  get alertSuccess(): Locator {
-    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
-  }
-
   get alertImportant(): Locator {
     return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Important' }) });
   }

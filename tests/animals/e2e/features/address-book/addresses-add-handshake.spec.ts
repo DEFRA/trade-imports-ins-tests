@@ -1,47 +1,153 @@
+import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { addressFormCountryNames } from '@resources/reference-data/reference-data';
-import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
-import { type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
+import { skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
+import type { AnimalsJourney } from '@flows/animals/journey';
+import { type InsAddressBookAddPage, type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
 import { FIELD_LABELS_IN_ORDER } from '@page-objects/ins/address-book/form-page';
-import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
+import { AnimalsAddressesPage, type PartyRole } from '@page-objects/animals/addresses-page';
 
 const insBaseUrl = (process.env.TRADE_IMPORTS_INS_FRONTEND_BASE_URL ?? 'http://localhost:3002').replace(/\/$/, '');
 const insAddUrlPattern = new RegExp(`^${insBaseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/address-book/add\\?`);
 
+const PARTY_ROLES: readonly PartyRole[] = ['Place of origin', 'Consignor', 'Consignee', 'Importer', 'Place of destination'];
+
+function newAddressFor(role: PartyRole): NewAddressDetails {
+  const unique = `${Date.now()}-${randomUUID().slice(0, 8)}`;
+  return {
+    name: `Handshake ${role} ${unique}`,
+    addressLine1: '9 Handshake Lane',
+    townOrCity: 'Carlisle',
+    postcode: 'CA2 7AA',
+    country: 'United Kingdom',
+    phone: '01228 555 0199',
+    email: `handshake-${unique}@example.co.uk`,
+  };
+}
+
+function addedBannerText(details: NewAddressDetails): string {
+  return `${details.name} address added to your address book`;
+}
+
+async function arriveOnInsAddPageAndFill(
+  animalsJourney: AnimalsJourney,
+  addPage: InsAddressBookAddPage,
+  role: PartyRole,
+  details: NewAddressDetails,
+): Promise<void> {
+  await animalsJourney.toInsAddAddressFromPicker(addPage, role);
+  await addPage.fill(details);
+}
+
 test.describe('Add an address from the journey via INS', () => {
+  test.describe.configure({ mode: 'serial' });
+
   test.beforeEach(() => {
-    skipUnlessComposeEnvironment('the handshake crosses animals-frontend and ins-frontend, which only the compose stack runs together');
+    skipUnlessNonStubStackEnvironment(
+      'the handshake crosses the animals and INS frontends, which both run on the compose stack and in CDP',
+    );
   });
 
+  for (const role of PARTY_ROLES) {
+    test(
+      `Save and select on the INS add page reached from the ${role} picker saves the address, selects it for the role and lands on Roles and addresses with the added banner`,
+      { tag: ['@address-book', '@ins-frontend'] },
+      async ({ animalsJourney, pages, animalsPages, insPages }) => {
+        const addPage = insPages.addressBookAdd;
+        const details = newAddressFor(role);
+
+        await arriveOnInsAddPageAndFill(animalsJourney, addPage, role, details);
+        await expect(pages.page).toHaveURL(insAddUrlPattern);
+        await expect(addPage.linkBack).toBeVisible();
+        await expect(addPage.btnSaveAndSelect).toBeVisible();
+        await expect(addPage.btnSaveAndReturnToAddressPage).toBeVisible();
+        await expect(addPage.linkCancelAndReturnToHub).toBeVisible();
+
+        await addPage.btnSaveAndSelect.click();
+
+        await expect(animalsPages.addresses.heading).toBeVisible();
+        await expect(animalsPages.addresses.successBanner.getByText(addedBannerText(details), { exact: true })).toBeVisible();
+        await expect(animalsPages.addresses.partyAddressLines(role)).toHaveText(AnimalsAddressesPage.expectedAddressText(details), {
+          useInnerText: true,
+        });
+        await expect(animalsPages.addresses.changeParty(role)).toBeVisible();
+      },
+    );
+
+    test(
+      `Save and return to address page on the INS add page reached from the ${role} picker lands on the picker with the added banner, the new address listed first and nothing selected`,
+      { tag: ['@address-book', '@ins-frontend'] },
+      async ({ animalsJourney, insPages }) => {
+        const addPage = insPages.addressBookAdd;
+        const picker = animalsJourney.partyPicker(role);
+        const details = newAddressFor(role);
+
+        await arriveOnInsAddPageAndFill(animalsJourney, addPage, role, details);
+        await addPage.btnSaveAndReturnToAddressPage.click();
+
+        await expect(picker.heading).toBeVisible();
+        await expect(picker.successBanner.getByText(addedBannerText(details), { exact: true })).toBeVisible();
+        await expect(picker.party(details.name)).not.toBeChecked();
+        expect((await picker.listedPartyNames())[0]).toBe(details.name);
+      },
+    );
+
+    test(
+      `Cancel and return to hub on the INS add page reached from the ${role} picker lands on the Overview and saves no address`,
+      { tag: ['@address-book', '@ins-frontend'] },
+      async ({ animalsJourney, animalsPages, insPages }) => {
+        const addPage = insPages.addressBookAdd;
+        const picker = animalsJourney.partyPicker(role);
+        const details = newAddressFor(role);
+
+        await arriveOnInsAddPageAndFill(animalsJourney, addPage, role, details);
+        await addPage.linkCancelAndReturnToHub.click();
+
+        await expect(animalsPages.overview.heading).toBeVisible();
+
+        await animalsPages.overview.task('Roles and addresses').click();
+        await expect(animalsPages.addresses.heading).toBeVisible();
+        await expect(animalsPages.addresses.partyLinks(role)).toHaveText([AnimalsAddressesPage.addLinkName(role)]);
+
+        await animalsPages.addresses.addParty(role).click();
+        await expect(picker.heading).toBeVisible();
+        await picker.searchBox.fill(details.name);
+        await picker.searchButton.click();
+        await expect(picker.noMatchesMessage).toBeVisible();
+      },
+    );
+  }
+
   test(
-    'saving a new address in INS returns to the picker with it selected and committed',
+    'Consignor: the added address banner is still shown ten seconds after Save and select and is gone after a reload',
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, pages, animalsPages, insPages }) => {
-      const stamp = Date.now();
-      const farmName = `Handshake Farm ${stamp}`;
-      const details: NewAddressDetails = {
-        name: farmName,
-        addressLine1: '9 Handshake Lane',
-        townOrCity: 'Carlisle',
-        postcode: 'CA2 7AA',
-        country: 'United Kingdom',
-        phone: '01228 555 0199',
-        email: `handshake-${stamp}@example.co.uk`,
-      };
+      const addPage = insPages.addressBookAdd;
 
-      const referenceNumber = await animalsJourney.toInsAddAddressFromPicker(insPages.addressBookAdd, 'Consignor');
-      await expect(pages.page).toHaveURL(insAddUrlPattern);
-
-      await animalsJourney.saveInsAddressAndPickIt(insPages.addressBookAdd, 'Consignor', details, referenceNumber);
-
-      await expect(animalsPages.consignorSelection.heading).toBeVisible();
-      await expect(animalsPages.consignorSelection.party(farmName)).toBeChecked();
-
-      await animalsPages.consignorSelection.saveAndContinue.click();
+      await arriveOnInsAddPageAndFill(animalsJourney, addPage, 'Consignor', newAddressFor('Consignor'));
+      await pages.page.clock.install();
+      await addPage.btnSaveAndSelect.click();
       await expect(animalsPages.addresses.heading).toBeVisible();
-      await expect(animalsPages.addresses.partyAddressLines('Consignor')).toHaveText(AnimalsAddressesPage.expectedAddressText(details), {
-        useInnerText: true,
-      });
+
+      await pages.page.clock.runFor(10_000);
+      await expect(animalsPages.addresses.successBanner).toBeVisible();
+
+      await pages.page.reload();
+      await expect(animalsPages.addresses.heading).toBeVisible();
+      await expect(animalsPages.addresses.successBanner).toHaveCount(0);
+    },
+  );
+
+  test(
+    'Back on the INS add page reached from the Consignor picker lands on the Consignor picker',
+    { tag: ['@address-book', '@ins-frontend'] },
+    async ({ animalsJourney, insPages }) => {
+      const addPage = insPages.addressBookAdd;
+
+      await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignor');
+      await addPage.linkBack.click();
+
+      await expect(animalsJourney.partyPicker('Consignor').heading).toBeVisible();
     },
   );
 
@@ -49,8 +155,8 @@ test.describe('Add an address from the journey via INS', () => {
     'the INS add page reached from the consignor picker shows the design page frame, the journey status, the field labels and autocomplete hints',
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, pages, insPages }) => {
-      const referenceNumber = await animalsJourney.toInsAddAddressFromPicker(insPages.addressBookAdd, 'Consignor');
       const addPage = insPages.addressBookAdd;
+      const referenceNumber = await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignor');
 
       await expect(pages.page).toHaveTitle('Add address and contact details - Import notification service - GOV.UK');
       await expect(addPage.heading).toBeVisible();
@@ -71,36 +177,15 @@ test.describe('Add an address from the journey via INS', () => {
   );
 
   test(
-    'the INS add page reached from the consignee picker offers United Kingdom alone, and the saved address reads United Kingdom on Roles and addresses',
+    'the INS add page reached from the consignee picker offers United Kingdom alone, already selected',
     { tag: ['@address-book', '@ins-frontend'] },
-    async ({ animalsJourney, animalsPages, insPages }) => {
-      const stamp = Date.now();
-      const consigneeName = `Handshake Consignee ${stamp}`;
-      const details: NewAddressDetails = {
-        name: consigneeName,
-        addressLine1: '12 Handshake Row',
-        townOrCity: 'Carlisle',
-        postcode: 'CA2 7AB',
-        country: 'United Kingdom',
-        phone: '01228 555 0198',
-        email: `consignee-${stamp}@example.co.uk`,
-      };
+    async ({ animalsJourney, insPages }) => {
       const addPage = insPages.addressBookAdd;
 
-      const referenceNumber = await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
+      await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
 
       await expect(addPage.countryOptionsIncludingPlaceholder).toHaveText(['United Kingdom']);
       await expect(addPage.selectedCountryOption).toHaveText('United Kingdom');
-      await expect(addPage.fieldLabels).toHaveText(FIELD_LABELS_IN_ORDER);
-
-      await animalsJourney.saveInsAddressAndPickIt(addPage, 'Consignee', details, referenceNumber);
-      await expect(animalsPages.consigneeSelection.party(consigneeName)).toBeChecked();
-
-      await animalsPages.consigneeSelection.saveAndContinue.click();
-      await expect(animalsPages.addresses.heading).toBeVisible();
-      await expect(animalsPages.addresses.partyAddressLines('Consignee')).toHaveText(AnimalsAddressesPage.expectedAddressText(details), {
-        useInnerText: true,
-      });
     },
   );
 
@@ -138,30 +223,11 @@ test.describe('Add an address from the journey via INS', () => {
         phone: '01228 555 0198',
         email: 'blank-name@example.co.uk',
       });
-      await addPage.save();
+      await addPage.btnSaveAndSelect.click();
 
       await expect(addPage.heading).toBeVisible();
       await expect(addPage.errorSummaryLink(blankNameMessage)).toBeVisible();
       await expect(addPage.inputName).toHaveAccessibleDescription(`Error: ${blankNameMessage}`);
-    },
-  );
-
-  test(
-    'cancelling INS add returns to the picker without saving an address',
-    { tag: '@ins-frontend' },
-    async ({ animalsJourney, pages, animalsPages, insPages }) => {
-      const referenceNumber = await animalsJourney.toInsAddAddressFromPicker(insPages.addressBookAdd, 'Consignor');
-
-      await insPages.addressBookAdd.btnCancelFromJourney.click();
-      await expect(pages.page).toHaveURL((url) => url.pathname === animalsPages.consignorSelection.expectedUrl(referenceNumber), {
-        timeout: 15_000,
-      });
-
-      await expect(animalsPages.consignorSelection.heading).toBeVisible();
-
-      await animalsPages.consignorSelection.linkBack.click();
-      await expect(animalsPages.addresses.heading).toBeVisible();
-      await expect(animalsPages.addresses.partyLinks('Consignor')).toHaveText([AnimalsAddressesPage.addLinkName('Consignor')]);
     },
   );
 });

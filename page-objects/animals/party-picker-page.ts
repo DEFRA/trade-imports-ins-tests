@@ -1,6 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import {
+  pickerNoMatchesMessage,
   pickerResultsGroup,
   pickerResultsHeading,
   pickerResultsSummary,
@@ -10,6 +11,8 @@ import {
 } from '@page-objects/shared/address-picker-results';
 
 export class AnimalsPartyPickerPage extends NotificationPage {
+  private static readonly SELECT_PREFIX = 'Select ';
+
   constructor(
     page: Page,
     slug: string,
@@ -47,7 +50,18 @@ export class AnimalsPartyPickerPage extends NotificationPage {
   }
 
   party(name: string): Locator {
-    return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
+    return this.page.getByRole('radio', { name: `${AnimalsPartyPickerPage.SELECT_PREFIX}${name}`, exact: true });
+  }
+
+  get noMatchesMessage(): Locator {
+    return pickerNoMatchesMessage(this.page);
+  }
+
+  async listedPartyNames(): Promise<string[]> {
+    const radioLabels = await this.resultsGroup
+      .getByRole('radio')
+      .evaluateAll((radios) => radios.map((radio) => (radio as HTMLInputElement).labels?.[0]?.textContent ?? ''));
+    return radioLabels.map((label) => label.trim().slice(AnimalsPartyPickerPage.SELECT_PREFIX.length));
   }
 
   get selectedAddress(): Locator {

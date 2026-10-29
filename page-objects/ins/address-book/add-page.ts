@@ -39,8 +39,16 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
     return this.page.getByRole('button', { name: 'Cancel and return to address book' });
   }
 
-  get btnCancelFromJourney(): Locator {
-    return this.page.getByRole('button', { name: 'Cancel and return to address page' });
+  get btnSaveAndSelect(): Locator {
+    return this.page.getByRole('button', { name: 'Save and select', exact: true });
+  }
+
+  get btnSaveAndReturnToAddressPage(): Locator {
+    return this.page.getByRole('button', { name: 'Save and return to address page', exact: true });
+  }
+
+  get linkCancelAndReturnToHub(): Locator {
+    return this.page.getByRole('link', { name: 'Cancel and return to hub', exact: true });
   }
 
   async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {

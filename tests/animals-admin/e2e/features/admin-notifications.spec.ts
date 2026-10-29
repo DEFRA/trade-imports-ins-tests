@@ -30,7 +30,7 @@ test.describe('Notifications (admin)', { tag: '@mongodb' }, () => {
       await animalsAdminPages.notifications.inputReferenceNumber.fill(referenceNumber);
       await animalsAdminPages.notifications.deleteByReferenceNumber();
       await animalsAdminPages.notifications.btnConfirm.click();
-      await expect(animalsAdminPages.notifications.alertSuccess).toContainText(DELETE_SUCCESS_MESSAGE);
+      await expect(animalsAdminPages.notifications.successBanner).toContainText(DELETE_SUCCESS_MESSAGE);
 
       await expect
         .poll(async () => animalsAdminPages.notifications.tableRowByReference(referenceNumber).isVisible(), {
@@ -67,7 +67,7 @@ test.describe('Notifications (admin)', { tag: '@mongodb' }, () => {
       await animalsAdminPages.notifications.checkboxNotificationByReference(referenceNumber).check();
       await animalsAdminPages.notifications.btnDelete.click();
       await animalsAdminPages.notifications.btnConfirm.click();
-      await expect(animalsAdminPages.notifications.alertSuccess).toContainText(DELETE_SUCCESS_MESSAGE);
+      await expect(animalsAdminPages.notifications.successBanner).toContainText(DELETE_SUCCESS_MESSAGE);
       await expect
         .poll(async () => animalsAdminPages.notifications.tableRowByReference(referenceNumber).isVisible(), {
           timeout: timeouts.medium,
@@ -125,7 +125,7 @@ test.describe('Notifications (admin)', { tag: '@mongodb' }, () => {
         await animalsAdminPages.notifications.checkBoxSelectAll.check();
         await animalsAdminPages.notifications.btnDelete.click();
         await animalsAdminPages.notifications.btnConfirm.click();
-        await expect(animalsAdminPages.notifications.alertSuccess).toContainText(DELETE_SUCCESS_MESSAGE);
+        await expect(animalsAdminPages.notifications.successBanner).toContainText(DELETE_SUCCESS_MESSAGE);
       });
 
       await test.step('writes a successful delete audit record covering a page-1 reference', async () => {

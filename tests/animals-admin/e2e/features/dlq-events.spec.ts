@@ -37,7 +37,7 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
 
     // The success banner renders only after the real gateway replay-all call (with the real admin
     // secret) succeeded — the cross-service wiring this test exists to prove.
-    await expect(animalsAdminPages.dlqEvents.bannerSuccess).toContainText('Replay-all started');
+    await expect(animalsAdminPages.dlqEvents.successBanner).toContainText('Replay-all started');
   });
 
   test('deletes all DLQ messages via the admin UI', async ({ animalsAdminNavigation, pages, animalsAdminPages }) => {
@@ -51,6 +51,6 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
     await animalsAdminPages.dlqEvents.btnConfirmDeleteAll.click();
 
     // As above: the banner is proof the real gateway delete-all call succeeded.
-    await expect(animalsAdminPages.dlqEvents.bannerSuccess).toContainText('Delete-all started');
+    await expect(animalsAdminPages.dlqEvents.successBanner).toContainText('Delete-all started');
   });
 });

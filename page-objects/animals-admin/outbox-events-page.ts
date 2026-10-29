@@ -52,10 +52,6 @@ export class AnimalsAdminOutboxEventsPage extends BasePage {
     return this.page.getByRole('button', { name: 'Replay all events' });
   }
 
-  get bannerSuccess(): Locator {
-    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
-  }
-
   get bannerError(): Locator {
     return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) });
   }

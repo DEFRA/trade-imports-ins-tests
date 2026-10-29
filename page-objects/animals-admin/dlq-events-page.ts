@@ -37,8 +37,4 @@ export class AnimalsAdminDlqEventsPage extends BasePage {
   get deleteAllDialog(): Locator {
     return this.page.getByRole('dialog', { name: /delete all messages/i });
   }
-
-  get bannerSuccess(): Locator {
-    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
-  }
 }

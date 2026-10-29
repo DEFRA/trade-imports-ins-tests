@@ -48,10 +48,6 @@ export class InsAddressBookListPage extends BasePage {
     return this.page.getByRole('main').getByRole('link');
   }
 
-  get successBanner(): Locator {
-    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
-  }
-
   get pagination(): Locator {
     return this.page.locator('.govuk-pagination');
   }
