@@ -59,7 +59,7 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
   }
 
   get commodityGroups(): Locator {
-    return this.page.getByRole('group');
+    return this.page.getByRole('group', { name: /^\d+$/ });
   }
 
   species(line: CommodityLine): Locator {

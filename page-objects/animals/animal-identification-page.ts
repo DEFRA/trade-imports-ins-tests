@@ -30,7 +30,7 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
   }
 
   get speciesCardTitles(): Locator {
-    return this.page.getByRole('form').getByRole('region').getByRole('heading', { level: 3 });
+    return this.page.getByRole('main').getByRole('region').getByRole('heading', { level: 3 });
   }
 
   enterDetailsHeadingText(latinName: string, current: number, total: number): string {
