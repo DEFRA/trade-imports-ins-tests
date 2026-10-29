@@ -72,10 +72,6 @@ export abstract class InsAddressBookFormPage extends BasePage {
     return this.page.getByLabel('Country');
   }
 
-  get countryOptions(): Locator {
-    return this.selectCountry.locator('option:not([value=""])');
-  }
-
   get selectedCountryOption(): Locator {
     return this.selectCountry.locator('option:checked');
   }

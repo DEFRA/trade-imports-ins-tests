@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { addFormCountryNames } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
 import { FIELD_LABELS_IN_ORDER } from '@page-objects/ins/address-book/form-page';
@@ -103,19 +104,21 @@ test.describe('Add an address from the journey via INS', () => {
     },
   );
 
-  test(
-    'the INS add page reached from the place of origin picker opens on Select a country and offers France',
-    { tag: ['@address-book', '@ins-frontend'] },
-    async ({ animalsJourney, insPages }) => {
-      const addPage = insPages.addressBookAdd;
+  for (const role of ['Place of origin', 'Consignor'] as const) {
+    test(
+      `the INS add page reached from the ${role} picker opens on Select a country and offers every captured country, alphabetically, as a plain select`,
+      { tag: ['@address-book', '@ins-frontend'] },
+      async ({ animalsJourney, insPages }) => {
+        const addPage = insPages.addressBookAdd;
 
-      await animalsJourney.toInsAddAddressFromPicker(addPage, 'Place of origin');
+        await animalsJourney.toInsAddAddressFromPicker(addPage, role);
 
-      await expect(addPage.countryOptionsIncludingPlaceholder.first()).toHaveText('Select a country');
-      await expect(addPage.selectCountry).toHaveValue('');
-      await expect(addPage.countryOptions.filter({ hasText: 'France' })).toHaveCount(1);
-    },
-  );
+        await expect(addPage.selectCountry).toHaveJSProperty('tagName', 'SELECT');
+        await expect(addPage.selectCountry).toHaveValue('');
+        await expect(addPage.countryOptionsIncludingPlaceholder).toHaveText(['Select a country', ...addFormCountryNames]);
+      },
+    );
+  }
 
   test(
     'saving the INS add page with a blank name keeps the page with the name error in the summary and on the field',
