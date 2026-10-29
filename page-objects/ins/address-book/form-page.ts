@@ -34,7 +34,7 @@ export abstract class InsAddressBookFormPage extends BasePage {
     return this.page.getByRole('heading', { level: 2, name, exact: true });
   }
 
-  /** The form's text inputs in page order, used to pin where each field sits. */
+  /** The form's text inputs in page order. */
   get textboxes(): Locator {
     return this.page.getByRole('main').getByRole('textbox');
   }
@@ -72,9 +72,12 @@ export abstract class InsAddressBookFormPage extends BasePage {
     return this.page.getByLabel('Country');
   }
 
-  // Every country offered, skipping the empty placeholder option.
   get countryOptions(): Locator {
     return this.selectCountry.locator('option:not([value=""])');
+  }
+
+  get selectedCountryOption(): Locator {
+    return this.selectCountry.locator('option:checked');
   }
 
   get inputEmail(): Locator {

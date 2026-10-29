@@ -2,7 +2,7 @@ import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { Locator } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
-import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
+import type { InsAddressBookAddPage, NewAddressDetails } from '@page-objects/ins/address-book/add-page';
 import type { PartyRole } from '@page-objects/animals/addresses-page';
 import {
   ALL_ANSWERS,
@@ -32,11 +32,17 @@ export type ArrivalDetailsAnswer = {
   documentReference?: string;
 };
 
-type PartyAnswer = [
-  role: PartyRole,
-  name: string,
-  picker: 'consignorSelection' | 'destinationSelection' | 'placeOfOriginSelection' | 'consigneeSelection' | 'importerSelection',
-];
+type PartyPicker = 'consignorSelection' | 'destinationSelection' | 'placeOfOriginSelection' | 'consigneeSelection' | 'importerSelection';
+
+type PartyAnswer = [role: PartyRole, name: string];
+
+const PARTY_PICKERS: Record<PartyRole, PartyPicker> = {
+  Consignor: 'consignorSelection',
+  'Place of destination': 'destinationSelection',
+  'Place of origin': 'placeOfOriginSelection',
+  Consignee: 'consigneeSelection',
+  Importer: 'importerSelection',
+};
 
 export type SpeciesAnimalCount = {
   species: CommodityLine;
@@ -227,21 +233,22 @@ export class AnimalsJourney {
   }
 
   async addFiveParties(names: PartyAnswers = MANDATORY_ANSWERS.parties): Promise<void> {
-    await this.addParties([['Consignor', names.consignor, 'consignorSelection']]);
+    await this.addParties([['Consignor', names.consignor]]);
     await this.addRemainingParties(names);
   }
 
   async addRemainingParties(names: PartyAnswers = MANDATORY_ANSWERS.parties): Promise<void> {
     await this.addParties([
-      ['Place of destination', names.placeOfDestination, 'destinationSelection'],
-      ['Place of origin', names.placeOfOrigin, 'placeOfOriginSelection'],
-      ['Consignee', names.consignee, 'consigneeSelection'],
-      ['Importer', names.importer, 'importerSelection'],
+      ['Place of destination', names.placeOfDestination],
+      ['Place of origin', names.placeOfOrigin],
+      ['Consignee', names.consignee],
+      ['Importer', names.importer],
     ]);
   }
 
   private async addParties(parties: PartyAnswer[]): Promise<void> {
-    for (const [role, name, picker] of parties) {
+    for (const [role, name] of parties) {
+      const picker = PARTY_PICKERS[role];
       await this.animalsPages.addresses.addParty(role).click();
       await this.animalsPages[picker].select(name);
       await this.animalsPages[picker].saveAndContinue.click();
@@ -528,15 +535,29 @@ export class AnimalsJourney {
     await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
   }
 
-  async toInsAddAddressFromConsignorPicker(addressBookAdd: InsAddressBookAddPage): Promise<string> {
+  async toInsAddAddressFromPicker(addressBookAdd: InsAddressBookAddPage, role: PartyRole): Promise<string> {
     const referenceNumber = await this.startNotification();
     await this.answerCommodity();
     await this.animalsPages.overview.task('Roles and addresses').click();
-    await this.animalsPages.addresses.addParty('Consignor').click();
-    await this.animalsPages.consignorSelection.addNewAddress.click();
+    await this.animalsPages.addresses.addParty(role).click();
+    await this.animalsPages[PARTY_PICKERS[role]].addNewAddress.click();
     await addressBookAdd.completeSignInIfRequested();
     await addressBookAdd.heading.waitFor(pageLoadWait);
     return referenceNumber;
+  }
+
+  async saveInsAddressAndPickIt(
+    addressBookAdd: InsAddressBookAddPage,
+    role: PartyRole,
+    details: NewAddressDetails,
+    referenceNumber: string,
+  ): Promise<void> {
+    const picker = this.animalsPages[PARTY_PICKERS[role]];
+    await addressBookAdd.fill(details);
+    await addressBookAdd.save();
+    await this.pages.page.waitForURL((url) => url.pathname === picker.expectedUrl(referenceNumber), { timeout: 15_000 });
+    await picker.searchBox.fill(details.name);
+    await picker.searchButton.click();
   }
 
   async toReview(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
