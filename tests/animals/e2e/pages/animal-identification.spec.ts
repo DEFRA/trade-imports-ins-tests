@@ -115,14 +115,14 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText(bison.latinName);
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText(domesticCat.latinName);
 
-    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.domesticDog]);
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.raccoonDog]);
     await animalsPages.commoditySelection.saveAndContinue.click();
 
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
     await expect(animalsPages.animalIdentification.selectedCommodities.bodyRows).toContainText([
       commodityLines.cattle.commodityCode,
-      commodityLines.domesticDog.latinName,
       commodityLines.domesticCat.latinName,
+      commodityLines.raccoonDog.latinName,
     ]);
   });
 
