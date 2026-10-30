@@ -26,7 +26,7 @@ test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => 
 
     await insPages.addressBookAdd.open();
     await insPages.addressBookAdd.fill(details);
-    await insPages.addressBookAdd.save();
+    await insPages.addressBookAdd.saveAndContinue();
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
 
     const client = new MongoDbClient();

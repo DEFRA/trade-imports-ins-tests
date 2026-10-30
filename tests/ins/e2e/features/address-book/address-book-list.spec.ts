@@ -35,7 +35,7 @@ const addAddressThroughForm = async ({ insPages }: Pick<PageFixtures, 'insPages'
   await insPages.addressBookList.open();
   await insPages.addressBookList.btnAddNewAddress.click();
   await insPages.addressBookAdd.fill(details);
-  await insPages.addressBookAdd.save();
+  await insPages.addressBookAdd.saveAndContinue();
 };
 
 test.describe('Address book list', () => {

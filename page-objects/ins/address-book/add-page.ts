@@ -19,11 +19,11 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
-  get linkCancel(): Locator {
+  get linkCancelAndReturnToAddressBook(): Locator {
     return this.page.getByRole('link', { name: 'Cancel and return to address book', exact: true });
   }
 
-  get btnCancel(): Locator {
+  get btnCancelAndReturnToAddressBook(): Locator {
     return this.page.getByRole('button', { name: 'Cancel and return to address book' });
   }
 
@@ -44,7 +44,7 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
     await this.signInWhenRequested(attemptSignIn, identity);
   }
 
-  async save(): Promise<void> {
+  async saveAndContinue(): Promise<void> {
     await this.btnSaveAndContinue.click();
   }
 }

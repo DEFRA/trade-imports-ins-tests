@@ -78,15 +78,15 @@ test.describe('The add-details form for an address entered by hand', () => {
     const name = `Cancelled Farm ${Date.now()}`;
     await insPages.addressBookAdd.open();
     await insPages.addressBookAdd.inputName.fill(name);
-    await expect(insPages.addressBookAdd.btnCancel).toHaveCount(0);
+    await expect(insPages.addressBookAdd.btnCancelAndReturnToAddressBook).toHaveCount(0);
 
     const buttonBox = await insPages.addressBookAdd.btnSaveAndContinue.boundingBox();
-    const linkBox = await insPages.addressBookAdd.linkCancel.boundingBox();
+    const linkBox = await insPages.addressBookAdd.linkCancelAndReturnToAddressBook.boundingBox();
     expect(buttonBox).not.toBeNull();
     expect(linkBox).not.toBeNull();
     expect(linkBox.y).toBeGreaterThan(buttonBox.y);
 
-    await insPages.addressBookAdd.linkCancel.click();
+    await insPages.addressBookAdd.linkCancelAndReturnToAddressBook.click();
 
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
     await expect(insPages.addressBookList.heading).toBeVisible();

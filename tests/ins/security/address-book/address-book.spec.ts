@@ -23,7 +23,7 @@ test.describe('Security scan (ins)', { tag: '@active' }, () => {
     const name = `Security Scan Farm ${Date.now()}`;
     await insPages.addressBookAdd.open();
     await insPages.addressBookAdd.fill({ name, ...address });
-    await insPages.addressBookAdd.save();
+    await insPages.addressBookAdd.saveAndContinue();
     await expect(insPages.addressBookList.row(name)).toBeVisible();
 
     const { id } = await addressBookApi.findByName(name);
