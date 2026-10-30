@@ -52,10 +52,6 @@ export class AnimalsAdminNotificationsPage extends BasePage {
     return this.page.getByTestId('results-count');
   }
 
-  async currentPageReferences(): Promise<string[]> {
-    return this.page.locator('.notification-checkbox').evaluateAll((elements) => (elements as HTMLInputElement[]).map((el) => el.value));
-  }
-
   async getTotalElements(): Promise<number> {
     await this.waitForPageRendered();
 

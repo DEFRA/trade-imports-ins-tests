@@ -3,7 +3,7 @@ import { timeouts } from '@config/timeouts';
 import { defaultUser } from '@config/users';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { ObjectId } from 'mongodb';
-import { skipIfCdpEnvironment, isComposeEnvironment } from '@utils/playwright/environment';
+import { isComposeEnvironment } from '@utils/playwright/environment';
 
 const DELETE_SUCCESS_MESSAGE = 'Notifications deleted successfully. Redirecting in 3 seconds...';
 const DELETE_FAILURE_MESSAGE = 'There was a problem deleting the notifications. Please try again.';
@@ -105,60 +105,6 @@ test.describe('Notifications (admin)', { tag: '@mongodb' }, () => {
       }
     });
   });
-
-  test.skip(
-    'deletes all current-page notifications by select all',
-    { tag: '@compose' },
-    async ({ animalsSeededJourney, animalsAdminNavigation, animalsAdminPages }) => {
-      skipIfCdpEnvironment('Compose/local only: destructive (deletes the current page of notifications).');
-      test.slow();
-
-      await animalsSeededJourney.createDraftNotification('unlocked');
-      await animalsSeededJourney.createDraftNotification('unlocked');
-      await animalsSeededJourney.createDraftNotification('unlocked');
-      await animalsSeededJourney.createDraftNotification('unlocked');
-
-      await animalsAdminNavigation.toNotifications();
-      await expect(animalsAdminPages.notifications.heading).toBeVisible();
-
-      const currentPageReferences = await animalsAdminPages.notifications.currentPageReferences();
-      const expectedDeleteCount = currentPageReferences.length;
-      expect(currentPageReferences.length).toBeGreaterThan(0);
-      const pageOneReference = currentPageReferences[0];
-
-      await test.step('select all deletes only the current page', async () => {
-        await animalsAdminPages.notifications.checkBoxSelectAll.check();
-        await animalsAdminPages.notifications.btnDelete.click();
-        await animalsAdminPages.notifications.btnConfirm.click();
-        await expect(animalsAdminPages.notifications.successBanner).toContainText(DELETE_SUCCESS_MESSAGE);
-      });
-
-      await test.step('writes a successful delete audit record covering a page-1 reference', async () => {
-        const client = new MongoDbClient();
-
-        try {
-          await client.connect();
-          const auditCollection = client.collection(AUDIT_DATABASE, AUDIT_COLLECTION);
-          const auditRecords = await auditCollection
-            .find({ action: 'DELETE_NOTIFICATIONS', notificationReferenceNumbers: pageOneReference })
-            .toArray();
-
-          expect(auditRecords).toHaveLength(1);
-          const [auditRecord] = auditRecords;
-          expect(String(auditRecord._id)).toMatch(OBJECT_ID_PATTERN);
-          expect(auditRecord.action).toBe('DELETE_NOTIFICATIONS');
-          expect(auditRecord.result).toBe('SUCCESS');
-          expect(String(auditRecord.timestamp)).toMatch(AUDIT_TIMESTAMP_PATTERN);
-          expect(auditRecord.numberOfNotifications).toBe(expectedDeleteCount);
-          expect(auditRecord.notificationReferenceNumbers).toContain(pageOneReference);
-          expect(auditRecord.traceId).toBe('test-trace-id');
-          expect(auditRecord.userId).toBe(defaultUser.crn);
-        } finally {
-          await client.close();
-        }
-      });
-    },
-  );
 
   test('does not allow deleting a notification by invalid reference number', async ({ animalsAdminNavigation, animalsAdminPages }) => {
     test.slow();
