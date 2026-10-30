@@ -7,7 +7,7 @@ test.describe('Address book country list', () => {
     skipUnlessComposeEnvironment("the list is the stub's MDM fixture, which only the compose stack is sure to serve");
   });
 
-  test("the add form's Country select opens on Select a country, then lists every country reference data serves alphabetically, United Kingdom in its place", async ({
+  test("the add form's Country select lists Select a country first, then every country reference data serves alphabetically, United Kingdom in its place", async ({
     insPages,
   }) => {
     await insPages.addressBookAdd.open();
