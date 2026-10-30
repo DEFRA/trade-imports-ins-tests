@@ -93,7 +93,7 @@ export class AnimalsAdminNotificationsPage extends BasePage {
     return this.page.getByRole('checkbox', { name: `Select notification ${referenceNumber}` });
   }
 
-  async findRowByReference(referenceNumber: string, maxPages: number = 10): Promise<void> {
+  async openPageShowingNotification(referenceNumber: string, maxPages: number = 10): Promise<void> {
     await this.navigateToAdminPortal(this.expectedUrl);
 
     const checkbox = this.checkboxNotificationByReference(referenceNumber);

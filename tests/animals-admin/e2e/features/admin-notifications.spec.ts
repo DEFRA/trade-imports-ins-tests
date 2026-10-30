@@ -24,7 +24,7 @@ test.describe('Notifications (admin)', { tag: '@mongodb' }, () => {
       const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
 
       await animalsAdminNavigation.toNotifications();
-      await animalsAdminPages.notifications.findRowByReference(referenceNumber);
+      await animalsAdminPages.notifications.openPageShowingNotification(referenceNumber);
       await expect(animalsAdminPages.notifications.tableRowByReference(referenceNumber)).toBeVisible();
 
       await animalsAdminPages.notifications.inputReferenceNumber.fill(referenceNumber);
@@ -49,7 +49,7 @@ test.describe('Notifications (admin)', { tag: '@mongodb' }, () => {
     const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
 
     await animalsAdminNavigation.toNotifications();
-    await animalsAdminPages.notifications.findRowByReference(referenceNumber);
+    await animalsAdminPages.notifications.openPageShowingNotification(referenceNumber);
     await animalsAdminPages.notifications.checkboxNotificationByReference(referenceNumber).check();
     await animalsAdminPages.notifications.btnDelete.click();
     await animalsAdminPages.notifications.btnCancel.click();
@@ -63,7 +63,7 @@ test.describe('Notifications (admin)', { tag: '@mongodb' }, () => {
     await animalsAdminNavigation.toNotifications();
 
     await test.step('delete notification by checkbox', async () => {
-      await animalsAdminPages.notifications.findRowByReference(referenceNumber);
+      await animalsAdminPages.notifications.openPageShowingNotification(referenceNumber);
       await animalsAdminPages.notifications.checkboxNotificationByReference(referenceNumber).check();
       await animalsAdminPages.notifications.btnDelete.click();
       await animalsAdminPages.notifications.btnConfirm.click();
