@@ -178,7 +178,7 @@ export function toShortDisplayDate(input: DateInput): string {
   return `${Number(input.day)} ${SHORT_MONTH_NAMES[Number(input.month) - 1]} ${input.year}`;
 }
 
-/** A regular-expression group matching today's or tomorrow's service display date, for a date stamped near midnight. */
+/** A regular-expression group matching today's or tomorrow's service display date. */
 export function todayOrTomorrowServiceDisplayDatePattern(): string {
   return `(${getRelativeServiceDisplayDate()}|${getRelativeServiceDisplayDate(1)})`;
 }
