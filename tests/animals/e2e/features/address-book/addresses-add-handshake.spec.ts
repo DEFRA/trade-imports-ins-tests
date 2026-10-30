@@ -6,9 +6,7 @@ import type { AnimalsJourney } from '@flows/animals/journey';
 import { type InsAddressBookAddPage, type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
 import { FIELD_LABELS_IN_ORDER } from '@page-objects/ins/address-book/form-page';
 import { AnimalsAddressesPage, type PartyRole } from '@page-objects/animals/addresses-page';
-
-const insBaseUrl = (process.env.TRADE_IMPORTS_INS_FRONTEND_BASE_URL ?? 'http://localhost:3002').replace(/\/$/, '');
-const insAddUrlPattern = new RegExp(`^${insBaseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/address-book/add\\?`);
+import { requireBaseUrl } from '@page-objects/shared/base-page';
 
 const PARTY_ROLES: readonly PartyRole[] = ['Place of origin', 'Consignor', 'Consignee', 'Importer', 'Place of destination'];
 
@@ -53,9 +51,10 @@ test.describe('Add an address from the journey via INS', () => {
       async ({ animalsJourney, pages, animalsPages, insPages }) => {
         const addPage = insPages.addressBookAdd;
         const details = newAddressFor(role);
+        const insOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_INS_FRONTEND_BASE_URL')).origin;
 
         await arriveOnInsAddPageAndFill(animalsJourney, addPage, role, details);
-        await expect(pages.page).toHaveURL(insAddUrlPattern);
+        await expect(pages.page).toHaveURL((url) => url.origin === insOrigin && url.pathname === '/address-book/add' && url.search !== '');
         await expect(addPage.linkBack).toBeVisible();
         await expect(addPage.btnSaveAndSelect).toBeVisible();
         await expect(addPage.btnSaveAndReturnToAddressPage).toBeVisible();
