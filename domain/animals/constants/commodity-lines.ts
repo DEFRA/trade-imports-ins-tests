@@ -9,7 +9,7 @@ export const commodityLines = {
   bison: { searchTerm: 'Bison bison', commodityCode: '0102', latinName: 'Bison bison' },
   horse: { searchTerm: 'horse', commodityCode: '0101', latinName: 'Equus cabalus' },
   domesticCat: { searchTerm: 'domestic cat', commodityCode: '01061900', latinName: 'Felis catus' },
-  domesticDog: { searchTerm: 'dog', commodityCode: '01061900', latinName: 'Canis familiaris' },
+  raccoonDog: { searchTerm: 'dog', commodityCode: '01061900', latinName: 'Nyctereutes procyonoides' },
   ostrich: { searchTerm: 'ostrich', commodityCode: '01063300', latinName: 'Struthio' },
 } as const satisfies Record<string, CommodityLine>;
 
