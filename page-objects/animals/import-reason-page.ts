@@ -68,8 +68,4 @@ export class AnimalsImportReasonPage extends NotificationPage {
   async selectTemporaryAdmissionPortOfExit(value: string): Promise<void> {
     await this.temporaryAdmissionPortOfExit.chooseByValue(value);
   }
-
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
-  }
 }

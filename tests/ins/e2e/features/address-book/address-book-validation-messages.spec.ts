@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { RestClientError } from '@adapters/http/rest-client';
 import type { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
-import { traderAddressInUnofferedCountry } from './trader-address';
+import { traderAddressInUnofferedCountry } from '@domain/ins/constants/trader-address';
 
 const MESSAGES = {
   name: 'Enter a name or organisation',
@@ -56,7 +56,7 @@ test.describe('Address book validation messages', () => {
       email: baseAddress.email,
       phone: '',
     });
-    await insPages.addressBookAdd.save();
+    await insPages.addressBookAdd.saveAndContinue();
 
     await expect(insPages.addressBookAdd.heading).toBeVisible();
     await expectFourMessagesAtTopAndAgainstFields(insPages.addressBookAdd);

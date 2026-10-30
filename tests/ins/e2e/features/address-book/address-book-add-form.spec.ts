@@ -1,26 +1,8 @@
 import { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
 import { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
-
-const baseAddress = {
-  addressLine1: '5 Form Lane',
-  addressLine2: 'Unit 2',
-  townOrCity: 'Carlisle',
-  county: 'Cumbria',
-  postcode: 'CA1 4DD',
-  countryCode: 'GB',
-  phone: '01228 555 0120',
-  email: 'form@example.co.uk',
-};
-
-const FIELD_NAMES_IN_ORDER = [
-  'Name or organisation',
-  'Address line 1',
-  'Address line 2 (optional)',
-  'Town or city',
-  'County (optional)',
-  'Postcode or Zip code',
-];
+import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
+import { ADDRESS_FORM_FIELD_LABELS, ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
 
 async function expectAbove(upper: Locator, lower: Locator): Promise<void> {
   const upperBox = await upper.boundingBox();
@@ -30,7 +12,6 @@ async function expectAbove(upper: Locator, lower: Locator): Promise<void> {
   expect(upperBox.y).toBeLessThan(lowerBox.y);
 }
 
-// Address heading, then Name down to Country; Contact details heading, then Email and Phone.
 async function expectFieldsGroupedUnderSections(form: InsAddressBookFormPage): Promise<void> {
   await expect(form.sectionHeading('Address')).toBeVisible();
   await expect(form.sectionHeading('Contact details')).toBeVisible();
@@ -48,21 +29,21 @@ test.describe('The add-details form for an address entered by hand', () => {
     await insPages.addressBookAdd.open();
 
     await expectFieldsGroupedUnderSections(insPages.addressBookAdd);
-    for (const [index, name] of FIELD_NAMES_IN_ORDER.entries()) {
+    for (const [index, name] of ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER.entries()) {
       await expect(insPages.addressBookAdd.textboxes.nth(index)).toHaveAccessibleName(name);
     }
 
-    const created = await addressBookApi.createAddress({ name: `Form Label Farm ${Date.now()}`, ...baseAddress });
+    const created = await addressBookApi.createAddress(addressWithLineTwoAndCounty(`Form Label Farm ${Date.now()}`));
     await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.inputName).toHaveAccessibleName('Name or organisation');
+    await expect(insPages.addressBookEdit.inputName).toHaveAccessibleName(ADDRESS_FORM_FIELD_LABELS.name);
   });
 
   test('the Country select opens on its blank first option, Select a country, with nothing pre-selected', async ({ insPages }) => {
     await insPages.addressBookAdd.open();
 
     await expect(insPages.addressBookAdd.selectCountry).toHaveValue('');
-    await expect(insPages.addressBookAdd.countryOptionsIncludingPlaceholder.first()).toHaveText('Select a country');
+    await expect(insPages.addressBookAdd.countryOptions.first()).toHaveText('Select a country');
   });
 
   test('Add a new address on the address book opens the add-details form, whose Back link returns to the address book', async ({
@@ -89,15 +70,15 @@ test.describe('The add-details form for an address entered by hand', () => {
     const name = `Cancelled Farm ${Date.now()}`;
     await insPages.addressBookAdd.open();
     await insPages.addressBookAdd.inputName.fill(name);
-    await expect(insPages.addressBookAdd.btnCancel).toHaveCount(0);
+    await expect(insPages.addressBookAdd.btnCancelAndReturnToAddressBook).toHaveCount(0);
 
     const buttonBox = await insPages.addressBookAdd.btnSaveAndContinue.boundingBox();
-    const linkBox = await insPages.addressBookAdd.linkCancel.boundingBox();
+    const linkBox = await insPages.addressBookAdd.linkCancelAndReturnToAddressBook.boundingBox();
     expect(buttonBox).not.toBeNull();
     expect(linkBox).not.toBeNull();
     expect(linkBox.y).toBeGreaterThan(buttonBox.y);
 
-    await insPages.addressBookAdd.linkCancel.click();
+    await insPages.addressBookAdd.linkCancelAndReturnToAddressBook.click();
 
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
     await expect(insPages.addressBookList.heading).toBeVisible();
@@ -105,12 +86,12 @@ test.describe('The add-details form for an address entered by hand', () => {
     expect(await addressBookApi.listAddresses(name)).toHaveLength(0);
   });
 
-  test('the edit page groups its fields under Address and Contact details and labels the name Name or organisation', async ({
+  test('the edit page groups its fields under Address and Contact details and opens with the saved name', async ({
     insPages,
     addressBookApi,
   }) => {
     const name = `Form Edit Farm ${Date.now()}`;
-    const created = await addressBookApi.createAddress({ name, ...baseAddress });
+    const created = await addressBookApi.createAddress(addressWithLineTwoAndCounty(name));
 
     await insPages.addressBookEdit.open(created.id);
 

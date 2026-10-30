@@ -48,10 +48,6 @@ export class PlantsCommodityDetailsPage extends PlantsNotificationPage {
     return this.page.getByRole('button', { name: 'Save and add another', exact: true });
   }
 
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
-
   /** The page as it is reached to edit a saved line, which it names by index. */
   editUrl(referenceNumber: string, index: number): string {
     return `${this.expectedUrl(referenceNumber)}?index=${index}`;

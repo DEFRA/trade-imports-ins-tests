@@ -54,7 +54,7 @@ test.describe('Authentication (admin)', { tag: '@auth' }, () => {
 
   test.describe('Notifications (admin) (unauthenticated entry)', () => {
     test.beforeEach(async ({ animalsJourney, animalsAdminPages }) => {
-      await animalsJourney.toSignIn((attemptSignIn) => animalsAdminPages.notifications.open(attemptSignIn));
+      await animalsJourney.toSignIn((attemptSignIn) => animalsAdminPages.notifications.open({ attemptSignIn }));
     });
 
     test('lands on the sign in page when opening a page further in the journey', async ({ pages }) => {

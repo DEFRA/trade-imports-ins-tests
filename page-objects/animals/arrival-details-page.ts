@@ -55,8 +55,4 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
   async fillArrivalDate(date: string): Promise<void> {
     await this.arrivalDate.fill(date);
   }
-
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
-  }
 }

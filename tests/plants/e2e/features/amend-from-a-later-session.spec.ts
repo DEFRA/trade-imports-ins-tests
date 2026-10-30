@@ -9,7 +9,7 @@ test.describe('Dashboard actions in a later browser session', () => {
     await new PlantsNotificationActions(freshPages, freshSharedPages).amendNotification(reference);
 
     await expect(freshPages.overview.statusTag).toHaveText('Amend');
-    await expect(freshPages.overview.reference).toHaveText(reference);
+    await expect(freshPages.overview.notificationReference).toHaveText(reference);
   });
 
   test('tells the user a deleted notification could not be amended', async ({
@@ -25,6 +25,6 @@ test.describe('Dashboard actions in a later browser session', () => {
 
     await freshPages.dashboard.amend(reference).click();
 
-    await expect(freshPages.dashboard.amendRefusedBanner).toContainText(freshPages.dashboard.amendRefusedMessage);
+    await expect(freshPages.dashboard.importantBanner).toContainText(freshPages.dashboard.amendRefusedMessage);
   });
 });

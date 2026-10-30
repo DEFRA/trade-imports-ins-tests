@@ -58,6 +58,10 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('group', { name: code, exact: true });
   }
 
+  get commodityGroups(): Locator {
+    return this.page.getByRole('group', { name: /^\d+$/ });
+  }
+
   species(line: CommodityLine): Locator {
     return this.commodityGroup(line.commodityCode).getByRole('checkbox', { name: line.latinName, exact: true });
   }
@@ -67,9 +71,5 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
       await this.search(line.searchTerm);
       await this.species(line).check();
     }
-  }
-
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
   }
 }
