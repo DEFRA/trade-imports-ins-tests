@@ -158,7 +158,7 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     expect.soft(row.defraimp_routetransitingstates, 'transited countries').toBeNull();
   });
 
-  test('a notification submitted with every answer is stored in PIMS Dynamics with its optional answers', async ({
+  test('a notification submitted with every answer is stored in PIMS Dynamics with its internal reference', async ({
     animalsJourney,
     journeyContext,
     externalRequest,
