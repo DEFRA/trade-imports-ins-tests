@@ -38,7 +38,7 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
 
     const eventId = await seedDlqMessage(sqs);
     await animalsAdminNavigation.toDlqEvents();
-    const seededDlqRow = animalsAdminPages.dlqEvents.rowById(eventId);
+    const seededDlqRow = animalsAdminPages.dlqEvents.rowContainingMessageId(eventId);
     await expect(async () => {
       if (!(await seededDlqRow.isVisible())) {
         await pages.page.reload();

@@ -8,7 +8,7 @@ import { timeouts } from '@config/timeouts';
 async function expectSeededRowListed(pages: SharedPages, animalsAdminPages: AnimalsAdminPages, eventId: string): Promise<void> {
   await expect(async () => {
     await pages.page.reload();
-    await expect(animalsAdminPages.dlqEvents.rowById(eventId)).toBeVisible({ timeout: timeouts.short });
+    await expect(animalsAdminPages.dlqEvents.rowContainingMessageId(eventId)).toBeVisible({ timeout: timeouts.short });
   }).toPass({ timeout: timeouts.medium });
 }
 

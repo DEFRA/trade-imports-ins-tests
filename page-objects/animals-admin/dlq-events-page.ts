@@ -17,9 +17,8 @@ export class AnimalsAdminDlqEventsPage extends BasePage {
     return this.page.getByRole('table').locator('tbody tr');
   }
 
-  /** The DLQ row whose Id cell holds the given message id (the body's eventId). */
-  rowById(id: string): Locator {
-    return this.tableRows.filter({ hasText: id });
+  rowContainingMessageId(messageId: string): Locator {
+    return this.tableRows.filter({ hasText: messageId });
   }
 
   get btnReplayAll(): Locator {
