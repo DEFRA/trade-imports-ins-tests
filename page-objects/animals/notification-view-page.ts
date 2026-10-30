@@ -1,5 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { pageLoadWait } from '@config/timeouts';
+import { type CommoditySpecies } from '@domain/animals/constants/commodity-species';
 import { NotificationPage, type OpenOptions } from '@page-objects/shared/base-page';
 
 export class AnimalsNotificationViewPage extends NotificationPage {
@@ -35,6 +36,10 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.locator('.govuk-summary-card', { hasText: name });
   }
 
+  speciesCard(species: CommoditySpecies): Locator {
+    return this.summaryCard(`${species.commodityCode} — ${species.latinName}`);
+  }
+
   summaryValue(card: Locator, key: string): Locator {
     return card
       .locator('.govuk-summary-list__row', { has: this.page.getByText(key, { exact: true }) })
@@ -43,6 +48,10 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   get regionOfOriginCode(): Locator {
     return this.summaryValue(this.summaryCard('Import details'), 'Region of origin code');
+  }
+
+  get errorSummary(): Locator {
+    return this.page.locator('.govuk-error-summary');
   }
 
   partyRow(card: string, role: string): Locator {
