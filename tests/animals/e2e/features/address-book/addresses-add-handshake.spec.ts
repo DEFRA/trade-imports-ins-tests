@@ -4,7 +4,7 @@ import { addressFormCountryNames } from '@resources/reference-data/reference-dat
 import { skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
 import type { AnimalsJourney } from '@flows/animals/journey';
 import { type InsAddressBookAddPage, type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
-import { FIELD_LABELS_IN_ORDER } from '@page-objects/ins/address-book/form-page';
+import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
 import { AnimalsAddressesPage, type PartyRole } from '@page-objects/animals/addresses-page';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 
@@ -166,7 +166,7 @@ test.describe('Add an address from the journey via INS', () => {
       await expect(addPage.notificationReference).toHaveText(journeyContext.referenceNumber);
       await expect(addPage.sectionHeading('Address')).toBeVisible();
       await expect(addPage.sectionHeading('Contact details')).toBeVisible();
-      await expect(addPage.fieldLabels).toHaveText(FIELD_LABELS_IN_ORDER);
+      await expect(addPage.fieldLabels).toHaveText(ADDRESS_FORM_FIELD_LABELS_IN_ORDER);
       await expect(addPage.inputName).not.toHaveAttribute('autocomplete');
       await expect(addPage.inputAddressLine1).toHaveAttribute('autocomplete', 'address-line1');
       await expect(addPage.inputAddressLine2).toHaveAttribute('autocomplete', 'address-line2');

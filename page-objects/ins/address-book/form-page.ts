@@ -1,5 +1,6 @@
 import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
+import { ADDRESS_FORM_FIELD_LABELS } from '@domain/ins/constants/address-form';
 
 export type AddressDetails = {
   name: string;
@@ -13,21 +14,9 @@ export type AddressDetails = {
   phone: string;
 };
 
-export const FIELD_LABELS_IN_ORDER = [
-  'Name or organisation',
-  'Address line 1',
-  'Address line 2 (optional)',
-  'Town or city',
-  'County (optional)',
-  'Postcode or Zip code',
-  'Country',
-  'Email address',
-  'Phone number',
-];
-
 export abstract class InsAddressBookFormPage extends BasePage {
   get inputName(): Locator {
-    return this.page.getByLabel('Name or organisation', { exact: true });
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.name, { exact: true });
   }
 
   sectionHeading(name: 'Address' | 'Contact details'): Locator {
@@ -49,27 +38,27 @@ export abstract class InsAddressBookFormPage extends BasePage {
   }
 
   get inputAddressLine1(): Locator {
-    return this.page.getByLabel('Address line 1');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.addressLine1);
   }
 
   get inputAddressLine2(): Locator {
-    return this.page.getByLabel('Address line 2 (optional)');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.addressLine2);
   }
 
   get inputTownOrCity(): Locator {
-    return this.page.getByLabel('Town or city');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.townOrCity);
   }
 
   get inputCounty(): Locator {
-    return this.page.getByLabel('County (optional)');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.county);
   }
 
   get inputPostcode(): Locator {
-    return this.page.getByLabel('Postcode or Zip code');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.postcode);
   }
 
   get selectCountry(): Locator {
-    return this.page.getByLabel('Country');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.country);
   }
 
   get selectedCountryOption(): Locator {
@@ -77,11 +66,11 @@ export abstract class InsAddressBookFormPage extends BasePage {
   }
 
   get inputEmail(): Locator {
-    return this.page.getByLabel('Email address');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.email);
   }
 
   get inputPhone(): Locator {
-    return this.page.getByLabel('Phone number');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.phone);
   }
 
   /** The error summary's link to a field, matched on the whole message. */

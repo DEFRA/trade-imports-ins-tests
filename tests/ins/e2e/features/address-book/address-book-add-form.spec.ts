@@ -2,15 +2,7 @@ import { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
 import { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
-
-const FIELD_NAMES_IN_ORDER = [
-  'Name or organisation',
-  'Address line 1',
-  'Address line 2 (optional)',
-  'Town or city',
-  'County (optional)',
-  'Postcode or Zip code',
-];
+import { ADDRESS_FORM_FIELD_LABELS, ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
 
 async function expectAbove(upper: Locator, lower: Locator): Promise<void> {
   const upperBox = await upper.boundingBox();
@@ -37,14 +29,14 @@ test.describe('The add-details form for an address entered by hand', () => {
     await insPages.addressBookAdd.open();
 
     await expectFieldsGroupedUnderSections(insPages.addressBookAdd);
-    for (const [index, name] of FIELD_NAMES_IN_ORDER.entries()) {
+    for (const [index, name] of ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER.entries()) {
       await expect(insPages.addressBookAdd.textboxes.nth(index)).toHaveAccessibleName(name);
     }
 
     const created = await addressBookApi.createAddress(addressWithLineTwoAndCounty(`Form Label Farm ${Date.now()}`));
     await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.inputName).toHaveAccessibleName('Name or organisation');
+    await expect(insPages.addressBookEdit.inputName).toHaveAccessibleName(ADDRESS_FORM_FIELD_LABELS.name);
   });
 
   test('the Country select opens on its blank first option, Select a country, with nothing pre-selected', async ({ insPages }) => {

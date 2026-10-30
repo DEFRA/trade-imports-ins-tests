@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { FIELD_LABELS_IN_ORDER } from '@page-objects/ins/address-book/form-page';
+import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER, ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
 import { expectAddressBookList } from './expect-address-book-list';
 import { expectOtherOrganisationAddressReturnsToList } from './expect-other-organisation-address-returns-to-list';
 import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
@@ -70,8 +70,7 @@ test.describe('Address book edit', () => {
     await insPages.addressBookEdit.open(created.id);
 
     await expect(insPages.addressBookEdit.heading).toBeVisible();
-    const textboxNamesInOrder = FIELD_LABELS_IN_ORDER.filter((label) => label !== 'Country');
-    for (const [index, name] of textboxNamesInOrder.entries()) {
+    for (const [index, name] of ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER.entries()) {
       await expect(insPages.addressBookEdit.textboxes.nth(index)).toHaveAccessibleName(name);
     }
     await expect(insPages.addressBookEdit.selectCountry).toHaveValue(address.countryCode);
@@ -82,7 +81,7 @@ test.describe('Address book edit', () => {
 
     await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.fieldLabels).toHaveText(FIELD_LABELS_IN_ORDER);
+    await expect(insPages.addressBookEdit.fieldLabels).toHaveText(ADDRESS_FORM_FIELD_LABELS_IN_ORDER);
   });
 
   test('after a refused save and Cancel, the edit page opens again with no errors and the stored name', async ({
