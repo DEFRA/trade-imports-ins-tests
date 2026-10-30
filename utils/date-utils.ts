@@ -63,6 +63,8 @@ export function getRelativeDateTime({
 /**
  * Gets a date-time relative to now with optional time offsets
  * @param options.dayOffset - Number of days to offset (can be negative, default: 0)
+ * @param options.monthOffset - Number of months to offset (can be negative, default: 0)
+ * @param options.yearOffset - Number of years to offset (can be negative, default: 0)
  * @param options.hourOffset - Number of hours to offset (can be negative, default: 0)
  * @param options.minuteOffset - Number of minutes to offset (can be negative, default: 0)
  * @param options.secondOffset - Number of seconds to offset (can be negative, default: 0)
