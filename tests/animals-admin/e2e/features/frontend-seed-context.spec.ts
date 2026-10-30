@@ -5,6 +5,7 @@ import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { CREATE_PATH } from '@flows/animals/seeded-journey';
 import { CPH_NUMBER, MANDATORY_ANSWERS as answers } from '@domain/animals/constants/journey-options';
+import { commodityNames } from '@domain/animals/constants/commodity-names';
 
 const CREATED_AT_ORIGIN = new RegExp(`^${CREATE_PATH}/([^/]+)/origin$`);
 
@@ -73,6 +74,7 @@ test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
     async ({ animalsSeededJourney, addressBookApi }) => {
       const consignor = await addressBookApi.findByName(answers.parties.consignor);
       const placeOfOrigin = await addressBookApi.findByName(answers.parties.placeOfOrigin);
+      const [cowLine] = answers.commodityLines;
 
       const referenceNumber = await animalsSeededJourney.createDraftNotification();
 
@@ -84,13 +86,18 @@ test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
 
         const [doc] = await collection.find({ referenceNumber }).toArray();
         const { notification } = doc;
-        const [complement] = notification.commodity.commodityComplement;
-        const [species] = complement.species;
+        const commodities = notification.commodities;
+        expect(commodities).toHaveLength(1);
+        const cow = commodities[0];
+        const [species] = cow.species;
 
         expect(doc.status).toBe('DRAFT');
         expect(notification.origin.countryCode).toBe(answers.countryCode.value);
-        expect(species.earTag).toBe(answers.earTag);
-        expect(complement.totalNoOfAnimals).toBe(answers.noOfAnimals);
+        expect(cow.name).toBe(commodityNames[cowLine.species.commodityCode]);
+        expect(cow.commodityCode).toBe(cowLine.species.commodityCode);
+        expect(species.text).toBe(cowLine.species.latinName);
+        expect(species.earTag).toBe(cowLine.earTag);
+        expect(cow.totalNoOfAnimals).toBe(cowLine.noOfAnimals);
         expect(notification.reasonForImport).toBe(answers.importReason.value);
         expect(notification.additionalDetails.unweanedAnimals).toBe(answers.unweanedAnimals.toLowerCase());
         // Each party is a copy of the record picked, with no link back to the book.
