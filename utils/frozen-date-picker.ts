@@ -1,11 +1,9 @@
 import type { Page } from '@playwright/test';
-import { getRelativeAppDateText } from '@utils/date-utils';
-
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
+import { getRelativeAppDateText, parseAppDateText } from '@utils/date-utils';
 
 function utcDayOf(appDateText: string): number {
-  const [day, month, year] = appDateText.split('/').map(Number);
-  return Date.UTC(year, month - 1, day);
+  const { day, month, year } = parseAppDateText(appDateText);
+  return Date.UTC(Number(year), Number(month) - 1, Number(day));
 }
 
 function shiftPickerBoundsOnceParsed(shiftInMs: number): void {
@@ -37,6 +35,7 @@ function shiftPickerBoundsOnceParsed(shiftInMs: number): void {
  * number of days before the picker reads them. Call it before the page loads.
  */
 export async function freezeDatePickersAt(page: Page, today: string): Promise<void> {
+  const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const frozenDay = Date.parse(`${today}T00:00:00Z`);
   const shiftInMs = Math.round((frozenDay - utcDayOf(getRelativeAppDateText())) / DAY_IN_MS) * DAY_IN_MS;
 
