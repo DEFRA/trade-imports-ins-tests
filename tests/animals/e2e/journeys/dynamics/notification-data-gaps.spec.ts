@@ -12,7 +12,7 @@ import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 //
 // Assertions notification-data.spec.ts cannot make yet, because PIMS Dynamics leaves their columns empty: one skipped
 // test each for the mandatory answers, the optional answers and a yes to unweaned animals. Assertions are grouped by
-// cause (legend order below), then in journey order. When a column fills, move its assertion to its placeholder in
+// cause (legend order below), then in journey order. When a column fills, move its assertion to its place in journey order in
 // notification-data.spec.ts, and delete the skip once the test is empty. Expected texts for fixed-list choices are the
 // journey's display text until the values PIMS accepts are agreed.
 //
