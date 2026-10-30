@@ -29,9 +29,17 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
     return this.page.getByLabel('Horse name', { exact: true });
   }
 
+  get speciesCardTitles(): Locator {
+    return this.page.getByRole('main').getByRole('region').getByRole('heading', { level: 3 });
+  }
+
+  enterDetailsHeadingText(latinName: string, current: number, total: number): string {
+    return `Enter details for ${latinName} ${current} of ${total}`;
+  }
+
   enterDetailsCounterHeading(latinName: string, current: number, total: number): Locator {
     return this.page.getByRole('heading', {
-      name: `Enter details for ${latinName} ${current} of ${total}`,
+      name: this.enterDetailsHeadingText(latinName, current, total),
       exact: true,
     });
   }
@@ -64,18 +72,18 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 2, name: heading, exact: true });
   }
 
-  speciesCard(species: string): Locator {
-    return this.page.getByRole('region', { name: species, exact: true });
+  speciesCard(latinName: string): Locator {
+    return this.page.getByRole('region', { name: latinName, exact: true });
   }
 
-  savedAnimalsRows(species: string): Locator {
-    return this.speciesCard(species).getByRole('table').locator('tbody').getByRole('row');
+  savedAnimalsRows(latinName: string): Locator {
+    return this.speciesCard(latinName).getByRole('table').locator('tbody').getByRole('row');
   }
 
-  savedAnimalRow(species: string, number: number): Locator {
-    return this.speciesCard(species)
+  savedAnimalRow(latinName: string, number: number): Locator {
+    return this.speciesCard(latinName)
       .getByRole('row')
-      .filter({ has: this.page.getByRole('cell', { name: `${species} ${number}`, exact: true }) });
+      .filter({ has: this.page.getByRole('cell', { name: `${latinName} ${number}`, exact: true }) });
   }
 
   identifierColumn(name: string): Locator {

@@ -421,7 +421,7 @@ export class AnimalsJourney {
     await this.openCommodityDetailsFromOverview();
   }
 
-  async addCommodityToCurrentNotification(line: CommodityLine): Promise<void> {
+  async addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(line: CommodityLine): Promise<void> {
     await this.openCurrentOverview();
     await this.animalsPages.overview.task('What are you importing?').click();
     await this.chooseCommodityLinesAndOpenDetails([line]);
