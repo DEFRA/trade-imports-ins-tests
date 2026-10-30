@@ -48,7 +48,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
 
     await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle.latinName, 1, 1)).toBeVisible();
     await expect(animalsPages.animalIdentification.earTag).toBeVisible();
-    await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.ostrich.latinName}` })).toHaveCount(0);
+    await expect(animalsPages.animalIdentification.speciesCardTitles).toHaveText([commodityLines.cattle.latinName]);
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
     await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
   });
