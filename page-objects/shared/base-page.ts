@@ -4,6 +4,7 @@ import { pageLoadWait } from '@config/timeouts';
 import { SignInPage } from '@page-objects/shared/auth/sign-in-page';
 import { OrganisationPickerPage } from '@page-objects/shared/auth/organisation-picker-page';
 import { SET_BASES, SetBase } from '@page-objects/shared/sets';
+import { errorSummaryOn, notificationBannerTitled } from '@page-objects/shared/govuk-banners';
 
 const SIGN_IN_ERROR_HEADING = 'Sorry, we are unable to sign you in.';
 
@@ -52,7 +53,15 @@ export class BasePage {
   }
 
   get successBanner(): Locator {
-    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
+    return notificationBannerTitled(this.page, 'Success');
+  }
+
+  get importantBanner(): Locator {
+    return notificationBannerTitled(this.page, 'Important');
+  }
+
+  get errorSummary(): Locator {
+    return errorSummaryOn(this.page);
   }
 
   get linkBack(): Locator {
@@ -186,7 +195,7 @@ export class NotificationPage extends BasePage {
   }
 
   get errorSummaryLinks(): Locator {
-    return this.page.getByRole('alert').getByRole('link');
+    return this.errorSummary.getByRole('link');
   }
 
   get saveAndContinue(): Locator {

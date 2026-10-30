@@ -25,6 +25,6 @@ test.describe('Dashboard actions in a later browser session', () => {
 
     await freshPages.dashboard.amend(reference).click();
 
-    await expect(freshPages.dashboard.amendRefusedBanner).toContainText(freshPages.dashboard.amendRefusedMessage);
+    await expect(freshPages.dashboard.importantBanner).toContainText(freshPages.dashboard.amendRefusedMessage);
   });
 });

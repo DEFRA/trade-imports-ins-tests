@@ -35,8 +35,4 @@ export class PlantsArrivalStatusPage extends PlantsNotificationPage {
   arrivalStatusHint(label: string): Locator {
     return this.page.locator('.govuk-radios__item').filter({ hasText: label }).locator('.govuk-hint');
   }
-
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
 }

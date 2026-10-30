@@ -8,10 +8,6 @@ export class InsAddressBookListPage extends BasePage {
     return this.page.getByRole('heading', { level: 1, name: 'Address book' });
   }
 
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
-  }
-
   get intro(): Locator {
     return this.page.getByText('Manage your addresses for use across all your import notifications', { exact: true });
   }

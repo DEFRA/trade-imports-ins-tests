@@ -86,10 +86,6 @@ export function withPartyEditForm(Base: NotificationPageClass) {
       return this.page.getByRole('button', { name: 'Cancel' });
     }
 
-    get errorSummary(): Locator {
-      return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) });
-    }
-
     async fill(fields: Partial<PartyEditFields>): Promise<void> {
       for (const [key, value] of Object.entries(fields) as Array<[keyof PartyEditFields, string]>) {
         await this[key].fill(value);

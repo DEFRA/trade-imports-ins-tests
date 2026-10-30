@@ -27,8 +27,4 @@ export class AnimalsContactAddressPage extends NotificationPage {
   get editCurrentContact(): Locator {
     return this.currentContact.getByRole('link', { name: 'Edit details' });
   }
-
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
-  }
 }

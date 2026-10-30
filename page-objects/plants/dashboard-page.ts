@@ -14,10 +14,6 @@ export class PlantsDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: 'Start a new notification' });
   }
 
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
-
   get inputReferenceSearch(): Locator {
     return this.page.getByLabel('Keyword or reference');
   }
@@ -75,10 +71,6 @@ export class PlantsDashboardPage extends BasePage {
   }
 
   readonly amendRefusedMessage = AMEND_REFUSED_MESSAGE;
-
-  get amendRefusedBanner(): Locator {
-    return this.page.getByRole('region', { name: 'Important' });
-  }
 
   get emptyState(): Locator {
     return this.page.getByText('You have not started any notifications in this session.');

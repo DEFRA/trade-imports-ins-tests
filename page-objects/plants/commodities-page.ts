@@ -52,10 +52,6 @@ export class PlantsCommoditiesPage extends PlantsNotificationPage {
     return this.page.getByRole('region', { name: 'Commodities removed' });
   }
 
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
-
   /** The list as a change of commodity type leaves it, reporting what it dropped. */
   removedUrl(referenceNumber: string, removed: number): string {
     return `${this.expectedUrl(referenceNumber)}?removed=${removed}`;

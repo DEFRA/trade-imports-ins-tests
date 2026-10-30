@@ -117,7 +117,7 @@ test.describe('Notifications (admin)', { tag: '@mongodb' }, () => {
       await animalsAdminPages.notifications.inputReferenceNumber.fill(invalidReference);
       await animalsAdminPages.notifications.deleteByReferenceNumber();
       await animalsAdminPages.notifications.btnConfirm.click();
-      await expect(animalsAdminPages.notifications.alertImportant).toContainText(DELETE_FAILURE_MESSAGE);
+      await expect(animalsAdminPages.notifications.importantBanner).toContainText(DELETE_FAILURE_MESSAGE);
     });
 
     await test.step('writes a failed delete audit record for one notification delete', async (step) => {

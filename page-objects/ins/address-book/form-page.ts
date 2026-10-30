@@ -84,13 +84,9 @@ export abstract class InsAddressBookFormPage extends BasePage {
     return this.page.getByLabel('Phone number');
   }
 
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
-  }
-
   /** The error summary's link to a field, matched on the whole message. */
   errorSummaryLink(message: string): Locator {
-    return this.page.getByRole('alert').getByRole('link', { name: message, exact: true });
+    return this.errorSummary.getByRole('link', { name: message, exact: true });
   }
 
   async fill(details: AddressDetails): Promise<void> {
