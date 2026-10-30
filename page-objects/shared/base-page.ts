@@ -4,6 +4,7 @@ import { pageLoadWait } from '@config/timeouts';
 import { SignInPage } from '@page-objects/shared/auth/sign-in-page';
 import { OrganisationPickerPage } from '@page-objects/shared/auth/organisation-picker-page';
 import { SET_BASES, SetBase } from '@page-objects/shared/sets';
+import { errorSummaryOn, notificationBannerTitled } from '@page-objects/shared/govuk-banners';
 
 const SIGN_IN_ERROR_HEADING = 'Sorry, we are unable to sign you in.';
 
@@ -51,8 +52,32 @@ export class BasePage {
     return this.page.getByRole('link', { name: 'Dashboard', exact: true });
   }
 
+  get successBanner(): Locator {
+    return notificationBannerTitled(this.page, 'Success');
+  }
+
+  get importantBanner(): Locator {
+    return notificationBannerTitled(this.page, 'Important');
+  }
+
+  get errorSummary(): Locator {
+    return errorSummaryOn(this.page);
+  }
+
   get linkBack(): Locator {
     return this.page.getByRole('link', { name: 'Back', exact: true });
+  }
+
+  get journeyStrip(): Locator {
+    return this.page.locator('.app-journey-strip');
+  }
+
+  get statusTag(): Locator {
+    return this.journeyStrip.locator('.govuk-tag');
+  }
+
+  get notificationReference(): Locator {
+    return this.journeyStrip.locator('.govuk-body');
   }
 
   async navigateToFrontend(path: string = '/'): Promise<void> {
@@ -165,20 +190,12 @@ export class NotificationPage extends BasePage {
     return this.page.locator(`#${fieldId}-hint`);
   }
 
-  get journeyStrip(): Locator {
-    return this.page.locator('.app-journey-strip');
-  }
-
-  get statusTag(): Locator {
-    return this.journeyStrip.locator('.govuk-tag');
-  }
-
   get cancelAmend(): Locator {
     return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
   }
 
   get errorSummaryLinks(): Locator {
-    return this.page.getByRole('alert').getByRole('link');
+    return this.errorSummary.getByRole('link');
   }
 
   get saveAndContinue(): Locator {

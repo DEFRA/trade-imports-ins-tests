@@ -20,7 +20,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await insPages.addressBookList.btnAddNewAddress.click();
       await insPages.addressBookAdd.heading.waitFor();
       await insPages.addressBookAdd.fill(addFormAddressWithLineTwoAndCounty(`A11y Added Farm ${Date.now()}`, 'United Kingdom'));
-      await insPages.addressBookAdd.save();
+      await insPages.addressBookAdd.saveAndContinue();
       await insPages.addressBookList.successBanner.waitFor();
       await runA11yScan();
     });

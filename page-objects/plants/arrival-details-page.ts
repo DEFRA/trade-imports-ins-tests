@@ -30,8 +30,4 @@ export class PlantsArrivalDetailsPage extends PlantsNotificationPage {
   get arrivalTime(): Locator {
     return this.page.locator('#arrivalTime');
   }
-
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
 }

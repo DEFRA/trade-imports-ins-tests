@@ -34,7 +34,7 @@ for (const [viewportName, viewport] of Object.entries(narrowViewports)) {
 
       await test.step('Add address with validation errors', async () => {
         await insPages.addressBookAdd.fill(addressDetailsMissingRequiredFields(''));
-        await insPages.addressBookAdd.save();
+        await insPages.addressBookAdd.saveAndContinue();
         await expect(insPages.addressBookAdd.errorSummary).toBeVisible();
         await scanNarrowPage(page, runA11yScan);
       });

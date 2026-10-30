@@ -43,10 +43,6 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
     return this.page.getByLabel('Your internal reference for this consignment (optional)');
   }
 
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
-  }
-
   get regionCodeMaxLengthErrorLink(): Locator {
     return this.page.getByRole('link', { name: 'Region of origin code must be 5 characters or less' });
   }

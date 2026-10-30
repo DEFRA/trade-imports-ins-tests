@@ -201,6 +201,16 @@ EUDPA-669 brings the real commodity name. So the outbox spec expects
 common name, and the aggregated notification spec expects it as the
 commodity.
 
+### DLQ specs in animals-admin
+
+`tests/animals-admin/e2e/features/dlq-events.spec.ts` runs its tests in serial
+mode. Replay-all and delete-all each act on the whole dead-letter queue, and
+the stack has one queue, so two at once would act on each other's messages.
+The admin portal shows the "Replay-all started" or "Delete-all started" banner
+only once its call to the dynamics gateway, made with the admin secret, has
+succeeded. The banner is how these specs prove the admin portal and the
+gateway are wired together.
+
 ### Authenticated session reuse
 
 Each worker signs in once per domain and its tests restore that session

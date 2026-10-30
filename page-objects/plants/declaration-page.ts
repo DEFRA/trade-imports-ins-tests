@@ -23,7 +23,4 @@ export class PlantsDeclarationPage extends PlantsNotificationPage {
   get btnContinue(): Locator {
     return this.page.getByRole('button', { name: 'Continue', exact: true });
   }
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
 }

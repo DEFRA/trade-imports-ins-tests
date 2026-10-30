@@ -72,8 +72,4 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
       await this.species(line).check();
     }
   }
-
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
-  }
 }

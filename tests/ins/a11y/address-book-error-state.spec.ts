@@ -7,7 +7,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await insPages.addressBookAdd.open();
     await insPages.addressBookAdd.heading.waitFor();
     await insPages.addressBookAdd.fill(addressDetailsMissingRequiredFields(''));
-    await insPages.addressBookAdd.save();
+    await insPages.addressBookAdd.saveAndContinue();
     await expect(insPages.addressBookAdd.errorSummary).toBeVisible();
 
     await runA11yScan();

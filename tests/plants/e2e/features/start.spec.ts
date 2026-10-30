@@ -47,7 +47,7 @@ test.describe('High-risk plants start section', () => {
 
     await expect(plantsPages.overview.journeyStrip).toBeVisible();
     await expect(plantsPages.overview.statusTag).toHaveText('Draft');
-    await expect(plantsPages.overview.reference).toHaveText(reference);
+    await expect(plantsPages.overview.notificationReference).toHaveText(reference);
     await expect(plantsPages.overview.cancelAmend).toHaveCount(0);
 
     // All four groups have landed a row, and a group with no rows is not
@@ -95,7 +95,7 @@ test.describe('High-risk plants start section', () => {
     await plantsPages.dashboard.searchForReference(reference);
 
     await expect(plantsPages.dashboard.notificationCard(reference)).toBeVisible();
-    await expect(plantsPages.dashboard.statusTag(reference)).toHaveText('Draft');
+    await expect(plantsPages.dashboard.cardStatusTag(reference)).toHaveText('Draft');
 
     await plantsPages.dashboard.resume(reference).click();
 
@@ -121,7 +121,7 @@ test.describe('High-risk plants start section', () => {
 
     await plantsPages.dashboard.searchForReference(reference);
     await expect(plantsPages.dashboard.notificationCard(reference)).toBeVisible();
-    await expect(plantsPages.dashboard.statusTag(reference)).toHaveText('Draft');
+    await expect(plantsPages.dashboard.cardStatusTag(reference)).toHaveText('Draft');
   });
 
   test('Yes, delete notification soft-deletes it and drops it from the listing', async ({ pages, plantsPages, plantsJourney }) => {

@@ -43,10 +43,10 @@ test.describe('INS page titles', { tag: '@duplicated-in-frontend' }, () => {
   test('a page showing errors opens its title with Error:', async ({ pages, insPages }) => {
     await insPages.addressBookAdd.open();
 
-    await insPages.addressBookAdd.save();
+    await insPages.addressBookAdd.saveAndContinue();
 
     await expect(insPages.addressBookAdd.errorSummary).toBeVisible();
-    await expect(pages.page).toHaveTitle('Error: Add address details - Import notification service - GOV.UK');
+    await expect(pages.page).toHaveTitle('Error: Add address and contact details - Import notification service - GOV.UK');
   });
 
   test('a missing page is titled Page not found - Import notification service - GOV.UK', async ({ pages, insPages }) => {

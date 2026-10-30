@@ -25,10 +25,6 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.page.getByRole('link', { name: 'Add another commodity' });
   }
 
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
-  }
-
   get animalsRequiredErrorLink(): Locator {
     return this.page.getByRole('link', { name: 'Enter the number of animals' });
   }

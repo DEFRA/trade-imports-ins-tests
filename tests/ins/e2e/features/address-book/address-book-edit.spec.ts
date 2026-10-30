@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER, ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
 import { expectAddressBookList } from './expect-address-book-list';
 import { expectOtherOrganisationAddressReturnsToList } from './expect-other-organisation-address-returns-to-list';
 import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
@@ -8,18 +9,6 @@ import {
   traderAddressInUnofferedCountry,
   UNOFFERED_COUNTRY_CODE,
 } from '@domain/ins/constants/trader-address';
-
-const FIELD_LABELS_IN_ORDER = [
-  'Name or organisation',
-  'Address line 1',
-  'Address line 2 (optional)',
-  'Town or city',
-  'County (optional)',
-  'Postcode or Zip code',
-  'Country',
-  'Email address',
-  'Phone number',
-];
 
 test.describe('Address book edit', () => {
   test('an edit replaces the whole record, clearing the optional fields left blank, and the list confirms it by name', async ({
@@ -81,8 +70,7 @@ test.describe('Address book edit', () => {
     await insPages.addressBookEdit.open(created.id);
 
     await expect(insPages.addressBookEdit.heading).toBeVisible();
-    const textboxNamesInOrder = FIELD_LABELS_IN_ORDER.filter((label) => label !== 'Country');
-    for (const [index, name] of textboxNamesInOrder.entries()) {
+    for (const [index, name] of ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER.entries()) {
       await expect(insPages.addressBookEdit.textboxes.nth(index)).toHaveAccessibleName(name);
     }
     await expect(insPages.addressBookEdit.selectCountry).toHaveValue(address.countryCode);
@@ -93,7 +81,7 @@ test.describe('Address book edit', () => {
 
     await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.fieldLabels).toHaveText(FIELD_LABELS_IN_ORDER);
+    await expect(insPages.addressBookEdit.fieldLabels).toHaveText(ADDRESS_FORM_FIELD_LABELS_IN_ORDER);
   });
 
   test('after a refused save and Cancel, the edit page opens again with no errors and the stored name', async ({

@@ -45,10 +45,6 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.summaryValue(this.summaryCard('Import details'), 'Region of origin code');
   }
 
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
-
   partyRow(card: string, role: string): Locator {
     return this.summaryCard(card)
       .locator('.govuk-summary-list__row')

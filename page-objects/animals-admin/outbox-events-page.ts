@@ -24,43 +24,11 @@ export class AnimalsAdminOutboxEventsPage extends BasePage {
     return this.page.locator('p.govuk-body', { hasText: 'No outbox events found for' });
   }
 
-  cellVersion(rowIndex: number): Locator {
-    return this.tableRows.nth(rowIndex).locator('td').nth(0);
-  }
-
-  cellEventType(rowIndex: number): Locator {
-    return this.tableRows.nth(rowIndex).locator('td').nth(1);
-  }
-
   get eventTypeCells(): Locator {
     return this.tableRows.locator('td:nth-child(2)');
   }
 
-  cellTimestamp(rowIndex: number): Locator {
-    return this.tableRows.nth(rowIndex).locator('td').nth(2);
-  }
-
-  linkViewJson(rowIndex: number): Locator {
-    return this.tableRows.nth(rowIndex).getByRole('group').getByText('View JSON');
-  }
-
-  cellDataPre(rowIndex: number): Locator {
-    return this.tableRows.nth(rowIndex).locator('pre');
-  }
-
   get btnReplay(): Locator {
     return this.page.getByRole('button', { name: 'Replay all events' });
-  }
-
-  get bannerSuccess(): Locator {
-    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
-  }
-
-  get bannerError(): Locator {
-    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) });
-  }
-
-  get dlqWarning(): Locator {
-    return this.page.locator('.govuk-warning-text');
   }
 }
