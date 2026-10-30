@@ -28,6 +28,10 @@ export class AnimalsAdminNotificationsPage extends BasePage {
     return this.page.getByRole('button', { name: 'Delete', exact: true });
   }
 
+  get deleteDialog(): Locator {
+    return this.page.getByRole('dialog', { name: 'Are you sure you want to delete the following notifications?' });
+  }
+
   get btnConfirm(): Locator {
     return this.page.getByRole('button', { name: 'Confirm' });
   }

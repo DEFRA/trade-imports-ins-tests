@@ -52,7 +52,12 @@ test.describe('Notifications (admin)', { tag: '@mongodb' }, () => {
     await animalsAdminPages.notifications.openPageShowingNotification(referenceNumber);
     await animalsAdminPages.notifications.checkboxNotificationByReference(referenceNumber).check();
     await animalsAdminPages.notifications.btnDelete.click();
+    await expect(animalsAdminPages.notifications.deleteDialog).toBeVisible();
     await animalsAdminPages.notifications.btnCancel.click();
+    await expect(animalsAdminPages.notifications.deleteDialog).toBeHidden();
+    await expect(animalsAdminPages.notifications.successBanner).toHaveCount(0);
+
+    await animalsAdminPages.notifications.openPageShowingNotification(referenceNumber);
     await expect(animalsAdminPages.notifications.tableRowByReference(referenceNumber)).toBeVisible();
   });
 
