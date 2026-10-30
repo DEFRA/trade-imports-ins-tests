@@ -4,8 +4,7 @@ import { SqsClient } from '@adapters/queue/sqs-client';
 import { seedDlqMessage } from '@flows/animals-admin/seed-dlq-message';
 import { timeouts } from '@config/timeouts';
 
-/** The list is server-rendered on page load, so a message that arrived after the render needs a fresh page. */
-async function expectSeededRowListed(pages: SharedPages, animalsAdminPages: AnimalsAdminPages, eventId: string): Promise<void> {
+async function reloadUntilSeededRowListed(pages: SharedPages, animalsAdminPages: AnimalsAdminPages, eventId: string): Promise<void> {
   await expect(async () => {
     await pages.page.reload();
     await expect(animalsAdminPages.dlqEvents.rowContainingMessageId(eventId)).toBeVisible({ timeout: timeouts.short });
@@ -31,7 +30,7 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
     const eventId = await seedDlqMessage(sqs);
 
     await animalsAdminNavigation.toDlqEvents();
-    await expectSeededRowListed(pages, animalsAdminPages, eventId);
+    await reloadUntilSeededRowListed(pages, animalsAdminPages, eventId);
 
     await animalsAdminPages.dlqEvents.btnReplayAll.click();
 
@@ -44,7 +43,7 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
     const eventId = await seedDlqMessage(sqs);
 
     await animalsAdminNavigation.toDlqEvents();
-    await expectSeededRowListed(pages, animalsAdminPages, eventId);
+    await reloadUntilSeededRowListed(pages, animalsAdminPages, eventId);
 
     await animalsAdminPages.dlqEvents.btnDeleteAll.click();
     await expect(animalsAdminPages.dlqEvents.deleteAllDialog).toBeVisible();
