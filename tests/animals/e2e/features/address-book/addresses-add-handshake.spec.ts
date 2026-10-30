@@ -40,8 +40,6 @@ async function arriveOnInsAddPageAndFill(
 }
 
 test.describe('Add an address from the journey via INS', () => {
-  test.describe.configure({ mode: 'serial' });
-
   test.beforeEach(() => {
     skipUnlessNonStubStackEnvironment(
       'the handshake crosses the animals and INS frontends, which both run on the compose stack and in CDP',
