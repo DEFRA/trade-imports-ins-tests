@@ -13,14 +13,12 @@ import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 // Top level because Playwright rejects test.use({ trace }) inside a describe group.
 test.use({ trace: 'off' });
 
-/** PIMS Dynamics' labels for the countries the parties' address-book records are in. */
 const PIMS_COUNTRY_LABELS: Record<string, string> = {
   CH: 'Switzerland',
   GB: 'United Kingdom of Great Britain and Northern Ireland',
   IE: 'Republic of Ireland',
 };
 
-/** PIMS Dynamics' text for each means of transport, which is not the journey's label for it. */
 const PIMS_MEANS_OF_TRANSPORT_LABELS: Record<string, string> = {
   AIRPLANE: 'Aeroplane',
   RAILWAY: 'Railway Wagon',
@@ -28,7 +26,6 @@ const PIMS_MEANS_OF_TRANSPORT_LABELS: Record<string, string> = {
   VESSEL: 'Ship',
 };
 
-/** The whole row, so a run shows the real lookups, option-set labels, dates and values to assert against. */
 const attachRow = (row: AnimalsDynamicsImporterNotification): Promise<void> =>
   test.info().attach('pims-dynamics-row.json', { body: JSON.stringify(row, null, 2), contentType: 'application/json' });
 
