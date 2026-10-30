@@ -12,8 +12,6 @@ async function reloadUntilSeededRowListed(pages: SharedPages, animalsAdminPages:
 }
 
 test.describe('DLQ operator actions', { tag: '@compose' }, () => {
-  // Serial: both tests act on the whole DLQ (replay-all / delete-all), so they must not run
-  // concurrently against the one shared queue.
   test.describe.configure({ mode: 'serial' });
 
   let sqs: SqsClient;
@@ -34,8 +32,6 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
 
     await animalsAdminPages.dlqEvents.btnReplayAll.click();
 
-    // The success banner renders only after the real gateway replay-all call (with the real admin
-    // secret) succeeded — the cross-service wiring this test exists to prove.
     await expect(animalsAdminPages.dlqEvents.successBanner).toContainText('Replay-all started');
   });
 
@@ -49,7 +45,6 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
     await expect(animalsAdminPages.dlqEvents.deleteAllDialog).toBeVisible();
     await animalsAdminPages.dlqEvents.btnConfirmDeleteAll.click();
 
-    // As above: the banner is proof the real gateway delete-all call succeeded.
     await expect(animalsAdminPages.dlqEvents.successBanner).toContainText('Delete-all started');
   });
 });
