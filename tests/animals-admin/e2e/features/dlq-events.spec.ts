@@ -27,7 +27,7 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
     sqs.destroy();
   });
 
-  test('replays all DLQ messages via the admin UI', async ({ animalsAdminNavigation, pages, animalsAdminPages }) => {
+  test('starts a replay of all DLQ messages from the admin UI', async ({ animalsAdminNavigation, pages, animalsAdminPages }) => {
     const eventId = await seedDlqMessage(sqs);
 
     await animalsAdminNavigation.toDlqEvents();
@@ -40,7 +40,7 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
     await expect(animalsAdminPages.dlqEvents.successBanner).toContainText('Replay-all started');
   });
 
-  test('deletes all DLQ messages via the admin UI', async ({ animalsAdminNavigation, pages, animalsAdminPages }) => {
+  test('starts a delete of all DLQ messages from the admin UI', async ({ animalsAdminNavigation, pages, animalsAdminPages }) => {
     const eventId = await seedDlqMessage(sqs);
 
     await animalsAdminNavigation.toDlqEvents();
