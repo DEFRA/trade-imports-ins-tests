@@ -71,7 +71,7 @@ export class AnimalsDashboardPage extends BasePage {
     return this.notificationCards.filter({ hasText: reference });
   }
 
-  statusTag(reference: string): Locator {
+  cardStatusTag(reference: string): Locator {
     return this.cardField(this.notificationCard(reference), 'Status').locator('.govuk-tag');
   }
 

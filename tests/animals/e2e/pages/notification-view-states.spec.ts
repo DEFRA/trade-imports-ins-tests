@@ -26,7 +26,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('shows the Draft strip with the notification reference', async ({ animalsPages, journeyContext }) => {
-      await expect(animalsPages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Draft');
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Draft');
       await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.referenceNumber);
     });
 
@@ -78,7 +78,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
 
     test('lands on the view page with the Submitted strip and reference', async ({ pages, animalsPages, journeyContext }) => {
       await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(journeyContext.referenceNumber)}$`));
-      await expect(animalsPages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Submitted');
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
       await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.referenceNumber);
     });
 

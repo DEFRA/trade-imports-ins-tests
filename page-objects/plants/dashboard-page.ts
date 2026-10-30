@@ -42,7 +42,7 @@ export class PlantsDashboardPage extends BasePage {
     return this.notificationCards.filter({ hasText: reference });
   }
 
-  statusTag(reference: string): Locator {
+  cardStatusTag(reference: string): Locator {
     return this.notificationCard(reference)
       .locator('dt')
       .filter({ hasText: 'Status' })

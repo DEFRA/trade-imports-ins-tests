@@ -59,6 +59,18 @@ export class BasePage {
     return this.page.getByRole('link', { name: 'Back', exact: true });
   }
 
+  get journeyStrip(): Locator {
+    return this.page.locator('.app-journey-strip');
+  }
+
+  get statusTag(): Locator {
+    return this.journeyStrip.locator('.govuk-tag');
+  }
+
+  get notificationReference(): Locator {
+    return this.journeyStrip.locator('.govuk-body');
+  }
+
   async navigateToFrontend(path: string = '/'): Promise<void> {
     const baseUrl = requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
     await this.page.goto(`${baseUrl}${path}`);
@@ -167,14 +179,6 @@ export class NotificationPage extends BasePage {
 
   fieldHint(fieldId: string): Locator {
     return this.page.locator(`#${fieldId}-hint`);
-  }
-
-  get journeyStrip(): Locator {
-    return this.page.locator('.app-journey-strip');
-  }
-
-  get statusTag(): Locator {
-    return this.journeyStrip.locator('.govuk-tag');
   }
 
   get cancelAmend(): Locator {
