@@ -16,7 +16,7 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
     sqs.destroy();
   });
 
-  test('routes the admin write actions through the ZAP proxy', async ({
+  test('routes the admin write actions and the about page through the ZAP proxy', async ({
     animalsSeededJourney,
     animalsAdminNavigation,
     pages,
@@ -50,7 +50,6 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
     await animalsAdminPages.dlqEvents.btnConfirmDeleteAll.click();
     await expect(animalsAdminPages.dlqEvents.successBanner).toBeVisible();
 
-    // No assertion: this goto exists only to put the static /about page through the ZAP proxy.
     await pages.page.goto('/about');
   });
 });
