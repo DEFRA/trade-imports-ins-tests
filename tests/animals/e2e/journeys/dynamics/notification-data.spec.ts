@@ -89,7 +89,7 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     // answers.noOfAnimals: [FROM v0.1.0: NOT MAPPED?] see 'mandatory answers PIMS Dynamics does not store yet' test.
     // answers.earTag: [FROM v0.1.0: NOT MAPPED?] see 'mandatory answers PIMS Dynamics does not store yet' test.
     // answers.importReason: [FROM v0.1.0: OPTION NOT MATCHED?] see 'mandatory answers PIMS Dynamics does not store yet' test.
-    // answers.internalMarketPurpose: [FROM v0.1.0: NOT IN MESSAGE] see 'mandatory answers PIMS Dynamics does not store yet' test.
+    // answers.internalMarketPurpose: [FROM v0.1.0: OPTION NOT MATCHED?] see 'mandatory answers PIMS Dynamics does not store yet' test.
     // answers.certifiedFor: [FROM v0.1.0: OPTION NOT MATCHED?] see 'mandatory answers PIMS Dynamics does not store yet' test.
     // answers.unweanedAnimals: PIMS defaults the column to false, so a no answer proves nothing. A yes answer is asserted
     // in 'answering yes to unweaned animals is stored in PIMS Dynamics' (gaps spec).

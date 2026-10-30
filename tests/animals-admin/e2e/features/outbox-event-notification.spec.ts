@@ -10,6 +10,7 @@ import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 const NOTIFICATION_SUBMITTED = 'uk.gov.defra.imports.notification.NotificationSubmitted';
 const SUBDIVISION_FUNCTION_TYPE_CODE = '106';
 const VETERINARY_CERTIFICATE_TYPE_CODE = '853';
+const ANIMAL_IDENTIFIER_TYPES = 'https://codelists.tbc.defra.gov.uk/animal_identifier_types';
 const EXPECTED_ACTOR: OutboxEventActor = {
   id: users.andrew.crn,
   source: 'dynamics-contact',
@@ -74,6 +75,20 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
           issueDateTime: '2026-01-03',
         },
       ]);
+      expect(data.exchangedDocument.firstSignatoryAuthentication?.includedClause).toEqual([
+        { identifier: 'PURPOSE', content: 'INTERNAL_MARKET', urlId: 'https://refdata.tbc.defra.gov.uk/gbn-ag-purposes' },
+        {
+          identifier: 'INTERNAL_MARKET_PURPOSE',
+          content: 'BREEDING',
+          urlId: 'https://refdata.tbc.defra.gov.uk/gbn-ag-internal-market-purposes',
+        },
+        {
+          identifier: 'GOODS_CERTIFIED_AS',
+          content: 'SLAUGHTER',
+          urlId: 'https://refdata.tbc.defra.gov.uk/gbn-ag-goods-certified-as',
+        },
+      ]);
+      expect(data.exchangedDocument.issuer?.name).toBe(answers.contactAddress);
       expect(data.specifiedConsignment.consignorParty?.name).toBe(answers.parties.consignor);
       expect(data.specifiedConsignment.originCountry?.code?.value).toBe(answers.countryCode.value);
       expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(answers.pointOfEntry.value);
@@ -108,8 +123,8 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       expect(animals[0].identifier).toHaveLength(2);
       expect(animals[0].identifier).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ typeCode: 'EAR_TAG', content: answers.earTag }),
-          expect.objectContaining({ typeCode: 'PASSPORT', content: answers.passportNumber }),
+          { typeCode: 'EAR_TAG', content: answers.earTag, urlId: ANIMAL_IDENTIFIER_TYPES },
+          { typeCode: 'PASSPORT', content: answers.passportNumber, urlId: ANIMAL_IDENTIFIER_TYPES },
         ]),
       );
       expect(actorWithNullableFields(doc.actor)).toEqual(EXPECTED_ACTOR);
