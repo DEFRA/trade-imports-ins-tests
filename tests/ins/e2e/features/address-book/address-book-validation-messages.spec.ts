@@ -1,33 +1,13 @@
 import { test, expect } from '@fixtures';
-import { RestClientError } from '@adapters/http/rest-client';
 import type { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
-import { traderAddressInUnofferedCountry } from '@domain/ins/constants/trader-address';
+import { traderAddress, traderAddressInUnofferedCountry } from '@domain/ins/constants/trader-address';
+import { expectedValidationRefusalOf } from './expected-api-refusal';
 
 const MESSAGES = {
   name: 'Enter a name or organisation',
   postcode: 'Enter a postcode or Zip code',
   country: 'Select a country',
   phone: 'Enter a phone number',
-};
-
-const baseAddress = {
-  addressLine1: '1 Message Lane',
-  townOrCity: 'Carlisle',
-  postcode: 'CA1 5EE',
-  countryCode: 'GB',
-  phone: '01228 555 0111',
-  email: 'messages@example.co.uk',
-};
-
-interface ValidationProblem {
-  type: string;
-  errors: Record<string, string[]>;
-}
-
-const expectedApiRefusalOf = (caught: unknown): { status: number; body: ValidationProblem } => {
-  expect(caught).toBeInstanceOf(RestClientError);
-  const error = caught as RestClientError;
-  return { status: error.status, body: JSON.parse(error.responseBody) as ValidationProblem };
 };
 
 const expectFourMessagesAtTopAndAgainstFields = async (form: InsAddressBookFormPage): Promise<void> => {
@@ -46,14 +26,16 @@ test.describe('Address book validation messages', () => {
   test('saving the add form with name, postcode, country and phone left blank shows each message at the top and against its field', async ({
     insPages,
   }) => {
+    const address = traderAddress('Blank Fields Farm');
+
     await insPages.addressBookAdd.open();
     await insPages.addressBookAdd.fill({
       name: '',
-      addressLine1: baseAddress.addressLine1,
-      townOrCity: baseAddress.townOrCity,
+      addressLine1: address.addressLine1,
+      townOrCity: address.townOrCity,
       postcode: '',
       country: '',
-      email: baseAddress.email,
+      email: address.email,
       phone: '',
     });
     await insPages.addressBookAdd.saveAndContinue();
@@ -90,13 +72,11 @@ test.describe('Address book validation messages', () => {
     addressBookApi,
   }) => {
     const searchMarkerTown = `Refused Town ${Date.now()}`;
-    const caught = await addressBookApi
-      .createAddress({ ...baseAddress, townOrCity: searchMarkerTown, name: '', postcode: '', countryCode: '', phone: '' })
-      .catch((error: unknown) => error);
 
-    const { status, body } = expectedApiRefusalOf(caught);
-    expect(status).toBe(400);
-    expect(body.type).toBe('https://api.cdp.defra.cloud/problems/validation-error');
+    const body = await expectedValidationRefusalOf(
+      addressBookApi.createAddress({ ...traderAddress(''), townOrCity: searchMarkerTown, postcode: '', countryCode: '', phone: '' }),
+    );
+
     expect(body.errors.name).toContain(MESSAGES.name);
     expect(body.errors.postcode).toContain(MESSAGES.postcode);
     expect(body.errors.countryCode).toContain(MESSAGES.country);

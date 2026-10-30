@@ -2,11 +2,7 @@ import type { APIRequestContext } from '@playwright/test';
 import { RestClient } from '@adapters/http/rest-client';
 import { getAddressBookBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
 
-/**
- * The organisation CRN 2100010101 — the default E2E sign-in — belongs to, and
- * the one the shared journey address-book fixtures are created under via the API
- * (`ensureE2eAddressBook` in Playwright globalSetup).
- */
+/** The organisation id that CRN 2100010101, the default E2E sign-in, belongs to. */
 export const E2E_ORGANISATION_ID = '5900001';
 
 const ORGANISATION_ID_HEADER = 'Trade-Imports-Organisation-Id';
@@ -22,22 +18,19 @@ export interface AddressBookRecord {
   countryCode: string;
   phone: string;
   email: string;
+  addressType?: string;
+  uses?: string[];
   deleted: boolean;
 }
+
+export type AddressBookEntry = Omit<AddressBookRecord, 'id' | 'deleted'>;
 
 interface AddressBookPage {
   items: AddressBookRecord[];
   totalItems: number;
 }
 
-/**
- * Direct HTTP access to the address book, so a spec can change an address
- * behind the journey's back — the only way to show whether a notification holds
- * a link to a record or a copy of it.
- *
- * The address book runs no authentication of its own: it trusts the
- * organisation header and requires it to match the organisation in the path.
- */
+/** Direct HTTP access to one organisation's address book. */
 export class AddressBookApiClient {
   private readonly rest: RestClient;
 
@@ -67,11 +60,11 @@ export class AddressBookApiClient {
   }
 
   /** Saves a new address to the organisation's book. */
-  async createAddress(record: Omit<AddressBookRecord, 'id' | 'deleted'>): Promise<AddressBookRecord> {
+  async createAddress(record: AddressBookEntry): Promise<AddressBookRecord> {
     return this.rest.post<AddressBookRecord>(this.path(), record, this.headers);
   }
 
-  /** The one live address with this name. Throws when there is not exactly one. */
+  /** The live address with this name. Throws unless exactly one live address has it. */
   async findByName(name: string): Promise<AddressBookRecord> {
     const matches = (await this.listAddresses(name)).filter((record) => record.name === name);
     if (matches.length !== 1) {
@@ -80,26 +73,17 @@ export class AddressBookApiClient {
     return matches[0];
   }
 
-  /**
-   * Replaces an address. The API takes the whole record, so the caller passes
-   * the current one with the fields it wants changed already applied.
-   */
-  async updateAddress(addressId: string, record: Omit<AddressBookRecord, 'id' | 'deleted'>): Promise<AddressBookRecord> {
+  /** Replaces an address with the whole record given. */
+  async updateAddress(addressId: string, record: AddressBookEntry): Promise<AddressBookRecord> {
     return this.rest.put<AddressBookRecord>(this.path(addressId), record, this.headers);
   }
 
-  /**
-   * One address by id, including soft-deleted tombstones (`deleted: true`).
-   * List endpoints omit tombstones; this is the only way to detect a deletion.
-   */
+  /** One address by id, including a soft-deleted tombstone (`deleted: true`). */
   async getAddress(addressId: string): Promise<AddressBookRecord> {
     return this.rest.get<AddressBookRecord>(this.path(addressId), this.headers);
   }
 
-  /**
-   * Soft-deletes an address (204, idempotent). The tombstone stays readable via
-   * {@link getAddress}; list/search no longer return it.
-   */
+  /** Soft-deletes an address. Deleting an address already deleted succeeds. */
   async deleteAddress(addressId: string): Promise<void> {
     await this.rest.delete(this.path(addressId), this.headers);
   }
