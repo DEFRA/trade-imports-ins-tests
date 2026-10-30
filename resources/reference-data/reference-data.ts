@@ -46,10 +46,12 @@ export function subdivisionByCode(code: string): { value: string; display: strin
   throw new Error(`Subdivision ${code} is not in the captured origin list`);
 }
 
+const byName = (first: string, second: string): number => first.localeCompare(second, 'en');
+
 function countryNamesWithSubdivisions(subdivisionName: (subDivision: CapturedSubDivision, country: CapturedCountry) => string): string[] {
   return countriesOrigin
     .flatMap((country) => [country.name, ...country.subDivisions.map((subDivision) => subdivisionName(subDivision, country))])
-    .sort((first, second) => first.localeCompare(second));
+    .toSorted(byName);
 }
 
 /** Each origin country and each of its subdivisions by its own name, sorted by name. */
@@ -63,9 +65,7 @@ export function countryAndSubdivisionNamesWithCountry(): string[] {
 }
 
 /** Every captured unfiltered country by name, plus United Kingdom, in alphabetical order. */
-export const addressFormCountryNames: string[] = [...countries.map(({ name }) => name), 'United Kingdom'].toSorted((first, second) =>
-  first.localeCompare(second, 'en'),
-);
+export const addressFormCountryNames: string[] = [...countries.map(({ name }) => name), 'United Kingdom'].toSorted(byName);
 
 /** The label of a port, '<name> - <code>'. */
 export function portLabel(port: CapturedPort): string {
