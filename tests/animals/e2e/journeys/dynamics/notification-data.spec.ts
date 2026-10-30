@@ -179,7 +179,7 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     expect(row.defraimp_commoditiesincludenonablactedanimals).toBe(true);
   });
 
-  test('a notification submitted with every answer is stored in PIMS Dynamics with its optional answers', async ({
+  test('a notification submitted with every answer is stored in PIMS Dynamics with its internal reference', async ({
     animalsJourney,
     journeyContext,
     externalRequest,
