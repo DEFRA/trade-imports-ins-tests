@@ -1,9 +1,5 @@
 import type { DateInput, DateTimeInput } from '@domain/shared/types/date-time-input';
 
-/**
- * Date utility functions for test automation
- */
-
 export type RelativeDateTimeOptions = {
   dayOffset?: number;
   monthOffset?: number;
