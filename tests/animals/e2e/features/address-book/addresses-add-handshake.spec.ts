@@ -80,13 +80,17 @@ test.describe('Add an address from the journey via INS', () => {
         const picker = animalsJourney.partyPicker(role);
         const details = newAddressFor(role);
 
-        await arriveOnInsAddPageAndFill(animalsJourney, addPage, role, details);
+        await animalsJourney.toPartyPicker(role);
+        const partyIdsListedBeforeTheAdd = await picker.listedPartyIds();
+        await animalsJourney.openInsAddAddressFromPicker(addPage, role);
+        await addPage.fill(details);
         await addPage.btnSaveAndReturnToAddressPage.click();
 
         await expect(picker.heading).toBeVisible();
         await expect(picker.successBanner.getByText(addedBannerText(details), { exact: true })).toBeVisible();
+        await expect(picker.party(details.name)).toHaveCount(1);
         await expect(picker.party(details.name)).not.toBeChecked();
-        expect((await picker.listedPartyNames())[0]).toBe(details.name);
+        await expect(picker.partiesListedAbove(details.name, partyIdsListedBeforeTheAdd)).toHaveCount(0);
       },
     );
 

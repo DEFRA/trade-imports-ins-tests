@@ -540,16 +540,23 @@ export class AnimalsJourney {
     return this.animalsPages[PARTY_PICKERS[role]];
   }
 
-  async toInsAddAddressFromPicker(addressBookAdd: InsAddressBookAddPage, role: PartyRole): Promise<void> {
+  async toPartyPicker(role: PartyRole): Promise<void> {
     await this.startNotification();
     await this.answerCommodity();
     await this.animalsPages.overview.task('Roles and addresses').click();
     await this.animalsPages.addresses.addParty(role).click();
-    const picker = this.partyPicker(role);
-    await picker.heading.waitFor(pageLoadWait);
-    await picker.addNewAddress.click();
+    await this.partyPicker(role).heading.waitFor(pageLoadWait);
+  }
+
+  async openInsAddAddressFromPicker(addressBookAdd: InsAddressBookAddPage, role: PartyRole): Promise<void> {
+    await this.partyPicker(role).addNewAddress.click();
     await addressBookAdd.completeSignInIfRequested();
     await addressBookAdd.heading.waitFor(pageLoadWait);
+  }
+
+  async toInsAddAddressFromPicker(addressBookAdd: InsAddressBookAddPage, role: PartyRole): Promise<void> {
+    await this.toPartyPicker(role);
+    await this.openInsAddAddressFromPicker(addressBookAdd, role);
   }
 
   async toReview(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {

@@ -57,11 +57,17 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return pickerNoMatchesMessage(this.page);
   }
 
-  async listedPartyNames(): Promise<string[]> {
-    const radioLabels = await this.resultsGroup
-      .getByRole('radio')
-      .evaluateAll((radios) => radios.map((radio) => (radio as HTMLInputElement).labels?.[0]?.textContent ?? ''));
-    return radioLabels.map((label) => label.trim().slice(AnimalsPartyPickerPage.SELECT_PREFIX.length));
+  get listedParties(): Locator {
+    return this.resultsGroup.getByRole('radio');
+  }
+
+  async listedPartyIds(): Promise<string[]> {
+    return Promise.all((await this.listedParties.all()).map((party) => party.inputValue()));
+  }
+
+  partiesListedAbove(name: string, amongPartyIds: readonly string[]): Locator {
+    const isAmongPartyIds = amongPartyIds.map((partyId) => `@value="${partyId}"`).join(' or ') || 'false()';
+    return this.party(name).locator(`xpath=preceding::input[@type="radio"][${isAmongPartyIds}]`);
   }
 
   get selectedAddress(): Locator {
