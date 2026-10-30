@@ -540,8 +540,8 @@ export class AnimalsJourney {
     return this.animalsPages[PARTY_PICKERS[role]];
   }
 
-  async toInsAddAddressFromPicker(addressBookAdd: InsAddressBookAddPage, role: PartyRole): Promise<string> {
-    const referenceNumber = await this.startNotification();
+  async toInsAddAddressFromPicker(addressBookAdd: InsAddressBookAddPage, role: PartyRole): Promise<void> {
+    await this.startNotification();
     await this.answerCommodity();
     await this.animalsPages.overview.task('Roles and addresses').click();
     await this.animalsPages.addresses.addParty(role).click();
@@ -550,7 +550,6 @@ export class AnimalsJourney {
     await picker.addNewAddress.click();
     await addressBookAdd.completeSignInIfRequested();
     await addressBookAdd.heading.waitFor(pageLoadWait);
-    return referenceNumber;
   }
 
   async toReview(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {

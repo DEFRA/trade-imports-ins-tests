@@ -154,15 +154,15 @@ test.describe('Add an address from the journey via INS', () => {
   test(
     'the INS add page reached from the consignor picker shows the design page frame, the journey status, the field labels and autocomplete hints',
     { tag: ['@address-book', '@ins-frontend'] },
-    async ({ animalsJourney, pages, insPages }) => {
+    async ({ animalsJourney, journeyContext, pages, insPages }) => {
       const addPage = insPages.addressBookAdd;
-      const referenceNumber = await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignor');
+      await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignor');
 
       await expect(pages.page).toHaveTitle('Add address and contact details - Import notification service - GOV.UK');
       await expect(addPage.heading).toBeVisible();
       await expect(addPage.caption).toBeVisible();
       await expect(addPage.statusTag).toHaveText('Draft');
-      await expect(addPage.notificationReference).toHaveText(referenceNumber);
+      await expect(addPage.notificationReference).toHaveText(journeyContext.referenceNumber);
       await expect(addPage.sectionHeading('Address')).toBeVisible();
       await expect(addPage.sectionHeading('Contact details')).toBeVisible();
       await expect(addPage.fieldLabels).toHaveText(FIELD_LABELS_IN_ORDER);
