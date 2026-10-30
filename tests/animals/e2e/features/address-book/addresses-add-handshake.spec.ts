@@ -184,7 +184,7 @@ test.describe('Add an address from the journey via INS', () => {
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
 
-      await expect(addPage.countryOptionsIncludingPlaceholder).toHaveText(['United Kingdom']);
+      await expect(addPage.countryOptions).toHaveText(['United Kingdom']);
       await expect(addPage.selectedCountryOption).toHaveText('United Kingdom');
     },
   );
@@ -200,7 +200,7 @@ test.describe('Add an address from the journey via INS', () => {
 
         await expect(addPage.selectCountry).toHaveJSProperty('tagName', 'SELECT');
         await expect(addPage.selectCountry).toHaveValue('');
-        await expect(addPage.countryOptionsIncludingPlaceholder).toHaveText(['Select a country', ...addressFormCountryNames]);
+        await expect(addPage.countryOptions).toHaveText(['Select a country', ...addressFormCountryNames]);
       },
     );
   }

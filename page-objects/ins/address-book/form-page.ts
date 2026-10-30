@@ -44,7 +44,7 @@ export abstract class InsAddressBookFormPage extends BasePage {
     return this.page.getByRole('main').locator('form label');
   }
 
-  get countryOptionsIncludingPlaceholder(): Locator {
+  get countryOptions(): Locator {
     return this.selectCountry.getByRole('option');
   }
 

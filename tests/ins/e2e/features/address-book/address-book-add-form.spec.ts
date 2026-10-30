@@ -51,7 +51,7 @@ test.describe('The add-details form for an address entered by hand', () => {
     await insPages.addressBookAdd.open();
 
     await expect(insPages.addressBookAdd.selectCountry).toHaveValue('');
-    await expect(insPages.addressBookAdd.countryOptionsIncludingPlaceholder.first()).toHaveText('Select a country');
+    await expect(insPages.addressBookAdd.countryOptions.first()).toHaveText('Select a country');
   });
 
   test('Add a new address on the address book opens the add-details form, whose Back link returns to the address book', async ({
