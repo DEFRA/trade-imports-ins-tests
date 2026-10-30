@@ -166,7 +166,7 @@ test.describe('Add an address from the journey via INS', () => {
       await expect(addPage.sectionHeading('Address')).toBeVisible();
       await expect(addPage.sectionHeading('Contact details')).toBeVisible();
       await expect(addPage.fieldLabels).toHaveText(FIELD_LABELS_IN_ORDER);
-      await expect(addPage.inputName).toHaveAttribute('autocomplete', 'organization');
+      await expect(addPage.inputName).not.toHaveAttribute('autocomplete');
       await expect(addPage.inputAddressLine1).toHaveAttribute('autocomplete', 'address-line1');
       await expect(addPage.inputAddressLine2).toHaveAttribute('autocomplete', 'address-line2');
       await expect(addPage.inputTownOrCity).toHaveAttribute('autocomplete', 'address-level2');
