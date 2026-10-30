@@ -1,4 +1,5 @@
 import { type Locator } from '@playwright/test';
+import { type CommoditySpecies } from '@domain/animals/constants/commodity-species';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { SelectedCommoditiesTable } from '@page-objects/animals/selected-commodities-table';
 
@@ -25,6 +26,10 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.page.getByRole('link', { name: 'Add another commodity' });
   }
 
+  get errorSummary(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
+  }
+
   get animalsRequiredErrorLink(): Locator {
     return this.page.getByRole('link', { name: 'Enter the number of animals' });
   }
@@ -37,29 +42,39 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.caption.locator('xpath=following-sibling::*[1]');
   }
 
-  async numberOfAnimalsFor(species: string): Promise<Locator> {
+  async numberOfAnimalsFor(species: CommoditySpecies): Promise<Locator> {
     return this.numberOfAnimals.nth(await this.speciesPosition(species));
   }
 
-  async numberOfPackagesFor(species: string): Promise<Locator> {
+  async numberOfPackagesFor(species: CommoditySpecies): Promise<Locator> {
     return this.numberOfPackages.nth(await this.speciesPosition(species));
   }
 
-  async fillAnimalCountFor(species: string, count: number): Promise<void> {
+  async fillAnimalCountFor(species: CommoditySpecies, count: number): Promise<void> {
     await (await this.numberOfAnimalsFor(species)).fill(String(count));
   }
 
-  private async speciesPosition(species: string): Promise<number> {
+  async fillPackageCountFor(species: CommoditySpecies, count: number): Promise<void> {
+    await (await this.numberOfPackagesFor(species)).fill(String(count));
+  }
+
+  private async speciesPosition(species: CommoditySpecies): Promise<number> {
     const speciesHeadings = await this.page.getByRole('heading', { level: 3 }).allTextContents();
-    const index = speciesHeadings.indexOf(species);
+    const index = speciesHeadings.indexOf(species.latinName);
     if (index === -1) {
-      throw new Error(`No "${species}" heading among: ${speciesHeadings.join(', ')}`);
+      throw new Error(`No "${species.latinName}" heading among: ${speciesHeadings.join(', ')}`);
     }
     return index;
   }
 
   async fillEveryAnimalCount(count: string): Promise<void> {
     for (const box of await this.numberOfAnimals.all()) {
+      await box.fill(count);
+    }
+  }
+
+  async fillEveryPackageCount(count: string): Promise<void> {
+    for (const box of await this.numberOfPackages.all()) {
       await box.fill(count);
     }
   }
