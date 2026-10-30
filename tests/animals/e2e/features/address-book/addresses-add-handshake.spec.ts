@@ -120,7 +120,7 @@ test.describe('Add an address from the journey via INS', () => {
   }
 
   test(
-    'Consignor: the added address banner is still shown ten seconds after Save and select and is gone after a reload',
+    'Save and select on the INS add page reached from the Consignor picker shows the added banner, which is still shown ten seconds later and is gone after a reload',
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, pages, animalsPages, insPages }) => {
       const addPage = insPages.addressBookAdd;
@@ -153,7 +153,7 @@ test.describe('Add an address from the journey via INS', () => {
   );
 
   test(
-    'the INS add page reached from the consignor picker shows the design page frame, the journey status, the field labels and autocomplete hints',
+    'the INS add page reached from the Consignor picker shows its page title, heading, caption, Draft status, notification reference, section headings, field labels and autocomplete hints',
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, journeyContext, pages, insPages }) => {
       const addPage = insPages.addressBookAdd;
@@ -178,7 +178,7 @@ test.describe('Add an address from the journey via INS', () => {
   );
 
   test(
-    'the INS add page reached from the consignee picker offers United Kingdom alone, already selected',
+    'the INS add page reached from the Consignee picker offers United Kingdom alone, already selected',
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, insPages }) => {
       const addPage = insPages.addressBookAdd;
