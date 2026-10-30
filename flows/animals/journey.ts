@@ -33,11 +33,11 @@ export type ArrivalDetailsAnswer = {
   documentReference?: string;
 };
 
-type PartyPicker = 'consignorSelection' | 'destinationSelection' | 'placeOfOriginSelection' | 'consigneeSelection' | 'importerSelection';
+type PartyPickerKey = 'consignorSelection' | 'destinationSelection' | 'placeOfOriginSelection' | 'consigneeSelection' | 'importerSelection';
 
 type PartyAnswer = [role: PartyRole, name: string];
 
-const PARTY_PICKERS: Record<PartyRole, PartyPicker> = {
+const PARTY_PICKER_KEYS: Record<PartyRole, PartyPickerKey> = {
   Consignor: 'consignorSelection',
   'Place of destination': 'destinationSelection',
   'Place of origin': 'placeOfOriginSelection',
@@ -249,10 +249,10 @@ export class AnimalsJourney {
 
   private async addParties(parties: PartyAnswer[]): Promise<void> {
     for (const [role, name] of parties) {
-      const picker = PARTY_PICKERS[role];
+      const picker = this.partyPicker(role);
       await this.animalsPages.addresses.addParty(role).click();
-      await this.animalsPages[picker].select(name);
-      await this.animalsPages[picker].saveAndContinue.click();
+      await picker.select(name);
+      await picker.saveAndContinue.click();
       await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     }
   }
@@ -537,7 +537,7 @@ export class AnimalsJourney {
   }
 
   partyPicker(role: PartyRole): AnimalsPartyPickerPage {
-    return this.animalsPages[PARTY_PICKERS[role]];
+    return this.animalsPages[PARTY_PICKER_KEYS[role]];
   }
 
   async toPartyPicker(role: PartyRole): Promise<void> {
