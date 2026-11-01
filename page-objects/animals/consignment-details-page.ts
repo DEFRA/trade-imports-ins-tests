@@ -2,6 +2,7 @@ import { type Locator } from '@playwright/test';
 import { type CommoditySpecies } from '@domain/animals/constants/commodity-species';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { SelectedCommoditiesTable } from '@page-objects/animals/selected-commodities-table';
+import { errorSummaryOn } from '@page-objects/shared/govuk-banners';
 
 export class AnimalsConsignmentDetailsPage extends NotificationPage {
   readonly selectedCommodities = new SelectedCommoditiesTable(this.page);
@@ -27,7 +28,7 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
   }
 
   get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
+    return errorSummaryOn(this.page);
   }
 
   get animalsRequiredErrorLink(): Locator {

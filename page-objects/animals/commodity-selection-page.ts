@@ -1,5 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import { errorSummaryOn } from '@page-objects/shared/govuk-banners';
 import type { CommoditySpecies } from '@domain/animals/constants/commodity-species';
 import { SEARCH_HINT } from '@domain/animals/constants/commodity-selection-page';
 
@@ -70,6 +71,6 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
   }
 
   get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
+    return errorSummaryOn(this.page);
   }
 }
