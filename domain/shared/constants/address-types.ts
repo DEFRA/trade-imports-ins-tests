@@ -26,10 +26,22 @@ export const useLabels: Record<AddressUse, string> = {
   BRANCH_ADDRESS: 'Branch',
 };
 
+export const typeOptionTexts: Record<AddressUse, string> = {
+  PLACE_OF_ORIGIN: 'Place of Origin',
+  CONSIGNOR: 'Consignor',
+  PLACE_OF_DESTINATION: 'Place of Destination',
+  CONSIGNEE: 'Consignee',
+  IMPORTER: 'Importer',
+  BRANCH_ADDRESS: 'Branch Address',
+};
+
+export const typeOptionPlaceholder = 'Select one';
+
 export interface AddressBookTab {
   addressType: AddressType;
   label: string;
   panelHeading: string;
+  typeOptions: readonly AddressUse[];
 }
 
 export const addressBookTabs: readonly AddressBookTab[] = [
@@ -37,16 +49,19 @@ export const addressBookTabs: readonly AddressBookTab[] = [
     addressType: addressTypes.originOrConsignor,
     label: 'Origin and Consignor',
     panelHeading: 'Origin and Consignor addresses',
+    typeOptions: [addressUses.placeOfOrigin, addressUses.consignor],
   },
   {
     addressType: addressTypes.destinationConsigneeOrImporter,
     label: 'Destination, Consignee and Importer',
     panelHeading: 'Destination, Consignee and Importer addresses',
+    typeOptions: [addressUses.consignee, addressUses.importer, addressUses.placeOfDestination],
   },
   {
     addressType: addressTypes.branch,
     label: 'Branch',
     panelHeading: 'Branch addresses',
+    typeOptions: [addressUses.branchAddress],
   },
 ];
 

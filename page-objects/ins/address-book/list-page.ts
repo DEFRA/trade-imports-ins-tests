@@ -1,6 +1,6 @@
 import { Locator } from '@playwright/test';
 import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
-import type { AddressType } from '@domain/shared/constants/address-types';
+import { typeOptionTexts, type AddressBookTab, type AddressType, type AddressUse } from '@domain/shared/constants/address-types';
 
 type ListPageOpenOptions = OpenOptions & { addressType?: AddressType };
 
@@ -103,14 +103,43 @@ export class InsAddressBookListPage extends BasePage {
     return this.page.getByRole('link', { name: `View ${name}`, exact: true });
   }
 
-  async search(term: string, { submitWith }: { submitWith: 'button' | 'enter' }): Promise<void> {
+  get selectType(): Locator {
+    return this.page.getByLabel('Type', { exact: true });
+  }
+
+  get typeOptions(): Locator {
+    return this.selectType.locator('option');
+  }
+
+  get selectedTypeOption(): Locator {
+    return this.selectType.locator('option:checked');
+  }
+
+  async search(term: string, { submitWith, use }: { submitWith: 'button' | 'enter'; use?: AddressUse }): Promise<void> {
     await this.filterSummary.click();
     await this.inputSearch.fill(term);
+    if (use) {
+      await this.selectType.selectOption({ label: typeOptionTexts[use] });
+    }
     if (submitWith === 'enter') {
       await this.inputSearch.press('Enter');
     } else {
       await this.btnSearch.click();
     }
+  }
+
+  async followTab(tab: AddressBookTab): Promise<void> {
+    await this.tabLink(tab.label).click();
+  }
+
+  async followResultPagesUntilRowShows(name: string): Promise<boolean> {
+    while ((await this.row(name).count()) === 0) {
+      if ((await this.linkNextPage.count()) === 0) {
+        return false;
+      }
+      await this.linkNextPage.click();
+    }
+    return true;
   }
 
   async open({ attemptSignIn = true, addressType, ...identity }: ListPageOpenOptions = {}): Promise<void> {

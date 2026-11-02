@@ -1,90 +1,16 @@
 import { test, expect } from '@fixtures';
-import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import {
   addressBookTabLabels,
   addressBookTabs,
-  addressTypes,
-  addressUses,
   branchTab,
-  destinationConsigneeOrImporterTab,
   originOrConsignorTab,
   unsupportedAddressValue,
-  useLabels,
-  type AddressBookTab,
   type AddressType,
-  type AddressUse,
 } from '@domain/shared/constants/address-types';
-import { traderAddress } from '@domain/ins/constants/trader-address';
 import { E2E_ADDRESS_BOOK_FIXTURES, ensureE2eAddressBook } from '@flows/shared/address-book-seed';
+import { createStamped, deleteAddressesCreatedByEachTest, searchTermOf, stampedAddressesOnTab, typeLabelOf } from './stamped-addresses';
 
-interface StampedAddress {
-  name: string;
-  addressType?: AddressType;
-  uses?: AddressUse[];
-  typeLabel: string;
-  tabs: readonly AddressBookTab[];
-}
-
-const searchTermOf = (stamp: number) => `Tabs ${stamp}`;
-
-const typeLabelOf = (uses: readonly AddressUse[] = []): string => uses.map((use) => useLabels[use]).join(', ');
-
-const stampedAddressesOf = (stamp: number) => {
-  const named = (suffix: string) => `${searchTermOf(stamp)} ${suffix}`;
-  const stampedAddress = (address: Omit<StampedAddress, 'typeLabel'>): StampedAddress => ({
-    ...address,
-    typeLabel: typeLabelOf(address.uses),
-  });
-  return {
-    placeOfOriginAndConsignee: stampedAddress({
-      name: named('Origin And Consignee'),
-      addressType: addressTypes.originOrConsignor,
-      uses: [addressUses.placeOfOrigin, addressUses.consignee],
-      tabs: [originOrConsignorTab, destinationConsigneeOrImporterTab],
-    }),
-    consignor: stampedAddress({
-      name: named('Consignor'),
-      addressType: addressTypes.originOrConsignor,
-      uses: [addressUses.consignor],
-      tabs: [originOrConsignorTab],
-    }),
-    importer: stampedAddress({
-      name: named('Importer'),
-      addressType: addressTypes.destinationConsigneeOrImporter,
-      uses: [addressUses.importer],
-      tabs: [destinationConsigneeOrImporterTab],
-    }),
-    branchAddress: stampedAddress({
-      name: named('Branch'),
-      addressType: addressTypes.branch,
-      uses: [addressUses.branchAddress],
-      tabs: [branchTab],
-    }),
-    noUses: stampedAddress({
-      name: named('No Uses'),
-      tabs: [originOrConsignorTab],
-    }),
-  };
-};
-
-const createStamped = async (api: AddressBookApiClient, stamp: number, createdIds: string[]) => {
-  const stamped = stampedAddressesOf(stamp);
-  for (const { name, addressType, uses } of Object.values<StampedAddress>(stamped)) {
-    createdIds.push((await api.createAddress({ ...traderAddress(name), addressType, uses })).id);
-  }
-  return stamped;
-};
-
-const stampedAddressesOnTab = (stamped: Record<string, StampedAddress>, tab: AddressBookTab): StampedAddress[] =>
-  Object.values(stamped).filter(({ tabs }) => tabs.includes(tab));
-
-const createdAddressIds: string[] = [];
-
-test.afterEach(async ({ addressBookApi }) => {
-  for (const addressId of createdAddressIds.splice(0)) {
-    await addressBookApi.deleteAddress(addressId);
-  }
-});
+const createdAddressIds = deleteAddressesCreatedByEachTest();
 
 test.describe('Address book tabs API', () => {
   const isolatedOrganisationAddressIds: string[] = [];
@@ -149,7 +75,8 @@ test.describe('Address book tabs', () => {
     const stamped = await createStamped(addressBookApi, stamp, createdAddressIds);
 
     for (const tab of addressBookTabs) {
-      await insPages.addressBookList.open({ addressType: tab.addressType });
+      await insPages.addressBookList.open();
+      await insPages.addressBookList.followTab(tab);
       await insPages.addressBookList.search(searchTermOf(stamp), { submitWith: 'button' });
 
       const expected = stampedAddressesOnTab(stamped, tab);
@@ -174,13 +101,15 @@ test.describe('Address book tabs', () => {
       if (!tab) {
         throw new Error(`Expected a tab for the fixture ${name}`);
       }
-      await insPages.addressBookList.open({ addressType: tab.addressType });
+      await insPages.addressBookList.open();
+      await insPages.addressBookList.followTab(tab);
       await insPages.addressBookList.search(name, { submitWith: 'button' });
 
       await expect(insPages.addressBookList.typeCell(name)).toHaveText(typeLabelOf(uses));
     }
 
-    await insPages.addressBookList.open({ addressType: originOrConsignorTab.addressType });
+    await insPages.addressBookList.open();
+    await insPages.addressBookList.followTab(originOrConsignorTab);
     await insPages.addressBookList.search(branchFixtureName, { submitWith: 'button' });
 
     await expect(insPages.addressBookList.row(branchFixtureName)).toHaveCount(0);
