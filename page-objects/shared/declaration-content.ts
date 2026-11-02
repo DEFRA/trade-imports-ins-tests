@@ -13,12 +13,8 @@ export class DeclarationContent {
     return this.confirmationGroup.getByRole('checkbox', { name: /I confirm that I have reviewed/ });
   }
 
-  get dateLine(): Locator {
-    return this.page.getByRole('paragraph').filter({ hasText: 'Date of declaration:' });
-  }
-
   get dateValue(): Locator {
-    return this.dateLine.getByRole('strong');
+    return this.page.getByRole('paragraph').filter({ hasText: 'Date of declaration:' }).getByRole('strong');
   }
 
   get firstContentElement(): Locator {
