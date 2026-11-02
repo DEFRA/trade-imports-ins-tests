@@ -1,5 +1,5 @@
 import { test, expect, type PageFixtures } from '@fixtures';
-import { expectAddressBookList, expectNoMatchesListed } from './expect-address-book-list';
+import { expectAddressBookList, expectMainLinks, expectNoMatchesListed } from './expect-address-book-list';
 import { type AddressDetails } from '@page-objects/ins/address-book/form-page';
 import { addFormAddressWithLineTwoAndCounty, addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
 
@@ -28,7 +28,7 @@ const addAddressAndExpectSearchToListIt = async (
   await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
   await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
   await expect(insPages.addressBookList.row(name)).toBeVisible();
-  await expect(insPages.addressBookList.mainLinks).toHaveText(['Clear search', `View ${name}`]);
+  await expectMainLinks(insPages.addressBookList, `View ${name}`);
 };
 
 const addAddressThroughForm = async ({ insPages }: Pick<PageFixtures, 'insPages'>, details: AddressDetails) => {

@@ -1,20 +1,18 @@
-import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
+import type { AddressBookApiClient, AddressBookEntry, AddressBookRecord } from '@adapters/http/address-book-api-client';
+import { addressTypes, addressUses } from '@domain/shared/constants/address-types';
 
-type AddressBookCreate = Omit<AddressBookRecord, 'id' | 'deleted'>;
+const heldAsConsignor = { addressType: addressTypes.originOrConsignor, uses: [addressUses.consignor] };
+const heldAsPlaceOfOrigin = { addressType: addressTypes.originOrConsignor, uses: [addressUses.placeOfOrigin] };
+const heldAsPlaceOfDestination = {
+  addressType: addressTypes.destinationConsigneeOrImporter,
+  uses: [addressUses.placeOfDestination],
+};
+const heldAsConsignee = { addressType: addressTypes.destinationConsigneeOrImporter, uses: [addressUses.consignee] };
+const heldAsImporter = { addressType: addressTypes.destinationConsigneeOrImporter, uses: [addressUses.importer] };
+const heldAsBranchAddress = { addressType: addressTypes.branch, uses: [addressUses.branchAddress] };
 
-/**
- * Shared address-book records the journey helpers pick by name (Astra Rosales,
- * Tech Imports Ltd, … plus pagination/search fodder).
- *
- * Seeded once through the address-book API in Playwright `globalSetup` — not
- * per worker — so parallel runs cannot create duplicate names. Address-feature
- * specs that do not need these names inject their own unique records in-test.
- *
- * Order is creation order when the book is empty: later rows are newer and land
- * on earlier picker pages (newest first). Journey parties are created last.
- */
-export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
-  // Page-three / pagination fodder (created first → oldest)
+/** The shared address-book records, in creation order. */
+export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
   {
     name: 'Alpine Dairy GmbH',
     addressLine1: 'Bahnhofstrasse 17',
@@ -23,6 +21,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'AT',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsConsignor,
   },
   {
     name: 'Irish Beef Traders Ltd',
@@ -32,6 +31,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'IE',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsConsignor,
   },
   {
     name: 'Iberian Swine SA',
@@ -41,9 +41,8 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'ES',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsConsignor,
   },
-
-  // Page-two fodder
   {
     name: 'Animal and Plant Health Agency',
     addressLine1: 'Woodham Lane',
@@ -52,6 +51,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'GB',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsBranchAddress,
   },
   {
     name: 'Danish Meat Export ApS',
@@ -61,6 +61,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'DK',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsConsignor,
   },
   {
     name: 'Jutland Swine ApS',
@@ -70,6 +71,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'DK',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsConsignor,
   },
   {
     name: 'Laiterie du Nord SARL',
@@ -79,6 +81,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'FR',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsConsignor,
   },
   {
     name: 'Nordvik Seafood AS',
@@ -88,9 +91,8 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'NO',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsConsignor,
   },
-
-  // Journey parties (created last → newest → page one on a fresh book)
   {
     name: 'Astra Rosales',
     addressLine1: '43 East Hague Extension',
@@ -99,6 +101,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'CH',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsConsignor,
   },
   {
     name: 'Tech Imports Ltd',
@@ -108,6 +111,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'GB',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsPlaceOfDestination,
   },
   {
     name: 'Origin Farm',
@@ -117,6 +121,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'IE',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsPlaceOfOrigin,
   },
   {
     name: 'British Livestock Ltd',
@@ -126,6 +131,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'GB',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsConsignee,
   },
   {
     name: 'Import Co UK',
@@ -135,18 +141,19 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     countryCode: 'GB',
     phone: '+44 1234 567890',
     email: 'contact@example.com',
+    ...heldAsImporter,
   },
 ];
 
-const differsFrom = (live: AddressBookRecord, wanted: AddressBookCreate): boolean =>
-  (Object.keys(wanted) as Array<keyof AddressBookCreate>).some((field) => live[field] !== wanted[field]);
+const sameValue = (live: unknown, wanted: unknown): boolean =>
+  Array.isArray(wanted) ? JSON.stringify(live) === JSON.stringify(wanted) : live === wanted;
+
+const differsFrom = (live: AddressBookRecord, wanted: AddressBookEntry): boolean =>
+  (Object.keys(wanted) as Array<keyof AddressBookEntry>).some((field) => !sameValue(live[field], wanted[field]));
 
 /**
- * Ensures exactly one live record per journey fixture name, holding the fixture's details.
- * Creates when missing; soft-deletes extras left over from an earlier race; rewrites a
- * record whose details have drifted — a notification copies what it picks, so a stale
- * record (such as one holding a country name rather than its ISO code) would be copied
- * onto every notification and refused at review.
+ * Ensures one live record per journey fixture name, holding the fixture's details, type and uses.
+ * Creates a missing record, rewrites one that differs and soft-deletes any extra with the name.
  */
 export async function ensureE2eAddressBook(api: AddressBookApiClient): Promise<void> {
   for (const record of E2E_ADDRESS_BOOK_FIXTURES) {

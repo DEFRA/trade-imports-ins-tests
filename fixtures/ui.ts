@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { test as base, expect, type APIRequestContext, type BrowserContext, type Page, type TestInfo } from '@playwright/test';
 import {
   createAnimalsAdminPages,
@@ -58,6 +59,7 @@ export interface PageFixtures {
   plantsNotificationActions: PlantsNotificationActions;
   notificationApi: NotificationApiClient;
   addressBookApi: AddressBookApiClient;
+  isolatedOrganisationAddressBookApi: AddressBookApiClient;
   referenceDataApi: ReferenceDataApiClient;
   frontendForms: FrontendFormClient;
   externalRequest: APIRequestContext;
@@ -134,6 +136,9 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   },
   addressBookApi: async ({ request }, use) => {
     await use(new AddressBookApiClient(request));
+  },
+  isolatedOrganisationAddressBookApi: async ({ request }, use) => {
+    await use(new AddressBookApiClient(request, `e2e-isolated-organisation-${randomUUID()}`));
   },
   referenceDataApi: async ({ request }, use) => {
     await use(new ReferenceDataApiClient(request));

@@ -1,5 +1,8 @@
 import { Locator } from '@playwright/test';
 import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
+import type { AddressType } from '@domain/shared/constants/address-types';
+
+type ListPageOpenOptions = OpenOptions & { addressType?: AddressType };
 
 export class InsAddressBookListPage extends BasePage {
   readonly expectedUrl = '/address-book';
@@ -60,12 +63,32 @@ export class InsAddressBookListPage extends BasePage {
     return this.row(name).getByRole('cell').nth(0);
   }
 
-  addressCell(name: string): Locator {
+  typeCell(name: string): Locator {
     return this.row(name).getByRole('cell').nth(1);
   }
 
-  countryCell(name: string): Locator {
+  addressCell(name: string): Locator {
     return this.row(name).getByRole('cell').nth(2);
+  }
+
+  countryCell(name: string): Locator {
+    return this.row(name).getByRole('cell').nth(3);
+  }
+
+  get tabLinks(): Locator {
+    return this.page.getByRole('navigation', { name: 'Address types' }).getByRole('link');
+  }
+
+  get selectedTab(): Locator {
+    return this.tabLinks.and(this.page.locator('[aria-current="page"]'));
+  }
+
+  get panelHeading(): Locator {
+    return this.page.getByRole('main').getByRole('heading', { level: 2 });
+  }
+
+  tabLink(label: string): Locator {
+    return this.tabLinks.filter({ hasText: new RegExp(`^${label}$`) });
   }
 
   get viewLinks(): Locator {
@@ -90,8 +113,9 @@ export class InsAddressBookListPage extends BasePage {
     }
   }
 
-  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
-    await this.page.goto(this.expectedUrl);
+  async open({ attemptSignIn = true, addressType, ...identity }: ListPageOpenOptions = {}): Promise<void> {
+    const query = addressType ? `?${new URLSearchParams({ addressType })}` : '';
+    await this.page.goto(`${this.expectedUrl}${query}`);
     await this.signInWhenRequested(attemptSignIn, identity);
   }
 }

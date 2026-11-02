@@ -1,6 +1,7 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient } from '@adapters/http/rest-client';
 import { getAddressBookBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
+import type { AddressType, AddressUse } from '@domain/shared/constants/address-types';
 
 /** The organisation id that CRN 2100010101, the default E2E sign-in, belongs to. */
 export const E2E_ORGANISATION_ID = '5900001';
@@ -18,12 +19,13 @@ export interface AddressBookRecord {
   countryCode: string;
   phone: string;
   email: string;
-  addressType?: string;
-  uses?: string[];
+  addressType?: AddressType;
+  uses?: AddressUse[];
   deleted: boolean;
+  modifiedAt: string;
 }
 
-export type AddressBookEntry = Omit<AddressBookRecord, 'id' | 'deleted'>;
+export type AddressBookEntry = Omit<AddressBookRecord, 'id' | 'deleted' | 'modifiedAt'>;
 
 interface AddressBookPage {
   items: AddressBookRecord[];
@@ -52,9 +54,16 @@ export class AddressBookApiClient {
     return addressId ? `${base}/${addressId}` : base;
   }
 
-  /** The first page of the organisation's live addresses, newest first. */
-  async listAddresses(query?: string): Promise<AddressBookRecord[]> {
-    const search = query ? `?q=${encodeURIComponent(query)}` : '';
+  /** The first page of the organisation's live addresses matching the search, newest first. */
+  async listAddresses(query?: string, { addressType }: { addressType?: AddressType } = {}): Promise<AddressBookRecord[]> {
+    const params = new URLSearchParams();
+    if (addressType) {
+      params.set('addressType', addressType);
+    }
+    if (query) {
+      params.set('q', query);
+    }
+    const search = params.size ? `?${params}` : '';
     const page = await this.rest.get<AddressBookPage>(`${this.path()}${search}`, this.headers);
     return page.items;
   }
