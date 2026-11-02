@@ -378,7 +378,7 @@ Visual specs run headless whatever the project setting, because headed mode uses
 
 The origin of import baseline masks the whole status strip, not the notification reference alone. The strip renders from the first request and the reference inside it is minted per run, so an unmasked strip never matches the baseline twice. Masking the full-width strip keeps the masked box a fixed size, which the reference alone is not. The strip's own content is covered by `tests/animals/e2e/features/reference-strip.spec.ts`.
 
-The declaration baselines mask the date of declaration instead, because the server writes today's date into the page text. `freezeDatePickersAt` does not reach that text: it stops the browser clock and moves each date picker's served bounds, and changes nothing the server has already written. The date's strong emphasis is proved by the declaration e2e specs.
+The declaration specs set the date of declaration to a fixed string before the screenshot instead of masking it, because the server writes today's date into the page text and a mask is as wide as that text, which changes with the day and month. `freezeDatePickersAt` does not reach that text: it stops the browser clock and moves each date picker's served bounds, and changes nothing the server has already written. The date's strong emphasis is proved by the declaration e2e specs.
 
 Run against the stack with `npm run test:docker-compose:visual` (or
 `test:docker-compose:animals:visual` for `animals` alone). `animals` and `plants` have `@visual` specs.
