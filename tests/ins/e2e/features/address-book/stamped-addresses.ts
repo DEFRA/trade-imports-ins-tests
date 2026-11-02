@@ -21,12 +21,12 @@ export interface StampedAddress {
   tabs: readonly AddressBookTab[];
 }
 
-export const searchTermOf = (stamp: number) => `Tabs ${stamp}`;
+export const stampedSearchTermOf = (stamp: number) => `Stamped ${stamp}`;
 
 export const typeLabelOf = (uses: readonly AddressUse[] = []): string => uses.map((use) => useLabels[use]).join(', ');
 
 const stampedAddressesOf = (stamp: number) => {
-  const named = (suffix: string) => `${searchTermOf(stamp)} ${suffix}`;
+  const named = (suffix: string) => `${stampedSearchTermOf(stamp)} ${suffix}`;
   const stampedAddress = (address: Omit<StampedAddress, 'typeLabel'>): StampedAddress => ({
     ...address,
     typeLabel: typeLabelOf(address.uses),
@@ -71,10 +71,18 @@ export const createStamped = async (api: AddressBookApiClient, stamp: number, cr
   return stamped;
 };
 
+export const createAddressHolding = async (
+  api: AddressBookApiClient,
+  createdAddressIds: string[],
+  { name, addressType, uses }: Pick<StampedAddress, 'name' | 'addressType' | 'uses'>,
+): Promise<void> => {
+  createdAddressIds.push((await api.createAddress({ ...traderAddress(name), addressType, uses })).id);
+};
+
 export const stampedAddressesOnTab = (stamped: Record<string, StampedAddress>, tab: AddressBookTab): StampedAddress[] =>
   Object.values(stamped).filter(({ tabs }) => tabs.includes(tab));
 
-export const deleteAddressesCreatedByEachTest = (): string[] => {
+export const createdAddressIdsDeletedAfterEachTest = (): string[] => {
   const createdAddressIds: string[] = [];
   test.afterEach(async ({ addressBookApi }) => {
     for (const addressId of createdAddressIds.splice(0)) {
@@ -82,4 +90,14 @@ export const deleteAddressesCreatedByEachTest = (): string[] => {
     }
   });
   return createdAddressIds;
+};
+
+export const isolatedOrganisationAddressIdsDeletedAfterEachTest = (): string[] => {
+  const isolatedOrganisationAddressIds: string[] = [];
+  test.afterEach(async ({ isolatedOrganisationAddressBookApi }) => {
+    for (const addressId of isolatedOrganisationAddressIds.splice(0)) {
+      await isolatedOrganisationAddressBookApi.deleteAddress(addressId);
+    }
+  });
+  return isolatedOrganisationAddressIds;
 };

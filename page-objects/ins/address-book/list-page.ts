@@ -115,12 +115,25 @@ export class InsAddressBookListPage extends BasePage {
     return this.selectType.locator('option:checked');
   }
 
-  async search(term: string, { submitWith, use }: { submitWith: 'button' | 'enter'; use?: AddressUse }): Promise<void> {
-    await this.filterSummary.click();
-    await this.inputSearch.fill(term);
-    if (use) {
-      await this.selectType.selectOption({ label: typeOptionTexts[use] });
+  private async openFilter(): Promise<void> {
+    if (!(await this.inputSearch.isVisible())) {
+      await this.filterSummary.click();
     }
+  }
+
+  async chooseType(use: AddressUse): Promise<void> {
+    await this.openFilter();
+    await this.selectType.selectOption({ label: typeOptionTexts[use] });
+  }
+
+  async filter({ term, use, submitWith }: { term: string; use: AddressUse; submitWith: 'button' | 'enter' }): Promise<void> {
+    await this.chooseType(use);
+    await this.search(term, { submitWith });
+  }
+
+  async search(term: string, { submitWith }: { submitWith: 'button' | 'enter' }): Promise<void> {
+    await this.openFilter();
+    await this.inputSearch.fill(term);
     if (submitWith === 'enter') {
       await this.inputSearch.press('Enter');
     } else {

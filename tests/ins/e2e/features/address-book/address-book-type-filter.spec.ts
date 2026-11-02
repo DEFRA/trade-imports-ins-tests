@@ -10,20 +10,22 @@ import {
   typeOptionTexts,
 } from '@domain/shared/constants/address-types';
 import { timeouts } from '@config/timeouts';
-import { createStamped, deleteAddressesCreatedByEachTest, searchTermOf, stampedAddressesOnTab, typeLabelOf } from './stamped-addresses';
+import {
+  createAddressHolding,
+  createStamped,
+  createdAddressIdsDeletedAfterEachTest,
+  isolatedOrganisationAddressIdsDeletedAfterEachTest,
+  stampedAddressesOnTab,
+  stampedSearchTermOf,
+  typeLabelOf,
+} from './stamped-addresses';
 
-const createdAddressIds = deleteAddressesCreatedByEachTest();
+const createdAddressIds = createdAddressIdsDeletedAfterEachTest();
 
 const typeFilterTermOf = (stamp: number) => `Typefilter ${stamp}`;
 
 test.describe('Address book Type filter API', () => {
-  const isolatedOrganisationAddressIds: string[] = [];
-
-  test.afterEach(async ({ isolatedOrganisationAddressBookApi }) => {
-    for (const addressId of isolatedOrganisationAddressIds.splice(0)) {
-      await isolatedOrganisationAddressBookApi.deleteAddress(addressId);
-    }
-  });
+  const isolatedOrganisationAddressIds = isolatedOrganisationAddressIdsDeletedAfterEachTest();
 
   test('listing by a use returns exactly the stamped addresses holding it, and none for a use nothing holds', async ({
     isolatedOrganisationAddressBookApi,
@@ -32,7 +34,7 @@ test.describe('Address book Type filter API', () => {
     const stamped = await createStamped(isolatedOrganisationAddressBookApi, stamp, isolatedOrganisationAddressIds);
 
     for (const use of Object.values(addressUses)) {
-      const listed = await isolatedOrganisationAddressBookApi.listAddresses(searchTermOf(stamp), { use });
+      const listed = await isolatedOrganisationAddressBookApi.listAddresses(stampedSearchTermOf(stamp), { use });
 
       expect(listed.map(({ name }) => name).sort()).toEqual(
         Object.values(stamped)
@@ -66,15 +68,11 @@ test.describe('Address book Type filter', () => {
   }) => {
     const term = typeFilterTermOf(Date.now());
     for (const suffix of ['First Consignor', 'Second Consignor']) {
-      createdAddressIds.push(
-        (
-          await addressBookApi.createAddress({
-            ...traderAddress(`${term} ${suffix}`),
-            addressType: addressTypes.originOrConsignor,
-            uses: [addressUses.consignor],
-          })
-        ).id,
-      );
+      await createAddressHolding(addressBookApi, createdAddressIds, {
+        name: `${term} ${suffix}`,
+        addressType: addressTypes.originOrConsignor,
+        uses: [addressUses.consignor],
+      });
     }
     for (let index = 1; index <= 9; index++) {
       createdAddressIds.push((await addressBookApi.createAddress(traderAddress(`${term} Without Uses ${index}`))).id);
@@ -85,7 +83,7 @@ test.describe('Address book Type filter', () => {
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-8 of 11');
 
-    await insPages.addressBookList.search(term, { submitWith: 'button', use: addressUses.consignor });
+    await insPages.addressBookList.filter({ term, submitWith: 'button', use: addressUses.consignor });
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-2 of 2');
     await expect(insPages.addressBookList.bodyRows).toHaveCount(2);
@@ -94,50 +92,81 @@ test.describe('Address book Type filter', () => {
     await expect(insPages.addressBookList.pagination).toHaveCount(0);
   });
 
-  test('a Type that runs past one page is counted and paged, the next page keeps the tab, the search and the Type, and a Type matching one address counts one', async ({
+  test('a Type that runs past one page is counted and paged, and the next page keeps the tab, the search and the Type', async ({
     insPages,
     addressBookApi,
+    page,
   }) => {
     const term = typeFilterTermOf(Date.now());
     for (let index = 1; index <= 9; index++) {
-      createdAddressIds.push(
-        (
-          await addressBookApi.createAddress({
-            ...traderAddress(`${term} Consignor ${index}`),
-            addressType: addressTypes.originOrConsignor,
-            uses: [addressUses.consignor],
-          })
-        ).id,
-      );
+      await createAddressHolding(addressBookApi, createdAddressIds, {
+        name: `${term} Consignor ${index}`,
+        addressType: addressTypes.originOrConsignor,
+        uses: [addressUses.consignor],
+      });
     }
-    createdAddressIds.push(
-      (
-        await addressBookApi.createAddress({
-          ...traderAddress(`${term} Place Of Origin`),
-          addressType: addressTypes.originOrConsignor,
-          uses: [addressUses.placeOfOrigin],
-        })
-      ).id,
-    );
     await insPages.addressBookList.open();
 
-    await insPages.addressBookList.search(term, { submitWith: 'button', use: addressUses.consignor });
+    await insPages.addressBookList.filter({ term, submitWith: 'button', use: addressUses.consignor });
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-8 of 9');
-    await expect(insPages.addressBookList.linkNextPage).toHaveAttribute(
-      'href',
-      `/address-book?${new URLSearchParams({ addressType: addressTypes.originOrConsignor, q: term, use: addressUses.consignor, page: '2' })}`,
-    );
+    const href = await insPages.addressBookList.linkNextPage.getAttribute('href');
+    const next = new URL(href ?? '', page.url());
+    expect(next.searchParams.get('addressType')).toBe(addressTypes.originOrConsignor);
+    expect(next.searchParams.get('q')).toBe(term);
+    expect(next.searchParams.get('use')).toBe(addressUses.consignor);
+    expect(next.searchParams.get('page')).toBe('2');
 
     await insPages.addressBookList.linkNextPage.click();
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 9-9 of 9');
     await expect(insPages.addressBookList.selectedTab).toHaveText(originOrConsignorTab.label);
     await expect(insPages.addressBookList.selectedTypeOption).toHaveText(typeOptionTexts.CONSIGNOR);
+  });
 
-    await insPages.addressBookList.search(term, { submitWith: 'button', use: addressUses.placeOfOrigin });
+  test('a Type matching one address counts one', async ({ insPages, addressBookApi }) => {
+    const term = typeFilterTermOf(Date.now());
+    await createAddressHolding(addressBookApi, createdAddressIds, {
+      name: `${term} Consignor`,
+      addressType: addressTypes.originOrConsignor,
+      uses: [addressUses.consignor],
+    });
+    await createAddressHolding(addressBookApi, createdAddressIds, {
+      name: `${term} Place Of Origin`,
+      addressType: addressTypes.originOrConsignor,
+      uses: [addressUses.placeOfOrigin],
+    });
+    await insPages.addressBookList.open();
+
+    await insPages.addressBookList.filter({ term, submitWith: 'button', use: addressUses.placeOfOrigin });
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
+  });
+
+  test('a Type chosen and not submitted leaves the URL, the results line and the listed rows unchanged', async ({
+    insPages,
+    addressBookApi,
+    page,
+  }) => {
+    const stamp = Date.now();
+    const stamped = await createStamped(addressBookApi, stamp, createdAddressIds);
+    await insPages.addressBookList.open();
+    await insPages.addressBookList.search(stampedSearchTermOf(stamp), { submitWith: 'button' });
+    const originAddresses = stampedAddressesOnTab(stamped, originOrConsignorTab);
+    const resultsLine = `Showing 1-${originAddresses.length} of ${originAddresses.length}`;
+    await expect(insPages.addressBookList.resultsLine).toHaveText(resultsLine);
+    const urlBeforeChoosing = page.url();
+
+    await insPages.addressBookList.chooseType(addressUses.consignor);
+
+    await expect(insPages.addressBookList.selectedTypeOption).toHaveText(typeOptionTexts.CONSIGNOR);
+    await expect(page).toHaveURL(urlBeforeChoosing);
+    expect(new URL(page.url()).searchParams.get('use')).toBe('');
+    await expect(insPages.addressBookList.resultsLine).toHaveText(resultsLine);
+    await expect(insPages.addressBookList.bodyRows).toHaveCount(originAddresses.length);
+    for (const { name } of originAddresses) {
+      await expect(insPages.addressBookList.row(name)).toBeVisible();
+    }
   });
 
   test('the tab stays selected after a Type is submitted, and following another tab keeps the search, resets the Type and lists that tab', async ({
@@ -148,7 +177,7 @@ test.describe('Address book Type filter', () => {
     const stamped = await createStamped(addressBookApi, stamp, createdAddressIds);
     await insPages.addressBookList.open();
 
-    await insPages.addressBookList.search(searchTermOf(stamp), { submitWith: 'button', use: addressUses.consignor });
+    await insPages.addressBookList.filter({ term: stampedSearchTermOf(stamp), submitWith: 'button', use: addressUses.consignor });
 
     await expect(insPages.addressBookList.selectedTab).toHaveText(originOrConsignorTab.label);
     await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
@@ -159,7 +188,7 @@ test.describe('Address book Type filter', () => {
     const destinationAddresses = stampedAddressesOnTab(stamped, destinationConsigneeOrImporterTab);
     await expect(insPages.addressBookList.selectedTab).toHaveText(destinationConsigneeOrImporterTab.label);
     await insPages.addressBookList.filterSummary.click();
-    await expect(insPages.addressBookList.inputSearch).toHaveValue(searchTermOf(stamp));
+    await expect(insPages.addressBookList.inputSearch).toHaveValue(stampedSearchTermOf(stamp));
     await expect(insPages.addressBookList.selectedTypeOption).toHaveText(typeOptionPlaceholder);
     await expect(insPages.addressBookList.resultsLine).toHaveText(
       `Showing 1-${destinationAddresses.length} of ${destinationAddresses.length}`,
@@ -174,19 +203,15 @@ test.describe('Address book Type filter', () => {
     addressBookApi,
   }) => {
     const name = `Label Search ${Date.now()}`;
-    createdAddressIds.push(
-      (
-        await addressBookApi.createAddress({
-          ...traderAddress(name),
-          addressType: addressTypes.originOrConsignor,
-          uses: [addressUses.placeOfOrigin, addressUses.consignor],
-        })
-      ).id,
-    );
+    await createAddressHolding(addressBookApi, createdAddressIds, {
+      name,
+      addressType: addressTypes.originOrConsignor,
+      uses: [addressUses.placeOfOrigin, addressUses.consignor],
+    });
 
     await expect(async () => {
       await insPages.addressBookList.open();
-      await insPages.addressBookList.search('consignor', { submitWith: 'button', use: addressUses.placeOfOrigin });
+      await insPages.addressBookList.filter({ term: 'consignor', submitWith: 'button', use: addressUses.placeOfOrigin });
 
       expect(await insPages.addressBookList.followResultPagesUntilRowShows(name)).toBe(true);
     }).toPass({ timeout: timeouts.medium });
@@ -198,12 +223,12 @@ test.describe('Address book Type filter', () => {
 test.describe('Address book Type filter without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('a Type chosen and submitted with the Search button lists the same addresses', async ({ insPages, addressBookApi }) => {
+  test('a Type chosen and submitted with the Search button lists only the addresses holding it', async ({ insPages, addressBookApi }) => {
     const stamp = Date.now();
     const stamped = await createStamped(addressBookApi, stamp, createdAddressIds);
     await insPages.addressBookList.open();
 
-    await insPages.addressBookList.search(searchTermOf(stamp), { submitWith: 'button', use: addressUses.consignor });
+    await insPages.addressBookList.filter({ term: stampedSearchTermOf(stamp), submitWith: 'button', use: addressUses.consignor });
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
     await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
