@@ -11,7 +11,7 @@ test.describe('Declaration (visual regression)', { tag: '@visual' }, () => {
   test('shows the declaration statements, the small confirmation checkbox and no visible legend', async ({ page, animalsPages }) => {
     await expect(page).toHaveScreenshot('declaration.png', {
       fullPage: true,
-      mask: [animalsPages.declaration.content.dateValue],
+      mask: [animalsPages.declaration.content.dateLine],
     });
   });
 });
