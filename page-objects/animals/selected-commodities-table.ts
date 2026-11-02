@@ -1,5 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
-import type { CommoditySpecies } from '@domain/animals/constants/commodity-species';
+import type { CommodityLine } from '@domain/animals/constants/commodity-lines';
 
 export class SelectedCommoditiesTable {
   constructor(private readonly page: Page) {}
@@ -12,14 +12,14 @@ export class SelectedCommoditiesTable {
     return this.table.locator('tbody').getByRole('row');
   }
 
-  rowFor(species: CommoditySpecies): Locator {
+  rowFor(species: CommodityLine): Locator {
     return this.table
       .getByRole('row')
       .filter({ has: this.page.getByRole('cell', { name: species.commodityCode, exact: true }) })
       .filter({ hasText: species.latinName });
   }
 
-  changeLinkFor(species: CommoditySpecies): Locator {
+  changeLinkFor(species: CommodityLine): Locator {
     return this.rowFor(species).getByRole('link', { name: new RegExp(`^Change\\s+${species.commodityCode}\\b`) });
   }
 

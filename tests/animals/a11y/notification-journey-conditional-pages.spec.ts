@@ -1,4 +1,4 @@
-import { commoditySpecies } from '@domain/animals/constants/commodity-species';
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
@@ -76,7 +76,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     animalsPages,
     runA11yScan,
   }) => {
-    const { horse, domesticCat } = commoditySpecies;
+    const { horse, domesticCat } = commodityLines;
     const horseCard = animalsPages.animalIdentification.speciesCard(horse);
     const catCard = animalsPages.animalIdentification.speciesCard(domesticCat);
 

@@ -180,23 +180,38 @@ only when the deletion is what it tests. Where expiry is on, the shared journey
 addresses seeded in `globalSetup` expire too; the next run's
 `ensureE2eAddressBook` creates them again.
 
-### Commodity species in the animals specs
+### Commodity lines in the animals specs
 
-`domain/animals/constants/commodity-species.ts` names each species a spec
-chooses by its CN commodity code and Latin name. The commodity page labels each
-tick box with the Latin name alone, under a heading of the code, and one Latin
-name can sit under several codes (`Bos taurus` is under four), so a species
-needs both. The stack's MDM stub answers only the searches saved from MDM, so
-each species' `searchTerm` is a saved term whose first page of results lists
-that species; the first page is the frontend's 100 results. The
+`domain/animals/constants/commodity-lines.ts` names each line a spec chooses
+by its CN commodity code and Latin name. The commodity page labels each tick
+box with the Latin name alone, under a heading of the code, and one Latin name
+can sit under several codes (`Bos taurus` is under four), so a line needs both.
+The stack's MDM stub answers only the searches saved from MDM, so each line's
+`searchTerm` is a saved term whose first page of results lists that line; the
+first page is the frontend's 100 results. The
 frontend saves only a species its search showed, so a seeded journey posts the
 search before it posts the chosen species. A spec that needs what MDM says
 about a species, such as its common name, reads it from reference-data's
 commodity search through `ReferenceDataApiClient`, rather than from a copy of
 it that goes stale.
 
-The outbox and PIMS Dynamics specs expect `GBN_AG_CATTLE_COMMON_NAME`, because
-the event's common name for `Bos taurus` differs from reference data's.
+Stored commodity names for the codes the specs drive live in
+`domain/animals/constants/commodity-names.ts`. The INS aggregated notification
+commodity label uses the first GBN-AG trade line description (for example
+`Live bovine animals`). The outbox and PIMS Dynamics specs expect
+`GBN_AG_CATTLE_COMMON_NAME` (`domain/animals/constants/gbn-ag.ts`,
+`Domestic Cattle`) because the event's Bos taurus common name differs from
+reference-data's search result for that species under `0102`.
+
+### DLQ specs in animals-admin
+
+`tests/animals-admin/e2e/features/dlq-events.spec.ts` runs its tests in serial
+mode. Replay-all and delete-all each act on the whole dead-letter queue, and
+the stack has one queue, so two at once would act on each other's messages.
+The admin portal shows the "Replay-all started" or "Delete-all started" banner
+only once its call to the dynamics gateway, made with the admin secret, has
+succeeded. The banner is how these specs prove the admin portal and the
+gateway are wired together.
 
 ### Authenticated session reuse
 

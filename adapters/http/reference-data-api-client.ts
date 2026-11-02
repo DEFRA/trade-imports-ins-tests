@@ -1,7 +1,7 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient } from '@adapters/http/rest-client';
 import { getDeveloperApiKey, getReferenceDataBaseUrl } from '@config/service-base-urls';
-import type { CommoditySpecies } from '@domain/animals/constants/commodity-species';
+import type { CommodityLine } from '@domain/animals/constants/commodity-lines';
 
 interface ListedSpecies {
   latinName: string;
@@ -26,7 +26,7 @@ export class ReferenceDataApiClient {
   }
 
   /** The common name the species' own search gives it. Throws when the search does not list the species or gives it no common name. */
-  async findCommonName(species: CommoditySpecies): Promise<string> {
+  async findCommonName(species: CommodityLine): Promise<string> {
     const { commonName } = await this.findSpecies(species);
     if (!commonName) {
       throw new Error(`Searching "${species.searchTerm}" gives ${species.latinName} under ${species.commodityCode} no common name`);
@@ -42,7 +42,7 @@ export class ReferenceDataApiClient {
     return response.groups;
   }
 
-  private async findSpecies(species: CommoditySpecies): Promise<ListedSpecies> {
+  private async findSpecies(species: CommodityLine): Promise<ListedSpecies> {
     const groups = await this.listGroups(species.searchTerm);
     const listed = groups
       .find((group) => group.code === species.commodityCode)

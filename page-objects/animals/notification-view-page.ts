@@ -1,6 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { pageLoadWait } from '@config/timeouts';
-import { type CommoditySpecies } from '@domain/animals/constants/commodity-species';
+import { speciesCardTitle, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { NotificationPage, type OpenOptions } from '@page-objects/shared/base-page';
 
 export class AnimalsNotificationViewPage extends NotificationPage {
@@ -36,8 +36,8 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.locator('.govuk-summary-card', { hasText: name });
   }
 
-  speciesCard(species: CommoditySpecies): Locator {
-    return this.summaryCard(`${species.commodityCode} — ${species.latinName}`);
+  speciesCard(line: CommodityLine): Locator {
+    return this.summaryCard(speciesCardTitle(line));
   }
 
   summaryValue(card: Locator, key: string): Locator {

@@ -1,5 +1,5 @@
 import { type Locator } from '@playwright/test';
-import { type CommoditySpecies } from '@domain/animals/constants/commodity-species';
+import { type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { SelectedCommoditiesTable } from '@page-objects/animals/selected-commodities-table';
 import { errorSummaryOn } from '@page-objects/shared/govuk-banners';
@@ -43,23 +43,23 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.caption.locator('xpath=following-sibling::*[1]');
   }
 
-  async numberOfAnimalsFor(species: CommoditySpecies): Promise<Locator> {
+  async numberOfAnimalsFor(species: CommodityLine): Promise<Locator> {
     return this.numberOfAnimals.nth(await this.speciesPosition(species));
   }
 
-  async numberOfPackagesFor(species: CommoditySpecies): Promise<Locator> {
+  async numberOfPackagesFor(species: CommodityLine): Promise<Locator> {
     return this.numberOfPackages.nth(await this.speciesPosition(species));
   }
 
-  async fillAnimalCountFor(species: CommoditySpecies, count: number): Promise<void> {
+  async fillAnimalCountFor(species: CommodityLine, count: number): Promise<void> {
     await (await this.numberOfAnimalsFor(species)).fill(String(count));
   }
 
-  async fillPackageCountFor(species: CommoditySpecies, count: number): Promise<void> {
+  async fillPackageCountFor(species: CommodityLine, count: number): Promise<void> {
     await (await this.numberOfPackagesFor(species)).fill(String(count));
   }
 
-  private async speciesPosition(species: CommoditySpecies): Promise<number> {
+  private async speciesPosition(species: CommodityLine): Promise<number> {
     const speciesHeadings = await this.page.getByRole('heading', { level: 3 }).allTextContents();
     const index = speciesHeadings.indexOf(species.latinName);
     if (index === -1) {

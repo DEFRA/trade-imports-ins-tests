@@ -1,7 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { errorSummaryOn } from '@page-objects/shared/govuk-banners';
-import type { CommoditySpecies } from '@domain/animals/constants/commodity-species';
+import type { CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { SEARCH_HINT } from '@domain/animals/constants/commodity-selection-page';
 
 export class AnimalsCommoditySelectionPage extends NotificationPage {
@@ -59,11 +59,11 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('group', { name: code, exact: true });
   }
 
-  species(species: CommoditySpecies): Locator {
+  species(species: CommodityLine): Locator {
     return this.commodityGroup(species.commodityCode).getByRole('checkbox', { name: species.latinName, exact: true });
   }
 
-  async searchAndCheckSpecies(speciesList: CommoditySpecies[]): Promise<void> {
+  async searchAndCheckSpecies(speciesList: CommodityLine[]): Promise<void> {
     for (const species of speciesList) {
       await this.search(species.searchTerm);
       await this.species(species).check();

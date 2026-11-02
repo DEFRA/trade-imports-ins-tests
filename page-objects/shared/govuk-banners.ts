@@ -5,5 +5,5 @@ export function notificationBannerTitled(page: Page, title: string): Locator {
 }
 
 export function errorSummaryOn(page: Page): Locator {
-  return page.locator('.govuk-error-summary');
+  return page.locator('.govuk-error-summary').filter({ has: page.getByRole('heading', { name: 'There is a problem' }) });
 }

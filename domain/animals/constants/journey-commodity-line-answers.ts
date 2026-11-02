@@ -1,8 +1,8 @@
-import { commoditySpecies, type CommoditySpecies } from '@domain/animals/constants/commodity-species';
+import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 
 /** One commodity line on the notification — species, counts and the identifiers that species needs. */
 export type CommodityLineAnswer = {
-  species: CommoditySpecies;
+  species: CommodityLine;
   noOfAnimals: number;
   noOfPackages?: number;
   earTag?: string;
@@ -26,12 +26,12 @@ export type PermanentAddressAnswer = {
 /** One animal per line, answering only what the frontend requires of that species. */
 export const MANDATORY_COMMODITY_LINES = {
   cattle: {
-    species: commoditySpecies.cattle,
+    species: commodityLines.cattle,
     noOfAnimals: 1,
     earTag: 'UK123456789012',
   },
   domesticCat: {
-    species: commoditySpecies.domesticCat,
+    species: commodityLines.domesticCat,
     noOfAnimals: 1,
     passportNumber: 'UK123456789',
     permanentAddress: {

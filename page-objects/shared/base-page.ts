@@ -195,7 +195,7 @@ export class NotificationPage extends BasePage {
   }
 
   get errorSummaryLinks(): Locator {
-    return this.page.getByRole('alert').getByRole('link');
+    return this.errorSummary.getByRole('link');
   }
 
   get saveAndContinue(): Locator {
