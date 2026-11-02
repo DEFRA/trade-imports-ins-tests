@@ -1,39 +1,33 @@
+import { commodityLines, speciesCardTitle } from '@domain/animals/constants/commodity-lines';
+import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { SET_BASES } from '@page-objects/shared/sets';
-import { fileUploadPaths } from '@resources/file-upload/paths';
-import { OPENING_RUN_TASKS } from '@flows/animals/journey';
+import { OPENING_RUN_TASKS, certificateDocument } from '@flows/animals/journey';
 
 import { test, expect } from '@fixtures';
 
 test.describe('Opening run', () => {
-  test('walks a cattle-by-air notification through the opening run in Design Release 2.1 order, from create to submitted', async ({
+  test('walks a cattle-by-air notification through every opening-run task, from create to submitted', async ({
     animalsJourney,
     animalsPages,
     pages,
   }) => {
     test.slow();
 
-    const journeyId = await animalsJourney.walkOpeningRunCattleByAir({
-      reference: `AWBDOC${Date.now()}`,
-      issueDate: '03/01/2026',
-      filePath: fileUploadPaths.safeFile1kbPdf,
-      type: 'VETERINARY_HEALTH_CERTIFICATE',
-    });
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/notification-view$`));
+    const referenceNumber = await animalsJourney.walkOpeningRunCattleByAir(certificateDocument('AWBDOC'));
+    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
 
-    await animalsPages.overview.open(journeyId);
-    for (const task of OPENING_RUN_TASKS) {
-      await expect(animalsPages.overview.taskStatus(task)).toHaveText('Complete');
-    }
-    await expect(animalsPages.overview.taskStatuses).toHaveCount(OPENING_RUN_TASKS.length);
+    await animalsPages.overview.open(referenceNumber);
+    await expect(animalsPages.overview.taskNames).toHaveText(OPENING_RUN_TASKS);
+    await expect(animalsPages.overview.taskStatuses).toHaveText(OPENING_RUN_TASKS.map(() => 'Complete'));
     await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
 
     const importDetails = animalsPages.notificationView.summaryCard('Import details');
-    await expect(animalsPages.notificationView.summaryValue(importDetails, 'Region of origin code')).toHaveText('FR-75');
+    await expect(animalsPages.notificationView.regionOfOriginCode).toHaveText('FR-75');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Internal reference number')).toHaveText('CATTLE-2026-01');
 
-    const speciesCard = animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus');
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText('Bos taurus');
+    const speciesCard = animalsPages.notificationView.summaryCard(speciesCardTitle(commodityLines.cattle));
+    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText(commodityLines.cattle.latinName);
     await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('2');
 
     const reasonForImport = animalsPages.notificationView.summaryCard('Reason for import');
@@ -55,6 +49,25 @@ test.describe('Opening run', () => {
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
   });
 
+  test('following Back from the main import reason and choosing Save and continue carries the run on to the main import reason, not the overview', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.toOriginOfImport();
+    await animalsJourney.fillOriginOfImport();
+    await animalsJourney.saveOriginOfImport();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+    await animalsPages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.species]);
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
+
+    await animalsPages.importReason.linkBack.click();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
+  });
+
   test('ends the opening run on the review page, naming what is outstanding, when the notification is incomplete', async ({
     animalsJourney,
     animalsPages,
@@ -62,18 +75,18 @@ test.describe('Opening run', () => {
   }) => {
     test.slow();
 
-    const journeyId = await animalsJourney.walkOpeningRunToRolesAndAddressesWithoutCph();
+    const referenceNumber = await animalsJourney.walkOpeningRunToRolesAndAddressesWithoutCph();
 
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.contactAddress.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/consignment/contact/select`));
+    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/consignment/contact/select`));
 
     await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
     await animalsPages.contactAddress.saveAndContinue.click();
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/notification-view$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete reason for import');
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete roles and addresses');
 

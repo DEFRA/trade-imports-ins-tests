@@ -1,6 +1,7 @@
 import { type Locator } from '@playwright/test';
 import type { SortByValue } from '@domain/animals/constants/sort-by-values';
 import { BasePage } from '@page-objects/shared/base-page';
+import { AMEND_REFUSED_MESSAGE } from '@page-objects/shared/dashboard-copy';
 import { SET_BASES } from '@page-objects/shared/sets';
 
 export type ResultsRange = {
@@ -48,9 +49,11 @@ export class AnimalsDashboardPage extends BasePage {
     return this.page.locator('.notification-list__results');
   }
 
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
+  get deletedBanner(): Locator {
+    return this.page.getByText('The notification has been deleted.');
   }
+
+  readonly amendRefusedMessage = AMEND_REFUSED_MESSAGE;
 
   get notificationCards(): Locator {
     return this.page.locator('.govuk-summary-card');
@@ -58,6 +61,10 @@ export class AnimalsDashboardPage extends BasePage {
 
   notificationCard(reference: string): Locator {
     return this.notificationCards.filter({ hasText: reference });
+  }
+
+  cardStatusTag(reference: string): Locator {
+    return this.cardField(this.notificationCard(reference), 'Status').locator('.govuk-tag');
   }
 
   notificationCardAt(index: number): Locator {
@@ -88,7 +95,6 @@ export class AnimalsDashboardPage extends BasePage {
     await this.page.getByLabel('Keyword or reference').waitFor();
   }
 
-  /** Server-side dashboard search via GET ?referenceNumber=. */
   async searchForReference(referenceNumber: string): Promise<void> {
     await this.inputReferenceSearch.fill(referenceNumber);
     await Promise.all([

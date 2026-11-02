@@ -6,15 +6,15 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     animalsPages,
     runA11yScan,
   }) => {
-    const journeyId = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
 
     await test.step('Consignment addresses with Change and Edit details on every role', async () => {
-      await animalsSeededJourney.resumeInUi(journeyId, animalsPages.addresses);
+      await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
       await runA11yScan();
     });
 
     await test.step('Edit address details, filled with the copy', async () => {
-      await animalsPages.addresses.editPartyDetails('Consignor or exporter').click();
+      await animalsPages.addresses.editPartyDetails('Consignor').click();
       await animalsPages.consignorEdit.heading.waitFor();
       await runA11yScan();
     });
@@ -27,7 +27,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Contact address with the current contact shown', async () => {
-      await animalsSeededJourney.resumeInUi(journeyId, animalsPages.contactAddress);
+      await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
       await animalsPages.contactAddress.currentContact.waitFor();
       await runA11yScan();
     });

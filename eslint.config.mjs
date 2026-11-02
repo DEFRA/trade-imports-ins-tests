@@ -1,5 +1,6 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import { codeQuality } from './eslint-rules/code-quality.js';
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -12,8 +13,12 @@ export default tseslint.config(
     },
   },
   {
+    plugins: { 'code-quality': codeQuality },
     rules: {
       '@typescript-eslint/no-floating-promises': 'error',
+      'code-quality/no-tracking-references': 'error',
+      'code-quality/no-silent-catch': 'error',
+      'code-quality/no-message-only-error-log': 'error',
     },
   },
   {
@@ -49,7 +54,9 @@ export default tseslint.config(
       'allure-results',
       'allure-report',
       'zap-report',
+      '.playwright-cli',
       '*.mjs',
+      'eslint-rules',
     ],
   },
 );

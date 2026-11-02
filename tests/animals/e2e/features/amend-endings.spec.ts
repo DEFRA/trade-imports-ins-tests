@@ -1,13 +1,13 @@
 import { test, expect } from '@fixtures';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
+const UPLOAD_DOCUMENTS_TASK = 'Upload documents';
 const CHANGE_IMPORT_DETAILS = 'Change import details';
 const AMENDED_REFERENCE = 'AMENDED-REF';
 const AMEND = 'Amend';
 
 test.describe('Amendment page endings', () => {
   test('a page opened from Overview while amending ends with Save and return and Save and continue, then Save and return to overview on its own line, with no cancel link, and Back goes to Overview', async ({
-    pages,
     animalsPages,
     animalsSeededJourney,
   }) => {
@@ -16,10 +16,10 @@ test.describe('Amendment page endings', () => {
     await animalsPages.overview.task(ARRIVAL_DETAILS_TASK).click();
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
 
-    const buttonGroup = pages.page.locator('.govuk-button-group');
-    await expect(buttonGroup.getByRole('button', { name: 'Save and return', exact: true })).toBeVisible();
-    await expect(buttonGroup.getByRole('button', { name: 'Save and continue', exact: true })).toBeVisible();
-    await expect(buttonGroup.getByRole('button', { name: 'Save and return to overview', exact: true })).toHaveCount(0);
+    const { arrivalDetails } = animalsPages;
+    await expect(arrivalDetails.buttonGroup.filter({ has: arrivalDetails.saveAndReturn })).toBeVisible();
+    await expect(arrivalDetails.buttonGroup.filter({ has: arrivalDetails.saveAndContinue })).toBeVisible();
+    await expect(arrivalDetails.buttonGroup.getByRole('button')).toHaveCount(2);
     await expect(animalsPages.arrivalDetails.saveAndReturnToOverview).toBeVisible();
     await expect(animalsPages.arrivalDetails.cancelAndReturnToOverview).toHaveCount(0);
     await expect(animalsPages.arrivalDetails.cancelAmend).toBeVisible();
@@ -27,6 +27,21 @@ test.describe('Amendment page endings', () => {
 
     await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
+  });
+
+  test('Upload documents opened from Overview while amending has a Back link to the review', async ({
+    animalsPages,
+    animalsSeededJourney,
+  }) => {
+    const reference = await animalsSeededJourney.createAmendNotification();
+    await animalsPages.overview.open(reference);
+    await animalsPages.overview.task(UPLOAD_DOCUMENTS_TASK).click();
+    await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
+
+    await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', animalsPages.notificationView.expectedUrl(reference));
+
+    await animalsPages.accompanyingDocuments.linkBack.click();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
   });
 
   test('Save and return from a Change link goes back to the amend review showing the changed answer', async ({
@@ -97,7 +112,7 @@ test.describe('Amendment page endings', () => {
   });
 
   test('outside an amendment the CPH number page keeps its single primary button', async ({ animalsPages, animalsSeededJourney }) => {
-    const reference = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const reference = await animalsSeededJourney.createDraftNotification();
 
     await animalsPages.cphNumber.open(reference);
     await expect(animalsPages.cphNumber.saveAndContinue).toBeVisible();

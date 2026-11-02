@@ -1,5 +1,7 @@
 import { type Locator } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import { DatePicker } from '@page-objects/shared/date-picker';
+import { TypeAhead } from '@page-objects/shared/type-ahead';
 
 export class AnimalsArrivalDetailsPage extends NotificationPage {
   constructor(page: ConstructorParameters<typeof NotificationPage>[0]) {
@@ -10,63 +12,24 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Arrival details' });
   }
 
-  // Progressive enhancement swaps the native <select> for an
-  // accessible-autocomplete combobox that keeps the field's id and label.
-  get portOfEntry(): Locator {
-    return this.page.getByLabel('Port of entry', { exact: true });
+  get portOfEntry(): TypeAhead {
+    return new TypeAhead(this.page, 'portOfEntry');
   }
 
-  // The native <select> behind the enhancement — hidden and renamed with a
-  // "-select" suffix, it still submits the selected port code.
-  get portOfEntryValue(): Locator {
-    return this.page.locator('select#portOfEntry-select');
-  }
-
-  get portOfEntryHint(): Locator {
-    return this.page.locator('#portOfEntry-hint');
-  }
-
-  // The native select's empty option, which carries the placeholder text.
-  get portOfEntryPlaceholderOption(): Locator {
-    return this.portOfEntryValue.locator('option[value=""]');
-  }
-
-  // The label of one question, addressed by the field id it labels.
-  questionLabel(fieldId: string): Locator {
-    return this.page.locator(`label[for="${fieldId}"]`);
-  }
-
-  get transportIdentificationHintLead(): Locator {
-    return this.page.locator('#transportIdentification-hint p');
-  }
-
-  // One port in the native select, addressed by the code it submits.
-  portOption(code: string): Locator {
-    return this.portOfEntryValue.locator(`option[value="${code}"]`);
-  }
-
-  // Every port offered, skipping the empty placeholder option.
-  get portOptions(): Locator {
-    return this.portOfEntryValue.locator('option:not([value=""])');
-  }
-
-  // Drive the type-ahead the way a user does: type to filter, then pick the
-  // matching option by its "{name} - {code}" label. Without JavaScript the
-  // field is still the native select, chosen by option label.
-  async selectPort(label: string): Promise<void> {
-    await this.page.waitForLoadState('domcontentloaded');
-    if ((await this.portOfEntry.evaluate((el) => el.tagName)) === 'SELECT') {
-      await this.portOfEntry.selectOption({ label });
-      return;
-    }
-    await this.portOfEntry.click();
-    await this.portOfEntry.fill(label);
-    await this.page.getByRole('option', { name: label, exact: true }).click();
-  }
-
-  // Means of transport is a <select> labelled by its visible question text.
   get meansOfTransport(): Locator {
     return this.page.getByLabel('Means of transport to the port of entry', { exact: true });
+  }
+
+  get meansOfTransportOptions(): Locator {
+    return this.meansOfTransport.locator('option');
+  }
+
+  get transportIdentificationLeadIn(): Locator {
+    return this.fieldHint('transportIdentification').locator('p');
+  }
+
+  get transportIdentificationItems(): Locator {
+    return this.fieldHint('transportIdentification').locator('li');
   }
 
   get transportIdentification(): Locator {
@@ -85,27 +48,11 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.page.locator('#arrivalDateAtPort-error');
   }
 
-  get meansOfTransportError(): Locator {
-    return this.page.locator('#meansOfTransport-error');
-  }
-
-  get meansOfTransportErrorLink(): Locator {
-    return this.page.getByRole('link', { name: 'Select a means of transport to the port of entry' });
-  }
-
-  get datePicker(): Locator {
-    return this.page.locator('[data-module="moj-date-picker"]');
+  get arrivalDatePicker(): DatePicker {
+    return new DatePicker(this.page, 'arrivalDateAtPort');
   }
 
   async fillArrivalDate(date: string): Promise<void> {
     await this.arrivalDate.fill(date);
-  }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
-  }
-
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
   }
 }

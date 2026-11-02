@@ -7,10 +7,12 @@ import { AnimalsArrivalDetailsPage } from '@page-objects/animals/arrival-details
 import { AnimalsCommercialTransporterPage } from '@page-objects/animals/commercial-transporter-page';
 import { AnimalsCommoditySelectionPage } from '@page-objects/animals/commodity-selection-page';
 import { AnimalsConsignmentDetailsPage } from '@page-objects/animals/consignment-details-page';
+import { AnimalsConfirmationPage } from '@page-objects/animals/confirmation-page';
 import { AnimalsContactAddressPage } from '@page-objects/animals/contact-address-page';
 import { AnimalsCphNumberPage } from '@page-objects/animals/cph-number-page';
 import { AnimalsDashboardPage } from '@page-objects/animals/dashboard-page';
 import { AnimalsDeclarationPage } from '@page-objects/animals/declaration-page';
+import { AnimalsDeleteNotificationPage } from '@page-objects/animals/delete-notification-page';
 import { AnimalsImportReasonPage } from '@page-objects/animals/import-reason-page';
 import { AnimalsNotificationCancelAmendPage } from '@page-objects/animals/notification-cancel-amend-page';
 import { AnimalsNotificationViewPage } from '@page-objects/animals/notification-view-page';
@@ -36,12 +38,12 @@ export function createAnimalsPages(page: Page) {
     additionalDetails: new AnimalsAdditionalDetailsPage(page),
     accompanyingDocuments: new AnimalsAccompanyingDocumentsPage(page),
     addresses: new AnimalsAddressesPage(page),
-    consignorSelection: new AnimalsPartyPickerPage(page, 'consignors/select', 'Consignor or exporter'),
+    consignorSelection: new AnimalsPartyPickerPage(page, 'consignors/select', 'Consignor'),
     destinationSelection: new AnimalsPartyPickerPage(page, 'destinations/select', 'Place of destination'),
     placeOfOriginSelection: new AnimalsPartyPickerPage(page, 'place-of-origin/select', 'Place of origin'),
     consigneeSelection: new AnimalsPartyPickerPage(page, 'consignees/select', 'Consignee'),
     importerSelection: new AnimalsPartyPickerPage(page, 'importers/select', 'Importer'),
-    consignorEdit: new AnimalsPartyEditPage(page, 'consignors/edit', 'Consignor or exporter'),
+    consignorEdit: new AnimalsPartyEditPage(page, 'consignors/edit', 'Consignor'),
     destinationEdit: new AnimalsPartyEditPage(page, 'destinations/edit', 'Place of destination'),
     placeOfOriginEdit: new AnimalsPartyEditPage(page, 'place-of-origin/edit', 'Place of origin'),
     consigneeEdit: new AnimalsPartyEditPage(page, 'consignees/edit', 'Consignee'),
@@ -58,6 +60,8 @@ export function createAnimalsPages(page: Page) {
     contactAddressEdit: new AnimalsPartyEditPage(page, 'consignment/contact/edit', 'Contact address for consignment'),
     notificationView: new AnimalsNotificationViewPage(page),
     declaration: new AnimalsDeclarationPage(page),
+    confirmation: new AnimalsConfirmationPage(page),
+    deleteNotification: new AnimalsDeleteNotificationPage(page),
     notificationCancelAmend: new AnimalsNotificationCancelAmendPage(page),
   };
 }

@@ -1,5 +1,6 @@
 import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
+import { AMEND_REFUSED_MESSAGE } from '@page-objects/shared/dashboard-copy';
 import { SET_BASES } from '@page-objects/shared/sets';
 
 export class PlantsDashboardPage extends BasePage {
@@ -13,10 +14,6 @@ export class PlantsDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: 'Start a new notification' });
   }
 
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
-
   get inputReferenceSearch(): Locator {
     return this.page.getByLabel('Keyword or reference');
   }
@@ -25,12 +22,6 @@ export class PlantsDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: 'Search', exact: true });
   }
 
-  /**
-   * Server-side dashboard search via GET ?referenceNumber=, an exact match on a
-   * complete reference. The listing is paginated over every notification the
-   * backend holds, not just this session's, so a spec that wants to see its own
-   * card narrows the listing to it first rather than hunting the pages.
-   */
   async searchForReference(referenceNumber: string): Promise<void> {
     await this.inputReferenceSearch.fill(referenceNumber);
     await Promise.all([
@@ -47,7 +38,7 @@ export class PlantsDashboardPage extends BasePage {
     return this.notificationCards.filter({ hasText: reference });
   }
 
-  statusTag(reference: string): Locator {
+  cardStatusTag(reference: string): Locator {
     return this.notificationCard(reference)
       .locator('dt')
       .filter({ hasText: 'Status' })
@@ -55,14 +46,12 @@ export class PlantsDashboardPage extends BasePage {
       .locator('.govuk-tag');
   }
 
-  /**
-   * The card's action links come from govukSummaryList's own card macro, which appends
-   * the card title in brackets as visually hidden text — so the accessible name is
-   * "Resume (25-ABC123)", not the animals dashboard's "Resume notification 25-ABC123".
-   * That dashboard hand-rolls its summary card; this one stays in the govuk toolbox.
-   */
   private cardAction(reference: string, text: string): Locator {
     return this.notificationCard(reference).getByRole('link', { name: `${text} (${reference})`, exact: true });
+  }
+
+  view(reference: string): Locator {
+    return this.cardAction(reference, 'View');
   }
 
   resume(reference: string): Locator {
@@ -73,9 +62,15 @@ export class PlantsDashboardPage extends BasePage {
     return this.cardAction(reference, 'Delete');
   }
 
-  get deletedBanner(): Locator {
-    return this.page.locator('.govuk-notification-banner');
+  amend(reference: string): Locator {
+    return this.notificationCard(reference).getByRole('button', { name: `Amend notification ${reference}`, exact: true });
   }
+
+  get deletedBanner(): Locator {
+    return this.page.getByRole('alert', { name: 'Notification deleted' });
+  }
+
+  readonly amendRefusedMessage = AMEND_REFUSED_MESSAGE;
 
   get emptyState(): Locator {
     return this.page.getByText('You have not started any notifications in this session.');

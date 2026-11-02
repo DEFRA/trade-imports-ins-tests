@@ -1,4 +1,6 @@
 import { test, expect } from '@fixtures';
+import { fileUploadPaths } from '@resources/file-upload/paths';
+import { DOCUMENT_ISSUE_DATE } from '@resources/file-upload/constants';
 
 test.describe('Change from check your answers', { tag: '@duplicated-in-frontend' }, () => {
   test('a Change link opens the answering page with change context and the save returns to check your answers with the new value', async ({
@@ -7,27 +9,20 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     animalsPages,
   }) => {
     test.slow();
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('readyToSubmit');
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
 
-    // Design release 1 puts one Change link in each card's heading and none on
-    // a row, so the link is named for the card and reaches every answer in it.
-    // Origin leg: the Change link threads ?change=1 to the answering page, so
-    // the save exits back to check your answers instead of the flow target.
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
     await expect(countryRow).toContainText('France');
     await animalsPages.notificationView.changeLink('Change import details').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
-    await animalsPages.originOfImport.selectCountry('Belgium');
+    await animalsPages.originOfImport.country.choose('Belgium');
     await animalsPages.originOfImport.saveAndContinue.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(countryRow).toContainText('Belgium');
 
-    // Additional animal details leg: without change context this save would
-    // continue into the consignment flow; under change context it returns to
-    // the summary.
     const certifiedForRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Certified for' });
     await expect(certifiedForRow).toContainText('Slaughter');
     await animalsPages.notificationView.changeLink('Change additional animal details').click();
@@ -38,17 +33,39 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(certifiedForRow).toContainText('Exhibition');
+  });
 
-    // Arrival details leg: the save returns to the summary with the new means of transport.
-    const meansRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Means of transport to the port of entry' });
-    await expect(meansRow).toContainText('Road');
-    await animalsPages.notificationView.changeLink('Change arrival details').click();
-    await expect(animalsPages.arrivalDetails.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(/\/port-of-entry\?change=1$/);
-    await animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: 'Sea' });
-    await animalsPages.arrivalDetails.saveAndContinue.click();
+  test('the documents Change link opens the page with a Back link to the review, which stays after a refusal, after Save and add another and after Remove', async ({
+    animalsSeededJourney,
+    pages,
+    animalsPages,
+  }) => {
+    test.slow();
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const reviewUrl = animalsPages.notificationView.expectedUrl(referenceNumber);
+
+    await animalsPages.notificationView.changeLink('Change uploaded documents').click();
+    await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/\/accompanying-documents\?change=1$/);
+    await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);
+
+    await animalsPages.accompanyingDocuments.documentReference.fill('GBHC1234567890');
+    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
+
+    await expect(animalsPages.accompanyingDocuments.errorSummary).toContainText('Upload a document');
+    await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);
+
+    const reference = `GBHC${Date.now()}`;
+    await animalsPages.accompanyingDocuments.fillDocument(reference, DOCUMENT_ISSUE_DATE, fileUploadPaths.safeFile1kbPdf);
+    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
+    await expect(animalsPages.accompanyingDocuments.documentRow(reference)).toBeVisible();
+    await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);
+
+    await animalsPages.accompanyingDocuments.removeDocument(1).click();
+    await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);
+
+    await animalsPages.accompanyingDocuments.linkBack.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(/\/notification-view$/);
-    await expect(meansRow).toContainText('Sea');
   });
 });

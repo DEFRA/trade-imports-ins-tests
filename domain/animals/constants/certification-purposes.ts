@@ -1,7 +1,5 @@
 export const certificationPurposes = {
-  approvedBodies: 'approvedBodies',
-  breedingAndOrProduction: 'breedingAndOrProduction',
-  slaughter: 'slaughter',
+  slaughter: { value: 'slaughter', display: 'Slaughter' },
 } as const;
 
 export type CertificationPurpose = (typeof certificationPurposes)[keyof typeof certificationPurposes];

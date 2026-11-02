@@ -1,3 +1,4 @@
+import { commodityLines, speciesCardTitle } from '@domain/animals/constants/commodity-lines';
 import { test, expect } from '@fixtures';
 
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
@@ -7,7 +8,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
   test.describe('DRAFT', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
       await animalsSeededJourney.createDraftNotification('unlocked');
-      await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
+      await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
     });
 
     test('renders the recorded answers in the numbered design sections', async ({ pages, animalsPages }) => {
@@ -21,12 +22,12 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toBeVisible();
       await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
       await expect(animalsPages.notificationView.summaryCard('Import details')).toContainText('France');
-      await expect(animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus')).toContainText('Number of animals');
+      await expect(animalsPages.notificationView.summaryCard(speciesCardTitle(commodityLines.cattle))).toContainText('Number of animals');
     });
 
     test('shows the Draft strip with the notification reference', async ({ animalsPages, journeyContext }) => {
-      await expect(animalsPages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Draft');
-      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.journeyId);
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Draft');
+      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.referenceNumber);
     });
 
     test('shows Change links for the recorded answers', async ({ animalsPages }) => {
@@ -53,8 +54,8 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
 
   test.describe('DRAFT ready to submit', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
-      await animalsSeededJourney.createDraftNotification('readyToSubmit');
-      await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
+      await animalsSeededJourney.createDraftNotification();
+      await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
     });
 
     test('shows no error summary once every section is answered', async ({ animalsPages }) => {
@@ -72,13 +73,13 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
   test.describe('SUBMITTED', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
       await animalsSeededJourney.createSubmittedNotification();
-      await animalsNotificationActions.toNotificationView(journeyContext.journeyId);
+      await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
     });
 
     test('lands on the view page with the Submitted strip and reference', async ({ pages, animalsPages, journeyContext }) => {
-      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(journeyContext.journeyId)}$`));
-      await expect(animalsPages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Submitted');
-      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.journeyId);
+      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(journeyContext.referenceNumber)}$`));
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
+      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.referenceNumber);
     });
 
     test('offers Copy as new and Delete on the read-only view', async ({ pages, animalsPages }) => {
@@ -88,7 +89,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('copies the submitted notification to a new draft', async ({ animalsPages, journeyContext }) => {
-      const originalReferenceNumber = journeyContext.journeyId;
+      const originalReferenceNumber = journeyContext.referenceNumber;
       await animalsPages.notificationView.btnCopyAsNew.click();
 
       await animalsPages.overview.heading.waitFor();
@@ -101,7 +102,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
 
     test('still renders the recorded answers after submission', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.summaryCard('Import details')).toContainText('France');
-      await expect(animalsPages.notificationView.summaryCard('Cow (0102) — Bos taurus')).toBeVisible();
+      await expect(animalsPages.notificationView.summaryCard(speciesCardTitle(commodityLines.cattle))).toBeVisible();
     });
   });
 });

@@ -19,9 +19,9 @@ test.describe('Notification withdrawal outbox event', { tag: '@mongodb' }, () =>
   }) => {
     test.slow();
     await animalsJourney.startNotification();
-    await animalsNotificationActions.deleteNotification(journeyContext.journeyId);
+    await animalsNotificationActions.deleteNotification(journeyContext.referenceNumber);
 
-    const aggregateId = aggregateIdFor(journeyContext.journeyId);
+    const aggregateId = aggregateIdFor(journeyContext.referenceNumber);
     const client = new MongoDbClient();
 
     try {

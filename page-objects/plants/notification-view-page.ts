@@ -12,14 +12,14 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
   get btnContinue(): Locator {
     return this.page.getByRole('button', { name: 'Continue', exact: true });
   }
+  get btnDelete(): Locator {
+    return this.page.getByRole('button', { name: 'Delete notification', exact: true });
+  }
   get changeLinks(): Locator {
     return this.page.getByRole('link', { name: /^Change/ });
   }
   get lateBanner(): Locator {
     return this.page.getByRole('heading', { name: 'Your notification was made outside the required timing', exact: true });
-  }
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
   }
   card(title: string): Locator {
     return this.page.locator('.govuk-summary-card').filter({ has: this.page.getByRole('heading', { name: title, exact: true }) });
@@ -32,6 +32,10 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
     return this.card(cardTitle)
       .locator('.govuk-summary-list__row')
       .filter({ has: this.page.locator('.govuk-summary-list__key').getByText(key, { exact: true }) });
+  }
+  /** Picks another address for the role; Edit details changes the copy this notification holds. */
+  changeAddress(cardTitle: string): Locator {
+    return this.card(cardTitle).getByRole('link', { name: /^Change/ });
   }
   /** Edits the copy this notification holds; the card's Change picks another address. */
   editDetails(cardTitle: string): Locator {

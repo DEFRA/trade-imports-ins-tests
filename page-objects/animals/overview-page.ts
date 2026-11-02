@@ -10,11 +10,10 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Overview' });
   }
 
-  /**
-   * Design release 1 reaches the review from a primary button under the task
-   * list rather than from a task row, and offers it whatever the notification
-   * still owes.
-   */
+  get numberedSectionHeadings(): Locator {
+    return this.page.getByRole('heading', { level: 3, name: /^\d+\. / });
+  }
+
   get reviewAndSubmitButton(): Locator {
     return this.page.getByRole('button', { name: 'Review and submit' });
   }
@@ -23,7 +22,17 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.page.getByRole('link', { name, exact: true });
   }
 
-  // Every task row's status tag, so a spec can count the rows the overview draws.
+  taskTitlesInSectionHeaded(heading: string): Locator {
+    return this.page
+      .getByRole('heading', { level: 3, name: heading, exact: true })
+      .locator('xpath=following-sibling::ul[contains(@class, "app-task-list")][1]')
+      .getByRole('link');
+  }
+
+  get taskNames(): Locator {
+    return this.page.locator('.govuk-task-list__link');
+  }
+
   get taskStatuses(): Locator {
     return this.page.locator('.govuk-task-list__status');
   }
@@ -33,5 +42,15 @@ export class AnimalsOverviewPage extends NotificationPage {
       .locator('.govuk-task-list__item')
       .filter({ has: this.page.getByRole('link', { name, exact: true }) })
       .locator('.govuk-task-list__status');
+  }
+
+  async taskStatusAfterReopening(referenceNumber: string, name: string): Promise<Locator> {
+    await this.open(referenceNumber);
+    return this.taskStatus(name);
+  }
+
+  async openTaskAfterReopening(referenceNumber: string, name: string): Promise<void> {
+    await this.open(referenceNumber);
+    await this.task(name).click();
   }
 }

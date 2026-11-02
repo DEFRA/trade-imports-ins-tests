@@ -5,7 +5,7 @@ import { test, expect } from '@fixtures';
  * The plants reference carries the agreed GBN-HRP type code: the backend's
  * ReferenceNumberGenerator mints GBN-HRP-{YY}-{XXXXXX} over a Crockford-style
  * alphabet, and the frontend's real records adapter carries it through as the
- * journey id. Assert the shape, never a literal — the body is random.
+ * notification URL's reference number. Assert the shape, never a literal — the body is random.
  */
 const PLANTS_REFERENCE = /^GBN-HRP-\d{2}-[0-9A-HJ-KM-NP-TV-Z]{6}$/;
 
@@ -47,7 +47,7 @@ test.describe('High-risk plants start section', () => {
 
     await expect(plantsPages.overview.journeyStrip).toBeVisible();
     await expect(plantsPages.overview.statusTag).toHaveText('Draft');
-    await expect(plantsPages.overview.reference).toHaveText(reference);
+    await expect(plantsPages.overview.notificationReference).toHaveText(reference);
     await expect(plantsPages.overview.cancelAmend).toHaveCount(0);
 
     // All four groups have landed a row, and a group with no rows is not
@@ -77,7 +77,7 @@ test.describe('High-risk plants start section', () => {
     // consignor row is conditional and is hidden entirely while it is NA.
     await expect(plantsPages.overview.taskRowByTitle('Identification numbers')).toContainText('Cannot start yet');
     await expect(plantsPages.overview.taskRowLink('Identification numbers')).toHaveCount(0);
-    await expect(plantsPages.overview.taskRowByTitle('Consignor or exporter')).toHaveCount(0);
+    await expect(plantsPages.overview.taskRowByTitle('Consignor')).toHaveCount(0);
 
     // Check and submit is blocked until every other row is complete, so on a
     // notification with nothing answered it is blocked and carries no link.
@@ -95,7 +95,7 @@ test.describe('High-risk plants start section', () => {
     await plantsPages.dashboard.searchForReference(reference);
 
     await expect(plantsPages.dashboard.notificationCard(reference)).toBeVisible();
-    await expect(plantsPages.dashboard.statusTag(reference)).toHaveText('Draft');
+    await expect(plantsPages.dashboard.cardStatusTag(reference)).toHaveText('Draft');
 
     await plantsPages.dashboard.resume(reference).click();
 
@@ -121,7 +121,7 @@ test.describe('High-risk plants start section', () => {
 
     await plantsPages.dashboard.searchForReference(reference);
     await expect(plantsPages.dashboard.notificationCard(reference)).toBeVisible();
-    await expect(plantsPages.dashboard.statusTag(reference)).toHaveText('Draft');
+    await expect(plantsPages.dashboard.cardStatusTag(reference)).toHaveText('Draft');
   });
 
   test('Yes, delete notification soft-deletes it and drops it from the listing', async ({ pages, plantsPages, plantsJourney }) => {
@@ -130,7 +130,7 @@ test.describe('High-risk plants start section', () => {
     await plantsJourney.returnToDashboard();
     await plantsJourney.deleteFromDashboard(reference);
 
-    await plantsPages.deleteNotification.btnConfirm.click();
+    await plantsPages.deleteNotification.confirmDelete.click();
 
     await expect(pages.page).toHaveURL(`${plantsPages.dashboard.expectedUrl}?deleted=1`);
     await expect(plantsPages.dashboard.deletedBanner).toContainText('Notification deleted');

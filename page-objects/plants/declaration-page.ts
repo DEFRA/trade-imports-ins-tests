@@ -1,9 +1,14 @@
 import type { Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
+import { DeclarationContent } from '@page-objects/shared/declaration-content';
 
 export class PlantsDeclarationPage extends PlantsNotificationPage {
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
     super(page, 'declaration');
+  }
+
+  get content(): DeclarationContent {
+    return new DeclarationContent(this.page);
   }
 
   get heading(): Locator {
@@ -17,8 +22,5 @@ export class PlantsDeclarationPage extends PlantsNotificationPage {
   }
   get btnContinue(): Locator {
     return this.page.getByRole('button', { name: 'Continue', exact: true });
-  }
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
   }
 }

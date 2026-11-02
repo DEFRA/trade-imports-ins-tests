@@ -29,6 +29,8 @@ const HTTP_STATUS_BAD_REQUEST = 400;
 
 const BODY_EXCERPT_LENGTH = 2000;
 
+const GET_RETRIES_AFTER_RESET = 2;
+
 const isRedirect = (response: APIResponse): boolean =>
   response.status() >= HTTP_STATUS_MULTIPLE_CHOICES && response.status() < HTTP_STATUS_BAD_REQUEST;
 
@@ -50,7 +52,7 @@ export class FrontendFormClient {
       return this.crumb;
     }
 
-    const landing = await this.request.get(CRUMB_MINT_PATH, { maxRedirects: 0 });
+    const landing = await this.request.get(CRUMB_MINT_PATH, { maxRedirects: 0, maxRetries: GET_RETRIES_AFTER_RESET });
     if (landing.status() !== HTTP_STATUS_OK) {
       throw new Error(
         `GET ${CRUMB_MINT_PATH} answered ${landing.status()} (${landing.headers().location ?? 'no Location'}) instead of the dashboard. ` +
@@ -69,7 +71,7 @@ export class FrontendFormClient {
   }
 
   async getPageHtml(path: string): Promise<string> {
-    const response = await this.request.get(path, { maxRedirects: 0 });
+    const response = await this.request.get(path, { maxRedirects: 0, maxRetries: GET_RETRIES_AFTER_RESET });
     if (response.status() !== HTTP_STATUS_OK) {
       throw new Error(
         `GET ${path} answered ${response.status()} (${response.headers().location ?? 'no Location'}) instead of rendering the page.`,

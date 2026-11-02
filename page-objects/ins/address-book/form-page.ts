@@ -1,5 +1,6 @@
 import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
+import { ADDRESS_FORM_FIELD_LABELS } from '@domain/ins/constants/address-form';
 
 export type AddressDetails = {
   name: string;
@@ -13,56 +14,68 @@ export type AddressDetails = {
   phone: string;
 };
 
-/**
- * The Standard Address Block form, shared by add and edit — both render the
- * same fields against the same schema, so only the URL, the heading and the
- * submit button differ. Optional fields are filled with the empty string when
- * omitted so that editing can clear a value that is already stored.
- */
 export abstract class InsAddressBookFormPage extends BasePage {
   get inputName(): Locator {
-    return this.page.getByLabel('Name or organisation name');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.name, { exact: true });
+  }
+
+  sectionHeading(name: 'Address' | 'Contact details'): Locator {
+    return this.page.getByRole('heading', { level: 2, name, exact: true });
+  }
+
+  /** The form's text inputs in page order. */
+  get textboxes(): Locator {
+    return this.page.getByRole('main').getByRole('textbox');
+  }
+
+  /** The label of every field on the form, in page order. */
+  get fieldLabels(): Locator {
+    return this.page.getByRole('main').locator('form label');
+  }
+
+  get countryOptions(): Locator {
+    return this.selectCountry.getByRole('option');
   }
 
   get inputAddressLine1(): Locator {
-    return this.page.getByLabel('Address line 1');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.addressLine1);
   }
 
   get inputAddressLine2(): Locator {
-    return this.page.getByLabel('Address line 2 (optional)');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.addressLine2);
   }
 
   get inputTownOrCity(): Locator {
-    return this.page.getByLabel('Town or city');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.townOrCity);
   }
 
   get inputCounty(): Locator {
-    return this.page.getByLabel('County (optional)');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.county);
   }
 
   get inputPostcode(): Locator {
-    return this.page.getByLabel('Postcode or Zip code');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.postcode);
   }
 
   get selectCountry(): Locator {
-    return this.page.getByLabel('Country');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.country);
   }
 
-  // Every country offered, skipping the empty placeholder option.
-  get countryOptions(): Locator {
-    return this.selectCountry.locator('option:not([value=""])');
+  get selectedCountryOption(): Locator {
+    return this.selectCountry.locator('option:checked');
   }
 
   get inputEmail(): Locator {
-    return this.page.getByLabel('Email address');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.email);
   }
 
   get inputPhone(): Locator {
-    return this.page.getByLabel('Phone number');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.phone);
   }
 
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
+  /** The error summary's link to a field, matched on the whole message. */
+  errorSummaryLink(message: string): Locator {
+    return this.errorSummary.getByRole('link', { name: message, exact: true });
   }
 
   async fill(details: AddressDetails): Promise<void> {

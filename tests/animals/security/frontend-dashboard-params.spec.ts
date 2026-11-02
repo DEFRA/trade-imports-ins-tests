@@ -7,11 +7,11 @@ test.describe('Security scan (frontend, dashboard parameters)', { tag: '@active'
     // server-side search, sort and paging are unattackable until a request
     // carrying each one reaches the proxy. The submitted journeys elsewhere in
     // this suite only ever land on the unparameterised dashboard.
-    const journeyId = await animalsJourney.startNotification();
+    const referenceNumber = await animalsJourney.startNotification();
 
     await animalsJourney.toNotificationDashboard();
-    await animalsPages.dashboard.searchForReference(journeyId);
-    await expect(animalsPages.dashboard.notificationCard(journeyId)).toBeVisible();
+    await animalsPages.dashboard.searchForReference(referenceNumber);
+    await expect(animalsPages.dashboard.notificationCard(referenceNumber)).toBeVisible();
 
     await animalsPages.dashboard.openDashboardPage(1);
     await animalsPages.dashboard.sortBy(sortByValues.dateCreatedOldestToNewest);

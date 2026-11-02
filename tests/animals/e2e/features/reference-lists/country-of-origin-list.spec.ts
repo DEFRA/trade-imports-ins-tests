@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
-import { originPageCountryNames } from '@domain/shared/fixtures/reference-data';
+import { countryAndSubdivisionNamesWithCountry } from '@resources/reference-data/reference-data';
+import { ORIGIN_COUNTRY_SELECT_TEXT } from '@domain/animals/constants/origin-page';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Country of origin list', () => {
@@ -7,13 +8,36 @@ test.describe('Country of origin list', () => {
     skipUnlessComposeEnvironment("the list is the stub's MDM fixture, which only the compose stack is sure to serve");
   });
 
-  test('the country of origin list offers the captured origin countries and territories, by name', async ({
-    animalsJourney,
-    animalsPages,
-  }) => {
-    await animalsJourney.startNotification();
-    await animalsPages.overview.task('Where is this consignment coming from?').click();
+  for (const javaScriptEnabled of [true, false]) {
+    test.describe(`with JavaScript ${javaScriptEnabled ? 'on' : 'off'}`, () => {
+      test.use({ javaScriptEnabled });
 
-    await expect(animalsPages.originOfImport.countryOptions).toHaveText(originPageCountryNames());
+      test('the country of origin list offers the captured origin countries and territories, each territory named with its country', async ({
+        animalsJourney,
+        animalsPages,
+      }) => {
+        await animalsJourney.startNotification();
+        await animalsPages.overview.task('Where is this consignment coming from?').click();
+
+        await expect(animalsPages.originOfImport.country.options).toHaveText([
+          ORIGIN_COUNTRY_SELECT_TEXT,
+          ...countryAndSubdivisionNamesWithCountry(),
+        ]);
+      });
+    });
+  }
+
+  test.describe('with JavaScript on', () => {
+    test('typing Fra lists France and the French territories, each ending (France)', async ({ animalsJourney, animalsPages }) => {
+      await animalsJourney.startNotification();
+      await animalsPages.overview.task('Where is this consignment coming from?').click();
+      const { country } = animalsPages.originOfImport;
+
+      await country.search('Fra');
+
+      await expect(country.suggestions).toHaveText(
+        countryAndSubdivisionNamesWithCountry().filter((name) => name === 'France' || name.endsWith('(France)')),
+      );
+    });
   });
 });

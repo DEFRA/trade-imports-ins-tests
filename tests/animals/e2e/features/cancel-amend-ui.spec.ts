@@ -101,11 +101,7 @@ test.describe('Cancel amendment through the UI', () => {
       const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
       await expect(countryRow).toContainText('France');
 
-      await animalsPages.notificationView.changeLink('Change import details').click();
-      await expect(animalsPages.originOfImport.heading).toBeVisible();
-      await animalsPages.originOfImport.selectCountry('Belgium');
-      await animalsPages.originOfImport.saveAndReturn.click();
-      await expect(animalsPages.notificationView.heading).toBeVisible();
+      await animalsNotificationActions.changeCountryOfOrigin('Belgium');
       await expect(countryRow).toContainText('Belgium');
 
       await animalsPages.notificationView.cancelAmend.click();
@@ -133,7 +129,7 @@ test.describe('Cancel amend without JavaScript', { tag: '@duplicated-in-frontend
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
 
     await animalsPages.originOfImport.open(reference);
-    await animalsPages.originOfImport.selectCountry('Belgium');
+    await animalsPages.originOfImport.country.choose('Belgium');
     await animalsPages.originOfImport.saveAndReturn.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(countryRow).toContainText('Belgium');

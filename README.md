@@ -97,7 +97,7 @@ the same suite as the all-domain script, limited to that domain's `tests/<domain
 | `ins`           | `test:docker-compose:ins`           | —                                        | —                                    | `test:docker-compose:ins:security`           | `test:docker-compose:ins:security:active`           |
 | `plants`        | `test:docker-compose:plants`        | —                                        | —                                    | —                                            | —                                                   |
 
-A dash means the domain has no specs for that suite yet.
+A dash means the domain has no specs of that test type yet.
 
 Per-domain `security:active` sets `ZAP_SCOPE` so the no-traffic gate only covers
 that domain's ZAP contexts; the report is labelled scoped. Full-corpus active
@@ -137,6 +137,13 @@ those settings:
 `@a11y` tests use the same configs; per-test timeout is longer in
 `fixtures/a11y.ts`.
 
+The animals journey scans leave out govuk-frontend's conditional-reveal radios
+(`govukConditionalRevealRadioOnOrigin` and
+`govukConditionalRevealRadiosOnReason` in `fixtures/a11y.ts`). govuk-frontend sets `aria-expanded` on
+each radio that opens a conditional reveal (`radios.mjs`), and axe's
+`aria-allowed-attr` rule rejects it. That is a disagreement between
+govuk-frontend and axe, not a service defect.
+
 The CDP config sets a 60s test timeout and a 15s expect timeout, against
 Playwright's 30s and 5s defaults that the docker-compose config keeps. Each CDP
 page load is a real network hop, so CDP needs a longer budget than the local
@@ -173,6 +180,37 @@ only when the deletion is what it tests. Where expiry is on, the shared journey
 addresses seeded in `globalSetup` expire too; the next run's
 `ensureE2eAddressBook` creates them again.
 
+### Commodity lines in the animals specs
+
+`domain/animals/constants/commodity-lines.ts` names each line a spec chooses
+by its CN commodity code and Latin name. The commodity page labels each tick
+box with the Latin name alone, under a heading of the code, and one Latin name
+can sit under several codes (`Bos taurus` is under four), so a line needs both.
+The stack's MDM stub answers only the searches saved from MDM, so each line's
+`searchTerm` is a saved term whose first page of results lists that line; the
+first page is the frontend's 100 results. The
+frontend saves only a species its search showed, so a seeded journey posts the
+search before it posts the chosen species. A spec that needs what MDM says
+about a species, such as its common name, reads it from reference-data's
+commodity search through `ReferenceDataApiClient`, rather than from a copy of
+it that goes stale.
+
+A notification's commodity name carries its first line's CN code until
+EUDPA-669 brings the real commodity name. So the outbox spec expects
+`commodityLines.cattle.commodityCode` as the trade line's description and
+common name, and the aggregated notification spec expects it as the
+commodity.
+
+### DLQ specs in animals-admin
+
+`tests/animals-admin/e2e/features/dlq-events.spec.ts` runs its tests in serial
+mode. Replay-all and delete-all each act on the whole dead-letter queue, and
+the stack has one queue, so two at once would act on each other's messages.
+The admin portal shows the "Replay-all started" or "Delete-all started" banner
+only once its call to the dynamics gateway, made with the admin secret, has
+succeeded. The banner is how these specs prove the admin portal and the
+gateway are wired together.
+
 ### Authenticated session reuse
 
 Each worker signs in once per domain and its tests restore that session
@@ -181,6 +219,14 @@ Saved state lives under `playwright/.auth/` (gitignored, removed by `_clean`),
 holds only the `sid` auth cookie, and is never written unless a fresh context
 has proved it restores to a signed-in landing page. A spec that must start
 unauthenticated opts out with `test.use({ storageState: COLD_START })`.
+
+The fixtures that sign in have their own timeout, longer than a test's, because
+signing in takes longer than a test's own budget.
+
+A spec that needs the same user in a new browser session uses the
+`openFreshSession` fixture. It opens a page in a new browser context that keeps
+only the auth cookie of the test's own page, so the service holds none of the
+first session's journey state. The fixture closes every context it opened.
 
 `E2E_SESSION_REUSE=off` is the kill switch: every test signs in for itself
 again. The CDP config caps workers at 4 when reuse is off; against the
@@ -199,22 +245,24 @@ reusable workflow.
 
 ### Domains, test suites and projects
 
-Tests are split into four domains, one per deployable app. A domain's specs
+Tests are split into four domains, each a functional area of the product. One
+or more services serve a domain: `animals` covers the animals frontend and
+backend, and `ins` covers the ins frontend, ins backend and address book. A domain's specs
 live under its own `tests/<domain>/` directory, and its base URL is resolved
 from the spec's directory:
 
-| Domain          | Service                          | Directory              |
+| Domain          | Front end                        | Directory              |
 | --------------- | -------------------------------- | ---------------------- |
 | `animals`       | `trade-imports-animals-frontend` | `tests/animals/`       |
 | `animals-admin` | `trade-imports-animals-admin`    | `tests/animals-admin/` |
 | `ins`           | `trade-imports-ins-frontend`     | `tests/ins/`           |
 | `plants`        | `trade-imports-plants-frontend`  | `tests/plants/`        |
 
-A test suite is a group of specs you run together: a domain's directory, or a
-suite within it such as `tests/animals/e2e/`. Select one or several by path:
+A test suite is a group of specs you run together: a domain's directory, or one
+test type within it such as `tests/animals/e2e/`. Select one or several by path:
 
 ```bash
-npm run test:docker-compose -- tests/animals/ tests/ins/
+npm run test:docker-compose -- tests/animals/ tests/ins/e2e/
 ```
 
 Always end a directory with `/`. Playwright reads the path as a regex, so
@@ -237,11 +285,16 @@ tests/<domain>/
   security/
 ```
 
-Folders only organise specs: tags (`@a11y`, `@active`, `@compose`, `@dynamics`, `@visual`)
-select the suite, and the directory selects the domain.
+Folders only organise specs: type tags (`@a11y`, `@active`, `@compose`, `@dynamics`, `@visual`)
+select the test type, and the directory selects the domain. A service tag, such as
+`@ins-backend`, is a different kind: it names a service whose pull request
+should also run the spec, whatever test type or domain the spec is in (see
+[GitHub Actions workflow](#github-actions-workflow)).
 
 `npm run lint` runs `lint:suite-tags` to keep the two in step: a test under `a11y/` must carry
 `@a11y`, one under `security/` must carry `@active`, and one under `e2e/` neither.
+
+`@duplicated-in-frontend` marks an end-to-end spec whose behaviour the frontend's own FIT suite also proves, so a reader knows the check exists in both places.
 
 ## Local Testing
 
@@ -286,10 +339,24 @@ See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
 
 ### Target CDP environments (from local machine)
 
-To run tests against a CDP environment from your local machine:
+To run tests against a CDP environment from your local machine (on the CCoE AWS OpenVPN):
 
-1. Set `PLAYWRIGHT_ENVIRONMENT` to one of `dev`, `test`, or `perf-test` in your `.env`.
+1. Set these in your `.env`:
+
+   ```bash
+   PLAYWRIGHT_ENVIRONMENT=dev   # or test, perf-test
+   CDP_LOCAL=true
+   DEVELOPER_API_KEY=<your developer API key from the CDP Portal>
+   ```
+
 2. Run tests with `npm test`.
+
+CDP blocks direct calls to its backend services from outside its network, so
+global set-up cannot reach the backend or the address book without
+`CDP_LOCAL=true`. That setting sends those calls through the protected
+ephemeral gateway, which needs `DEVELOPER_API_KEY` as `x-api-key`. The run
+stops at once if `CDP_LOCAL=true` and the key is missing. The CDP Portal run
+sits inside CDP and needs neither.
 
 Use `.env.example` as a template.
 When running via the CDP Portal, `ENVIRONMENT` is provided by the portal; use `PLAYWRIGHT_ENVIRONMENT` and avoid setting `ENVIRONMENT` locally.
@@ -305,20 +372,45 @@ Visual regression tests (tagged `@visual`) guard rendered composition — layout
 
 Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. Each platform requires its own baseline — update both when visual changes are intentional.
 
+Visual specs import `test` from `@fixtures/visual`. On macOS it launches Playwright's headless shell with legacy scroll bars (`-AppleShowScrollBars Always`) and connects to it over CDP. Chromium sizes a native `<select>` arrow box from the macOS scroll bar style, and with the default "Show scroll bars: Automatically" setting that style follows whether a mouse is connected: overlay scroll bars on a trackpad alone, legacy ones with a mouse. Overlay scroll bars draw every native select 4px narrower, so a `*-darwin.png` baseline made on a laptop's trackpad failed with a mouse plugged in (704 pixels on the no-JavaScript import reason page), and the other way round. Playwright's own launch refuses an argument that does not start with `-`, so the fixture starts the browser itself. On Linux the fixture is the shared one, unchanged.
+
+Visual specs run headless whatever the project setting, because headed mode uses OS font rendering, which produces pixel differences against a headless baseline.
+
+The origin of import baseline masks the whole status strip, not the notification reference alone. The strip renders from the first request and the reference inside it is minted per run, so an unmasked strip never matches the baseline twice. Masking the full-width strip keeps the masked box a fixed size, which the reference alone is not. The strip's own content is covered by `tests/animals/e2e/features/reference-strip.spec.ts`.
+
+The declaration specs set the date of declaration to a fixed string before the screenshot instead of masking it, because the server writes today's date into the page text and a mask is as wide as that text, which changes with the day and month. `freezeDatePickersAt` does not reach that text: it stops the browser clock and moves each date picker's served bounds, and changes nothing the server has already written. The date's strong emphasis is proved by the declaration e2e specs.
+
 Run against the stack with `npm run test:docker-compose:visual` (or
-`test:docker-compose:animals:visual` — only `animals` has `@visual` specs today).
+`test:docker-compose:animals:visual` for `animals` alone). `animals` and `plants` have `@visual` specs.
 
 Regenerate the E2E baseline against the stack frontend with
 `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
 `npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
-used by CI. Both commands run the `animals` domain's `@visual` suite and write the
+used by CI. Both commands run every `@visual` spec and write the
 updated snapshot into the working tree for commit. Narrow to one spec (or title via
-`--grep`) by passing Playwright args after the command:
+`--grep`) by passing Playwright args after the command, and add
+`--update-snapshots=missing` to write only new baselines:
 
 ```bash
 npm run test:visual:update:macos -- tests/animals/e2e/visual/origin-of-import.visual.spec.ts
 ./bin/update-visual-baselines-linux.sh tests/animals/e2e/visual/origin-of-import.visual.spec.ts
 ```
+
+The Linux script points the service URLs at `host.docker.internal`, because inside the container `localhost` is the container. It also runs the container with `--add-host=localhost:host-gateway`, which maps `localhost` to the host, so any URL the script does not override and that still names `localhost` reaches the stack too.
+
+Visual specs set `headless: true`, because headed mode uses the host's font rendering and
+never matches a headless baseline.
+
+Every full-page screenshot of a notification page masks the whole status strip. It renders
+from the first request and holds the notification reference, which is minted per run. The
+whole strip is masked, not the reference alone, so the masked box stays a fixed size. The
+strip's own content is covered by `tests/animals/e2e/features/reference-strip.spec.ts`.
+
+A calendar screenshot depends on today's date twice: the browser's today picks the month and
+the highlighted day, and the server's today sets each picker's `data-min-date` and
+`data-max-date`. `freezeDatePickersAt` (`utils/frozen-date-picker.ts`) stops the browser clock
+on a fixed day and moves the served bounds by the same number of days, so the calendar looks
+as it would if that day were today.
 
 ## Security Testing
 
@@ -336,6 +428,8 @@ E2E tests run in GitHub Actions via the workspace's reusable workflow, which sta
 ### GitHub Actions workflow
 
 The `/.github/workflows/workspace-e2e-tests.yml` workflow triggers after `Publish Branch Image` completes and calls `DEFRA/trade-imports-workspace/.github/workflows/e2e-tests.yml@main` with the branch name, then reports the result back to the PR.
+
+A service tag (`config/service-tags.ts`, for example `@ins-backend`) marks a spec in another domain that the service's pull request should also run. `npm run lint` fails if a spec carries the tag of a service whose pull request already runs the spec's domain by path, as `config/service-tags.ts` maps it.
 
 ### Scheduled security scan
 
@@ -368,8 +462,12 @@ suite with its domain name as `<domain>:<suite>`:
 | `<domain>:security:active` | **not supported on CDP**, as `security:active`          |
 
 `<domain>` is one of `animals`, `animals-admin`, `ins` or `plants`, e.g.
-`animals:a11y` or `plants:e2e`. A domain with no specs for a suite (for example
+`animals:a11y` or `plants:e2e`. A domain with no specs of a test type (for example
 `plants:a11y` today) fails with Playwright's "No tests found".
+
+Calls that leave CDP for the internet go through the CDP proxy
+(`localhost:3128`), which the `externalRequest` fixture uses. Journey and
+service calls stay direct.
 
 ### Dynamics checks
 
@@ -387,8 +485,8 @@ app-config and secrets on CDP, `.env` locally; see `.env.example`):
 
 A missing setting fails the test at once, naming the variable, before any journey
 runs. The tests skip on the docker-compose stack, which has no PIMS Dynamics. On CDP their
-Dataverse calls go through the CDP proxy (`localhost:3128`), which must allow
-`login.microsoftonline.com` and the Dynamics host for this test suite.
+Dataverse calls go through the CDP proxy (see [Running Tests via CDP Portal](#running-tests-via-cdp-portal)),
+which must allow `login.microsoftonline.com` and the Dynamics host for this test suite.
 
 **The suite is for CDP.** Run `npm run test:dynamics` from a laptop only to debug it or
 write a new test: use the laptop-to-CDP `.env` (`CDP_LOCAL=true`, `PLAYWRIGHT_ENVIRONMENT`)

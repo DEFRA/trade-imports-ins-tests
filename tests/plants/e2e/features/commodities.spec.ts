@@ -1,10 +1,6 @@
 import { test, expect } from '@fixtures';
+import { PLANTS_FOR_PLANTING, POTATOES, SEED_POTATOES, WOOD_AND_CUT_TREES } from '@flows/plants/journey';
 
-const POTATOES = 'Potatoes (seed or ware)';
-const PLANTS_FOR_PLANTING = 'Plants for planting';
-const WOOD_AND_CUT_TREES = 'Wood and cut trees';
-
-const SEED_POTATOES = 'Seed potatoes';
 const WARE_POTATOES = 'Ware potatoes';
 const TREES_FOR_PLANTING = 'Trees for planting';
 const CUT_CONIFEROUS_TREES = 'Cut coniferous trees more than 3 metres high';
@@ -36,8 +32,6 @@ test.describe('High-risk plants commodity section', () => {
     await expect(details.category(TREES_FOR_PLANTING)).toBeVisible();
     await expect(details.categoryRadios).toHaveCount(2);
 
-    // The five wood categories are the only set the journey offers that is not
-    // a pair, so the count is worth stating as well as the one named category.
     await plantsJourney.changeCommodityType(reference, WOOD_AND_CUT_TREES);
     await expect(pages.page).toHaveURL(details.expectedUrl(reference));
     await expect(details.category(CUT_CONIFEROUS_TREES)).toBeVisible();
@@ -83,8 +77,6 @@ test.describe('High-risk plants commodity section', () => {
     await plantsPages.commodityDetails.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.commodityDetails.editUrl(reference, 0));
 
-    // Wood is identified by its commodity code, not a genus, and only cut trees
-    // are asked how tall they are.
     await expect(plantsPages.commodityDetails.field('Phytosanitary treatments applied')).toBeVisible();
     await expect(plantsPages.commodityDetails.field('Size of the trees')).toBeVisible();
     await expect(plantsPages.commodityDetails.field('Genus')).toHaveCount(0);
@@ -93,7 +85,7 @@ test.describe('High-risk plants commodity section', () => {
     await plantsPages.commodityDetails.field('Quantity').fill('40');
     await plantsPages.commodityDetails.field('Size of the trees').fill('4.5');
     await plantsPages.commodityDetails.field('Phytosanitary treatments applied').fill('Kiln dried (KD)');
-    await plantsPages.commodityDetails.btnSaveAndContinue.click();
+    await plantsPages.commodityDetails.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrl(reference));
     await expect(plantsPages.commodities.lineRows.first()).toContainText(CUT_CONIFEROUS_TREES);
@@ -113,7 +105,7 @@ test.describe('High-risk plants commodity section', () => {
     await expect(pages.page).toHaveURL(plantsPages.commodityDetails.editUrl(reference, 0));
     await expect(plantsPages.commodityDetails.field('Variety')).toHaveValue(MARIS_PIPER);
 
-    await plantsPages.commodityDetails.btnSaveAndContinue.click();
+    await plantsPages.commodityDetails.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrl(reference));
 
     await plantsPages.commodities.btnRemove(1).click();
@@ -132,7 +124,7 @@ test.describe('High-risk plants commodity section', () => {
     await expect(plantsPages.commodityType.linesWarning).toBeVisible();
 
     await plantsPages.commodityType.commodityType(WOOD_AND_CUT_TREES).check();
-    await plantsPages.commodityType.btnSaveAndContinue.click();
+    await plantsPages.commodityType.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.commodities.removedUrl(reference, 1));
     await expect(plantsPages.commodities.removedBanner).toContainText(`We removed 1 commodity that is not ${WOOD_AND_CUT_TREES}`);
@@ -148,7 +140,7 @@ test.describe('High-risk plants commodity section', () => {
 
     await expect(pages.page).toHaveURL(plantsPages.commodities.removedUrl(reference, 1));
 
-    await plantsPages.commodities.btnSaveAndContinue.click();
+    await plantsPages.commodities.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.commodities.removedUrl(reference, 1));
     await expect(plantsPages.commodities.errorSummary).toContainText('Add at least one commodity');
@@ -159,7 +151,7 @@ test.describe('High-risk plants commodity section', () => {
     await plantsJourney.chooseCommodityType(POTATOES);
     await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine(MARIS_PIPER, '250'));
 
-    await plantsPages.commodities.btnSaveAndContinue.click();
+    await plantsPages.commodities.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
 

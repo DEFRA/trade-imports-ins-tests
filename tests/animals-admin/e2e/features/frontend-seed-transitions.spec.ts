@@ -15,42 +15,46 @@ test.describe('Seeded notification transitions', { tag: '@mongodb' }, () => {
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });
 
-  test('carries an actor and a populated event through submit, amend and cancel', async ({ animalsSeededJourney }) => {
-    test.slow();
-    const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
-    await animalsSeededJourney.amend(referenceNumber);
-    await animalsSeededJourney.cancelAmend(referenceNumber);
+  test(
+    'carries an actor and a populated event through submit, amend and cancel',
+    { tag: '@animals-frontend' },
+    async ({ animalsSeededJourney }) => {
+      test.slow();
+      const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
+      await animalsSeededJourney.amend(referenceNumber);
+      await animalsSeededJourney.cancelAmend(referenceNumber);
 
-    const aggregateId = aggregateIdFor(referenceNumber);
-    const client = new MongoDbClient();
+      const aggregateId = aggregateIdFor(referenceNumber);
+      const client = new MongoDbClient();
 
-    try {
-      await client.connect();
-      const collection = client.collection<OutboxEventDocument>(BACKEND_DATABASE, OUTBOX_COLLECTION);
-      const events = (): Promise<OutboxEventDocument[]> => collection.find({ aggregateId }).sort({ aggregateVersion: 1 }).toArray();
+      try {
+        await client.connect();
+        const collection = client.collection<OutboxEventDocument>(BACKEND_DATABASE, OUTBOX_COLLECTION);
+        const events = (): Promise<OutboxEventDocument[]> => collection.find({ aggregateId }).sort({ aggregateVersion: 1 }).toArray();
 
-      await expect
-        .poll(async () => (await events()).map((event) => shortType(event.eventType)).filter((type) => type !== 'NotificationEdited'), {
-          timeout: timeouts.long,
-        })
-        .toEqual(['NotificationCreated', 'NotificationSubmitted', 'NotificationAmendmentRequested', 'NotificationAmendmentCancelled']);
+        await expect
+          .poll(async () => (await events()).map((event) => shortType(event.eventType)).filter((type) => type !== 'NotificationEdited'), {
+            timeout: timeouts.long,
+          })
+          .toEqual(['NotificationCreated', 'NotificationSubmitted', 'NotificationAmendmentRequested', 'NotificationAmendmentCancelled']);
 
-      const writtenEvents = await events();
-      for (const event of writtenEvents) {
-        expect(event.actor?.organisationId, `${shortType(event.eventType)} carries no actor`).toBeTruthy();
+        const writtenEvents = await events();
+        for (const event of writtenEvents) {
+          expect(event.actor?.organisationId, `${shortType(event.eventType)} carries no actor`).toBeTruthy();
+        }
+
+        const submitted = writtenEvents.find((event) => shortType(event.eventType) === 'NotificationSubmitted');
+        const consignment = submitted?.data.specifiedConsignment;
+        expect(consignment?.consignorParty).toBeTruthy();
+        expect(consignment?.consigneeParty).toBeTruthy();
+        expect(consignment?.originCountry).toBeTruthy();
+        expect(consignment?.unloadingBaseportLocation).toBeTruthy();
+        expect(consignment?.includedConsignmentItem?.length).toBeGreaterThan(0);
+      } finally {
+        await client.close();
       }
-
-      const submitted = writtenEvents.find((event) => shortType(event.eventType) === 'NotificationSubmitted');
-      const consignment = submitted?.data.specifiedConsignment;
-      expect(consignment?.consignorParty).toBeTruthy();
-      expect(consignment?.consigneeParty).toBeTruthy();
-      expect(consignment?.originCountry).toBeTruthy();
-      expect(consignment?.unloadingBaseportLocation).toBeTruthy();
-      expect(consignment?.includedConsignmentItem?.length).toBeGreaterThan(0);
-    } finally {
-      await client.close();
-    }
-  });
+    },
+  );
 
   test('soft-deletes a submitted notification through the frontend', async ({ animalsSeededJourney }) => {
     test.slow();

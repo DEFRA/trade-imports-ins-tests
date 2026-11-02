@@ -1,5 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import type { CommodityLine } from '@domain/animals/constants/commodity-lines';
+import { SEARCH_HINT } from '@domain/animals/constants/commodity-selection-page';
 
 export class AnimalsCommoditySelectionPage extends NotificationPage {
   constructor(page: Page) {
@@ -10,16 +12,28 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'What are you importing?' });
   }
 
+  get itahcInset(): Locator {
+    return this.page.getByText(
+      'You must submit a separate notification for every single ITAHC. You must also submit a notification for goods that do not need an ITAHC.',
+      { exact: true },
+    );
+  }
+
   get searchBox(): Locator {
     return this.page.getByLabel('Search for a commodity');
+  }
+
+  get searchHint(): Locator {
+    return this.page.getByText(SEARCH_HINT, {
+      exact: true,
+    });
   }
 
   get searchButton(): Locator {
     return this.page.getByRole('button', { name: 'Search', exact: true });
   }
 
-  /** The panel listing what is already on the notification, headed with its count. */
-  get selectionPanel(): Locator {
+  get selectedSummary(): Locator {
     return this.page.locator('#commodity-selection');
   }
 
@@ -27,32 +41,35 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Clear all' });
   }
 
-  /** The page lists nothing of its own accord — results only appear once a
-   * query of at least three characters has been submitted. */
+  get commodityCodeHelp(): Locator {
+    return this.page.getByText('Help with commodity codes', { exact: true });
+  }
+
+  get tradeTariffLink(): Locator {
+    return this.page.getByRole('link', { name: 'Trade Tariff tool (opens in a new tab)', exact: true });
+  }
+
   async search(query: string): Promise<void> {
     await this.searchBox.fill(query);
     await this.searchButton.click();
   }
 
-  species(name: string): Locator {
-    return this.page.getByRole('checkbox', { name });
+  commodityGroup(code: string): Locator {
+    return this.page.getByRole('group', { name: code, exact: true });
   }
 
-  /** A species has no tick box until its own query puts it in the results, so
-   * each name is searched for before it is ticked. Ticks made under an earlier
-   * query ride back with the form, so they survive the next search. */
-  async selectSpecies(names: string[]): Promise<void> {
-    for (const name of names) {
-      await this.search(name);
-      await this.species(name).check();
+  get commodityGroups(): Locator {
+    return this.page.getByRole('group', { name: /^\d+$/ });
+  }
+
+  species(line: CommodityLine): Locator {
+    return this.commodityGroup(line.commodityCode).getByRole('checkbox', { name: line.latinName, exact: true });
+  }
+
+  async searchAndCheckSpecies(lines: CommodityLine[]): Promise<void> {
+    for (const line of lines) {
+      await this.search(line.searchTerm);
+      await this.species(line).check();
     }
-  }
-
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
-  }
-
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
   }
 }

@@ -1,6 +1,5 @@
 export const importReasons = {
-  internalMarket: 'internalMarket',
-  reEntry: 'reEntry',
+  internalMarket: { value: 'internalMarket', display: 'Internal market' },
 } as const;
 
 export type ImportReason = (typeof importReasons)[keyof typeof importReasons];

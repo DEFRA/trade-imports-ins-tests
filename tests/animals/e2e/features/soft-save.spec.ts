@@ -1,163 +1,153 @@
 import { test, expect } from '@fixtures';
+import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
+import { SELECT_COMMODITY_ERROR } from '@domain/animals/constants/commodity-selection-page';
+import { countryCodes } from '@domain/animals/constants/country-codes';
+import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 
-const COMPLETE = 'Complete';
 const TO_DO = 'To do';
 const ORIGIN_TASK = 'Where is this consignment coming from?';
-const IMPORT_REASON_TASK = 'Main reason for import';
 const COMMODITY_SELECTION_TASK = 'What are you importing?';
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
 const IMPOSSIBLE_ARRIVAL_DATE = '31/2/2026';
 const ARRIVAL_DATE_ERROR = 'Enter a real arrival date';
 const COMMODITY_DETAILS_TASK = 'Commodity details';
+const PORT_OF_EXIT_ERROR = 'Select a port of exit';
+const DESTINATION_COUNTRY_ERROR = 'Select a destination country';
+const REGION_CODE_REQUIRED_ERROR = 'Enter the region of origin code';
+const INTERNAL_REFERENCE = 'Imports456GB';
 
 test.describe('Save and return to overview', () => {
-  test('main reason for import: when a required answer is missing, saves, leaves the task not complete and keeps the answers', async ({
+  test('main import reason: when a required answer is missing, refuses the save, names each missing answer and keeps the answer given', async ({
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.toImportReason();
     await animalsPages.importReason.reason('Transit').check();
+    const referenceNumber = animalsPages.importReason.referenceNumberFromUrl();
 
-    // Act
     await animalsPages.importReason.saveAndReturnToOverview.click();
 
-    // Assert
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await expect(animalsPages.importReason.errorSummary).toBeHidden();
-    await expect(animalsPages.overview.taskStatus(IMPORT_REASON_TASK)).toHaveText(TO_DO);
-    await animalsPages.overview.task(IMPORT_REASON_TASK).click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
+    await expect(animalsPages.importReason.errorSummaryLinks).toHaveText([PORT_OF_EXIT_ERROR, DESTINATION_COUNTRY_ERROR]);
     await expect(animalsPages.importReason.reason('Transit')).toBeChecked();
+    await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, IMPORT_REASON_TASK)).toHaveText(TO_DO);
   });
 
-  test('origin of the import: when the region code is left blank, saves "Yes", leaves the task not complete and keeps the answer', async ({
+  test('origin of the import: when the region code is left blank, refuses the save, names the region code, keeps "Yes" and saves nothing', async ({
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.startNotification();
     await animalsPages.overview.task(ORIGIN_TASK).click();
     await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
     await animalsPages.originOfImport.regionCode.fill('');
+    const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
 
-    // Act
     await animalsPages.originOfImport.saveAndReturnToOverview.click();
 
-    // Assert
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await expect(animalsPages.overview.taskStatus(ORIGIN_TASK)).toHaveText(TO_DO);
-    await animalsPages.overview.task(ORIGIN_TASK).click();
+    await expect(animalsPages.originOfImport.heading).toBeVisible();
+    await expect(animalsPages.originOfImport.errorSummaryLinks).toHaveText([REGION_CODE_REQUIRED_ERROR]);
     await expect(animalsPages.originOfImport.radioRequiresOriginCode('Yes')).toBeChecked();
+    await animalsPages.overview.openTaskAfterReopening(referenceNumber, ORIGIN_TASK);
+    await expect(animalsPages.originOfImport.radioRequiresOriginCode('No')).toBeChecked();
+  });
+
+  test('origin of the import: when every answer is valid, saves, shows the overview and keeps the answers on reopening', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.startNotification();
+    await animalsPages.overview.task(ORIGIN_TASK).click();
+    await animalsPages.originOfImport.country.choose(countryCodes.eu.france.display);
+    await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
+    await animalsPages.originOfImport.internalReference.fill(INTERNAL_REFERENCE);
+
+    await animalsPages.originOfImport.saveAndReturnToOverview.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task(ORIGIN_TASK).click();
+    await expect(animalsPages.originOfImport.country.select).toHaveValue(countryCodes.eu.france.value);
+    await expect(animalsPages.originOfImport.radioRequiresOriginCode('No')).toBeChecked();
+    await expect(animalsPages.originOfImport.internalReference).toHaveValue(INTERNAL_REFERENCE);
   });
 
   test('arrival details: when the arrival date names no day, refuses the save and keeps nothing', async ({
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.toArrivalDetails();
     await animalsPages.arrivalDetails.fillArrivalDate(IMPOSSIBLE_ARRIVAL_DATE);
 
-    // Act
     await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
 
-    // Assert
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
     await expect(animalsPages.arrivalDetails.errorSummary).toBeVisible();
     await expect(animalsPages.arrivalDetails.arrivalDateError).toContainText(ARRIVAL_DATE_ERROR);
-    await animalsPages.overview.open(animalsPages.arrivalDetails.journeyIdFromUrl());
-    await animalsPages.overview.task(ARRIVAL_DETAILS_TASK).click();
+    await animalsPages.overview.openTaskAfterReopening(animalsPages.arrivalDetails.referenceNumberFromUrl(), ARRIVAL_DETAILS_TASK);
     await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue('');
   });
 
-  test('arrival details: when no means of transport is chosen, saves the other answers and leaves the task not complete', async ({
+  test('arrival details: when no means of transport is chosen, saves the port, shows the overview and keeps the task to do', async ({
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.toArrivalDetails();
-    await animalsPages.arrivalDetails.selectPort('Port of Dover - GB DVR');
+    await animalsPages.arrivalDetails.portOfEntry.choose(MANDATORY_ANSWERS.pointOfEntry.display);
+    const referenceNumber = animalsPages.arrivalDetails.referenceNumberFromUrl();
 
-    // Act
     await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
 
-    // Assert
     await expect(animalsPages.overview.heading).toBeVisible();
-    await expect(animalsPages.arrivalDetails.errorSummary).toBeHidden();
-    await expect(animalsPages.overview.taskStatus(ARRIVAL_DETAILS_TASK)).not.toHaveText(COMPLETE);
-    await animalsPages.overview.task(ARRIVAL_DETAILS_TASK).click();
-    await expect(animalsPages.arrivalDetails.portOfEntryValue).toHaveValue('GB DVR');
-  });
-
-  test('transit countries: saves the countries listed and goes to the overview', async ({ animalsJourney, animalsPages }) => {
-    // Arrange
-    await animalsJourney.toTransitedCountries();
-    await animalsPages.transitedCountries.addCountry('France');
-    await animalsPages.transitedCountries.addCountry('Belgium');
-
-    // Act
-    await animalsPages.transitedCountries.saveAndReturnToOverview.click();
-
-    // Assert
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.task('Transit countries').click();
-    await expect(animalsPages.transitedCountries.row('France')).toBeVisible();
-    await expect(animalsPages.transitedCountries.row('Belgium')).toBeVisible();
+    await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, ARRIVAL_DETAILS_TASK)).toHaveText(TO_DO);
+    await animalsPages.overview.openTaskAfterReopening(referenceNumber, ARRIVAL_DETAILS_TASK);
+    await expect(animalsPages.arrivalDetails.portOfEntry.select).toHaveValue(MANDATORY_ANSWERS.pointOfEntry.value);
   });
 
   test('commodity details: when the number of animals is blank, keeps its checks and stays on the page', async ({
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.toConsignmentDetails();
 
-    // Act
     await animalsPages.consignmentDetails.saveAndReturnToOverview.click();
 
-    // Assert
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
     await expect(animalsPages.consignmentDetails.errorSummary).toBeVisible();
     await expect(animalsPages.consignmentDetails.animalsRequiredErrorLink).toBeVisible();
-    await animalsPages.overview.open(animalsPages.consignmentDetails.journeyIdFromUrl());
-    await expect(animalsPages.overview.taskStatus(COMMODITY_DETAILS_TASK)).toHaveText(TO_DO);
+    const referenceNumber = animalsPages.consignmentDetails.referenceNumberFromUrl();
+    await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, COMMODITY_DETAILS_TASK)).toHaveText(TO_DO);
   });
 
   test('origin of the import: when the region code is longer than five characters, refuses the save and keeps nothing', async ({
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.startNotification();
     await animalsPages.overview.task(ORIGIN_TASK).click();
     await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();
+    await animalsPages.originOfImport.removeRegionCodeMaxlength();
     await animalsPages.originOfImport.regionCode.fill('ABCDEF');
 
-    // Act
     await animalsPages.originOfImport.saveAndReturnToOverview.click();
 
-    // Assert
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await expect(animalsPages.originOfImport.errorSummary).toBeVisible();
     await expect(animalsPages.originOfImport.regionCodeMaxLengthErrorLink).toBeVisible();
-    await animalsPages.overview.open(animalsPages.originOfImport.journeyIdFromUrl());
-    await animalsPages.overview.task(ORIGIN_TASK).click();
+    await animalsPages.overview.openTaskAfterReopening(animalsPages.originOfImport.referenceNumberFromUrl(), ORIGIN_TASK);
     await expect(animalsPages.originOfImport.regionCode).toHaveValue('');
   });
 
-  test('what are you importing: when nothing is chosen, returns to the overview without an error', async ({
+  test('what are you importing: when nothing is chosen, refuses the save with "Select a commodity" and leaves the task not complete', async ({
     animalsJourney,
     animalsPages,
   }) => {
-    // Arrange
     await animalsJourney.toCommoditySelection();
+    const referenceNumber = animalsPages.commoditySelection.referenceNumberFromUrl();
 
-    // Act
     await animalsPages.commoditySelection.saveAndReturnToOverview.click();
 
-    // Assert
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await expect(animalsPages.commoditySelection.errorSummary).toBeHidden();
-    await expect(animalsPages.overview.taskStatus(COMMODITY_SELECTION_TASK)).toHaveText(TO_DO);
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+    await expect(animalsPages.commoditySelection.errorSummaryLinks).toHaveText([SELECT_COMMODITY_ERROR]);
+    await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, COMMODITY_SELECTION_TASK)).toHaveText(TO_DO);
   });
 });

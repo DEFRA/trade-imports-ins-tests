@@ -1,42 +1,33 @@
 import { test, expect } from '@fixtures';
 import { getRelativeDatePickerValue } from '@utils/date-utils';
-import { portByCode } from '@domain/shared/fixtures/reference-data';
+import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 
-const DOVER = portByCode('GB DVR');
-const PORT_OPTION = DOVER.display;
-const PORT_CODE = DOVER.value;
+const PORT_OPTION = pointOfEntries.aberdeenHarbour.display;
+const PORT_CODE = pointOfEntries.aberdeenHarbour.value;
 
 test.describe('Port of entry type-ahead', { tag: '@duplicated-in-frontend' }, () => {
-  test('enhances the select, filters by name or code, submits and persists the code', async ({ animalsJourney, pages, animalsPages }) => {
+  test('enhances the select, filters by name or code, submits and persists the code', async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toArrivalDetails();
-    const journeyId = animalsPages.arrivalDetails.journeyIdFromUrl();
+    const referenceNumber = animalsPages.arrivalDetails.referenceNumberFromUrl();
 
-    const combobox = animalsPages.arrivalDetails.portOfEntry;
+    const combobox = animalsPages.arrivalDetails.portOfEntry.field;
     await expect(combobox).toBeVisible();
     await expect(combobox).toHaveRole('combobox');
     await expect(combobox).toHaveAccessibleName('Port of entry');
 
-    // Focusing shows the whole list (showAllValues) before any typing.
     await combobox.click();
-    await expect(pages.page.getByRole('option', { name: PORT_OPTION, exact: true })).toBeVisible();
+    await expect(animalsPages.arrivalDetails.portOfEntry.option(PORT_OPTION)).toBeVisible();
 
-    // Filtering by the port code works because the code is part of the label.
-    await combobox.fill('gb dvr');
-    await expect(pages.page.getByRole('option', { name: PORT_OPTION, exact: true })).toBeVisible();
+    await combobox.fill('gb abd');
+    await expect(animalsPages.arrivalDetails.portOfEntry.option(PORT_OPTION)).toBeVisible();
 
-    // The native option a user without JavaScript picks reads the same.
-    await expect(animalsPages.arrivalDetails.portOption(PORT_CODE)).toHaveText(PORT_OPTION);
-
-    // Selecting the option puts the label in the field and the code in the
-    // native select that submits.
-    await animalsPages.arrivalDetails.selectPort(PORT_OPTION);
+    await animalsPages.arrivalDetails.portOfEntry.choose(PORT_OPTION);
     await expect(combobox).toHaveValue(PORT_OPTION);
     await animalsPages.arrivalDetails.fillArrivalDate(getRelativeDatePickerValue({ monthOffset: 1 }));
-    await animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: 'Air' });
     await animalsPages.arrivalDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    await animalsPages.arrivalDetails.open(journeyId);
-    await expect(animalsPages.arrivalDetails.portOfEntryValue).toHaveValue(PORT_CODE);
+    await animalsPages.arrivalDetails.open(referenceNumber);
+    await expect(animalsPages.arrivalDetails.portOfEntry.select).toHaveValue(PORT_CODE);
   });
 });

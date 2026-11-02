@@ -35,10 +35,6 @@ export class PlantsCommoditiesPage extends PlantsNotificationPage {
     return this.page.getByRole('button', { name: 'Add another commodity', exact: true });
   }
 
-  get btnSaveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue', exact: true });
-  }
-
   /**
    * The row actions name their line by its position on the page, not by the
    * index the href carries: the visually hidden suffix that tells one Change
@@ -56,12 +52,8 @@ export class PlantsCommoditiesPage extends PlantsNotificationPage {
     return this.page.getByRole('region', { name: 'Commodities removed' });
   }
 
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
-
   /** The list as a change of commodity type leaves it, reporting what it dropped. */
-  removedUrl(journeyId: string, removed: number): string {
-    return `${this.expectedUrl(journeyId)}?removed=${removed}`;
+  removedUrl(referenceNumber: string, removed: number): string {
+    return `${this.expectedUrl(referenceNumber)}?removed=${removed}`;
   }
 }

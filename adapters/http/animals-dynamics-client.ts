@@ -1,11 +1,13 @@
 import type { APIRequestContext } from '@playwright/test';
 import { DataverseClient, odataString } from '@adapters/http/dataverse-client';
-import {
-  ANIMALS_DYNAMICS_NOTIFICATIONS_ENTITY_SET,
-  ANIMALS_DYNAMICS_REFERENCE_COLUMN,
-  getAnimalsDynamicsUrl,
-} from '@config/animals-dynamics';
+import { requireEnv } from '@config/dataverse';
 import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
+
+const NOTIFICATIONS_ENTITY_SET = 'defraimp_importernotifications';
+const REFERENCE_COLUMN = 'defraimp_name';
+
+// Trailing '/' stripped so the query URL and the token's `resource` match however the secret is typed.
+const environmentUrl = (): string => requireEnv('ANIMALS_DYNAMICS_URL')[0].replace(/\/+$/, '');
 
 /**
  * Looks up animals notifications in PIMS Dynamics. Built at the start of a test so a
@@ -15,7 +17,7 @@ export class AnimalsDynamicsClient {
   private readonly dataverse: DataverseClient;
 
   constructor(request: APIRequestContext) {
-    this.dataverse = new DataverseClient(request, getAnimalsDynamicsUrl());
+    this.dataverse = new DataverseClient(request, environmentUrl());
   }
 
   /**
@@ -23,10 +25,7 @@ export class AnimalsDynamicsClient {
    * Typed as AnimalsDynamicsImporterNotification, which lists only the columns catalogued so far.
    */
   async findNotifications(referenceNumber: string): Promise<AnimalsDynamicsImporterNotification[]> {
-    return this.dataverse.query<AnimalsDynamicsImporterNotification>(
-      ANIMALS_DYNAMICS_NOTIFICATIONS_ENTITY_SET,
-      this.referenceFilter(referenceNumber),
-    );
+    return this.dataverse.query<AnimalsDynamicsImporterNotification>(NOTIFICATIONS_ENTITY_SET, this.referenceFilter(referenceNumber));
   }
 
   /** As {@link findNotifications}, but each row carries only the named columns, and is typed to match. */
@@ -35,13 +34,13 @@ export class AnimalsDynamicsClient {
     columns: readonly K[],
   ): Promise<Pick<AnimalsDynamicsImporterNotification, K>[]> {
     return this.dataverse.query<Pick<AnimalsDynamicsImporterNotification, K>>(
-      ANIMALS_DYNAMICS_NOTIFICATIONS_ENTITY_SET,
+      NOTIFICATIONS_ENTITY_SET,
       this.referenceFilter(referenceNumber),
       columns,
     );
   }
 
   private referenceFilter(referenceNumber: string): string {
-    return `${ANIMALS_DYNAMICS_REFERENCE_COLUMN} eq ${odataString(referenceNumber)}`;
+    return `${REFERENCE_COLUMN} eq ${odataString(referenceNumber)}`;
   }
 }

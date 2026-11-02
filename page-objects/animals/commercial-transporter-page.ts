@@ -39,10 +39,6 @@ export class AnimalsCommercialTransporterPage extends NotificationPage {
     return this.page.getByLabel('Country');
   }
 
-  get saveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
-  }
-
   async fill(details: CommercialTransporterDetails): Promise<void> {
     await this.approvalNumber.fill(details.approvalNumber);
     await this.nameOrOrganisationName.fill(details.name);

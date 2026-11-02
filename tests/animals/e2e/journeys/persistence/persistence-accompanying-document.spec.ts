@@ -23,7 +23,7 @@ test.describe('Accompanying document persistence round-trip', { tag: '@mongodb' 
   test('uploads a document that persists to Mongo and reloads', async ({ animalsJourney, journeyContext, animalsPages }) => {
     test.slow();
     await animalsJourney.toAccompanyingDocuments();
-    const referenceNumber = journeyContext.journeyId;
+    const referenceNumber = journeyContext.referenceNumber;
     const documentReference = `PW${Date.now()}`;
     const issueDate = '03/01/2026';
     const persistedIssueDate = { day: '3', month: '1', year: '2026' };
