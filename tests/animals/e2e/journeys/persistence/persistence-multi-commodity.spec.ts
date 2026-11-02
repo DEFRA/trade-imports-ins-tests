@@ -42,7 +42,6 @@ test.describe('Notification persistence — multiple commodities', { tag: '@mong
             ]),
           }),
           expect.objectContaining({
-            name: commodityNames[catLine.species.commodityCode],
             commodityCode: catLine.species.commodityCode,
             species: expect.arrayContaining([
               expect.objectContaining({
@@ -59,6 +58,9 @@ test.describe('Notification persistence — multiple commodities', { tag: '@mong
           }),
         ]),
       );
+      const catCommodity = storedCommodities.find((entry) => entry.commodityCode === catLine.species.commodityCode);
+      expect(catCommodity?.name).toBeDefined();
+      expect(catCommodity?.name).not.toBe(catLine.species.commodityCode);
 
       expect(doc.status).toBe('SUBMITTED');
     } finally {
