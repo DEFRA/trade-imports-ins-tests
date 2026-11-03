@@ -62,30 +62,30 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('group', { name: /^\d+$/ });
   }
 
-  species(line: CommodityLine): Locator {
-    return this.commodityGroup(line.commodityCode).getByRole('checkbox', { name: line.latinName, exact: true });
+  species(species: CommodityLine): Locator {
+    return this.commodityGroup(species.commodityCode).getByRole('checkbox', { name: species.latinName, exact: true });
   }
 
-  async searchAndCheckSpecies(lines: CommodityLine[]): Promise<void> {
-    for (const line of lines) {
-      await this.search(line.searchTerm);
-      await this.species(line).check();
+  async searchAndCheckSpecies(speciesList: CommodityLine[]): Promise<void> {
+    for (const species of speciesList) {
+      await this.search(species.searchTerm);
+      await this.species(species).check();
     }
   }
 
-  commodityLine(code: string): Locator {
+  selectedCommodityHeading(code: string): Locator {
     return this.selectedSummary.getByText(`${code}:`, { exact: true });
   }
 
-  speciesEntry(line: CommodityLine): Locator {
-    return this.selectedSummary.getByRole('listitem').filter({ hasText: line.latinName });
+  speciesEntry(species: CommodityLine): Locator {
+    return this.selectedSummary.getByRole('listitem').filter({ hasText: species.latinName });
   }
 
-  removeSpecies(line: CommodityLine): Locator {
-    return this.selectedSummary.getByRole('button', { name: `Remove ${line.latinName}`, exact: true });
+  removeSpecies(species: CommodityLine): Locator {
+    return this.selectedSummary.getByRole('button', { name: `Remove ${species.latinName}`, exact: true });
   }
 
-  async pressRemoveSpecies(line: CommodityLine): Promise<void> {
-    await this.removeSpecies(line).click();
+  async pressRemoveSpecies(species: CommodityLine): Promise<void> {
+    await this.removeSpecies(species).click();
   }
 }

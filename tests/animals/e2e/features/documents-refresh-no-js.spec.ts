@@ -10,9 +10,7 @@ test.describe('Documents scan refresh without JavaScript', { tag: '@duplicated-i
 
   test('the refresh fallback reflects scan progress without client JavaScript', async ({ animalsJourney, pages, animalsPages }) => {
     test.slow();
-    await animalsJourney.startNotification();
-
-    await animalsPages.overview.task('Where is this consignment coming from?').click();
+    await animalsJourney.toOriginFromOverview();
     await pages.page.getByLabel('Country of origin').selectOption('FR');
     await pages.page.getByRole('radio', { name: 'No' }).check();
     await animalsPages.originOfImport.saveAndContinue.click();

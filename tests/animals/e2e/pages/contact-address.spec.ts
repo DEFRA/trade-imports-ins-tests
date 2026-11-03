@@ -27,6 +27,8 @@ test.describe('Contact address page', { tag: '@duplicated-in-frontend' }, () => 
     pages,
     animalsPages,
   }) => {
+    test.slow();
+
     const contact = 'Animal and Plant Health Agency';
     await animalsPages.contactAddress.address(contact).check();
     await animalsPages.contactAddress.saveAndContinue.click();

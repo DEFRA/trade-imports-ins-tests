@@ -72,7 +72,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     }
   });
 
-  test('bolds the matched text in a group heading and in a species label', async ({ animalsPages }) => {
+  test('bolds the matched text in the commodity heading and in a species label', async ({ animalsPages }) => {
     await animalsPages.commoditySelection.search(commodityLines.cattle.commodityCode);
     await expect(animalsPages.commoditySelection.commodityGroup(commodityLines.cattle.commodityCode).locator('legend strong')).toHaveText(
       commodityLines.cattle.commodityCode,
@@ -168,11 +168,11 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle, commodityLines.domesticCat]);
     await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
 
-    await expect(animalsPages.commoditySelection.commodityLine(commodityLines.cattle.commodityCode)).toBeVisible();
+    await expect(animalsPages.commoditySelection.selectedCommodityHeading(commodityLines.cattle.commodityCode)).toBeVisible();
     await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.cattle)).toBeVisible();
     await expect(animalsPages.commoditySelection.removeSpecies(commodityLines.cattle)).toBeVisible();
 
-    await expect(animalsPages.commoditySelection.commodityLine(commodityLines.domesticCat.commodityCode)).toBeVisible();
+    await expect(animalsPages.commoditySelection.selectedCommodityHeading(commodityLines.domesticCat.commodityCode)).toBeVisible();
     await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.domesticCat)).toBeVisible();
     await expect(animalsPages.commoditySelection.removeSpecies(commodityLines.domesticCat)).toBeVisible();
   });
