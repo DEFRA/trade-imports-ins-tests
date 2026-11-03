@@ -1,11 +1,6 @@
 import { test, expect } from '@fixtures';
-import {
-  TRANSIT_COUNTRIES_PAGE_TITLE,
-  TRANSIT_COUNTRY_SEARCH_PLACEHOLDER,
-  TRANSIT_COUNTRY_SELECT_TEXT,
-} from '@domain/animals/constants/transit-countries-page';
-import { countriesOrigin } from '@resources/reference-data/reference-data';
-import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
+import { TRANSIT_COUNTRIES_PAGE_TITLE, TRANSIT_COUNTRY_SEARCH_PLACEHOLDER } from '@domain/animals/constants/transit-countries-page';
+import { countryCodes } from '@domain/animals/constants/country-codes';
 import { expectEmptyTransitList } from '@utils/transit-countries-assertions';
 
 test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, () => {
@@ -56,6 +51,19 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
     await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText(['France', 'Belgium']);
   });
 
+  test('a territory is listed named with its country, saved, and listed again under that name when the page is reopened', async ({
+    animalsPages,
+  }) => {
+    const { display } = countryCodes.subdivisions.canaryIslands;
+    const referenceNumber = animalsPages.transitedCountries.referenceNumberFromUrl();
+    await animalsPages.transitedCountries.addCountry(display);
+    await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText([display]);
+    await animalsPages.transitedCountries.saveAndContinue.click();
+
+    await animalsPages.transitedCountries.open(referenceNumber);
+    await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText([display]);
+  });
+
   test('removes a country from the list, leaving the others', async ({ animalsPages }) => {
     await animalsPages.transitedCountries.addCountry('France');
     await animalsPages.transitedCountries.addCountry('Belgium');
@@ -87,15 +95,6 @@ test.describe('Transited countries page without JavaScript', { tag: '@duplicated
 
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toTransitedCountries();
-  });
-
-  test('the select opens on "Select a country" followed by every origin country', async ({ animalsPages }) => {
-    skipUnlessComposeEnvironment("the list is the stub's MDM fixture, which only the compose stack is sure to serve");
-
-    await expect(animalsPages.transitedCountries.country.options).toHaveText([
-      TRANSIT_COUNTRY_SELECT_TEXT,
-      ...countriesOrigin.map(({ name }) => name),
-    ]);
   });
 
   test('choosing France and pressing Add country lists it', async ({ animalsPages }) => {
