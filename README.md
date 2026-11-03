@@ -9,6 +9,7 @@ End-to-end, accessibility and security tests for the trade imports services — 
 - [Editor Setup](#editor-setup)
 - [Running Tests](#running-tests)
 - [Local Testing](#local-testing)
+- [Cross-browser tests](#cross-browser-tests)
 - [Visual Regression Tests](#visual-regression-tests)
 - [Security Testing](#security-testing)
 - [Running Tests on GitHub](#running-tests-on-github)
@@ -54,6 +55,12 @@ End-to-end, accessibility and security tests for the trade imports services — 
 
    ```bash
    npx playwright install chromium
+   ```
+
+   The [cross-browser tests](#cross-browser-tests) also need Firefox and WebKit:
+
+   ```bash
+   npx playwright install firefox webkit
    ```
 
 ## Editor Setup
@@ -270,8 +277,9 @@ npm run test:docker-compose -- tests/animals/ tests/ins/e2e/
 Always end a directory with `/`. Playwright reads the path as a regex, so
 `tests/animals` would also run `tests/animals-admin/`.
 
-A Playwright project is browser config only. Both configs have one, `chromium`,
-and it runs every domain.
+A Playwright project is browser config only. Both configs have `chromium`, which
+runs every domain, plus opt-in `firefox` and `webkit` projects for the
+[cross-browser tests](#cross-browser-tests).
 
 Within a domain directory, specs are grouped by test type, then by feature:
 
@@ -367,6 +375,36 @@ When running via the CDP Portal, `ENVIRONMENT` is provided by the portal; use `P
 
 Set `PLAYWRIGHT_WORKERS` to limit how many browsers Playwright runs at once, because the device is usually the bottleneck. Use a whole number or a percentage, for example `PLAYWRIGHT_WORKERS=2` on a 16 GB machine running the full Docker stack.
 If it is not set, Playwright's default applies (50% of cores on CI).
+
+## Cross-browser tests
+
+Tests tagged `@cross-browser` also run in Playwright's Firefox and WebKit. The
+set is the journey walks, sign-in and one test for each page the walks do not
+reach, so every page is rendered in each engine. It does not repeat the
+validation and backend checks, which do not vary by browser.
+
+The animals commands are also in [`tests/animals/cross-browser/`](tests/animals/cross-browser/README.md).
+
+Run them against the docker-compose stack. Install the browsers first (see
+[Installation](#installation)).
+
+| Command                                             | Runs                           |
+| --------------------------------------------------- | ------------------------------ |
+| `npm run test:docker-compose:cross-browser`         | Firefox and WebKit, in one run |
+| `npm run test:docker-compose:cross-browser:firefox` | Firefox only                   |
+| `npm run test:docker-compose:cross-browser:webkit`  | WebKit only                    |
+
+The `firefox` and `webkit` projects run only with `--project`, so every other
+script stays on Chromium. The scripts add `--grep '@cross-browser'`; without it
+a named engine runs every test. Write the flag as `--project=firefox`: `--project` takes several values, so with a space a
+trailing path is read as a project name. Add a test to the set by tagging it:
+
+```ts
+test('renders the page', { tag: '@cross-browser' }, async ({ animalsPages }) => {});
+```
+
+Do not run these engines with `PLAYWRIGHT_IN_CONTAINER=1`. The host-resolver
+rule that mode adds is Chromium-only.
 
 ## Visual Regression Tests
 
