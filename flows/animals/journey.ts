@@ -17,7 +17,7 @@ import {
 } from '@domain/animals/constants/journey-options';
 import { type CommodityLineAnswer } from '@domain/animals/constants/journey-commodity-line-answers';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
-import { MEANS_OF_TRANSPORT_WITHOUT_TRANSIT, meansOfTransport } from '@domain/animals/constants/means-of-transport';
+import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { fileUploadPaths } from '@resources/file-upload/paths';
@@ -362,15 +362,13 @@ export class AnimalsJourney {
 
   async answerTransport(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Arrival details').click();
-    await this.fillArrivalDetails({
+    await this.saveArrivalDetailsOnOpenPage({
       date: answers.arrivalDate,
       means: answers.meansOfTransport.display,
       port: answers.pointOfEntry.display,
       transportId: answers.transportIdentification,
       documentReference: answers.transportDocumentReference,
     });
-    await this.animalsPages.arrivalDetails.saveAndContinue.click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     if (answers.transitedCountries) {
       await this.animalsPages.overview.task('Transit countries').click();
       await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
@@ -509,27 +507,26 @@ export class AnimalsJourney {
 
   async saveArrivalDetailsFromOverview(means: string = MANDATORY_ANSWERS.meansOfTransport.display): Promise<void> {
     await this.animalsPages.overview.task('Arrival details').click();
-    await this.saveArrivalDetailsOnOpenPage(means);
+    await this.saveArrivalDetailsOnOpenPage({ means });
   }
 
   async saveArrivalDetailsInTab(tab: Page, referenceNumber: string, means: string): Promise<void> {
     const tabJourney = new AnimalsJourney(createAnimalsPages(tab), this.pages, this.context);
     await tabJourney.animalsPages.arrivalDetails.open(referenceNumber);
-    await tabJourney.saveArrivalDetailsOnOpenPage(means);
+    await tabJourney.saveArrivalDetailsOnOpenPage({ means });
   }
 
-  private async saveArrivalDetailsOnOpenPage(means: string): Promise<void> {
+  private async saveArrivalDetailsOnOpenPage(answer: ArrivalDetailsAnswer): Promise<void> {
     await this.animalsPages.arrivalDetails.heading.waitFor(pageLoadWait);
-    await this.fillArrivalDetails({ means });
+    await this.fillArrivalDetails(answer);
     await this.animalsPages.arrivalDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
   async toTransitedCountries(): Promise<void> {
-    await this.toArrivalDetails();
-    await this.fillArrivalDetails();
-    await this.animalsPages.arrivalDetails.saveAndContinue.click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.startNotification();
+    await this.answerCommodity();
+    await this.saveArrivalDetailsFromOverview();
     await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
   }
@@ -631,7 +628,7 @@ export class AnimalsJourney {
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
-    await pages.arrivalDetails.chooseMeansOfTransport(MEANS_OF_TRANSPORT_WITHOUT_TRANSIT.display);
+    await pages.arrivalDetails.chooseMeansOfTransport(meansOfTransport.airplane.display);
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);

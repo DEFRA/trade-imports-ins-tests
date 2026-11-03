@@ -5,8 +5,6 @@ export const meansOfTransport = {
   vessel: { value: 'VESSEL', display: 'Sea' },
 } as const;
 
-export const MEANS_OF_TRANSPORT_WITHOUT_TRANSIT = meansOfTransport.airplane;
-
 export type MeansOfTransport = (typeof meansOfTransport)[keyof typeof meansOfTransport];
 
 export const MEANS_OF_TRANSPORT_SELECT_TEXT = 'Select one';

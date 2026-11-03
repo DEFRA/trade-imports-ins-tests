@@ -1,10 +1,16 @@
 import { test, expect } from '@fixtures';
+import type { AnimalsPages, SharedPages } from '@page-objects';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { expectEmptyTransitList } from '@utils/transit-countries-assertions';
 
 const TRANSPORT_AND_ARRIVAL_HEADING = '3. Transport and arrival';
 const TASKS_WITHOUT_TRANSIT_COUNTRIES = ['Arrival details', 'Transport details'];
 const TASKS_WITH_TRANSIT_COUNTRIES = ['Arrival details', 'Transit countries', 'Transport details'];
+
+const expectOverviewShownFor = async (pages: SharedPages, animalsPages: AnimalsPages, referenceNumber: string): Promise<void> => {
+  await expect(animalsPages.overview.heading).toBeVisible();
+  await expect(pages.page).toHaveURL((url) => url.pathname === animalsPages.overview.expectedUrl(referenceNumber));
+};
 
 test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () => {
   test('the transit-countries page is routed only for rail or road; changing the means wipes saved countries', async ({
@@ -45,24 +51,24 @@ test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () 
   });
 
   test('opening the transit-countries page by its address shows the overview when no means, air or sea is saved', async ({
+    pages,
     animalsJourney,
     animalsPages,
   }) => {
     await animalsJourney.startNotification();
     await animalsJourney.answerCommodity();
     const referenceNumber = animalsPages.overview.referenceNumberFromUrl();
-    const overviewPath = animalsPages.overview.currentJourneyUrl();
 
     await animalsPages.transitedCountries.open(referenceNumber);
-    await animalsPages.overview.expectShownAt(overviewPath);
+    await expectOverviewShownFor(pages, animalsPages, referenceNumber);
 
     await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.airplane.display);
     await animalsPages.transitedCountries.open(referenceNumber);
-    await animalsPages.overview.expectShownAt(overviewPath);
+    await expectOverviewShownFor(pages, animalsPages, referenceNumber);
 
     await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.vessel.display);
     await animalsPages.transitedCountries.open(referenceNumber);
-    await animalsPages.overview.expectShownAt(overviewPath);
+    await expectOverviewShownFor(pages, animalsPages, referenceNumber);
   });
 
   test('adding a country from a transit-countries page left open after the means changed to air shows the overview', async ({
@@ -72,7 +78,6 @@ test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () 
   }) => {
     await animalsJourney.toTransitedCountries();
     const referenceNumber = animalsPages.transitedCountries.referenceNumberFromUrl();
-    const overviewPath = animalsPages.overview.currentJourneyUrl();
 
     const secondTab = await pages.page.context().newPage();
     try {
@@ -84,6 +89,6 @@ test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () 
     await animalsPages.transitedCountries.country.choose('France');
     await animalsPages.transitedCountries.addCountryButton.click();
 
-    await animalsPages.overview.expectShownAt(overviewPath);
+    await expectOverviewShownFor(pages, animalsPages, referenceNumber);
   });
 });
