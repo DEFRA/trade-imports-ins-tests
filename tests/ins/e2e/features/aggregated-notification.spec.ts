@@ -8,6 +8,8 @@ import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
+const INS_DASHBOARD_COMMODITY_LABEL = 'Live bovine animals';
+
 test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '@animals-backend'] }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('aggregated notification assertions read Mongo directly, which only the compose stack exposes');
@@ -53,7 +55,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(draftDoc.referenceNumber).toBe(referenceNumber);
       expect(draftDoc.status).toBe('DRAFT');
       expect(draftDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
-      expect(draftDoc.commodity).toBe(MANDATORY_ANSWERS.species.commodityCode);
+      expect(draftDoc.commodity).toBe(INS_DASHBOARD_COMMODITY_LABEL);
       expect(draftDoc.arrivalDate).toBeInstanceOf(Date);
       expect(draftDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
       expect(draftDoc.lastUpdated).toBeInstanceOf(Date);
@@ -74,7 +76,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(submittedDoc.referenceNumber).toBe(referenceNumber);
       expect(submittedDoc.status).toBe('SUBMITTED');
       expect(submittedDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
-      expect(submittedDoc.commodity).toBe(MANDATORY_ANSWERS.species.commodityCode);
+      expect(submittedDoc.commodity).toBe(INS_DASHBOARD_COMMODITY_LABEL);
       expect(submittedDoc.arrivalDate).toBeInstanceOf(Date);
       expect(submittedDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
       expect(submittedDoc.lastUpdated).toBeInstanceOf(Date);

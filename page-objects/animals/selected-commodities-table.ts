@@ -12,15 +12,15 @@ export class SelectedCommoditiesTable {
     return this.table.locator('tbody').getByRole('row');
   }
 
-  rowFor(line: CommodityLine): Locator {
+  rowFor(species: CommodityLine): Locator {
     return this.table
       .getByRole('row')
-      .filter({ has: this.page.getByRole('cell', { name: line.commodityCode, exact: true }) })
-      .filter({ hasText: line.latinName });
+      .filter({ has: this.page.getByRole('cell', { name: species.commodityCode, exact: true }) })
+      .filter({ hasText: species.latinName });
   }
 
-  changeLinkFor(line: CommodityLine): Locator {
-    return this.rowFor(line).getByRole('link', { name: new RegExp(`^Change\\s+${line.commodityCode}\\b`) });
+  changeLinkFor(species: CommodityLine): Locator {
+    return this.rowFor(species).getByRole('link', { name: new RegExp(`^Change\\s+${species.commodityCode}\\b`) });
   }
 
   codeCell(row: Locator): Locator {
