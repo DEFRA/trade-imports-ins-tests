@@ -3,7 +3,10 @@ import { test, expect } from '@fixtures';
 const GBN_REFERENCE = /GBN-AG-\d{2}-[0-9A-HJKMNP-TV-Z]{6}/;
 
 test.describe('Reference strip', { tag: '@duplicated-in-frontend' }, () => {
-  test('the Draft tag and GBN-AG reference show from the entry page onwards, and not on the dashboard', async ({ animalsPages }) => {
+  test('the Draft tag and GBN-AG reference show from the entry page onwards, and not on the dashboard', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
     const strip = animalsPages.overview.journeyStrip;
 
     // The dashboard precedes any journey — no strip.
@@ -35,7 +38,7 @@ test.describe('Reference strip', { tag: '@duplicated-in-frontend' }, () => {
     await expect(strip).toContainText(GBN_REFERENCE);
     await expect(animalsPages.overview.cancelAmend).toHaveCount(0);
 
-    await animalsPages.overview.task('Where is this consignment coming from?').click();
+    await animalsJourney.openOriginFromOverview();
     await expect(strip).toBeVisible();
     await expect(strip).toContainText(GBN_REFERENCE);
 

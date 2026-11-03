@@ -24,6 +24,12 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await expect(animalsPages.originOfImport.formLinks).toHaveCount(0);
   });
 
+  test('Back returns to the dashboard when the page was opened from the dashboard', async ({ animalsPages }) => {
+    await animalsPages.originOfImport.linkBack.click();
+
+    await expect(animalsPages.dashboard.heading).toBeVisible();
+  });
+
   test('shows the country selector on load', async ({ animalsPages }) => {
     await expect(animalsPages.originOfImport.country.field).toBeVisible();
   });
@@ -225,6 +231,25 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
       await expect(originOfImport.regionCode).toHaveAccessibleDescription(REGION_CODE_HINT);
     });
   });
+});
+
+test.describe('Origin of the import page opened from the overview', { tag: '@duplicated-in-frontend' }, () => {
+  const setUps = [
+    { title: 'before any answer is saved', start: 'startNotificationAtOrigin' },
+    { title: 'when the page is opened from the overview after origin answers are saved', start: 'startNotification' },
+  ] as const;
+
+  for (const { title, start } of setUps) {
+    test(`Back returns to the overview ${title}`, async ({ pages, animalsPages, animalsJourney }) => {
+      const referenceNumber = await animalsJourney[start]();
+      await animalsJourney.openOriginFromOverview();
+
+      await animalsPages.originOfImport.linkBack.click();
+
+      await expect(animalsPages.overview.heading).toBeVisible();
+      await expect(pages.page).toHaveURL(animalsPages.overview.expectedUrl(referenceNumber));
+    });
+  }
 });
 
 test.describe('Origin of the import page without JavaScript', { tag: '@duplicated-in-frontend' }, () => {

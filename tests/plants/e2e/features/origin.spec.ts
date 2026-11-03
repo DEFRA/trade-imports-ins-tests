@@ -2,6 +2,13 @@ import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, POTATOES, WOOD_AND_CUT_TREES } from '@flows/plants/journey';
 import { ORIGIN_COUNTRY_SEARCH_PLACEHOLDER, ORIGIN_COUNTRY_SELECT_TEXT } from '@domain/plants/constants/origin-page';
 import { SEARCH_BOX_ASSISTIVE_DESCRIPTION } from '@domain/shared/constants/type-ahead';
+import {
+  expectFirstOptionAnnounced,
+  expectResultCountAnnounced,
+  expectSearchButtonHiddenAndInert,
+  expectSearchButtonStyledAsGovukBlue,
+} from '@page-objects/shared/type-ahead-checks';
+import { countryAndSubdivisionNames, namesContaining } from '@resources/reference-data/reference-data';
 
 const WARE_POTATOES = 'Ware potatoes';
 const CONIFER_WOOD_WITHOUT_BARK = 'Conifer wood without bark (from Italy, France, Portugal or Spain)';
@@ -68,7 +75,10 @@ test.describe('High-risk plants origin section', () => {
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
   });
 
-  test('the country search box shows its placeholder and no hint', async ({ plantsPages, plantsJourney }) => {
+  test('the country search box is described by the assistive hint and shows its placeholder and no hint', async ({
+    plantsPages,
+    plantsJourney,
+  }) => {
     await plantsJourney.toOriginOfNewNotification(POTATOES);
 
     await expect(plantsPages.origin.country.field).toHaveAttribute('placeholder', ORIGIN_COUNTRY_SEARCH_PLACEHOLDER);
@@ -202,6 +212,34 @@ test.describe('High-risk plants origin section', () => {
 
     await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRow(ORIGIN_TASK_ROW)).toContainText('Completed');
+  });
+});
+
+test.describe('High-risk plants origin country search button and announcements', () => {
+  const typed = 'Belg';
+  const offered = namesContaining(countryAndSubdivisionNames(), typed);
+
+  test.beforeEach(async ({ plantsJourney }) => {
+    await plantsJourney.toOriginOfNewNotification(POTATOES);
+  });
+
+  test('shows a GOV.UK blue search button with a white magnifying glass icon', async ({ plantsPages }) => {
+    await expectSearchButtonStyledAsGovukBlue(plantsPages.origin.country);
+  });
+
+  test('keeps the search button out of assistive technology and the tab order, and focuses the box when it is clicked', async ({
+    pages,
+    plantsPages,
+  }) => {
+    await expectSearchButtonHiddenAndInert(pages.page, plantsPages.origin.country);
+  });
+
+  test('announces the number of results after typing', async ({ plantsPages }) => {
+    await expectResultCountAnnounced(plantsPages.origin.country, typed, offered);
+  });
+
+  test('announces the highlighted country after moving onto its suggestion', async ({ plantsPages }) => {
+    await expectFirstOptionAnnounced(plantsPages.origin.country, typed, offered);
   });
 });
 
