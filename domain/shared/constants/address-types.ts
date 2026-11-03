@@ -71,14 +71,36 @@ export const addressBookTabLabels = addressBookTabs.map(({ label }) => label);
 
 export const unsupportedAddressValue = 'TRANSPORTER';
 
+export const usesQuestionOptions: Record<AddressType, readonly AddressUse[]> = {
+  ORIGIN_OR_CONSIGNOR: [addressUses.placeOfOrigin, addressUses.consignor],
+  DESTINATION_CONSIGNEE_OR_IMPORTER: [addressUses.placeOfDestination, addressUses.consignee, addressUses.importer],
+  BRANCH: [addressUses.branchAddress],
+};
+
+export const usesQuestionLabels: Record<AddressUse, string> = {
+  PLACE_OF_ORIGIN: 'Place of origin',
+  CONSIGNOR: 'Consignor',
+  PLACE_OF_DESTINATION: 'Place of destination',
+  CONSIGNEE: 'Consignee',
+  IMPORTER: 'Importer',
+  BRANCH_ADDRESS: 'Branch address',
+};
+
+export const addressTypesRequiringUnitedKingdom: readonly AddressType[] = [
+  addressTypes.destinationConsigneeOrImporter,
+  addressTypes.branch,
+];
+
+const hintOf = (addressType: AddressType): string => usesQuestionOptions[addressType].map((use) => usesQuestionLabels[use]).join(', ');
+
 export const addressTypeOptions: readonly { addressType: AddressType; label: string; hint: string }[] = [
-  { addressType: addressTypes.originOrConsignor, label: 'Origin or Consignor', hint: 'Place of origin, Consignor' },
+  { addressType: addressTypes.originOrConsignor, label: 'Origin or Consignor', hint: hintOf(addressTypes.originOrConsignor) },
   {
     addressType: addressTypes.destinationConsigneeOrImporter,
     label: 'Destination, Consignee or Importer',
-    hint: 'Place of destination, Consignee, Importer',
+    hint: hintOf(addressTypes.destinationConsigneeOrImporter),
   },
-  { addressType: addressTypes.branch, label: 'Branch', hint: 'Branch address' },
+  { addressType: addressTypes.branch, label: 'Branch', hint: hintOf(addressTypes.branch) },
 ];
 
 export const addressTypeLabels = Object.fromEntries(addressTypeOptions.map(({ addressType, label }) => [addressType, label])) as Record<
@@ -122,16 +144,12 @@ export const heldAsBranchAddress: AddressClassification = {
 };
 
 export const usesQuestion = {
-  legend: 'What can this address be used for?',
   hint: 'Select where this address can be used',
   error: 'Select what this address can be used for',
 };
 
-export const usesQuestionLabels: Record<AddressUse, string> = {
-  PLACE_OF_ORIGIN: 'Place of origin',
-  CONSIGNOR: 'Consignor',
-  PLACE_OF_DESTINATION: 'Place of destination',
-  CONSIGNEE: 'Consignee',
-  IMPORTER: 'Importer',
-  BRANCH_ADDRESS: 'Branch address',
+export const usesQuestionLegends: Record<AddressType, string> = {
+  ORIGIN_OR_CONSIGNOR: 'What can this address be used for?',
+  DESTINATION_CONSIGNEE_OR_IMPORTER: 'Address type',
+  BRANCH: 'Address type',
 };

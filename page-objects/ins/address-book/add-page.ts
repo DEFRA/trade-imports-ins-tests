@@ -1,7 +1,7 @@
 import { Locator } from '@playwright/test';
 import { type AddressDetails, InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 import { opensAtExpectedUrl } from '@page-objects/ins/address-book/opens-at-expected-url';
-import { usesQuestion, usesQuestionLabels, type AddressUse } from '@domain/shared/constants/address-types';
+import { usesQuestionLabels, type AddressUse } from '@domain/shared/constants/address-types';
 
 export type NewAddressDetails = AddressDetails;
 
@@ -42,7 +42,11 @@ export class InsAddressBookAddPage extends opensAtExpectedUrl(InsAddressBookForm
 
   /** The uses question: the group after the section break that follows the contact fields. */
   get usesGroup(): Locator {
-    return this.page.locator('hr.govuk-section-break + .govuk-form-group').getByRole('group', { name: usesQuestion.legend });
+    return this.page.locator('hr.govuk-section-break + .govuk-form-group > fieldset.govuk-fieldset');
+  }
+
+  get usesLegend(): Locator {
+    return this.usesGroup.locator('legend');
   }
 
   get sectionBreak(): Locator {

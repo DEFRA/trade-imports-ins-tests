@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { addressTypeOptions, addressTypes } from '@domain/shared/constants/address-types';
+import { addressTypeOptions, addressTypes, addressUses } from '@domain/shared/constants/address-types';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 
 const MISSING_TYPE_MESSAGE = 'Select an address type';
@@ -54,6 +54,45 @@ test.describe('Choosing an address type before adding an address', () => {
       await insPages.addressBookAdd.linkBack.click();
 
       await expect(insPages.addressBookAddressType.radio(addressType)).toBeChecked();
+    });
+  }
+
+  const useTickedByAddressType = {
+    [addressTypes.originOrConsignor]: addressUses.placeOfOrigin,
+    [addressTypes.destinationConsigneeOrImporter]: addressUses.consignee,
+    [addressTypes.branch]: addressUses.branchAddress,
+  } as const;
+
+  for (const { addressType, label } of addressTypeOptions) {
+    test(`after a refused save of ${label}, choosing it again shows the address, the contact details and the ticked use entered`, async ({
+      insPages,
+      insJourney,
+    }) => {
+      const addPage = insPages.addressBookAdd;
+      const use = useTickedByAddressType[addressType];
+      const entered = {
+        ...addFormAddressWithLineTwoAndCounty(`Kept Entry ${label} ${Date.now()}`, 'United Kingdom'),
+        email: 'not-an-email',
+      };
+      await insJourney.toAddressForm({ addressType });
+      await addPage.fill(entered);
+      await addPage.tickUses([use]);
+      await addPage.saveAndContinue();
+      await expect(addPage.errorSummary).toBeVisible();
+
+      await addPage.linkBack.click();
+      await insJourney.chooseAddressType(addressType);
+
+      await expect(addPage.inputName).toHaveValue(entered.name);
+      await expect(addPage.inputAddressLine1).toHaveValue(entered.addressLine1);
+      await expect(addPage.inputAddressLine2).toHaveValue(entered.addressLine2);
+      await expect(addPage.inputTownOrCity).toHaveValue(entered.townOrCity);
+      await expect(addPage.inputCounty).toHaveValue(entered.county);
+      await expect(addPage.inputPostcode).toHaveValue(entered.postcode);
+      await expect(addPage.selectedCountryOption).toHaveText(entered.country);
+      await expect(addPage.inputEmail).toHaveValue(entered.email);
+      await expect(addPage.inputPhone).toHaveValue(entered.phone);
+      await expect(addPage.usesOption(use)).toBeChecked();
     });
   }
 
