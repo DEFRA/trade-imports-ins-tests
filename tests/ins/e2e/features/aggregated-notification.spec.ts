@@ -1,6 +1,5 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { commodityNameOf } from '@domain/animals/constants/commodity-lines';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { type AggregatedNotificationDocument } from '@domain/ins/models/db/aggregated-notification-document';
 import { timeouts } from '@config/timeouts';
@@ -8,6 +7,8 @@ import { getMongoDbUri } from '@config/service-base-urls';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
+
+const INS_DASHBOARD_COMMODITY_LABEL = 'Live bovine animals';
 
 test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '@animals-backend'] }, () => {
   test.beforeEach(() => {
@@ -54,7 +55,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(draftDoc.referenceNumber).toBe(referenceNumber);
       expect(draftDoc.status).toBe('DRAFT');
       expect(draftDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
-      expect(draftDoc.commodity).toBe(commodityNameOf(MANDATORY_ANSWERS.species));
+      expect(draftDoc.commodity).toBe(INS_DASHBOARD_COMMODITY_LABEL);
       expect(draftDoc.arrivalDate).toBeInstanceOf(Date);
       expect(draftDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
       expect(draftDoc.lastUpdated).toBeInstanceOf(Date);
@@ -75,7 +76,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(submittedDoc.referenceNumber).toBe(referenceNumber);
       expect(submittedDoc.status).toBe('SUBMITTED');
       expect(submittedDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
-      expect(submittedDoc.commodity).toBe(commodityNameOf(MANDATORY_ANSWERS.species));
+      expect(submittedDoc.commodity).toBe(INS_DASHBOARD_COMMODITY_LABEL);
       expect(submittedDoc.arrivalDate).toBeInstanceOf(Date);
       expect(submittedDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
       expect(submittedDoc.lastUpdated).toBeInstanceOf(Date);

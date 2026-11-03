@@ -1,6 +1,6 @@
 import type { FormFields } from '@adapters/http/frontend-form-client';
+import { type CommodityLineAnswer } from '@domain/animals/constants/journey-commodity-line-answers';
 import { assertConsistentAnswers, type NotificationAnswers } from '@domain/animals/constants/journey-options';
-import { speciesCheckboxValue } from '@domain/animals/constants/commodity-lines';
 
 export type PartyRole = 'placeOfOrigin' | 'consignor' | 'consignee' | 'importer' | 'placeOfDestination' | 'contact';
 
@@ -26,7 +26,50 @@ export type SeedStep = {
  */
 export type DraftStage = 'unlocked' | 'partial' | 'ready';
 
-const FIRST_LINE_INDEX = 0;
+const consignmentDetailsForm = (lines: CommodityLineAnswer[]): FormFields => {
+  const form: FormFields = {};
+  lines.forEach((line, index) => {
+    form[`numberOfAnimalsQuantity-${index}`] = String(line.noOfAnimals);
+    if (line.noOfPackages !== undefined) {
+      form[`numberOfPackages-${index}`] = String(line.noOfPackages);
+    }
+  });
+  return form;
+};
+
+const identificationForm = (lines: CommodityLineAnswer[]): FormFields => {
+  const form: FormFields = {};
+  lines.forEach((line, index) => {
+    if (line.earTag) {
+      form[`animalIdentifierEarTag-${index}`] = line.earTag;
+    }
+    if (line.passportNumber) {
+      form[`animalIdentifierPassport-${index}`] = line.passportNumber;
+    }
+    if (line.microchip) {
+      form[`animalIdentifierMicrochip-${index}`] = line.microchip;
+    }
+    if (line.tattoo) {
+      form[`animalIdentifierTattoo-${index}`] = line.tattoo;
+    }
+    if (line.permanentAddress) {
+      const { permanentAddress: address } = line;
+      form[`nameOrOrganisationName-${index}`] = address.nameOrOrganisationName;
+      form[`addressLine1-${index}`] = address.addressLine1;
+      if (address.addressLine2) {
+        form[`addressLine2-${index}`] = address.addressLine2;
+      }
+      form[`townOrCity-${index}`] = address.townOrCity;
+      if (address.county) {
+        form[`county-${index}`] = address.county;
+      }
+      form[`postcode-${index}`] = address.postcode;
+      form[`phone-${index}`] = address.phone;
+      form[`email-${index}`] = address.email;
+    }
+  });
+  return form;
+};
 
 const originStep = (answers: NotificationAnswers): SeedStep => ({
   slug: 'origin',
@@ -38,24 +81,21 @@ const originStep = (answers: NotificationAnswers): SeedStep => ({
   },
 });
 
-const commoditySteps = (answers: NotificationAnswers): SeedStep[] => [
-  { slug: 'commodities', form: { commoditySearch: answers.species.searchTerm, action: 'search' }, returnsHtml: true },
-  { slug: 'commodities', form: { species: speciesCheckboxValue(answers.species) } },
-  {
-    slug: 'consignment-details',
-    form: {
-      [`numberOfAnimalsQuantity-${FIRST_LINE_INDEX}`]: String(answers.noOfAnimals),
-      ...(answers.noOfPackages !== undefined && { [`numberOfPackages-${FIRST_LINE_INDEX}`]: String(answers.noOfPackages) }),
-    },
-  },
-  {
-    slug: 'commodities/identification',
-    form: {
-      [`animalIdentifierEarTag-${FIRST_LINE_INDEX}`]: answers.earTag,
-      ...(answers.passportNumber && { [`animalIdentifierPassport-${FIRST_LINE_INDEX}`]: answers.passportNumber }),
-    },
-  },
-];
+const commoditySteps = (answers: NotificationAnswers): SeedStep[] => {
+  const lines = answers.commodityLines;
+  const speciesCheckboxValue = ({ species }: CommodityLineAnswer): string => `${species.commodityCode}|${species.latinName}`;
+  const searchSteps: SeedStep[] = lines.map((line) => ({
+    slug: 'commodities',
+    form: { commoditySearch: line.species.searchTerm, action: 'search' },
+    returnsHtml: true,
+  }));
+  return [
+    ...searchSteps,
+    { slug: 'commodities', form: { species: lines.map(speciesCheckboxValue) } },
+    { slug: 'consignment-details', form: consignmentDetailsForm(lines) },
+    { slug: 'commodities/identification', form: identificationForm(lines) },
+  ];
+};
 
 const consignmentSteps = (answers: NotificationAnswers): SeedStep[] => [
   {

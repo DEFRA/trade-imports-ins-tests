@@ -33,6 +33,29 @@ type StoredAnimalIdentifier = {
   permanentAddress?: StoredParty;
 };
 
+type StoredSpecies = {
+  value: string;
+  text: string;
+  commonName?: string;
+  typeOfCommodity?: string;
+  noOfAnimals: number;
+  noOfPackages: number;
+  earTag?: string;
+  passport?: string;
+  microchip?: string;
+  animalIdentifiers?: StoredAnimalIdentifier[];
+};
+
+type StoredCommodityComplement = {
+  name: string;
+  commodityCode?: string;
+  description?: string;
+  typeOfCommodity?: string;
+  totalNoOfAnimals: number;
+  totalNoOfPackages?: number;
+  species: StoredSpecies[];
+};
+
 type NotificationContent = {
   origin: {
     countryCode: string;
@@ -40,25 +63,7 @@ type NotificationContent = {
     regionOfOriginCode?: string;
     internalReference?: string;
   };
-  commodities: Array<{
-    name: string;
-    commodityCode: string;
-    description?: string;
-    typeOfCommodity?: string;
-    species: Array<{
-      value: string;
-      text: string;
-      commonName?: string;
-      noOfAnimals: number;
-      noOfPackages: number;
-      earTag: string;
-      passport: string;
-      microchip?: string;
-      animalIdentifiers?: StoredAnimalIdentifier[];
-    }>;
-    totalNoOfAnimals: number;
-    totalNoOfPackages: number;
-  }>;
+  commodities: StoredCommodityComplement[];
   reasonForImport: string;
   additionalDetails: {
     certifiedFor?: string;

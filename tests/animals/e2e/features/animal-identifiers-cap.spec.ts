@@ -11,30 +11,28 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     test.slow();
     await animalsJourney.toAnimalIdentificationWithCounts([{ species: commodityLines.cattle, animalCount: 2 }]);
 
-    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle.latinName, 1, 2)).toBeVisible();
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle, 1, 2)).toBeVisible();
     await animalsPages.animalIdentification.earTag.fill('UK000000000001');
     await animalsPages.animalIdentification.saveAndAddAnother.click();
-    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle.latinName, 2, 2)).toBeVisible();
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle, 2, 2)).toBeVisible();
     await expect(animalsPages.animalIdentification.identifierColumn('Animal')).toBeVisible();
     await expect(animalsPages.animalIdentification.identifierColumn('Ear tag')).toBeVisible();
     await expect(animalsPages.animalIdentification.identifierColumn('Passport')).toBeVisible();
     await expect(
-      animalsPages.animalIdentification
-        .savedAnimalRow(commodityLines.cattle.latinName, 1)
-        .getByRole('cell', { name: 'UK000000000001', exact: true }),
+      animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 1).getByRole('cell', { name: 'UK000000000001', exact: true }),
     ).toBeVisible();
 
     await animalsPages.animalIdentification.earTag.fill('UK000000000002');
     await animalsPages.animalIdentification.saveAndFinish.click();
-    const card = animalsPages.animalIdentification.speciesCard(commodityLines.cattle.latinName);
-    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle.latinName, 1)).toBeVisible();
-    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle.latinName, 2)).toBeVisible();
+    const card = animalsPages.animalIdentification.speciesCard(commodityLines.cattle);
+    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 1)).toBeVisible();
+    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 2)).toBeVisible();
     await expect(card.getByRole('button')).toHaveText([/^Remove/, /^Remove/]);
     await expect(card.getByRole('textbox')).toHaveCount(0);
     await expect(card.getByRole('paragraph')).toHaveCount(0);
     await expect(card.getByRole('heading')).toHaveText([commodityLines.cattle.latinName]);
     await expect(card.getByRole('link')).toHaveText([/^Change number of animals/]);
-    await expect(animalsPages.animalIdentification.savedAnimalsRows(commodityLines.cattle.latinName)).toHaveCount(2);
+    await expect(animalsPages.animalIdentification.savedAnimalsRows(commodityLines.cattle)).toHaveCount(2);
 
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
@@ -52,13 +50,10 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await expect(pages.page).toHaveURL(/#identification-card-0$/);
     await expect(animalsPages.animalIdentification.commodityHeading(commodityLines.cattle.commodityCode)).toBeVisible();
     await expect(card.getByRole('heading', { name: commodityLines.cattle.latinName, exact: true })).toBeVisible();
-    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle.latinName, 2)).toBeVisible();
+    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 2)).toBeVisible();
 
-    await animalsPages.animalIdentification
-      .savedAnimalRow(commodityLines.cattle.latinName, 2)
-      .getByRole('button', { name: 'Remove' })
-      .click();
-    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle.latinName, 2, 2)).toBeVisible();
+    await animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 2).getByRole('button', { name: 'Remove' }).click();
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle, 2, 2)).toBeVisible();
 
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();

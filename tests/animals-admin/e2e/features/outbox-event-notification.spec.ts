@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
+import { GBN_AG_CATTLE_COMMON_NAME } from '@domain/animals/constants/gbn-ag';
 import { ALL_ANSWERS as answers, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
-import { commodityNameOf } from '@domain/animals/constants/commodity-lines';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
@@ -9,6 +9,7 @@ import { users } from '@config/users';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_SUBMITTED = 'uk.gov.defra.imports.notification.NotificationSubmitted';
+const LIVE_BOVINE_LINE_DESCRIPTION = 'Live bovine animals';
 const SUBDIVISION_FUNCTION_TYPE_CODE = '106';
 const VETERINARY_CERTIFICATE_TYPE_CODE = '853';
 const EXPECTED_ACTOR: OutboxEventActor = {
@@ -41,6 +42,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
     await animalsJourney.submitNotification(answers);
     const referenceNumber = journeyContext.referenceNumber;
     const aggregateId = aggregateIdFor(referenceNumber);
+    const [cowLine] = answers.commodityLines;
     const client = new MongoDbClient();
 
     try {
@@ -99,18 +101,18 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       const tradeLines = data.specifiedConsignment.includedConsignmentItem?.[0].includedTradeLineItem ?? [];
       expect(tradeLines).toHaveLength(1);
       const [line] = tradeLines;
-      expect(line.description).toEqual([commodityNameOf(answers.species)]);
-      expect(line.commonName).toBe(commodityNameOf(answers.species));
-      expect(line.scientificName).toBe(answers.species.latinName);
-      expect(line.specifiedLineTradeDelivery?.[0].productUnitQuantity.content).toBe(answers.noOfAnimals);
-      expect(line.physicalReferencedLogisticsPackage?.[0].itemQuantity).toBe(answers.noOfPackages);
+      expect(line.description).toEqual([LIVE_BOVINE_LINE_DESCRIPTION]);
+      expect(line.commonName).toBe(GBN_AG_CATTLE_COMMON_NAME);
+      expect(line.scientificName).toBe(cowLine.species.latinName);
+      expect(line.specifiedLineTradeDelivery?.[0].productUnitQuantity.content).toBe(cowLine.noOfAnimals);
+      expect(line.physicalReferencedLogisticsPackage?.[0].itemQuantity).toBe(cowLine.noOfPackages);
       const animals = line.individualTradeProductInstance ?? [];
       expect(animals).toHaveLength(1);
       expect(animals[0].identifier).toHaveLength(2);
       expect(animals[0].identifier).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ typeCode: 'EAR_TAG', content: answers.earTag }),
-          expect.objectContaining({ typeCode: 'PASSPORT', content: answers.passportNumber }),
+          expect.objectContaining({ typeCode: 'EAR_TAG', content: cowLine.earTag }),
+          expect.objectContaining({ typeCode: 'PASSPORT', content: cowLine.passportNumber }),
         ]),
       );
       expect(actorWithNullableFields(doc.actor)).toEqual(EXPECTED_ACTOR);

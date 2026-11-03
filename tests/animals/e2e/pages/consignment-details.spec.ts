@@ -34,12 +34,12 @@ test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () =
     await expect(animalsPages.consignmentDetails.numberOfAnimals).toHaveValue('');
   });
 
-  test('accepts valid consignment details', async ({ pages, animalsPages }) => {
+  test('accepts valid consignment details', async ({ animalsPages }) => {
     await animalsPages.consignmentDetails.numberOfAnimals.fill('1');
     await animalsPages.consignmentDetails.numberOfPackages.fill('5');
     await animalsPages.consignmentDetails.saveAndContinue.click();
 
-    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+    await expect(animalsPages.overview.heading).toBeVisible();
   });
 });
 
@@ -88,9 +88,9 @@ test.describe('Commodity details page after counts are saved', { tag: '@duplicat
     await animalsPages.commoditySelection.saveAndContinue.click();
 
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
-    await expect(await animalsPages.consignmentDetails.numberOfAnimalsFor('Bos taurus')).toHaveValue('2');
-    await expect(await animalsPages.consignmentDetails.numberOfPackagesFor('Bos taurus')).toHaveValue('5');
-    await expect(await animalsPages.consignmentDetails.numberOfAnimalsFor('Felis catus')).toHaveValue('');
-    await expect(await animalsPages.consignmentDetails.numberOfPackagesFor('Felis catus')).toHaveValue('');
+    await expect(await animalsPages.consignmentDetails.numberOfAnimalsFor(commodityLines.cattle)).toHaveValue('2');
+    await expect(await animalsPages.consignmentDetails.numberOfPackagesFor(commodityLines.cattle)).toHaveValue('5');
+    await expect(await animalsPages.consignmentDetails.numberOfAnimalsFor(commodityLines.domesticCat)).toHaveValue('');
+    await expect(await animalsPages.consignmentDetails.numberOfPackagesFor(commodityLines.domesticCat)).toHaveValue('');
   });
 });
