@@ -1,4 +1,4 @@
-import { type Locator } from '@playwright/test';
+import { expect, type Locator } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 
 export class AnimalsOverviewPage extends NotificationPage {
@@ -8,6 +8,11 @@ export class AnimalsOverviewPage extends NotificationPage {
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Overview' });
+  }
+
+  async expectShownAt(overviewPath: string): Promise<void> {
+    await expect(this.heading).toBeVisible();
+    await expect(this.page).toHaveURL((url) => url.pathname === overviewPath);
   }
 
   get numberedSectionHeadings(): Locator {

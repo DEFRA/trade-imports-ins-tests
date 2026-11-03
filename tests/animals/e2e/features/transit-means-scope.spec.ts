@@ -14,24 +14,16 @@ test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () 
     await animalsJourney.startNotification();
     await animalsJourney.answerCommodity();
 
-    const saveArrivalWithMeans = async (means: string) => {
-      await animalsPages.overview.task('Arrival details').click();
-      await expect(animalsPages.arrivalDetails.heading).toBeVisible();
-      await animalsJourney.fillArrivalDetails({ means });
-      await animalsPages.arrivalDetails.saveAndContinue.click();
-      await expect(animalsPages.overview.heading).toBeVisible();
-    };
-
-    await saveArrivalWithMeans(meansOfTransport.airplane.display);
+    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.airplane.display);
     await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(
       TASKS_WITHOUT_TRANSIT_COUNTRIES,
     );
 
-    await saveArrivalWithMeans(meansOfTransport.railway.display);
+    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.railway.display);
     await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(TASKS_WITH_TRANSIT_COUNTRIES);
     await expect(animalsPages.overview.taskStatus('Transit countries')).toHaveText('To do');
 
-    await saveArrivalWithMeans(meansOfTransport.roadVehicle.display);
+    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.roadVehicle.display);
     await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(TASKS_WITH_TRANSIT_COUNTRIES);
     await animalsPages.overview.task('Transit countries').click();
     await expect(animalsPages.transitedCountries.heading).toBeVisible();
@@ -41,14 +33,57 @@ test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () 
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.taskStatus('Transit countries')).toHaveText('Complete');
 
-    await saveArrivalWithMeans(meansOfTransport.vessel.display);
+    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.vessel.display);
     await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(
       TASKS_WITHOUT_TRANSIT_COUNTRIES,
     );
 
-    await saveArrivalWithMeans(meansOfTransport.roadVehicle.display);
+    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.roadVehicle.display);
     await animalsPages.overview.task('Transit countries').click();
     await expect(animalsPages.transitedCountries.heading).toBeVisible();
     await expectEmptyTransitList(animalsPages.transitedCountries);
+  });
+
+  test('opening the transit-countries page by its address shows the overview when no means, air or sea is saved', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.startNotification();
+    await animalsJourney.answerCommodity();
+    const referenceNumber = animalsPages.overview.referenceNumberFromUrl();
+    const overviewPath = animalsPages.overview.currentJourneyUrl();
+
+    await animalsPages.transitedCountries.open(referenceNumber);
+    await animalsPages.overview.expectShownAt(overviewPath);
+
+    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.airplane.display);
+    await animalsPages.transitedCountries.open(referenceNumber);
+    await animalsPages.overview.expectShownAt(overviewPath);
+
+    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.vessel.display);
+    await animalsPages.transitedCountries.open(referenceNumber);
+    await animalsPages.overview.expectShownAt(overviewPath);
+  });
+
+  test('adding a country from a transit-countries page left open after the means changed to air shows the overview', async ({
+    pages,
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.toTransitedCountries();
+    const referenceNumber = animalsPages.transitedCountries.referenceNumberFromUrl();
+    const overviewPath = animalsPages.overview.currentJourneyUrl();
+
+    const secondTab = await pages.page.context().newPage();
+    try {
+      await animalsJourney.saveArrivalDetailsInTab(secondTab, referenceNumber, meansOfTransport.airplane.display);
+    } finally {
+      await secondTab.close();
+    }
+
+    await animalsPages.transitedCountries.country.choose('France');
+    await animalsPages.transitedCountries.addCountryButton.click();
+
+    await animalsPages.overview.expectShownAt(overviewPath);
   });
 });

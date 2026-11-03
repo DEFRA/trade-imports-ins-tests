@@ -8,3 +8,5 @@ export const EMPTY_TRANSIT_COUNTRIES_BODY_TEXT = [
 ];
 
 export const EMPTY_TRANSIT_COUNTRIES_BUTTONS = ['Add country', 'Save and continue', 'Save and return to overview'];
+
+export const TRANSIT_COUNTRIES_PAGE_TITLE = 'Transit countries - Import notification service - GOV.UK';

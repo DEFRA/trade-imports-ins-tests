@@ -1,5 +1,9 @@
 import { test, expect } from '@fixtures';
-import { TRANSIT_COUNTRY_SEARCH_PLACEHOLDER, TRANSIT_COUNTRY_SELECT_TEXT } from '@domain/animals/constants/transit-countries-page';
+import {
+  TRANSIT_COUNTRIES_PAGE_TITLE,
+  TRANSIT_COUNTRY_SEARCH_PLACEHOLDER,
+  TRANSIT_COUNTRY_SELECT_TEXT,
+} from '@domain/animals/constants/transit-countries-page';
 import { countriesOrigin } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { expectEmptyTransitList } from '@utils/transit-countries-assertions';
@@ -15,6 +19,16 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
     await expect(transitedCountries.heading).toBeVisible();
     await expect(transitedCountries.country.field).toBeVisible();
     await expectEmptyTransitList(transitedCountries);
+  });
+
+  test('titles the browser tab Transit countries', async ({ pages }) => {
+    await expect(pages.page).toHaveTitle(TRANSIT_COUNTRIES_PAGE_TITLE);
+  });
+
+  test('prefixes the browser tab title with Error when Add country is pressed with no country chosen', async ({ pages, animalsPages }) => {
+    await animalsPages.transitedCountries.addCountryButton.click();
+
+    await expect(pages.page).toHaveTitle(`Error: ${TRANSIT_COUNTRIES_PAGE_TITLE}`);
   });
 
   test('the empty search box reads "Search for a country"', async ({ animalsPages }) => {
