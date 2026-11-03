@@ -81,7 +81,7 @@ test.describe('Amendment page endings', () => {
     await expect(pages.page).not.toHaveURL(/\/notification-view/);
   });
 
-  test('the origin page, the CPH number page, a party picker and the contact address page end with Save and return and Save and continue only, and Save and return goes to the amend review', async ({
+  test('while amending, the origin page ends with exactly Save and return and Save and continue and no link, the CPH number page, a party picker and the contact address page offer both without Save and return to overview, and Save and return goes to the amend review', async ({
     animalsPages,
     animalsSeededJourney,
   }) => {
@@ -89,9 +89,8 @@ test.describe('Amendment page endings', () => {
 
     await animalsPages.originOfImport.open(reference);
     await expect(animalsPages.originOfImport.heading).toBeVisible();
-    await expect(animalsPages.originOfImport.saveAndReturn).toBeVisible();
-    await expect(animalsPages.originOfImport.saveAndContinue).toBeVisible();
-    await expect(animalsPages.originOfImport.saveAndReturnToOverview).toHaveCount(0);
+    await expect(animalsPages.originOfImport.formButtons).toHaveText(['Save and return', 'Save and continue']);
+    await expect(animalsPages.originOfImport.formLinks).toHaveCount(0);
     await animalsPages.originOfImport.saveAndReturn.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
 
@@ -119,7 +118,7 @@ test.describe('Amendment page endings', () => {
     await expect(animalsPages.notificationView.heading).toBeVisible();
   });
 
-  test('outside an amendment the CPH number page and the origin page keep their single primary button', async ({
+  test('outside an amendment the CPH number page offers Save and continue without Save and return, and the origin page ends with exactly Save and continue and no link', async ({
     animalsPages,
     animalsSeededJourney,
   }) => {
@@ -131,10 +130,8 @@ test.describe('Amendment page endings', () => {
     await expect(animalsPages.cphNumber.saveAndReturnToOverview).toHaveCount(0);
 
     await animalsPages.originOfImport.open(reference);
-    await expect(animalsPages.originOfImport.saveAndContinue).toBeVisible();
-    await expect(animalsPages.originOfImport.saveAndReturn).toHaveCount(0);
-    await expect(animalsPages.originOfImport.saveAndReturnToOverview).toHaveCount(0);
-    await expect(animalsPages.originOfImport.cancelAndReturnToOverview).toHaveCount(0);
+    await expect(animalsPages.originOfImport.formButtons).toHaveText(['Save and continue']);
+    await expect(animalsPages.originOfImport.formLinks).toHaveCount(0);
   });
 
   test('Continue on an amend review with an answer missing stays on the review and shows There is a problem, naming what is missing', async ({
