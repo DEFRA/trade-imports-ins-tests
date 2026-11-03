@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Notification delete', { tag: '@duplicated-in-frontend' }, () => {
-  test('deletes a draft notification', async ({ animalsJourney, animalsPages, journeyContext }) => {
+  test('deletes a draft notification', { tag: '@cross-browser' }, async ({ animalsJourney, animalsPages, journeyContext }) => {
     test.slow();
     await animalsJourney.startNotification();
     const { referenceNumber } = journeyContext;
