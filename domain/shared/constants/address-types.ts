@@ -70,3 +70,18 @@ export const [originOrConsignorTab, destinationConsigneeOrImporterTab, branchTab
 export const addressBookTabLabels = addressBookTabs.map(({ label }) => label);
 
 export const unsupportedAddressValue = 'TRANSPORTER';
+
+export const addressTypeOptions: readonly { addressType: AddressType; label: string; hint: string }[] = [
+  { addressType: addressTypes.originOrConsignor, label: 'Origin or Consignor', hint: 'Place of origin, Consignor' },
+  {
+    addressType: addressTypes.destinationConsigneeOrImporter,
+    label: 'Destination, Consignee or Importer',
+    hint: 'Place of destination, Consignee, Importer',
+  },
+  { addressType: addressTypes.branch, label: 'Branch', hint: 'Branch address' },
+];
+
+export const addressTypeLabels = Object.fromEntries(addressTypeOptions.map(({ addressType, label }) => [addressType, label])) as Record<
+  AddressType,
+  string
+>;

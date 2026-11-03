@@ -1,10 +1,10 @@
 import { Locator } from '@playwright/test';
-import { type OpenOptions } from '@page-objects/shared/base-page';
 import { type AddressDetails, InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
+import { opensAtExpectedUrl } from '@page-objects/ins/address-book/opens-at-expected-url';
 
 export type NewAddressDetails = AddressDetails;
 
-export class InsAddressBookAddPage extends InsAddressBookFormPage {
+export class InsAddressBookAddPage extends opensAtExpectedUrl(InsAddressBookFormPage) {
   readonly expectedUrl = '/address-book/add';
 
   get heading(): Locator {
@@ -37,11 +37,6 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
 
   get linkCancelAndReturnToHub(): Locator {
     return this.page.getByRole('link', { name: 'Cancel and return to hub', exact: true });
-  }
-
-  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
-    await this.page.goto(this.expectedUrl);
-    await this.signInWhenRequested(attemptSignIn, identity);
   }
 
   async saveAndContinue(): Promise<void> {

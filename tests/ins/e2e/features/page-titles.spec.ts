@@ -40,8 +40,28 @@ test.describe('INS page titles', { tag: '@duplicated-in-frontend' }, () => {
     await expect(pages.page).toHaveTitle('Edit address and contact details - Import notification service - GOV.UK');
   });
 
-  test('a page showing errors opens its title with Error:', async ({ pages, insPages }) => {
-    await insPages.addressBookAdd.open();
+  test('the address type page is titled Choose an address type - Import notification service - GOV.UK', async ({
+    pages,
+    insPages,
+    insJourney,
+  }) => {
+    await insJourney.toAddressType();
+
+    await expect(insPages.addressBookAddressType.heading).toBeVisible();
+    await expect(pages.page).toHaveTitle('Choose an address type - Import notification service - GOV.UK');
+  });
+
+  test('the address type page showing its error opens its title with Error:', async ({ pages, insPages, insJourney }) => {
+    await insJourney.toAddressType();
+
+    await insPages.addressBookAddressType.continue();
+
+    await expect(insPages.addressBookAddressType.errorSummary).toBeVisible();
+    await expect(pages.page).toHaveTitle('Error: Choose an address type - Import notification service - GOV.UK');
+  });
+
+  test('a page showing errors opens its title with Error:', async ({ pages, insPages, insJourney }) => {
+    await insJourney.toAddressForm();
 
     await insPages.addressBookAdd.saveAndContinue();
 

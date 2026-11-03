@@ -9,8 +9,9 @@ test.describe('Address book country list', () => {
 
   test("the add form's Country select lists Select a country first, then every country reference data serves alphabetically, United Kingdom in its place", async ({
     insPages,
+    insJourney,
   }) => {
-    await insPages.addressBookAdd.open();
+    await insJourney.toAddressForm();
 
     await expect(insPages.addressBookAdd.countryOptions).toHaveText(['Select a country', ...addressFormCountryNames]);
   });

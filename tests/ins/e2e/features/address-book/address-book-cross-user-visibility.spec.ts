@@ -4,10 +4,15 @@ import { createInsPages } from '@page-objects';
 import { users } from '@config/users';
 
 test.describe('Address book cross-user visibility', () => {
-  test('an address added by one user is visible to another user in the same organisation', async ({ browser, pages, insPages }) => {
+  test('an address added by one user is visible to another user in the same organisation', async ({
+    browser,
+    pages,
+    insPages,
+    insJourney,
+  }) => {
     const createdName = `Cross User Farm ${Date.now()}`;
 
-    await insPages.addressBookAdd.open({ userId: users.andrew.crn });
+    await insJourney.toAddressForm({ userId: users.andrew.crn });
     await insPages.addressBookAdd.fill({
       name: createdName,
       addressLine1: '2 Test Lane',

@@ -17,6 +17,7 @@ import { AnimalsJourney } from '@flows/animals/journey';
 import { AnimalsNotificationActions } from '@flows/animals/notification-actions';
 import { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { AnimalsAdminNavigation } from '@flows/animals-admin/navigation';
+import { InsJourney } from '@flows/ins/journey';
 import { PlantsJourney } from '@flows/plants/journey';
 import { PlantsNotificationActions } from '@flows/plants/notification-actions';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
@@ -55,6 +56,7 @@ export interface PageFixtures {
   animalsSeededJourney: AnimalsSeededJourney;
   animalsNotificationActions: AnimalsNotificationActions;
   animalsAdminNavigation: AnimalsAdminNavigation;
+  insJourney: InsJourney;
   plantsJourney: PlantsJourney;
   plantsNotificationActions: PlantsNotificationActions;
   notificationApi: NotificationApiClient;
@@ -124,6 +126,9 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   },
   animalsAdminNavigation: async ({ animalsAdminPages }, use) => {
     await use(new AnimalsAdminNavigation(animalsAdminPages));
+  },
+  insJourney: async ({ insPages }, use) => {
+    await use(new InsJourney(insPages));
   },
   plantsJourney: async ({ plantsPages, journeyContext }, use) => {
     await use(new PlantsJourney(plantsPages, journeyContext));

@@ -15,6 +15,7 @@ for (const [viewportName, viewport] of Object.entries(narrowViewports)) {
     test(`the address book pages have no accessibility violations and no sideways scrolling at ${viewportName}`, async ({
       page,
       insPages,
+      insJourney,
       addressBookApi,
       runA11yScan,
     }) => {
@@ -26,9 +27,13 @@ for (const [viewportName, viewport] of Object.entries(narrowViewports)) {
         await scanNarrowPage(page, runA11yScan);
       });
 
+      await test.step('Choose an address type (blank)', async () => {
+        await insJourney.toAddressType();
+        await scanNarrowPage(page, runA11yScan);
+      });
+
       await test.step('Add address (blank)', async () => {
-        await insPages.addressBookAdd.open();
-        await insPages.addressBookAdd.heading.waitFor();
+        await insJourney.chooseAddressType();
         await scanNarrowPage(page, runA11yScan);
       });
 

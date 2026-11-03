@@ -10,7 +10,7 @@ test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => 
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
   });
 
-  test('a created address persists with its full Standard Address Block', async ({ pages, insPages }) => {
+  test('a created address persists with its full Standard Address Block', async ({ pages, insPages, insJourney }) => {
     const createdName = `Persistence Test Farm ${Date.now()}`;
     const details: NewAddressDetails = {
       name: createdName,
@@ -24,7 +24,7 @@ test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => 
       email: 'farm@example.co.uk',
     };
 
-    await insPages.addressBookAdd.open();
+    await insJourney.toAddressForm();
     await insPages.addressBookAdd.fill(details);
     await insPages.addressBookAdd.saveAndContinue();
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));

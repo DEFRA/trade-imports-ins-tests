@@ -4,6 +4,7 @@ import { addFormAddressWithLineTwoAndCounty, traderAddress } from '@domain/ins/c
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('the address book has no accessibility violations when populated and after an address is added', async ({
     insPages,
+    insJourney,
     addressBookApi,
     runA11yScan,
   }) => {
@@ -17,8 +18,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Address book with the success banner', async () => {
-      await insPages.addressBookList.btnAddNewAddress.click();
-      await insPages.addressBookAdd.heading.waitFor();
+      await insJourney.toAddressFormFromList();
       await insPages.addressBookAdd.fill(addFormAddressWithLineTwoAndCounty(`A11y Added Farm ${Date.now()}`, 'United Kingdom'));
       await insPages.addressBookAdd.saveAndContinue();
       await insPages.addressBookList.successBanner.waitFor();

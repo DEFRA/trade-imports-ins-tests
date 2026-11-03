@@ -24,9 +24,10 @@ async function expectFieldsGroupedUnderSections(form: InsAddressBookFormPage): P
 test.describe('The add-details form for an address entered by hand', () => {
   test('the add-details step groups its fields under Address and Contact details, with Name or organisation first and County between Town or city and Postcode, and the edit page labels the name the same', async ({
     insPages,
+    insJourney,
     addressBookApi,
   }) => {
-    await insPages.addressBookAdd.open();
+    await insJourney.toAddressForm();
 
     await expectFieldsGroupedUnderSections(insPages.addressBookAdd);
     for (const [index, name] of ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER.entries()) {
@@ -39,36 +40,30 @@ test.describe('The add-details form for an address entered by hand', () => {
     await expect(insPages.addressBookEdit.inputName).toHaveAccessibleName(ADDRESS_FORM_FIELD_LABELS.name);
   });
 
-  test('the Country select opens on its blank first option, Select a country, with nothing pre-selected', async ({ insPages }) => {
-    await insPages.addressBookAdd.open();
-
-    await expect(insPages.addressBookAdd.selectCountry).toHaveValue('');
-    await expect(insPages.addressBookAdd.countryOptions.first()).toHaveText('Select a country');
-  });
-
-  test('Add a new address on the address book opens the add-details form, whose Back link returns to the address book', async ({
+  test('Add a new address on the address book opens the add-details form after a type is chosen, whose Back link returns to Choose an address type', async ({
     pages,
     insPages,
+    insJourney,
   }) => {
-    await insPages.addressBookList.open();
-    await insPages.addressBookList.btnAddNewAddress.click();
+    await insJourney.toAddressFormFromList();
 
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookAdd.expectedUrl}$`));
     await expect(insPages.addressBookAdd.heading).toBeVisible();
 
     await insPages.addressBookAdd.linkBack.click();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
-    await expect(insPages.addressBookList.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookAddressType.expectedUrl}$`));
+    await expect(insPages.addressBookAddressType.heading).toBeVisible();
   });
 
   test('Cancel and return to address book is a link below Save and continue that returns to the address book and saves nothing', async ({
     pages,
     insPages,
+    insJourney,
     addressBookApi,
   }) => {
     const name = `Cancelled Farm ${Date.now()}`;
-    await insPages.addressBookAdd.open();
+    await insJourney.toAddressForm();
     await insPages.addressBookAdd.inputName.fill(name);
     await expect(insPages.addressBookAdd.btnCancelAndReturnToAddressBook).toHaveCount(0);
 

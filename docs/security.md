@@ -68,6 +68,12 @@ Ports are the compose stack's; on CDP each service is a per-service subdomain. D
 | `cdp-uploader` (7337)                | A platform component. The browser posts uploads to the frontend, which forwards them server-side, so the uploader never enters the site tree.                                                                             |
 | `trade-imports-ins-backend` (8090)   | An SQS consumer with no HTTP controllers. Its risk boundary is the queue, which DAST cannot reach; the API that produces those events is scanned.                                                                         |
 
+### What the INS `@active` specs drive
+
+- **Sign-in round trip.** `/auth/sign-in` and `/auth/sign-in-oidc` are in scope, and every other spec starts pre-authenticated, so `address-book-auth.spec.ts` is the only spec that drives them. It also holds the only check that INS renders a sign-out link: if the sign-out step fails, check that first before assuming the route moved.
+- **Record lifecycle.** `address-book.spec.ts` adds, views, edits and deletes one address. Each of those is an `/address-book/{addressId}` route, and the `addressId` dataDrivenNode has nothing to fold without them.
+- **Handshake query parameters.** `journey-type`, `notification-id`, `fulfilment-id` and `handshake-token` are sent by no other spec. Only the rejected-guard path is provable here; extend it to a real accepted token if seeding one becomes possible.
+
 ## Gating
 
 `utils/zap/run-and-gate.ts` fails a run on any of three conditions:

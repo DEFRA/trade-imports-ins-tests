@@ -25,10 +25,11 @@ const expectFourMessagesAtTopAndAgainstFields = async (form: InsAddressBookFormP
 test.describe('Address book validation messages', () => {
   test('saving the add form with name, postcode, country and phone left blank shows each message at the top and against its field', async ({
     insPages,
+    insJourney,
   }) => {
     const address = traderAddress('Blank Fields Farm');
 
-    await insPages.addressBookAdd.open();
+    await insJourney.toAddressForm();
     await insPages.addressBookAdd.fill({
       name: '',
       addressLine1: address.addressLine1,

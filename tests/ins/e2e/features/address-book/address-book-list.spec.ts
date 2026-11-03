@@ -31,9 +31,8 @@ const addAddressAndExpectSearchToListIt = async (
   await expectMainLinks(insPages.addressBookList, `View ${name}`);
 };
 
-const addAddressThroughForm = async ({ insPages }: Pick<PageFixtures, 'insPages'>, details: AddressDetails) => {
-  await insPages.addressBookList.open();
-  await insPages.addressBookList.btnAddNewAddress.click();
+const addAddressThroughForm = async ({ insPages, insJourney }: Pick<PageFixtures, 'insPages' | 'insJourney'>, details: AddressDetails) => {
+  await insJourney.toAddressFormFromList();
   await insPages.addressBookAdd.fill(details);
   await insPages.addressBookAdd.saveAndContinue();
 };
@@ -167,10 +166,11 @@ test.describe('Address book list', () => {
   test('an address added through the form lands on the list with its success banner, its address and country, and a View link to its own page', async ({
     pages,
     insPages,
+    insJourney,
   }) => {
     const name = `Added Farm ${Date.now()}`;
 
-    await addAddressThroughForm({ insPages }, addFormAddressWithLineTwoAndCounty(name, 'France'));
+    await addAddressThroughForm({ insPages, insJourney }, addFormAddressWithLineTwoAndCounty(name, 'France'));
 
     await expectAddressBookList({ pages, insPages });
     await expect(
@@ -189,6 +189,7 @@ test.describe('Address book list', () => {
 
   test('an address added through the form lands on the list with its success banner, and is listed ahead of an older address', async ({
     insPages,
+    insJourney,
     addressBookApi,
   }) => {
     const stamp = Date.now();
@@ -196,7 +197,7 @@ test.describe('Address book list', () => {
     const newerName = `Newest first ${stamp} newer`;
     await addressBookApi.createAddress(traderAddress(olderName));
 
-    await addAddressThroughForm({ insPages }, addFormAddressWithLineTwoAndCounty(newerName, 'France'));
+    await addAddressThroughForm({ insPages, insJourney }, addFormAddressWithLineTwoAndCounty(newerName, 'France'));
     await expect(insPages.addressBookList.successBanner).toContainText(`${newerName} address added to your address book`);
     await insPages.addressBookList.search(`Newest first ${stamp}`, { submitWith: 'button' });
 
@@ -206,11 +207,12 @@ test.describe('Address book list', () => {
 
   test('an address added through the form is found by a search on its name, part of its address and part of its country name', async ({
     insPages,
+    insJourney,
   }) => {
     const stamp = Date.now();
     const name = `Findable Farm ${stamp}`;
     const details = { ...addFormAddressWithLineTwoAndCounty(name, 'France'), addressLine1: `${stamp} Drover Lane` };
-    await addAddressThroughForm({ insPages }, details);
+    await addAddressThroughForm({ insPages, insJourney }, details);
 
     for (const term of [name, `${stamp} drover`, 'fran']) {
       await insPages.addressBookList.search(term, { submitWith: 'button' });
