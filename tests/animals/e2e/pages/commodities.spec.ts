@@ -40,7 +40,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
   });
 
-  test("groups the matching species under their commodity code, in reference-data's order", async ({
+  test("lists reference-data's groups by commodity heading and each group's species by label, in that order", async ({
     pages,
     animalsPages,
     referenceDataApi,
@@ -48,14 +48,21 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     for (const query of GROUPING_QUERIES) {
       const groups = await referenceDataApi.listGroups(query);
       expect(groups.length).toBeGreaterThan(0);
+      const orderedGroups = [...groups]
+        .sort((left, right) => left.code.localeCompare(right.code))
+        .map((group) => ({
+          ...group,
+          species: [...group.species].sort((left, right) => left.latinName.localeCompare(right.latinName)),
+        }));
+
       await animalsPages.commoditySelection.search(query);
-      await expect(pages.page.getByRole('checkbox')).toHaveCount(groups.flatMap((group) => group.species).length);
+      await expect(pages.page.getByRole('checkbox')).toHaveCount(orderedGroups.flatMap((group) => group.species).length);
       const commodityGroups = animalsPages.commoditySelection.commodityGroups;
-      await expect(commodityGroups).toHaveCount(groups.length);
-      for (const [index, { code }] of groups.entries()) {
+      await expect(commodityGroups).toHaveCount(orderedGroups.length);
+      for (const [index, { code }] of orderedGroups.entries()) {
         await expect(commodityGroups.nth(index)).toHaveAccessibleName(code);
       }
-      for (const { code, species } of groups) {
+      for (const { code, species } of orderedGroups) {
         const checkboxes = animalsPages.commoditySelection.commodityGroup(code).getByRole('checkbox');
         await expect(checkboxes).toHaveCount(species.length);
         for (const [index, { latinName }] of species.entries()) {
@@ -63,6 +70,18 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
         }
       }
     }
+  });
+
+  test('bolds the matched text in a group heading and in a species label', async ({ animalsPages }) => {
+    await animalsPages.commoditySelection.search(commodityLines.cattle.commodityCode);
+    await expect(animalsPages.commoditySelection.commodityGroup(commodityLines.cattle.commodityCode).locator('legend strong')).toHaveText(
+      commodityLines.cattle.commodityCode,
+    );
+
+    await animalsPages.commoditySelection.search(commodityLines.cattle.searchTerm);
+    await expect(animalsPages.commoditySelection.commodityGroup(commodityLines.cattle.commodityCode).locator('label strong')).toHaveText(
+      commodityLines.cattle.latinName,
+    );
   });
 
   test('says so when nothing matches', async ({ pages, animalsPages }) => {
@@ -143,5 +162,53 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
       await animalsPages.overview.openTaskAfterReopening(referenceNumber, 'What are you importing?');
       await expect(animalsPages.commoditySelection.selectedSummary).toContainText(commodityLines.cattle.latinName);
     });
+  });
+
+  test('lists each chosen commodity with one entry per chosen species offering a Remove control', async ({ animalsPages }) => {
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle, commodityLines.domesticCat]);
+    await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
+
+    await expect(animalsPages.commoditySelection.commodityLine(commodityLines.cattle.commodityCode)).toBeVisible();
+    await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.cattle)).toBeVisible();
+    await expect(animalsPages.commoditySelection.removeSpecies(commodityLines.cattle)).toBeVisible();
+
+    await expect(animalsPages.commoditySelection.commodityLine(commodityLines.domesticCat.commodityCode)).toBeVisible();
+    await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.domesticCat)).toBeVisible();
+    await expect(animalsPages.commoditySelection.removeSpecies(commodityLines.domesticCat)).toBeVisible();
+  });
+
+  test('removing one chosen species leaves the other chosen and a save persists only the one left', async ({ animalsPages }) => {
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle, commodityLines.domesticCat]);
+    await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
+    await animalsPages.commoditySelection.pressRemoveSpecies(commodityLines.cattle);
+
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('1 selected');
+    await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.domesticCat)).toBeVisible();
+
+    await animalsPages.commoditySelection.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.task('What are you importing?').click();
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('1 selected');
+    await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.domesticCat)).toBeVisible();
+  });
+});
+
+test.describe('Commodity selection page without JavaScript', { tag: '@duplicated-in-frontend' }, () => {
+  test.use({ javaScriptEnabled: false });
+
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toCommoditySelection();
+  });
+
+  test('Search, one species Remove and Clear all all work', async ({ animalsPages }) => {
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle, commodityLines.domesticCat]);
+    await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
+
+    await animalsPages.commoditySelection.pressRemoveSpecies(commodityLines.cattle);
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText('1 selected');
+    await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.domesticCat)).toBeVisible();
+
+    await animalsPages.commoditySelection.clearAll.click();
+    await expect(animalsPages.commoditySelection.selectedSummary).toHaveCount(0);
   });
 });

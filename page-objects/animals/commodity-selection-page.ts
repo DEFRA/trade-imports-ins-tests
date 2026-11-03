@@ -72,4 +72,20 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
       await this.species(line).check();
     }
   }
+
+  commodityLine(code: string): Locator {
+    return this.selectedSummary.getByText(`${code}:`, { exact: true });
+  }
+
+  speciesEntry(line: CommodityLine): Locator {
+    return this.selectedSummary.getByRole('listitem').filter({ hasText: line.latinName });
+  }
+
+  removeSpecies(line: CommodityLine): Locator {
+    return this.selectedSummary.getByRole('button', { name: `Remove ${line.latinName}`, exact: true });
+  }
+
+  async pressRemoveSpecies(line: CommodityLine): Promise<void> {
+    await this.removeSpecies(line).click();
+  }
 }
