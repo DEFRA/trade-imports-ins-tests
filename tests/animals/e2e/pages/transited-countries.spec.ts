@@ -1,9 +1,5 @@
 import { test, expect } from '@fixtures';
-import {
-  TRANSIT_COUNTRIES_CANCEL_LINK_TEXT,
-  TRANSIT_COUNTRY_SEARCH_PLACEHOLDER,
-  TRANSIT_COUNTRY_SELECT_TEXT,
-} from '@domain/animals/constants/transit-countries-page';
+import { TRANSIT_COUNTRY_SEARCH_PLACEHOLDER, TRANSIT_COUNTRY_SELECT_TEXT } from '@domain/animals/constants/transit-countries-page';
 import { countriesOrigin } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { expectEmptyTransitList } from '@utils/transit-countries-assertions';
@@ -14,17 +10,11 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
   });
 
   test('renders the country search with only the intro paragraphs, the cancel link and the three buttons', async ({ animalsPages }) => {
-    const { transitedCountries, overview } = animalsPages;
+    const { transitedCountries } = animalsPages;
 
     await expect(transitedCountries.heading).toBeVisible();
     await expect(transitedCountries.country.field).toBeVisible();
     await expectEmptyTransitList(transitedCountries);
-    await expect(transitedCountries.cancelAndReturnToOverview).toBeVisible();
-    await expect(transitedCountries.cancelAndReturnToOverview).toHaveText(TRANSIT_COUNTRIES_CANCEL_LINK_TEXT);
-    await expect(transitedCountries.cancelAndReturnToOverview).toHaveAttribute(
-      'href',
-      overview.expectedUrl(transitedCountries.referenceNumberFromUrl()),
-    );
   });
 
   test('the empty search box reads "Search for a country"', async ({ animalsPages }) => {

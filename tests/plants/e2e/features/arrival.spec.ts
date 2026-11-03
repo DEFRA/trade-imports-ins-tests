@@ -193,7 +193,11 @@ test.describe('High-risk plants arrival section', () => {
     await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
-    await expect(plantsPages.arrivalDetails.errorSummaryLinks).toHaveText([ARRIVAL_DATE_ERROR, ARRIVAL_TIME_ERROR, PLACE_OF_LANDING_ERROR]);
+    await expect(plantsPages.arrivalDetails.errorSummaryLinks).toHaveText([
+      'Enter the arrival date',
+      'Enter the expected time of arrival',
+      'Select the proposed place of landing',
+    ]);
     await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Not yet started');
   });
