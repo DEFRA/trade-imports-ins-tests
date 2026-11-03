@@ -13,6 +13,7 @@ Run against the docker-compose stack, from the repo root. Install the browsers o
 | `npm run test:docker-compose:cross-browser`         | Firefox and WebKit, in one run |
 | `npm run test:docker-compose:cross-browser:firefox` | Firefox only                   |
 | `npm run test:docker-compose:cross-browser:webkit`  | WebKit only                    |
+| `npm run test:docker-compose:cross-browser:mobile`  | Paused, see Mobile (paused)    |
 
 ## Notes
 
@@ -21,3 +22,16 @@ Run against the docker-compose stack, from the repo root. Install the browsers o
 - Visual, a11y and security specs stay out: snapshots are per engine, and axe and ZAP results barely change by browser.
 - Only tests under `tests/animals/` carry the tag so far. The same commands pick up `tests/ins/` once it is tagged.
 - Write `--project=firefox`, not `--project firefox`: `--project` takes several values, so a trailing path would be read as a project name.
+
+## Mobile (paused)
+
+The `mobile-webkit` project (iPhone 17 on WebKit) stays in `utils/playwright/shared-config.ts`, but its npm command is paused.
+
+- On an iPhone user agent, `accessible-autocomplete` adds a hidden "1 of 7" to each suggestion, so `TypeAhead.option()` no longer matches "France" exactly. The 10 tests that choose a country time out.
+- Fix that helper first. iOS also turns autoselect off, so expect more differences.
+
+Run it by hand:
+
+```bash
+npx playwright test --config=playwright.docker-compose.config.ts --grep '@cross-browser' --project=mobile-webkit
+```

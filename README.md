@@ -393,6 +393,7 @@ Run them against the docker-compose stack. Install the browsers first (see
 | `npm run test:docker-compose:cross-browser`         | Firefox and WebKit, in one run |
 | `npm run test:docker-compose:cross-browser:firefox` | Firefox only                   |
 | `npm run test:docker-compose:cross-browser:webkit`  | WebKit only                    |
+| `npm run test:docker-compose:cross-browser:mobile`  | Paused, see Mobile (paused)    |
 
 The `firefox` and `webkit` projects run only with `--project`, so every other
 script stays on Chromium. The scripts add `--grep '@cross-browser'`; without it
@@ -402,6 +403,8 @@ trailing path is read as a project name. Add a test to the set by tagging it:
 ```ts
 test('renders the page', { tag: '@cross-browser' }, async ({ animalsPages }) => {});
 ```
+
+The `mobile` script is paused: see [Mobile (paused)](tests/animals/cross-browser/README.md#mobile-paused).
 
 Do not run these engines with `PLAYWRIGHT_IN_CONTAINER=1`. The host-resolver
 rule that mode adds is Chromium-only.
