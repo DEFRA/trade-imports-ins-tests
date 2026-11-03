@@ -5,10 +5,26 @@ import { skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment
 import type { AnimalsJourney } from '@flows/animals/journey';
 import { type InsAddressBookAddPage, type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
 import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
+import {
+  heldAsConsignee,
+  heldAsConsignor,
+  heldAsImporter,
+  heldAsPlaceOfDestination,
+  heldAsPlaceOfOrigin,
+  type AddressClassification,
+} from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage, type PartyRole } from '@page-objects/animals/addresses-page';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 
 const PARTY_ROLES: readonly PartyRole[] = ['Place of origin', 'Consignor', 'Consignee', 'Importer', 'Place of destination'];
+
+const CLASSIFICATION_BY_ROLE: Record<PartyRole, AddressClassification> = {
+  'Place of origin': heldAsPlaceOfOrigin,
+  Consignor: heldAsConsignor,
+  Consignee: heldAsConsignee,
+  Importer: heldAsImporter,
+  'Place of destination': heldAsPlaceOfDestination,
+};
 
 function newAddressFor(role: PartyRole): NewAddressDetails {
   const unique = `${Date.now()}-${randomUUID().slice(0, 8)}`;
@@ -46,9 +62,9 @@ test.describe('Add an address from the journey via INS', () => {
 
   for (const role of PARTY_ROLES) {
     test(
-      `Save and select on the INS add page reached from the ${role} picker saves the address, selects it for the role and lands on Roles and addresses with the added banner`,
+      `Save and select on the INS add page reached from the ${role} picker saves the address with the role's type and use, selects it for the role and lands on Roles and addresses with the added banner`,
       { tag: ['@address-book', '@ins-frontend'] },
-      async ({ animalsJourney, pages, animalsPages, insPages }) => {
+      async ({ animalsJourney, pages, animalsPages, insPages, addressBookApi }) => {
         const addPage = insPages.addressBookAdd;
         const details = newAddressFor(role);
         const insOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_INS_FRONTEND_BASE_URL')).origin;
@@ -68,6 +84,9 @@ test.describe('Add an address from the journey via INS', () => {
           useInnerText: true,
         });
         await expect(animalsPages.addresses.changeParty(role)).toBeVisible();
+
+        const saved = await addressBookApi.findByName(details.name);
+        expect({ addressType: saved.addressType, uses: saved.uses }).toEqual(CLASSIFICATION_BY_ROLE[role]);
       },
     );
 

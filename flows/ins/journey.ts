@@ -1,6 +1,7 @@
 import type { InsPages } from '@page-objects';
 import type { OpenOptions } from '@page-objects/shared/base-page';
-import { addressTypes, type AddressType } from '@domain/shared/constants/address-types';
+import type { AddressDetails } from '@page-objects/ins/address-book/form-page';
+import { addressTypes, addressUses, type AddressType, type AddressUse } from '@domain/shared/constants/address-types';
 
 type AddressFormOptions = OpenOptions & { addressType?: AddressType };
 
@@ -37,5 +38,17 @@ export class InsJourney {
   async toAddressFormFromList({ addressType = addressTypes.originOrConsignor, ...openOptions }: AddressFormOptions = {}): Promise<void> {
     await this.toAddressTypeFromList(openOptions);
     await this.chooseAddressType(addressType);
+  }
+
+  /** Adds an address from the address book list: chooses the type, fills the form, ticks the uses and saves, landing on the list. */
+  async addAddressFromList(
+    details: AddressDetails,
+    { uses = [addressUses.placeOfOrigin], ...formOptions }: AddressFormOptions & { uses?: readonly AddressUse[] } = {},
+  ): Promise<void> {
+    await this.toAddressFormFromList(formOptions);
+    await this.insPages.addressBookAdd.fill(details);
+    await this.insPages.addressBookAdd.tickUses(uses);
+    await this.insPages.addressBookAdd.saveAndContinue();
+    await this.insPages.addressBookList.heading.waitFor();
   }
 }

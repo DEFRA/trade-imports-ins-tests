@@ -1,6 +1,7 @@
 import { Locator } from '@playwright/test';
 import { type AddressDetails, InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 import { opensAtExpectedUrl } from '@page-objects/ins/address-book/opens-at-expected-url';
+import { usesQuestion, usesQuestionLabels, type AddressUse } from '@domain/shared/constants/address-types';
 
 export type NewAddressDetails = AddressDetails;
 
@@ -37,6 +38,37 @@ export class InsAddressBookAddPage extends opensAtExpectedUrl(InsAddressBookForm
 
   get linkCancelAndReturnToHub(): Locator {
     return this.page.getByRole('link', { name: 'Cancel and return to hub', exact: true });
+  }
+
+  /** The uses question: the group after the section break that follows the contact fields. */
+  get usesGroup(): Locator {
+    return this.page.locator('hr.govuk-section-break + .govuk-form-group').getByRole('group', { name: usesQuestion.legend });
+  }
+
+  get sectionBreak(): Locator {
+    return this.page.getByRole('separator');
+  }
+
+  get usesOptionLabels(): Locator {
+    return this.usesGroup.locator('label');
+  }
+
+  get usesOptionHints(): Locator {
+    return this.usesGroup.locator('.govuk-checkboxes__hint');
+  }
+
+  get usesInlineError(): Locator {
+    return this.usesGroup.locator('.govuk-error-message');
+  }
+
+  usesOption(use: AddressUse): Locator {
+    return this.usesGroup.getByRole('checkbox', { name: usesQuestionLabels[use], exact: true });
+  }
+
+  async tickUses(uses: readonly AddressUse[]): Promise<void> {
+    for (const use of uses) {
+      await this.usesOption(use).check();
+    }
   }
 
   async saveAndContinue(): Promise<void> {

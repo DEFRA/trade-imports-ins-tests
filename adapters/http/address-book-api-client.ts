@@ -1,7 +1,7 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient } from '@adapters/http/rest-client';
 import { getAddressBookBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
-import type { AddressType, AddressUse } from '@domain/shared/constants/address-types';
+import type { AddressClassification, AddressType, AddressUse } from '@domain/shared/constants/address-types';
 
 /** The organisation id that CRN 2100010101, the default E2E sign-in, belongs to. */
 export const E2E_ORGANISATION_ID = '5900001';
@@ -25,7 +25,7 @@ export interface AddressBookRecord {
   modifiedAt: string;
 }
 
-export type AddressBookEntry = Omit<AddressBookRecord, 'id' | 'deleted' | 'modifiedAt'>;
+export type AddressBookEntry = Omit<AddressBookRecord, 'id' | 'deleted' | 'modifiedAt' | 'addressType' | 'uses'> & AddressClassification;
 
 interface AddressBookPage {
   items: AddressBookRecord[];

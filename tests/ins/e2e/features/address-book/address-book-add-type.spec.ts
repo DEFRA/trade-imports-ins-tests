@@ -67,9 +67,7 @@ test.describe('Choosing an address type before adding an address', () => {
   });
 
   test('after a save the next add starts with no type chosen and empty fields', async ({ insPages, insJourney }) => {
-    await insJourney.toAddressFormFromList();
-    await insPages.addressBookAdd.fill(addFormAddressWithLineTwoAndCounty(`Type Step Farm ${Date.now()}`, 'United Kingdom'));
-    await insPages.addressBookAdd.saveAndContinue();
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(`Type Step Farm ${Date.now()}`, 'United Kingdom'));
     await insPages.addressBookList.successBanner.waitFor();
 
     await insPages.addressBookList.btnAddNewAddress.click();

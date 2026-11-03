@@ -1,16 +1,8 @@
-import { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
 import { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { ADDRESS_FORM_FIELD_LABELS, ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
-
-async function expectAbove(upper: Locator, lower: Locator): Promise<void> {
-  const upperBox = await upper.boundingBox();
-  const lowerBox = await lower.boundingBox();
-  expect(upperBox).not.toBeNull();
-  expect(lowerBox).not.toBeNull();
-  expect(upperBox.y).toBeLessThan(lowerBox.y);
-}
+import { expectAbove } from './expect-above';
 
 async function expectFieldsGroupedUnderSections(form: InsAddressBookFormPage): Promise<void> {
   await expect(form.sectionHeading('Address')).toBeVisible();

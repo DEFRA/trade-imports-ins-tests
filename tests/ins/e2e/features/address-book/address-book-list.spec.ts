@@ -1,6 +1,6 @@
 import { test, expect, type PageFixtures } from '@fixtures';
-import { expectAddressBookList, expectMainLinks, expectNoMatchesListed } from './expect-address-book-list';
-import { type AddressDetails } from '@page-objects/ins/address-book/form-page';
+import { expectMainLinks, expectNoMatchesListed } from './expect-address-book-list';
+import { originOrConsignorTab } from '@domain/shared/constants/address-types';
 import { addFormAddressWithLineTwoAndCounty, addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
 
 const SUBMIT_METHODS = [
@@ -29,12 +29,6 @@ const addAddressAndExpectSearchToListIt = async (
   await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
   await expect(insPages.addressBookList.row(name)).toBeVisible();
   await expectMainLinks(insPages.addressBookList, `View ${name}`);
-};
-
-const addAddressThroughForm = async ({ insPages, insJourney }: Pick<PageFixtures, 'insPages' | 'insJourney'>, details: AddressDetails) => {
-  await insJourney.toAddressFormFromList();
-  await insPages.addressBookAdd.fill(details);
-  await insPages.addressBookAdd.saveAndContinue();
 };
 
 test.describe('Address book list', () => {
@@ -163,16 +157,16 @@ test.describe('Address book list', () => {
     });
   });
 
-  test('an address added through the form lands on the list with its success banner, its address and country, and a View link to its own page', async ({
+  test('an address added through the form lands on the Origin and Consignor tab of the list with its success banner, its address and country, and a View link to its own page', async ({
     pages,
     insPages,
     insJourney,
   }) => {
     const name = `Added Farm ${Date.now()}`;
 
-    await addAddressThroughForm({ insPages, insJourney }, addFormAddressWithLineTwoAndCounty(name, 'France'));
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(name, 'France'));
 
-    await expectAddressBookList({ pages, insPages });
+    await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrl(originOrConsignorTab));
     await expect(
       insPages.addressBookList.successBanner.getByText(`${name} address added to your address book`, { exact: true }),
     ).toBeVisible();
@@ -187,7 +181,7 @@ test.describe('Address book list', () => {
     await expect(insPages.addressBookView.heading(name)).toBeVisible();
   });
 
-  test('an address added through the form lands on the list with its success banner, and is listed ahead of an older address', async ({
+  test('an address added through the form lands on the Origin and Consignor tab of the list with its success banner, and is listed ahead of an older address', async ({
     insPages,
     insJourney,
     addressBookApi,
@@ -197,7 +191,7 @@ test.describe('Address book list', () => {
     const newerName = `Newest first ${stamp} newer`;
     await addressBookApi.createAddress(traderAddress(olderName));
 
-    await addAddressThroughForm({ insPages, insJourney }, addFormAddressWithLineTwoAndCounty(newerName, 'France'));
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(newerName, 'France'));
     await expect(insPages.addressBookList.successBanner).toContainText(`${newerName} address added to your address book`);
     await insPages.addressBookList.search(`Newest first ${stamp}`, { submitWith: 'button' });
 
@@ -212,7 +206,7 @@ test.describe('Address book list', () => {
     const stamp = Date.now();
     const name = `Findable Farm ${stamp}`;
     const details = { ...addFormAddressWithLineTwoAndCounty(name, 'France'), addressLine1: `${stamp} Drover Lane` };
-    await addAddressThroughForm({ insPages, insJourney }, details);
+    await insJourney.addAddressFromList(details);
 
     for (const term of [name, `${stamp} drover`, 'fran']) {
       await insPages.addressBookList.search(term, { submitWith: 'button' });

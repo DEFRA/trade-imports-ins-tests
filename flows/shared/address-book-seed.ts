@@ -1,15 +1,12 @@
 import type { AddressBookApiClient, AddressBookEntry, AddressBookRecord } from '@adapters/http/address-book-api-client';
-import { addressTypes, addressUses } from '@domain/shared/constants/address-types';
-
-const heldAsConsignor = { addressType: addressTypes.originOrConsignor, uses: [addressUses.consignor] };
-const heldAsPlaceOfOrigin = { addressType: addressTypes.originOrConsignor, uses: [addressUses.placeOfOrigin] };
-const heldAsPlaceOfDestination = {
-  addressType: addressTypes.destinationConsigneeOrImporter,
-  uses: [addressUses.placeOfDestination],
-};
-const heldAsConsignee = { addressType: addressTypes.destinationConsigneeOrImporter, uses: [addressUses.consignee] };
-const heldAsImporter = { addressType: addressTypes.destinationConsigneeOrImporter, uses: [addressUses.importer] };
-const heldAsBranchAddress = { addressType: addressTypes.branch, uses: [addressUses.branchAddress] };
+import {
+  heldAsBranchAddress,
+  heldAsConsignee,
+  heldAsConsignor,
+  heldAsImporter,
+  heldAsPlaceOfDestination,
+  heldAsPlaceOfOrigin,
+} from '@domain/shared/constants/address-types';
 
 /** The shared address-book records, in creation order. */
 export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [

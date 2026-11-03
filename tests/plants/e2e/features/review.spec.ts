@@ -1,6 +1,7 @@
 import { SET_BASES } from '@page-objects/shared/sets';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
+import { heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
 import { POTATOES, PLANTS_FOR_PLANTING, WOOD_AND_CUT_TREES, potatoLine, arrivalDate } from '@flows/plants/journey';
 import type { PlantsPages, SharedPages } from '@page-objects';
 import { todayOrTomorrowServiceDisplayDatePattern } from '@utils/date-utils';
@@ -228,6 +229,7 @@ test.describe('High-risk plants check and submit section', () => {
       const renamed = `Renamed Holding ${randomUUID()}`;
 
       await addressBookApi.updateAddress(address.id, {
+        ...heldAsPlaceOfOrigin,
         name: renamed,
         addressLine1: '4 Nursery Lane',
         townOrCity: 'Dundee',

@@ -8,22 +8,20 @@ import {
   originOrConsignorTab,
   useLabels,
   type AddressBookTab,
-  type AddressType,
+  type AddressClassification,
   type AddressUse,
 } from '@domain/shared/constants/address-types';
 import { traderAddress } from '@domain/ins/constants/trader-address';
 
-export interface StampedAddress {
+export interface StampedAddress extends AddressClassification {
   name: string;
-  addressType?: AddressType;
-  uses?: AddressUse[];
   typeLabel: string;
   tabs: readonly AddressBookTab[];
 }
 
 export const stampedSearchTermOf = (stamp: number) => `Stamped ${stamp}`;
 
-export const typeLabelOf = (uses: readonly AddressUse[] = []): string => uses.map((use) => useLabels[use]).join(', ');
+export const typeLabelOf = (uses: readonly AddressUse[]): string => uses.map((use) => useLabels[use]).join(', ');
 
 const stampedAddressesOf = (stamp: number) => {
   const named = (suffix: string) => `${stampedSearchTermOf(stamp)} ${suffix}`;
@@ -55,10 +53,6 @@ const stampedAddressesOf = (stamp: number) => {
       addressType: addressTypes.branch,
       uses: [addressUses.branchAddress],
       tabs: [branchTab],
-    }),
-    noUses: stampedAddress({
-      name: named('No Uses'),
-      tabs: [originOrConsignorTab],
     }),
   };
 };

@@ -3,6 +3,7 @@ import {
   addressBookTabLabels,
   addressBookTabs,
   branchTab,
+  heldAsConsignor,
   originOrConsignorTab,
   unsupportedAddressValue,
   type AddressType,
@@ -22,7 +23,7 @@ const createdAddressIds = createdAddressIdsDeletedAfterEachTest();
 test.describe('Address book tabs API', () => {
   const isolatedOrganisationAddressIds = isolatedOrganisationAddressIdsDeletedAfterEachTest();
 
-  test('listing by an address type returns exactly the addresses holding one of its uses, an address with no uses under Origin and Consignor only', async ({
+  test('listing by an address type returns exactly the addresses holding one of its uses', async ({
     isolatedOrganisationAddressBookApi,
   }) => {
     const stamp = Date.now();
@@ -136,7 +137,7 @@ test.describe('Address book tabs without JavaScript', () => {
 });
 
 test.describe('Address book fixture reconcile', () => {
-  test('a fixture record with no type or uses is rewritten with them once, and a second run leaves it untouched', async ({
+  test('a fixture record holding a different use is rewritten with the fixture type and uses once, and a second run leaves it untouched', async ({
     isolatedOrganisationAddressBookApi,
   }) => {
     const fixture = E2E_ADDRESS_BOOK_FIXTURES.find(({ name }) => name === 'Origin Farm');
@@ -144,7 +145,16 @@ test.describe('Address book fixture reconcile', () => {
       throw new Error('Expected an Origin Farm fixture');
     }
     const { name, addressLine1, townOrCity, postcode, countryCode, phone, email } = fixture;
-    await isolatedOrganisationAddressBookApi.createAddress({ name, addressLine1, townOrCity, postcode, countryCode, phone, email });
+    await isolatedOrganisationAddressBookApi.createAddress({
+      name,
+      addressLine1,
+      townOrCity,
+      postcode,
+      countryCode,
+      phone,
+      email,
+      ...heldAsConsignor,
+    });
 
     await ensureE2eAddressBook(isolatedOrganisationAddressBookApi);
 

@@ -22,7 +22,7 @@ import {
 
 const createdAddressIds = createdAddressIdsDeletedAfterEachTest();
 
-const typeFilterTermOf = (stamp: number) => `Typefilter ${stamp}`;
+const typeFilterTermOf = (scenario: string) => `Typefilter ${scenario} ${Date.now()}`;
 
 test.describe('Address book Type filter API', () => {
   const isolatedOrganisationAddressIds = isolatedOrganisationAddressIdsDeletedAfterEachTest();
@@ -66,7 +66,7 @@ test.describe('Address book Type filter', () => {
     insPages,
     addressBookApi,
   }) => {
-    const term = typeFilterTermOf(Date.now());
+    const term = typeFilterTermOf('beyond first page');
     for (const suffix of ['First Consignor', 'Second Consignor']) {
       await createAddressHolding(addressBookApi, createdAddressIds, {
         name: `${term} ${suffix}`,
@@ -75,7 +75,7 @@ test.describe('Address book Type filter', () => {
       });
     }
     for (let index = 1; index <= 9; index++) {
-      createdAddressIds.push((await addressBookApi.createAddress(traderAddress(`${term} Without Uses ${index}`))).id);
+      createdAddressIds.push((await addressBookApi.createAddress(traderAddress(`${term} Place Of Origin ${index}`))).id);
     }
     await insPages.addressBookList.open();
 
@@ -97,7 +97,7 @@ test.describe('Address book Type filter', () => {
     addressBookApi,
     page,
   }) => {
-    const term = typeFilterTermOf(Date.now());
+    const term = typeFilterTermOf('paged');
     for (let index = 1; index <= 9; index++) {
       await createAddressHolding(addressBookApi, createdAddressIds, {
         name: `${term} Consignor ${index}`,
@@ -125,7 +125,7 @@ test.describe('Address book Type filter', () => {
   });
 
   test('a Type matching one address counts one', async ({ insPages, addressBookApi }) => {
-    const term = typeFilterTermOf(Date.now());
+    const term = typeFilterTermOf('counts one');
     await createAddressHolding(addressBookApi, createdAddressIds, {
       name: `${term} Consignor`,
       addressType: addressTypes.originOrConsignor,

@@ -1,9 +1,11 @@
 import { test, expect } from '@fixtures';
+import { heldAsConsignor } from '@domain/shared/constants/address-types';
 import type { AnimalsPages } from '@page-objects';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 
 const OWN_RECORD = {
+  ...heldAsConsignor,
   addressLine1: '12 Copy Street',
   addressLine2: 'Unit 4',
   townOrCity: 'Carlisle',

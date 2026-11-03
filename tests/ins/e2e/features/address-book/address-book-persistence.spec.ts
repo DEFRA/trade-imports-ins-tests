@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type AddressDocument } from '@domain/ins/models/db/address-document';
+import { addressTypes, addressUses, originOrConsignorTab } from '@domain/shared/constants/address-types';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
@@ -10,7 +11,11 @@ test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => 
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
   });
 
-  test('a created address persists with its full Standard Address Block', async ({ pages, insPages, insJourney }) => {
+  test('a created address persists with its full Standard Address Block, its address type and its ticked uses', async ({
+    pages,
+    insPages,
+    insJourney,
+  }) => {
     const createdName = `Persistence Test Farm ${Date.now()}`;
     const details: NewAddressDetails = {
       name: createdName,
@@ -24,10 +29,8 @@ test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => 
       email: 'farm@example.co.uk',
     };
 
-    await insJourney.toAddressForm();
-    await insPages.addressBookAdd.fill(details);
-    await insPages.addressBookAdd.saveAndContinue();
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await insJourney.addAddressFromList(details, { uses: [addressUses.placeOfOrigin, addressUses.consignor] });
+    await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrl(originOrConsignorTab));
 
     const client = new MongoDbClient();
     try {
@@ -38,6 +41,8 @@ test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => 
       const [doc] = await collection.find({ name: createdName }).toArray();
       expect(doc.addressLine2).toBe(details.addressLine2);
       expect(doc.county).toBe(details.county);
+      expect(doc.addressType).toBe(addressTypes.originOrConsignor);
+      expect(doc.uses).toEqual([addressUses.placeOfOrigin, addressUses.consignor]);
     } finally {
       await client.close();
     }

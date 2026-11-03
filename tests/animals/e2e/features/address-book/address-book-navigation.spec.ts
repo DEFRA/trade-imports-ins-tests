@@ -1,10 +1,12 @@
 import { test, expect } from '@fixtures';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
+import { heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 import { SET_BASES } from '@page-objects/shared/sets';
 
 const createReturnFarm = (addressBookApi: AddressBookApiClient): Promise<AddressBookRecord> =>
   addressBookApi.createAddress({
+    ...heldAsPlaceOfOrigin,
     name: `Return Farm ${Date.now()}`,
     addressLine1: '7 Return Road',
     townOrCity: 'Carlisle',
@@ -90,6 +92,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       const animalsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')).origin;
       const unservedAnimalsReturnUrl = `${animalsOrigin}/germinal-products/notifications`;
       const createdAddress = await addressBookApi.createAddress({
+        ...heldAsPlaceOfOrigin,
         name: `Germinal Return Farm ${Date.now()}`,
         addressLine1: '8 Return Road',
         townOrCity: 'Carlisle',

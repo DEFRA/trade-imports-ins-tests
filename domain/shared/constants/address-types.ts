@@ -85,3 +85,53 @@ export const addressTypeLabels = Object.fromEntries(addressTypeOptions.map(({ ad
   AddressType,
   string
 >;
+
+export interface AddressClassification {
+  addressType: AddressType;
+  uses: AddressUse[];
+}
+
+export const heldAsPlaceOfOrigin: AddressClassification = {
+  addressType: addressTypes.originOrConsignor,
+  uses: [addressUses.placeOfOrigin],
+};
+
+export const heldAsConsignor: AddressClassification = {
+  addressType: addressTypes.originOrConsignor,
+  uses: [addressUses.consignor],
+};
+
+export const heldAsPlaceOfDestination: AddressClassification = {
+  addressType: addressTypes.destinationConsigneeOrImporter,
+  uses: [addressUses.placeOfDestination],
+};
+
+export const heldAsConsignee: AddressClassification = {
+  addressType: addressTypes.destinationConsigneeOrImporter,
+  uses: [addressUses.consignee],
+};
+
+export const heldAsImporter: AddressClassification = {
+  addressType: addressTypes.destinationConsigneeOrImporter,
+  uses: [addressUses.importer],
+};
+
+export const heldAsBranchAddress: AddressClassification = {
+  addressType: addressTypes.branch,
+  uses: [addressUses.branchAddress],
+};
+
+export const usesQuestion = {
+  legend: 'What can this address be used for?',
+  hint: 'Select where this address can be used',
+  error: 'Select what this address can be used for',
+};
+
+export const usesQuestionLabels: Record<AddressUse, string> = {
+  PLACE_OF_ORIGIN: 'Place of origin',
+  CONSIGNOR: 'Consignor',
+  PLACE_OF_DESTINATION: 'Place of destination',
+  CONSIGNEE: 'Consignee',
+  IMPORTER: 'Importer',
+  BRANCH_ADDRESS: 'Branch address',
+};

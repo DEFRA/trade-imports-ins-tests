@@ -18,9 +18,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Address book with the success banner', async () => {
-      await insJourney.toAddressFormFromList();
-      await insPages.addressBookAdd.fill(addFormAddressWithLineTwoAndCounty(`A11y Added Farm ${Date.now()}`, 'United Kingdom'));
-      await insPages.addressBookAdd.saveAndContinue();
+      await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(`A11y Added Farm ${Date.now()}`, 'United Kingdom'));
       await insPages.addressBookList.successBanner.waitFor();
       await runA11yScan();
     });

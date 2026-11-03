@@ -11,6 +11,12 @@ export class InsAddressBookListPage extends BasePage {
     return this.page.getByRole('heading', { level: 1, name: 'Address book' });
   }
 
+  /** The URL of the list opened on a tab. */
+  tabUrl(tab: AddressBookTab): RegExp {
+    const escapedUrl = this.expectedUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`${escapedUrl}\\?addressType=${tab.addressType}$`);
+  }
+
   get intro(): Locator {
     return this.page.getByText('Manage your addresses for use across all your import notifications', { exact: true });
   }

@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
 
 test.describe('Submitted addresses keep their copy', () => {
   test('renaming the book after submit changes neither the submitted view nor the amendment, and cancelling the amendment keeps the copy', async ({
@@ -14,6 +15,7 @@ test.describe('Submitted addresses keep their copy', () => {
     const originalName = `Frozen Origin ${stamp}`;
     const renamed = `Renamed Origin ${stamp}`;
     const address = await addressBookApi.createAddress({
+      ...heldAsPlaceOfOrigin,
       name: originalName,
       addressLine1: '8 Freeze Street',
       townOrCity: 'Carlisle',
@@ -44,6 +46,7 @@ test.describe('Submitted addresses keep their copy', () => {
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
 
     await addressBookApi.updateAddress(address.id, {
+      ...heldAsPlaceOfOrigin,
       name: renamed,
       addressLine1: '8 Freeze Street',
       townOrCity: 'Penrith',
@@ -90,6 +93,7 @@ test.describe('Submitted addresses keep their copy', () => {
     const stamp = Date.now();
     const originalName = `Frozen Then Deleted ${stamp}`;
     const address = await addressBookApi.createAddress({
+      ...heldAsPlaceOfOrigin,
       name: originalName,
       addressLine1: '9 Delete Street',
       townOrCity: 'Carlisle',

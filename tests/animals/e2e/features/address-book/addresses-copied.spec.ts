@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { heldAsConsignor } from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 
 test.describe('Addresses are copied, not linked', () => {
@@ -16,6 +17,7 @@ test.describe('Addresses are copied, not linked', () => {
       const seeded = { name: originalName, addressLine1: '3 Copy Lane', townOrCity: 'Carlisle', postcode: 'CA1 1AA' };
       const address = await addressBookApi.createAddress({
         ...seeded,
+        ...heldAsConsignor,
         countryCode: 'GB',
         phone: '01228 555 0102',
         email: 'copied@example.co.uk',
@@ -36,6 +38,7 @@ test.describe('Addresses are copied, not linked', () => {
 
       // Edit the record in the address book, with the journey none the wiser.
       await addressBookApi.updateAddress(address.id, {
+        ...heldAsConsignor,
         name: renamed,
         addressLine1: '3 Copy Lane',
         townOrCity: 'Penrith',
@@ -69,6 +72,7 @@ test.describe('Addresses are copied, not linked', () => {
     // Every field set, each value distinct, so each assert proves its own field was copied.
     const stamp = Date.now();
     const record = {
+      ...heldAsConsignor,
       name: `Full Detail Farm ${stamp}`,
       addressLine1: '12 Primary Row',
       addressLine2: 'Secondary Wing',
@@ -115,6 +119,7 @@ test.describe('Addresses are copied, not linked', () => {
       const seeded = { name, addressLine1: '7 Gone Street', townOrCity: 'Carlisle', postcode: 'CA1 2BB' };
       const address = await addressBookApi.createAddress({
         ...seeded,
+        ...heldAsConsignor,
         countryCode: 'GB',
         phone: '01228 555 0103',
         email: 'doomed@example.co.uk',
@@ -176,6 +181,7 @@ test.describe('Addresses are copied, not linked', () => {
     const stamp = Date.now();
     const name = `Invalid address (country "United Kingdom" is not a code) ${stamp}`;
     await addressBookApi.createAddress({
+      ...heldAsConsignor,
       name,
       addressLine1: '9 Swap Street',
       townOrCity: 'Carlisle',

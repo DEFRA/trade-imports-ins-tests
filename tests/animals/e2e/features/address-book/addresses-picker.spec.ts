@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { heldAsConsignor } from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 
 const FIVE_RESULTS_SUMMARY = /^Showing 5 out of \d+ results$/;
@@ -18,6 +19,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     const searchMatches = [`Danish Meat Export ${searchToken}`, `Jutland Swine ${searchToken}`];
     for (const name of searchMatches) {
       await addressBookApi.createAddress({
+        ...heldAsConsignor,
         name,
         addressLine1: 'Havnegade 21',
         townOrCity: 'Copenhagen',
@@ -35,12 +37,14 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     const targetAddressText = AnimalsAddressesPage.expectedAddressText({ ...targetRecord, country: 'United Kingdom' });
     await addressBookApi.createAddress({
       ...targetRecord,
+      ...heldAsConsignor,
       countryCode: 'GB',
       phone: '01228 555 0199',
       email: 'paged@example.co.uk',
     });
     for (let i = 0; i < 5; i += 1) {
       await addressBookApi.createAddress({
+        ...heldAsConsignor,
         name: `Newer Than Target ${stamp} ${i}`,
         addressLine1: `${i} Front Row`,
         townOrCity: 'Carlisle',

@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { PlantsPages } from '@page-objects';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
+import { heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
 import { portByCode } from '@resources/reference-data/reference-data';
 
 /** One commodity line's answers, keyed by field label. The fields a line needs depend on its category. */
@@ -43,6 +44,7 @@ const ALREADY_ARRIVED = 'Yes, it has already arrived';
 const NOT_YET_ARRIVED = 'No, it has not arrived yet';
 
 export const nurseryAddress = (name: string, countryCode = 'GB') => ({
+  ...heldAsPlaceOfOrigin,
   name,
   addressLine1: '4 Nursery Lane',
   townOrCity: 'Perth',
