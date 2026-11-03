@@ -1,25 +1,26 @@
 import { test, expect } from '@fixtures';
 
+const ARRIVAL_DETAILS_TASK = 'Arrival details';
+
 test.describe('Task-page exits', { tag: '@duplicated-in-frontend' }, () => {
   test('Cancel and return to overview discards typed input; Save and return to overview commits and lands on the hub', async ({
     animalsJourney,
     animalsPages,
   }) => {
-    await animalsJourney.startNotification();
+    await animalsJourney.toArrivalDetails();
 
-    await animalsPages.overview.task('Where is this consignment coming from?').click();
-    await animalsPages.originOfImport.internalReference.fill('DiscardedRef');
-    await animalsPages.originOfImport.cancelAndReturnToOverview.click();
+    await animalsPages.arrivalDetails.transportDocumentReference.fill('DiscardedRef');
+    await animalsPages.arrivalDetails.cancelAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    await animalsPages.overview.task('Where is this consignment coming from?').click();
-    await expect(animalsPages.originOfImport.internalReference).toHaveValue('');
+    await animalsPages.overview.task(ARRIVAL_DETAILS_TASK).click();
+    await expect(animalsPages.arrivalDetails.transportDocumentReference).toHaveValue('');
 
-    await animalsJourney.fillOriginOfImport({ internalReference: 'CommittedRef' });
-    await animalsPages.originOfImport.saveAndReturnToOverview.click();
+    await animalsPages.arrivalDetails.transportDocumentReference.fill('CommittedRef');
+    await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    await animalsPages.overview.task('Where is this consignment coming from?').click();
-    await expect(animalsPages.originOfImport.internalReference).toHaveValue('CommittedRef');
+    await animalsPages.overview.task(ARRIVAL_DETAILS_TASK).click();
+    await expect(animalsPages.arrivalDetails.transportDocumentReference).toHaveValue('CommittedRef');
   });
 });

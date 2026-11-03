@@ -15,11 +15,13 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await animalsJourney.toOriginOfImport();
   });
 
-  test('renders the page controls', async ({ animalsPages }) => {
+  test('renders the page controls, with Save and continue as the only way to save and move on', async ({ animalsPages }) => {
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await expect(animalsPages.originOfImport.country.field).toBeVisible();
     await expect(animalsPages.originOfImport.radioRequiresOriginCode('No')).toBeVisible();
     await expect(animalsPages.originOfImport.saveAndContinue).toBeVisible();
+    await expect(animalsPages.originOfImport.saveAndReturnToOverview).toHaveCount(0);
+    await expect(animalsPages.originOfImport.cancelAndReturnToOverview).toHaveCount(0);
   });
 
   test('shows the country selector on load', async ({ animalsPages }) => {
