@@ -1,6 +1,7 @@
 import { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
 import { formattedValue } from '@adapters/http/dataverse-client';
 import { animalsDynamics } from '@config/animals-dynamics';
+import { commodityNameOf } from '@domain/animals/constants/commodity-lines';
 import { ALL_ANSWERS, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { test, expect } from '@fixtures';
@@ -101,7 +102,7 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].scientificName and commonName.
     // The event carries both. Only the v0.2.0 message does; the gateway's v0.1.0 mapper omits the species names.
     expect.soft(row.defraimp_commodityspeciesname, 'species name').toBe(answers.species.latinName);
-    expect.soft(row.defraimp_commodityspeciescommonname, 'species common name').toBe(answers.species.commodityCode);
+    expect.soft(row.defraimp_commodityspeciescommonname, 'species common name').toBe(commodityNameOf(answers.species));
     // Each party's postalAddress.postcodeCode, and its definedContact[].telephoneUniversalCommunication and
     // emailURIUniversalCommunication.
     // The event carries them. Only the v0.2.0 message does. The phone column is a guess: the row also has an international

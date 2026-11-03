@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { ALL_ANSWERS as answers, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { commodityNameOf } from '@domain/animals/constants/commodity-lines';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
@@ -98,8 +99,8 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       const tradeLines = data.specifiedConsignment.includedConsignmentItem?.[0].includedTradeLineItem ?? [];
       expect(tradeLines).toHaveLength(1);
       const [line] = tradeLines;
-      expect(line.description).toEqual([answers.species.commodityCode]);
-      expect(line.commonName).toBe(answers.species.commodityCode);
+      expect(line.description).toEqual([commodityNameOf(answers.species)]);
+      expect(line.commonName).toBe(commodityNameOf(answers.species));
       expect(line.scientificName).toBe(answers.species.latinName);
       expect(line.specifiedLineTradeDelivery?.[0].productUnitQuantity.content).toBe(answers.noOfAnimals);
       expect(line.physicalReferencedLogisticsPackage?.[0].itemQuantity).toBe(answers.noOfPackages);

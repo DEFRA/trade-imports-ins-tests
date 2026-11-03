@@ -40,24 +40,25 @@ type NotificationContent = {
     regionOfOriginCode?: string;
     internalReference?: string;
   };
-  commodity: {
+  commodities: Array<{
     name: string;
-    commodityComplement: Array<{
-      typeOfCommodity: string;
-      species: Array<{
-        value: string;
-        text: string;
-        noOfAnimals: number;
-        noOfPackages: number;
-        earTag: string;
-        passport: string;
-        microchip?: string;
-        animalIdentifiers?: StoredAnimalIdentifier[];
-      }>;
-      totalNoOfAnimals: number;
-      totalNoOfPackages: number;
+    commodityCode: string;
+    description?: string;
+    typeOfCommodity?: string;
+    species: Array<{
+      value: string;
+      text: string;
+      commonName?: string;
+      noOfAnimals: number;
+      noOfPackages: number;
+      earTag: string;
+      passport: string;
+      microchip?: string;
+      animalIdentifiers?: StoredAnimalIdentifier[];
     }>;
-  };
+    totalNoOfAnimals: number;
+    totalNoOfPackages: number;
+  }>;
   reasonForImport: string;
   additionalDetails: {
     certifiedFor?: string;

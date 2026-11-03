@@ -4,6 +4,7 @@ import { type NotificationDocument } from '@domain/animals/models/db/notificatio
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { ALL_ANSWERS as answers, CPH_NUMBER } from '@domain/animals/constants/journey-options';
+import { commodityNameOf } from '@domain/animals/constants/commodity-lines';
 import { toIsoDate } from '@utils/date-utils';
 
 test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => {
@@ -55,8 +56,8 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
 
       const [doc] = await collection.find({ referenceNumber }).toArray();
       const { notification } = doc;
-      const [complement] = notification.commodity.commodityComplement;
-      const [species] = complement.species;
+      const [commodity] = notification.commodities;
+      const [species] = commodity.species;
 
       expect(doc.referenceNumber).toBe(referenceNumber);
       expect(doc.status).toBe('SUBMITTED');
@@ -64,12 +65,13 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
       expect(notification.origin.requiresRegionCode).toBe('yes');
       expect(notification.origin.regionOfOriginCode).toBe(`${answers.countryCode.value}-${answers.regionCode}`);
       expect(notification.origin.internalReference).toBe(answers.internalReference);
-      expect(notification.commodity.name).toBe(answers.species.commodityCode);
+      expect(commodity.name).toBe(commodityNameOf(answers.species));
+      expect(commodity.commodityCode).toBe(answers.species.commodityCode);
       expect(species.text).toBe(answers.species.latinName);
       expect(species.earTag).toBe(answers.earTag);
       expect(species.animalIdentifiers).toEqual([{ earTag: answers.earTag, passport: answers.passportNumber }]);
-      expect(complement.totalNoOfAnimals).toBe(answers.noOfAnimals);
-      expect(complement.totalNoOfPackages).toBe(answers.noOfPackages);
+      expect(commodity.totalNoOfAnimals).toBe(answers.noOfAnimals);
+      expect(commodity.totalNoOfPackages).toBe(answers.noOfPackages);
       expect(notification.reasonForImport).toBe(answers.importReason.value);
       expect(notification.purposeInInternalMarket).toBe(answers.internalMarketPurpose.value);
       expect(notification.additionalDetails.certifiedFor).toBe(answers.certifiedFor.value);
