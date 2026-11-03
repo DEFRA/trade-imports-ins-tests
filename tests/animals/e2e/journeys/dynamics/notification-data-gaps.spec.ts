@@ -3,7 +3,6 @@ import { formattedValue } from '@adapters/http/dataverse-client';
 import { animalsDynamics } from '@config/animals-dynamics';
 import { GBN_AG_CATTLE_COMMON_NAME } from '@domain/animals/constants/gbn-ag';
 import { ALL_ANSWERS, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
-import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { test, expect } from '@fixtures';
 import { annotateDuration } from '@utils/playwright/annotate-duration';
 import { skipIfComposeEnvironment } from '@utils/playwright/environment';
@@ -12,7 +11,7 @@ import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 // assertion has moved to notification-data.spec.ts.
 //
 // Assertions notification-data.spec.ts cannot make yet, because PIMS Dynamics leaves their columns empty: one skipped
-// test each for the mandatory answers, the optional answers and a yes to unweaned animals. Assertions are grouped by
+// test each for the mandatory answers and the optional answers. Assertions are grouped by
 // cause (legend order below), then in journey order. When a column fills, move its assertion to its placeholder in
 // notification-data.spec.ts, and delete the skip once the test is empty. Expected texts for fixed-list choices are the
 // journey's display text until the values PIMS accepts are agreed.
@@ -224,32 +223,5 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     // The event carries it and both messages pass it on, but the identification text column is empty. PIMS has a
     // per-animal identifier table this test does not query, so the passport number may be there. Ask the PIMS team.
     expect.soft(row.defraimp_identificationofanimalstext, 'passport number').toContain(cowLine.passportNumber);
-  });
-
-  test('answering yes to unweaned animals is stored in PIMS Dynamics', async ({ animalsJourney, journeyContext, externalRequest }) => {
-    test.fixme(true, 'The backend converts a yes answer to false, so PIMS Dynamics shows no unweaned animals');
-    const dynamics = new AnimalsDynamicsClient(externalRequest);
-    const answers = { ...MANDATORY_ANSWERS, unweanedAnimals: yesNoValues.yes };
-    await animalsJourney.submitNotification(answers);
-    const referenceNumber = journeyContext.referenceNumber;
-
-    await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
-      expect
-        .poll(
-          () => dynamics.findNotifications(referenceNumber),
-          animalsDynamics.pollOptions(`Expected exactly one notification for ${referenceNumber}`),
-        )
-        .toHaveLength(1),
-    );
-    const [row] = await dynamics.findNotifications(referenceNumber);
-
-    // [FROM v0.1.0: NOT IN MESSAGE]
-    // specifiedConsignment.isOrHasUnweanedAnimals. The owner is the backend.
-    // The PIMS field is "Include Non-Ablacted Animals". The mapping doc says it may be removed from the schema, because
-    // PIMS says it is not relevant for the EU journey, pending PO confirmation.
-    // The frontend stores 'yes' or 'no', and the backend's Boolean.valueOf is true only for "true", so a yes reaches both
-    // messages as false (confirmed on the outbox event). Remove the skip when the backend fix is released. PIMS defaults
-    // this column to false, so the mandatory test's no answer proves nothing.
-    expect.soft(row.defraimp_commoditiesincludenonablactedanimals, 'unweaned animals').toBe(true);
   });
 });

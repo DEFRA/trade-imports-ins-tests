@@ -128,5 +128,6 @@ export type GbnAgSpecifiedConsignment = {
   finalDestinationLocation?: GbnAgLogisticsLocation;
   mainCarriageLogisticsTransportMovement?: GbnAgLogisticsTransportMovement[];
   transitTradeCountry?: GbnAgTradeCountry[];
+  isOrHasUnweanedAnimals?: boolean | null;
   includedConsignmentItem?: GbnAgConsignmentItem[];
 };
