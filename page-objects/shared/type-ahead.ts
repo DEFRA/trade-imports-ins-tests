@@ -43,6 +43,10 @@ export class TypeAhead {
     return this.page.locator(`select[name="${this.fieldId}"]`);
   }
 
+  get error(): Locator {
+    return this.page.locator(`#${this.fieldId}-error`);
+  }
+
   get options(): Locator {
     return this.select.locator('option');
   }
