@@ -206,6 +206,14 @@ export class NotificationPage extends BasePage {
     return this.page.locator('.govuk-button-group');
   }
 
+  get formButtons(): Locator {
+    return this.page.locator('form').getByRole('button');
+  }
+
+  get formLinks(): Locator {
+    return this.page.locator('form').getByRole('link');
+  }
+
   get saveAndReturn(): Locator {
     return this.page.getByRole('button', { name: 'Save and return', exact: true });
   }
