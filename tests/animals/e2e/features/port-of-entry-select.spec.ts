@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { getRelativeDatePickerValue } from '@utils/date-utils';
+import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 
 const PORT_OPTION = pointOfEntries.aberdeenHarbour.display;
@@ -24,6 +25,7 @@ test.describe('Port of entry type-ahead', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.arrivalDetails.portOfEntry.choose(PORT_OPTION);
     await expect(combobox).toHaveValue(PORT_OPTION);
     await animalsPages.arrivalDetails.fillArrivalDate(getRelativeDatePickerValue({ monthOffset: 1 }));
+    await animalsPages.arrivalDetails.chooseMeansOfTransport(MANDATORY_ANSWERS.meansOfTransport.display);
     await animalsPages.arrivalDetails.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 

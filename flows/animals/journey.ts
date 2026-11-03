@@ -16,7 +16,7 @@ import {
   type PartyAnswers,
 } from '@domain/animals/constants/journey-options';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
-import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
+import { MEANS_OF_TRANSPORT_WITHOUT_TRANSIT, meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { fileUploadPaths } from '@resources/file-upload/paths';
@@ -289,7 +289,7 @@ export class AnimalsJourney {
   }: ArrivalDetailsAnswer = {}): Promise<void> {
     await this.animalsPages.arrivalDetails.fillArrivalDate(date);
     await this.animalsPages.arrivalDetails.portOfEntry.choose(port);
-    await this.animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: means });
+    await this.animalsPages.arrivalDetails.chooseMeansOfTransport(means);
     await this.animalsPages.arrivalDetails.transportIdentification.fill(transportId);
     await this.animalsPages.arrivalDetails.transportDocumentReference.fill(documentReference);
   }
@@ -602,6 +602,7 @@ export class AnimalsJourney {
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await pages.arrivalDetails.chooseMeansOfTransport(MEANS_OF_TRANSPORT_WITHOUT_TRANSIT.display);
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);

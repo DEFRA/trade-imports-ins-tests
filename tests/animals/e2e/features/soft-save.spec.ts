@@ -3,6 +3,7 @@ import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page
 import { SELECT_COMMODITY_ERROR } from '@domain/animals/constants/commodity-selection-page';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { MEANS_OF_TRANSPORT_REQUIRED_MESSAGE } from '@domain/animals/constants/means-of-transport';
 
 const TO_DO = 'To do';
 const ORIGIN_TASK = 'Where is this consignment coming from?';
@@ -87,7 +88,7 @@ test.describe('Save and return to overview', () => {
     await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue('');
   });
 
-  test('arrival details: when no means of transport is chosen, saves the port, shows the overview and keeps the task to do', async ({
+  test('arrival details: when no means of transport is chosen, refuses the save, shows the port back and keeps the task to do', async ({
     animalsJourney,
     animalsPages,
   }) => {
@@ -97,10 +98,12 @@ test.describe('Save and return to overview', () => {
 
     await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
 
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.arrivalDetails.heading).toBeVisible();
+    await expect(animalsPages.arrivalDetails.errorSummaryLinks).toHaveText([MEANS_OF_TRANSPORT_REQUIRED_MESSAGE]);
+    await expect(animalsPages.arrivalDetails.portOfEntry.select).toHaveValue(MANDATORY_ANSWERS.pointOfEntry.value);
     await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, ARRIVAL_DETAILS_TASK)).toHaveText(TO_DO);
     await animalsPages.overview.openTaskAfterReopening(referenceNumber, ARRIVAL_DETAILS_TASK);
-    await expect(animalsPages.arrivalDetails.portOfEntry.select).toHaveValue(MANDATORY_ANSWERS.pointOfEntry.value);
+    await expect(animalsPages.arrivalDetails.portOfEntry.select).toHaveValue('');
   });
 
   test('commodity details: when the number of animals is blank, keeps its checks and stays on the page', async ({
