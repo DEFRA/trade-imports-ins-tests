@@ -2,11 +2,10 @@ import { Page, Locator } from '@playwright/test';
 import { defaultUser } from '@config/users';
 import { pageLoadWait } from '@config/timeouts';
 import { SignInPage } from '@page-objects/shared/auth/sign-in-page';
+import { SignInErrorPage } from '@page-objects/shared/auth/sign-in-error-page';
 import { OrganisationPickerPage } from '@page-objects/shared/auth/organisation-picker-page';
 import { SET_BASES, SetBase } from '@page-objects/shared/sets';
 import { errorSummaryOn, notificationBannerTitled } from '@page-objects/shared/govuk-banners';
-
-const SIGN_IN_ERROR_HEADING = 'Sorry, we are unable to sign you in.';
 
 export function requireBaseUrl(
   envVar:
@@ -121,7 +120,7 @@ export class BasePage {
         await signInPage.signIn({ userId: options?.userId });
       }
       if (await this.landedOnSignInError(signInPage)) {
-        throw new Error(`Sign-in failed twice: "${SIGN_IN_ERROR_HEADING}" was shown again after trying again.`);
+        throw new Error(`Sign-in failed twice: "${new SignInErrorPage(this.page).headingName}" was shown again after trying again.`);
       }
     }
     await this.selectOrganisationIfPrompted(options?.organisationSbi);
@@ -132,14 +131,14 @@ export class BasePage {
   }
 
   private async landedOnSignInError(signInPage: SignInPage): Promise<boolean> {
-    const signInError = this.page.getByRole('heading', { level: 1, name: SIGN_IN_ERROR_HEADING });
+    const signInError = new SignInErrorPage(this.page).heading;
     const landingHeading = this.page.getByRole('heading', { level: 1 }).filter({ hasNotText: signInPage.headingName });
     await signInError.or(landingHeading).first().waitFor(pageLoadWait);
     return signInError.isVisible();
   }
 
   private async landedOnSignInForm(signInPage: SignInPage): Promise<boolean> {
-    const signInError = this.page.getByRole('heading', { level: 1, name: SIGN_IN_ERROR_HEADING });
+    const signInError = new SignInErrorPage(this.page).heading;
     const landingHeading = this.page.getByRole('heading', { level: 1 }).filter({ hasNotText: signInPage.headingName });
     await signInPage.heading.or(signInError).or(landingHeading).first().waitFor(pageLoadWait);
     return signInPage.heading.isVisible();
