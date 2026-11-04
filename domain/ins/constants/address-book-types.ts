@@ -60,15 +60,10 @@ export const addressBookTabLabels = addressBookTabs.map(({ label }) => label);
 
 export const unsupportedAddressValue = 'TRANSPORTER';
 
-const usesInFormOrder: readonly AddressUse[] = Object.values(addressUses);
-
-const usesInFormOrderOf = ({ useFilterOptions }: AddressBookTab): readonly AddressUse[] =>
-  useFilterOptions.toSorted((left, right) => usesInFormOrder.indexOf(left) - usesInFormOrder.indexOf(right));
-
 export const usesQuestionOptions: Record<AddressType, readonly AddressUse[]> = {
-  [addressTypes.originOrConsignor]: usesInFormOrderOf(originOrConsignorTab),
-  [addressTypes.destinationConsigneeOrImporter]: usesInFormOrderOf(destinationConsigneeOrImporterTab),
-  [addressTypes.branch]: usesInFormOrderOf(branchTab),
+  [addressTypes.originOrConsignor]: [addressUses.placeOfOrigin, addressUses.consignor],
+  [addressTypes.destinationConsigneeOrImporter]: [addressUses.placeOfDestination, addressUses.consignee, addressUses.importer],
+  [addressTypes.branch]: [addressUses.branchAddress],
 };
 
 export const addressTypesRequiringUnitedKingdom: readonly AddressType[] = [
