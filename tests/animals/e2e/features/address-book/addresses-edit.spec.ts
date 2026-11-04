@@ -1,8 +1,6 @@
 import { test, expect } from '@fixtures';
 import { heldAsConsignor } from '@domain/shared/constants/address-types';
-import type { AnimalsPages } from '@page-objects';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
-import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 
 const OWN_RECORD = {
   ...heldAsConsignor,
@@ -15,16 +13,6 @@ const OWN_RECORD = {
   phone: '01228 555 0110',
   email: 'edit-copy@example.co.uk',
 };
-
-async function draftWithConsignor(animalsSeededJourney: AnimalsSeededJourney, animalsPages: AnimalsPages, name: string): Promise<string> {
-  const referenceNumber = await animalsSeededJourney.createDraftNotification();
-  await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
-  await animalsPages.addresses.changeParty('Consignor').click();
-  await animalsPages.consignorSelection.select(name);
-  await animalsPages.consignorSelection.saveAndContinue.click();
-  await animalsPages.addresses.heading.waitFor();
-  return referenceNumber;
-}
 
 test.describe('Copied addresses are edited on the notification', () => {
   test('editing a copied address changes only this notification, not the address book record or another notification', async ({
@@ -39,8 +27,8 @@ test.describe('Copied addresses are edited on the notification', () => {
     const editedName = `Edited Holding ${stamp}`;
     const address = await addressBookApi.createAddress({ name, ...OWN_RECORD });
 
-    const otherReferenceNumber = await draftWithConsignor(animalsSeededJourney, animalsPages, name);
-    const referenceNumber = await draftWithConsignor(animalsSeededJourney, animalsPages, name);
+    const otherReferenceNumber = await animalsSeededJourney.createDraftWithConsignorChosenInUi(animalsPages, name);
+    const referenceNumber = await animalsSeededJourney.createDraftWithConsignorChosenInUi(animalsPages, name);
 
     await animalsPages.addresses.editPartyDetails('Consignor').click();
     await expect(animalsPages.consignorEdit.heading).toBeVisible();
@@ -77,7 +65,7 @@ test.describe('Copied addresses are edited on the notification', () => {
   }) => {
     const name = `Prefilled Farm ${Date.now()}`;
     await addressBookApi.createAddress({ name, ...OWN_RECORD });
-    await draftWithConsignor(animalsSeededJourney, animalsPages, name);
+    await animalsSeededJourney.createDraftWithConsignorChosenInUi(animalsPages, name);
 
     await animalsPages.addresses.editPartyDetails('Consignor').click();
 

@@ -115,14 +115,9 @@ test.describe('Addresses are copied, not linked', () => {
         email: 'doomed@example.co.uk',
       });
 
-      const referenceNumber = await animalsSeededJourney.createDraftNotification();
-      await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
+      const referenceNumber = await animalsSeededJourney.createDraftWithConsignorChosenInUi(animalsPages, name);
       const consignorAddressLines = animalsPages.addresses.partyAddressLines('Consignor');
       const chosenAddressText = AnimalsAddressesPage.expectedAddressText({ ...seeded, country: 'United Kingdom' });
-      await animalsPages.addresses.changeParty('Consignor').click();
-      await animalsPages.consignorSelection.select(name);
-      await animalsPages.consignorSelection.saveAndContinue.click();
-      await expect(animalsPages.addresses.heading).toBeVisible();
       await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
 
       await addressBookApi.deleteAddress(address.id);
@@ -173,12 +168,7 @@ test.describe('Addresses are copied, not linked', () => {
       email: 'unlisted@example.co.uk',
     });
 
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
-    await animalsPages.addresses.changeParty('Consignor').click();
-    await animalsPages.consignorSelection.select(name);
-    await animalsPages.consignorSelection.saveAndContinue.click();
-    await expect(animalsPages.addresses.heading).toBeVisible();
+    const referenceNumber = await animalsSeededJourney.createDraftWithConsignorChosenInUi(animalsPages, name);
 
     await animalsPages.notificationView.open(referenceNumber);
     const message = 'Correct the address details for the consignor';
