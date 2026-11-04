@@ -34,7 +34,7 @@ export class InsDashboardPage extends BasePage {
   }
 
   get pagination(): Locator {
-    return this.page.locator('.govuk-pagination');
+    return this.page.getByRole('navigation', { name: 'Pagination', exact: true });
   }
 
   get linkNextPage(): Locator {
