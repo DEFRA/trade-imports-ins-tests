@@ -86,6 +86,7 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 | `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites        | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:cross-browser`   | Cross-browser (`@cross-browser`) suite                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
@@ -388,15 +389,15 @@ The animals commands are also in [`tests/animals/cross-browser/`](tests/animals/
 Run them against the docker-compose stack. Install the browsers first (see
 [Installation](#installation)).
 
-| Command                                             | Runs                           |
-| --------------------------------------------------- | ------------------------------ |
-| `npm run test:docker-compose:cross-browser`         | Firefox and WebKit, in one run |
-| `npm run test:docker-compose:cross-browser:firefox` | Firefox only                   |
-| `npm run test:docker-compose:cross-browser:webkit`  | WebKit only                    |
-| `npm run test:docker-compose:cross-browser:mobile`  | Paused, see Mobile (paused)    |
+| Command                                                                                     | Runs                           |
+| ------------------------------------------------------------------------------------------- | ------------------------------ |
+| `npm run test:docker-compose:cross-browser`                                                 | Firefox and WebKit, in one run |
+| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=firefox`       | Firefox only                   |
+| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=webkit`        | WebKit only                    |
+| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=mobile-webkit` | iPhone 17 on WebKit (paused)   |
 
 The `firefox` and `webkit` projects run only with `--project`, so every other
-script stays on Chromium. The scripts add `--grep '@cross-browser'`; without it
+script stays on Chromium. The commands add `--grep '@cross-browser'`; without it
 a named engine runs every test. Write the flag as `--project=firefox`: `--project` takes several values, so with a space a
 trailing path is read as a project name. Add a test to the set by tagging it:
 
@@ -404,7 +405,7 @@ trailing path is read as a project name. Add a test to the set by tagging it:
 test('renders the page', { tag: '@cross-browser' }, async ({ animalsPages }) => {});
 ```
 
-The `mobile` script is paused: see [Mobile (paused)](tests/animals/cross-browser/README.md#mobile-paused).
+The `mobile-webkit` project is paused: see [Mobile (paused)](tests/animals/cross-browser/README.md#mobile-paused).
 
 Do not run these engines with `PLAYWRIGHT_IN_CONTAINER=1`. The host-resolver
 rule that mode adds is Chromium-only.

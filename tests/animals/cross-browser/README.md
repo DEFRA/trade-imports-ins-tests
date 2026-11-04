@@ -8,12 +8,12 @@ This folder holds no specs. The animals cross-browser tests are existing e2e spe
 Run against the docker-compose stack, from the repo root. Install the browsers once with
 `npx playwright install firefox webkit`.
 
-| Command                                             | Runs                           |
-| --------------------------------------------------- | ------------------------------ |
-| `npm run test:docker-compose:cross-browser`         | Firefox and WebKit, in one run |
-| `npm run test:docker-compose:cross-browser:firefox` | Firefox only                   |
-| `npm run test:docker-compose:cross-browser:webkit`  | WebKit only                    |
-| `npm run test:docker-compose:cross-browser:mobile`  | Paused, see Mobile (paused)    |
+| Command                                                                                     | Runs                                    |
+| ------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `npm run test:docker-compose:cross-browser`                                                 | Firefox and WebKit, in one run          |
+| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=firefox`       | Firefox only                            |
+| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=webkit`        | WebKit only                             |
+| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=mobile-webkit` | iPhone 17 on WebKit (paused, see below) |
 
 ## Notes
 
@@ -25,13 +25,7 @@ Run against the docker-compose stack, from the repo root. Install the browsers o
 
 ## Mobile (paused)
 
-The `mobile-webkit` project (iPhone 17 on WebKit) stays in `utils/playwright/shared-config.ts`, but its npm command is paused.
+The `mobile-webkit` project (iPhone 17 on WebKit) stays in `utils/playwright/shared-config.ts`, but is paused.
 
 - On an iPhone user agent, `accessible-autocomplete` adds a hidden "1 of 7" to each suggestion, so `TypeAhead.option()` no longer matches "France" exactly. The 10 tests that choose a country time out.
 - Fix that helper first. iOS also turns autoselect off, so expect more differences.
-
-Run it by hand:
-
-```bash
-npx playwright test --config=playwright.docker-compose.config.ts --grep '@cross-browser' --project=mobile-webkit
-```
