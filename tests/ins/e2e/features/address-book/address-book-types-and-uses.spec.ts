@@ -34,17 +34,19 @@ test.describe('Address book API address type and uses', () => {
     expect(read.uses).toEqual([addressUses.importer, addressUses.placeOfDestination]);
   });
 
-  test('an address created with all six uses reads all six back in the order given', async ({ isolatedOrganisationAddressBookApi }) => {
-    const allSixUses = Object.values(addressUses);
+  test('an address created with all six uses, listed last to first, reads all six back in that order', async ({
+    isolatedOrganisationAddressBookApi,
+  }) => {
+    const allSixUsesReversed = Object.values(addressUses).reverse();
     const created = await isolatedOrganisationAddressBookApi.createAddress({
       ...traderAddress(`All Uses Farm ${Date.now()}`),
       addressType: addressTypes.branch,
-      uses: allSixUses,
+      uses: allSixUsesReversed,
     });
 
     const read = await isolatedOrganisationAddressBookApi.getAddress(created.id);
 
-    expect(read.uses).toEqual(allSixUses);
+    expect(read.uses).toEqual(allSixUsesReversed);
   });
 
   test('an update with a different set of uses reads back with exactly the new set', async ({ isolatedOrganisationAddressBookApi }) => {
