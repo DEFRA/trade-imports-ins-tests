@@ -153,3 +153,8 @@ export const usesQuestionLegends: Record<AddressType, string> = {
   DESTINATION_CONSIGNEE_OR_IMPORTER: 'Address type',
   BRANCH: 'Address type',
 };
+
+export const journeyUsesQuestion = {
+  legend: 'What else should this address be used for?',
+  consigneeHint: 'This address is being added as a Consignee address. Select any other roles or addresses this address should be used for.',
+};

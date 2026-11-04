@@ -6,11 +6,15 @@ import type { AnimalsJourney } from '@flows/animals/journey';
 import { type InsAddressBookAddPage, type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
 import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
 import {
+  addressTypes,
+  addressUses,
   heldAsConsignee,
   heldAsConsignor,
   heldAsImporter,
   heldAsPlaceOfDestination,
   heldAsPlaceOfOrigin,
+  journeyUsesQuestion,
+  usesQuestionLabels,
   type AddressClassification,
 } from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage, type PartyRole } from '@page-objects/animals/addresses-page';
@@ -185,7 +189,7 @@ test.describe('Add an address from the journey via INS', () => {
       await expect(addPage.notificationReference).toHaveText(journeyContext.referenceNumber);
       await expect(addPage.sectionHeading('Address')).toBeVisible();
       await expect(addPage.sectionHeading('Contact details')).toBeVisible();
-      await expect(addPage.fieldLabels).toHaveText(ADDRESS_FORM_FIELD_LABELS_IN_ORDER);
+      await expect(addPage.fieldLabels).toHaveText([...ADDRESS_FORM_FIELD_LABELS_IN_ORDER, usesQuestionLabels.PLACE_OF_ORIGIN]);
       await expect(addPage.inputName).not.toHaveAttribute('autocomplete');
       await expect(addPage.inputAddressLine1).toHaveAttribute('autocomplete', 'address-line1');
       await expect(addPage.inputAddressLine2).toHaveAttribute('autocomplete', 'address-line2');
@@ -224,6 +228,59 @@ test.describe('Add an address from the journey via INS', () => {
       },
     );
   }
+
+  test(
+    'Save and select on the INS add page reached from the Consignee picker with Importer ticked saves the address under the destination type with the consignee and importer uses',
+    { tag: ['@address-book', '@ins-frontend'] },
+    async ({ animalsJourney, animalsPages, insPages, addressBookApi }) => {
+      const addPage = insPages.addressBookAdd;
+      const details = newAddressFor('Consignee');
+
+      await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
+      await expect(addPage.usesLegend).toHaveText(journeyUsesQuestion.legend);
+      await expect(addPage.usesGroup).toHaveAccessibleDescription(journeyUsesQuestion.consigneeHint);
+      await expect(addPage.usesOptionLabels).toHaveText([usesQuestionLabels.IMPORTER, usesQuestionLabels.PLACE_OF_DESTINATION]);
+      await expect(addPage.usesOption(addressUses.importer)).not.toBeChecked();
+      await expect(addPage.usesOption(addressUses.placeOfDestination)).not.toBeChecked();
+
+      await addPage.fill(details);
+      await addPage.tickUses([addressUses.importer]);
+      await addPage.btnSaveAndSelect.click();
+
+      await expect(animalsPages.addresses.heading).toBeVisible();
+      const saved = await addressBookApi.getAddress((await addressBookApi.findByName(details.name)).id);
+      expect({ addressType: saved.addressType, uses: saved.uses }).toEqual({
+        addressType: addressTypes.destinationConsigneeOrImporter,
+        uses: [addressUses.consignee, addressUses.importer],
+      });
+    },
+  );
+
+  test(
+    'Save and return to address page on the INS add page reached from the Consignee picker with answers missing keeps the page, lists each error in field order, keeps the name and the Importer tick and saves nothing',
+    { tag: ['@address-book', '@ins-frontend'] },
+    async ({ animalsJourney, insPages, addressBookApi }) => {
+      const addPage = insPages.addressBookAdd;
+      const details = newAddressFor('Consignee');
+
+      await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
+      await addPage.fill({ ...details, addressLine1: '', townOrCity: '', postcode: '', email: '', phone: '' });
+      await addPage.tickUses([addressUses.importer]);
+      await addPage.btnSaveAndReturnToAddressPage.click();
+
+      await expect(addPage.heading).toBeVisible();
+      await expect(addPage.errorSummary.getByRole('link')).toHaveText([
+        'Enter address line 1',
+        'Enter a town or city',
+        'Enter a postcode or Zip code',
+        'Enter an email address',
+        'Enter a phone number',
+      ]);
+      await expect(addPage.inputName).toHaveValue(details.name);
+      await expect(addPage.usesOption(addressUses.importer)).toBeChecked();
+      expect(await addressBookApi.listAddresses(details.name)).toEqual([]);
+    },
+  );
 
   test(
     'saving the INS add page with a blank name keeps the page with the name error in the summary and on the field',
