@@ -1,7 +1,6 @@
 import { test, expect } from '@fixtures';
 import { COLD_START } from '@fixtures/auth-state';
 
-// This spec IS the sign-in journey, so it starts unauthenticated.
 test.use({ storageState: COLD_START });
 
 test.describe('Security scan (ins, auth)', { tag: '@active' }, () => {
