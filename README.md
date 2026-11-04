@@ -188,6 +188,13 @@ than a listed code: the address book checks only that a country is present,
 so that is the one way through the services alone to copy an address the
 notification refuses.
 
+The address book is shared and, locally, never wiped, so a spec that counts
+rows searches for a token only its own run created. The picker lists newest
+first, so a spec that needs a record off page one creates it, then enough
+newer records to fill page one. Other workers add records while a spec pages
+through the list, so the spec follows Next until the record shows or Next
+runs out, rather than to a last page worked out before it started.
+
 ### Commodity lines in the animals specs
 
 `domain/animals/constants/commodity-lines.ts` names each line a spec chooses
