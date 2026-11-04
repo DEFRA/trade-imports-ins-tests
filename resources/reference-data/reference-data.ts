@@ -79,3 +79,8 @@ export function portByCode(code: string): { value: string; display: string } {
   }
   return { value: port.code, display: portLabel(port) };
 }
+
+/** The names that contain the typed text, ignoring case: what a type-ahead offers for plain ASCII text. */
+export function namesContaining(names: string[], typed: string): string[] {
+  return names.filter((name) => name.toLowerCase().includes(typed.toLowerCase()));
+}

@@ -15,6 +15,7 @@ import {
   type OriginOptions,
   type PartyAnswers,
 } from '@domain/animals/constants/journey-options';
+import { type CommodityLineAnswer } from '@domain/animals/constants/journey-commodity-line-answers';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
@@ -45,6 +46,8 @@ const PARTY_PICKER_KEYS: Record<PartyRole, PartyPickerKey> = {
   Importer: 'importerSelection',
 };
 
+type AnimalWithPermanentAddress = Required<Pick<CommodityLineAnswer, 'passportNumber' | 'permanentAddress'>>;
+
 export type SpeciesAnimalCount = {
   species: CommodityLine;
   animalCount: number;
@@ -68,8 +71,6 @@ export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffse
 
 export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
 export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
-export const PERMANENT_ADDRESS_PASSPORT_NUMBER = 'UK123456789';
-export const PERMANENT_ADDRESS_NAME = 'Pet Owner';
 
 const timestampedReference = (referencePrefix: string): string => `${referencePrefix}${Date.now()}`;
 
@@ -147,15 +148,25 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
   }
 
-  async answerOrigin(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+  async openOriginFromOverview(): Promise<void> {
     await this.animalsPages.overview.task('Where is this consignment coming from?').click();
+    await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
+  }
+
+  async toOriginFromOverview(): Promise<void> {
+    await this.startNotification();
+    await this.openOriginFromOverview();
+  }
+
+  async answerOrigin(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+    await this.openOriginFromOverview();
     await this.fillOriginOfImport(answers);
     await this.saveOriginOfImport();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  private async chooseCommodityLinesAndOpenDetails(lines: CommodityLine[]): Promise<void> {
-    await this.animalsPages.commoditySelection.searchAndCheckSpecies(lines);
+  private async chooseSpeciesAndOpenDetails(speciesList: CommodityLine[]): Promise<void> {
+    await this.animalsPages.commoditySelection.searchAndCheckSpecies(speciesList);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.openCommodityDetailsFromOverview();
@@ -193,23 +204,42 @@ export class AnimalsJourney {
   }
 
   async answerCommodity(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+    const { commodityLines: lines } = answers;
     await this.animalsPages.overview.task('What are you importing?').click();
-    await this.chooseCommodityLinesAndOpenDetails([answers.species]);
-    await this.animalsPages.consignmentDetails.numberOfAnimals.fill(String(answers.noOfAnimals));
-    if (answers.noOfPackages !== undefined) {
-      await this.animalsPages.consignmentDetails.numberOfPackages.fill(String(answers.noOfPackages));
+    await this.chooseSpeciesAndOpenDetails(lines.map((line) => line.species));
+    for (const line of lines) {
+      await this.animalsPages.consignmentDetails.fillAnimalCountFor(line.species, line.noOfAnimals);
+      if (line.noOfPackages !== undefined) {
+        await this.animalsPages.consignmentDetails.fillPackageCountFor(line.species, line.noOfPackages);
+      }
     }
     await this.animalsPages.consignmentDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
   async answerAnimalIdentification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+    const { commodityLines: lines } = answers;
     await this.animalsPages.overview.task('Identification details').click();
-    await this.animalsPages.animalIdentification.earTag.fill(answers.earTag);
-    if (answers.passportNumber !== undefined) {
-      await this.animalsPages.animalIdentification.passportNumber.fill(answers.passportNumber);
+    const { animalIdentification: identification } = this.animalsPages;
+    for (const line of lines) {
+      const card = identification.speciesCard(line.species);
+      if (line.earTag) {
+        await card.getByLabel('Ear tag', { exact: true }).fill(line.earTag);
+      }
+      if (line.passportNumber) {
+        await card.getByLabel('Passport', { exact: true }).fill(line.passportNumber);
+      }
+      if (line.microchip) {
+        await card.getByLabel('Microchip', { exact: true }).fill(line.microchip);
+      }
+      if (line.tattoo) {
+        await card.getByLabel('Tattoo', { exact: true }).fill(line.tattoo);
+      }
+      if (line.permanentAddress) {
+        await identification.fillPermanentAddress(line.permanentAddress, card);
+      }
     }
-    await this.animalsPages.animalIdentification.saveAndContinue.click();
+    await identification.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -404,9 +434,9 @@ export class AnimalsJourney {
     await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
   }
 
-  async toConsignmentDetails(lines: CommodityLine[] = [MANDATORY_ANSWERS.species]): Promise<void> {
+  async toConsignmentDetails(speciesList: CommodityLine[] = [MANDATORY_ANSWERS.commodityLines[0].species]): Promise<void> {
     await this.toCommoditySelection();
-    await this.chooseCommodityLinesAndOpenDetails(lines);
+    await this.chooseSpeciesAndOpenDetails(speciesList);
   }
 
   async toOverviewWithSavedCounts(counts: { animals: string; packages: string }): Promise<void> {
@@ -424,7 +454,7 @@ export class AnimalsJourney {
   async addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(line: CommodityLine): Promise<void> {
     await this.openCurrentOverview();
     await this.animalsPages.overview.task('What are you importing?').click();
-    await this.chooseCommodityLinesAndOpenDetails([line]);
+    await this.chooseSpeciesAndOpenDetails([line]);
     await this.animalsPages.consignmentDetails.fillEveryAnimalCount('1');
     await this.saveCountsAndReturnToOverview();
   }
@@ -438,21 +468,16 @@ export class AnimalsJourney {
   async toAnimalIdentificationWithCounts(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
     await this.toConsignmentDetails(speciesCounts.map(({ species }) => species));
     for (const { species, animalCount } of speciesCounts) {
-      await this.animalsPages.consignmentDetails.fillAnimalCountFor(species.latinName, animalCount);
+      await this.animalsPages.consignmentDetails.fillAnimalCountFor(species, animalCount);
     }
     await this.saveCountsAndReturnToOverview();
     await this.openIdentificationFromOverview();
   }
 
-  async saveAnimalWithPermanentAddress(): Promise<void> {
+  async saveAnimalWithPermanentAddress({ passportNumber, permanentAddress }: AnimalWithPermanentAddress): Promise<void> {
     const identification = this.animalsPages.animalIdentification;
-    await identification.passportNumber.fill(PERMANENT_ADDRESS_PASSPORT_NUMBER);
-    await identification.permanentAddressName.fill(PERMANENT_ADDRESS_NAME);
-    await identification.permanentAddressLine1.fill('1 Farm Lane');
-    await identification.permanentAddressTownOrCity.fill('Skipton');
-    await identification.permanentAddressPostcode.fill('BD23 1UD');
-    await identification.permanentAddressPhone.fill('+44 1756 555 0192');
-    await identification.permanentAddressEmail.fill('owner@example.co.uk');
+    await identification.passportNumber.fill(passportNumber);
+    await identification.fillPermanentAddress(permanentAddress);
     await identification.saveAndAddAnother.click();
   }
 
@@ -585,7 +610,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.species]);
+    await pages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.commodityLines[0].species]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);
@@ -622,7 +647,7 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
 
     await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.species]);
+    await pages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.commodityLines[0].species]);
     await pages.commoditySelection.saveAndContinue.click();
 
     await pages.importReason.heading.waitFor(pageLoadWait);
@@ -639,11 +664,11 @@ export class AnimalsJourney {
     await pages.animalIdentification.earTag.fill('UK000000000001');
     await pages.animalIdentification.passportNumber.fill('PASSPORT-0001');
     await pages.animalIdentification.saveAndAddAnother.click();
-    await pages.animalIdentification.savedAnimalRow(MANDATORY_ANSWERS.species.latinName, 1).waitFor(pageLoadWait);
+    await pages.animalIdentification.savedAnimalRow(MANDATORY_ANSWERS.commodityLines[0].species, 1).waitFor(pageLoadWait);
     await pages.animalIdentification.earTag.fill('UK000000000002');
     await pages.animalIdentification.passportNumber.fill('PASSPORT-0002');
     await pages.animalIdentification.saveAndFinish.click();
-    await pages.animalIdentification.savedAnimalRow(MANDATORY_ANSWERS.species.latinName, 2).waitFor(pageLoadWait);
+    await pages.animalIdentification.savedAnimalRow(MANDATORY_ANSWERS.commodityLines[0].species, 2).waitFor(pageLoadWait);
     await pages.animalIdentification.saveAndContinue.click();
 
     await pages.additionalDetails.heading.waitFor(pageLoadWait);

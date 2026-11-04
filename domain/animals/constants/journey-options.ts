@@ -1,6 +1,10 @@
 import { type CountryCode, countryCodes } from '@domain/animals/constants/country-codes';
 import { type CertificationPurpose, certificationPurposes } from '@domain/animals/constants/certification-purposes';
-import { type CommodityLine, commodityLines } from '@domain/animals/constants/commodity-lines';
+import {
+  ALL_COMMODITY_LINES,
+  MANDATORY_COMMODITY_LINES,
+  type CommodityLineAnswer,
+} from '@domain/animals/constants/journey-commodity-line-answers';
 import { documentTypes } from '@domain/animals/constants/document-types';
 import { type ImportReason, importReasons } from '@domain/animals/constants/import-reasons';
 import { type InternalMarketPurpose, internalMarketPurposes } from '@domain/animals/constants/internal-market-purposes';
@@ -54,9 +58,7 @@ export type PartyAnswers = {
 export type MandatoryAnswers = {
   countryCode: CountryCode;
   requiresRegionCode: YesNoValue;
-  species: CommodityLine;
-  noOfAnimals: number;
-  earTag: string;
+  commodityLines: CommodityLineAnswer[];
   importReason: ImportReason;
   internalMarketPurpose: InternalMarketPurpose;
   certifiedFor: CertificationPurpose;
@@ -77,8 +79,6 @@ export type OptionalAnswers = {
   /** Asked when the origin needs a region code. */
   regionCode: string;
   internalReference: string;
-  noOfPackages: number;
-  passportNumber: string;
   /** Asked only of rail and road consignments. */
   transitedCountries: CountryCode[];
   accompanyingDocument: AccompanyingDocumentAnswer;
@@ -108,9 +108,7 @@ export const assertConsistentAnswers = (answers: NotificationAnswers): void => {
 export const MANDATORY_ANSWERS: MandatoryAnswers = {
   countryCode: countryCodes.eu.france,
   requiresRegionCode: yesNoValues.no,
-  species: commodityLines.cattle,
-  noOfAnimals: 1,
-  earTag: 'UK123456789012',
+  commodityLines: [MANDATORY_COMMODITY_LINES.cattle],
   importReason: importReasons.internalMarket,
   internalMarketPurpose: internalMarketPurposes.breeding,
   certifiedFor: certificationPurposes.slaughter,
@@ -135,11 +133,10 @@ export const MANDATORY_ANSWERS: MandatoryAnswers = {
 /** Every answer, including an accompanying document. The UI journey uses this set, as a browser can upload a file. */
 export const ALL_ANSWERS: AllAnswers = {
   ...MANDATORY_ANSWERS,
+  commodityLines: [ALL_COMMODITY_LINES.cattle],
   requiresRegionCode: yesNoValues.yes,
   regionCode: '75',
   internalReference: 'Imports456GB',
-  noOfPackages: 5,
-  passportNumber: 'PASSPORT-0001',
   transitedCountries: [countryCodes.eu.france, countryCodes.eu.belgium],
   accompanyingDocument: {
     reference: 'DOCREF0001',

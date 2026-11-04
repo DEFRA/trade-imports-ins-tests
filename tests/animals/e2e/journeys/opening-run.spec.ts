@@ -1,4 +1,4 @@
-import { commodityLines, speciesCardTitle } from '@domain/animals/constants/commodity-lines';
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { OPENING_RUN_TASKS, certificateDocument } from '@flows/animals/journey';
@@ -26,7 +26,7 @@ test.describe('Opening run', () => {
     await expect(animalsPages.notificationView.regionOfOriginCode).toHaveText('FR-75');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Internal reference number')).toHaveText('CATTLE-2026-01');
 
-    const speciesCard = animalsPages.notificationView.summaryCard(speciesCardTitle(commodityLines.cattle));
+    const speciesCard = animalsPages.notificationView.speciesCard(commodityLines.cattle);
     await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText(commodityLines.cattle.latinName);
     await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('2');
 
@@ -57,7 +57,7 @@ test.describe('Opening run', () => {
     await animalsJourney.fillOriginOfImport();
     await animalsJourney.saveOriginOfImport();
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
-    await animalsPages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.species]);
+    await animalsPages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.commodityLines[0].species]);
     await animalsPages.commoditySelection.saveAndContinue.click();
     await expect(animalsPages.importReason.heading).toBeVisible();
 

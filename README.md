@@ -195,11 +195,13 @@ about a species, such as its common name, reads it from reference-data's
 commodity search through `ReferenceDataApiClient`, rather than from a copy of
 it that goes stale.
 
-A notification's commodity name carries its first line's CN code until
-EUDPA-669 brings the real commodity name. So the outbox spec expects
-`commodityLines.cattle.commodityCode` as the trade line's description and
-common name, and the aggregated notification spec expects it as the
-commodity.
+Stored commodity names for the codes the specs drive live in
+`domain/animals/constants/commodity-names.ts`. The INS aggregated notification
+commodity label uses the first GBN-AG trade line description (for example
+`Live bovine animals`). The outbox and PIMS Dynamics specs expect
+`GBN_AG_CATTLE_COMMON_NAME` (`domain/animals/constants/gbn-ag.ts`,
+`Domestic Cattle`) because the event's Bos taurus common name differs from
+reference-data's search result for that species under `0102`.
 
 ### DLQ specs in animals-admin
 

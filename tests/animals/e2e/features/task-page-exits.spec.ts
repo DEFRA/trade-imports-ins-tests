@@ -5,21 +5,20 @@ test.describe('Task-page exits', { tag: '@duplicated-in-frontend' }, () => {
     animalsJourney,
     animalsPages,
   }) => {
-    await animalsJourney.startNotification();
+    await animalsJourney.toArrivalDetails();
 
-    await animalsPages.overview.task('Where is this consignment coming from?').click();
-    await animalsPages.originOfImport.internalReference.fill('DiscardedRef');
-    await animalsPages.originOfImport.cancelAndReturnToOverview.click();
+    await animalsPages.arrivalDetails.transportDocumentReference.fill('DiscardedRef');
+    await animalsPages.arrivalDetails.cancelAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    await animalsPages.overview.task('Where is this consignment coming from?').click();
-    await expect(animalsPages.originOfImport.internalReference).toHaveValue('');
+    await animalsPages.overview.task('Arrival details').click();
+    await expect(animalsPages.arrivalDetails.transportDocumentReference).toHaveValue('');
 
-    await animalsJourney.fillOriginOfImport({ internalReference: 'CommittedRef' });
-    await animalsPages.originOfImport.saveAndReturnToOverview.click();
+    await animalsPages.arrivalDetails.transportDocumentReference.fill('CommittedRef');
+    await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    await animalsPages.overview.task('Where is this consignment coming from?').click();
-    await expect(animalsPages.originOfImport.internalReference).toHaveValue('CommittedRef');
+    await animalsPages.overview.task('Arrival details').click();
+    await expect(animalsPages.arrivalDetails.transportDocumentReference).toHaveValue('CommittedRef');
   });
 });
