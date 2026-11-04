@@ -1,9 +1,7 @@
 import { test, expect } from '@fixtures';
 import { addressTypes, addressUses } from '@domain/shared/constants/address-types';
-import { addressTypeOptions } from '@domain/ins/constants/address-book-types';
+import { addressTypeOptions, addressTypeQuestion } from '@domain/ins/constants/address-book-types';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
-
-const MISSING_TYPE_MESSAGE = 'Select an address type';
 
 test.describe('Choosing an address type before adding an address', () => {
   test('Add a new address opens Choose an address type with its caption, the three types and their hints in order, Continue and Back to the address book', async ({
@@ -35,8 +33,8 @@ test.describe('Choosing an address type before adding an address', () => {
     await typePage.continue();
 
     await expect(typePage.errorSummary).toBeVisible();
-    await expect(typePage.radioGroup).toHaveAccessibleDescription(`Error: ${MISSING_TYPE_MESSAGE}`);
-    await typePage.errorSummaryLink(MISSING_TYPE_MESSAGE).click();
+    await expect(typePage.radioGroup).toHaveAccessibleDescription(`Error: ${addressTypeQuestion.error}`);
+    await typePage.errorSummaryLink(addressTypeQuestion.error).click();
     await expect(typePage.radio(addressTypes.originOrConsignor)).toBeFocused();
   });
 

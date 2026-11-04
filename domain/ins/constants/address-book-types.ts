@@ -88,6 +88,10 @@ export const addressTypeLabels = Object.fromEntries(addressTypeOptions.map(({ ad
   string
 >;
 
+export const addressTypeQuestion = {
+  error: 'Select an address type',
+};
+
 export const usesQuestion = {
   hint: 'Select where this address can be used',
   error: 'Select what this address can be used for',
