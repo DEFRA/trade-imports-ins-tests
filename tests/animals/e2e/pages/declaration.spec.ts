@@ -9,13 +9,13 @@ test.describe('Declaration page', { tag: '@duplicated-in-frontend' }, () => {
       await animalsJourney.toDeclarationOfCurrentNotification();
     });
 
-    test('renders the page controls', async ({ animalsPages }) => {
+    test('renders the page controls', { tag: '@cross-browser' }, async ({ animalsPages }) => {
       await expect(animalsPages.declaration.heading).toBeVisible();
       await expect(animalsPages.declaration.confirmation).toBeVisible();
       await expect(animalsPages.declaration.continueButton).toBeVisible();
     });
 
-    test('shows an error summary when submitted unconfirmed', async ({ pages, animalsPages }) => {
+    test('shows an error summary when submitted unconfirmed', { tag: '@cross-browser' }, async ({ pages, animalsPages }) => {
       await animalsPages.declaration.continueButton.click();
 
       await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();

@@ -22,22 +22,23 @@ async function expectFieldsGroupedUnderSections(form: InsAddressBookFormPage): P
 }
 
 test.describe('The add-details form for an address entered by hand', () => {
-  test('the add-details step groups its fields under Address and Contact details, with Name or organisation first and County between Town or city and Postcode, and the edit page labels the name the same', async ({
-    insPages,
-    addressBookApi,
-  }) => {
-    await insPages.addressBookAdd.open();
+  test(
+    'the add-details step groups its fields under Address and Contact details, with Name or organisation first and County between Town or city and Postcode, and the edit page labels the name the same',
+    { tag: '@cross-browser' },
+    async ({ insPages, addressBookApi }) => {
+      await insPages.addressBookAdd.open();
 
-    await expectFieldsGroupedUnderSections(insPages.addressBookAdd);
-    for (const [index, name] of ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER.entries()) {
-      await expect(insPages.addressBookAdd.textboxes.nth(index)).toHaveAccessibleName(name);
-    }
+      await expectFieldsGroupedUnderSections(insPages.addressBookAdd);
+      for (const [index, name] of ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER.entries()) {
+        await expect(insPages.addressBookAdd.textboxes.nth(index)).toHaveAccessibleName(name);
+      }
 
-    const created = await addressBookApi.createAddress(addressWithLineTwoAndCounty(`Form Label Farm ${Date.now()}`));
-    await insPages.addressBookEdit.open(created.id);
+      const created = await addressBookApi.createAddress(addressWithLineTwoAndCounty(`Form Label Farm ${Date.now()}`));
+      await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.inputName).toHaveAccessibleName(ADDRESS_FORM_FIELD_LABELS.name);
-  });
+      await expect(insPages.addressBookEdit.inputName).toHaveAccessibleName(ADDRESS_FORM_FIELD_LABELS.name);
+    },
+  );
 
   test('the Country select opens on its blank first option, Select a country, with nothing pre-selected', async ({ insPages }) => {
     await insPages.addressBookAdd.open();

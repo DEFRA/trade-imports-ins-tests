@@ -16,7 +16,7 @@ test.describe('Authentication', { tag: '@auth' }, () => {
     await expect(pages.signIn.heading).toBeVisible();
   });
 
-  test('allows signing into the notification dashboard', { tag: '@smoke' }, async ({ pages, animalsPages }) => {
+  test('allows signing into the notification dashboard', { tag: ['@smoke', '@cross-browser'] }, async ({ pages, animalsPages }) => {
     await pages.signIn.signIn();
     await expect(pages.page).toHaveURL(animalsPages.dashboard.expectedUrl);
     await expect(animalsPages.dashboard.heading).toBeVisible();

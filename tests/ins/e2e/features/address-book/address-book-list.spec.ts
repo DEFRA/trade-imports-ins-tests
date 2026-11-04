@@ -39,15 +39,19 @@ const addAddressThroughForm = async ({ insPages }: Pick<PageFixtures, 'insPages'
 };
 
 test.describe('Address book list', () => {
-  test('shows the intro and Add a new address, with the Search field hidden until Filter addresses is opened', async ({ insPages }) => {
-    await insPages.addressBookList.open();
+  test(
+    'shows the intro and Add a new address, with the Search field hidden until Filter addresses is opened',
+    { tag: '@cross-browser' },
+    async ({ insPages }) => {
+      await insPages.addressBookList.open();
 
-    await expect(insPages.addressBookList.intro).toBeVisible();
-    await expect(insPages.addressBookList.btnAddNewAddress).toBeVisible();
-    await expect(insPages.addressBookList.inputSearch).toBeHidden();
-    await insPages.addressBookList.filterSummary.click();
-    await expect(insPages.addressBookList.inputSearch).toBeVisible();
-  });
+      await expect(insPages.addressBookList.intro).toBeVisible();
+      await expect(insPages.addressBookList.btnAddNewAddress).toBeVisible();
+      await expect(insPages.addressBookList.inputSearch).toBeHidden();
+      await insPages.addressBookList.filterSummary.click();
+      await expect(insPages.addressBookList.inputSearch).toBeVisible();
+    },
+  );
 
   for (const { submitWith, how } of SUBMIT_METHODS) {
     test(`a search submitted with ${how} lists the address it matches`, async ({ insPages, addressBookApi }) => {

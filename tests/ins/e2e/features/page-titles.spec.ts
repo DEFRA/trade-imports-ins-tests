@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { traderAddress } from '@domain/ins/constants/trader-address';
 
 test.describe('INS page titles', { tag: '@duplicated-in-frontend' }, () => {
-  test('the home is titled Dashboard - Import notification service - GOV.UK', async ({ pages, insPages }) => {
+  test('the home is titled Dashboard - Import notification service - GOV.UK', { tag: '@cross-browser' }, async ({ pages, insPages }) => {
     await insPages.dashboard.open();
 
     await expect(pages.page).toHaveTitle('Dashboard - Import notification service - GOV.UK');
@@ -49,11 +49,15 @@ test.describe('INS page titles', { tag: '@duplicated-in-frontend' }, () => {
     await expect(pages.page).toHaveTitle('Error: Add address and contact details - Import notification service - GOV.UK');
   });
 
-  test('a missing page is titled Page not found - Import notification service - GOV.UK', async ({ pages, insPages }) => {
-    await insPages.dashboard.open();
+  test(
+    'a missing page is titled Page not found - Import notification service - GOV.UK',
+    { tag: '@cross-browser' },
+    async ({ pages, insPages }) => {
+      await insPages.dashboard.open();
 
-    await insPages.dashboard.navigateToInsFrontend('/no-such-page');
+      await insPages.dashboard.navigateToInsFrontend('/no-such-page');
 
-    await expect(pages.page).toHaveTitle('Page not found - Import notification service - GOV.UK');
-  });
+      await expect(pages.page).toHaveTitle('Page not found - Import notification service - GOV.UK');
+    },
+  );
 });

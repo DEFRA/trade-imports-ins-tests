@@ -1,5 +1,10 @@
 import { type Locator, type Page } from '@playwright/test';
 
+const escapeRegExp = (text: string): string => text.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+
+/** iOS adds a hidden "1 of 7" to each suggestion's accessible name. */
+const OPTIONAL_POSITION = String.raw`( \d+ of \d+)?`;
+
 /** A type-ahead that enhances a native select, addressed by the select's id. */
 export class TypeAhead {
   constructor(
@@ -35,7 +40,7 @@ export class TypeAhead {
   }
 
   announcement(text: string): Locator {
-    const exactText = new RegExp(`^${text.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)}\\s*$`);
+    const exactText = new RegExp(`^${escapeRegExp(text)}\\s*$`);
     return this.page.locator(`#${this.fieldId}__status--A, #${this.fieldId}__status--B`).filter({ hasText: exactText });
   }
 
@@ -56,7 +61,7 @@ export class TypeAhead {
   }
 
   option(name: string): Locator {
-    return this.page.getByRole('option', { name, exact: true });
+    return this.page.getByRole('option', { name: new RegExp(`^${escapeRegExp(name)}${OPTIONAL_POSITION}$`) });
   }
 
   boldLettersOf(name: string): Locator {

@@ -14,42 +14,43 @@ const expectOverviewShownFor = async (pages: SharedPages, animalsPages: AnimalsP
 };
 
 test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () => {
-  test('the transit-countries page is routed only for rail or road; changing the means wipes saved countries', async ({
-    animalsJourney,
-    animalsPages,
-  }) => {
-    await animalsJourney.startNotification();
-    await animalsJourney.answerCommodity();
+  test(
+    'the transit-countries page is routed only for rail or road; changing the means wipes saved countries',
+    { tag: '@cross-browser' },
+    async ({ animalsJourney, animalsPages }) => {
+      await animalsJourney.startNotification();
+      await animalsJourney.answerCommodity();
 
-    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.airplane.display);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(
-      TASKS_WITHOUT_TRANSIT_COUNTRIES,
-    );
+      await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.airplane.display);
+      await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(
+        TASKS_WITHOUT_TRANSIT_COUNTRIES,
+      );
 
-    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.railway.display);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(TASKS_WITH_TRANSIT_COUNTRIES);
-    await expect(animalsPages.overview.taskStatus('Transit countries')).toHaveText('To do');
+      await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.railway.display);
+      await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(TASKS_WITH_TRANSIT_COUNTRIES);
+      await expect(animalsPages.overview.taskStatus('Transit countries')).toHaveText('To do');
 
-    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.roadVehicle.display);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(TASKS_WITH_TRANSIT_COUNTRIES);
-    await animalsPages.overview.task('Transit countries').click();
-    await expect(animalsPages.transitedCountries.heading).toBeVisible();
-    await animalsPages.transitedCountries.addCountry('France');
-    await animalsPages.transitedCountries.addCountry('Belgium');
-    await animalsPages.transitedCountries.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await expect(animalsPages.overview.taskStatus('Transit countries')).toHaveText('Complete');
+      await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.roadVehicle.display);
+      await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(TASKS_WITH_TRANSIT_COUNTRIES);
+      await animalsPages.overview.task('Transit countries').click();
+      await expect(animalsPages.transitedCountries.heading).toBeVisible();
+      await animalsPages.transitedCountries.addCountry('France');
+      await animalsPages.transitedCountries.addCountry('Belgium');
+      await animalsPages.transitedCountries.saveAndContinue.click();
+      await expect(animalsPages.overview.heading).toBeVisible();
+      await expect(animalsPages.overview.taskStatus('Transit countries')).toHaveText('Complete');
 
-    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.vessel.display);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(
-      TASKS_WITHOUT_TRANSIT_COUNTRIES,
-    );
+      await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.vessel.display);
+      await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(
+        TASKS_WITHOUT_TRANSIT_COUNTRIES,
+      );
 
-    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.roadVehicle.display);
-    await animalsPages.overview.task('Transit countries').click();
-    await expect(animalsPages.transitedCountries.heading).toBeVisible();
-    await expectEmptyTransitList(animalsPages.transitedCountries);
-  });
+      await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.roadVehicle.display);
+      await animalsPages.overview.task('Transit countries').click();
+      await expect(animalsPages.transitedCountries.heading).toBeVisible();
+      await expectEmptyTransitList(animalsPages.transitedCountries);
+    },
+  );
 
   test('opening the transit-countries page by its address shows the overview when no means, air or sea is saved', async ({
     pages,
