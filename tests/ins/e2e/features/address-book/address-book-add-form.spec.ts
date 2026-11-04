@@ -59,11 +59,7 @@ test.describe('The add-details form for an address entered by hand', () => {
     await insPages.addressBookAdd.inputName.fill(name);
     await expect(insPages.addressBookAdd.btnCancelAndReturnToAddressBook).toHaveCount(0);
 
-    const buttonBox = await insPages.addressBookAdd.btnSaveAndContinue.boundingBox();
-    const linkBox = await insPages.addressBookAdd.linkCancelAndReturnToAddressBook.boundingBox();
-    expect(buttonBox).not.toBeNull();
-    expect(linkBox).not.toBeNull();
-    expect(linkBox.y).toBeGreaterThan(buttonBox.y);
+    await expectAbove(insPages.addressBookAdd.btnSaveAndContinue, insPages.addressBookAdd.linkCancelAndReturnToAddressBook);
 
     await insPages.addressBookAdd.linkCancelAndReturnToAddressBook.click();
 
