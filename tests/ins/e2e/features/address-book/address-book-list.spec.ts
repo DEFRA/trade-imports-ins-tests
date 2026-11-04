@@ -1,6 +1,7 @@
 import { test, expect, type PageFixtures } from '@fixtures';
-import { expectMainLinks, expectNoMatchesListed } from './expect-address-book-list';
-import { originOrConsignorTab } from '@domain/ins/constants/address-book-types';
+import { expectSearchedListLinks, expectNoMatchesListed } from './expect-address-book-list';
+import { destinationConsigneeOrImporterTab, originOrConsignorTab, useFilterOptionTexts } from '@domain/ins/constants/address-book-types';
+import { addressUses } from '@domain/shared/constants/address-types';
 import { addFormAddressWithLineTwoAndCounty, addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
 
 const SUBMIT_METHODS = [
@@ -28,7 +29,7 @@ const addAddressAndExpectSearchToListIt = async (
   await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
   await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
   await expect(insPages.addressBookList.row(name)).toBeVisible();
-  await expectMainLinks(insPages.addressBookList, `View ${name}`);
+  await expectSearchedListLinks(insPages.addressBookList, `View ${name}`);
 };
 
 test.describe('Address book list', () => {
@@ -48,12 +49,32 @@ test.describe('Address book list', () => {
     });
   }
 
-  test('a search matching nothing shows Showing 0 of 0, the column headers, no rows and no link below the tabs', async ({ insPages }) => {
+  test('a search matching nothing shows Showing 0 of 0, the column headers, no rows and Clear search as the only link below the tabs', async ({
+    insPages,
+  }) => {
     await insPages.addressBookList.open();
 
     await insPages.addressBookList.search(`NoMatch${Date.now()}`, { submitWith: 'button' });
 
     await expectNoMatchesListed(insPages.addressBookList);
+  });
+
+  test('Clear search returns to the searched tab with its Type filter kept, no search applied and the Search field empty', async ({
+    pages,
+    insPages,
+  }) => {
+    const { addressType } = destinationConsigneeOrImporterTab;
+    await insPages.addressBookList.open({ addressType });
+    await insPages.addressBookList.filter({ term: `NoMatch${Date.now()}`, use: addressUses.importer, submitWith: 'button' });
+
+    await insPages.addressBookList.linkClearSearch.click();
+
+    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}\\?`));
+    expect(Object.fromEntries(new URL(pages.page.url()).searchParams)).toEqual({ addressType, use: addressUses.importer });
+    await expect(insPages.addressBookList.selectedTab).toHaveText(destinationConsigneeOrImporterTab.label);
+    await insPages.addressBookList.filterSummary.click();
+    await expect(insPages.addressBookList.inputSearch).toHaveValue('');
+    await expect(insPages.addressBookList.selectedUseFilterOption).toHaveText(useFilterOptionTexts.IMPORTER);
   });
 
   test('an address is found from the dashboard, viewed, kept on No, cancel, then deleted on Yes, delete and no longer found by search', async ({

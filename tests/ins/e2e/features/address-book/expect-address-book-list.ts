@@ -15,13 +15,16 @@ export const expectAddressBookList = async ({
   await expect(page.getByText('Page not found')).toHaveCount(0);
 };
 
-export const expectMainLinks = async (addressBookList: InsAddressBookListPage, ...linksAfterTabs: string[]): Promise<void> => {
-  await expect(addressBookList.mainLinks).toHaveText([...addressBookTabLabels, ...linksAfterTabs]);
+export const expectSearchedListLinks = async (
+  addressBookList: InsAddressBookListPage,
+  ...linksAfterClearSearch: string[]
+): Promise<void> => {
+  await expect(addressBookList.mainLinks).toHaveText([...addressBookTabLabels, 'Clear search', ...linksAfterClearSearch]);
 };
 
 export const expectNoMatchesListed = async (addressBookList: InsAddressBookListPage): Promise<void> => {
   await expect(addressBookList.resultsLine).toHaveText('Showing 0 of 0');
   await expect(addressBookList.columnHeaders).toHaveText(['Name', 'Type', 'Address', 'Country', 'Action']);
   await expect(addressBookList.bodyRows).toHaveCount(0);
-  await expectMainLinks(addressBookList);
+  await expectSearchedListLinks(addressBookList);
 };

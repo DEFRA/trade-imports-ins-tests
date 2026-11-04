@@ -51,6 +51,10 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
     return this.page.getByRole('row').filter({ has: this.page.getByRole('cell') });
   }
 
+  get linkClearSearch(): Locator {
+    return this.page.getByRole('link', { name: 'Clear search', exact: true });
+  }
+
   get mainLinks(): Locator {
     return this.page.getByRole('main').getByRole('link');
   }
