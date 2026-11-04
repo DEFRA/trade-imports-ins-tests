@@ -33,7 +33,7 @@ Playwright end-to-end, accessibility and security suite for the trade imports se
 
 ## Journey answers (plants)
 
-- Answers still live in `flows/plants/journey.ts` until plants moves to the animals pattern.
+- Plants answers live in `flows/plants/journey.ts`.
 
 ## Code quality
 
