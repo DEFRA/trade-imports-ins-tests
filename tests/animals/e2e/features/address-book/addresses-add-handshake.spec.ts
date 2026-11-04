@@ -4,7 +4,8 @@ import { addressFormCountryNames } from '@resources/reference-data/reference-dat
 import { skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
 import type { AnimalsJourney } from '@flows/animals/journey';
 import { type InsAddressBookAddPage, type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
-import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
+import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
+import { journeyUsesQuestion, usesQuestionLabels } from '@domain/ins/constants/address-book-types';
 import {
   addressTypes,
   addressUses,
@@ -13,8 +14,7 @@ import {
   heldAsImporter,
   heldAsPlaceOfDestination,
   heldAsPlaceOfOrigin,
-  journeyUsesQuestion,
-  usesQuestionLabels,
+  classificationOf,
   type AddressClassification,
 } from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage, type PartyRole } from '@page-objects/animals/addresses-page';
@@ -90,7 +90,7 @@ test.describe('Add an address from the journey via INS', () => {
         await expect(animalsPages.addresses.changeParty(role)).toBeVisible();
 
         const saved = await addressBookApi.findByName(details.name);
-        expect({ addressType: saved.addressType, uses: saved.uses }).toEqual(CLASSIFICATION_BY_ROLE[role]);
+        expect(classificationOf(saved)).toEqual(CLASSIFICATION_BY_ROLE[role]);
       },
     );
 
@@ -248,8 +248,8 @@ test.describe('Add an address from the journey via INS', () => {
       await addPage.btnSaveAndSelect.click();
 
       await expect(animalsPages.addresses.heading).toBeVisible();
-      const saved = await addressBookApi.getAddress((await addressBookApi.findByName(details.name)).id);
-      expect({ addressType: saved.addressType, uses: saved.uses }).toEqual({
+      const saved = await addressBookApi.findByName(details.name);
+      expect(classificationOf(saved)).toEqual({
         addressType: addressTypes.destinationConsigneeOrImporter,
         uses: [addressUses.consignee, addressUses.importer],
       });
@@ -287,7 +287,6 @@ test.describe('Add an address from the journey via INS', () => {
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, insPages }) => {
       const addPage = insPages.addressBookAdd;
-      const blankNameMessage = 'Enter a name or organisation';
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
 
@@ -303,8 +302,8 @@ test.describe('Add an address from the journey via INS', () => {
       await addPage.btnSaveAndSelect.click();
 
       await expect(addPage.heading).toBeVisible();
-      await expect(addPage.errorSummaryLink(blankNameMessage)).toBeVisible();
-      await expect(addPage.inputName).toHaveAccessibleDescription(`Error: ${blankNameMessage}`);
+      await expect(addPage.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired)).toBeVisible();
+      await expect(addPage.inputName).toHaveAccessibleDescription(`Error: ${ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired}`);
     },
   );
 });

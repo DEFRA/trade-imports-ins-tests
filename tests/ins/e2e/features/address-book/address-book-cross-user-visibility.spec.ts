@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { COLD_START } from '@fixtures/auth-state';
 import { createInsPages } from '@page-objects';
 import { users } from '@config/users';
-import { originOrConsignorTab } from '@domain/shared/constants/address-types';
+import { originOrConsignorTab } from '@domain/ins/constants/address-book-types';
 
 test.describe('Address book cross-user visibility', () => {
   test('an address added by one user is visible to another user in the same organisation', async ({

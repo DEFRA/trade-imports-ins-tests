@@ -1,25 +1,19 @@
 import { test, expect } from '@fixtures';
 import type { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 import { traderAddress, traderAddressInUnofferedCountry } from '@domain/ins/constants/trader-address';
+import { ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
 import { expectedValidationRefusalOf } from './expected-api-refusal';
-
-const MESSAGES = {
-  name: 'Enter a name or organisation',
-  postcode: 'Enter a postcode or Zip code',
-  country: 'Select a country',
-  phone: 'Enter a phone number',
-};
 
 const expectFourMessagesAtTopAndAgainstFields = async (form: InsAddressBookFormPage): Promise<void> => {
   await expect(form.errorSummary).toBeVisible();
-  await expect(form.errorSummaryLink(MESSAGES.name)).toBeVisible();
-  await expect(form.errorSummaryLink(MESSAGES.postcode)).toBeVisible();
-  await expect(form.errorSummaryLink(MESSAGES.country)).toBeVisible();
-  await expect(form.errorSummaryLink(MESSAGES.phone)).toBeVisible();
-  await expect(form.inputName).toHaveAccessibleDescription(new RegExp(MESSAGES.name));
-  await expect(form.inputPostcode).toHaveAccessibleDescription(new RegExp(MESSAGES.postcode));
-  await expect(form.selectCountry).toHaveAccessibleDescription(new RegExp(MESSAGES.country));
-  await expect(form.inputPhone).toHaveAccessibleDescription(new RegExp(MESSAGES.phone));
+  await expect(form.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired)).toBeVisible();
+  await expect(form.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.postcodeRequired)).toBeVisible();
+  await expect(form.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.countryRequired)).toBeVisible();
+  await expect(form.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.phoneRequired)).toBeVisible();
+  await expect(form.inputName).toHaveAccessibleDescription(new RegExp(ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired));
+  await expect(form.inputPostcode).toHaveAccessibleDescription(new RegExp(ADDRESS_FORM_VALIDATION_MESSAGES.postcodeRequired));
+  await expect(form.selectCountry).toHaveAccessibleDescription(new RegExp(ADDRESS_FORM_VALIDATION_MESSAGES.countryRequired));
+  await expect(form.inputPhone).toHaveAccessibleDescription(new RegExp(ADDRESS_FORM_VALIDATION_MESSAGES.phoneRequired));
 };
 
 test.describe('Address book validation messages', () => {
@@ -78,10 +72,10 @@ test.describe('Address book validation messages', () => {
       addressBookApi.createAddress({ ...traderAddress(''), townOrCity: searchMarkerTown, postcode: '', countryCode: '', phone: '' }),
     );
 
-    expect(body.errors.name).toContain(MESSAGES.name);
-    expect(body.errors.postcode).toContain(MESSAGES.postcode);
-    expect(body.errors.countryCode).toContain(MESSAGES.country);
-    expect(body.errors.phone).toContain(MESSAGES.phone);
+    expect(body.errors.name).toContain(ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired);
+    expect(body.errors.postcode).toContain(ADDRESS_FORM_VALIDATION_MESSAGES.postcodeRequired);
+    expect(body.errors.countryCode).toContain(ADDRESS_FORM_VALIDATION_MESSAGES.countryRequired);
+    expect(body.errors.phone).toContain(ADDRESS_FORM_VALIDATION_MESSAGES.phoneRequired);
     expect(await addressBookApi.listAddresses(searchMarkerTown)).toHaveLength(0);
   });
 });

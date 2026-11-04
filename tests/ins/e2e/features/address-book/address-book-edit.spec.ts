@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER, ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
-import { addressTypes, addressUses } from '@domain/shared/constants/address-types';
+import { addressTypes, addressUses, classificationOf } from '@domain/shared/constants/address-types';
 import { expectAddressBookList } from './expect-address-book-list';
 import { expectOtherOrganisationAddressReturnsToList } from './expect-other-organisation-address-returns-to-list';
 import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
@@ -60,7 +60,7 @@ test.describe('Address book edit', () => {
     await expect(insPages.addressBookList.successBanner).toContainText('address updated');
 
     const stored = await addressBookApi.getAddress(created.id);
-    expect({ addressType: stored.addressType, uses: stored.uses }).toEqual(classification);
+    expect(classificationOf(stored)).toEqual(classification);
   });
 
   test('the address book links the new name to the edited address', async ({ insPages, addressBookApi }) => {

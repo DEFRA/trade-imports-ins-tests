@@ -1,33 +1,46 @@
 import { test, expect } from '@fixtures';
 import { timeouts } from '@config/timeouts';
-import { ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
+import { ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
+import { addressUses, classificationOf } from '@domain/shared/constants/address-types';
 import {
   addressBookTabs,
   addressTypeLabels,
   addressTypesRequiringUnitedKingdom,
-  addressUses,
   usesQuestion,
   usesQuestionLabels,
   usesQuestionLegends,
   usesQuestionOptions,
-} from '@domain/shared/constants/address-types';
+} from '@domain/ins/constants/address-book-types';
 import { expectAbove } from './expect-above';
-import { typeLabelOf } from './stamped-addresses';
+import { usesLabelOf } from './stamped-addresses';
 
 const UNITED_KINGDOM = 'United Kingdom';
-const NAME_REQUIRED = 'Enter a name or organisation';
 
 test.describe('Adding an address with its uses', () => {
-  test('an address saved with Consignor ticked is found by searching Consignor', async ({ insPages, insJourney }) => {
-    const name = `Consignor Search Farm ${Date.now()}`;
-    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(name, UNITED_KINGDOM), { uses: [addressUses.consignor] });
+  test('an address saved with Consignor ticked is found by searching Consignor, and one saved with only Place of origin ticked is not', async ({
+    insPages,
+    insJourney,
+  }) => {
+    const stamp = Date.now();
+    const consignorName = `Label Use Farm ${stamp}`;
+    const placeOfOriginName = `Label Use Farm ${stamp} Other`;
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(consignorName, UNITED_KINGDOM), {
+      uses: [addressUses.consignor],
+    });
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(placeOfOriginName, UNITED_KINGDOM), {
+      uses: [addressUses.placeOfOrigin],
+    });
 
     await expect(async () => {
       await insPages.addressBookList.search(usesQuestionLabels[addressUses.consignor], { submitWith: 'button' });
 
-      expect(await insPages.addressBookList.followResultPagesUntilRowShows(name)).toBe(true);
+      expect(await insPages.addressBookList.followResultPagesUntilRowShows(consignorName)).toBe(true);
     }).toPass({ timeout: timeouts.medium });
+
+    await insPages.addressBookList.search(usesQuestionLabels[addressUses.consignor], { submitWith: 'button' });
+
+    expect(await insPages.addressBookList.followResultPagesUntilRowShows(placeOfOriginName)).toBe(false);
   });
 });
 
@@ -63,9 +76,10 @@ for (const tab of addressBookTabs) {
         await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText(UNITED_KINGDOM);
       });
     } else {
-      test('opens the Country select with United Kingdom selected', async ({ insPages, insJourney }) => {
+      test('opens the Country select on Select a country first with United Kingdom selected', async ({ insPages, insJourney }) => {
         await insJourney.toAddressForm({ addressType });
 
+        await expect(insPages.addressBookAdd.countryOptions.first()).toHaveText('Select a country');
         await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText(UNITED_KINGDOM);
       });
     }
@@ -93,11 +107,11 @@ for (const tab of addressBookTabs) {
 
       await addPage.saveAndContinue();
 
-      await expect(addPage.errorSummary.getByRole('link')).toHaveText([NAME_REQUIRED]);
+      await expect(addPage.errorSummary.getByRole('link')).toHaveText([ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired]);
       await expect(addPage.usesInlineError).toHaveCount(0);
     });
 
-    test('ticking every offered use and saving lands on its tab, lists the address with its Type, and stores its type, its uses and its country', async ({
+    test('ticking every offered use and saving lands on its tab, lists the address with its uses, and stores its type, its uses and its country', async ({
       pages,
       insPages,
       insJourney,
@@ -112,8 +126,9 @@ for (const tab of addressBookTabs) {
       await insPages.addressBookList.search(name, { submitWith: 'button' });
       await expect(insPages.addressBookList.viewLinks.first()).toHaveText(`View ${name}`);
       const stored = await addressBookApi.findByName(name);
-      await expect(insPages.addressBookList.typeCell(name)).toHaveText(typeLabelOf(stored.uses ?? []));
-      expect({ addressType: stored.addressType, uses: [...(stored.uses ?? [])].sort(), countryCode: stored.countryCode }).toEqual({
+      await expect(insPages.addressBookList.usesCell(name)).toHaveText(usesLabelOf(stored.uses ?? []));
+      const { uses, ...storedClassification } = classificationOf(stored);
+      expect({ ...storedClassification, uses: [...(uses ?? [])].sort(), countryCode: stored.countryCode }).toEqual({
         addressType,
         uses: [...offeredUses].sort(),
         countryCode: 'GB',

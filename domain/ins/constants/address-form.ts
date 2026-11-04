@@ -25,3 +25,10 @@ export const ADDRESS_FORM_FIELD_LABELS_IN_ORDER = [
 export const ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER = ADDRESS_FORM_FIELD_LABELS_IN_ORDER.filter(
   (label) => label !== ADDRESS_FORM_FIELD_LABELS.country,
 );
+
+export const ADDRESS_FORM_VALIDATION_MESSAGES = {
+  nameRequired: 'Enter a name or organisation',
+  postcodeRequired: 'Enter a postcode or Zip code',
+  countryRequired: 'Select a country',
+  phoneRequired: 'Enter a phone number',
+} as const;

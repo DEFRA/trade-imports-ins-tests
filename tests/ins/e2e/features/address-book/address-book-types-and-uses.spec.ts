@@ -1,13 +1,8 @@
 import { test, expect } from '@fixtures';
 import type { AddressBookEntry } from '@adapters/http/address-book-api-client';
 import { traderAddress } from '@domain/ins/constants/trader-address';
-import {
-  addressTypes,
-  addressUses,
-  unsupportedAddressValue,
-  type AddressType,
-  type AddressUse,
-} from '@domain/shared/constants/address-types';
+import { addressTypes, addressUses, type AddressType, type AddressUse } from '@domain/shared/constants/address-types';
+import { unsupportedAddressValue } from '@domain/ins/constants/address-book-types';
 import { expectedValidationRefusalOf } from './expected-api-refusal';
 
 type TypeOrUsesField = 'uses' | 'addressType';

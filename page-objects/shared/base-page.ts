@@ -64,6 +64,11 @@ export class BasePage {
     return errorSummaryOn(this.page);
   }
 
+  /** The error summary's link to a field, matched on the whole message. */
+  errorSummaryLink(message: string): Locator {
+    return this.errorSummary.getByRole('link', { name: message, exact: true });
+  }
+
   get linkBack(): Locator {
     return this.page.getByRole('link', { name: 'Back', exact: true });
   }

@@ -1,7 +1,8 @@
 import { expect, Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
 import { opensAtExpectedUrl } from '@page-objects/ins/address-book/opens-at-expected-url';
-import { addressTypeLabels, addressTypeOptions, type AddressType } from '@domain/shared/constants/address-types';
+import type { AddressType } from '@domain/shared/constants/address-types';
+import { addressTypeLabels, addressTypeOptions } from '@domain/ins/constants/address-book-types';
 
 export class InsAddressBookAddressTypePage extends opensAtExpectedUrl(BasePage) {
   readonly expectedUrl = '/address-book/add/address-type';
@@ -36,10 +37,6 @@ export class InsAddressBookAddressTypePage extends opensAtExpectedUrl(BasePage) 
 
   radio(addressType: AddressType): Locator {
     return this.radioGroup.getByRole('radio', { name: addressTypeLabels[addressType], exact: true });
-  }
-
-  errorSummaryLink(message: string): Locator {
-    return this.errorSummary.getByRole('link', { name: message, exact: true });
   }
 
   async expectNoTypeChosen(): Promise<void> {

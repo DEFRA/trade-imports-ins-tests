@@ -1,10 +1,13 @@
 import { Locator } from '@playwright/test';
-import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
-import { typeOptionTexts, type AddressBookTab, type AddressType, type AddressUse } from '@domain/shared/constants/address-types';
+import { BasePage } from '@page-objects/shared/base-page';
+import { escapeRegex } from '@page-objects/shared/escape-regex';
+import { opensAtExpectedUrl, type OpensAtExpectedUrlOptions } from '@page-objects/ins/address-book/opens-at-expected-url';
+import type { AddressType, AddressUse } from '@domain/shared/constants/address-types';
+import { useFilterOptionTexts, type AddressBookTab } from '@domain/ins/constants/address-book-types';
 
-type ListPageOpenOptions = OpenOptions & { addressType?: AddressType };
+type ListPageOpenOptions = Omit<OpensAtExpectedUrlOptions, 'query'> & { addressType?: AddressType };
 
-export class InsAddressBookListPage extends BasePage {
+export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
   readonly expectedUrl = '/address-book';
 
   get heading(): Locator {
@@ -13,8 +16,7 @@ export class InsAddressBookListPage extends BasePage {
 
   /** The URL of the list opened on a tab. */
   tabUrl(tab: AddressBookTab): RegExp {
-    const escapedUrl = this.expectedUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return new RegExp(`${escapedUrl}\\?addressType=${tab.addressType}$`);
+    return new RegExp(`${escapeRegex(this.expectedUrl)}\\?addressType=${tab.addressType}$`);
   }
 
   get intro(): Locator {
@@ -69,7 +71,7 @@ export class InsAddressBookListPage extends BasePage {
     return this.row(name).getByRole('cell').nth(0);
   }
 
-  typeCell(name: string): Locator {
+  usesCell(name: string): Locator {
     return this.row(name).getByRole('cell').nth(1);
   }
 
@@ -109,16 +111,16 @@ export class InsAddressBookListPage extends BasePage {
     return this.page.getByRole('link', { name: `View ${name}`, exact: true });
   }
 
-  get selectType(): Locator {
+  get selectUseFilter(): Locator {
     return this.page.getByLabel('Type', { exact: true });
   }
 
-  get typeOptions(): Locator {
-    return this.selectType.locator('option');
+  get useFilterOptions(): Locator {
+    return this.selectUseFilter.locator('option');
   }
 
-  get selectedTypeOption(): Locator {
-    return this.selectType.locator('option:checked');
+  get selectedUseFilterOption(): Locator {
+    return this.selectUseFilter.locator('option:checked');
   }
 
   private async openFilter(): Promise<void> {
@@ -127,13 +129,13 @@ export class InsAddressBookListPage extends BasePage {
     }
   }
 
-  async chooseType(use: AddressUse): Promise<void> {
+  async chooseUseFilter(use: AddressUse): Promise<void> {
     await this.openFilter();
-    await this.selectType.selectOption({ label: typeOptionTexts[use] });
+    await this.selectUseFilter.selectOption({ label: useFilterOptionTexts[use] });
   }
 
   async filter({ term, use, submitWith }: { term: string; use: AddressUse; submitWith: 'button' | 'enter' }): Promise<void> {
-    await this.chooseType(use);
+    await this.chooseUseFilter(use);
     await this.search(term, { submitWith });
   }
 
@@ -161,9 +163,7 @@ export class InsAddressBookListPage extends BasePage {
     return true;
   }
 
-  async open({ attemptSignIn = true, addressType, ...identity }: ListPageOpenOptions = {}): Promise<void> {
-    const query = addressType ? `?${new URLSearchParams({ addressType })}` : '';
-    await this.page.goto(`${this.expectedUrl}${query}`);
-    await this.signInWhenRequested(attemptSignIn, identity);
+  override async open({ addressType, ...options }: ListPageOpenOptions = {}): Promise<void> {
+    await super.open({ ...options, query: addressType ? { addressType } : undefined });
   }
 }

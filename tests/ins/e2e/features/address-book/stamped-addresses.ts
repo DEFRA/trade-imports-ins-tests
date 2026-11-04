@@ -1,33 +1,31 @@
 import { test } from '@fixtures';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
+import type { InsPages } from '@page-objects';
+import { addressTypes, addressUses, type AddressClassification, type AddressUse } from '@domain/shared/constants/address-types';
 import {
-  addressTypes,
-  addressUses,
   branchTab,
   destinationConsigneeOrImporterTab,
   originOrConsignorTab,
   useLabels,
   type AddressBookTab,
-  type AddressClassification,
-  type AddressUse,
-} from '@domain/shared/constants/address-types';
+} from '@domain/ins/constants/address-book-types';
 import { traderAddress } from '@domain/ins/constants/trader-address';
 
 export interface StampedAddress extends AddressClassification {
   name: string;
-  typeLabel: string;
+  usesLabel: string;
   tabs: readonly AddressBookTab[];
 }
 
 export const stampedSearchTermOf = (stamp: number) => `Stamped ${stamp}`;
 
-export const typeLabelOf = (uses: readonly AddressUse[]): string => uses.map((use) => useLabels[use]).join(', ');
+export const usesLabelOf = (uses: readonly AddressUse[]): string => uses.map((use) => useLabels[use]).join(', ');
 
 const stampedAddressesOf = (stamp: number) => {
   const named = (suffix: string) => `${stampedSearchTermOf(stamp)} ${suffix}`;
-  const stampedAddress = (address: Omit<StampedAddress, 'typeLabel'>): StampedAddress => ({
+  const stampedAddress = (address: Omit<StampedAddress, 'usesLabel'>): StampedAddress => ({
     ...address,
-    typeLabel: typeLabelOf(address.uses),
+    usesLabel: usesLabelOf(address.uses),
   });
   return {
     placeOfOriginAndConsignee: stampedAddress({
@@ -57,14 +55,6 @@ const stampedAddressesOf = (stamp: number) => {
   };
 };
 
-export const createStamped = async (api: AddressBookApiClient, stamp: number, createdIds: string[]) => {
-  const stamped = stampedAddressesOf(stamp);
-  for (const { name, addressType, uses } of Object.values<StampedAddress>(stamped)) {
-    createdIds.push((await api.createAddress({ ...traderAddress(name), addressType, uses })).id);
-  }
-  return stamped;
-};
-
 export const createAddressHolding = async (
   api: AddressBookApiClient,
   createdAddressIds: string[],
@@ -73,25 +63,35 @@ export const createAddressHolding = async (
   createdAddressIds.push((await api.createAddress({ ...traderAddress(name), addressType, uses })).id);
 };
 
+export const createStamped = async (api: AddressBookApiClient, stamp: number, createdIds: string[]) => {
+  const stamped = stampedAddressesOf(stamp);
+  for (const stampedAddress of Object.values<StampedAddress>(stamped)) {
+    await createAddressHolding(api, createdIds, stampedAddress);
+  }
+  return stamped;
+};
+
 export const stampedAddressesOnTab = (stamped: Record<string, StampedAddress>, tab: AddressBookTab): StampedAddress[] =>
   Object.values(stamped).filter(({ tabs }) => tabs.includes(tab));
 
-export const createdAddressIdsDeletedAfterEachTest = (): string[] => {
+export const addressIdsDeletedAfterEachTest = (apiFixtureName: 'addressBookApi' | 'isolatedOrganisationAddressBookApi'): string[] => {
   const createdAddressIds: string[] = [];
-  test.afterEach(async ({ addressBookApi }) => {
+  test.afterEach(async ({ addressBookApi, isolatedOrganisationAddressBookApi }) => {
+    const api = apiFixtureName === 'addressBookApi' ? addressBookApi : isolatedOrganisationAddressBookApi;
     for (const addressId of createdAddressIds.splice(0)) {
-      await addressBookApi.deleteAddress(addressId);
+      await api.deleteAddress(addressId);
     }
   });
   return createdAddressIds;
 };
 
-export const isolatedOrganisationAddressIdsDeletedAfterEachTest = (): string[] => {
-  const isolatedOrganisationAddressIds: string[] = [];
-  test.afterEach(async ({ isolatedOrganisationAddressBookApi }) => {
-    for (const addressId of isolatedOrganisationAddressIds.splice(0)) {
-      await isolatedOrganisationAddressBookApi.deleteAddress(addressId);
-    }
-  });
-  return isolatedOrganisationAddressIds;
+export const createStampedAndFilterListByUse = async (
+  { insPages, api, createdAddressIds }: { insPages: InsPages; api: AddressBookApiClient; createdAddressIds: string[] },
+  use: AddressUse,
+) => {
+  const stamp = Date.now();
+  const stamped = await createStamped(api, stamp, createdAddressIds);
+  await insPages.addressBookList.open();
+  await insPages.addressBookList.filter({ term: stampedSearchTermOf(stamp), submitWith: 'button', use });
+  return { stamp, stamped };
 };

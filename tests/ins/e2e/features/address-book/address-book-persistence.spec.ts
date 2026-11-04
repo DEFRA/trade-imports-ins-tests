@@ -1,7 +1,8 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type AddressDocument } from '@domain/ins/models/db/address-document';
-import { addressTypes, addressUses, originOrConsignorTab } from '@domain/shared/constants/address-types';
+import { addressTypes, addressUses } from '@domain/shared/constants/address-types';
+import { originOrConsignorTab } from '@domain/ins/constants/address-book-types';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { type NewAddressDetails } from '@page-objects/ins/address-book/add-page';

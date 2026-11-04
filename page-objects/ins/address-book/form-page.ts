@@ -1,6 +1,6 @@
-import { Locator } from '@playwright/test';
+import { expect, Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
-import { ADDRESS_FORM_FIELD_LABELS } from '@domain/ins/constants/address-form';
+import { ADDRESS_FORM_FIELD_LABELS, ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
 
 export type AddressDetails = {
   name: string;
@@ -73,9 +73,10 @@ export abstract class InsAddressBookFormPage extends BasePage {
     return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.phone);
   }
 
-  /** The error summary's link to a field, matched on the whole message. */
-  errorSummaryLink(message: string): Locator {
-    return this.errorSummary.getByRole('link', { name: message, exact: true });
+  async expectTextboxesEmpty(): Promise<void> {
+    for (const label of ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER) {
+      await expect(this.page.getByLabel(label, { exact: true })).toHaveValue('');
+    }
   }
 
   async fill(details: AddressDetails): Promise<void> {

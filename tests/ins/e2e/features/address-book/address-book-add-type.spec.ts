@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
-import { addressTypeOptions, addressTypes, addressUses } from '@domain/shared/constants/address-types';
+import { addressTypes, addressUses } from '@domain/shared/constants/address-types';
+import { addressTypeOptions } from '@domain/ins/constants/address-book-types';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 
 const MISSING_TYPE_MESSAGE = 'Select an address type';
@@ -96,25 +97,37 @@ test.describe('Choosing an address type before adding an address', () => {
     });
   }
 
-  test('Add a new address from the address book list again starts with no type chosen', async ({ insPages, insJourney }) => {
+  test('Add a new address from the address book list again starts with no type chosen, empty text fields and no use ticked', async ({
+    insPages,
+    insJourney,
+  }) => {
+    const addPage = insPages.addressBookAdd;
     await insJourney.toAddressFormFromList({ addressType: addressTypes.branch });
+    await addPage.fill(addFormAddressWithLineTwoAndCounty(`Abandoned Entry ${Date.now()}`, 'United Kingdom'));
+    await addPage.tickUses([addressUses.branchAddress]);
     await insPages.addressBookList.open();
 
     await insPages.addressBookList.btnAddNewAddress.click();
 
     await insPages.addressBookAddressType.expectNoTypeChosen();
+    await insJourney.chooseAddressType(addressTypes.branch);
+    await addPage.expectTextboxesEmpty();
+    await expect(addPage.usesOption(addressUses.branchAddress)).not.toBeChecked();
   });
 
-  test('after a save the next add starts with no type chosen and empty fields', async ({ insPages, insJourney }) => {
-    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(`Type Step Farm ${Date.now()}`, 'United Kingdom'));
+  test('after a save the next add starts with no type chosen, empty text fields and no use ticked', async ({ insPages, insJourney }) => {
+    const addPage = insPages.addressBookAdd;
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(`Type Step Farm ${Date.now()}`, 'United Kingdom'), {
+      uses: [addressUses.placeOfOrigin],
+    });
     await insPages.addressBookList.successBanner.waitFor();
 
     await insPages.addressBookList.btnAddNewAddress.click();
 
     await insPages.addressBookAddressType.expectNoTypeChosen();
     await insJourney.chooseAddressType();
-    await expect(insPages.addressBookAdd.inputName).toHaveValue('');
-    await expect(insPages.addressBookAdd.inputAddressLine1).toHaveValue('');
+    await addPage.expectTextboxesEmpty();
+    await expect(addPage.usesOption(addressUses.placeOfOrigin)).not.toBeChecked();
   });
 
   test('opening the add form with no type chosen lands on Choose an address type', async ({ pages, insPages }) => {
@@ -122,15 +135,5 @@ test.describe('Choosing an address type before adding an address', () => {
 
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookAddressType.expectedUrl}$`));
     await expect(insPages.addressBookAddressType.heading).toBeVisible();
-  });
-
-  test('Origin or Consignor opens the Country select on Select a country first with United Kingdom selected', async ({
-    insPages,
-    insJourney,
-  }) => {
-    await insJourney.toAddressForm({ addressType: addressTypes.originOrConsignor });
-
-    await expect(insPages.addressBookAdd.countryOptions.first()).toHaveText('Select a country');
-    await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText('United Kingdom');
   });
 });

@@ -2,6 +2,7 @@ import type { InsPages } from '@page-objects';
 import type { OpenOptions } from '@page-objects/shared/base-page';
 import type { AddressDetails } from '@page-objects/ins/address-book/form-page';
 import { addressTypes, addressUses, type AddressType, type AddressUse } from '@domain/shared/constants/address-types';
+import type { AddressBookTab } from '@domain/ins/constants/address-book-types';
 
 type AddressFormOptions = OpenOptions & { addressType?: AddressType };
 
@@ -19,6 +20,15 @@ export class InsJourney {
     await this.insPages.addressBookList.open(options);
     await this.insPages.addressBookList.btnAddNewAddress.click();
     await this.insPages.addressBookAddressType.heading.waitFor();
+  }
+
+  /** Opens the address book list on a tab and, when a search term is given, searches that tab with the Search button. */
+  async toAddressBookTab(tab: AddressBookTab, { search, ...openOptions }: OpenOptions & { search?: string } = {}): Promise<void> {
+    await this.insPages.addressBookList.open(openOptions);
+    await this.insPages.addressBookList.followTab(tab);
+    if (search !== undefined) {
+      await this.insPages.addressBookList.search(search, { submitWith: 'button' });
+    }
   }
 
   /** Chooses a type on the address type page and lands on the add address form. */

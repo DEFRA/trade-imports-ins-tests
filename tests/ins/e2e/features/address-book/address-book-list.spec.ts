@@ -1,6 +1,6 @@
 import { test, expect, type PageFixtures } from '@fixtures';
 import { expectMainLinks, expectNoMatchesListed } from './expect-address-book-list';
-import { originOrConsignorTab } from '@domain/shared/constants/address-types';
+import { originOrConsignorTab } from '@domain/ins/constants/address-book-types';
 import { addFormAddressWithLineTwoAndCounty, addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
 
 const SUBMIT_METHODS = [
@@ -48,9 +48,7 @@ test.describe('Address book list', () => {
     });
   }
 
-  test('a search matching nothing shows Showing 0 of 0, the column headers, no rows and Clear search as the only link', async ({
-    insPages,
-  }) => {
+  test('a search matching nothing shows Showing 0 of 0, the column headers, no rows and no link below the tabs', async ({ insPages }) => {
     await insPages.addressBookList.open();
 
     await insPages.addressBookList.search(`NoMatch${Date.now()}`, { submitWith: 'button' });

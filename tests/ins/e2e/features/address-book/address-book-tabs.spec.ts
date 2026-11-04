@@ -1,27 +1,25 @@
 import { test, expect } from '@fixtures';
+import { heldAsConsignor, type AddressType } from '@domain/shared/constants/address-types';
 import {
   addressBookTabLabels,
   addressBookTabs,
   branchTab,
-  heldAsConsignor,
   originOrConsignorTab,
   unsupportedAddressValue,
-  type AddressType,
-} from '@domain/shared/constants/address-types';
+} from '@domain/ins/constants/address-book-types';
 import { E2E_ADDRESS_BOOK_FIXTURES, ensureE2eAddressBook } from '@flows/shared/address-book-seed';
 import {
+  addressIdsDeletedAfterEachTest,
   createStamped,
-  createdAddressIdsDeletedAfterEachTest,
-  isolatedOrganisationAddressIdsDeletedAfterEachTest,
   stampedAddressesOnTab,
   stampedSearchTermOf,
-  typeLabelOf,
+  usesLabelOf,
 } from './stamped-addresses';
 
-const createdAddressIds = createdAddressIdsDeletedAfterEachTest();
+const createdAddressIds = addressIdsDeletedAfterEachTest('addressBookApi');
 
 test.describe('Address book tabs API', () => {
-  const isolatedOrganisationAddressIds = isolatedOrganisationAddressIdsDeletedAfterEachTest();
+  const isolatedOrganisationAddressIds = addressIdsDeletedAfterEachTest('isolatedOrganisationAddressBookApi');
 
   test('listing by an address type returns exactly the addresses holding one of its uses', async ({
     isolatedOrganisationAddressBookApi,
@@ -30,7 +28,7 @@ test.describe('Address book tabs API', () => {
     const stamped = await createStamped(isolatedOrganisationAddressBookApi, stamp, isolatedOrganisationAddressIds);
 
     for (const tab of addressBookTabs) {
-      const listed = await isolatedOrganisationAddressBookApi.listAddresses(stampedSearchTermOf(stamp), { addressType: tab.addressType });
+      const listed = await isolatedOrganisationAddressBookApi.listAddresses(stampedSearchTermOf(stamp), { category: tab.addressType });
 
       expect(listed.map(({ name }) => name).sort()).toEqual(
         stampedAddressesOnTab(stamped, tab)
@@ -69,17 +67,16 @@ test.describe('Address book tabs', () => {
     await expect(insPages.addressBookList.selectedTab).toHaveText(originOrConsignorTab.label);
   });
 
-  test('each tab opens with its own panel heading, the columns Name, Type, Address, Country and Action, and exactly its stamped addresses with their Type', async ({
+  test('each tab opens with its own panel heading, the columns Name, Type, Address, Country and Action, and exactly its stamped addresses with their uses', async ({
     insPages,
+    insJourney,
     addressBookApi,
   }) => {
     const stamp = Date.now();
     const stamped = await createStamped(addressBookApi, stamp, createdAddressIds);
 
     for (const tab of addressBookTabs) {
-      await insPages.addressBookList.open();
-      await insPages.addressBookList.followTab(tab);
-      await insPages.addressBookList.search(stampedSearchTermOf(stamp), { submitWith: 'button' });
+      await insJourney.toAddressBookTab(tab, { search: stampedSearchTermOf(stamp) });
 
       const expected = stampedAddressesOnTab(stamped, tab);
       await expect(insPages.addressBookList.selectedTab).toHaveText(tab.label);
@@ -87,14 +84,15 @@ test.describe('Address book tabs', () => {
       await expect(insPages.addressBookList.columnHeaders).toHaveText(['Name', 'Type', 'Address', 'Country', 'Action']);
       await expect(insPages.addressBookList.resultsLine).toHaveText(`Showing 1-${expected.length} of ${expected.length}`);
       await expect(insPages.addressBookList.bodyRows).toHaveCount(expected.length);
-      for (const { name, typeLabel } of expected) {
-        await expect(insPages.addressBookList.typeCell(name)).toHaveText(typeLabel);
+      for (const { name, usesLabel } of expected) {
+        await expect(insPages.addressBookList.usesCell(name)).toHaveText(usesLabel);
       }
     }
   });
 
-  test('every shared fixture shows on the tab of its type with its Type label, and a branch fixture is absent from the Origin and Consignor tab', async ({
+  test('every shared fixture shows on the tab of its type with its uses label, and a branch fixture is absent from the Origin and Consignor tab', async ({
     insPages,
+    insJourney,
   }) => {
     const branchFixtureName = 'Animal and Plant Health Agency';
 
@@ -103,16 +101,12 @@ test.describe('Address book tabs', () => {
       if (!tab) {
         throw new Error(`Expected a tab for the fixture ${name}`);
       }
-      await insPages.addressBookList.open();
-      await insPages.addressBookList.followTab(tab);
-      await insPages.addressBookList.search(name, { submitWith: 'button' });
+      await insJourney.toAddressBookTab(tab, { search: name });
 
-      await expect(insPages.addressBookList.typeCell(name)).toHaveText(typeLabelOf(uses));
+      await expect(insPages.addressBookList.usesCell(name)).toHaveText(usesLabelOf(uses));
     }
 
-    await insPages.addressBookList.open();
-    await insPages.addressBookList.followTab(originOrConsignorTab);
-    await insPages.addressBookList.search(branchFixtureName, { submitWith: 'button' });
+    await insJourney.toAddressBookTab(originOrConsignorTab, { search: branchFixtureName });
 
     await expect(insPages.addressBookList.row(branchFixtureName)).toHaveCount(0);
   });
