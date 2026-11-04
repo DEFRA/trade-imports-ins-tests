@@ -12,44 +12,44 @@ const transporter = {
 };
 
 test.describe('Commercial transporter journeys', () => {
-  test('a trader can submit a notification using a hand-added commercial transporter', async ({
-    animalsSeededJourney,
-    pages,
-    animalsPages,
-  }) => {
-    // Everything up to transport is seeded through the API — only the
-    // scenario under test (transit countries onward) is driven through the UI.
-    const referenceNumber = await animalsSeededJourney.createDraftNotification('partial');
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.transitedCountries);
+  test(
+    'a trader can submit a notification using a hand-added commercial transporter',
+    { tag: '@cross-browser' },
+    async ({ animalsSeededJourney, pages, animalsPages }) => {
+      // Everything up to transport is seeded through the API — only the
+      // scenario under test (transit countries onward) is driven through the UI.
+      const referenceNumber = await animalsSeededJourney.createDraftNotification('partial');
+      await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.transitedCountries);
 
-    await animalsPages.transitedCountries.addCountry('France');
-    await animalsPages.transitedCountries.addCountry('Belgium');
-    await animalsPages.transitedCountries.saveAndContinue.click();
+      await animalsPages.transitedCountries.addCountry('France');
+      await animalsPages.transitedCountries.addCountry('Belgium');
+      await animalsPages.transitedCountries.saveAndContinue.click();
 
-    await animalsPages.overview.heading.waitFor();
-    await animalsPages.overview.task('Transport details').click();
-    await animalsPages.transporter.heading.waitFor();
-    await animalsPages.transporter.addTransporter.click();
-    await animalsPages.transporterAdd.heading.waitFor();
-    await animalsPages.transporterAdd.transporterType('Commercial').check();
-    await animalsPages.transporterAdd.saveAndContinue.click();
-    await animalsPages.commercialTransporter.heading.waitFor();
-    await animalsPages.commercialTransporter.fill(transporter);
-    await animalsPages.commercialTransporter.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Transport details').click();
+      await animalsPages.transporter.heading.waitFor();
+      await animalsPages.transporter.addTransporter.click();
+      await animalsPages.transporterAdd.heading.waitFor();
+      await animalsPages.transporterAdd.transporterType('Commercial').check();
+      await animalsPages.transporterAdd.saveAndContinue.click();
+      await animalsPages.commercialTransporter.heading.waitFor();
+      await animalsPages.commercialTransporter.fill(transporter);
+      await animalsPages.commercialTransporter.saveAndContinue.click();
 
-    await animalsPages.overview.heading.waitFor();
-    await animalsPages.overview.task('Contact address for this consignment').click();
-    await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
-    await animalsPages.contactAddress.saveAndContinue.click();
-    await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.heading.waitFor();
+      await animalsPages.overview.task('Contact address for this consignment').click();
+      await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
+      await animalsPages.contactAddress.saveAndContinue.click();
+      await animalsPages.overview.heading.waitFor();
 
-    await animalsPages.overview.reviewAndSubmitButton.click();
-    await animalsPages.notificationView.heading.waitFor();
-    await animalsPages.notificationView.continueButton.click();
-    await animalsPages.declaration.heading.waitFor();
-    await animalsPages.declaration.confirmation.check();
-    await animalsPages.declaration.continueButton.click();
+      await animalsPages.overview.reviewAndSubmitButton.click();
+      await animalsPages.notificationView.heading.waitFor();
+      await animalsPages.notificationView.continueButton.click();
+      await animalsPages.declaration.heading.waitFor();
+      await animalsPages.declaration.confirmation.check();
+      await animalsPages.declaration.continueButton.click();
 
-    await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
-  });
+      await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
+    },
+  );
 });

@@ -6,23 +6,27 @@ import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
 import { addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
 
 test.describe('Address book view', () => {
-  test('shows Address line 2 (optional) and County (optional) when the address has them', async ({ insPages, addressBookApi }) => {
-    const addressWithOptionalFields = await addressBookApi.createAddress(addressWithLineTwoAndCounty(`View Full Farm ${Date.now()}`));
+  test(
+    'shows Address line 2 (optional) and County (optional) when the address has them',
+    { tag: '@cross-browser' },
+    async ({ insPages, addressBookApi }) => {
+      const addressWithOptionalFields = await addressBookApi.createAddress(addressWithLineTwoAndCounty(`View Full Farm ${Date.now()}`));
 
-    await insPages.addressBookView.open(addressWithOptionalFields.id);
+      await insPages.addressBookView.open(addressWithOptionalFields.id);
 
-    await expect(insPages.addressBookView.summaryListKeys).toHaveText([
-      'Name or organisation',
-      'Address line 1',
-      'Address line 2 (optional)',
-      'Town or city',
-      'County (optional)',
-      'Postcode or Zip code',
-      'Country',
-      'Email address',
-      'Phone number',
-    ]);
-  });
+      await expect(insPages.addressBookView.summaryListKeys).toHaveText([
+        'Name or organisation',
+        'Address line 1',
+        'Address line 2 (optional)',
+        'Town or city',
+        'County (optional)',
+        'Postcode or Zip code',
+        'Country',
+        'Email address',
+        'Phone number',
+      ]);
+    },
+  );
 
   test('shows neither Address line 2 nor County when the address has neither', async ({ insPages, addressBookApi }) => {
     const addressWithoutOptionalFields = await addressBookApi.createAddress(traderAddress(`View Bare Farm ${Date.now()}`));

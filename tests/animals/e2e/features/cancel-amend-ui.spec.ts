@@ -34,15 +34,19 @@ test.describe('Cancel amendment through the UI', () => {
       await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
     });
 
-    test('Cancel amend on the Overview opens the cancel-amendment confirmation page', async ({ pages, animalsPages, journeyContext }) => {
-      const reference = journeyContext.referenceNumber;
+    test(
+      'Cancel amend on the Overview opens the cancel-amendment confirmation page',
+      { tag: '@cross-browser' },
+      async ({ pages, animalsPages, journeyContext }) => {
+        const reference = journeyContext.referenceNumber;
 
-      await animalsPages.overview.open(reference);
-      await animalsPages.overview.cancelAmend.click();
+        await animalsPages.overview.open(reference);
+        await animalsPages.overview.cancelAmend.click();
 
-      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationCancelAmend.expectedUrl(reference)}$`));
-      await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
-    });
+        await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationCancelAmend.expectedUrl(reference)}$`));
+        await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
+      },
+    );
 
     test('opens the confirmation page when Cancel amend is selected', async ({ pages, animalsPages, journeyContext }) => {
       await animalsPages.notificationView.cancelAmend.click();

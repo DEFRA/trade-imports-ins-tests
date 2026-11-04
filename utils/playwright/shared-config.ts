@@ -23,6 +23,8 @@ function resolveWorkers(): number | string | undefined {
   throw new Error(`Invalid PLAYWRIGHT_WORKERS "${raw}": use a positive integer (e.g. 2) or a percentage (e.g. 50%).`);
 }
 
+const viewport = { width: 1280, height: 1000 };
+
 /**
  * Shared Playwright settings without per-environment baseURLs.
  * Each spec's baseURL comes from its domain (tests/<domain>/), applied by the environment-specific
@@ -45,13 +47,35 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
 
+  // firefox, webkit and mobile-webkit have default: false, so they run only when --project names them.
   projects: [
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        viewport: { width: 1280, height: 1000 },
+        viewport,
       },
+    },
+    {
+      name: 'firefox',
+      default: false,
+      use: {
+        ...devices['Desktop Firefox'],
+        viewport,
+      },
+    },
+    {
+      name: 'webkit',
+      default: false,
+      use: {
+        ...devices['Desktop Safari'],
+        viewport,
+      },
+    },
+    {
+      name: 'mobile-webkit',
+      default: false,
+      use: devices['iPhone 17'],
     },
   ],
 });
