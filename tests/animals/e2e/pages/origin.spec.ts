@@ -30,11 +30,7 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await expect(animalsPages.dashboard.heading).toBeVisible();
   });
 
-  test('shows the country selector on load', async ({ animalsPages }) => {
-    await expect(animalsPages.originOfImport.country.field).toBeVisible();
-  });
-
-  test('shows the region of origin code hint and the internal reference hint without its length limit', async ({ animalsPages }) => {
+  test('describes the region of origin question and the internal reference field by their hints', async ({ animalsPages }) => {
     const { regionRequirementGroup, internalReference } = animalsPages.originOfImport;
 
     await expect(regionRequirementGroup).toHaveAccessibleDescription(REGION_HINT);
@@ -52,27 +48,26 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await expect(regionCode).toHaveAttribute('spellcheck', 'false');
   });
 
-  test('accepts valid origin details', async ({ pages, animalsPages }) => {
+  test('accepts valid origin details', async ({ animalsPages }) => {
     await animalsPages.originOfImport.country.choose(countryCodes.eu.france.display);
     await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
     await animalsPages.originOfImport.saveAndContinue.click();
 
-    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
   });
 
-  test('saves what the user has when submitted without a country', async ({ animalsPages }) => {
-    const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
+  test('refuses save and continue when no country is chosen', async ({ animalsPages, pages }) => {
+    const originUrl = pages.page.url();
 
     await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
     await animalsPages.originOfImport.internalReference.fill(INTERNAL_REFERENCE);
     await animalsPages.originOfImport.saveAndContinue.click();
 
-    await expect(animalsPages.originOfImport.errorSummary).toHaveCount(0);
-    await expect(animalsPages.overview.heading).toBeVisible();
-
-    await animalsPages.originOfImport.open(referenceNumber);
+    await expect(pages.page).toHaveURL(originUrl);
+    await expect(animalsPages.originOfImport.errorSummary).toBeVisible();
+    await expect(animalsPages.originOfImport.errorSummary).toContainText('Select a country of origin');
+    await expect(animalsPages.originOfImport.country.error).toContainText('Select a country of origin');
     await expect(animalsPages.originOfImport.country.select).toHaveValue('');
-    await expect(animalsPages.originOfImport.radioRequiresOriginCode('No')).toBeChecked();
     await expect(animalsPages.originOfImport.internalReference).toHaveValue(INTERNAL_REFERENCE);
   });
 
