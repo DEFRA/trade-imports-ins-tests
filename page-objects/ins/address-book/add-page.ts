@@ -1,6 +1,6 @@
 import { expect, Locator } from '@playwright/test';
 import { type AddressDetails, InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
-import { opensAtExpectedUrl } from '@page-objects/ins/address-book/opens-at-expected-url';
+import { opensAtExpectedUrl } from '@page-objects/shared/opens-at-expected-url';
 import type { AddressUse } from '@domain/shared/constants/address-types';
 import { usesQuestionLabels } from '@domain/ins/constants/address-book-types';
 

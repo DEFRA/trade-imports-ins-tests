@@ -1,7 +1,7 @@
 import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
 import { escapeRegex } from '@page-objects/shared/escape-regex';
-import { opensAtExpectedUrl, type OpensAtExpectedUrlOptions } from '@page-objects/ins/address-book/opens-at-expected-url';
+import { opensAtExpectedUrl, type OpensAtExpectedUrlOptions } from '@page-objects/shared/opens-at-expected-url';
 import type { AddressType, AddressUse } from '@domain/shared/constants/address-types';
 import { useFilterOptionTexts, type AddressBookTab } from '@domain/ins/constants/address-book-types';
 

@@ -1,6 +1,6 @@
 import { expect, Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
-import { opensAtExpectedUrl } from '@page-objects/ins/address-book/opens-at-expected-url';
+import { opensAtExpectedUrl } from '@page-objects/shared/opens-at-expected-url';
 import type { AddressType } from '@domain/shared/constants/address-types';
 import { addressTypeLabels, addressTypeOptions } from '@domain/ins/constants/address-book-types';
 
