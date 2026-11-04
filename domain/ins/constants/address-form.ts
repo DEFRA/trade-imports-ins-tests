@@ -28,7 +28,10 @@ export const ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER = ADDRESS_FORM_FIELD_LABELS_IN
 
 export const ADDRESS_FORM_VALIDATION_MESSAGES = {
   nameRequired: 'Enter a name or organisation',
+  addressLine1Required: 'Enter address line 1',
+  townOrCityRequired: 'Enter a town or city',
   postcodeRequired: 'Enter a postcode or Zip code',
   countryRequired: 'Select a country',
+  emailRequired: 'Enter an email address',
   phoneRequired: 'Enter a phone number',
 } as const;

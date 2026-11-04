@@ -1,5 +1,9 @@
 import { test, expect } from '@fixtures';
-import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER, ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
+import {
+  ADDRESS_FORM_FIELD_LABELS_IN_ORDER,
+  ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER,
+  ADDRESS_FORM_VALIDATION_MESSAGES,
+} from '@domain/ins/constants/address-form';
 import { addressTypes, addressUses, classificationOf } from '@domain/shared/constants/address-types';
 import { expectAddressBookList } from './expect-address-book-list';
 import { expectOtherOrganisationAddressReturnsToList } from './expect-other-organisation-address-returns-to-list';
@@ -244,7 +248,7 @@ test.describe('Address book edit', () => {
       await insPages.addressBookEdit.save();
 
       await expect(insPages.addressBookEdit.errorSummary).toBeVisible();
-      await expect(insPages.addressBookEdit.errorSummaryLink('Select a country')).toBeVisible();
+      await expect(insPages.addressBookEdit.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.countryRequired)).toBeVisible();
       await expect(insPages.addressBookEdit.selectCountry).toHaveAccessibleDescription(/Select a country/);
       expect((await addressBookApi.getAddress(created.id)).countryCode).toBe(UNOFFERED_COUNTRY_CODE);
     });

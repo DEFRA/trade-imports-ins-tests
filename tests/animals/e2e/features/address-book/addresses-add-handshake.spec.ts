@@ -269,11 +269,11 @@ test.describe('Add an address from the journey via INS', () => {
 
       await expect(addPage.heading).toBeVisible();
       await expect(addPage.errorSummaryLinks).toHaveText([
-        'Enter address line 1',
-        'Enter a town or city',
-        'Enter a postcode or Zip code',
-        'Enter an email address',
-        'Enter a phone number',
+        ADDRESS_FORM_VALIDATION_MESSAGES.addressLine1Required,
+        ADDRESS_FORM_VALIDATION_MESSAGES.townOrCityRequired,
+        ADDRESS_FORM_VALIDATION_MESSAGES.postcodeRequired,
+        ADDRESS_FORM_VALIDATION_MESSAGES.emailRequired,
+        ADDRESS_FORM_VALIDATION_MESSAGES.phoneRequired,
       ]);
       await expect(addPage.inputName).toHaveValue(details.name);
       await expect(addPage.usesOption(addressUses.importer)).toBeChecked();
