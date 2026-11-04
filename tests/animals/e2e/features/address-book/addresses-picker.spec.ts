@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { heldAsConsignor } from '@domain/shared/constants/address-types';
+import { DESTINATION_NAME } from '@domain/shared/constants/journey-party-names';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 
 const FIVE_RESULTS_SUMMARY = /^Showing 5 out of \d+ results$/;
@@ -7,11 +8,9 @@ const FIVE_RESULTS_SUMMARY = /^Showing 5 out of \d+ results$/;
 test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-book'] }, () => {
   test('the picker searches and pages the address book, and the row selected on a later page is the one that saves', async ({
     animalsJourney,
-    pages,
     animalsPages,
     addressBookApi,
   }) => {
-    const page = pages.page;
     const stamp = Date.now();
     const runOnlySearchToken = `Kolding${stamp}`;
     const searchMatches = [`Danish Meat Export ${runOnlySearchToken}`, `Jutland Swine ${runOnlySearchToken}`];
@@ -67,36 +66,26 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
     await expect(animalsPages.consignorSelection.resultsGroup.getByRole('radio')).toHaveCount(5);
 
-    await animalsPages.consignorSelection.searchBox.fill('Tech Imports Ltd');
+    await animalsPages.consignorSelection.searchBox.fill(DESTINATION_NAME);
     await animalsPages.consignorSelection.searchButton.click();
-    const detailedRow = page.locator('tr', { hasText: 'Tech Imports Ltd' });
-    const rowDetails = detailedRow.locator('details');
-    await expect(rowDetails.locator('.govuk-details__text')).toBeHidden();
-    await rowDetails.locator('summary').click();
-    await expect(rowDetails.locator('.govuk-details__text')).toBeVisible();
-    await expect(rowDetails).toContainText('London');
+    const detailLines = animalsPages.consignorSelection.partyDetailsLines(DESTINATION_NAME);
+    await expect(detailLines).toHaveCount(0);
+    await animalsPages.consignorSelection.openPartyDetails(DESTINATION_NAME);
+    await expect(detailLines.filter({ hasText: 'London' })).toBeVisible();
 
     await animalsPages.consignorSelection.searchBox.fill(runOnlySearchToken);
     await animalsPages.consignorSelection.searchButton.click();
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText('Showing 2 out of 2 results');
     await expect(animalsPages.consignorSelection.party(searchMatches[1])).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Page 2' })).toHaveCount(0);
+    await expect(animalsPages.consignorSelection.paginationPageLink(2)).toHaveCount(0);
 
     await animalsPages.consignorSelection.searchBox.fill('');
     await animalsPages.consignorSelection.searchButton.click();
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
 
-    await expect(animalsPages.consignorSelection.party(olderThanPageOneName)).toHaveCount(0);
     const olderThanPageOne = animalsPages.consignorSelection.party(olderThanPageOneName);
-    const nextLink = page.getByRole('link', { name: /Next/ });
-    const currentPageNumber = page.locator('[aria-current="page"]');
-    for (let landedOn = 1; (await olderThanPageOne.count()) === 0; landedOn += 1) {
-      if ((await nextLink.count()) === 0) {
-        break;
-      }
-      await nextLink.click();
-      await expect(currentPageNumber).toHaveText(String(landedOn + 1));
-    }
+    await expect(olderThanPageOne).toHaveCount(0);
+    await animalsPages.consignorSelection.followNextUntilListed(olderThanPageOneName);
     await expect(olderThanPageOne).toBeVisible();
 
     await animalsPages.consignorSelection.party(olderThanPageOneName).check();

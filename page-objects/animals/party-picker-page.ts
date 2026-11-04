@@ -1,4 +1,4 @@
-import { type Locator, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import {
   pickerNoMatchesMessage,
@@ -51,6 +51,37 @@ export class AnimalsPartyPickerPage extends NotificationPage {
 
   party(name: string): Locator {
     return this.page.getByRole('radio', { name: `${AnimalsPartyPickerPage.SELECT_PREFIX}${name}`, exact: true });
+  }
+
+  partyRow(name: string): Locator {
+    return this.page.getByRole('row').filter({ has: this.party(name) });
+  }
+
+  partyDetailsLines(name: string): Locator {
+    return this.partyRow(name).getByRole('group').getByRole('listitem');
+  }
+
+  async openPartyDetails(name: string): Promise<void> {
+    await this.partyRow(name).getByText(`View details for ${name}`, { exact: true }).click();
+  }
+
+  get pagination(): Locator {
+    return this.page.getByRole('navigation', { name: 'Pagination' });
+  }
+
+  paginationPageLink(pageNumber: number): Locator {
+    return this.pagination.getByRole('link', { name: `Page ${pageNumber}`, exact: true });
+  }
+
+  get nextPageLink(): Locator {
+    return this.pagination.getByRole('link', { name: 'Next page', exact: true });
+  }
+
+  async followNextUntilListed(name: string): Promise<void> {
+    for (let pageNumber = 2; (await this.party(name).count()) === 0 && (await this.nextPageLink.count()) > 0; pageNumber += 1) {
+      await this.nextPageLink.click();
+      await expect(this.paginationPageLink(pageNumber)).toHaveAttribute('aria-current', 'page');
+    }
   }
 
   get noMatchesMessage(): Locator {
