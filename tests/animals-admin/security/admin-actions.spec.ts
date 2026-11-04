@@ -50,6 +50,6 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
     await animalsAdminPages.dlqEvents.btnConfirmDeleteAll.click();
     await expect(animalsAdminPages.dlqEvents.successBanner).toBeVisible();
 
-    await pages.page.goto('/about');
+    await animalsAdminPages.about.open();
   });
 });
