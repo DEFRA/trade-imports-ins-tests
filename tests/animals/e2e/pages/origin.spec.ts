@@ -60,19 +60,13 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
 
-  test('saves what the user has when submitted without a country', async ({ animalsPages }) => {
-    const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
-
+  test('refuses save and continue when no country is chosen, keeping what was entered', async ({ animalsPages }) => {
     await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
     await animalsPages.originOfImport.internalReference.fill(INTERNAL_REFERENCE);
     await animalsPages.originOfImport.saveAndContinue.click();
 
-    await expect(animalsPages.originOfImport.errorSummary).toHaveCount(0);
-    await expect(animalsPages.overview.heading).toBeVisible();
-
-    await animalsPages.originOfImport.open(referenceNumber);
-    await expect(animalsPages.originOfImport.country.select).toHaveValue('');
-    await expect(animalsPages.originOfImport.radioRequiresOriginCode('No')).toBeChecked();
+    await expect(animalsPages.originOfImport.errorSummary).toBeVisible();
+    await expect(animalsPages.originOfImport.errorSummary.getByRole('link', { name: 'Select a country of origin' })).toBeVisible();
     await expect(animalsPages.originOfImport.internalReference).toHaveValue(INTERNAL_REFERENCE);
   });
 
