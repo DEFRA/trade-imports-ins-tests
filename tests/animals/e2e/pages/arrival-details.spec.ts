@@ -1,5 +1,9 @@
 import { test, expect } from '@fixtures';
-import { MEANS_OF_TRANSPORT_SELECT_TEXT, meansOfTransport } from '@domain/animals/constants/means-of-transport';
+import {
+  MEANS_OF_TRANSPORT_REQUIRED_ERROR,
+  MEANS_OF_TRANSPORT_SELECT_TEXT,
+  meansOfTransport,
+} from '@domain/animals/constants/means-of-transport';
 import { PORT_OF_ENTRY_SEARCH_PLACEHOLDER, PORT_OF_ENTRY_SELECT_TEXT } from '@domain/animals/constants/point-of-entries';
 import { getRelativeAppDateText, getRelativeDatePickerValue } from '@utils/date-utils';
 
@@ -74,13 +78,29 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
     await expect(animalsPages.overview.taskStatus('Arrival details')).toHaveText('Complete');
   });
 
-  test('saves a draft and returns to the overview with the Arrival details task still to do when submitted empty', async ({
-    animalsPages,
-  }) => {
+  test('refuses an empty save, keeping the user on the page with the means-of-transport error', async ({ animalsPages }) => {
+    await animalsPages.arrivalDetails.saveAndContinue.click();
+
+    await expect(animalsPages.arrivalDetails.heading).toBeVisible();
+    await expect(animalsPages.arrivalDetails.errorSummaryLinks).toHaveText([MEANS_OF_TRANSPORT_REQUIRED_ERROR]);
+    await expect(animalsPages.arrivalDetails.meansOfTransportError).toContainText(MEANS_OF_TRANSPORT_REQUIRED_ERROR);
+  });
+
+  test('saves a means of transport alone, leaving the other arrival answers blank', async ({ animalsPages }) => {
+    const referenceNumber = animalsPages.arrivalDetails.referenceNumberFromUrl();
+    await animalsPages.arrivalDetails.chooseMeansOfTransport(meansOfTransport.roadVehicle.display);
     await animalsPages.arrivalDetails.saveAndContinue.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.taskStatus('Arrival details')).toHaveText('To do');
+
+    await animalsPages.arrivalDetails.open(referenceNumber);
+    await expect(animalsPages.arrivalDetails.errorSummary).toHaveCount(0);
+    await expect(animalsPages.arrivalDetails.meansOfTransport).toHaveValue(meansOfTransport.roadVehicle.value);
+    await expect(animalsPages.arrivalDetails.portOfEntry.field).toHaveValue('');
+    await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue('');
+    await expect(animalsPages.arrivalDetails.transportIdentification).toHaveValue('');
+    await expect(animalsPages.arrivalDetails.transportDocumentReference).toHaveValue('');
   });
 
   test('restricts the date picker to one week back and six months ahead', async ({ animalsPages }) => {

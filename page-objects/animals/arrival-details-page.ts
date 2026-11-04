@@ -48,11 +48,19 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.page.locator('#arrivalDateAtPort-error');
   }
 
+  get meansOfTransportError(): Locator {
+    return this.page.locator('#meansOfTransport-error');
+  }
+
   get arrivalDatePicker(): DatePicker {
     return new DatePicker(this.page, 'arrivalDateAtPort');
   }
 
   async fillArrivalDate(date: string): Promise<void> {
     await this.arrivalDate.fill(date);
+  }
+
+  async chooseMeansOfTransport(label: string): Promise<void> {
+    await this.meansOfTransport.selectOption({ label });
   }
 }

@@ -319,7 +319,7 @@ export class AnimalsJourney {
   }: ArrivalDetailsAnswer = {}): Promise<void> {
     await this.animalsPages.arrivalDetails.fillArrivalDate(date);
     await this.animalsPages.arrivalDetails.portOfEntry.choose(port);
-    await this.animalsPages.arrivalDetails.meansOfTransport.selectOption({ label: means });
+    await this.animalsPages.arrivalDetails.chooseMeansOfTransport(means);
     await this.animalsPages.arrivalDetails.transportIdentification.fill(transportId);
     await this.animalsPages.arrivalDetails.transportDocumentReference.fill(documentReference);
   }
@@ -627,6 +627,7 @@ export class AnimalsJourney {
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await pages.arrivalDetails.chooseMeansOfTransport(meansOfTransport.airplane.display);
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);
