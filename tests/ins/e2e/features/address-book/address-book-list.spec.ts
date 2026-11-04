@@ -179,7 +179,7 @@ test.describe('Address book list', () => {
     await expect(insPages.addressBookView.heading(name)).toBeVisible();
   });
 
-  test('an address added through the form lands on the Origin and Consignor tab of the list with its success banner, and is listed ahead of an older address', async ({
+  test('an address added through the form lands on the list with its success banner, and is listed ahead of an older address', async ({
     insPages,
     insJourney,
     addressBookApi,
