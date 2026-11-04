@@ -27,19 +27,18 @@ test.describe('Address book cross-user visibility', () => {
     );
     await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrl(originOrConsignorTab));
 
-    // browser.newContext() inherits the test's storageState; Sarah must start cold.
-    const contextB = await browser.newContext({ storageState: COLD_START });
+    const sarahsContext = await browser.newContext({ storageState: COLD_START });
     try {
-      const insPagesB = createInsPages(await contextB.newPage());
+      const sarahsInsPages = createInsPages(await sarahsContext.newPage());
 
-      await insPagesB.addressBookList.open({
+      await sarahsInsPages.addressBookList.open({
         userId: users.sarah.crn,
         organisationSbi: users.sarah.organisations.gatwickAirport,
       });
 
-      await expect(insPagesB.addressBookList.row(createdName)).toBeVisible();
+      await expect(sarahsInsPages.addressBookList.row(createdName)).toBeVisible();
     } finally {
-      await contextB.close();
+      await sarahsContext.close();
     }
   });
 });
