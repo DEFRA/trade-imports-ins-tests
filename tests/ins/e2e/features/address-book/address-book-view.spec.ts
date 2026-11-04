@@ -84,8 +84,8 @@ test.describe('Address book view', () => {
       await expectAddressBookList({ pages, insPages });
     });
 
-    test("another organisation's address returns to the address book", async ({ pages, insPages, request }) => {
-      await expectOtherOrganisationAddressReturnsToList({ pages, insPages, request }, (addressId) =>
+    test("another organisation's address returns to the address book", async ({ pages, insPages, isolatedOrganisationAddressBookApi }) => {
+      await expectOtherOrganisationAddressReturnsToList({ pages, insPages, isolatedOrganisationAddressBookApi }, (addressId) =>
         insPages.addressBookView.open(addressId),
       );
     });

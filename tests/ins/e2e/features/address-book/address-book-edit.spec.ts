@@ -198,8 +198,8 @@ test.describe('Address book edit', () => {
       await expect(pages.page).toHaveURL(new RegExp(`${viewUrl}$`));
     });
 
-    test("another organisation's address returns to the address book", async ({ pages, insPages, request }) => {
-      await expectOtherOrganisationAddressReturnsToList({ pages, insPages, request }, (addressId) =>
+    test("another organisation's address returns to the address book", async ({ pages, insPages, isolatedOrganisationAddressBookApi }) => {
+      await expectOtherOrganisationAddressReturnsToList({ pages, insPages, isolatedOrganisationAddressBookApi }, (addressId) =>
         insPages.addressBookEdit.open(addressId),
       );
     });
