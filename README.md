@@ -57,11 +57,8 @@ End-to-end, accessibility and security tests for the trade imports services — 
    npx playwright install chromium
    ```
 
-   The [cross-browser tests](#cross-browser-tests) also need Firefox and WebKit:
-
-   ```bash
-   npx playwright install firefox webkit
-   ```
+   The Chromium-only install skips Firefox and WebKit, which the
+   [cross-browser tests](#cross-browser-tests) need.
 
 ## Editor Setup
 
@@ -387,8 +384,7 @@ validation and backend checks, which do not vary by browser.
 
 The animals commands are also in [`tests/animals/cross-browser/`](tests/animals/cross-browser/README.md).
 
-Run them against the docker-compose stack. Install the browsers first (see
-[Installation](#installation)).
+Run them against the docker-compose stack.
 
 | Command                                                                                     | Runs                           |
 | ------------------------------------------------------------------------------------------- | ------------------------------ |

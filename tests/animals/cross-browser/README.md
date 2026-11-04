@@ -3,10 +3,17 @@
 This folder holds no specs. The animals cross-browser tests are existing e2e specs, selected by the
 `@cross-browser` tag and run in Playwright's Firefox and WebKit.
 
-## Commands
+## Strategy
 
-Run against the docker-compose stack, from the repo root. Install the browsers once with
-`npx playwright install firefox webkit`.
+Tag existing e2e tests so that, together, they render as many animals pages as possible in each engine.
+
+- Walk the journey, then add one test for each page the walks do not reach.
+- Choose tests that also run on CDP.
+- Leave out validation and backend checks, which do not vary by browser.
+
+## Run on the local stack
+
+Run against the docker-compose stack, from the repo root.
 
 | Command                                                                                                    | Runs                                    |
 | ---------------------------------------------------------------------------------------------------------- | --------------------------------------- |
@@ -15,13 +22,9 @@ Run against the docker-compose stack, from the repo root. Install the browsers o
 | `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=webkit tests/animals/`        | WebKit only                             |
 | `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=mobile-webkit tests/animals/` | iPhone 17 on WebKit (paused, see below) |
 
-## Notes
+## Run on CDP
 
-- The set is the journey walks, sign-in and one test for each page the walks do not reach, so every page is rendered in each engine. It leaves out validation and backend checks, which do not vary by browser.
-- To add a test, tag it `{ tag: '@cross-browser' }`. It still runs in the Chromium e2e run.
-- Visual, a11y and security specs stay out: snapshots are per engine, and axe and ZAP results barely change by browser.
-- Only tests under `tests/animals/` carry the tag so far. The same commands pick up `tests/ins/` once it is tagged.
-- Write `--project=firefox`, not `--project firefox`: `--project` takes several values, so a trailing path would be read as a project name.
+Run the `animals:cross-browser` profile.
 
 ## Mobile (paused)
 
