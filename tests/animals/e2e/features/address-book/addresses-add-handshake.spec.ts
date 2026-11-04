@@ -89,7 +89,12 @@ test.describe('Add an address from the journey via INS', () => {
         await expect(picker.successBanner.getByText(addedBannerText(details), { exact: true })).toBeVisible();
         await expect(picker.party(details.name)).toHaveCount(1);
         await expect(picker.checkedParties).toHaveCount(0);
-        await expect(picker.partiesListedAbove(details.name, partyIdsListedBeforeTheAdd)).toHaveCount(0);
+        const newPartyId = await picker.party(details.name).inputValue();
+        await expect
+          .poll(async () =>
+            (await picker.listedPartyIds()).find((partyId) => partyId === newPartyId || partyIdsListedBeforeTheAdd.includes(partyId)),
+          )
+          .toBe(newPartyId);
       },
     );
 

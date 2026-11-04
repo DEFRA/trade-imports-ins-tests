@@ -67,11 +67,6 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return Promise.all((await this.listedParties.all()).map((party) => party.inputValue()));
   }
 
-  partiesListedAbove(name: string, amongPartyIds: readonly string[]): Locator {
-    const isAmongPartyIds = amongPartyIds.map((partyId) => `@value="${partyId}"`).join(' or ') || 'false()';
-    return this.party(name).locator(`xpath=preceding::input[@type="radio"][${isAmongPartyIds}]`);
-  }
-
   get selectedAddress(): Locator {
     return this.page.getByText('Selected address:');
   }
