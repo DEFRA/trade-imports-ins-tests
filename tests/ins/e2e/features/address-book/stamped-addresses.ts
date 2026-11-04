@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { test } from '@fixtures';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import type { InsPages } from '@page-objects';
@@ -17,12 +18,12 @@ export interface StampedAddress extends AddressClassification {
   tabs: readonly AddressBookTab[];
 }
 
-export const stampedSearchTermOf = (stamp: number) => `Stamped ${stamp}`;
+const newStampedSearchTerm = (): string => `Stamped ${randomUUID().replaceAll('-', '')}`;
 
 export const usesLabelOf = (uses: readonly AddressUse[]): string => uses.map((use) => useLabels[use]).join(', ');
 
-const stampedAddressesOf = (stamp: number) => {
-  const named = (suffix: string) => `${stampedSearchTermOf(stamp)} ${suffix}`;
+const stampedAddressesOf = (searchTerm: string) => {
+  const named = (suffix: string) => `${searchTerm} ${suffix}`;
   const stampedAddress = (address: Omit<StampedAddress, 'usesLabel'>): StampedAddress => ({
     ...address,
     usesLabel: usesLabelOf(address.uses),
@@ -63,12 +64,13 @@ export const createAddressHolding = async (
   createdAddressIds.push((await api.createAddress({ ...traderAddress(name), addressType, uses })).id);
 };
 
-export const createStamped = async (api: AddressBookApiClient, stamp: number, createdIds: string[]) => {
-  const stamped = stampedAddressesOf(stamp);
+export const createStamped = async (api: AddressBookApiClient, createdIds: string[]) => {
+  const searchTerm = newStampedSearchTerm();
+  const stamped = stampedAddressesOf(searchTerm);
   for (const stampedAddress of Object.values<StampedAddress>(stamped)) {
     await createAddressHolding(api, createdIds, stampedAddress);
   }
-  return stamped;
+  return { searchTerm, stamped };
 };
 
 export const stampedAddressesOnTab = (stamped: Record<string, StampedAddress>, tab: AddressBookTab): StampedAddress[] =>
@@ -89,9 +91,8 @@ export const createStampedAndFilterListByUse = async (
   { insPages, api, createdAddressIds }: { insPages: InsPages; api: AddressBookApiClient; createdAddressIds: string[] },
   use: AddressUse,
 ) => {
-  const stamp = Date.now();
-  const stamped = await createStamped(api, stamp, createdAddressIds);
+  const { searchTerm, stamped } = await createStamped(api, createdAddressIds);
   await insPages.addressBookList.open();
-  await insPages.addressBookList.filter({ term: stampedSearchTermOf(stamp), submitWith: 'button', use });
-  return { stamp, stamped };
+  await insPages.addressBookList.filter({ term: searchTerm, submitWith: 'button', use });
+  return { searchTerm, stamped };
 };

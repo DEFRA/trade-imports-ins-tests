@@ -14,7 +14,6 @@ import {
   createStamped,
   createStampedAndFilterListByUse,
   stampedAddressesOnTab,
-  stampedSearchTermOf,
   usesLabelOf,
 } from './stamped-addresses';
 
@@ -28,11 +27,10 @@ test.describe('Address book use filter API', () => {
   test('listing by a use returns exactly the stamped addresses holding it, and none for a use nothing holds', async ({
     isolatedOrganisationAddressBookApi,
   }) => {
-    const stamp = Date.now();
-    const stamped = await createStamped(isolatedOrganisationAddressBookApi, stamp, isolatedOrganisationAddressIds);
+    const { searchTerm, stamped } = await createStamped(isolatedOrganisationAddressBookApi, isolatedOrganisationAddressIds);
 
     for (const use of Object.values(addressUses)) {
-      const listed = await isolatedOrganisationAddressBookApi.listAddresses(stampedSearchTermOf(stamp), { use });
+      const listed = await isolatedOrganisationAddressBookApi.listAddresses(searchTerm, { use });
 
       expect(listed.map(({ name }) => name).sort()).toEqual(
         Object.values(stamped)
@@ -147,10 +145,9 @@ test.describe('Address book use filter', () => {
     addressBookApi,
     page,
   }) => {
-    const stamp = Date.now();
-    const stamped = await createStamped(addressBookApi, stamp, createdAddressIds);
+    const { searchTerm, stamped } = await createStamped(addressBookApi, createdAddressIds);
     await insPages.addressBookList.open();
-    await insPages.addressBookList.search(stampedSearchTermOf(stamp), { submitWith: 'button' });
+    await insPages.addressBookList.search(searchTerm, { submitWith: 'button' });
     const originAddresses = stampedAddressesOnTab(stamped, originOrConsignorTab);
     const resultsLine = `Showing 1-${originAddresses.length} of ${originAddresses.length}`;
     await expect(insPages.addressBookList.resultsLine).toHaveText(resultsLine);
@@ -172,7 +169,7 @@ test.describe('Address book use filter', () => {
     insPages,
     addressBookApi,
   }) => {
-    const { stamp, stamped } = await createStampedAndFilterListByUse(
+    const { searchTerm, stamped } = await createStampedAndFilterListByUse(
       { insPages, api: addressBookApi, createdAddressIds },
       addressUses.consignor,
     );
@@ -186,7 +183,7 @@ test.describe('Address book use filter', () => {
     const destinationAddresses = stampedAddressesOnTab(stamped, destinationConsigneeOrImporterTab);
     await expect(insPages.addressBookList.selectedTab).toHaveText(destinationConsigneeOrImporterTab.label);
     await insPages.addressBookList.filterSummary.click();
-    await expect(insPages.addressBookList.inputSearch).toHaveValue(stampedSearchTermOf(stamp));
+    await expect(insPages.addressBookList.inputSearch).toHaveValue(searchTerm);
     await expect(insPages.addressBookList.selectedUseFilterOption).toHaveText(useFilterPlaceholder);
     await expect(insPages.addressBookList.resultsLine).toHaveText(
       `Showing 1-${destinationAddresses.length} of ${destinationAddresses.length}`,

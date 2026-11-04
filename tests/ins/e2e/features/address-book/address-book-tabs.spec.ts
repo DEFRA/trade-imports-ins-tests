@@ -9,13 +9,7 @@ import {
   unsupportedAddressValue,
 } from '@domain/ins/constants/address-book-types';
 import { E2E_ADDRESS_BOOK_FIXTURES, ensureE2eAddressBook, placeOfOriginFixture } from '@flows/shared/address-book-seed';
-import {
-  addressIdsDeletedAfterEachTest,
-  createStamped,
-  stampedAddressesOnTab,
-  stampedSearchTermOf,
-  usesLabelOf,
-} from './stamped-addresses';
+import { addressIdsDeletedAfterEachTest, createStamped, stampedAddressesOnTab, usesLabelOf } from './stamped-addresses';
 
 const createdAddressIds = addressIdsDeletedAfterEachTest('addressBookApi');
 
@@ -25,11 +19,10 @@ test.describe('Address book tabs API', () => {
   test('listing by an address type returns exactly the addresses holding one of its uses', async ({
     isolatedOrganisationAddressBookApi,
   }) => {
-    const stamp = Date.now();
-    const stamped = await createStamped(isolatedOrganisationAddressBookApi, stamp, isolatedOrganisationAddressIds);
+    const { searchTerm, stamped } = await createStamped(isolatedOrganisationAddressBookApi, isolatedOrganisationAddressIds);
 
     for (const tab of addressBookTabs) {
-      const listed = await isolatedOrganisationAddressBookApi.listAddresses(stampedSearchTermOf(stamp), { addressType: tab.addressType });
+      const listed = await isolatedOrganisationAddressBookApi.listAddresses(searchTerm, { addressType: tab.addressType });
 
       expect(listed.map(({ name }) => name).sort()).toEqual(
         stampedAddressesOnTab(stamped, tab)
@@ -40,10 +33,9 @@ test.describe('Address book tabs API', () => {
   });
 
   test('listing with no address type returns every live address', async ({ isolatedOrganisationAddressBookApi }) => {
-    const stamp = Date.now();
-    const stamped = await createStamped(isolatedOrganisationAddressBookApi, stamp, isolatedOrganisationAddressIds);
+    const { searchTerm, stamped } = await createStamped(isolatedOrganisationAddressBookApi, isolatedOrganisationAddressIds);
 
-    const listed = await isolatedOrganisationAddressBookApi.listAddresses(stampedSearchTermOf(stamp));
+    const listed = await isolatedOrganisationAddressBookApi.listAddresses(searchTerm);
 
     expect(listed.map(({ name }) => name).sort()).toEqual(
       Object.values(stamped)
@@ -73,11 +65,10 @@ test.describe('Address book tabs', () => {
     insJourney,
     addressBookApi,
   }) => {
-    const stamp = Date.now();
-    const stamped = await createStamped(addressBookApi, stamp, createdAddressIds);
+    const { searchTerm, stamped } = await createStamped(addressBookApi, createdAddressIds);
 
     for (const tab of addressBookTabs) {
-      await insJourney.toAddressBookTab(tab, { search: stampedSearchTermOf(stamp) });
+      await insJourney.toAddressBookTab(tab, { search: searchTerm });
 
       const expected = stampedAddressesOnTab(stamped, tab);
       await expect(insPages.addressBookList.selectedTab).toHaveText(tab.label);
@@ -113,12 +104,11 @@ test.describe('Address book tabs without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
   test('following the Branch tab loads it, marks it current and lists the stamped branch address', async ({ insPages, addressBookApi }) => {
-    const stamp = Date.now();
-    const stamped = await createStamped(addressBookApi, stamp, createdAddressIds);
+    const { searchTerm, stamped } = await createStamped(addressBookApi, createdAddressIds);
     await insPages.addressBookList.open();
 
     await insPages.addressBookList.tabLink(branchTab.label).click();
-    await insPages.addressBookList.search(stampedSearchTermOf(stamp), { submitWith: 'button' });
+    await insPages.addressBookList.search(searchTerm, { submitWith: 'button' });
 
     await expect(insPages.addressBookList.selectedTab).toHaveText(branchTab.label);
     await expect(insPages.addressBookList.panelHeading).toHaveText(branchTab.panelHeading);
