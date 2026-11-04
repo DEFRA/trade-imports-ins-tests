@@ -1,13 +1,12 @@
 import { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
 import { formattedValue } from '@adapters/http/dataverse-client';
-import { animalsDynamics } from '@config/animals-dynamics';
+import { animalsDynamics, waitForNotificationRow } from '@config/animals-dynamics';
 import { defaultUser } from '@config/users';
 import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
 import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { test, expect } from '@fixtures';
 import { parseAppDateText, toIsoDate } from '@utils/date-utils';
-import { annotateDuration } from '@utils/playwright/annotate-duration';
 import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 
 // Traces record APIRequestContext calls with their headers and form bodies: the bearer token and client secret.
@@ -54,18 +53,7 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     const importer = await addressBookApi.findByName(answers.parties.importer);
     await animalsJourney.submitNotification(answers);
     const referenceNumber = journeyContext.referenceNumber;
-
-    await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
-      expect
-        .poll(
-          () => dynamics.findNotifications(referenceNumber),
-          animalsDynamics.pollOptions(`Expected exactly one notification for ${referenceNumber}`),
-        )
-        .toHaveLength(1),
-    );
-
-    // No columns requested, so the whole row comes back.
-    const [row] = await dynamics.findNotifications(referenceNumber);
+    const row = await waitForNotificationRow(dynamics, referenceNumber);
     await attachRow(row);
 
     expect.soft(row.defraimp_name, 'reference number').toBe(referenceNumber);
@@ -127,18 +115,7 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
   test('answering yes to unweaned animals is stored in PIMS Dynamics', async ({ animalsJourney, journeyContext, externalRequest }) => {
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     await animalsJourney.submitNotification({ ...MANDATORY_ANSWERS, unweanedAnimals: yesNoValues.yes });
-    const referenceNumber = journeyContext.referenceNumber;
-
-    await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
-      expect
-        .poll(
-          () => dynamics.findNotifications(referenceNumber),
-          animalsDynamics.pollOptions(`Expected exactly one notification for ${referenceNumber}`),
-        )
-        .toHaveLength(1),
-    );
-
-    const [row] = await dynamics.findNotifications(referenceNumber);
+    const row = await waitForNotificationRow(dynamics, journeyContext.referenceNumber);
     await attachRow(row);
 
     expect(row.defraimp_commoditiesincludenonablactedanimals).toBe(true);
@@ -154,18 +131,7 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     const answers = ALL_ANSWERS;
     await animalsJourney.submitNotification(answers);
-    const referenceNumber = journeyContext.referenceNumber;
-
-    await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
-      expect
-        .poll(
-          () => dynamics.findNotifications(referenceNumber),
-          animalsDynamics.pollOptions(`Expected exactly one notification for ${referenceNumber}`),
-        )
-        .toHaveLength(1),
-    );
-
-    const [row] = await dynamics.findNotifications(referenceNumber);
+    const row = await waitForNotificationRow(dynamics, journeyContext.referenceNumber);
     await attachRow(row);
 
     expect.soft(row.defraimp_traderreference, 'internal reference').toBe(answers.internalReference);

@@ -1,10 +1,9 @@
 import { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
 import { formattedValue } from '@adapters/http/dataverse-client';
-import { animalsDynamics } from '@config/animals-dynamics';
+import { animalsDynamics, waitForNotificationRow } from '@config/animals-dynamics';
 import { GBN_AG_CATTLE_COMMON_NAME } from '@domain/animals/constants/gbn-ag';
 import { ALL_ANSWERS, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { test, expect } from '@fixtures';
-import { annotateDuration } from '@utils/playwright/annotate-duration';
 import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 
 // Traces record APIRequestContext calls with their headers and form bodies: the bearer token and client secret.
@@ -36,17 +35,7 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     const importer = await addressBookApi.findByName(answers.parties.importer);
     const contact = await addressBookApi.findByName(answers.contactAddress);
     await animalsJourney.submitNotification(answers);
-    const referenceNumber = journeyContext.referenceNumber;
-
-    await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
-      expect
-        .poll(
-          () => dynamics.findNotifications(referenceNumber),
-          animalsDynamics.pollOptions(`Expected exactly one notification for ${referenceNumber}`),
-        )
-        .toHaveLength(1),
-    );
-    const [row] = await dynamics.findNotifications(referenceNumber);
+    const row = await waitForNotificationRow(dynamics, journeyContext.referenceNumber);
 
     // [FROM v0.3.0]
     // exchangedDocument.issuer.postalAddress
@@ -112,17 +101,7 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     const answers = ALL_ANSWERS;
     const [cowLine] = answers.commodityLines;
     await animalsJourney.submitNotification(answers);
-    const referenceNumber = journeyContext.referenceNumber;
-
-    await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
-      expect
-        .poll(
-          () => dynamics.findNotifications(referenceNumber),
-          animalsDynamics.pollOptions(`Expected exactly one notification for ${referenceNumber}`),
-        )
-        .toHaveLength(1),
-    );
-    const [row] = await dynamics.findNotifications(referenceNumber);
+    const row = await waitForNotificationRow(dynamics, journeyContext.referenceNumber);
 
     // [FROM v0.3.0]
     // specifiedConsignment.originCountry.regionOfOriginCode
