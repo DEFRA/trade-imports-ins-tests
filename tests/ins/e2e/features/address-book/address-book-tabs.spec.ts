@@ -28,7 +28,7 @@ test.describe('Address book tabs API', () => {
     const stamped = await createStamped(isolatedOrganisationAddressBookApi, stamp, isolatedOrganisationAddressIds);
 
     for (const tab of addressBookTabs) {
-      const listed = await isolatedOrganisationAddressBookApi.listAddresses(stampedSearchTermOf(stamp), { category: tab.addressType });
+      const listed = await isolatedOrganisationAddressBookApi.listAddresses(stampedSearchTermOf(stamp), { addressType: tab.addressType });
 
       expect(listed.map(({ name }) => name).sort()).toEqual(
         stampedAddressesOnTab(stamped, tab)

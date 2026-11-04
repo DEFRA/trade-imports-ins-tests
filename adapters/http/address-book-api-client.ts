@@ -56,12 +56,15 @@ export class AddressBookApiClient {
 
   /**
    * The first page of the organisation's live addresses matching the search, newest first.
-   * With `category`, only addresses listed under it; with `use`, only addresses holding that use.
+   * With `addressType`, only addresses of that type; with `use`, only addresses holding that use.
    */
-  async listAddresses(query?: string, { category, use }: { category?: AddressType; use?: AddressUse } = {}): Promise<AddressBookRecord[]> {
+  async listAddresses(
+    query?: string,
+    { addressType, use }: { addressType?: AddressType; use?: AddressUse } = {},
+  ): Promise<AddressBookRecord[]> {
     const params = new URLSearchParams();
-    if (category) {
-      params.set('category', category);
+    if (addressType) {
+      params.set('addressType', addressType);
     }
     if (use) {
       params.set('use', use);
