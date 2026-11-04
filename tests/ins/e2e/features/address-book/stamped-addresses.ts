@@ -64,11 +64,11 @@ export const createAddressHolding = async (
   createdAddressIds.push((await api.createAddress({ ...traderAddress(name), addressType, uses })).id);
 };
 
-export const createStamped = async (api: AddressBookApiClient, createdIds: string[]) => {
+export const createStamped = async (api: AddressBookApiClient, createdAddressIds: string[]) => {
   const searchTerm = newStampedSearchTerm();
   const stamped = stampedAddressesOf(searchTerm);
   for (const stampedAddress of Object.values<StampedAddress>(stamped)) {
-    await createAddressHolding(api, createdIds, stampedAddress);
+    await createAddressHolding(api, createdAddressIds, stampedAddress);
   }
   return { searchTerm, stamped };
 };
