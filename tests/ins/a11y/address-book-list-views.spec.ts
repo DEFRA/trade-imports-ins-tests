@@ -1,5 +1,6 @@
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 import { addFormAddressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
+import { scanNextPage } from '@utils/next-page-scan';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('the address book has no accessibility violations when populated and after an address is added', async ({
@@ -26,17 +27,13 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
   });
 
-  test.describe('pagination', () => {
-    test.beforeEach(async ({ insPages }) => {
-      await insPages.addressBookList.open();
-      const hasPagination = await insPages.addressBookList.pagination.isVisible();
-      test.skip(!hasPagination, 'Requires more than one page of addresses.');
-    });
+  test('the address book has no accessibility violations when paginated', async ({ insPages, addressBookApi, runA11yScan }) => {
+    const stamp = Date.now();
+    await Promise.all(
+      Array.from({ length: 9 }, (_, index) => addressBookApi.createAddress(traderAddress(`A11y Paged Farm ${stamp} number ${index}`))),
+    );
+    await insPages.addressBookList.open();
 
-    test('the address book has no accessibility violations when paginated', async ({ insPages, runA11yScan }) => {
-      await insPages.addressBookList.linkNextPage.click();
-      await insPages.addressBookList.heading.waitFor();
-      await runA11yScan();
-    });
+    await scanNextPage(insPages.addressBookList.linkNextPage, runA11yScan);
   });
 });
