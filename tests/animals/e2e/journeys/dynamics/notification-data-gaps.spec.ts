@@ -49,7 +49,7 @@ import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 // Top level because Playwright rejects test.use({ trace }) inside a describe group.
 test.use({ trace: 'off' });
 
-test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamics' }, () => {
+test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics' }, () => {
   test.beforeEach(() => {
     skipIfComposeEnvironment('the compose stack has no PIMS Dynamics');
     // The slowed UI journey plus the PIMS Dynamics poll.
@@ -57,7 +57,7 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     test.setTimeout(test.info().timeout + animalsDynamics.arrivalTimeoutMs);
   });
 
-  test('mandatory answers PIMS Dynamics does not store yet', async ({
+  test('the contact address, species names, party postcodes, phones and emails, CPH number, transport document and identification, internal market purpose, reason for import, certified for, number of animals and ear tag are stored in PIMS Dynamics', async ({
     animalsJourney,
     journeyContext,
     externalRequest,
@@ -166,7 +166,11 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     expect.soft(row.defraimp_meansoftransporttoentrypointid, 'transport identification').toBe(answers.transportIdentification);
   });
 
-  test('optional answers PIMS Dynamics does not store yet', async ({ animalsJourney, journeyContext, externalRequest }) => {
+  test('the region of origin code, transited countries, number of packages and passport number are stored in PIMS Dynamics', async ({
+    animalsJourney,
+    journeyContext,
+    externalRequest,
+  }) => {
     test.fixme(true, 'PIMS Dynamics leaves these optional answers empty; the likely cause of each is in the comments');
     // The accompanying document is uploaded and virus-scanned before the journey can submit.
     test.setTimeout(test.info().timeout + 2 * 60_000);
