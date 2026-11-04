@@ -64,6 +64,10 @@ export class BasePage {
     return errorSummaryOn(this.page);
   }
 
+  get errorSummaryLinks(): Locator {
+    return this.errorSummary.getByRole('link');
+  }
+
   /** The error summary's link to a field, matched on the whole message. */
   errorSummaryLink(message: string): Locator {
     return this.errorSummary.getByRole('link', { name: message, exact: true });
@@ -197,10 +201,6 @@ export class NotificationPage extends BasePage {
 
   get cancelAmend(): Locator {
     return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
-  }
-
-  get errorSummaryLinks(): Locator {
-    return this.errorSummary.getByRole('link');
   }
 
   get saveAndContinue(): Locator {

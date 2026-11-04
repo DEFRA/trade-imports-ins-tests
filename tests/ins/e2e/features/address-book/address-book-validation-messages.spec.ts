@@ -2,14 +2,16 @@ import { test, expect } from '@fixtures';
 import type { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 import { traderAddress, traderAddressInUnofferedCountry } from '@domain/ins/constants/trader-address';
 import { ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
+import { addressUses } from '@domain/shared/constants/address-types';
 import { expectedValidationRefusalOf } from './expected-api-refusal';
 
-const expectFourMessagesAtTopAndAgainstFields = async (form: InsAddressBookFormPage): Promise<void> => {
-  await expect(form.errorSummary).toBeVisible();
-  await expect(form.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired)).toBeVisible();
-  await expect(form.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.postcodeRequired)).toBeVisible();
-  await expect(form.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.countryRequired)).toBeVisible();
-  await expect(form.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.phoneRequired)).toBeVisible();
+const expectOnlyFourMessagesAtTopAndAgainstFields = async (form: InsAddressBookFormPage): Promise<void> => {
+  await expect(form.errorSummaryLinks).toHaveText([
+    ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired,
+    ADDRESS_FORM_VALIDATION_MESSAGES.postcodeRequired,
+    ADDRESS_FORM_VALIDATION_MESSAGES.countryRequired,
+    ADDRESS_FORM_VALIDATION_MESSAGES.phoneRequired,
+  ]);
   await expect(form.inputName).toHaveAccessibleDescription(new RegExp(ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired));
   await expect(form.inputPostcode).toHaveAccessibleDescription(new RegExp(ADDRESS_FORM_VALIDATION_MESSAGES.postcodeRequired));
   await expect(form.selectCountry).toHaveAccessibleDescription(new RegExp(ADDRESS_FORM_VALIDATION_MESSAGES.countryRequired));
@@ -17,7 +19,7 @@ const expectFourMessagesAtTopAndAgainstFields = async (form: InsAddressBookFormP
 };
 
 test.describe('Address book validation messages', () => {
-  test('saving the add form with name, postcode, country and phone left blank shows each message at the top and against its field', async ({
+  test('saving the add form with a use ticked and name, postcode, country and phone left blank shows only those four messages, at the top and against each field', async ({
     insPages,
     insJourney,
   }) => {
@@ -33,10 +35,11 @@ test.describe('Address book validation messages', () => {
       email: address.email,
       phone: '',
     });
+    await insPages.addressBookAdd.tickUses([addressUses.placeOfOrigin]);
     await insPages.addressBookAdd.saveAndContinue();
 
     await expect(insPages.addressBookAdd.heading).toBeVisible();
-    await expectFourMessagesAtTopAndAgainstFields(insPages.addressBookAdd);
+    await expectOnlyFourMessagesAtTopAndAgainstFields(insPages.addressBookAdd);
   });
 
   test('saving the edit form of an address whose stored country is not offered, with name, postcode and phone cleared and no country chosen, shows the four messages and saves nothing', async ({
@@ -59,7 +62,7 @@ test.describe('Address book validation messages', () => {
     await insPages.addressBookEdit.save();
 
     await expect(insPages.addressBookEdit.heading).toBeVisible();
-    await expectFourMessagesAtTopAndAgainstFields(insPages.addressBookEdit);
+    await expectOnlyFourMessagesAtTopAndAgainstFields(insPages.addressBookEdit);
     expect(await addressBookApi.getAddress(created.id)).toMatchObject(address);
   });
 
