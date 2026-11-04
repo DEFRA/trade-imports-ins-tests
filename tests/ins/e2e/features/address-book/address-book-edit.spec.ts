@@ -60,21 +60,22 @@ test.describe('Address book edit', () => {
     await expect(insPages.addressBookList.viewLink(renamed)).toHaveAttribute('href', `/address-book/${created.id}`);
   });
 
-  test('the edit page is headed Edit address and contact details, with Email address before Phone number and the stored country selected', async ({
-    insPages,
-    addressBookApi,
-  }) => {
-    const address = addressWithLineTwoAndCounty(`Edit Layout Farm ${Date.now()}`);
-    const created = await addressBookApi.createAddress(address);
+  test(
+    'the edit page is headed Edit address and contact details, with Email address before Phone number and the stored country selected',
+    { tag: '@cross-browser' },
+    async ({ insPages, addressBookApi }) => {
+      const address = addressWithLineTwoAndCounty(`Edit Layout Farm ${Date.now()}`);
+      const created = await addressBookApi.createAddress(address);
 
-    await insPages.addressBookEdit.open(created.id);
+      await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.heading).toBeVisible();
-    for (const [index, name] of ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER.entries()) {
-      await expect(insPages.addressBookEdit.textboxes.nth(index)).toHaveAccessibleName(name);
-    }
-    await expect(insPages.addressBookEdit.selectCountry).toHaveValue(address.countryCode);
-  });
+      await expect(insPages.addressBookEdit.heading).toBeVisible();
+      for (const [index, name] of ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER.entries()) {
+        await expect(insPages.addressBookEdit.textboxes.nth(index)).toHaveAccessibleName(name);
+      }
+      await expect(insPages.addressBookEdit.selectCountry).toHaveValue(address.countryCode);
+    },
+  );
 
   test('asks only for the address and contact fields', async ({ insPages, addressBookApi }) => {
     const created = await addressBookApi.createAddress(traderAddress(`Edit Fields Farm ${Date.now()}`));

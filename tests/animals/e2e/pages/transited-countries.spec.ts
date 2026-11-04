@@ -9,13 +9,17 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
     await animalsJourney.toTransitedCountries();
   });
 
-  test('renders the country search with only the intro paragraphs, the cancel link and the three buttons', async ({ animalsPages }) => {
-    const { transitedCountries } = animalsPages;
+  test(
+    'renders the country search with only the intro paragraphs, the cancel link and the three buttons',
+    { tag: '@cross-browser' },
+    async ({ animalsPages }) => {
+      const { transitedCountries } = animalsPages;
 
-    await expect(transitedCountries.heading).toBeVisible();
-    await expect(transitedCountries.country.field).toBeVisible();
-    await expectEmptyTransitList(transitedCountries);
-  });
+      await expect(transitedCountries.heading).toBeVisible();
+      await expect(transitedCountries.country.field).toBeVisible();
+      await expectEmptyTransitList(transitedCountries);
+    },
+  );
 
   test('the empty search box reads "Search for a country"', async ({ animalsPages }) => {
     await expect(animalsPages.transitedCountries.country.field).toHaveAttribute('placeholder', TRANSIT_COUNTRY_SEARCH_PLACEHOLDER);
