@@ -60,7 +60,7 @@ test.describe('INS page titles', { tag: '@duplicated-in-frontend' }, () => {
     await expect(pages.page).toHaveTitle('Error: Choose an address type - Import notification service - GOV.UK');
   });
 
-  test('a page showing errors opens its title with Error:', async ({ pages, insPages, insJourney }) => {
+  test('the add address form showing errors opens its title with Error:', async ({ pages, insPages, insJourney }) => {
     await insJourney.toAddressForm();
 
     await insPages.addressBookAdd.saveAndContinue();
