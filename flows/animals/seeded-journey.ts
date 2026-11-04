@@ -1,5 +1,7 @@
 import type { Locator } from '@playwright/test';
 import type { AnimalsPages } from '@page-objects';
+import type { PartyRole as AddressesPartyRole } from '@page-objects/animals/addresses-page';
+import type { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
 import { pageLoadWait } from '@config/timeouts';
 import type { FrontendFormClient } from '@adapters/http/frontend-form-client';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
@@ -110,11 +112,36 @@ export class AnimalsSeededJourney {
   async createDraftWithConsignorChosenInUi(animalsPages: AnimalsPages, consignorName: string): Promise<string> {
     const referenceNumber = await this.createDraftNotification();
     await this.resumeInUi(referenceNumber, animalsPages.addresses);
-    await animalsPages.addresses.changeParty('Consignor').click();
-    await animalsPages.consignorSelection.select(consignorName);
-    await animalsPages.consignorSelection.saveAndContinue.click();
-    await animalsPages.addresses.heading.waitFor(pageLoadWait);
+    await this.choosePartyInUi(animalsPages, 'Consignor', animalsPages.consignorSelection, consignorName);
     return referenceNumber;
+  }
+
+  async createSubmittedWithPlaceOfOriginChosenInUi(animalsPages: AnimalsPages, placeOfOriginName: string): Promise<string> {
+    const referenceNumber = await this.createDraftNotification();
+    await this.resumeInUi(referenceNumber, animalsPages.notificationView);
+    await animalsPages.notificationView.changeLink('Change roles and addresses').click();
+    await animalsPages.addresses.heading.waitFor(pageLoadWait);
+    await this.choosePartyInUi(animalsPages, 'Place of origin', animalsPages.placeOfOriginSelection, placeOfOriginName);
+    await animalsPages.addresses.continueButton.click();
+    await animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await animalsPages.notificationView.continueButton.click();
+    await animalsPages.declaration.heading.waitFor(pageLoadWait);
+    await animalsPages.declaration.confirmation.check();
+    await animalsPages.declaration.continueButton.click();
+    await animalsPages.confirmation.heading.waitFor(pageLoadWait);
+    return referenceNumber;
+  }
+
+  private async choosePartyInUi(
+    animalsPages: AnimalsPages,
+    role: AddressesPartyRole,
+    picker: AnimalsPartyPickerPage,
+    name: string,
+  ): Promise<void> {
+    await animalsPages.addresses.changeParty(role).click();
+    await picker.select(name);
+    await picker.saveAndContinue.click();
+    await animalsPages.addresses.heading.waitFor(pageLoadWait);
   }
 
   private async partyIds(names: PartyNames): Promise<PartyIds> {

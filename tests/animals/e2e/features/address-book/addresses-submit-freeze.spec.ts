@@ -25,25 +25,8 @@ test.describe('Submitted addresses keep their copy', () => {
       email: 'freeze@example.co.uk',
     });
 
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
-    await animalsPages.notificationView.changeLink('Change roles and addresses').click();
-    await expect(animalsPages.addresses.heading).toBeVisible();
-    await animalsPages.addresses.changeParty('Place of origin').click();
-    await animalsPages.placeOfOriginSelection.select(originalName);
-    await animalsPages.placeOfOriginSelection.saveAndContinue.click();
-    await expect(animalsPages.addresses.heading).toBeVisible();
-    await animalsPages.addresses.continueButton.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-
+    const referenceNumber = await animalsSeededJourney.createSubmittedWithPlaceOfOriginChosenInUi(animalsPages, originalName);
     const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
-    await expect(originRow).toContainText(originalName);
-
-    await animalsPages.notificationView.continueButton.click();
-    await expect(animalsPages.declaration.heading).toBeVisible();
-    await animalsPages.declaration.confirmation.check();
-    await animalsPages.declaration.continueButton.click();
-    await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
 
     await addressBookApi.updateAddress(address.id, {
       ...heldAsPlaceOfOrigin,
@@ -83,7 +66,6 @@ test.describe('Submitted addresses keep their copy', () => {
 
   test('deleting the book record after submit changes neither the submitted view nor the amendment, and shows no error', async ({
     animalsSeededJourney,
-    pages,
     animalsPages,
     addressBookApi,
     animalsNotificationActions,
@@ -103,21 +85,8 @@ test.describe('Submitted addresses keep their copy', () => {
       email: 'delete-freeze@example.co.uk',
     });
 
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
-    await animalsPages.notificationView.changeLink('Change roles and addresses').click();
-    await animalsPages.addresses.changeParty('Place of origin').click();
-    await animalsPages.placeOfOriginSelection.select(originalName);
-    await animalsPages.placeOfOriginSelection.saveAndContinue.click();
-    await animalsPages.addresses.continueButton.click();
-
+    const referenceNumber = await animalsSeededJourney.createSubmittedWithPlaceOfOriginChosenInUi(animalsPages, originalName);
     const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
-    await expect(originRow).toContainText(originalName);
-
-    await animalsPages.notificationView.continueButton.click();
-    await animalsPages.declaration.confirmation.check();
-    await animalsPages.declaration.continueButton.click();
-    await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
 
     await addressBookApi.deleteAddress(address.id);
 
