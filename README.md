@@ -277,7 +277,7 @@ Always end a directory with `/`. Playwright reads the path as a regex, so
 `tests/animals` would also run `tests/animals-admin/`.
 
 A Playwright project is browser config only. Both configs have `chromium`, which
-runs every domain, plus opt-in `firefox` and `webkit` projects for the
+runs every domain, plus opt-in `firefox`, `webkit` and `mobile-webkit` projects for the
 [cross-browser tests](#cross-browser-tests).
 
 Within a domain directory, specs are grouped by test type, then by feature:
@@ -377,8 +377,8 @@ If it is not set, Playwright's default applies (50% of cores on CI).
 
 ## Cross-browser tests
 
-Tests tagged `@cross-browser` also run in Playwright's Firefox and WebKit, to
-render every page in each engine. Each domain has its own commands:
+Tests tagged `@cross-browser` also run in Playwright's Firefox, WebKit and an
+emulated iPhone 17, to render every page in each. Each domain has its own commands:
 [animals](tests/animals/cross-browser/README.md),
 [animals-admin](tests/animals-admin/cross-browser/README.md) and
 [ins](tests/ins/cross-browser/README.md). `npm run test:docker-compose:cross-browser`
@@ -467,7 +467,7 @@ If `PROFILE` is not set, the `default` profile is used.
 | `default`         | e2e test suite                                                                                 | `npm test`                   |
 | `a11y`            | accessibility test suite                                                                       | `npm run test:a11y`          |
 | `dynamics`        | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics`      |
-| `cross-browser`   | `@cross-browser` tests in Firefox and WebKit                                                   | `npm run test:cross-browser` |
+| `cross-browser`   | `@cross-browser` tests in Firefox, WebKit and iPhone 17                                        | `npm run test:cross-browser` |
 | `security`        | security test suite (ZAP passive scan)                                                         | `npm run test:security`      |
 | `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                            |
 

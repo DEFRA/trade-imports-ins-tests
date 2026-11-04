@@ -1,6 +1,6 @@
 # Cross-browser testing
 
-Tests tagged `@cross-browser` also run in Playwright's Firefox and WebKit, to find browser-specific problems before users do. Commands live beside each domain's tests, in `tests/<domain>/cross-browser/README.md`.
+Tests tagged `@cross-browser` also run in Playwright's Firefox, WebKit and an emulated iPhone 17, to find browser-specific problems before users do. Commands live beside each domain's tests, in `tests/<domain>/cross-browser/README.md`.
 
 ## Strategy
 
@@ -29,12 +29,11 @@ test('renders the page', { tag: '@cross-browser' }, async ({ insPages }) => {});
 
 It still runs in the Chromium e2e run. Tag it only if it runs on CDP and renders a page the set does not already cover.
 
-## Mobile (paused)
+## iPhone emulation
 
-The `mobile-webkit` project (iPhone 17 on WebKit) stays in the shared config, but is paused.
+The `mobile-webkit` project emulates an iPhone 17 on WebKit, to catch layout problems at phone size. It is emulation, not a real device.
 
-- On an iPhone user agent, `accessible-autocomplete` adds a hidden "1 of 7" to each suggestion, so `TypeAhead.option()` no longer matches "France" exactly. The 10 animals tests that choose a country time out.
-- Fix that helper first. iOS also turns autoselect off, so expect more differences.
+- On an iPhone user agent, `accessible-autocomplete` adds a hidden "1 of 7" to each suggestion, so `TypeAhead.option()` accepts an optional position suffix.
 - Specs must not assume a fixed viewport.
 
 ## Later
