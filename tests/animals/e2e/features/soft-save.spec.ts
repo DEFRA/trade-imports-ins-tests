@@ -1,12 +1,13 @@
 import { test, expect } from '@fixtures';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { SELECT_COMMODITY_ERROR } from '@domain/animals/constants/commodity-selection-page';
-import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { MEANS_OF_TRANSPORT_REQUIRED_MESSAGE } from '@domain/animals/constants/means-of-transport';
 
 const TO_DO = 'To do';
 const COMMODITY_SELECTION_TASK = 'What are you importing?';
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
+const TRANSIT_COUNTRIES_TASK = 'Transit countries';
 const IMPOSSIBLE_ARRIVAL_DATE = '31/2/2026';
 const ARRIVAL_DATE_ERROR = 'Enter a real arrival date';
 const COMMODITY_DETAILS_TASK = 'Commodity details';
@@ -62,6 +63,21 @@ test.describe('Save and return to overview', () => {
     await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, ARRIVAL_DETAILS_TASK)).toHaveText(TO_DO);
     await animalsPages.overview.openTaskAfterReopening(referenceNumber, ARRIVAL_DETAILS_TASK);
     await expect(animalsPages.arrivalDetails.portOfEntry.select).toHaveValue('');
+  });
+
+  test('transit countries: saves the countries listed and goes to the overview', async ({ animalsJourney, animalsPages }) => {
+    const countryNames = ALL_ANSWERS.transitedCountries.map((country) => country.display);
+    await animalsJourney.toTransitedCountries();
+    for (const name of countryNames) {
+      await animalsPages.transitedCountries.addCountry(name);
+    }
+    const referenceNumber = animalsPages.transitedCountries.referenceNumberFromUrl();
+
+    await animalsPages.transitedCountries.saveAndReturnToOverview.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.openTaskAfterReopening(referenceNumber, TRANSIT_COUNTRIES_TASK);
+    await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText(countryNames);
   });
 
   test('commodity details: when the number of animals is blank, keeps its checks and stays on the page', async ({
