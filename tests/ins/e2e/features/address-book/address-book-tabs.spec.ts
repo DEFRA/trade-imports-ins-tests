@@ -5,9 +5,10 @@ import {
   addressBookTabs,
   branchTab,
   originOrConsignorTab,
+  tabOf,
   unsupportedAddressValue,
 } from '@domain/ins/constants/address-book-types';
-import { E2E_ADDRESS_BOOK_FIXTURES, ensureE2eAddressBook } from '@flows/shared/address-book-seed';
+import { E2E_ADDRESS_BOOK_FIXTURES, ensureE2eAddressBook, placeOfOriginFixture } from '@flows/shared/address-book-seed';
 import {
   addressIdsDeletedAfterEachTest,
   createStamped,
@@ -97,11 +98,7 @@ test.describe('Address book tabs', () => {
     const branchFixtureName = 'Animal and Plant Health Agency';
 
     for (const { name, addressType, uses } of E2E_ADDRESS_BOOK_FIXTURES) {
-      const tab = addressBookTabs.find((candidate) => candidate.addressType === addressType);
-      if (!tab) {
-        throw new Error(`Expected a tab for the fixture ${name}`);
-      }
-      await insJourney.toAddressBookTab(tab, { search: name });
+      await insJourney.toAddressBookTab(tabOf(addressType), { search: name });
 
       await expect(insPages.addressBookList.usesCell(name)).toHaveText(usesLabelOf(uses));
     }
@@ -134,11 +131,7 @@ test.describe('Address book fixture reconcile', () => {
   test('a fixture record holding a different use is rewritten with the fixture type and uses once, and a second run leaves it untouched', async ({
     isolatedOrganisationAddressBookApi,
   }) => {
-    const fixture = E2E_ADDRESS_BOOK_FIXTURES.find(({ name }) => name === 'Origin Farm');
-    if (!fixture) {
-      throw new Error('Expected an Origin Farm fixture');
-    }
-    const { name, addressLine1, townOrCity, postcode, countryCode, phone, email } = fixture;
+    const { name, addressLine1, townOrCity, postcode, countryCode, phone, email } = placeOfOriginFixture;
     await isolatedOrganisationAddressBookApi.createAddress({
       name,
       addressLine1,
@@ -153,8 +146,8 @@ test.describe('Address book fixture reconcile', () => {
     await ensureE2eAddressBook(isolatedOrganisationAddressBookApi);
 
     const afterFirstRun = await isolatedOrganisationAddressBookApi.findByName(name);
-    expect(afterFirstRun.addressType).toBe(fixture.addressType);
-    expect(afterFirstRun.uses).toEqual(fixture.uses);
+    expect(afterFirstRun.addressType).toBe(placeOfOriginFixture.addressType);
+    expect(afterFirstRun.uses).toEqual(placeOfOriginFixture.uses);
 
     await ensureE2eAddressBook(isolatedOrganisationAddressBookApi);
 

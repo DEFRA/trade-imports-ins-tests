@@ -16,6 +16,17 @@ import {
   PLACE_OF_ORIGIN_NAME,
 } from '@domain/shared/constants/journey-party-names';
 
+export const placeOfOriginFixture: AddressBookEntry = {
+  name: PLACE_OF_ORIGIN_NAME,
+  addressLine1: '1 Farm Lane',
+  townOrCity: 'Ennis',
+  postcode: 'V95 X7P2',
+  countryCode: 'IE',
+  phone: '+44 1234 567890',
+  email: 'contact@example.com',
+  ...heldAsPlaceOfOrigin,
+};
+
 /** The shared address-book records, in creation order. */
 export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
   {
@@ -118,16 +129,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
     email: 'contact@example.com',
     ...heldAsPlaceOfDestination,
   },
-  {
-    name: PLACE_OF_ORIGIN_NAME,
-    addressLine1: '1 Farm Lane',
-    townOrCity: 'Ennis',
-    postcode: 'V95 X7P2',
-    countryCode: 'IE',
-    phone: '+44 1234 567890',
-    email: 'contact@example.com',
-    ...heldAsPlaceOfOrigin,
-  },
+  placeOfOriginFixture,
   {
     name: CONSIGNEE_NAME,
     addressLine1: '10 Market Street',

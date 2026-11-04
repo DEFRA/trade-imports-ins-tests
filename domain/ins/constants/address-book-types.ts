@@ -56,6 +56,14 @@ export const addressBookTabs: readonly AddressBookTab[] = [
 
 export const [originOrConsignorTab, destinationConsigneeOrImporterTab, branchTab] = addressBookTabs;
 
+const tabsByAddressType: Record<AddressType, AddressBookTab> = {
+  [addressTypes.originOrConsignor]: originOrConsignorTab,
+  [addressTypes.destinationConsigneeOrImporter]: destinationConsigneeOrImporterTab,
+  [addressTypes.branch]: branchTab,
+};
+
+export const tabOf = (addressType: AddressType): AddressBookTab => tabsByAddressType[addressType];
+
 export const addressBookTabLabels = addressBookTabs.map(({ label }) => label);
 
 export const unsupportedAddressValue = 'TRANSPORTER';
