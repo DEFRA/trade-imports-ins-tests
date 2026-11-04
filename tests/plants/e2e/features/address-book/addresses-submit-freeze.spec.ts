@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
+import { renamedAndMovedNurseryAddress } from '@flows/plants/journey';
 
 test.describe('Submitted addresses keep their copy', () => {
   test('renaming the book after submit changes neither the submitted view nor the amendment, and cancelling the amendment keeps the copy', async ({
@@ -19,16 +19,7 @@ test.describe('Submitted addresses keep their copy', () => {
 
     await plantsJourney.submitFromReview();
 
-    await addressBookApi.updateAddress(address.id, {
-      ...heldAsPlaceOfOrigin,
-      name: renamed,
-      addressLine1: '4 Nursery Lane',
-      townOrCity: 'Dundee',
-      postcode: 'DD1 1AA',
-      countryCode: 'GB',
-      phone: '01738 555 0143',
-      email: 'review@example.co.uk',
-    });
+    await addressBookApi.updateAddress(address.id, renamedAndMovedNurseryAddress(renamed));
 
     await plantsNotificationActions.toNotificationView(reference);
     await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');

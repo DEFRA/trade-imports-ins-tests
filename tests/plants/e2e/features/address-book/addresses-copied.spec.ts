@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
+import { nurseryAddress } from '@flows/plants/journey';
 import type { Locator } from '@playwright/test';
 
 type AddressFields = {
@@ -42,7 +42,7 @@ test.describe('Addresses are copied, not linked', () => {
       phone: '01539 555 0105',
       email: 'full.detail@example.co.uk',
     };
-    const address = await addressBookApi.createAddress({ ...record, ...heldAsPlaceOfOrigin, countryCode: 'GB' });
+    const address = await addressBookApi.createAddress({ ...nurseryAddress(record.name), ...record });
 
     await plantsJourney.completeNotification(addressBookApi, { existing: address });
 

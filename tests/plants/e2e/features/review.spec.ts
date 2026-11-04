@@ -1,8 +1,14 @@
 import { SET_BASES } from '@page-objects/shared/sets';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
-import { POTATOES, PLANTS_FOR_PLANTING, WOOD_AND_CUT_TREES, potatoLine, arrivalDate } from '@flows/plants/journey';
+import {
+  POTATOES,
+  PLANTS_FOR_PLANTING,
+  WOOD_AND_CUT_TREES,
+  potatoLine,
+  arrivalDate,
+  renamedAndMovedNurseryAddress,
+} from '@flows/plants/journey';
 import type { PlantsPages, SharedPages } from '@page-objects';
 import { todayOrTomorrowServiceDisplayDatePattern } from '@utils/date-utils';
 
@@ -228,16 +234,7 @@ test.describe('High-risk plants check and submit section', () => {
       const originalName = address.name;
       const renamed = `Renamed Holding ${randomUUID()}`;
 
-      await addressBookApi.updateAddress(address.id, {
-        ...heldAsPlaceOfOrigin,
-        name: renamed,
-        addressLine1: '4 Nursery Lane',
-        townOrCity: 'Dundee',
-        postcode: 'DD1 1AA',
-        countryCode: 'GB',
-        phone: '01738 555 0143',
-        email: 'review@example.co.uk',
-      });
+      await addressBookApi.updateAddress(address.id, renamedAndMovedNurseryAddress(renamed));
 
       await plantsPages.placeOfDestination.open(reference);
       await expect(plantsPages.placeOfDestination.currentAddress).toContainText(originalName);
