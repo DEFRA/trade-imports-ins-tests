@@ -26,7 +26,7 @@ Playwright end-to-end, accessibility and security suite for the trade imports se
 
 ## Journey answers (animals)
 
-- `journey.ts` drives pages and holds no values. What a user says is plain data in the `journey-` files in `domain/<domain>/constants/`.
+- `journey.ts` drives pages. Notification answers, what a user says, are plain data in `domain/animals/constants/journey-options.ts`.
 - Answers come in named sets: the mandatory set (a missing answer is a compile error) and the full set. A spec starts from a set and overrides single values only where the test needs them, e.g. `{ ...MANDATORY_ANSWERS, unweanedAnimals: yesNoValues.yes }`. It never changes `journey.ts` to get a different value.
 - An answer states a fact, never how it is entered. By default the UI and seeded journeys build from the same answers.
 - A new field touches one answer type and the step that enters it.
