@@ -1,6 +1,6 @@
-import { expect, Locator } from '@playwright/test';
+import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
-import { ADDRESS_FORM_FIELD_LABELS, ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
+import { ADDRESS_FORM_FIELD_LABELS } from '@domain/ins/constants/address-form';
 
 export type AddressDetails = {
   name: string;
@@ -71,12 +71,6 @@ export abstract class InsAddressBookFormPage extends BasePage {
 
   get inputPhone(): Locator {
     return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.phone);
-  }
-
-  async expectTextboxesEmpty(): Promise<void> {
-    for (const label of ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER) {
-      await expect(this.page.getByLabel(label, { exact: true })).toHaveValue('');
-    }
   }
 
   async fill(details: AddressDetails): Promise<void> {

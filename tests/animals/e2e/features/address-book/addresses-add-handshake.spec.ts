@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { addressFormCountryNames } from '@resources/reference-data/reference-data';
 import { skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
+import { expectUsesOptions } from '@utils/uses-options-assertions';
 import type { AnimalsJourney } from '@flows/animals/journey';
 import { type InsAddressBookAddPage, type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
 import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
@@ -238,7 +239,7 @@ test.describe('Add an address from the journey via INS', () => {
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
       await expect(addPage.usesGroup(journeyUsesQuestion.legend)).toHaveAccessibleDescription(journeyUsesQuestion.consigneeHint);
-      await addPage.expectUsesOptions(journeyUsesQuestion.legend, [addressUses.importer, addressUses.placeOfDestination]);
+      await expectUsesOptions(addPage, journeyUsesQuestion.legend, [addressUses.importer, addressUses.placeOfDestination]);
       await expect(addPage.usesOption(addressUses.importer)).not.toBeChecked();
       await expect(addPage.usesOption(addressUses.placeOfDestination)).not.toBeChecked();
 

@@ -2,7 +2,23 @@ import { test, expect } from '@fixtures';
 import { addressTypes, addressUses } from '@domain/shared/constants/address-types';
 import { addressTypeOptions, addressTypeQuestion } from '@domain/ins/constants/address-book-types';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
+import { ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
+import type { InsAddressBookAddressTypePage } from '@page-objects/ins/address-book/address-type-page';
+import type { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 import { expectAddressBookList } from './expect-address-book-list';
+
+const expectNoTypeChosen = async (typePage: InsAddressBookAddressTypePage): Promise<void> => {
+  for (const { addressType } of addressTypeOptions) {
+    await expect(typePage.radio(addressType)).not.toBeChecked();
+  }
+};
+
+const expectTextboxesEmpty = async (form: InsAddressBookFormPage): Promise<void> => {
+  await expect(form.textboxes).toHaveCount(ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER.length);
+  for (const textbox of await form.textboxes.all()) {
+    await expect(textbox).toHaveValue('');
+  }
+};
 
 test.describe('Choosing an address type before adding an address', () => {
   test('Add a new address opens Choose an address type with its caption, the three types and their hints in order, Continue and Back to the address book', async ({
@@ -16,7 +32,11 @@ test.describe('Choosing an address type before adding an address', () => {
     await expect(pages.page).toHaveURL(new RegExp(`${typePage.expectedUrl}\\?start=true$`));
     await expect(typePage.caption).toBeVisible();
     await expect(typePage.heading).toBeVisible();
-    await typePage.expectTypeOptionsInOrder();
+    await expect(typePage.radios).toHaveCount(addressTypeOptions.length);
+    for (const [index, { label, hint }] of addressTypeOptions.entries()) {
+      await expect(typePage.radios.nth(index)).toHaveAccessibleName(label);
+      await expect(typePage.radios.nth(index)).toHaveAccessibleDescription(hint);
+    }
     await expect(typePage.btnContinue).toBeVisible();
 
     await typePage.linkBack.click();
@@ -107,9 +127,9 @@ test.describe('Choosing an address type before adding an address', () => {
 
     await insPages.addressBookList.btnAddNewAddress.click();
 
-    await insPages.addressBookAddressType.expectNoTypeChosen();
+    await expectNoTypeChosen(insPages.addressBookAddressType);
     await insJourney.chooseAddressType(addressTypes.branch);
-    await addPage.expectTextboxesEmpty();
+    await expectTextboxesEmpty(addPage);
     await expect(addPage.usesOption(addressUses.branchAddress)).not.toBeChecked();
   });
 
@@ -122,9 +142,9 @@ test.describe('Choosing an address type before adding an address', () => {
 
     await insPages.addressBookList.btnAddNewAddress.click();
 
-    await insPages.addressBookAddressType.expectNoTypeChosen();
+    await expectNoTypeChosen(insPages.addressBookAddressType);
     await insJourney.chooseAddressType();
-    await addPage.expectTextboxesEmpty();
+    await expectTextboxesEmpty(addPage);
     await expect(addPage.usesOption(addressUses.placeOfOrigin)).not.toBeChecked();
   });
 

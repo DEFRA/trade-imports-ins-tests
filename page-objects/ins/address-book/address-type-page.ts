@@ -1,8 +1,8 @@
-import { expect, Locator } from '@playwright/test';
+import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
 import { opensAtExpectedUrl } from '@page-objects/shared/opens-at-expected-url';
 import type { AddressType } from '@domain/shared/constants/address-types';
-import { addressTypeLabels, addressTypeOptions } from '@domain/ins/constants/address-book-types';
+import { addressTypeLabels } from '@domain/ins/constants/address-book-types';
 
 export class InsAddressBookAddressTypePage extends opensAtExpectedUrl(BasePage) {
   readonly expectedUrl = '/address-book/add/address-type';
@@ -27,22 +27,8 @@ export class InsAddressBookAddressTypePage extends opensAtExpectedUrl(BasePage) 
     return this.page.getByRole('button', { name: 'Continue', exact: true });
   }
 
-  async expectTypeOptionsInOrder(): Promise<void> {
-    await expect(this.radios).toHaveCount(addressTypeOptions.length);
-    for (const [index, { label, hint }] of addressTypeOptions.entries()) {
-      await expect(this.radios.nth(index)).toHaveAccessibleName(label);
-      await expect(this.radios.nth(index)).toHaveAccessibleDescription(hint);
-    }
-  }
-
   radio(addressType: AddressType): Locator {
     return this.radioGroup.getByRole('radio', { name: addressTypeLabels[addressType], exact: true });
-  }
-
-  async expectNoTypeChosen(): Promise<void> {
-    for (const { addressType } of addressTypeOptions) {
-      await expect(this.radio(addressType)).not.toBeChecked();
-    }
   }
 
   async choose(addressType: AddressType): Promise<void> {

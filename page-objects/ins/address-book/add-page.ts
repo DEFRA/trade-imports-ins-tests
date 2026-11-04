@@ -1,4 +1,4 @@
-import { expect, Locator } from '@playwright/test';
+import { Locator } from '@playwright/test';
 import { type AddressDetails, InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 import { opensAtExpectedUrl } from '@page-objects/shared/opens-at-expected-url';
 import type { AddressUse } from '@domain/shared/constants/address-types';
@@ -55,14 +55,6 @@ export class InsAddressBookAddPage extends opensAtExpectedUrl(InsAddressBookForm
 
   usesOption(use: AddressUse): Locator {
     return this.page.getByRole('checkbox', { name: usesQuestionLabels[use], exact: true });
-  }
-
-  async expectUsesOptions(legend: string, uses: readonly AddressUse[]): Promise<void> {
-    const options = this.usesOptions(legend);
-    await expect(options).toHaveCount(uses.length);
-    for (const [index, use] of uses.entries()) {
-      await expect(options.nth(index)).toHaveAccessibleName(usesQuestionLabels[use]);
-    }
   }
 
   async tickUses(uses: readonly AddressUse[]): Promise<void> {

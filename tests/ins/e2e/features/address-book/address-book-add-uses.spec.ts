@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { timeouts } from '@config/timeouts';
+import { expectUsesOptions } from '@utils/uses-options-assertions';
 import { ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { addressTypes, addressUses, classificationOf } from '@domain/shared/constants/address-types';
@@ -86,7 +87,7 @@ for (const tab of addressBookTabs) {
       await expect(addPage.usesGroup(legend)).toBeVisible();
       await expectAbove(addPage.sectionBreak, addPage.usesGroup(legend));
       await expect(addPage.usesGroup(legend)).toHaveAccessibleDescription(usesQuestion.hint);
-      await addPage.expectUsesOptions(legend, offeredUses);
+      await expectUsesOptions(addPage, legend, offeredUses);
       for (const use of offeredUses) {
         await expect(addPage.usesOption(use)).toHaveAccessibleDescription('');
       }
