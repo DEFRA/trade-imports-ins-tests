@@ -48,6 +48,7 @@ for (const tab of addressBookTabs) {
   const { addressType } = tab;
   const label = addressTypeLabels[addressType];
   const offeredUses = usesQuestionOptions[addressType];
+  const legend = usesQuestionLegends[addressType];
 
   test.describe(`Adding a ${label} address`, () => {
     test('opens the form with only the address and contact text fields, a section break, and the uses question with its legend, hint and options', async ({
@@ -61,11 +62,13 @@ for (const tab of addressBookTabs) {
       await expect(addPage.textboxes).toHaveCount(ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER.length);
       await expect(addPage.sectionBreak).toHaveCount(1);
       await expectAbove(addPage.inputPhone, addPage.sectionBreak);
-      await expectAbove(addPage.sectionBreak, addPage.usesGroup);
-      await expect(addPage.usesLegend).toHaveText(usesQuestionLegends[addressType]);
-      await expect(addPage.usesGroup).toHaveAccessibleDescription(usesQuestion.hint);
-      await expect(addPage.usesOptionLabels).toHaveText(offeredUses.map((use) => usesQuestionLabels[use]));
-      await expect(addPage.usesOptionHints).toHaveCount(0);
+      await expect(addPage.usesGroup(legend)).toBeVisible();
+      await expectAbove(addPage.sectionBreak, addPage.usesGroup(legend));
+      await expect(addPage.usesGroup(legend)).toHaveAccessibleDescription(usesQuestion.hint);
+      await addPage.expectUsesOptions(legend, offeredUses);
+      for (const use of offeredUses) {
+        await expect(addPage.usesOption(use)).toHaveAccessibleDescription('');
+      }
     });
 
     if (addressTypesRequiringUnitedKingdom.includes(addressType)) {
@@ -95,7 +98,7 @@ for (const tab of addressBookTabs) {
       await addPage.saveAndContinue();
 
       await expect(addPage.errorSummary).toBeVisible();
-      await expect(addPage.usesInlineError).toContainText(usesQuestion.error);
+      await expect(addPage.usesGroup(legend)).toHaveAccessibleDescription(`${usesQuestion.hint} Error: ${usesQuestion.error}`);
       await addPage.errorSummaryLink(usesQuestion.error).click();
       await expect(addPage.usesOption(offeredUses[0])).toBeFocused();
     });
@@ -108,7 +111,7 @@ for (const tab of addressBookTabs) {
       await addPage.saveAndContinue();
 
       await expect(addPage.errorSummary.getByRole('link')).toHaveText([ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired]);
-      await expect(addPage.usesInlineError).toHaveCount(0);
+      await expect(addPage.usesGroup(legend)).toHaveAccessibleDescription(usesQuestion.hint);
     });
 
     test('ticking every offered use and saving lands on its tab, lists the address with its uses, and stores its type, its uses and its country', async ({

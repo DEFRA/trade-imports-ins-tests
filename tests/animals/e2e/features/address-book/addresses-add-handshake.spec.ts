@@ -237,9 +237,8 @@ test.describe('Add an address from the journey via INS', () => {
       const details = newAddressFor('Consignee');
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
-      await expect(addPage.usesLegend).toHaveText(journeyUsesQuestion.legend);
-      await expect(addPage.usesGroup).toHaveAccessibleDescription(journeyUsesQuestion.consigneeHint);
-      await expect(addPage.usesOptionLabels).toHaveText([usesQuestionLabels.IMPORTER, usesQuestionLabels.PLACE_OF_DESTINATION]);
+      await expect(addPage.usesGroup(journeyUsesQuestion.legend)).toHaveAccessibleDescription(journeyUsesQuestion.consigneeHint);
+      await addPage.expectUsesOptions(journeyUsesQuestion.legend, [addressUses.importer, addressUses.placeOfDestination]);
       await expect(addPage.usesOption(addressUses.importer)).not.toBeChecked();
       await expect(addPage.usesOption(addressUses.placeOfDestination)).not.toBeChecked();
 

@@ -1,4 +1,4 @@
-import { Locator } from '@playwright/test';
+import { expect, Locator } from '@playwright/test';
 import { type AddressDetails, InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 import { opensAtExpectedUrl } from '@page-objects/ins/address-book/opens-at-expected-url';
 import type { AddressUse } from '@domain/shared/constants/address-types';
@@ -41,33 +41,28 @@ export class InsAddressBookAddPage extends opensAtExpectedUrl(InsAddressBookForm
     return this.page.getByRole('link', { name: 'Cancel and return to hub', exact: true });
   }
 
-  /** The uses question: the group after the section break that follows the contact fields. */
-  get usesGroup(): Locator {
-    return this.page.locator('hr.govuk-section-break + .govuk-form-group > fieldset.govuk-fieldset');
-  }
-
-  get usesLegend(): Locator {
-    return this.usesGroup.locator('legend');
+  usesGroup(legend: string): Locator {
+    return this.page.getByRole('group', { name: legend, exact: true });
   }
 
   get sectionBreak(): Locator {
     return this.page.getByRole('separator');
   }
 
-  get usesOptionLabels(): Locator {
-    return this.usesGroup.locator('label');
-  }
-
-  get usesOptionHints(): Locator {
-    return this.usesGroup.locator('.govuk-checkboxes__hint');
-  }
-
-  get usesInlineError(): Locator {
-    return this.usesGroup.locator('.govuk-error-message');
+  usesOptions(legend: string): Locator {
+    return this.usesGroup(legend).getByRole('checkbox');
   }
 
   usesOption(use: AddressUse): Locator {
-    return this.usesGroup.getByRole('checkbox', { name: usesQuestionLabels[use], exact: true });
+    return this.page.getByRole('checkbox', { name: usesQuestionLabels[use], exact: true });
+  }
+
+  async expectUsesOptions(legend: string, uses: readonly AddressUse[]): Promise<void> {
+    const options = this.usesOptions(legend);
+    await expect(options).toHaveCount(uses.length);
+    for (const [index, use] of uses.entries()) {
+      await expect(options.nth(index)).toHaveAccessibleName(usesQuestionLabels[use]);
+    }
   }
 
   async tickUses(uses: readonly AddressUse[]): Promise<void> {
