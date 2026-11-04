@@ -14,6 +14,11 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
     return this.page.getByRole('heading', { level: 1, name: 'Address book' });
   }
 
+  /** The URL of the list opened with no query. */
+  get listUrl(): RegExp {
+    return new RegExp(`${escapeRegex(this.expectedUrl)}$`);
+  }
+
   /** The URL of the list opened on a tab. */
   tabUrl(tab: AddressBookTab): RegExp {
     return new RegExp(`${escapeRegex(this.expectedUrl)}\\?addressType=${tab.addressType}$`);

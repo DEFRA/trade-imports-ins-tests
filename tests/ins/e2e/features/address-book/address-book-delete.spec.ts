@@ -16,7 +16,7 @@ test.describe('Address book delete', () => {
     await expect(insPages.addressBookDelete.heading).toBeVisible();
     await insPages.addressBookDelete.confirm();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await expectAddressBookList({ pages, insPages });
     await expect(insPages.addressBookList.successBanner).toContainText(`${name} address deleted`);
     await insPages.addressBookList.search(name, { submitWith: 'button' });
     await expectNoMatchesListed(insPages.addressBookList);
@@ -144,7 +144,7 @@ test.describe('Address book delete', () => {
 
     await insPages.addressBookDelete.open(created.id, { userId: users.andrew.crn });
     await insPages.addressBookDelete.confirm();
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await expectAddressBookList({ pages, insPages });
     expect((await addressBookApi.getAddress(created.id)).deleted).toBe(true);
     await insPages.addressBookList.search(name, { submitWith: 'button' });
     await expectNoMatchesListed(insPages.addressBookList);

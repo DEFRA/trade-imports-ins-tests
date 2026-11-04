@@ -42,7 +42,7 @@ test.describe('Address book edit', () => {
     await insPages.addressBookEdit.fill(detailsWithOptionalFieldsBlank);
     await insPages.addressBookEdit.save();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await expectAddressBookList({ pages, insPages });
     await expect(insPages.addressBookList.successBanner).toContainText(`${renamed} address updated`);
 
     const stored = await addressBookApi.getAddress(created.id);

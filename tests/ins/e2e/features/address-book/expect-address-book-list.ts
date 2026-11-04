@@ -1,5 +1,5 @@
 import { expect } from '@fixtures';
-import type { Page, Locator } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import type { InsAddressBookListPage } from '@page-objects/ins/address-book/list-page';
 import { addressBookTabLabels } from '@domain/ins/constants/address-book-types';
 
@@ -8,9 +8,9 @@ export const expectAddressBookList = async ({
   insPages: { addressBookList },
 }: {
   pages: { page: Page };
-  insPages: { addressBookList: { expectedUrl: string; heading: Locator } };
+  insPages: { addressBookList: Pick<InsAddressBookListPage, 'listUrl' | 'heading'> };
 }): Promise<void> => {
-  await expect(page).toHaveURL(new RegExp(`${addressBookList.expectedUrl}$`));
+  await expect(page).toHaveURL(addressBookList.listUrl);
   await expect(addressBookList.heading).toBeVisible();
   await expect(page.getByText('Page not found')).toHaveCount(0);
 };

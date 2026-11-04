@@ -3,6 +3,7 @@ import { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page
 import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { ADDRESS_FORM_FIELD_LABELS, ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
 import { expectAbove } from './expect-above';
+import { expectAddressBookList } from './expect-address-book-list';
 
 async function expectFieldsGroupedUnderSections(form: InsAddressBookFormPage): Promise<void> {
   await expect(form.sectionHeading('Address')).toBeVisible();
@@ -63,8 +64,7 @@ test.describe('The add-details form for an address entered by hand', () => {
 
     await insPages.addressBookAdd.linkCancelAndReturnToAddressBook.click();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
-    await expect(insPages.addressBookList.heading).toBeVisible();
+    await expectAddressBookList({ pages, insPages });
     await expect(insPages.addressBookList.row(name)).toHaveCount(0);
     expect(await addressBookApi.listAddresses(name)).toHaveLength(0);
   });

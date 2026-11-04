@@ -14,7 +14,7 @@ test.describe('Security scan (ins)', { tag: '@active' }, () => {
     test.slow();
     await insPages.addressBookList.open();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await expect(pages.page).toHaveURL(insPages.addressBookList.listUrl);
     await expect(insPages.addressBookList.heading).toBeVisible();
 
     const name = `Security Scan Farm ${Date.now()}`;

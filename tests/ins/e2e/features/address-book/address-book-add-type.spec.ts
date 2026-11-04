@@ -2,6 +2,7 @@ import { test, expect } from '@fixtures';
 import { addressTypes, addressUses } from '@domain/shared/constants/address-types';
 import { addressTypeOptions, addressTypeQuestion } from '@domain/ins/constants/address-book-types';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
+import { expectAddressBookList } from './expect-address-book-list';
 
 test.describe('Choosing an address type before adding an address', () => {
   test('Add a new address opens Choose an address type with its caption, the three types and their hints in order, Continue and Back to the address book', async ({
@@ -20,7 +21,7 @@ test.describe('Choosing an address type before adding an address', () => {
 
     await typePage.linkBack.click();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await expectAddressBookList({ pages, insPages });
   });
 
   test('Continue with no type chosen shows Select an address type against the options and in the summary, whose link focuses the first option', async ({
