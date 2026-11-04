@@ -190,7 +190,7 @@ test.describe('Addresses are copied, not linked', () => {
       },
     );
 
-    await animalsPages.notificationView.errorSummary.getByRole('link', { name: message }).click();
+    await animalsPages.notificationView.errorSummaryLink(message).click();
     await expect(animalsPages.consignorEdit.heading).toBeVisible();
     await animalsPages.consignorEdit.country.selectOption({ label: 'United Kingdom' });
     await animalsPages.consignorEdit.saveChanges.click();

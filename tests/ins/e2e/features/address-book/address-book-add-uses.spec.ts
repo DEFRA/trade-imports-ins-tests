@@ -115,7 +115,7 @@ for (const tab of addressBookTabs) {
 
       await addPage.saveAndContinue();
 
-      await expect(addPage.errorSummary.getByRole('link')).toHaveText([ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired]);
+      await expect(addPage.errorSummaryLinks).toHaveText([ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired]);
       await expect(addPage.usesGroup(legend)).toHaveAccessibleDescription(usesQuestion.hint);
     });
 

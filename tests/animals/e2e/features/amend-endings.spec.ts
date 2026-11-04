@@ -149,7 +149,7 @@ test.describe('Amendment page endings', () => {
     await expect(pages.page).toHaveURL(/\/notification-view\?refused=1$/);
     await expect(animalsPages.notificationView.errorSummary).toBeVisible();
     await expect(animalsPages.notificationView.errorSummary).toContainText('There is a problem');
-    await expect(animalsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toBeVisible();
+    await expect(animalsPages.notificationView.errorSummaryLink('Complete arrival details')).toBeVisible();
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
     await expect(animalsPages.declaration.heading).not.toBeVisible();
   });

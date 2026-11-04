@@ -268,7 +268,7 @@ test.describe('Add an address from the journey via INS', () => {
       await addPage.btnSaveAndReturnToAddressPage.click();
 
       await expect(addPage.heading).toBeVisible();
-      await expect(addPage.errorSummary.getByRole('link')).toHaveText([
+      await expect(addPage.errorSummaryLinks).toHaveText([
         'Enter address line 1',
         'Enter a town or city',
         'Enter a postcode or Zip code',

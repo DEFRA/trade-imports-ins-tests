@@ -48,7 +48,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(pages.page).toHaveURL(/\/notification-view\?refused=1$/);
       await expect(animalsPages.notificationView.errorSummary).toBeVisible();
       await expect(animalsPages.notificationView.errorSummary).toContainText('There is a problem');
-      await expect(animalsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toBeVisible();
+      await expect(animalsPages.notificationView.errorSummaryLink('Complete arrival details')).toBeVisible();
     });
   });
 

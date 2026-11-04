@@ -32,7 +32,7 @@ async function expectAmending(pages: SharedPages, plantsPages: PlantsPages, refe
 test.describe('High-risk plants check and submit section', () => {
   test('review stays blocked until the final required row is complete', async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
     const { reference, address } = await plantsJourney.completeNotification(addressBookApi, { contact: false });
-    const contactEntry = plantsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete contact', exact: true });
+    const contactEntry = plantsPages.notificationView.errorSummaryLink('Complete contact');
     await expect(contactEntry).toHaveAttribute('href', '#contact');
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
@@ -197,7 +197,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(plantsPages.notificationView.card('Import details')).toContainText('France');
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
-    const correction = plantsPages.notificationView.errorSummary.getByRole('link', { name: /Poland/ });
+    const correction = plantsPages.notificationView.errorSummaryLink(/Poland/);
     await expect(correction).toHaveAttribute('href', `${SET_BASES.highRiskPlants}/notifications/${reference}/origin?change=1`);
     await expect(plantsPages.overview.statusTag).toHaveText('Draft');
     await correction.click();
@@ -483,10 +483,7 @@ test.describe('High-risk plants check and submit section', () => {
 
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
     await expect(plantsPages.notificationView.errorSummary).toContainText('There is a problem');
-    await expect(plantsPages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toHaveAttribute(
-      'href',
-      '#arrival-details',
-    );
+    await expect(plantsPages.notificationView.errorSummaryLink('Complete arrival details')).toHaveAttribute('href', '#arrival-details');
     await expect(plantsPages.overview.statusTag).toHaveText('Amend');
   });
 });
@@ -635,7 +632,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
     await expect(plantsPages.overview.statusTag).not.toHaveText('Submitted');
 
-    await plantsPages.notificationView.errorSummary.getByRole('link', { name: error }).click();
+    await plantsPages.notificationView.errorSummaryLink(error).click();
     await expect(plantsPages.placeOfDestinationEdit.heading).toBeVisible();
     await plantsPages.placeOfDestinationEdit.country.selectOption('GB');
     await plantsPages.placeOfDestinationEdit.saveChanges.click();
@@ -644,7 +641,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await expect(plantsPages.notificationView.errorSummary).not.toContainText(error);
     await expect(plantsPages.notificationView.errorSummary).toContainText(contactError);
 
-    await plantsPages.notificationView.errorSummary.getByRole('link', { name: contactError }).click();
+    await plantsPages.notificationView.errorSummaryLink(contactError).click();
     await expect(plantsPages.contactAddressEdit.heading).toBeVisible();
     await plantsPages.contactAddressEdit.country.selectOption('GB');
     await plantsPages.contactAddressEdit.saveChanges.click();
