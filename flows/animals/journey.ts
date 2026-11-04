@@ -28,6 +28,7 @@ import { countryCodes } from '@domain/animals/constants/country-codes';
 import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { importReasons } from '@domain/animals/constants/import-reasons';
 import { transporters } from '@domain/animals/constants/transporters';
+import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 
 export type ArrivalDetailsAnswer = {
   date?: string;
@@ -695,7 +696,7 @@ export class AnimalsJourney {
 
     await pages.additionalDetails.heading.waitFor(pageLoadWait);
     await pages.additionalDetails.certifiedFor('Further keeping').check();
-    await pages.additionalDetails.containsUnweanedAnimals('No').check();
+    await pages.additionalDetails.containsUnweanedAnimals(yesNoValues.no).check();
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
@@ -748,6 +749,7 @@ export class AnimalsJourney {
 
     await pages.additionalDetails.heading.waitFor(pageLoadWait);
     await pages.additionalDetails.certifiedFor('Registered equine animal').check();
+    await pages.additionalDetails.containsUnweanedAnimals(yesNoValues.no).check();
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);

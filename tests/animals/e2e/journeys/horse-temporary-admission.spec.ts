@@ -41,9 +41,8 @@ test.describe('Horse by sea under temporary admission', () => {
     await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Port of exit')).toContainText('Holyhead Port');
 
     const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional animal details');
-    await expect(animalsPages.notificationView.summaryValue(additionalAnimalDetails, 'Certified for')).toHaveText(
-      'Registered equine animal',
-    );
+    await expect(additionalAnimalDetails.getByRole('term')).toHaveText(['Certified for', 'Includes unweaned animals']);
+    await expect(additionalAnimalDetails.getByRole('definition')).toHaveText(['Registered equine animal', 'No']);
 
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Port of entry')).toContainText('Holyhead Port');
