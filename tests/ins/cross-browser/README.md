@@ -3,12 +3,7 @@
 This folder holds no specs. The INS cross-browser tests are existing e2e specs, selected by the
 `@cross-browser` tag and run in Playwright's Firefox and WebKit.
 
-## Strategy
-
-Tag existing e2e tests so that, together, they render as many INS pages as possible in each engine.
-
-- Choose tests that also run on CDP.
-- Leave out validation and backend checks, which do not vary by browser.
+Strategy: see [`docs/cross-browser.md`](../../../docs/cross-browser.md).
 
 ## Run on the local stack
 

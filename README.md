@@ -377,35 +377,14 @@ If it is not set, Playwright's default applies (50% of cores on CI).
 
 ## Cross-browser tests
 
-Tests tagged `@cross-browser` also run in Playwright's Firefox and WebKit. The
-set is the journey walks, sign-in and one test for each page the walks do not
-reach, so every page is rendered in each engine. It does not repeat the
-validation and backend checks, which do not vary by browser.
+Tests tagged `@cross-browser` also run in Playwright's Firefox and WebKit, to
+render every page in each engine. Each domain has its own commands:
+[animals](tests/animals/cross-browser/README.md),
+[animals-admin](tests/animals-admin/cross-browser/README.md) and
+[ins](tests/ins/cross-browser/README.md). `npm run test:docker-compose:cross-browser`
+runs them all.
 
-The animals commands are also in [`tests/animals/cross-browser/`](tests/animals/cross-browser/README.md).
-
-Run them against the docker-compose stack.
-
-| Command                                                                                     | Runs                           |
-| ------------------------------------------------------------------------------------------- | ------------------------------ |
-| `npm run test:docker-compose:cross-browser`                                                 | Firefox and WebKit, in one run |
-| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=firefox`       | Firefox only                   |
-| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=webkit`        | WebKit only                    |
-| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=mobile-webkit` | iPhone 17 on WebKit (paused)   |
-
-The `firefox` and `webkit` projects run only with `--project`, so every other
-script stays on Chromium. The commands add `--grep '@cross-browser'`; without it
-a named engine runs every test. Write the flag as `--project=firefox`: `--project` takes several values, so with a space a
-trailing path is read as a project name. Add a test to the set by tagging it:
-
-```ts
-test('renders the page', { tag: '@cross-browser' }, async ({ animalsPages }) => {});
-```
-
-The `mobile-webkit` project is paused: see [Mobile (paused)](tests/animals/cross-browser/README.md#mobile-paused).
-
-Do not run these engines with `PLAYWRIGHT_IN_CONTAINER=1`. The host-resolver
-rule that mode adds is Chromium-only.
+See [`docs/cross-browser.md`](docs/cross-browser.md) for the strategy, what is covered and how it works.
 
 ## Visual Regression Tests
 
