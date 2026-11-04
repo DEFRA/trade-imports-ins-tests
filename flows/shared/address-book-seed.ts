@@ -16,6 +16,17 @@ import {
   PLACE_OF_ORIGIN_NAME,
 } from '@domain/shared/constants/journey-party-names';
 
+export const branchAddressFixture: AddressBookEntry = {
+  name: CONTACT_ADDRESS_NAME,
+  addressLine1: 'Woodham Lane',
+  townOrCity: 'Addlestone',
+  postcode: 'KT15 3NB',
+  countryCode: 'GB',
+  phone: '+44 1234 567890',
+  email: 'contact@example.com',
+  ...heldAsBranchAddress,
+};
+
 export const placeOfOriginFixture: AddressBookEntry = {
   name: PLACE_OF_ORIGIN_NAME,
   addressLine1: '1 Farm Lane',
@@ -59,16 +70,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
     email: 'contact@example.com',
     ...heldAsConsignor,
   },
-  {
-    name: CONTACT_ADDRESS_NAME,
-    addressLine1: 'Woodham Lane',
-    townOrCity: 'Addlestone',
-    postcode: 'KT15 3NB',
-    countryCode: 'GB',
-    phone: '+44 1234 567890',
-    email: 'contact@example.com',
-    ...heldAsBranchAddress,
-  },
+  branchAddressFixture,
   {
     name: 'Danish Meat Export ApS',
     addressLine1: 'Havnegade 21',

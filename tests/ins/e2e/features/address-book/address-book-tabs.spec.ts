@@ -8,7 +8,12 @@ import {
   tabOf,
   unsupportedAddressValue,
 } from '@domain/ins/constants/address-book-types';
-import { E2E_ADDRESS_BOOK_FIXTURES, ensureE2eAddressBook, placeOfOriginFixture } from '@flows/shared/address-book-seed';
+import {
+  branchAddressFixture,
+  E2E_ADDRESS_BOOK_FIXTURES,
+  ensureE2eAddressBook,
+  placeOfOriginFixture,
+} from '@flows/shared/address-book-seed';
 import { addressIdsDeletedAfterEachTest, createStamped, stampedAddressesOnTab, usesLabelOf } from './stamped-addresses';
 
 const createdAddressIds = addressIdsDeletedAfterEachTest('addressBookApi');
@@ -86,17 +91,15 @@ test.describe('Address book tabs', () => {
     insPages,
     insJourney,
   }) => {
-    const branchFixtureName = 'Animal and Plant Health Agency';
-
     for (const { name, addressType, uses } of E2E_ADDRESS_BOOK_FIXTURES) {
       await insJourney.toAddressBookTab(tabOf(addressType), { search: name });
 
       await expect(insPages.addressBookList.usesCell(name)).toHaveText(usesLabelOf(uses));
     }
 
-    await insJourney.toAddressBookTab(originOrConsignorTab, { search: branchFixtureName });
+    await insJourney.toAddressBookTab(originOrConsignorTab, { search: branchAddressFixture.name });
 
-    await expect(insPages.addressBookList.row(branchFixtureName)).toHaveCount(0);
+    await expect(insPages.addressBookList.row(branchAddressFixture.name)).toHaveCount(0);
   });
 });
 
