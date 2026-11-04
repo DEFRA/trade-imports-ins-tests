@@ -16,7 +16,6 @@ const OWN_RECORD = {
   email: 'edit-copy@example.co.uk',
 };
 
-/** A ready-to-submit notification whose consignor is a copy of the named record. */
 async function draftWithConsignor(animalsSeededJourney: AnimalsSeededJourney, animalsPages: AnimalsPages, name: string): Promise<string> {
   const referenceNumber = await animalsSeededJourney.createDraftNotification();
   await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
@@ -35,8 +34,6 @@ test.describe('Copied addresses are edited on the notification', () => {
   }) => {
     test.slow();
 
-    // Own record: a broken edit would reach the book, and the shared fixtures
-    // are read by every other spec running alongside this one.
     const stamp = Date.now();
     const name = `Editable Farm ${stamp}`;
     const editedName = `Edited Holding ${stamp}`;
@@ -172,12 +169,10 @@ test.describe('Copied addresses are edited on the notification', () => {
     const { change, editDetails } = AnimalsAddressesPage.partyLinkNames('Consignor');
     await expect(animalsPages.addresses.partyLinks('Consignor')).toHaveText([change, editDetails]);
 
-    // The list below chooses a different contact; the current one is edited apart from it.
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
     await expect(animalsPages.contactAddress.address('Animal and Plant Health Agency')).toBeVisible();
     await expect(animalsPages.contactAddress.editCurrentContact).toBeVisible();
 
-    // The review keeps one Change per card, and an Edit details per copied address.
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
     await expect(animalsPages.notificationView.changeLink('Change roles and addresses')).toBeVisible();
     await expect(animalsPages.notificationView.editPartyDetails('Roles and addresses', 'Consignor')).toBeVisible();
