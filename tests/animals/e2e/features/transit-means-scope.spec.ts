@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
-import type { AnimalsPages, SharedPages } from '@page-objects';
+import { createAnimalsPages, createSharedPages, type AnimalsPages, type SharedPages } from '@page-objects';
+import { AnimalsJourney } from '@flows/animals/journey';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { expectEmptyTransitList } from '@utils/transit-countries-assertions';
 
@@ -75,13 +76,17 @@ test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () 
     pages,
     animalsJourney,
     animalsPages,
+    journeyContext,
   }) => {
     await animalsJourney.toTransitedCountries();
     const referenceNumber = animalsPages.transitedCountries.referenceNumberFromUrl();
 
     const secondTab = await pages.page.context().newPage();
     try {
-      await animalsJourney.saveArrivalDetailsInTab(secondTab, referenceNumber, meansOfTransport.airplane.display);
+      const secondTabPages = createAnimalsPages(secondTab);
+      const secondTabJourney = new AnimalsJourney(secondTabPages, createSharedPages(secondTab), journeyContext);
+      await secondTabPages.arrivalDetails.open(referenceNumber);
+      await secondTabJourney.saveArrivalDetailsOnOpenPage({ means: meansOfTransport.airplane.display });
     } finally {
       await secondTab.close();
     }

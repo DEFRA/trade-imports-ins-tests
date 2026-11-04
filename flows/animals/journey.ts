@@ -1,7 +1,7 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
-import type { Locator, Page } from '@playwright/test';
-import { createAnimalsPages, type AnimalsPages, type SharedPages } from '@page-objects';
+import type { Locator } from '@playwright/test';
+import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
 import type { PartyRole } from '@page-objects/animals/addresses-page';
 import type { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
@@ -520,13 +520,7 @@ export class AnimalsJourney {
     await this.saveArrivalDetailsOnOpenPage({ means });
   }
 
-  async saveArrivalDetailsInTab(tab: Page, referenceNumber: string, means: string): Promise<void> {
-    const tabJourney = new AnimalsJourney(createAnimalsPages(tab), this.pages, this.context);
-    await tabJourney.animalsPages.arrivalDetails.open(referenceNumber);
-    await tabJourney.saveArrivalDetailsOnOpenPage({ means });
-  }
-
-  private async saveArrivalDetailsOnOpenPage(answer: ArrivalDetailsAnswer): Promise<void> {
+  async saveArrivalDetailsOnOpenPage(answer: ArrivalDetailsAnswer): Promise<void> {
     await this.animalsPages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails(answer);
     await this.animalsPages.arrivalDetails.saveAndContinue.click();
