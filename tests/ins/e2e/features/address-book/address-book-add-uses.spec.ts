@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { timeouts } from '@config/timeouts';
 import { ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
-import { addressUses, classificationOf } from '@domain/shared/constants/address-types';
+import { addressTypes, addressUses, classificationOf } from '@domain/shared/constants/address-types';
 import {
   addressBookTabs,
   addressTypeLabels,
@@ -44,6 +44,27 @@ test.describe('Adding an address with its uses', () => {
   });
 });
 
+test.describe('The Country select on the add form', () => {
+  for (const addressType of addressTypesRequiringUnitedKingdom) {
+    test(`a ${addressTypeLabels[addressType]} address offers United Kingdom alone, selected`, async ({ insPages, insJourney }) => {
+      await insJourney.toAddressForm({ addressType });
+
+      await expect(insPages.addressBookAdd.countryOptions).toHaveText([UNITED_KINGDOM]);
+      await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText(UNITED_KINGDOM);
+    });
+  }
+
+  test(`an ${addressTypeLabels[addressTypes.originOrConsignor]} address opens on Select a country first with United Kingdom selected`, async ({
+    insPages,
+    insJourney,
+  }) => {
+    await insJourney.toAddressForm({ addressType: addressTypes.originOrConsignor });
+
+    await expect(insPages.addressBookAdd.countryOptions.first()).toHaveText('Select a country');
+    await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText(UNITED_KINGDOM);
+  });
+});
+
 for (const tab of addressBookTabs) {
   const { addressType } = tab;
   const label = addressTypeLabels[addressType];
@@ -70,22 +91,6 @@ for (const tab of addressBookTabs) {
         await expect(addPage.usesOption(use)).toHaveAccessibleDescription('');
       }
     });
-
-    if (addressTypesRequiringUnitedKingdom.includes(addressType)) {
-      test('opens the Country select offering United Kingdom alone, selected', async ({ insPages, insJourney }) => {
-        await insJourney.toAddressForm({ addressType });
-
-        await expect(insPages.addressBookAdd.countryOptions).toHaveText([UNITED_KINGDOM]);
-        await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText(UNITED_KINGDOM);
-      });
-    } else {
-      test('opens the Country select on Select a country first with United Kingdom selected', async ({ insPages, insJourney }) => {
-        await insJourney.toAddressForm({ addressType });
-
-        await expect(insPages.addressBookAdd.countryOptions.first()).toHaveText('Select a country');
-        await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText(UNITED_KINGDOM);
-      });
-    }
 
     test('saving valid fields with no use shows the uses error against the question and in the summary, whose link focuses the first option', async ({
       insPages,
