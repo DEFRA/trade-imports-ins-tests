@@ -1,20 +1,11 @@
 import { test, expect } from '@fixtures';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
-import { heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
+import { traderAddress } from '@domain/ins/constants/trader-address';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 import { SET_BASES } from '@page-objects/shared/sets';
 
-const createReturnFarm = (addressBookApi: AddressBookApiClient): Promise<AddressBookRecord> =>
-  addressBookApi.createAddress({
-    ...heldAsPlaceOfOrigin,
-    name: `Return Farm ${Date.now()}`,
-    addressLine1: '7 Return Road',
-    townOrCity: 'Carlisle',
-    postcode: 'CA1 5EE',
-    countryCode: 'GB',
-    phone: '01228 555 0166',
-    email: 'return@example.co.uk',
-  });
+const createReturnFarm = (addressBookApi: AddressBookApiClient, name = `Return Farm ${Date.now()}`): Promise<AddressBookRecord> =>
+  addressBookApi.createAddress(traderAddress(name));
 
 test.describe('Address book navigation between services', { tag: ['@compose', '@ins-frontend'] }, () => {
   test('follows the Address book item from the animals journey to the INS address book and back', async ({
@@ -91,16 +82,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
 
       const animalsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')).origin;
       const unservedAnimalsReturnUrl = `${animalsOrigin}/germinal-products/notifications`;
-      const createdAddress = await addressBookApi.createAddress({
-        ...heldAsPlaceOfOrigin,
-        name: `Germinal Return Farm ${Date.now()}`,
-        addressLine1: '8 Return Road',
-        townOrCity: 'Carlisle',
-        postcode: 'CA1 5EF',
-        countryCode: 'GB',
-        phone: '01228 555 0167',
-        email: 'germinal-return@example.co.uk',
-      });
+      const createdAddress = await createReturnFarm(addressBookApi, `Germinal Return Farm ${Date.now()}`);
 
       await insPages.addressBookView.openWithReturn(createdAddress.id, unservedAnimalsReturnUrl);
       await insPages.addressBookView.linkBack.click();

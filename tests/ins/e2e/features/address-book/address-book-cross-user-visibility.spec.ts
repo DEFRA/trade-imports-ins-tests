@@ -3,6 +3,7 @@ import { COLD_START } from '@fixtures/auth-state';
 import { createInsPages } from '@page-objects';
 import { users } from '@config/users';
 import { originOrConsignorTab } from '@domain/ins/constants/address-book-types';
+import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 
 test.describe('Address book cross-user visibility', () => {
   test('an address added by one user is visible to another user in the same organisation', async ({
@@ -13,18 +14,7 @@ test.describe('Address book cross-user visibility', () => {
   }) => {
     const createdName = `Cross User Farm ${Date.now()}`;
 
-    await insJourney.addAddressFromList(
-      {
-        name: createdName,
-        addressLine1: '2 Test Lane',
-        townOrCity: 'Carlisle',
-        postcode: 'CA1 1AA',
-        country: 'United Kingdom',
-        phone: '01228 555 0102',
-        email: 'cross-user@example.co.uk',
-      },
-      { userId: users.andrew.crn },
-    );
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(createdName, 'United Kingdom'), { userId: users.andrew.crn });
     await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrl(originOrConsignorTab));
 
     const sarahsContext = await browser.newContext({ storageState: COLD_START });

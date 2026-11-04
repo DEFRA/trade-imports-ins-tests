@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
+import { traderAddress } from '@domain/ins/constants/trader-address';
 import { addressFormCountryNames } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
@@ -18,16 +18,7 @@ test.describe('Address book country list', () => {
   });
 
   test("the edit form's Country select offers the same alphabetical list with no blank option", async ({ insPages, addressBookApi }) => {
-    const created = await addressBookApi.createAddress({
-      ...heldAsPlaceOfOrigin,
-      name: `Country Order Farm ${Date.now()}`,
-      addressLine1: '7 Order Lane',
-      townOrCity: 'Carlisle',
-      postcode: 'CA1 6FF',
-      countryCode: 'GB',
-      phone: '01228 555 0130',
-      email: 'order@example.co.uk',
-    });
+    const created = await addressBookApi.createAddress(traderAddress(`Country Order Farm ${Date.now()}`));
 
     await insPages.addressBookEdit.open(created.id);
 
