@@ -23,6 +23,10 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.page.getByLabel('Number of packages (when required)');
   }
 
+  get quantityQuestionLabels(): Locator {
+    return this.page.locator('label[for^="numberOfAnimalsQuantity"], label[for^="numberOfPackages"]');
+  }
+
   get addAnotherCommodity(): Locator {
     return this.page.getByRole('link', { name: 'Add another commodity' });
   }

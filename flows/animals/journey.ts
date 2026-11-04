@@ -205,6 +205,19 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
+  private async openReviewFromOverview(): Promise<void> {
+    await this.animalsPages.overview.reviewAndSubmitButton.click();
+    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+  }
+
+  private async chooseSpeciesAndSaveAnimalCountsToOverview(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
+    await this.toConsignmentDetails(speciesCounts.map(({ species }) => species));
+    for (const { species, animalCount } of speciesCounts) {
+      await this.animalsPages.consignmentDetails.fillAnimalCountFor(species, animalCount);
+    }
+    await this.saveCountsAndReturnToOverview();
+  }
+
   private currentReferenceNumber(): string {
     const { referenceNumber } = this.context;
     if (!referenceNumber) throw new Error('No notification has been started');
@@ -484,12 +497,13 @@ export class AnimalsJourney {
   }
 
   async toAnimalIdentificationWithCounts(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
-    await this.toConsignmentDetails(speciesCounts.map(({ species }) => species));
-    for (const { species, animalCount } of speciesCounts) {
-      await this.animalsPages.consignmentDetails.fillAnimalCountFor(species, animalCount);
-    }
-    await this.saveCountsAndReturnToOverview();
+    await this.chooseSpeciesAndSaveAnimalCountsToOverview(speciesCounts);
     await this.openIdentificationFromOverview();
+  }
+
+  async toReviewWithAnimalCounts(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
+    await this.chooseSpeciesAndSaveAnimalCountsToOverview(speciesCounts);
+    await this.openReviewFromOverview();
   }
 
   async saveAnimalWithPermanentAddress({ passportNumber, permanentAddress }: AnimalWithPermanentAddress): Promise<void> {
@@ -605,8 +619,7 @@ export class AnimalsJourney {
   async toReview(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     if (!this.context.referenceNumber) await this.startNotification();
     await this.completeAnswerSections(answers);
-    await this.animalsPages.overview.reviewAndSubmitButton.click();
-    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.openReviewFromOverview();
   }
 
   async toDeclaration(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
@@ -842,8 +855,7 @@ export class AnimalsJourney {
   }
 
   private async fromOverviewToDeclaration(): Promise<void> {
-    await this.animalsPages.overview.reviewAndSubmitButton.click();
-    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.openReviewFromOverview();
     await this.continueFromReviewToDeclaration();
   }
 
