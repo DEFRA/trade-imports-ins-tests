@@ -7,10 +7,6 @@ test.describe('Addresses are copied, not linked', () => {
     'editing the record in the address book leaves the copy on a draft notification unchanged',
     { tag: '@address-book' },
     async ({ animalsJourney, pages, animalsPages, addressBookApi }) => {
-      // Its own address rather than a shared fixture: this spec edits the record,
-      // and the E2E fixtures are shared with every other spec running alongside it.
-      // Distinct names, not one derived from the other, so "the new name is absent"
-      // is a real assertion rather than one substring matching another.
       const stamp = Date.now();
       const originalName = `Copied Farm ${stamp}`;
       const renamed = `Renamed Holding ${stamp}`;
@@ -30,13 +26,11 @@ test.describe('Addresses are copied, not linked', () => {
       const consignorAddressLines = animalsPages.addresses.partyAddressLines('Consignor');
       const chosenAddressText = AnimalsAddressesPage.expectedAddressText({ ...seeded, country: 'United Kingdom' });
       await animalsPages.addresses.addParty('Consignor').click();
-      // Newly created, so it is at the back of the book — search rather than page.
       await animalsPages.consignorSelection.select(originalName);
       await animalsPages.consignorSelection.saveAndContinue.click();
       await expect(animalsPages.addresses.heading).toBeVisible();
       await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
 
-      // Edit the record in the address book, with the journey none the wiser.
       await addressBookApi.updateAddress(address.id, {
         ...heldAsConsignor,
         name: renamed,
@@ -51,7 +45,6 @@ test.describe('Addresses are copied, not linked', () => {
       await pages.page.reload();
       await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
 
-      // The full details on check-your-answers are still the ones copied at selection.
       const referenceNumber = animalsPages.addresses.referenceNumberFromUrl();
       await animalsPages.notificationView.open(referenceNumber);
       const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
@@ -69,7 +62,6 @@ test.describe('Addresses are copied, not linked', () => {
     animalsPages,
     addressBookApi,
   }) => {
-    // Every field set, each value distinct, so each assert proves its own field was copied.
     const stamp = Date.now();
     const record = {
       ...heldAsConsignor,
@@ -112,8 +104,6 @@ test.describe('Addresses are copied, not linked', () => {
     'deleting the record in the address book leaves the copy on a draft notification unchanged, with no error, and drops it from the picker',
     { tag: '@address-book' },
     async ({ animalsSeededJourney, pages, animalsPages, addressBookApi }) => {
-      // Own record so parallel specs do not race on a shared fixture when this one
-      // soft-deletes behind the journey's back.
       const stamp = Date.now();
       const name = `Doomed Farm ${stamp}`;
       const seeded = { name, addressLine1: '7 Gone Street', townOrCity: 'Carlisle', postcode: 'CA1 2BB' };
@@ -125,7 +115,6 @@ test.describe('Addresses are copied, not linked', () => {
         email: 'doomed@example.co.uk',
       });
 
-      // A complete notification, so any error on the review page could only come from the deletion.
       const referenceNumber = await animalsSeededJourney.createDraftNotification();
       await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
       const consignorAddressLines = animalsPages.addresses.partyAddressLines('Consignor');
@@ -136,8 +125,6 @@ test.describe('Addresses are copied, not linked', () => {
       await expect(animalsPages.addresses.heading).toBeVisible();
       await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
 
-      // Soft-delete behind the journey's back. List/search omit tombstones; get
-      // by id still returns deleted:true so the deletion is detectable.
       await addressBookApi.deleteAddress(address.id);
       const tombstone = await addressBookApi.getAddress(address.id);
       expect(tombstone.deleted).toBe(true);
@@ -155,7 +142,6 @@ test.describe('Addresses are copied, not linked', () => {
       await animalsPages.notificationView.continueButton.click();
       await expect(animalsPages.declaration.heading).toBeVisible();
 
-      // The picker neither pre-selects nor offers the deleted record.
       await animalsPages.addresses.open(referenceNumber);
       await animalsPages.addresses.changeParty('Consignor').click();
       await expect(animalsPages.consignorSelection.selectedAddress).toHaveCount(0);
@@ -174,10 +160,6 @@ test.describe('Addresses are copied, not linked', () => {
   }) => {
     test.slow();
 
-    // The address book checks only that a country is present, so a record can
-    // hold a country name rather than a listed code. Its copy breaks the
-    // notification's rules from the moment it is picked — the one way to reach
-    // this state through the services alone.
     const stamp = Date.now();
     const name = `Invalid address (country "United Kingdom" is not a code) ${stamp}`;
     await addressBookApi.createAddress({
@@ -198,7 +180,6 @@ test.describe('Addresses are copied, not linked', () => {
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
 
-    // Named at the top of the page and against the role's own row, with the address still shown.
     await animalsPages.notificationView.open(referenceNumber);
     const message = 'Correct the address details for the consignor';
     const consignorRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
@@ -207,12 +188,10 @@ test.describe('Addresses are copied, not linked', () => {
     await expect(consignorRow).toContainText(name);
     await expect(consignorRow).toContainText('Carlisle');
 
-    // Continuing past the review page is refused.
     await animalsPages.notificationView.continueButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.notificationView.errorSummary).toContainText(message);
 
-    // And so is the submit itself: the declaration hands back to the review page.
     await frontendForms.postForm(
       animalsPages.declaration.expectedUrl(referenceNumber),
       { declaration: 'confirmed' },
@@ -221,7 +200,6 @@ test.describe('Addresses are copied, not linked', () => {
       },
     );
 
-    // The message leads to the edit page, which hands back to the review once corrected.
     await animalsPages.notificationView.errorSummary.getByRole('link', { name: message }).click();
     await expect(animalsPages.consignorEdit.heading).toBeVisible();
     await animalsPages.consignorEdit.country.selectOption({ label: 'United Kingdom' });

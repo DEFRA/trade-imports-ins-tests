@@ -180,6 +180,14 @@ only when the deletion is what it tests. Where expiry is on, the shared journey
 addresses seeded in `globalSetup` expire too; the next run's
 `ensureE2eAddressBook` creates them again.
 
+A spec that edits or deletes an address makes its own record rather than
+using one of the shared journey addresses, because every spec running
+alongside it reads those. A spec that checks a copied address against the
+notification's rules makes a record whose country is a country name rather
+than a listed code: the address book checks only that a country is present,
+so that is the one way through the services alone to copy an address the
+notification refuses.
+
 ### Commodity lines in the animals specs
 
 `domain/animals/constants/commodity-lines.ts` names each line a spec chooses
