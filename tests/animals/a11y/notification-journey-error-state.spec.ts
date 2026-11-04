@@ -26,7 +26,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     const errorSummaryHeading = pages.page.getByRole('heading', { name: 'There is a problem' });
 
     await test.step('Origin of import with validation errors', async () => {
-      await animalsPages.overview.task('Where is this consignment coming from?').click();
+      await animalsJourney.openOriginFromOverview();
       await animalsPages.originOfImport.heading.waitFor();
       await expect(animalsPages.originOfImport.country.field).toHaveValue('');
       await animalsPages.originOfImport.radioRequiresOriginCode('Yes').check();

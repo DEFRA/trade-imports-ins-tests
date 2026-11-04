@@ -148,8 +148,18 @@ export class AnimalsJourney {
     await this.saveOriginOfImport();
   }
 
-  async answerOrigin(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+  async openOriginFromOverview(): Promise<void> {
     await this.animalsPages.overview.task('Where is this consignment coming from?').click();
+    await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
+  }
+
+  async toOriginFromOverview(): Promise<void> {
+    await this.startNotification();
+    await this.openOriginFromOverview();
+  }
+
+  async answerOrigin(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+    await this.openOriginFromOverview();
     await this.fillOriginOfImport(answers);
     await this.saveOriginOfImport();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
