@@ -59,6 +59,8 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.transitedCountries.addCountry(display);
     await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText([display]);
     await animalsPages.transitedCountries.saveAndContinue.click();
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.overview.errorSummary).toHaveCount(0);
 
     await animalsPages.transitedCountries.open(referenceNumber);
     await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText([display]);

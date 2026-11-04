@@ -36,12 +36,14 @@ test.describe('Save and return to overview', () => {
     animalsPages,
   }) => {
     await animalsJourney.toArrivalDetails();
+    await animalsPages.arrivalDetails.chooseMeansOfTransport(MANDATORY_ANSWERS.meansOfTransport.display);
     await animalsPages.arrivalDetails.fillArrivalDate(IMPOSSIBLE_ARRIVAL_DATE);
 
     await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
     await expect(animalsPages.arrivalDetails.errorSummary).toBeVisible();
+    await expect(animalsPages.arrivalDetails.errorSummaryLinks).toHaveText([ARRIVAL_DATE_ERROR]);
     await expect(animalsPages.arrivalDetails.arrivalDateError).toContainText(ARRIVAL_DATE_ERROR);
     await animalsPages.overview.openTaskAfterReopening(animalsPages.arrivalDetails.referenceNumberFromUrl(), ARRIVAL_DETAILS_TASK);
     await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue('');
