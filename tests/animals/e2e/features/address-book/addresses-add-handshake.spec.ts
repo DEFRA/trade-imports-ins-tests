@@ -124,14 +124,17 @@ test.describe('Add an address from the journey via INS', () => {
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, pages, animalsPages, insPages }) => {
       const addPage = insPages.addressBookAdd;
+      const details = newAddressFor('Consignor');
+      const addedBanner = animalsPages.addresses.successBanner.getByText(addedBannerText(details), { exact: true });
 
-      await arriveOnInsAddPageAndFill(animalsJourney, addPage, 'Consignor', newAddressFor('Consignor'));
+      await arriveOnInsAddPageAndFill(animalsJourney, addPage, 'Consignor', details);
       await pages.page.clock.install();
       await addPage.btnSaveAndSelect.click();
       await expect(animalsPages.addresses.heading).toBeVisible();
+      await expect(addedBanner).toBeVisible();
 
       await pages.page.clock.runFor(10_000);
-      await expect(animalsPages.addresses.successBanner).toBeVisible();
+      await expect(addedBanner).toBeVisible();
 
       await pages.page.reload();
       await expect(animalsPages.addresses.heading).toBeVisible();
