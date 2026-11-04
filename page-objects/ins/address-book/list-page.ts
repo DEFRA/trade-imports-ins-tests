@@ -153,6 +153,15 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
     await this.tabLink(tab.label).click();
   }
 
+  async waitForTabListing(tab: AddressBookTab, { searchTerm }: { searchTerm?: string } = {}): Promise<void> {
+    await this.page.waitForURL(
+      (url) =>
+        url.pathname === this.expectedUrl &&
+        url.searchParams.get('addressType') === tab.addressType &&
+        (searchTerm === undefined || url.searchParams.get('q') === searchTerm),
+    );
+  }
+
   async followResultPagesUntilRowShows(name: string): Promise<boolean> {
     while ((await this.row(name).count()) === 0) {
       if ((await this.linkNextPage.count()) === 0) {

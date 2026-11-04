@@ -26,8 +26,10 @@ export class InsJourney {
   async toAddressBookTab(tab: AddressBookTab, { search, ...openOptions }: OpenOptions & { search?: string } = {}): Promise<void> {
     await this.insPages.addressBookList.open(openOptions);
     await this.insPages.addressBookList.followTab(tab);
+    await this.insPages.addressBookList.waitForTabListing(tab);
     if (search !== undefined) {
       await this.insPages.addressBookList.search(search, { submitWith: 'button' });
+      await this.insPages.addressBookList.waitForTabListing(tab, { searchTerm: search });
     }
   }
 
