@@ -1,26 +1,26 @@
 import { addressTypes, addressUses, type AddressType, type AddressUse } from '@domain/shared/constants/address-types';
 
 interface UseTexts {
-  listLabel: string;
-  filterText: string;
+  columnLabel: string;
+  optionLabel: string;
   formLabel: string;
 }
 
 const useTexts: Record<AddressUse, UseTexts> = {
-  PLACE_OF_ORIGIN: { listLabel: 'Place of origin', filterText: 'Place of Origin', formLabel: 'Place of origin' },
-  CONSIGNOR: { listLabel: 'Consignor', filterText: 'Consignor', formLabel: 'Consignor' },
-  PLACE_OF_DESTINATION: { listLabel: 'Place of destination', filterText: 'Place of Destination', formLabel: 'Place of destination' },
-  CONSIGNEE: { listLabel: 'Consignee', filterText: 'Consignee', formLabel: 'Consignee' },
-  IMPORTER: { listLabel: 'Importer', filterText: 'Importer', formLabel: 'Importer' },
-  BRANCH_ADDRESS: { listLabel: 'Branch', filterText: 'Branch Address', formLabel: 'Branch address' },
+  PLACE_OF_ORIGIN: { columnLabel: 'Place of origin', optionLabel: 'Place of Origin', formLabel: 'Place of origin' },
+  CONSIGNOR: { columnLabel: 'Consignor', optionLabel: 'Consignor', formLabel: 'Consignor' },
+  PLACE_OF_DESTINATION: { columnLabel: 'Place of destination', optionLabel: 'Place of Destination', formLabel: 'Place of destination' },
+  CONSIGNEE: { columnLabel: 'Consignee', optionLabel: 'Consignee', formLabel: 'Consignee' },
+  IMPORTER: { columnLabel: 'Importer', optionLabel: 'Importer', formLabel: 'Importer' },
+  BRANCH_ADDRESS: { columnLabel: 'Branch', optionLabel: 'Branch Address', formLabel: 'Branch address' },
 };
 
 const textsOfEachUse = (textOf: (texts: UseTexts) => string): Record<AddressUse, string> =>
   Object.fromEntries(Object.entries(useTexts).map(([use, texts]) => [use, textOf(texts)])) as Record<AddressUse, string>;
 
-export const useLabels = textsOfEachUse(({ listLabel }) => listLabel);
+export const useColumnLabels = textsOfEachUse(({ columnLabel }) => columnLabel);
 
-export const useFilterOptionTexts = textsOfEachUse(({ filterText }) => filterText);
+export const useOptionLabels = textsOfEachUse(({ optionLabel }) => optionLabel);
 
 export const usesQuestionLabels = textsOfEachUse(({ formLabel }) => formLabel);
 

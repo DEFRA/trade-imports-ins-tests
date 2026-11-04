@@ -3,7 +3,7 @@ import { BasePage } from '@page-objects/shared/base-page';
 import { escapeRegex } from '@page-objects/shared/escape-regex';
 import { opensAtExpectedUrl, type OpensAtExpectedUrlOptions } from '@page-objects/shared/opens-at-expected-url';
 import type { AddressType, AddressUse } from '@domain/shared/constants/address-types';
-import { useFilterOptionTexts, type AddressBookTab } from '@domain/ins/constants/address-book-types';
+import { useOptionLabels, type AddressBookTab } from '@domain/ins/constants/address-book-types';
 
 type ListPageOpenOptions = Omit<OpensAtExpectedUrlOptions, 'query'> & { addressType?: AddressType };
 
@@ -135,7 +135,7 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
 
   async chooseUseFilter(use: AddressUse): Promise<void> {
     await this.openFilter();
-    await this.selectUseFilter.selectOption({ label: useFilterOptionTexts[use] });
+    await this.selectUseFilter.selectOption({ label: useOptionLabels[use] });
   }
 
   async filter({ term, use, submitWith }: { term: string; use: AddressUse; submitWith: 'button' | 'enter' }): Promise<void> {

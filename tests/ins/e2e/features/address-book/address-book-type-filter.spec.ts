@@ -4,7 +4,7 @@ import {
   addressBookTabs,
   destinationConsigneeOrImporterTab,
   originOrConsignorTab,
-  useFilterOptionTexts,
+  useOptionLabels,
   useFilterPlaceholder,
 } from '@domain/ins/constants/address-book-types';
 import { timeouts } from '@config/timeouts';
@@ -53,7 +53,7 @@ test.describe('Address book use filter', () => {
       await expect(insPages.addressBookList.selectedTab).toHaveText(tab.label);
       await expect(insPages.addressBookList.useFilterOptions).toHaveText([
         useFilterPlaceholder,
-        ...tab.useFilterOptions.map((use) => useFilterOptionTexts[use]),
+        ...tab.useFilterOptions.map((use) => useOptionLabels[use]),
       ]);
       await expect(insPages.addressBookList.useFilterOptions.first()).toHaveAttribute('value', '');
     }
@@ -118,7 +118,7 @@ test.describe('Address book use filter', () => {
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 9-9 of 9');
     await expect(insPages.addressBookList.selectedTab).toHaveText(originOrConsignorTab.label);
-    await expect(insPages.addressBookList.selectedUseFilterOption).toHaveText(useFilterOptionTexts.CONSIGNOR);
+    await expect(insPages.addressBookList.selectedUseFilterOption).toHaveText(useOptionLabels.CONSIGNOR);
   });
 
   test('a use filter matching one address counts one', async ({ insPages, addressBookApi }) => {
@@ -155,7 +155,7 @@ test.describe('Address book use filter', () => {
 
     await insPages.addressBookList.chooseUseFilter(addressUses.consignor);
 
-    await expect(insPages.addressBookList.selectedUseFilterOption).toHaveText(useFilterOptionTexts.CONSIGNOR);
+    await expect(insPages.addressBookList.selectedUseFilterOption).toHaveText(useOptionLabels.CONSIGNOR);
     await expect(page).toHaveURL(urlBeforeChoosing);
     expect(new URL(page.url()).searchParams.get('use')).toBe('');
     await expect(insPages.addressBookList.resultsLine).toHaveText(resultsLine);

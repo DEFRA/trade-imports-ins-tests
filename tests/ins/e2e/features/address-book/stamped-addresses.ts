@@ -7,7 +7,7 @@ import {
   branchTab,
   destinationConsigneeOrImporterTab,
   originOrConsignorTab,
-  useLabels,
+  useColumnLabels,
   type AddressBookTab,
 } from '@domain/ins/constants/address-book-types';
 import { traderAddress } from '@domain/ins/constants/trader-address';
@@ -20,7 +20,7 @@ export interface StampedAddress extends AddressClassification {
 
 const newStampedSearchTerm = (): string => `Stamped ${randomUUID().replaceAll('-', '')}`;
 
-export const usesLabelOf = (uses: readonly AddressUse[]): string => uses.map((use) => useLabels[use]).join(', ');
+export const usesLabelOf = (uses: readonly AddressUse[]): string => uses.map((use) => useColumnLabels[use]).join(', ');
 
 const stampedAddressesOf = (searchTerm: string) => {
   const named = (suffix: string) => `${searchTerm} ${suffix}`;

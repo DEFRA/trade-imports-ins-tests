@@ -1,6 +1,6 @@
 import { test, expect, type PageFixtures } from '@fixtures';
 import { expectSearchedListLinks, expectNoMatchesListed } from './expect-address-book-list';
-import { destinationConsigneeOrImporterTab, originOrConsignorTab, useFilterOptionTexts } from '@domain/ins/constants/address-book-types';
+import { destinationConsigneeOrImporterTab, originOrConsignorTab, useOptionLabels } from '@domain/ins/constants/address-book-types';
 import { addressUses } from '@domain/shared/constants/address-types';
 import { addFormAddressWithLineTwoAndCounty, addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
 
@@ -74,7 +74,7 @@ test.describe('Address book list', () => {
     await expect(insPages.addressBookList.selectedTab).toHaveText(destinationConsigneeOrImporterTab.label);
     await insPages.addressBookList.filterSummary.click();
     await expect(insPages.addressBookList.inputSearch).toHaveValue('');
-    await expect(insPages.addressBookList.selectedUseFilterOption).toHaveText(useFilterOptionTexts.IMPORTER);
+    await expect(insPages.addressBookList.selectedUseFilterOption).toHaveText(useOptionLabels.IMPORTER);
   });
 
   test('an address is found from the dashboard, viewed, kept on No, cancel, then deleted on Yes, delete and no longer found by search', async ({
