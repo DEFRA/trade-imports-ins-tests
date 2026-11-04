@@ -1,5 +1,4 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
-import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { OPENING_RUN_TASKS, certificateDocument } from '@flows/animals/journey';
 
@@ -53,12 +52,7 @@ test.describe('Opening run', () => {
     animalsJourney,
     animalsPages,
   }) => {
-    await animalsJourney.toOriginOfImport();
-    await animalsJourney.fillOriginOfImport();
-    await animalsJourney.saveOriginOfImport();
-    await expect(animalsPages.commoditySelection.heading).toBeVisible();
-    await animalsPages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.commodityLines[0].species]);
-    await animalsPages.commoditySelection.saveAndContinue.click();
+    await animalsJourney.walkOpeningRunToImportReason();
     await expect(animalsPages.importReason.heading).toBeVisible();
 
     await animalsPages.importReason.linkBack.click();

@@ -10,6 +10,7 @@ const ARRIVAL_DETAILS_TASK = 'Arrival details';
 const IMPOSSIBLE_ARRIVAL_DATE = '31/2/2026';
 const ARRIVAL_DATE_ERROR = 'Enter a real arrival date';
 const COMMODITY_DETAILS_TASK = 'Commodity details';
+const ADDITIONAL_DETAILS_TASK = 'Additional details';
 const PORT_OF_EXIT_ERROR = 'Select a port of exit';
 const DESTINATION_COUNTRY_ERROR = 'Select a destination country';
 
@@ -91,5 +92,33 @@ test.describe('Save and return to overview', () => {
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await expect(animalsPages.commoditySelection.errorSummaryLinks).toHaveText([SELECT_COMMODITY_ERROR]);
     await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, COMMODITY_SELECTION_TASK)).toHaveText(TO_DO);
+  });
+
+  test('additional details: accepts the save with both questions left blank and shows the task still to do', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.toAdditionalDetails();
+
+    await animalsPages.additionalDetails.saveAndReturnToOverview.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.overview.taskStatus(ADDITIONAL_DETAILS_TASK)).toHaveText(TO_DO);
+  });
+
+  test('main import reason: inside the opening run, saves the answer and shows the overview rather than commodity details', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    const referenceNumber = await animalsJourney.walkOpeningRunToImportReason();
+    await animalsPages.importReason.reason('Internal market').check();
+    await animalsPages.importReason.purpose('Breeding').check();
+
+    await animalsPages.importReason.saveAndReturnToOverview.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.openTaskAfterReopening(referenceNumber, IMPORT_REASON_TASK);
+    await expect(animalsPages.importReason.reason('Internal market')).toBeChecked();
+    await expect(animalsPages.importReason.purpose('Breeding')).toBeChecked();
   });
 });

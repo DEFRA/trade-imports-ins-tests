@@ -619,18 +619,27 @@ export class AnimalsJourney {
     await this.confirmDeclaration();
   }
 
-  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
-    const pages = this.animalsPages;
+  async walkOpeningRunToImportReason(
+    originOptions: OriginOptions = {},
+    species: CommodityLine[] = [MANDATORY_ANSWERS.commodityLines[0].species],
+  ): Promise<string> {
     const referenceNumber = await this.createNotificationAtOrigin();
 
-    await this.fillOriginOfImport();
+    await this.fillOriginOfImport(originOptions);
     await this.saveOriginOfImport();
 
-    await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.commodityLines[0].species]);
-    await pages.commoditySelection.saveAndContinue.click();
+    await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
+    await this.animalsPages.commoditySelection.searchAndCheckSpecies(species);
+    await this.animalsPages.commoditySelection.saveAndContinue.click();
 
-    await pages.importReason.heading.waitFor(pageLoadWait);
+    await this.animalsPages.importReason.heading.waitFor(pageLoadWait);
+    return referenceNumber;
+  }
+
+  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+    const pages = this.animalsPages;
+    const referenceNumber = await this.walkOpeningRunToImportReason();
+
     await pages.importReason.saveAndContinue.click();
 
     await pages.consignmentDetails.heading.waitFor(pageLoadWait);
@@ -659,16 +668,11 @@ export class AnimalsJourney {
 
   async walkOpeningRunCattleByAir(document: AccompanyingDocumentAnswer): Promise<string> {
     const pages = this.animalsPages;
-    const referenceNumber = await this.createNotificationAtOrigin();
+    const referenceNumber = await this.walkOpeningRunToImportReason({
+      requiresRegionCode: 'Yes',
+      internalReference: 'CATTLE-2026-01',
+    });
 
-    await this.fillOriginOfImport({ requiresRegionCode: 'Yes', internalReference: 'CATTLE-2026-01' });
-    await this.saveOriginOfImport();
-
-    await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.commodityLines[0].species]);
-    await pages.commoditySelection.saveAndContinue.click();
-
-    await pages.importReason.heading.waitFor(pageLoadWait);
     await pages.importReason.reason('Internal market').check();
     await pages.importReason.purpose('Breeding').check();
     await pages.importReason.saveAndContinue.click();
@@ -724,16 +728,8 @@ export class AnimalsJourney {
 
   async walkOpeningRunHorseBySea(document: AccompanyingDocumentAnswer): Promise<string> {
     const pages = this.animalsPages;
-    const referenceNumber = await this.createNotificationAtOrigin();
+    const referenceNumber = await this.walkOpeningRunToImportReason({ countryCode: countryCodes.eu.ireland }, [commodityLines.horse]);
 
-    await this.fillOriginOfImport({ countryCode: countryCodes.eu.ireland });
-    await this.saveOriginOfImport();
-
-    await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.searchAndCheckSpecies([commodityLines.horse]);
-    await pages.commoditySelection.saveAndContinue.click();
-
-    await pages.importReason.heading.waitFor(pageLoadWait);
     await pages.importReason.reason('Temporary admission horses').check();
     await pages.importReason.temporaryAdmissionExitDate.fill(TEMPORARY_ADMISSION_EXIT_DATE);
     await pages.importReason.selectTemporaryAdmissionPortOfExit('GB HLY');
@@ -784,16 +780,8 @@ export class AnimalsJourney {
 
   async walkOpeningRunPoultryByRail(document: AccompanyingDocumentAnswer): Promise<string> {
     const pages = this.animalsPages;
-    const referenceNumber = await this.createNotificationAtOrigin();
+    const referenceNumber = await this.walkOpeningRunToImportReason({ countryCode: countryCodes.eu.germany }, [commodityLines.chicken]);
 
-    await this.fillOriginOfImport({ countryCode: countryCodes.eu.germany });
-    await this.saveOriginOfImport();
-
-    await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.searchAndCheckSpecies([commodityLines.chicken]);
-    await pages.commoditySelection.saveAndContinue.click();
-
-    await pages.importReason.heading.waitFor(pageLoadWait);
     await pages.importReason.reason(importReasons.transit.display).check();
     await pages.importReason.selectTransitPortOfExit('GB HLY');
     await pages.importReason.selectTransitDestinationCountry(countryCodes.eu.ireland.value);

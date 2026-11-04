@@ -42,6 +42,7 @@ Why the animals flows and page objects are written the way they are. The code ca
 
 ## Opening-run walks
 
+- `walkOpeningRunToImportReason` carries a fresh notification from creation to the main import reason page, leaving the caller on that page with a chosen species and no reason answered. Every `walkOpeningRun*` walk starts this way before it diverges on its own reason and species, and a spec that only needs to be mid-run at the main import reason page — rather than the fuller walk one of the named consignments gives it — calls this one directly instead of taking on a whole consignment's worth of unrelated answers.
 - `walkOpeningRunPoultryByRail` runs the whole opening sequence for a rail consignment in transit. It waits for the additional-details heading straight after saving commodity details, not an identification heading, because the chosen commodity carries no identifiers and the run skips that step. It ends on the review rather than submitting, because the MDM stub serves no species page for this commodity and Continue from the review is refused.
 
 ## Addresses
