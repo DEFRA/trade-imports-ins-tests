@@ -17,8 +17,7 @@ test.describe('Choosing an address type before adding an address', () => {
     await expect(pages.page).toHaveURL(new RegExp(`${typePage.expectedUrl}\\?start=true$`));
     await expect(typePage.caption).toBeVisible();
     await expect(typePage.heading).toBeVisible();
-    await expect(typePage.radioLabels).toHaveText(addressTypeOptions.map(({ label }) => label));
-    await expect(typePage.radioHints).toHaveText(addressTypeOptions.map(({ hint }) => hint));
+    await typePage.expectTypeOptionsInOrder();
     await expect(typePage.btnContinue).toBeVisible();
 
     await typePage.linkBack.click();
@@ -36,7 +35,7 @@ test.describe('Choosing an address type before adding an address', () => {
     await typePage.continue();
 
     await expect(typePage.errorSummary).toBeVisible();
-    await expect(typePage.inlineError).toContainText(MISSING_TYPE_MESSAGE);
+    await expect(typePage.radioGroup).toHaveAccessibleDescription(`Error: ${MISSING_TYPE_MESSAGE}`);
     await typePage.errorSummaryLink(MISSING_TYPE_MESSAGE).click();
     await expect(typePage.radio(addressTypes.originOrConsignor)).toBeFocused();
   });

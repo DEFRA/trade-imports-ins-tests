@@ -19,20 +19,20 @@ export class InsAddressBookAddressTypePage extends opensAtExpectedUrl(BasePage) 
     return this.page.getByRole('group', { name: 'Choose an address type' });
   }
 
-  get radioLabels(): Locator {
-    return this.radioGroup.locator('.govuk-radios__label');
-  }
-
-  get radioHints(): Locator {
-    return this.radioGroup.locator('.govuk-radios__hint');
+  get radios(): Locator {
+    return this.radioGroup.getByRole('radio');
   }
 
   get btnContinue(): Locator {
     return this.page.getByRole('button', { name: 'Continue', exact: true });
   }
 
-  get inlineError(): Locator {
-    return this.radioGroup.locator('.govuk-error-message');
+  async expectTypeOptionsInOrder(): Promise<void> {
+    await expect(this.radios).toHaveCount(addressTypeOptions.length);
+    for (const [index, { label, hint }] of addressTypeOptions.entries()) {
+      await expect(this.radios.nth(index)).toHaveAccessibleName(label);
+      await expect(this.radios.nth(index)).toHaveAccessibleDescription(hint);
+    }
   }
 
   radio(addressType: AddressType): Locator {
