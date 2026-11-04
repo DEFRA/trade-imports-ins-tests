@@ -96,7 +96,7 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
   }
 
   tabLink(label: string): Locator {
-    return this.tabLinks.filter({ hasText: new RegExp(`^${label}$`) });
+    return this.tabLinks.filter({ hasText: new RegExp(`^${escapeRegex(label)}$`) });
   }
 
   get viewLinks(): Locator {
