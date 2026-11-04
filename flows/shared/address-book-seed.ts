@@ -7,6 +7,14 @@ import {
   heldAsPlaceOfDestination,
   heldAsPlaceOfOrigin,
 } from '@domain/shared/constants/address-types';
+import {
+  CONSIGNEE_NAME,
+  CONSIGNOR_NAME,
+  CONTACT_ADDRESS_NAME,
+  DESTINATION_NAME,
+  IMPORTER_NAME,
+  PLACE_OF_ORIGIN_NAME,
+} from '@domain/shared/constants/journey-party-names';
 
 /** The shared address-book records, in creation order. */
 export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
@@ -41,7 +49,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
     ...heldAsConsignor,
   },
   {
-    name: 'Animal and Plant Health Agency',
+    name: CONTACT_ADDRESS_NAME,
     addressLine1: 'Woodham Lane',
     townOrCity: 'Addlestone',
     postcode: 'KT15 3NB',
@@ -91,7 +99,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
     ...heldAsConsignor,
   },
   {
-    name: 'Astra Rosales',
+    name: CONSIGNOR_NAME,
     addressLine1: '43 East Hague Extension',
     townOrCity: 'Bern',
     postcode: '30055',
@@ -101,7 +109,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
     ...heldAsConsignor,
   },
   {
-    name: 'Tech Imports Ltd',
+    name: DESTINATION_NAME,
     addressLine1: '18 Dockside Road',
     townOrCity: 'London',
     postcode: 'E14 9GE',
@@ -111,7 +119,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
     ...heldAsPlaceOfDestination,
   },
   {
-    name: 'Origin Farm',
+    name: PLACE_OF_ORIGIN_NAME,
     addressLine1: '1 Farm Lane',
     townOrCity: 'Ennis',
     postcode: 'V95 X7P2',
@@ -121,7 +129,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
     ...heldAsPlaceOfOrigin,
   },
   {
-    name: 'British Livestock Ltd',
+    name: CONSIGNEE_NAME,
     addressLine1: '10 Market Street',
     townOrCity: 'Leeds',
     postcode: 'LS1 6HB',
@@ -131,7 +139,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
     ...heldAsConsignee,
   },
   {
-    name: 'Import Co UK',
+    name: IMPORTER_NAME,
     addressLine1: '20 Trade Road',
     townOrCity: 'London',
     postcode: 'EC1A 1BB',
