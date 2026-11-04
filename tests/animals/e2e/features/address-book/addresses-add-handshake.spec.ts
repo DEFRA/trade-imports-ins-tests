@@ -88,7 +88,7 @@ test.describe('Add an address from the journey via INS', () => {
         await expect(picker.heading).toBeVisible();
         await expect(picker.successBanner.getByText(addedBannerText(details), { exact: true })).toBeVisible();
         await expect(picker.party(details.name)).toHaveCount(1);
-        await expect(picker.party(details.name)).not.toBeChecked();
+        await expect(picker.checkedParties).toHaveCount(0);
         await expect(picker.partiesListedAbove(details.name, partyIdsListedBeforeTheAdd)).toHaveCount(0);
       },
     );

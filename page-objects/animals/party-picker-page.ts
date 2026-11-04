@@ -59,6 +59,10 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return this.resultsGroup.getByRole('radio');
   }
 
+  get checkedParties(): Locator {
+    return this.page.locator('input[type="radio"]:checked');
+  }
+
   async listedPartyIds(): Promise<string[]> {
     return Promise.all((await this.listedParties.all()).map((party) => party.inputValue()));
   }
