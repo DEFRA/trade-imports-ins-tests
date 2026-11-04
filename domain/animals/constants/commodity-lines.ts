@@ -11,6 +11,7 @@ export const commodityLines = {
   domesticCat: { searchTerm: 'domestic cat', commodityCode: '01061900', latinName: 'Felis catus' },
   raccoonDog: { searchTerm: 'dog', commodityCode: '01061900', latinName: 'Nyctereutes procyonoides' },
   ostrich: { searchTerm: 'ostrich', commodityCode: '01063300', latinName: 'Struthio spp.' },
+  chicken: { searchTerm: '010', commodityCode: '01051111', latinName: 'Gallus gallus' },
 } as const satisfies Record<string, CommodityLine>;
 
 export const speciesCheckboxValue = (line: CommodityLine): string => `${line.commodityCode}|${line.latinName}`;

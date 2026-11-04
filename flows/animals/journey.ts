@@ -16,6 +16,7 @@ import {
   type PartyAnswers,
 } from '@domain/animals/constants/journey-options';
 import { type CommodityLineAnswer } from '@domain/animals/constants/journey-commodity-line-answers';
+import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
@@ -25,6 +26,8 @@ import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
+import { importReasons } from '@domain/animals/constants/import-reasons';
+import { transporters } from '@domain/animals/constants/transporters';
 
 export type ArrivalDetailsAnswer = {
   date?: string;
@@ -61,6 +64,20 @@ export const OPENING_RUN_TASKS = [
   'Identification details',
   'Additional details',
   'Arrival details',
+  'Transport details',
+  'Upload documents',
+  'Roles and addresses',
+  'Contact address for this consignment',
+] as const;
+
+export const OPENING_RUN_TASKS_OVERLAND_WITHOUT_IDENTIFICATION = [
+  'Where is this consignment coming from?',
+  'What are you importing?',
+  IMPORT_REASON_TASK,
+  'Commodity details',
+  'Additional details',
+  'Arrival details',
+  'Transit countries',
   'Transport details',
   'Upload documents',
   'Roles and addresses',
@@ -757,6 +774,64 @@ export class AnimalsJourney {
     await pages.addresses.heading.waitFor(pageLoadWait);
     await this.addFiveParties();
     await pages.addresses.continueButton.click();
+
+    await pages.contactAddress.heading.waitFor(pageLoadWait);
+    await this.chooseContactAddress();
+
+    await pages.notificationView.heading.waitFor(pageLoadWait);
+    return referenceNumber;
+  }
+
+  async walkOpeningRunPoultryByRail(document: AccompanyingDocumentAnswer): Promise<string> {
+    const pages = this.animalsPages;
+    const referenceNumber = await this.createNotificationAtOrigin();
+
+    await this.fillOriginOfImport({ countryCode: countryCodes.eu.germany });
+    await this.saveOriginOfImport();
+
+    await pages.commoditySelection.heading.waitFor(pageLoadWait);
+    await pages.commoditySelection.searchAndCheckSpecies([commodityLines.chicken]);
+    await pages.commoditySelection.saveAndContinue.click();
+
+    await pages.importReason.heading.waitFor(pageLoadWait);
+    await pages.importReason.reason(importReasons.transit.display).check();
+    await pages.importReason.selectTransitPortOfExit('GB HLY');
+    await pages.importReason.selectTransitDestinationCountry(countryCodes.eu.ireland.value);
+    await pages.importReason.saveAndContinue.click();
+
+    await pages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await pages.consignmentDetails.numberOfAnimals.fill('400');
+    await pages.consignmentDetails.saveAndContinue.click();
+
+    await pages.additionalDetails.heading.waitFor(pageLoadWait);
+    await pages.additionalDetails.certifiedFor(certificationPurposes.slaughter.display).check();
+    await pages.additionalDetails.saveAndContinue.click();
+
+    await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await this.fillArrivalDetails({
+      port: pointOfEntries.doverPort.display,
+      means: meansOfTransport.railway.display,
+      transportId: 'WAGON-2026-0001',
+      documentReference: 'CIM-2026-0001',
+    });
+    await pages.arrivalDetails.saveAndContinue.click();
+
+    await pages.transitedCountries.heading.waitFor(pageLoadWait);
+    await pages.transitedCountries.addCountry(countryCodes.eu.belgium.display);
+    await pages.transitedCountries.addCountry(countryCodes.eu.france.display);
+    await pages.transitedCountries.saveAndContinue.click();
+
+    await pages.transporter.heading.waitFor(pageLoadWait);
+    await pages.transporter.transporter(transporters.garciaLivestockTransport.display).check();
+    await pages.transporter.saveAndContinue.click();
+
+    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
+    await this.uploadDocumentAndWaitForScan(document);
+    await pages.accompanyingDocuments.continueButton.click();
+
+    await pages.addresses.heading.waitFor(pageLoadWait);
+    await this.addFiveParties();
+    await this.addCphAndLeaveAddresses();
 
     await pages.contactAddress.heading.waitFor(pageLoadWait);
     await this.chooseContactAddress();

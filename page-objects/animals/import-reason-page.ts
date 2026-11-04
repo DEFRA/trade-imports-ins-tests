@@ -53,6 +53,10 @@ export class AnimalsImportReasonPage extends NotificationPage {
     await this.transitPortOfExit.chooseByIndex(index);
   }
 
+  async selectTransitPortOfExit(value: string): Promise<void> {
+    await this.transitPortOfExit.chooseByValue(value);
+  }
+
   async selectTransitDestinationCountry(value: string): Promise<void> {
     await this.transitDestinationCountry.chooseByValue(value);
   }

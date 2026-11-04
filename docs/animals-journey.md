@@ -37,7 +37,12 @@ Why the animals flows and page objects are written the way they are. The code ca
 
 ## The overview task list
 
-- `OPENING_RUN_TASKS` is the overview's task rows once a full opening run has answered everything, in the order the overview lists them.
+- `OPENING_RUN_TASKS` is the overview's task rows for a consignment that identifies an animal and travels by air or sea, in the order the overview lists them.
+- `OPENING_RUN_TASKS_OVERLAND_WITHOUT_IDENTIFICATION` is the overview's task rows for an overland consignment whose commodity carries no identifiers, in the order the overview lists them. It is stated outright rather than derived from `OPENING_RUN_TASKS`, because the order is what the assertion that reads it exists to prove.
+
+## Opening-run walks
+
+- `walkOpeningRunPoultryByRail` runs the whole opening sequence for a rail consignment in transit. It waits for the additional-details heading straight after saving commodity details, not an identification heading, because the chosen commodity carries no identifiers and the run skips that step. It ends on the review rather than submitting, because the MDM stub serves no species page for this commodity and Continue from the review is refused.
 
 ## Addresses
 
@@ -58,3 +63,7 @@ Why the animals flows and page objects are written the way they are. The code ca
 ## Choosing species (`page-objects/animals/commodity-selection-page.ts`)
 
 - `searchAndCheckSpecies` searches for each species before ticking it, because a species has no tick box until its own search lists it, and ticks it inside the group for the species' own commodity code.
+
+## The transit port of exit (`page-objects/animals/import-reason-page.ts`)
+
+- `selectTransitPortOfExit` chooses the transit port of exit by its code, beside the by-position `selectTransitPortOfExitByIndex` that remains for a spec that only needs any port, so an assertion naming a particular port does not depend on the port list's order.
