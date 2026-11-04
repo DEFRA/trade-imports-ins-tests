@@ -83,6 +83,7 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 | `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`           | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                    | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:dynamics`                       | Dynamics integration (`@dynamics`) test suite         | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:cross-browser`                  | Cross-browser (`@cross-browser`) suite                | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites        | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
@@ -486,13 +487,14 @@ Test Suite URL: https://portal.cdp-int.defra.cloud/test-suites/trade-imports-ins
 In the CDP Portal, provide a `PROFILE` value to choose which test suite the container runs via `entrypoint.sh`.
 If `PROFILE` is not set, the `default` profile is used.
 
-| PROFILE           | Test suite                                                                                     | NPM script              |
-| ----------------- | ---------------------------------------------------------------------------------------------- | ----------------------- |
-| `default`         | e2e test suite                                                                                 | `npm test`              |
-| `a11y`            | accessibility test suite                                                                       | `npm run test:a11y`     |
-| `dynamics`        | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics` |
-| `security`        | security test suite (ZAP passive scan)                                                         | `npm run test:security` |
-| `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                       |
+| PROFILE           | Test suite                                                                                     | NPM script                   |
+| ----------------- | ---------------------------------------------------------------------------------------------- | ---------------------------- |
+| `default`         | e2e test suite                                                                                 | `npm test`                   |
+| `a11y`            | accessibility test suite                                                                       | `npm run test:a11y`          |
+| `dynamics`        | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics`      |
+| `cross-browser`   | `@cross-browser` tests in Firefox and WebKit                                                   | `npm run test:cross-browser` |
+| `security`        | security test suite (ZAP passive scan)                                                         | `npm run test:security`      |
+| `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                            |
 
 The profiles above run every domain. To run one domain's suite only, prefix the
 suite with its domain name as `<domain>:<suite>`:
@@ -502,6 +504,7 @@ suite with its domain name as `<domain>:<suite>`:
 | `<domain>:e2e`             | that domain's e2e suite (`npm test -- tests/<domain>/`) |
 | `<domain>:a11y`            | that domain's accessibility suite                       |
 | `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)             |
+| `<domain>:cross-browser`   | that domain's `@cross-browser` tests                    |
 | `<domain>:security`        | that domain's security suite (ZAP passive scan)         |
 | `<domain>:security:active` | **not supported on CDP**, as `security:active`          |
 

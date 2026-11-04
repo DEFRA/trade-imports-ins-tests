@@ -8,12 +8,12 @@ This folder holds no specs. The animals cross-browser tests are existing e2e spe
 Run against the docker-compose stack, from the repo root. Install the browsers once with
 `npx playwright install firefox webkit`.
 
-| Command                                                                                     | Runs                                    |
-| ------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `npm run test:docker-compose:cross-browser`                                                 | Firefox and WebKit, in one run          |
-| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=firefox`       | Firefox only                            |
-| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=webkit`        | WebKit only                             |
-| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=mobile-webkit` | iPhone 17 on WebKit (paused, see below) |
+| Command                                                                                                    | Runs                                    |
+| ---------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `npm run test:docker-compose:animals:cross-browser`                                                        | Firefox and WebKit, in one run          |
+| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=firefox tests/animals/`       | Firefox only                            |
+| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=webkit tests/animals/`        | WebKit only                             |
+| `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=mobile-webkit tests/animals/` | iPhone 17 on WebKit (paused, see below) |
 
 ## Notes
 
