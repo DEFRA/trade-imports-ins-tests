@@ -32,7 +32,6 @@ test.describe('Addresses are copied, not linked', () => {
     plantsJourney,
     addressBookApi,
   }) => {
-    // Every field set, each value distinct, so each assert proves its own field was copied.
     const record = {
       name: `Full Detail Farm ${randomUUID()}`,
       addressLine1: '12 Primary Row',
@@ -45,7 +44,6 @@ test.describe('Addresses are copied, not linked', () => {
     };
     const address = await addressBookApi.createAddress({ ...record, ...heldAsPlaceOfOrigin, countryCode: 'GB' });
 
-    // The same record is picked for the place of destination and the contact address.
     await plantsJourney.completeNotification(addressBookApi, { existing: address });
 
     await expectEveryField(plantsPages.notificationView.card('Place of destination'), record);
