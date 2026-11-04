@@ -59,7 +59,6 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     expect.soft(row.defraimp_name, 'reference number').toBe(referenceNumber);
     expect.soft(row.defraimp_submittedbydisplayname, 'submitted by').toBe(defaultUser.displayName);
 
-    // Each mandatory answer, in the order MandatoryAnswers declares them.
     expect.soft(formattedValue(row, '_defraimp_countryoforiginid_value'), 'country of origin').toBe(answers.countryCode.display);
     expect.soft(row.defraimp_commoditiesincludenonablactedanimals, 'unweaned animals').toBe(false);
     expect.soft(row.defraimp_consignorcompanyname, 'consignor').toBe(answers.parties.consignor);
