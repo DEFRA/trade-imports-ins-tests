@@ -39,6 +39,12 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.page.getByRole('link', { name: 'Enter the number of animals' });
   }
 
+  get animalsAboveMaxErrorLink(): Locator {
+    return this.page.getByRole('link', {
+      name: 'Number of animals must be 9,223,372,036,854,775,807 or fewer',
+    });
+  }
+
   get caption(): Locator {
     return this.page.getByText('Description of the goods', { exact: true });
   }

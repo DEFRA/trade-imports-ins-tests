@@ -41,6 +41,23 @@ test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () =
 
     await expect(animalsPages.overview.heading).toBeVisible();
   });
+
+  test('holds the page on a number of animals above the largest signed 64-bit integer, keeping the digits typed', async ({
+    animalsPages,
+  }) => {
+    await animalsPages.consignmentDetails.numberOfAnimals.fill('9223372036854775808');
+    await animalsPages.consignmentDetails.saveAndContinue.click();
+
+    await expect(animalsPages.consignmentDetails.animalsAboveMaxErrorLink).toBeVisible();
+    await expect(animalsPages.consignmentDetails.numberOfAnimals).toHaveValue('9223372036854775808');
+  });
+
+  test('accepts a number of animals exactly at the largest signed 64-bit integer', async ({ animalsPages }) => {
+    await animalsPages.consignmentDetails.numberOfAnimals.fill('9223372036854775807');
+    await animalsPages.consignmentDetails.saveAndContinue.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+  });
 });
 
 test.describe('Commodity details page with two species of one commodity', { tag: '@duplicated-in-frontend' }, () => {
