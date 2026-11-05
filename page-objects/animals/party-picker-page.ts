@@ -11,8 +11,6 @@ import {
 } from '@page-objects/shared/address-picker-results';
 
 export class AnimalsPartyPickerPage extends NotificationPage {
-  private static readonly SELECT_PREFIX = 'Select ';
-
   constructor(
     page: Page,
     slug: string,
@@ -50,7 +48,7 @@ export class AnimalsPartyPickerPage extends NotificationPage {
   }
 
   party(name: string): Locator {
-    return this.page.getByRole('radio', { name: `${AnimalsPartyPickerPage.SELECT_PREFIX}${name}`, exact: true });
+    return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
   }
 
   get noMatchesMessage(): Locator {
@@ -61,13 +59,12 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return this.resultsGroup.getByRole('radio');
   }
 
-  async listedPartyIds(): Promise<string[]> {
-    return Promise.all((await this.listedParties.all()).map((party) => party.inputValue()));
+  get checkedParties(): Locator {
+    return this.page.locator('input[type="radio"]:checked');
   }
 
-  partiesListedAbove(name: string, amongPartyIds: readonly string[]): Locator {
-    const isAmongPartyIds = amongPartyIds.map((partyId) => `@value="${partyId}"`).join(' or ') || 'false()';
-    return this.party(name).locator(`xpath=preceding::input[@type="radio"][${isAmongPartyIds}]`);
+  async listedPartyIds(): Promise<string[]> {
+    return Promise.all((await this.listedParties.all()).map((party) => party.inputValue()));
   }
 
   get selectedAddress(): Locator {

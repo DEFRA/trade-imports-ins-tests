@@ -88,8 +88,13 @@ test.describe('Add an address from the journey via INS', () => {
         await expect(picker.heading).toBeVisible();
         await expect(picker.successBanner.getByText(addedBannerText(details), { exact: true })).toBeVisible();
         await expect(picker.party(details.name)).toHaveCount(1);
-        await expect(picker.party(details.name)).not.toBeChecked();
-        await expect(picker.partiesListedAbove(details.name, partyIdsListedBeforeTheAdd)).toHaveCount(0);
+        await expect(picker.checkedParties).toHaveCount(0);
+        const newPartyId = await picker.party(details.name).inputValue();
+        await expect
+          .poll(async () =>
+            (await picker.listedPartyIds()).find((partyId) => partyId === newPartyId || partyIdsListedBeforeTheAdd.includes(partyId)),
+          )
+          .toBe(newPartyId);
       },
     );
 
@@ -124,14 +129,17 @@ test.describe('Add an address from the journey via INS', () => {
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, pages, animalsPages, insPages }) => {
       const addPage = insPages.addressBookAdd;
+      const details = newAddressFor('Consignor');
+      const addedBanner = animalsPages.addresses.successBanner.getByText(addedBannerText(details), { exact: true });
 
-      await arriveOnInsAddPageAndFill(animalsJourney, addPage, 'Consignor', newAddressFor('Consignor'));
+      await arriveOnInsAddPageAndFill(animalsJourney, addPage, 'Consignor', details);
       await pages.page.clock.install();
       await addPage.btnSaveAndSelect.click();
       await expect(animalsPages.addresses.heading).toBeVisible();
+      await expect(addedBanner).toBeVisible();
 
       await pages.page.clock.runFor(10_000);
-      await expect(animalsPages.addresses.successBanner).toBeVisible();
+      await expect(addedBanner).toBeVisible();
 
       await pages.page.reload();
       await expect(animalsPages.addresses.heading).toBeVisible();

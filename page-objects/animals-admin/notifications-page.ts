@@ -69,16 +69,12 @@ export class AnimalsAdminNotificationsPage extends BasePage {
   }
 
   async deleteByReferenceNumber(): Promise<void> {
-    await this.waitForDeleteDialogScript();
+    await this.page.waitForLoadState('networkidle');
     await this.btnDeleteByReferenceNumber.click();
   }
 
   private async waitForPageRendered(): Promise<void> {
     await this.heading.waitFor({ state: 'visible' });
-  }
-
-  private async waitForDeleteDialogScript(): Promise<void> {
-    await this.page.waitForLoadState('networkidle');
   }
 
   tableRowByReference(referenceNumber: string): Locator {

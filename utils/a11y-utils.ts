@@ -63,6 +63,24 @@ export async function scanPage(page: Page, options: A11yScanOptions = {}): Promi
   };
 }
 
+export const injectUnnamedButton = (page: Page): Promise<void> =>
+  page.evaluate(() => {
+    document.body.append(document.createElement('button'));
+  });
+
+export const injectAdjacentSmallTargets = (page: Page): Promise<void> =>
+  page.evaluate(() => {
+    const smallTargets = document.createElement('div');
+    for (const name of ['first', 'second']) {
+      const target = document.createElement('a');
+      target.href = '#';
+      target.setAttribute('aria-label', `Injected ${name} small target`);
+      target.style.cssText = 'display:inline-block;width:8px;height:8px;';
+      smallTargets.append(target);
+    }
+    document.body.append(smallTargets);
+  });
+
 export function formatViolations(violations: Result[]): string {
   return violations
     .map(({ id, impact, description, helpUrl, nodes }) => {
