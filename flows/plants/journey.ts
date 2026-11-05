@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { PlantsPages } from '@page-objects';
+import type { PlantsAddressBookPickerPage } from '@page-objects/plants/address-book-picker-page';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { portByCode } from '@resources/reference-data/reference-data';
@@ -190,6 +191,16 @@ export class PlantsJourney {
     await this.plantsPages.placeOfDestination.searchFor(addressName);
     await this.plantsPages.placeOfDestination.address(addressName).check();
     await this.plantsPages.placeOfDestination.saveAndContinue.click();
+  }
+
+  /** Creates an address-book record, searches the open picker for it, ticks it, then deletes the record from the book. */
+  async createSearchTickThenDeleteAddress(api: AddressBookApiClient, picker: PlantsAddressBookPickerPage): Promise<{ searchTerm: string }> {
+    const addressName = `Deleted Before Save Nursery ${randomUUID()}`;
+    const record = await api.createAddress(nurseryAddress(addressName));
+    await picker.searchFor(addressName);
+    await picker.address(addressName).check();
+    await api.deleteAddress(record.id);
+    return { searchTerm: addressName };
   }
 
   /** Names the country and lands on the arrival-status question. Not for potatoes: use `toArrivalDetails`. */
