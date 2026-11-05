@@ -15,7 +15,10 @@ test.describe('Address book country list', () => {
     await expect(insPages.addressBookAdd.countryOptions).toHaveText(['Select a country', ...addressFormCountryNames]);
   });
 
-  test("the edit form's Country select offers the same alphabetical list with no blank option", async ({ insPages, addressBookApi }) => {
+  test("the edit form's Country select lists every country reference data serves alphabetically, United Kingdom in its place, with no Select a country option", async ({
+    insPages,
+    addressBookApi,
+  }) => {
     const created = await addressBookApi.createAddress({
       name: `Country Order Farm ${Date.now()}`,
       addressLine1: '7 Order Lane',

@@ -5,6 +5,7 @@ import { type AggregatedNotificationDocument } from '@domain/ins/models/db/aggre
 import { timeouts } from '@config/timeouts';
 import { getMongoDbUri } from '@config/service-base-urls';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
+import { parseAppDateText, toIsoDate } from '@utils/date-utils';
 
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
@@ -26,6 +27,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
     await animalsJourney.toDeclaration();
     const referenceNumber = journeyContext.referenceNumber;
     const aggregateId = aggregateIdFor(referenceNumber);
+    const arrivalIsoDate = toIsoDate(parseAppDateText(MANDATORY_ANSWERS.arrivalDate));
     const client = new MongoDbClient(getMongoDbUri());
 
     try {
@@ -56,8 +58,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(draftDoc.status).toBe('DRAFT');
       expect(draftDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
       expect(draftDoc.commodity).toBe(INS_DASHBOARD_COMMODITY_LABEL);
-      expect(draftDoc.arrivalDate).toBeInstanceOf(Date);
-      expect(draftDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
+      expect(draftDoc.arrivalDate).toBe(arrivalIsoDate);
       expect(draftDoc.lastUpdated).toBeInstanceOf(Date);
       expect(draftDoc.aggregateVersion).toBeGreaterThan(0);
 
@@ -77,8 +78,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(submittedDoc.status).toBe('SUBMITTED');
       expect(submittedDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
       expect(submittedDoc.commodity).toBe(INS_DASHBOARD_COMMODITY_LABEL);
-      expect(submittedDoc.arrivalDate).toBeInstanceOf(Date);
-      expect(submittedDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
+      expect(submittedDoc.arrivalDate).toBe(arrivalIsoDate);
       expect(submittedDoc.lastUpdated).toBeInstanceOf(Date);
       expect(submittedDoc.aggregateVersion).toBeGreaterThan(draftVersion);
     } finally {

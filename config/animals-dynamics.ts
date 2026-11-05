@@ -1,4 +1,8 @@
+import { expect } from '@playwright/test';
+import type { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
 import { timeouts } from '@config/timeouts';
+import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
+import { annotateDuration } from '@utils/playwright/annotate-duration';
 
 // Delivery is outbox → SQS → gateway → ASB → PIMS Dynamics.
 const arrivalTimeoutMs = timeouts.veryLong;
@@ -19,3 +23,20 @@ export const animalsDynamics = {
     intervals: [timeouts.short],
   }),
 } as const;
+
+/** Polls PIMS Dynamics until it holds exactly one notification for the reference, then returns that row with all its columns. */
+export async function waitForNotificationRow(
+  dynamics: AnimalsDynamicsClient,
+  referenceNumber: string,
+): Promise<AnimalsDynamicsImporterNotification> {
+  await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
+    expect
+      .poll(
+        () => dynamics.findNotifications(referenceNumber),
+        animalsDynamics.pollOptions(`Expected exactly one notification for ${referenceNumber}`),
+      )
+      .toHaveLength(1),
+  );
+  const [row] = await dynamics.findNotifications(referenceNumber);
+  return row;
+}

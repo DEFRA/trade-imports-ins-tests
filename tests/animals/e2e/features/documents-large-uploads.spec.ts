@@ -28,7 +28,10 @@ test.describe('Documents at the full file size', () => {
     expect(href).toBeTruthy();
     const response = await pages.page.request.get(new URL(href, pages.page.url()).toString());
     expect(response.status()).toBe(200);
-    expect((await response.body()).length).toBe(MAX_FILE_SIZE_BYTES);
-    expect(await response.body()).toEqual(await readFile(large));
+    const downloaded = await response.body();
+    expect(downloaded.length).toBe(MAX_FILE_SIZE_BYTES);
+    // Buffer.equals compares natively; toEqual exhausts memory on a file this size.
+    // If memory is still short, compare SHA-256 digests instead.
+    expect(downloaded.equals(await readFile(large))).toBe(true);
   });
 });
