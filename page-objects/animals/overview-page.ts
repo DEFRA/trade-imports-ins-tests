@@ -1,4 +1,4 @@
-import { type Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 
 export class AnimalsOverviewPage extends NotificationPage {

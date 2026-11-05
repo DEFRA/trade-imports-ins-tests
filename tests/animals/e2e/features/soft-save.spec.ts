@@ -1,12 +1,13 @@
 import { test, expect } from '@fixtures';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { SELECT_COMMODITY_ERROR } from '@domain/animals/constants/commodity-selection-page';
-import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
-import { MEANS_OF_TRANSPORT_REQUIRED_ERROR } from '@domain/animals/constants/means-of-transport';
+import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { MEANS_OF_TRANSPORT_REQUIRED_MESSAGE } from '@domain/animals/constants/means-of-transport';
 
 const TO_DO = 'To do';
 const COMMODITY_SELECTION_TASK = 'What are you importing?';
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
+const TRANSIT_COUNTRIES_TASK = 'Transit countries';
 const IMPOSSIBLE_ARRIVAL_DATE = '31/2/2026';
 const ARRIVAL_DATE_ERROR = 'Enter a real arrival date';
 const COMMODITY_DETAILS_TASK = 'Commodity details';
@@ -36,18 +37,20 @@ test.describe('Save and return to overview', () => {
     animalsPages,
   }) => {
     await animalsJourney.toArrivalDetails();
+    await animalsPages.arrivalDetails.chooseMeansOfTransport(MANDATORY_ANSWERS.meansOfTransport.display);
     await animalsPages.arrivalDetails.fillArrivalDate(IMPOSSIBLE_ARRIVAL_DATE);
 
     await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
     await expect(animalsPages.arrivalDetails.errorSummary).toBeVisible();
+    await expect(animalsPages.arrivalDetails.errorSummaryLinks).toHaveText([ARRIVAL_DATE_ERROR]);
     await expect(animalsPages.arrivalDetails.arrivalDateError).toContainText(ARRIVAL_DATE_ERROR);
     await animalsPages.overview.openTaskAfterReopening(animalsPages.arrivalDetails.referenceNumberFromUrl(), ARRIVAL_DETAILS_TASK);
     await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue('');
   });
 
-  test('arrival details: when no means of transport is chosen, refuses the save, keeps the port chosen and saves nothing', async ({
+  test('arrival details: when no means of transport is chosen, refuses the save, shows the port back and keeps the task to do', async ({
     animalsJourney,
     animalsPages,
   }) => {
@@ -58,11 +61,26 @@ test.describe('Save and return to overview', () => {
     await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
-    await expect(animalsPages.arrivalDetails.meansOfTransportError).toContainText(MEANS_OF_TRANSPORT_REQUIRED_ERROR);
+    await expect(animalsPages.arrivalDetails.errorSummaryLinks).toHaveText([MEANS_OF_TRANSPORT_REQUIRED_MESSAGE]);
     await expect(animalsPages.arrivalDetails.portOfEntry.select).toHaveValue(MANDATORY_ANSWERS.pointOfEntry.value);
-
+    await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, ARRIVAL_DETAILS_TASK)).toHaveText(TO_DO);
     await animalsPages.overview.openTaskAfterReopening(referenceNumber, ARRIVAL_DETAILS_TASK);
     await expect(animalsPages.arrivalDetails.portOfEntry.select).toHaveValue('');
+  });
+
+  test('transit countries: saves the countries listed and goes to the overview', async ({ animalsJourney, animalsPages }) => {
+    const countryNames = ALL_ANSWERS.transitedCountries.map((country) => country.display);
+    await animalsJourney.toTransitedCountries();
+    for (const name of countryNames) {
+      await animalsPages.transitedCountries.addCountry(name);
+    }
+    const referenceNumber = animalsPages.transitedCountries.referenceNumberFromUrl();
+
+    await animalsPages.transitedCountries.saveAndReturnToOverview.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.openTaskAfterReopening(referenceNumber, TRANSIT_COUNTRIES_TASK);
+    await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText(countryNames);
   });
 
   test('commodity details: when the number of animals is blank, keeps its checks and stays on the page', async ({

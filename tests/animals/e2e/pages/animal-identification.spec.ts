@@ -1,4 +1,4 @@
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, speciesLabel } from '@domain/animals/constants/commodity-lines';
 import { test, expect } from '@fixtures';
 
 const EAR_TAG_ONE_OVER_LIMIT = 'X'.repeat(59);
@@ -42,14 +42,14 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     const { cattle, bison, domesticCat } = commodityLines;
     const cattleRow = selectedCommodities.rowFor(cattle);
     await expect(selectedCommodities.codeCell(cattleRow)).toHaveText(cattle.commodityCode);
-    await expect(selectedCommodities.speciesCell(cattleRow)).toHaveText(`${bison.latinName}, ${cattle.latinName}`, {
+    await expect(selectedCommodities.speciesCell(cattleRow)).toHaveText(`${speciesLabel(bison)}, ${speciesLabel(cattle)}`, {
       useInnerText: true,
     });
     await expect(selectedCommodities.animalCountCell(cattleRow)).toHaveText('4');
 
     const catRow = selectedCommodities.rowFor(domesticCat);
     await expect(selectedCommodities.codeCell(catRow)).toHaveText(domesticCat.commodityCode);
-    await expect(selectedCommodities.speciesCell(catRow)).toHaveText(domesticCat.latinName);
+    await expect(selectedCommodities.speciesCell(catRow)).toHaveText(speciesLabel(domesticCat));
     await expect(selectedCommodities.animalCountCell(catRow)).toHaveText('2');
   });
 
@@ -59,10 +59,10 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     const { cattle, bison, domesticCat } = commodityLines;
     await expect(pages.page.locator('main h2, main h3')).toHaveText([
       cattle.commodityCode,
-      bison.latinName,
-      cattle.latinName,
+      speciesLabel(bison),
+      speciesLabel(cattle),
       domesticCat.commodityCode,
-      domesticCat.latinName,
+      speciesLabel(domesticCat),
     ]);
   });
 

@@ -20,7 +20,7 @@ type CapturedSubDivision = CapturedCountry['subDivisions'][number];
 const readFixture = <T>(path: string): T => JSON.parse(readFileSync(path, 'utf-8')) as T;
 
 export const countries = readFixture<CapturedCountry[]>(referenceDataPaths.countries);
-export const countriesOrigin = readFixture<CapturedCountry[]>(referenceDataPaths.countriesOrigin);
+const countriesOrigin = readFixture<CapturedCountry[]>(referenceDataPaths.countriesOrigin);
 export const portsOfEntry = readFixture<CapturedPort[]>(referenceDataPaths.portsOfEntry);
 
 export function countryByCode(code: string): { value: string; display: string } {
@@ -62,6 +62,11 @@ export function countryAndSubdivisionNames(): string[] {
 /** Each origin country and each of its subdivisions named "<subdivision> (<country>)", sorted by name. */
 export function countryAndSubdivisionNamesWithCountry(): string[] {
   return countryNamesWithSubdivisions(subdivisionNamedWithCountry);
+}
+
+/** One origin country and each of its subdivisions named with the country, sorted by name. */
+export function countryAndItsSubdivisionNames(countryName: string): string[] {
+  return countryAndSubdivisionNamesWithCountry().filter((name) => name === countryName || name.endsWith(`(${countryName})`));
 }
 
 /** Every captured unfiltered country by name, plus United Kingdom, in alphabetical order. */

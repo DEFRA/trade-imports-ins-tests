@@ -9,4 +9,4 @@ export type MeansOfTransport = (typeof meansOfTransport)[keyof typeof meansOfTra
 
 export const MEANS_OF_TRANSPORT_SELECT_TEXT = 'Select one';
 
-export const MEANS_OF_TRANSPORT_REQUIRED_ERROR = 'Select a means of transport to the port of entry';
+export const MEANS_OF_TRANSPORT_REQUIRED_MESSAGE = 'Select a means of transport to the port of entry';

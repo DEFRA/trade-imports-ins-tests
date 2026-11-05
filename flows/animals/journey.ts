@@ -380,11 +380,7 @@ export class AnimalsJourney {
   }
 
   async reachTransporterFromHub(): Promise<void> {
-    await this.animalsPages.overview.task('Arrival details').click();
-    await this.animalsPages.arrivalDetails.heading.waitFor(pageLoadWait);
-    await this.fillArrivalDetails();
-    await this.animalsPages.arrivalDetails.saveAndContinue.click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.saveArrivalDetailsFromOverview();
     await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
     await this.animalsPages.transitedCountries.addCountry(ALL_ANSWERS.transitedCountries[0].display);
@@ -407,15 +403,13 @@ export class AnimalsJourney {
 
   async answerTransport(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Arrival details').click();
-    await this.fillArrivalDetails({
+    await this.saveArrivalDetailsOnOpenPage({
       date: answers.arrivalDate,
       means: answers.meansOfTransport.display,
       port: answers.pointOfEntry.display,
       transportId: answers.transportIdentification,
       documentReference: answers.transportDocumentReference,
     });
-    await this.animalsPages.arrivalDetails.saveAndContinue.click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     if (answers.transitedCountries) {
       await this.animalsPages.overview.task('Transit countries').click();
       await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
@@ -553,11 +547,22 @@ export class AnimalsJourney {
     await this.animalsPages.arrivalDetails.heading.waitFor(pageLoadWait);
   }
 
-  async toTransitedCountries(): Promise<void> {
-    await this.toArrivalDetails();
-    await this.fillArrivalDetails();
+  async saveArrivalDetailsFromOverview(means: string = MANDATORY_ANSWERS.meansOfTransport.display): Promise<void> {
+    await this.animalsPages.overview.task('Arrival details').click();
+    await this.saveArrivalDetailsOnOpenPage({ means });
+  }
+
+  async saveArrivalDetailsOnOpenPage(answer: ArrivalDetailsAnswer): Promise<void> {
+    await this.animalsPages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await this.fillArrivalDetails(answer);
     await this.animalsPages.arrivalDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+  }
+
+  async toTransitedCountries(): Promise<void> {
+    await this.startNotification();
+    await this.answerCommodity();
+    await this.saveArrivalDetailsFromOverview();
     await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
   }

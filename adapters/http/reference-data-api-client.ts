@@ -1,16 +1,11 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient } from '@adapters/http/rest-client';
 import { getDeveloperApiKey, getReferenceDataBaseUrl } from '@config/service-base-urls';
-import type { CommodityLine } from '@domain/animals/constants/commodity-lines';
-
-interface ListedSpecies {
-  latinName: string;
-  commonName: string | null;
-}
+import type { CommodityLine, SpeciesNamePair } from '@domain/animals/constants/commodity-lines';
 
 interface CommodityGroup {
   code: string;
-  species: ListedSpecies[];
+  species: SpeciesNamePair[];
 }
 
 interface CommoditySearchResponse {
@@ -42,7 +37,7 @@ export class ReferenceDataApiClient {
     return response.groups;
   }
 
-  private async findSpecies(species: CommodityLine): Promise<ListedSpecies> {
+  private async findSpecies(species: CommodityLine): Promise<SpeciesNamePair> {
     const groups = await this.listGroups(species.searchTerm);
     const listed = groups
       .find((group) => group.code === species.commodityCode)

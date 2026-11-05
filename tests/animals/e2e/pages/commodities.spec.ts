@@ -1,4 +1,4 @@
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, speciesLabel } from '@domain/animals/constants/commodity-lines';
 
 import { test, expect } from '@fixtures';
 import { SEARCH_HINT, SELECT_COMMODITY_ERROR } from '@domain/animals/constants/commodity-selection-page';
@@ -52,7 +52,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
         .sort((left, right) => left.code.localeCompare(right.code))
         .map((group) => ({
           ...group,
-          species: [...group.species].sort((left, right) => left.latinName.localeCompare(right.latinName)),
+          species: [...group.species].sort((left, right) => speciesLabel(left).localeCompare(speciesLabel(right))),
         }));
 
       await animalsPages.commoditySelection.search(query);
@@ -65,8 +65,8 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
       for (const { code, species } of orderedGroups) {
         const checkboxes = animalsPages.commoditySelection.commodityGroup(code).getByRole('checkbox');
         await expect(checkboxes).toHaveCount(species.length);
-        for (const [index, { latinName }] of species.entries()) {
-          await expect(checkboxes.nth(index)).toHaveAccessibleName(latinName);
+        for (const [index, pair] of species.entries()) {
+          await expect(checkboxes.nth(index)).toHaveAccessibleName(speciesLabel(pair));
         }
       }
     }
@@ -82,6 +82,13 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await expect(animalsPages.commoditySelection.commodityGroup(commodityLines.cattle.commodityCode).locator('label strong')).toHaveText(
       commodityLines.cattle.latinName,
     );
+  });
+
+  test('bolds the matched text inside the common name when a search matches it', async ({ animalsPages }) => {
+    await animalsPages.commoditySelection.search(commodityLines.raccoonDog.searchTerm);
+    await expect(
+      animalsPages.commoditySelection.commodityGroup(commodityLines.raccoonDog.commodityCode).locator('label strong'),
+    ).toHaveText('Dog');
   });
 
   test('says so when nothing matches', async ({ pages, animalsPages }) => {
@@ -101,8 +108,8 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.overview.task('What are you importing?').click();
 
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText('2 selected');
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(commodityLines.cattle.latinName);
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(commodityLines.domesticCat.latinName);
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(commodityLines.cattle));
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(commodityLines.domesticCat));
 
     await animalsPages.commoditySelection.search(commodityLines.cattle.searchTerm);
     await expect(animalsPages.commoditySelection.species(commodityLines.cattle)).toBeChecked();
@@ -114,7 +121,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText('1 selected');
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(commodityLines.cattle.latinName);
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(commodityLines.cattle));
 
     await animalsPages.commoditySelection.clearAll.click();
     await expect(animalsPages.commoditySelection.selectedSummary).toHaveCount(0);
@@ -160,7 +167,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     test('keeps the saved selection when the page is reopened', async ({ animalsPages }) => {
       const referenceNumber = animalsPages.commoditySelection.referenceNumberFromUrl();
       await animalsPages.overview.openTaskAfterReopening(referenceNumber, 'What are you importing?');
-      await expect(animalsPages.commoditySelection.selectedSummary).toContainText(commodityLines.cattle.latinName);
+      await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(commodityLines.cattle));
     });
   });
 

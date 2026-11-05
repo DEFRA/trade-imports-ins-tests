@@ -1,4 +1,4 @@
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, speciesLabel } from '@domain/animals/constants/commodity-lines';
 import { test, expect } from '@fixtures';
 
 test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () => {
@@ -25,8 +25,8 @@ test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () =
     await expect(table.getByRole('columnheader')).toHaveText(['Commodity code', 'Species', 'Actions']);
     await expect(animalsPages.consignmentDetails.selectedCommodities.rowFor(cattle).getByRole('cell')).toHaveText([
       cattle.commodityCode,
-      cattle.latinName,
-      `Remove ${cattle.commodityCode} ${cattle.latinName}`,
+      speciesLabel(cattle),
+      `Remove ${cattle.commodityCode} ${speciesLabel(cattle)}`,
     ]);
   });
 
@@ -64,13 +64,13 @@ test.describe('Commodity details page with two species of one commodity', { tag:
     await expect(animalsPages.consignmentDetails.numberOfPackages.first()).toBeFocused();
   });
 
-  test("lists both species' Latin names, one per line, in the commodity's Species cell", async ({ animalsPages }) => {
+  test("lists both species' labels, one per line, in the commodity's Species cell", async ({ animalsPages }) => {
     const speciesCell = animalsPages.consignmentDetails.selectedCommodities.speciesCell(
       animalsPages.consignmentDetails.selectedCommodities.rowFor(commodityLines.cattle),
     );
 
     expect(await speciesCell.evaluate((el) => (el as HTMLElement).innerText)).toBe(
-      `${commodityLines.bison.latinName},\n${commodityLines.cattle.latinName}`,
+      `${speciesLabel(commodityLines.bison)},\n${speciesLabel(commodityLines.cattle)}`,
     );
   });
 });

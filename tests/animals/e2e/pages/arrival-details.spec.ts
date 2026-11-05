@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
+import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import {
-  MEANS_OF_TRANSPORT_REQUIRED_ERROR,
+  MEANS_OF_TRANSPORT_REQUIRED_MESSAGE,
   MEANS_OF_TRANSPORT_SELECT_TEXT,
   meansOfTransport,
 } from '@domain/animals/constants/means-of-transport';
@@ -78,12 +79,36 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
     await expect(animalsPages.overview.taskStatus('Arrival details')).toHaveText('Complete');
   });
 
-  test('refuses an empty save, keeping the user on the page with the means-of-transport error', async ({ animalsPages }) => {
+  test('refuses Save and continue with no means of transport and names the missing answer', async ({ pages, animalsPages }) => {
     await animalsPages.arrivalDetails.saveAndContinue.click();
 
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
-    await expect(animalsPages.arrivalDetails.errorSummaryLinks).toHaveText([MEANS_OF_TRANSPORT_REQUIRED_ERROR]);
-    await expect(animalsPages.arrivalDetails.meansOfTransportError).toContainText(MEANS_OF_TRANSPORT_REQUIRED_ERROR);
+    await expect(animalsPages.arrivalDetails.errorSummaryLinks).toHaveText([MEANS_OF_TRANSPORT_REQUIRED_MESSAGE]);
+    await expect(animalsPages.arrivalDetails.meansOfTransportError).toContainText(MEANS_OF_TRANSPORT_REQUIRED_MESSAGE);
+    await expect(animalsPages.arrivalDetails.meansOfTransport).toHaveClass(/govuk-select--error/);
+    await expect(pages.page).toHaveTitle(/^Error: /);
+
+    await animalsPages.arrivalDetails.errorSummaryLinks.click();
+    await expect(animalsPages.arrivalDetails.meansOfTransport).toBeFocused();
+  });
+
+  test('shows the port and date back and saves nothing when Save and continue is refused for no means of transport', async ({
+    animalsPages,
+  }) => {
+    await animalsPages.arrivalDetails.portOfEntry.choose(MANDATORY_ANSWERS.pointOfEntry.display);
+    const arrivalDate = getRelativeDatePickerValue({ dayOffset: 1 });
+    await animalsPages.arrivalDetails.fillArrivalDate(arrivalDate);
+    await animalsPages.arrivalDetails.saveAndContinue.click();
+
+    await expect(animalsPages.arrivalDetails.errorSummaryLinks).toHaveText([MEANS_OF_TRANSPORT_REQUIRED_MESSAGE]);
+    await expect(animalsPages.arrivalDetails.portOfEntry.select).toHaveValue(MANDATORY_ANSWERS.pointOfEntry.value);
+    await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue(arrivalDate);
+
+    await animalsPages.overview.openTaskAfterReopening(animalsPages.arrivalDetails.referenceNumberFromUrl(), 'Arrival details');
+    await animalsPages.arrivalDetails.heading.waitFor();
+
+    await expect(animalsPages.arrivalDetails.portOfEntry.select).toHaveValue('');
+    await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue('');
   });
 
   test('saves a means of transport alone, leaving the other arrival answers blank', async ({ animalsPages }) => {
@@ -126,8 +151,7 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
     await expect(animalsPages.arrivalDetails.arrivalDateError).toContainText(OUT_OF_RANGE_MESSAGE);
     const notificationUrl = pages.page.url();
 
-    await pages.page.locator('.govuk-back-link').click();
-    await animalsPages.overview.task('Arrival details').click();
+    await animalsPages.overview.openTaskAfterReopening(animalsPages.arrivalDetails.referenceNumberFromUrl(), 'Arrival details');
     await animalsPages.arrivalDetails.heading.waitFor();
 
     expect(pages.page.url()).toBe(notificationUrl);

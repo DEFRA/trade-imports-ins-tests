@@ -1,4 +1,4 @@
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, speciesLabel } from '@domain/animals/constants/commodity-lines';
 
 import { test, expect } from '@fixtures';
 
@@ -30,7 +30,7 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await expect(card.getByRole('button')).toHaveText([/^Remove/, /^Remove/]);
     await expect(card.getByRole('textbox')).toHaveCount(0);
     await expect(card.getByRole('paragraph')).toHaveCount(0);
-    await expect(card.getByRole('heading')).toHaveText([commodityLines.cattle.latinName]);
+    await expect(card.getByRole('heading')).toHaveText([speciesLabel(commodityLines.cattle)]);
     await expect(card.getByRole('link')).toHaveText([/^Change number of animals/]);
     await expect(animalsPages.animalIdentification.savedAnimalsRows(commodityLines.cattle)).toHaveCount(2);
 
@@ -42,14 +42,14 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await animalsPages.consignmentDetails.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     const dropError = pages.page.getByRole('link', {
-      name: `You have 2 identifier records for ${commodityLines.cattle.latinName} but entered 1 animal. Remove identifier records or keep the higher count.`,
+      name: `You have 2 identifier records for ${speciesLabel(commodityLines.cattle)} but entered 1 animal. Remove identifier records or keep the higher count.`,
     });
     await expect(dropError).toBeVisible();
     await dropError.click();
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/#identification-card-0$/);
     await expect(animalsPages.animalIdentification.commodityHeading(commodityLines.cattle.commodityCode)).toBeVisible();
-    await expect(card.getByRole('heading', { name: commodityLines.cattle.latinName, exact: true })).toBeVisible();
+    await expect(card.getByRole('heading', { name: speciesLabel(commodityLines.cattle), exact: true })).toBeVisible();
     await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 2)).toBeVisible();
 
     await animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 2).getByRole('button', { name: 'Remove' }).click();

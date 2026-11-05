@@ -1,6 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
-import type { CommodityLine } from '@domain/animals/constants/commodity-lines';
+import { speciesLabel, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { SEARCH_HINT } from '@domain/animals/constants/commodity-selection-page';
 
 export class AnimalsCommoditySelectionPage extends NotificationPage {
@@ -63,7 +63,7 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
   }
 
   species(species: CommodityLine): Locator {
-    return this.commodityGroup(species.commodityCode).getByRole('checkbox', { name: species.latinName, exact: true });
+    return this.commodityGroup(species.commodityCode).getByRole('checkbox', { name: speciesLabel(species), exact: true });
   }
 
   async searchAndCheckSpecies(speciesList: CommodityLine[]): Promise<void> {
@@ -78,11 +78,11 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
   }
 
   speciesEntry(species: CommodityLine): Locator {
-    return this.selectedSummary.getByRole('listitem').filter({ hasText: species.latinName });
+    return this.selectedSummary.getByRole('listitem').filter({ hasText: speciesLabel(species) });
   }
 
   removeSpecies(species: CommodityLine): Locator {
-    return this.selectedSummary.getByRole('button', { name: `Remove ${species.latinName}`, exact: true });
+    return this.selectedSummary.getByRole('button', { name: `Remove ${speciesLabel(species)}`, exact: true });
   }
 
   async pressRemoveSpecies(species: CommodityLine): Promise<void> {
