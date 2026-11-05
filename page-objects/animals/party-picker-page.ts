@@ -65,9 +65,8 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return Promise.all((await this.listedParties.all()).map((party) => party.inputValue()));
   }
 
-  partiesListedAbove(name: string, amongPartyIds: readonly string[]): Locator {
-    const isAmongPartyIds = amongPartyIds.map((partyId) => `@value="${partyId}"`).join(' or ') || 'false()';
-    return this.party(name).locator(`xpath=preceding::input[@type="radio"][${isAmongPartyIds}]`);
+  get checkedParties(): Locator {
+    return this.resultsGroup.getByRole('radio', { checked: true });
   }
 
   get selectedAddress(): Locator {
@@ -90,9 +89,13 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Add a new address' });
   }
 
-  async select(name: string): Promise<void> {
-    await this.searchBox.fill(name);
+  async search(term: string): Promise<void> {
+    await this.searchBox.fill(term);
     await this.searchButton.click();
+  }
+
+  async select(name: string): Promise<void> {
+    await this.search(name);
     await this.party(name).check();
   }
 }

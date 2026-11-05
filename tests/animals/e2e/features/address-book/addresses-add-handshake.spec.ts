@@ -10,16 +10,31 @@ import { originOf } from '@page-objects/shared/base-page';
 
 const PARTY_ROLES: readonly PartyRole[] = ['Place of origin', 'Consignor', 'Consignee', 'Importer', 'Place of destination'];
 
-function newAddressFor(role: PartyRole): NewAddressDetails {
-  const unique = `${Date.now()}-${randomUUID().slice(0, 8)}`;
+function uniqueToken(): string {
+  return `${Date.now()}-${randomUUID().slice(0, 8)}`;
+}
+
+function newAddressFor(role: PartyRole, token: string = uniqueToken()): NewAddressDetails {
   return {
-    name: `Handshake ${role} ${unique}`,
+    name: `Handshake ${role} ${token}`,
     addressLine1: '9 Handshake Lane',
     townOrCity: 'Carlisle',
     postcode: 'CA2 7AA',
     country: 'United Kingdom',
     phone: '01228 555 0199',
-    email: `handshake-${unique}@example.co.uk`,
+    email: `handshake-${token}@example.co.uk`,
+  };
+}
+
+function addressAlreadyInTheBookFor(role: PartyRole, token: string) {
+  return {
+    name: `Already in the book ${role} ${token}`,
+    addressLine1: '9 Handshake Lane',
+    townOrCity: 'Carlisle',
+    postcode: 'CA2 7AA',
+    countryCode: 'GB',
+    phone: '01228 555 0199',
+    email: `already-${token}@example.co.uk`,
   };
 }
 
@@ -74,22 +89,27 @@ test.describe('Add an address from the journey via INS', () => {
     test(
       `Save and return to address page on the INS add page reached from the ${role} picker lands on the picker with the added banner, the new address listed first and nothing selected`,
       { tag: ['@address-book', '@ins-frontend'] },
-      async ({ animalsJourney, insPages }) => {
+      async ({ animalsJourney, insPages, addressBookApi }) => {
         const addPage = insPages.addressBookAdd;
         const picker = animalsJourney.partyPicker(role);
-        const details = newAddressFor(role);
+        const token = uniqueToken();
+        const details = newAddressFor(role, token);
+        const alreadyInTheBook = await addressBookApi.createAddress(addressAlreadyInTheBookFor(role, token));
 
         await animalsJourney.toPartyPicker(role);
-        const partyIdsListedBeforeTheAdd = await picker.listedPartyIds();
         await animalsJourney.openInsAddAddressFromPicker(addPage, role);
         await addPage.fill(details);
         await addPage.btnSaveAndReturnToAddressPage.click();
 
         await expect(picker.heading).toBeVisible();
         await expect(picker.successBanner.getByText(addedBannerText(details), { exact: true })).toBeVisible();
-        await expect(picker.party(details.name)).toHaveCount(1);
-        await expect(picker.party(details.name)).not.toBeChecked();
-        await expect(picker.partiesListedAbove(details.name, partyIdsListedBeforeTheAdd)).toHaveCount(0);
+        await expect(picker.checkedParties).toHaveCount(0);
+
+        const added = await addressBookApi.findByName(details.name);
+        await picker.search(token);
+        await expect(picker.listedParties).toHaveCount(2);
+        expect(await picker.listedPartyIds()).toEqual([added.id, alreadyInTheBook.id]);
+        await expect(picker.checkedParties).toHaveCount(0);
       },
     );
 
