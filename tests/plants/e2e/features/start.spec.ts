@@ -26,12 +26,14 @@ test.describe('High-risk plants start section', () => {
     await expect(plantsPages.commodityType.heading).toBeVisible();
     await expect(plantsPages.commodityType.commodityType('Potatoes (seed or ware)')).toBeVisible();
 
-    // The entry page's back link is the one in the journey that depends on
-    // state: nothing is committed yet, so it points at the dashboard.
     await expect(plantsPages.commodityType.linkBack).toHaveAttribute('href', plantsPages.dashboard.expectedUrl);
   });
 
-  test('the Overview carries the journey strip and the task rows landed so far', async ({ pages, plantsPages, plantsJourney }) => {
+  test('the Overview shows the journey strip, the Draft status, the four group captions and each task row state', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.toOverview();
 
@@ -43,8 +45,6 @@ test.describe('High-risk plants start section', () => {
     await expect(plantsPages.overview.notificationReference).toHaveText(reference);
     await expect(plantsPages.overview.cancelAmend).toHaveCount(0);
 
-    // All four groups have landed a row, and a group with no rows is not
-    // rendered — each section's own spec asserts its row as that page lands.
     await expect(plantsPages.overview.taskLists).toHaveCount(4);
     await expect(plantsPages.overview.groupHeadings).toHaveText([
       '1. About the consignment',
@@ -58,22 +58,13 @@ test.describe('High-risk plants start section', () => {
     );
     await expect(plantsPages.overview.taskRow('What are you importing?')).toContainText('Not yet started');
 
-    // Arrival holds only the arrival-status question so far, and that question
-    // is out of scope until a commodity type that is asked it is chosen — so on
-    // a notification with nothing answered the row is blocked and has no link.
     await expect(plantsPages.overview.taskRowByTitle('Arrival details')).toContainText('Cannot start yet');
     await expect(plantsPages.overview.taskRowLink('Arrival details')).toHaveCount(0);
 
-    // Consignment parties renders because identification numbers is an
-    // unconditional row. That row's own questions are out of scope until a
-    // commodity type is chosen, so it is blocked and carries no link; the
-    // consignor row is conditional and is hidden entirely while it is NA.
     await expect(plantsPages.overview.taskRowByTitle('Identification numbers')).toContainText('Cannot start yet');
     await expect(plantsPages.overview.taskRowLink('Identification numbers')).toHaveCount(0);
     await expect(plantsPages.overview.taskRowByTitle('Consignor')).toHaveCount(0);
 
-    // Check and submit is blocked until every other row is complete, so on a
-    // notification with nothing answered it is blocked and carries no link.
     await expect(plantsPages.overview.taskRowByTitle('Check and submit')).toContainText('Cannot start yet');
     await expect(plantsPages.overview.taskRowLink('Check and submit')).toHaveCount(0);
 
@@ -117,7 +108,11 @@ test.describe('High-risk plants start section', () => {
     await expect(plantsPages.dashboard.cardStatusTag(reference)).toHaveText('Draft');
   });
 
-  test('Yes, delete notification soft-deletes it and drops it from the listing', async ({ pages, plantsPages, plantsJourney }) => {
+  test('Yes, delete notification shows the deleted banner and the reference no longer matches a dashboard search', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.toOverview();
     await plantsJourney.returnToDashboard();
@@ -129,8 +124,6 @@ test.describe('High-risk plants start section', () => {
     await expect(plantsPages.dashboard.deletedBanner).toContainText('Notification deleted');
     await expect(plantsPages.dashboard.deletedBanner).toContainText('The notification has been deleted.');
 
-    // DELETED rows are filtered out of the listing, so the reference now
-    // matches nothing — proved against the search, not against page one.
     await plantsPages.dashboard.searchForReference(reference);
     await expect(plantsPages.dashboard.notificationCard(reference)).toHaveCount(0);
   });

@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { WHOLE_REFERENCE_NUMBER_PATTERN } from '@domain/plants/constants/reference-number-patterns';
 import { portByCode } from '@resources/reference-data/reference-data';
+import { NOT_YET_ARRIVED } from '@domain/plants/constants/arrival-status-page';
 import { COLD_START } from '@fixtures/auth-state';
 import { PLANTS_FOR_PLANTING, POTATOES, WOOD_AND_CUT_TREES, arrivalDate, nurseryAddress, type CommodityLine } from '@flows/plants/journey';
 
@@ -71,7 +72,7 @@ test.describe('High-risk plants full happy-path journeys', () => {
         await plantsPages.arrivalDetails.placeOfLanding.choose(portByCode('GB ABD').display);
       } else {
         await plantsJourney.toArrivalStatus(scenario.country);
-        await plantsJourney.answerArrivalStatus('No, it has not arrived yet');
+        await plantsJourney.answerArrivalStatus(NOT_YET_ARRIVED);
       }
       await plantsPages.arrivalDetails.arrivalDate.fill(expectedArrival);
       await plantsPages.arrivalDetails.saveAndContinue.click();

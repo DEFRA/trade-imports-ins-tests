@@ -3,8 +3,9 @@ import type { PlantsPages } from '@page-objects';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { portByCode } from '@resources/reference-data/reference-data';
+import { ALREADY_ARRIVED, NOT_YET_ARRIVED } from '@domain/plants/constants/arrival-status-page';
 
-/** One commodity line's answers, keyed by field label. The fields a line needs depend on its category. */
+/** One commodity line's answers, keyed by field label. */
 export type CommodityLine = Record<string, string>;
 
 export type CategorisedLine = { category: string; line: CommodityLine };
@@ -14,8 +15,6 @@ export const PLANTS_FOR_PLANTING = 'Plants for planting';
 export const WOOD_AND_CUT_TREES = 'Wood and cut trees';
 
 export const SEED_POTATOES = 'Seed potatoes';
-const CUT_CONIFEROUS_TREES = 'Cut coniferous trees more than 3 metres high';
-
 export const potatoLine = { Variety: 'Maris Piper', Quantity: '250', 'Intended use': 'Planting' };
 
 export const plantsLine = {
@@ -25,22 +24,6 @@ export const plantsLine = {
   Quantity: '120',
   'EPPO code': 'QUERO',
 };
-
-const coniferousTreesLine = {
-  'Commodity code': '4403 25 10',
-  Quantity: '40',
-  'Size of the trees': '4.5',
-  'Phytosanitary treatments applied': 'Kiln dried (KD)',
-};
-
-const DEFAULT_LINE_BY_COMMODITY_TYPE: Record<string, CategorisedLine> = {
-  [POTATOES]: { category: SEED_POTATOES, line: potatoLine },
-  [PLANTS_FOR_PLANTING]: { category: PLANTS_FOR_PLANTING, line: plantsLine },
-  [WOOD_AND_CUT_TREES]: { category: CUT_CONIFEROUS_TREES, line: coniferousTreesLine },
-};
-
-const ALREADY_ARRIVED = 'Yes, it has already arrived';
-const NOT_YET_ARRIVED = 'No, it has not arrived yet';
 
 export const nurseryAddress = (name: string, countryCode = 'GB') => ({
   name,
@@ -68,15 +51,10 @@ type NotificationOptions = {
   type?: string;
   days?: number;
   contact?: boolean;
-  /** The country the minted record carries. */
   countryCode?: string;
-  /** The minted record's name. Must be unique: the address book is shared and never wiped. */
   name?: string;
-  /** A record to pick instead of minting one, so two notifications can copy the same address. */
   existing?: AddressBookRecord;
 };
-
-const TYPE_AHEAD_FIELD = 'Genus';
 
 export class PlantsJourney {
   constructor(
@@ -140,10 +118,21 @@ export class PlantsJourney {
     await this.plantsPages.origin.heading.waitFor();
   }
 
-  async toOriginOfNewNotification(
-    commodityType: string,
-    { category, line }: CategorisedLine = DEFAULT_LINE_BY_COMMODITY_TYPE[commodityType],
-  ): Promise<string> {
+  async toOriginOfNewNotification(commodityType: string, categorisedLine?: CategorisedLine): Promise<string> {
+    const defaultLineByCommodityType: Record<string, CategorisedLine> = {
+      [POTATOES]: { category: SEED_POTATOES, line: potatoLine },
+      [PLANTS_FOR_PLANTING]: { category: PLANTS_FOR_PLANTING, line: plantsLine },
+      [WOOD_AND_CUT_TREES]: {
+        category: 'Cut coniferous trees more than 3 metres high',
+        line: {
+          'Commodity code': '4403 25 10',
+          Quantity: '40',
+          'Size of the trees': '4.5',
+          'Phytosanitary treatments applied': 'Kiln dried (KD)',
+        },
+      },
+    };
+    const { category, line } = categorisedLine ?? defaultLineByCommodityType[commodityType];
     const reference = await this.startNotification();
     await this.chooseCommodityType(commodityType);
     await this.addCommodityLine(category, line);
@@ -203,7 +192,7 @@ export class PlantsJourney {
     await this.plantsPages.placeOfDestination.saveAndContinue.click();
   }
 
-  /** Names the country and lands on the arrival-status question. Not for potatoes, which skip it: use `toArrivalDetails`. */
+  /** Names the country and lands on the arrival-status question. Not for potatoes: use `toArrivalDetails`. */
   async toArrivalStatus(country: string): Promise<void> {
     await this.plantsPages.origin.country.choose(country);
     await this.plantsPages.origin.saveAndContinue.click();
@@ -225,8 +214,9 @@ export class PlantsJourney {
   }
 
   private async fillCommodityLine(values: CommodityLine): Promise<void> {
+    const typeAheadField = 'Genus';
     for (const [label, value] of Object.entries(values)) {
-      if (label === TYPE_AHEAD_FIELD) {
+      if (label === typeAheadField) {
         await this.plantsPages.commodityDetails.selectGenus(value);
         continue;
       }
