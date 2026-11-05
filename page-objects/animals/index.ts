@@ -24,7 +24,6 @@ import { AnimalsPrivateTransporterPage } from '@page-objects/animals/private-tra
 import { AnimalsTransitedCountriesPage } from '@page-objects/animals/transited-countries-page';
 import { AnimalsTransporterAddPage } from '@page-objects/animals/transporter-add-page';
 import { AnimalsTransporterPage } from '@page-objects/animals/transporter-page';
-import { AnimalsTransporterSelectionPage } from '@page-objects/animals/transporter-selection-page';
 
 export function createAnimalsPages(page: Page) {
   return {
@@ -53,7 +52,6 @@ export function createAnimalsPages(page: Page) {
     transitedCountries: new AnimalsTransitedCountriesPage(page),
     transporter: new AnimalsTransporterPage(page),
     transporterAdd: new AnimalsTransporterAddPage(page),
-    transporterSelection: new AnimalsTransporterSelectionPage(page),
     commercialTransporter: new AnimalsCommercialTransporterPage(page),
     privateTransporter: new AnimalsPrivateTransporterPage(page),
     contactAddress: new AnimalsContactAddressPage(page),
