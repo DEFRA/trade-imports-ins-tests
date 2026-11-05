@@ -100,6 +100,11 @@ export class BasePage {
     await this.page.goto(`${baseUrl}${path}`);
   }
 
+  protected async leaveOriginThenSignIn(origin: string, activate: () => Promise<void>): Promise<void> {
+    await Promise.all([this.page.waitForURL((url) => url.origin !== origin), activate()]);
+    await this.completeSignInIfRequested();
+  }
+
   async completeSignInIfRequested(options?: SignInIdentity): Promise<void> {
     await this.signInWhenRequested(true, options);
   }

@@ -1,3 +1,4 @@
+import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { WHOLE_REFERENCE_NUMBER_PATTERN as ANIMALS_REFERENCE } from '@domain/animals/constants/reference-number-patterns';
 import { WHOLE_REFERENCE_NUMBER_PATTERN as PLANTS_REFERENCE } from '@domain/plants/constants/reference-number-patterns';
 import type { InsNotificationTypePage } from '@page-objects/ins/notification-type-page';
@@ -8,6 +9,7 @@ import { recordMainFrameNavigationPaths } from '@utils/playwright/main-frame-nav
 import type { Page } from '@playwright/test';
 
 import { test, expect } from '@fixtures';
+import { authCookieNameFor } from '@fixtures/auth-state';
 
 const QUESTION_TITLE = 'What are you importing? - Import notification service - GOV.UK';
 const OPTIONS = [
@@ -97,18 +99,15 @@ test.describe('INS notification type question', { tag: ['@animals-frontend', '@p
   test('choosing Live animals signs the user in to the animals service and opens a new draft at Origin of the import', async ({
     insPages,
     animalsPages,
+    animalsJourney,
     pages,
   }) => {
     test.slow();
     const { animalsNavigations, plantsNavigations } = recordHandOverNavigations(pages.page);
-    const notificationTypePage = insPages.notificationType;
-    await notificationTypePage.open();
 
-    await notificationTypePage.option(LIVE_ANIMALS.label).check();
-    await notificationTypePage.continueToService();
+    const reference = await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType);
 
     await expect(animalsPages.originOfImport.heading).toBeVisible();
-    const reference = animalsPages.originOfImport.referenceNumberFromUrl();
     expect(reference).toMatch(ANIMALS_REFERENCE);
     await expect(animalsPages.originOfImport.statusTag).toHaveText('Draft');
     await expect(animalsPages.originOfImport.notificationReference).toContainText(reference);
@@ -181,5 +180,161 @@ test.describe('INS home Create new', () => {
     await expect(pages.page).toHaveURL(`${originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL')}${notificationTypePage.expectedUrl}`);
     await expect(notificationTypePage.heading).toBeVisible();
     await expectOptionsListedInOrderAndUnselected(notificationTypePage);
+  });
+});
+
+test.describe('Live animals notification started from the INS question', { tag: '@animals-frontend' }, () => {
+  const ORIGIN_TASK = 'Where is this consignment coming from?';
+  const COMMODITY_TASK = 'What are you importing?';
+  const SELECTED_SPECIES = MANDATORY_ANSWERS.commodityLines.map((line) => line.species);
+
+  test('Back from origin opens the INS question with Live animals chosen alone', async ({
+    insPages,
+    animalsPages,
+    animalsJourney,
+    pages,
+  }) => {
+    test.slow();
+    await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType);
+
+    await animalsPages.originOfImport.followBackToInsTypeQuestion();
+
+    await expect(pages.page).toHaveURL(
+      (url) => url.origin === originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL') && url.pathname === insPages.notificationType.expectedUrl,
+    );
+    await expect(insPages.notificationType.heading).toBeVisible();
+    await expect(insPages.notificationType.checkedOptions).toHaveCount(1);
+    await expect(insPages.notificationType.option(LIVE_ANIMALS.label)).toBeChecked();
+  });
+
+  test('keeping Live animals returns to the same notification and adds no second draft', async ({
+    insPages,
+    animalsPages,
+    animalsJourney,
+    pages,
+  }) => {
+    test.slow();
+    const reference = await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType);
+    await animalsPages.originOfImport.followBackToInsTypeQuestion();
+
+    await insPages.notificationType.continueToService();
+
+    await expect(pages.page).toHaveURL(
+      (url) =>
+        url.origin === originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL') &&
+        url.pathname === animalsPages.originOfImport.expectedUrl(reference),
+    );
+    await expect(animalsPages.originOfImport.heading).toBeVisible();
+    await expect(animalsPages.originOfImport.statusTag).toHaveText('Draft');
+    await expect(animalsPages.originOfImport.notificationReference).toContainText(reference);
+    await animalsPages.dashboard.open();
+    await animalsPages.dashboard.searchForReference(reference);
+    await expect(animalsPages.dashboard.notificationCards).toHaveCount(1);
+    await expect(animalsPages.dashboard.cardStatusTag(reference)).toHaveText('Draft');
+  });
+
+  for (const { label, destination } of [
+    { label: 'Plants for planting', destination: 'plants' },
+    { label: 'Germinal products (semen, ova, embryos)', destination: 'germinal' },
+  ] as const) {
+    test(`choosing ${label} instead leaves the live animals notification with its reference, Draft status and answers`, async ({
+      insPages,
+      animalsPages,
+      plantsPages,
+      animalsJourney,
+      pages,
+    }) => {
+      test.slow();
+      const reference = await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType);
+      await animalsJourney.answerOriginAndSelectSpecies(SELECTED_SPECIES);
+      await animalsPages.originOfImport.open(reference);
+      await animalsPages.originOfImport.followBackToInsTypeQuestion();
+
+      await insPages.notificationType.option(label).check();
+      await insPages.notificationType.continueToService();
+
+      if (destination === 'plants') {
+        await expect(plantsPages.commodityType.heading).toBeVisible();
+      } else {
+        await expect(pages.page).toHaveURL(`${originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')}${SET_BASES.germinalProducts}/start`);
+      }
+      await animalsPages.dashboard.open();
+      await animalsPages.dashboard.searchForReference(reference);
+      await expect(animalsPages.dashboard.notificationCard(reference)).toBeVisible();
+      await expect(animalsPages.dashboard.cardStatusTag(reference)).toHaveText('Draft');
+      await animalsPages.overview.open(reference);
+      await expect(animalsPages.overview.taskStatus(ORIGIN_TASK)).toHaveText('Complete');
+      await expect(animalsPages.overview.taskStatus(COMMODITY_TASK)).toHaveText('Complete');
+      await animalsPages.originOfImport.open(reference);
+      await expect(animalsPages.originOfImport.country.field).toHaveValue(MANDATORY_ANSWERS.countryCode.display);
+      await animalsPages.commoditySelection.open(reference);
+      for (const species of SELECTED_SPECIES) {
+        await expect(animalsPages.commoditySelection.selectedSummary).toContainText(species.latinName);
+      }
+    });
+  }
+
+  test('Create new on the INS home after the round trip shows every option unselected', async ({
+    insPages,
+    animalsPages,
+    animalsJourney,
+  }) => {
+    test.slow();
+    await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType);
+    await animalsPages.originOfImport.followBackToInsTypeQuestion();
+
+    await insPages.dashboard.open();
+    await insPages.dashboard.btnCreateNew.click();
+
+    await expect(insPages.notificationType.heading).toBeVisible();
+    await expectOptionsListedInOrderAndUnselected(insPages.notificationType);
+  });
+
+  test('signing in to the INS again on the way back still lands on the question with Live animals chosen', async ({
+    insPages,
+    animalsPages,
+    animalsJourney,
+    pages,
+  }) => {
+    test.slow();
+    const insBaseUrl = requireBaseUrl('TRADE_IMPORTS_INS_FRONTEND_BASE_URL');
+    await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType);
+    const insNavigations = recordMainFrameNavigationPaths(pages.page, originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL'));
+    await pages.page.context().clearCookies({ name: authCookieNameFor('ins', insBaseUrl) });
+
+    await animalsPages.originOfImport.followBackToInsTypeQuestion();
+
+    await expect(insPages.notificationType.heading).toBeVisible();
+    await expect(insPages.notificationType.option(LIVE_ANIMALS.label)).toBeChecked();
+    expect(insNavigations).toEqual([
+      insPages.notificationType.expectedUrl,
+      SIGN_IN_PATH,
+      SIGN_IN_CALLBACK_PATH,
+      insPages.notificationType.expectedUrl,
+    ]);
+  });
+
+  test('signing in to the animals service again on the way back still lands on the same notification origin page', async ({
+    insPages,
+    animalsPages,
+    animalsJourney,
+    pages,
+  }) => {
+    test.slow();
+    const animalsBaseUrl = requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
+    const reference = await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType);
+    await animalsPages.originOfImport.followBackToInsTypeQuestion();
+    const animalsNavigations = recordMainFrameNavigationPaths(pages.page, originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL'));
+    await pages.page.context().clearCookies({ name: authCookieNameFor('animals', animalsBaseUrl) });
+
+    await insPages.notificationType.continueToService();
+
+    await expect(animalsPages.originOfImport.heading).toBeVisible();
+    expect(animalsNavigations).toEqual([
+      animalsPages.originOfImport.expectedUrl(reference),
+      SIGN_IN_PATH,
+      SIGN_IN_CALLBACK_PATH,
+      animalsPages.originOfImport.expectedUrl(reference),
+    ]);
   });
 });

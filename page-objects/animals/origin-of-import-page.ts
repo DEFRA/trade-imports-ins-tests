@@ -1,5 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
-import { NotificationPage } from '@page-objects/shared/base-page';
+import { NotificationPage, requireBaseUrl } from '@page-objects/shared/base-page';
 import { TypeAhead } from '@page-objects/shared/type-ahead';
 import type { YesNoValue } from '@domain/shared/constants/yes-no-values';
 
@@ -41,6 +41,12 @@ export class AnimalsOriginOfImportPage extends NotificationPage {
 
   get internalReference(): Locator {
     return this.page.getByLabel('Your internal reference for this consignment (optional)');
+  }
+
+  /** Follows Back out of the animals service, then completes any sign-in the INS asks for. */
+  async followBackToInsTypeQuestion(): Promise<void> {
+    const animalsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')).origin;
+    await this.leaveOriginThenSignIn(animalsOrigin, () => this.linkBack.click());
   }
 
   get regionCodeMaxLengthErrorLink(): Locator {

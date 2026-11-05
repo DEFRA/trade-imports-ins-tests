@@ -3,6 +3,7 @@ import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { Locator } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
+import type { InsNotificationTypePage } from '@page-objects/ins/notification-type-page';
 import type { PartyRole } from '@page-objects/animals/addresses-page';
 import type { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
 import {
@@ -101,6 +102,10 @@ export class AnimalsJourney {
     await this.toNotificationDashboard();
     await this.animalsPages.dashboard.btnCreateNewNotification.click();
     await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
+    return this.recordReferenceNumberFromUrl();
+  }
+
+  private recordReferenceNumberFromUrl(): string {
     const referenceNumber = this.animalsPages.originOfImport.referenceNumberFromUrl();
     this.context.recordReferenceNumber(referenceNumber);
     return referenceNumber;
@@ -114,6 +119,23 @@ export class AnimalsJourney {
     await this.animalsPages.overview.open(referenceNumber);
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     return referenceNumber;
+  }
+
+  async startNotificationFromInsTypeQuestion(notificationTypePage: InsNotificationTypePage): Promise<string> {
+    await notificationTypePage.open();
+    await notificationTypePage.option('Live animals').check();
+    await notificationTypePage.continueToService();
+    await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
+    return this.recordReferenceNumberFromUrl();
+  }
+
+  async answerOriginAndSelectSpecies(species: CommodityLine[], options: OriginOptions = {}): Promise<void> {
+    await this.fillOriginOfImport(options);
+    await this.saveOriginOfImport();
+    await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
+    await this.animalsPages.commoditySelection.searchAndCheckSpecies(species);
+    await this.animalsPages.commoditySelection.saveAndContinue.click();
+    await this.animalsPages.commoditySelection.heading.waitFor({ ...pageLoadWait, state: 'hidden' });
   }
 
   async startNotificationAtOrigin(): Promise<string> {
@@ -611,12 +633,7 @@ export class AnimalsJourney {
     const pages = this.animalsPages;
     const referenceNumber = await this.createNotificationAtOrigin();
 
-    await this.fillOriginOfImport();
-    await this.saveOriginOfImport();
-
-    await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.commodityLines[0].species]);
-    await pages.commoditySelection.saveAndContinue.click();
+    await this.answerOriginAndSelectSpecies([MANDATORY_ANSWERS.commodityLines[0].species]);
 
     await pages.importReason.heading.waitFor(pageLoadWait);
     await pages.importReason.saveAndContinue.click();
@@ -649,12 +666,10 @@ export class AnimalsJourney {
     const pages = this.animalsPages;
     const referenceNumber = await this.createNotificationAtOrigin();
 
-    await this.fillOriginOfImport({ requiresRegionCode: 'Yes', internalReference: 'CATTLE-2026-01' });
-    await this.saveOriginOfImport();
-
-    await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.searchAndCheckSpecies([MANDATORY_ANSWERS.commodityLines[0].species]);
-    await pages.commoditySelection.saveAndContinue.click();
+    await this.answerOriginAndSelectSpecies([MANDATORY_ANSWERS.commodityLines[0].species], {
+      requiresRegionCode: 'Yes',
+      internalReference: 'CATTLE-2026-01',
+    });
 
     await pages.importReason.heading.waitFor(pageLoadWait);
     await pages.importReason.reason('Internal market').check();
@@ -714,12 +729,7 @@ export class AnimalsJourney {
     const pages = this.animalsPages;
     const referenceNumber = await this.createNotificationAtOrigin();
 
-    await this.fillOriginOfImport({ countryCode: countryCodes.eu.ireland });
-    await this.saveOriginOfImport();
-
-    await pages.commoditySelection.heading.waitFor(pageLoadWait);
-    await pages.commoditySelection.searchAndCheckSpecies([commodityLines.horse]);
-    await pages.commoditySelection.saveAndContinue.click();
+    await this.answerOriginAndSelectSpecies([commodityLines.horse], { countryCode: countryCodes.eu.ireland });
 
     await pages.importReason.heading.waitFor(pageLoadWait);
     await pages.importReason.reason('Temporary admission horses').check();

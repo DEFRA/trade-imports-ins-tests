@@ -16,6 +16,10 @@ export class InsNotificationTypePage extends BasePage {
     return this.page.getByRole('radio');
   }
 
+  get checkedOptions(): Locator {
+    return this.page.getByRole('radio', { checked: true });
+  }
+
   option(name: string): Locator {
     return this.page.getByRole('radio', { name, exact: true });
   }
@@ -53,7 +57,6 @@ export class InsNotificationTypePage extends BasePage {
   /** Presses Continue, waits for the browser to leave the INS origin, then completes any sign-in the receiving service asks for. */
   async continueToService(): Promise<void> {
     const insOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_INS_FRONTEND_BASE_URL')).origin;
-    await Promise.all([this.page.waitForURL((url) => url.origin !== insOrigin), this.btnContinue.click()]);
-    await this.completeSignInIfRequested();
+    await this.leaveOriginThenSignIn(insOrigin, () => this.btnContinue.click());
   }
 }
