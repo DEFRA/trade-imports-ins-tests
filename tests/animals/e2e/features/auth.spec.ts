@@ -8,7 +8,7 @@ test.use({ storageState: COLD_START });
 
 test.describe('Authentication', { tag: '@auth' }, () => {
   test.beforeEach(async ({ animalsJourney, animalsPages }) => {
-    await animalsJourney.toSignIn((attemptSignIn) => animalsPages.dashboard.open(attemptSignIn));
+    await animalsJourney.toSignIn((attemptSignIn) => animalsPages.dashboard.open({ attemptSignIn }));
   });
 
   test('lands on the sign in page when opening the notification dashboard', async ({ pages }) => {
@@ -58,7 +58,7 @@ test.describe('Authentication', { tag: '@auth' }, () => {
     await pages.signIn.signIn();
     await animalsPages.dashboard.linkSignOut.click();
     await pages.signOut.heading.waitFor();
-    await animalsPages.dashboard.open(false);
+    await animalsPages.dashboard.open({ attemptSignIn: false });
     await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);
     await expect(pages.signIn.heading).toBeVisible();
   });

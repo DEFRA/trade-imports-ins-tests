@@ -1,5 +1,5 @@
 import { Locator } from '@playwright/test';
-import { BasePage } from '@page-objects/shared/base-page';
+import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
 
 export class AnimalsAdminDashboardPage extends BasePage {
   readonly expectedUrl = '/';
@@ -24,9 +24,9 @@ export class AnimalsAdminDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: 'DLQ process' });
   }
 
-  async open(attemptSignIn: boolean = true): Promise<void> {
+  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.navigateToAdminPortal(this.expectedUrl);
-    await this.signInWhenRequested(attemptSignIn);
+    await this.signInWhenRequested(attemptSignIn, identity);
 
     if (attemptSignIn) {
       // The auth stub can fail under concurrent load. If we don't land on the

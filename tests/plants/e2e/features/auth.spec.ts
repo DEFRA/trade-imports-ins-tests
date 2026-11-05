@@ -8,7 +8,7 @@ test.use({ storageState: COLD_START });
 
 test.describe('Authentication (plants)', { tag: '@auth' }, () => {
   test.beforeEach(async ({ plantsPages }) => {
-    await plantsPages.dashboard.open(false);
+    await plantsPages.dashboard.open({ attemptSignIn: false });
   });
 
   test('displays an error message when signing in with invalid user id', async ({ pages }) => {

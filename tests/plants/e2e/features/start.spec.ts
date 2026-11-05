@@ -1,13 +1,6 @@
+import { WHOLE_REFERENCE_NUMBER_PATTERN } from '@domain/plants/constants/reference-number-patterns';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { test, expect } from '@fixtures';
-
-/**
- * The plants reference carries the agreed GBN-HRP type code: the backend's
- * ReferenceNumberGenerator mints GBN-HRP-{YY}-{XXXXXX} over a Crockford-style
- * alphabet, and the frontend's real records adapter carries it through as the
- * notification URL's reference number. Assert the shape, never a literal — the body is random.
- */
-const PLANTS_REFERENCE = /^GBN-HRP-\d{2}-[0-9A-HJ-KM-NP-TV-Z]{6}$/;
 
 test.describe('High-risk plants start section', () => {
   test('the dashboard renders after signing in', { tag: '@smoke' }, async ({ pages, plantsPages }) => {
@@ -27,7 +20,7 @@ test.describe('High-risk plants start section', () => {
   }) => {
     const reference = await plantsJourney.startNotification();
 
-    expect(reference).toMatch(PLANTS_REFERENCE);
+    expect(reference).toMatch(WHOLE_REFERENCE_NUMBER_PATTERN);
     expect(journeyContext.referenceNumber).toBe(reference);
     await expect(pages.page).toHaveURL(plantsPages.commodityType.expectedUrl(reference));
     await expect(plantsPages.commodityType.heading).toBeVisible();

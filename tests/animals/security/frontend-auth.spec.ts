@@ -8,7 +8,7 @@ test.describe('Security scan (frontend, auth)', { tag: '@active' }, () => {
   test('routes the sign-in redirect round trip through the ZAP proxy', async ({ animalsJourney, pages, animalsPages }) => {
     // /auth/sign-in and /auth/sign-in-oidc are documented as in scope
     // (docs/security.md) but every other spec here starts pre-authenticated.
-    await animalsJourney.toSignIn((attemptSignIn) => animalsPages.dashboard.open(attemptSignIn));
+    await animalsJourney.toSignIn((attemptSignIn) => animalsPages.dashboard.open({ attemptSignIn }));
     await expect(pages.signIn.heading).toBeVisible();
 
     await pages.signIn.signIn({ userId: 'invalid' });
