@@ -553,12 +553,6 @@ export class AnimalsJourney {
     await this.animalsPages.commercialTransporter.heading.waitFor(pageLoadWait);
   }
 
-  async toTransporterSelection(): Promise<void> {
-    await this.toCommercialTransporter();
-    await this.animalsPages.transporterSelection.open(this.animalsPages.commercialTransporter.referenceNumberFromUrl());
-    await this.animalsPages.transporterSelection.heading.waitFor(pageLoadWait);
-  }
-
   async toContactAddress(): Promise<void> {
     await this.startNotification();
     await this.answerCommodity();
