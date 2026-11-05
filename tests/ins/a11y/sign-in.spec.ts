@@ -6,10 +6,15 @@ test.use({ storageState: COLD_START });
 const stubErrorSummaryList = '.govuk-error-summary__list';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test('the sign-in page has no accessibility violations on initial load and with an error', async ({ pages, insPages, runA11yScan }) => {
+  test('the sign-in page has no accessibility violations on initial load, and none outside the stub error summary list with an error', async ({
+    pages,
+    insPages,
+    runA11yScan,
+  }) => {
     await insPages.dashboard.open(false);
 
     await test.step('Sign in', async () => {
+      await pages.signIn.heading.waitFor();
       await runA11yScan();
     });
 
@@ -21,8 +26,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   });
 
   test('the unauthorised page has no accessibility violations', async ({ pages, runA11yScan }) => {
-    await pages.page.goto('/auth/sign-in-oidc?code=invalid&state=invalid');
-    await pages.page.getByRole('heading', { name: 'Sorry, we are unable to sign you in.' }).waitFor();
+    await pages.signInError.openUnauthorised();
 
     await runA11yScan();
   });

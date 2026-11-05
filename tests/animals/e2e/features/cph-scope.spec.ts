@@ -11,7 +11,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
 
     await animalsJourney.startNotification();
 
-    const { cphSection, cphLinks, cphNumberText } = animalsPages.addresses;
+    const { cphSection, cphLinks } = animalsPages.addresses;
 
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.domesticCat);
     await animalsJourney.toRolesAndAddressesOfCurrentNotification();
@@ -24,7 +24,20 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await animalsJourney.toRolesAndAddressesOfCurrentNotification();
     await expect(cphSection).toBeVisible();
     await expect(cphLinks).toHaveText(['Add a CPH number']);
+  });
 
+  test('a saved CPH number shows as 123456789 on the addresses page, Change pre-fills county, parish and holding, and Back returns to the addresses page, whose Continue reaches the overview', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    test.slow();
+
+    await animalsJourney.startNotification();
+
+    const { cphLinks, cphNumberText } = animalsPages.addresses;
+
+    await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.cattle);
+    await animalsJourney.toRolesAndAddressesOfCurrentNotification();
     await animalsPages.addresses.addCph.click();
     await expect(animalsPages.cphNumber.heading).toBeVisible();
     await animalsPages.cphNumber.fillCphNumber();

@@ -5,6 +5,6 @@ export type AggregatedNotificationDocument = {
   status?: string;
   originCountry?: string;
   commodity?: string;
-  arrivalDate?: Date;
+  arrivalDate?: string;
   lastUpdated?: Date;
 };
