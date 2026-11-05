@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { countryAndSubdivisionNamesWithCountry } from '@resources/reference-data/reference-data';
+import { countryAndItsSubdivisionNames, countryAndSubdivisionNamesWithCountry } from '@resources/reference-data/reference-data';
 import { ORIGIN_COUNTRY_SELECT_TEXT } from '@domain/animals/constants/origin-page';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
@@ -33,9 +33,7 @@ test.describe('Country of origin list', () => {
 
       await country.search('Fra');
 
-      await expect(country.suggestions).toHaveText(
-        countryAndSubdivisionNamesWithCountry().filter((name) => name === 'France' || name.endsWith('(France)')),
-      );
+      await expect(country.suggestions).toHaveText(countryAndItsSubdivisionNames('France'));
     });
   });
 });

@@ -51,7 +51,15 @@ export type GbnAgExchangedDocument = {
   notificationStatusCode?: string;
   versionId?: number;
   issueDateTime?: string;
+  issuer?: GbnAgTradeParty;
+  firstSignatoryAuthentication?: { includedClause: GbnAgClause[] };
   referenceDocument?: GbnAgReferencedDocument[];
+};
+
+export type GbnAgClause = {
+  identifier: string;
+  content?: string | null;
+  urlId?: string | null;
 };
 
 export type GbnAgTradeParty = {
@@ -96,6 +104,7 @@ export type GbnAgLogisticsTransportMovement = {
 export type GbnAgAnimalIdentifier = {
   typeCode: string;
   content: string;
+  urlId?: string | null;
 };
 
 export type GbnAgTradeProductInstance = {
@@ -128,5 +137,6 @@ export type GbnAgSpecifiedConsignment = {
   finalDestinationLocation?: GbnAgLogisticsLocation;
   mainCarriageLogisticsTransportMovement?: GbnAgLogisticsTransportMovement[];
   transitTradeCountry?: GbnAgTradeCountry[];
+  isOrHasUnweanedAnimals?: boolean | null;
   includedConsignmentItem?: GbnAgConsignmentItem[];
 };

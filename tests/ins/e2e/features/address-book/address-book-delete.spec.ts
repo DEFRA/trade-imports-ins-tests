@@ -26,41 +26,41 @@ test.describe('Address book delete', () => {
     expect(tombstone.name).toBe(name);
   });
 
-  test('the delete page summarises the address, and No, cancel returns to its details with nothing deleted', async ({
-    pages,
-    insPages,
-    addressBookApi,
-  }) => {
-    const address = addressWithLineTwoAndCounty(`Delete Summary Farm ${Date.now()}`);
-    const created = await addressBookApi.createAddress(address);
+  test(
+    'the delete page summarises the address, and No, cancel returns to its details with nothing deleted',
+    { tag: '@cross-browser' },
+    async ({ pages, insPages, addressBookApi }) => {
+      const address = addressWithLineTwoAndCounty(`Delete Summary Farm ${Date.now()}`);
+      const created = await addressBookApi.createAddress(address);
 
-    await insPages.addressBookDelete.open(created.id);
+      await insPages.addressBookDelete.open(created.id);
 
-    await expect(insPages.addressBookDelete.heading).toBeVisible();
-    await expect(insPages.addressBookDelete.summaryListKeys).toHaveText(['Address']);
-    await expect(insPages.addressBookDelete.summaryListValues).toHaveText(
-      [
-        address.name,
-        address.addressLine1,
-        address.addressLine2,
-        address.townOrCity,
-        address.county,
-        address.postcode,
-        'United Kingdom',
-      ].join(' '),
-      { useInnerText: true },
-    );
-    await expect(insPages.addressBookDelete.confirmation).toBeVisible();
-    await expect(insPages.addressBookDelete.warning).toBeVisible();
+      await expect(insPages.addressBookDelete.heading).toBeVisible();
+      await expect(insPages.addressBookDelete.summaryListKeys).toHaveText(['Address']);
+      await expect(insPages.addressBookDelete.summaryListValues).toHaveText(
+        [
+          address.name,
+          address.addressLine1,
+          address.addressLine2,
+          address.townOrCity,
+          address.county,
+          address.postcode,
+          'United Kingdom',
+        ].join(' '),
+        { useInnerText: true },
+      );
+      await expect(insPages.addressBookDelete.confirmation).toBeVisible();
+      await expect(insPages.addressBookDelete.warning).toBeVisible();
 
-    await insPages.addressBookDelete.cancel();
+      await insPages.addressBookDelete.cancel();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookView.expectedUrl(created.id)}$`));
-    await expect(insPages.addressBookView.heading(address.name)).toBeVisible();
-    expect((await addressBookApi.getAddress(created.id)).deleted).toBe(false);
-    await insPages.addressBookList.open();
-    await expect(insPages.addressBookList.successBanner).toHaveCount(0);
-  });
+      await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookView.expectedUrl(created.id)}$`));
+      await expect(insPages.addressBookView.heading(address.name)).toBeVisible();
+      expect((await addressBookApi.getAddress(created.id)).deleted).toBe(false);
+      await insPages.addressBookList.open();
+      await expect(insPages.addressBookList.successBanner).toHaveCount(0);
+    },
+  );
 
   test.describe('return', () => {
     test('reached with a return, No, cancel goes to the view page carrying it, and Yes, delete lands on the return', async ({

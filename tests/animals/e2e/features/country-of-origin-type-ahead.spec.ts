@@ -10,33 +10,37 @@ import {
 } from '@page-objects/shared/type-ahead-checks';
 
 test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }, () => {
-  test('filters as you type, submits the country code and persists it', async ({ animalsJourney, animalsPages }) => {
-    await animalsJourney.toOriginFromOverview();
+  test(
+    'filters as you type, submits the country code and persists it',
+    { tag: '@cross-browser' },
+    async ({ animalsJourney, animalsPages }) => {
+      await animalsJourney.toOriginFromOverview();
 
-    const field = animalsPages.originOfImport.country.field;
-    await expect(field).toBeVisible();
-    await expect(field).toHaveRole('combobox');
-    await expect(field).toHaveAccessibleName('Country of origin');
+      const field = animalsPages.originOfImport.country.field;
+      await expect(field).toBeVisible();
+      await expect(field).toHaveRole('combobox');
+      await expect(field).toHaveAccessibleName('Country of origin');
 
-    const fallback = animalsPages.originOfImport.country.select;
-    await expect(fallback.locator('option').first()).toHaveText(ORIGIN_COUNTRY_SELECT_TEXT);
-    await expect(fallback.locator('option')).toHaveCount(countryAndSubdivisionNamesWithCountry().length + 1);
+      const fallback = animalsPages.originOfImport.country.select;
+      await expect(fallback.locator('option').first()).toHaveText(ORIGIN_COUNTRY_SELECT_TEXT);
+      await expect(fallback.locator('option')).toHaveCount(countryAndSubdivisionNamesWithCountry().length + 1);
 
-    await animalsPages.originOfImport.country.search('Belg');
-    await expect(animalsPages.originOfImport.country.option('Belgium')).toBeVisible();
+      await animalsPages.originOfImport.country.search('Belg');
+      await expect(animalsPages.originOfImport.country.option('Belgium')).toBeVisible();
 
-    await animalsPages.originOfImport.country.choose('Belgium');
-    await expect(field).toHaveValue('Belgium');
-    await expect(fallback).toHaveValue('BE');
+      await animalsPages.originOfImport.country.choose('Belgium');
+      await expect(field).toHaveValue('Belgium');
+      await expect(fallback).toHaveValue('BE');
 
-    await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
-    await animalsPages.originOfImport.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
+      await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
+      await animalsPages.originOfImport.saveAndContinue.click();
+      await expect(animalsPages.overview.heading).toBeVisible();
 
-    await animalsJourney.openOriginFromOverview();
-    await expect(fallback).toHaveValue('BE');
-    await expect(animalsPages.originOfImport.country.field).toHaveValue('Belgium');
-  });
+      await animalsJourney.openOriginFromOverview();
+      await expect(fallback).toHaveValue('BE');
+      await expect(animalsPages.originOfImport.country.field).toHaveValue('Belgium');
+    },
+  );
 
   test('describes the search box with the assistive hint and shows its placeholder and no hint', async ({
     animalsJourney,

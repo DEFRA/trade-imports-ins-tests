@@ -58,31 +58,31 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(consignorRow).not.toContainText('Penrith');
   });
 
-  test('the edit form opens with the copied details, including the county', async ({
-    animalsSeededJourney,
-    animalsPages,
-    addressBookApi,
-  }) => {
-    const name = `Prefilled Farm ${Date.now()}`;
-    await addressBookApi.createAddress({ name, ...OWN_RECORD });
-    await animalsSeededJourney.createDraftWithConsignorChosenInUi(animalsPages, name);
+  test(
+    'the edit form opens with the copied details, including the county',
+    { tag: '@cross-browser' },
+    async ({ animalsSeededJourney, animalsPages, addressBookApi }) => {
+      const name = `Prefilled Farm ${Date.now()}`;
+      await addressBookApi.createAddress({ name, ...OWN_RECORD });
+      await animalsSeededJourney.createDraftWithConsignorChosenInUi(animalsPages, name);
 
-    await animalsPages.addresses.editPartyDetails('Consignor').click();
+      await animalsPages.addresses.editPartyDetails('Consignor').click();
 
-    const form = animalsPages.consignorEdit;
-    await expect(form.heading).toBeVisible();
-    await expect(form.roleCaption).toBeVisible();
-    await expect(form.hint).toBeVisible();
-    await expect(form.name).toHaveValue(name);
-    await expect(form.addressLine1).toHaveValue(OWN_RECORD.addressLine1);
-    await expect(form.addressLine2).toHaveValue(OWN_RECORD.addressLine2);
-    await expect(form.townOrCity).toHaveValue(OWN_RECORD.townOrCity);
-    await expect(form.county).toHaveValue(OWN_RECORD.county);
-    await expect(form.postcode).toHaveValue(OWN_RECORD.postcode);
-    await expect(form.country).toHaveValue(OWN_RECORD.countryCode);
-    await expect(form.phone).toHaveValue(OWN_RECORD.phone);
-    await expect(form.email).toHaveValue(OWN_RECORD.email);
-  });
+      const form = animalsPages.consignorEdit;
+      await expect(form.heading).toBeVisible();
+      await expect(form.roleCaption).toBeVisible();
+      await expect(form.hint).toBeVisible();
+      await expect(form.name).toHaveValue(name);
+      await expect(form.addressLine1).toHaveValue(OWN_RECORD.addressLine1);
+      await expect(form.addressLine2).toHaveValue(OWN_RECORD.addressLine2);
+      await expect(form.townOrCity).toHaveValue(OWN_RECORD.townOrCity);
+      await expect(form.county).toHaveValue(OWN_RECORD.county);
+      await expect(form.postcode).toHaveValue(OWN_RECORD.postcode);
+      await expect(form.country).toHaveValue(OWN_RECORD.countryCode);
+      await expect(form.phone).toHaveValue(OWN_RECORD.phone);
+      await expect(form.email).toHaveValue(OWN_RECORD.email);
+    },
+  );
 
   test('an edit that breaks the address book rules is refused with its messages, at the top and against each field, and nothing is saved', async ({
     animalsSeededJourney,

@@ -11,7 +11,7 @@ import { timeouts } from '@config/timeouts';
 test.describe('Outbox events (admin)', { tag: '@mongodb' }, () => {
   test(
     'shows the outbox event for a submitted notification',
-    { tag: '@smoke' },
+    { tag: ['@smoke', '@cross-browser'] },
     async ({ animalsSeededJourney, animalsAdminNavigation, animalsAdminPages }) => {
       test.slow();
       const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
@@ -40,10 +40,14 @@ test.describe('Outbox events (admin)', { tag: '@mongodb' }, () => {
     },
   );
 
-  test('shows the empty state for an unknown reference number', async ({ animalsAdminNavigation, animalsAdminPages }) => {
-    const unknownRef = 'GBN-AG-00-000000';
-    await animalsAdminNavigation.toOutboxEvents(unknownRef);
-    await expect(animalsAdminPages.outboxEvents.emptyStateMessage).toBeVisible();
-    await expect(animalsAdminPages.outboxEvents.emptyStateMessage).toContainText(unknownRef);
-  });
+  test(
+    'shows the empty state for an unknown reference number',
+    { tag: '@cross-browser' },
+    async ({ animalsAdminNavigation, animalsAdminPages }) => {
+      const unknownRef = 'GBN-AG-00-000000';
+      await animalsAdminNavigation.toOutboxEvents(unknownRef);
+      await expect(animalsAdminPages.outboxEvents.emptyStateMessage).toBeVisible();
+      await expect(animalsAdminPages.outboxEvents.emptyStateMessage).toContainText(unknownRef);
+    },
+  );
 });
