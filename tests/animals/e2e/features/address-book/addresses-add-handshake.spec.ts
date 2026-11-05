@@ -6,7 +6,7 @@ import type { AnimalsJourney } from '@flows/animals/journey';
 import { type InsAddressBookAddPage, type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
 import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
 import { AnimalsAddressesPage, type PartyRole } from '@page-objects/animals/addresses-page';
-import { requireBaseUrl } from '@page-objects/shared/base-page';
+import { originOf } from '@page-objects/shared/base-page';
 
 const PARTY_ROLES: readonly PartyRole[] = ['Place of origin', 'Consignor', 'Consignee', 'Importer', 'Place of destination'];
 
@@ -51,7 +51,7 @@ test.describe('Add an address from the journey via INS', () => {
       async ({ animalsJourney, pages, animalsPages, insPages }) => {
         const addPage = insPages.addressBookAdd;
         const details = newAddressFor(role);
-        const insOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_INS_FRONTEND_BASE_URL')).origin;
+        const insOrigin = originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL');
 
         await arriveOnInsAddPageAndFill(animalsJourney, addPage, role, details);
         await expect(pages.page).toHaveURL((url) => url.origin === insOrigin && url.pathname === '/address-book/add' && url.search !== '');

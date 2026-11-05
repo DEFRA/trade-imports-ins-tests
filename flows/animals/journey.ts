@@ -4,6 +4,7 @@ import type { Locator } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
 import type { InsNotificationTypePage } from '@page-objects/ins/notification-type-page';
+import type { NotificationTypeOption } from '@domain/ins/constants/notification-types';
 import type { PartyRole } from '@page-objects/animals/addresses-page';
 import type { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
 import {
@@ -121,12 +122,16 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
-  async startNotificationFromInsTypeQuestion(notificationTypePage: InsNotificationTypePage): Promise<string> {
+  async startNotificationFromInsTypeQuestion(notificationTypePage: InsNotificationTypePage, type: NotificationTypeOption): Promise<string> {
     await notificationTypePage.open();
-    await notificationTypePage.option('Live animals').check();
-    await notificationTypePage.continueToService();
+    await notificationTypePage.chooseNotificationType(type);
     await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
     return this.recordReferenceNumberFromUrl();
+  }
+
+  async backToInsTypeQuestionAndChoose(notificationTypePage: InsNotificationTypePage, type: NotificationTypeOption): Promise<void> {
+    await this.animalsPages.originOfImport.followBackToInsTypeQuestion();
+    await notificationTypePage.chooseNotificationType(type);
   }
 
   async answerOriginAndSelectSpecies(species: CommodityLine[], options: OriginOptions = {}): Promise<void> {

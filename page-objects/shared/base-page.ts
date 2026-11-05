@@ -22,6 +22,10 @@ export function requireBaseUrl(
   return baseUrl;
 }
 
+export function originOf(envVar: Parameters<typeof requireBaseUrl>[0]): string {
+  return new URL(requireBaseUrl(envVar)).origin;
+}
+
 export type SignInIdentity = { userId?: string; organisationSbi?: string };
 export type OpenOptions = SignInIdentity & { attemptSignIn?: boolean };
 

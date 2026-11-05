@@ -1,5 +1,6 @@
 import { type Locator } from '@playwright/test';
-import { BasePage, requireBaseUrl } from '@page-objects/shared/base-page';
+import { BasePage, originOf, type OpenOptions } from '@page-objects/shared/base-page';
+import type { NotificationTypeOption } from '@domain/ins/constants/notification-types';
 
 export class InsNotificationTypePage extends BasePage {
   readonly expectedUrl = '/notification-type';
@@ -36,8 +37,8 @@ export class InsNotificationTypePage extends BasePage {
     return this.errorSummary.getByRole('link', { name: 'Select what you are importing' });
   }
 
-  get inlineError(): Locator {
-    return this.page.locator('.govuk-error-message');
+  get optionsError(): Locator {
+    return this.page.getByRole('group', { name: /What are you importing\?/ }).locator('.govuk-error-message');
   }
 
   get hints(): Locator {
@@ -48,15 +49,19 @@ export class InsNotificationTypePage extends BasePage {
     return this.page.locator('.govuk-phase-banner').filter({ hasText: 'Alpha' });
   }
 
-  async open(): Promise<void> {
+  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.navigateToInsFrontend(this.expectedUrl);
-    await this.signInWhenRequested(true);
-    await this.heading.waitFor();
+    await this.signInWhenRequested(attemptSignIn, identity);
+    if (attemptSignIn) await this.heading.waitFor();
   }
 
   /** Presses Continue, waits for the browser to leave the INS origin, then completes any sign-in the receiving service asks for. */
   async continueToService(): Promise<void> {
-    const insOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_INS_FRONTEND_BASE_URL')).origin;
-    await this.leaveOriginThenSignIn(insOrigin, () => this.btnContinue.click());
+    await this.leaveOriginThenSignIn(originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL'), () => this.btnContinue.click());
+  }
+
+  async chooseNotificationType(type: NotificationTypeOption): Promise<void> {
+    await this.option(type.label).check();
+    await this.continueToService();
   }
 }

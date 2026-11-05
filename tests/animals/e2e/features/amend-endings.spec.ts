@@ -1,3 +1,5 @@
+import type { AnimalsPages } from '@page-objects';
+import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { test, expect } from '@fixtures';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
@@ -5,6 +7,17 @@ const UPLOAD_DOCUMENTS_TASK = 'Upload documents';
 const CHANGE_IMPORT_DETAILS = 'Change import details';
 const AMENDED_REFERENCE = 'AMENDED-REF';
 const AMEND = 'Amend';
+
+const openOriginFromImportDetailsChangeLink = async (
+  animalsPages: AnimalsPages,
+  animalsSeededJourney: AnimalsSeededJourney,
+): Promise<string> => {
+  const reference = await animalsSeededJourney.createAmendNotification();
+  await animalsPages.notificationView.open(reference);
+  await animalsPages.notificationView.changeLink(CHANGE_IMPORT_DETAILS).click();
+  await expect(animalsPages.originOfImport.heading).toBeVisible();
+  return reference;
+};
 
 test.describe('Amendment page endings', () => {
   test('a page opened from Overview while amending ends with Save and return and Save and continue, then Save and return to overview on its own line, with no cancel link, and Back goes to Overview', async ({
@@ -49,12 +62,9 @@ test.describe('Amendment page endings', () => {
     animalsPages,
     animalsSeededJourney,
   }) => {
-    const reference = await animalsSeededJourney.createAmendNotification();
-    await animalsPages.notificationView.open(reference);
-    await animalsPages.notificationView.changeLink(CHANGE_IMPORT_DETAILS).click();
-    await expect(animalsPages.originOfImport.heading).toBeVisible();
+    const reference = await openOriginFromImportDetailsChangeLink(animalsPages, animalsSeededJourney);
 
-    await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
+    await expect(pages.page).toHaveURL(animalsPages.originOfImport.changeContextUrl(reference));
     await expect(animalsPages.originOfImport.linkBack).toHaveAttribute('href', animalsPages.overview.expectedUrl(reference));
 
     await animalsPages.originOfImport.internalReference.fill(AMENDED_REFERENCE);
@@ -70,10 +80,7 @@ test.describe('Amendment page endings', () => {
     animalsPages,
     animalsSeededJourney,
   }) => {
-    const reference = await animalsSeededJourney.createAmendNotification();
-    await animalsPages.notificationView.open(reference);
-    await animalsPages.notificationView.changeLink(CHANGE_IMPORT_DETAILS).click();
-    await expect(animalsPages.originOfImport.heading).toBeVisible();
+    await openOriginFromImportDetailsChangeLink(animalsPages, animalsSeededJourney);
 
     await animalsPages.originOfImport.saveAndContinue.click();
 

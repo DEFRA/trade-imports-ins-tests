@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
-import { requireBaseUrl } from '@page-objects/shared/base-page';
+import { originOf } from '@page-objects/shared/base-page';
+import { LIVE_ANIMALS } from '@domain/ins/constants/notification-types';
 import { SET_BASES } from '@page-objects/shared/sets';
 
 const createReturnFarm = (addressBookApi: AddressBookApiClient): Promise<AddressBookRecord> =>
@@ -22,8 +23,8 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
   }) => {
     test.slow();
 
-    const animalsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')).origin;
-    const insOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_INS_FRONTEND_BASE_URL')).origin;
+    const animalsOrigin = originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
+    const insOrigin = originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL');
 
     await animalsPages.dashboard.open();
 
@@ -36,8 +37,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
     await insPages.addressBookList.linkDashboard.click();
     await expect(insPages.dashboard.heading).toBeVisible();
     await insPages.dashboard.btnCreateNew.click();
-    await insPages.notificationType.option('Live animals').check();
-    await insPages.notificationType.continueToService();
+    await insPages.notificationType.chooseNotificationType(LIVE_ANIMALS);
 
     await expect(pages.page).toHaveURL((url) => url.origin === animalsOrigin && url.pathname.startsWith(SET_BASES.liveAnimals));
   });
@@ -88,7 +88,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
     async ({ pages, insPages, addressBookApi }) => {
       test.slow();
 
-      const animalsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')).origin;
+      const animalsOrigin = originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
       const unservedAnimalsReturnUrl = `${animalsOrigin}/germinal-products/notifications`;
       const createdAddress = await addressBookApi.createAddress({
         name: `Germinal Return Farm ${Date.now()}`,
