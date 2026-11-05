@@ -80,7 +80,10 @@ for (const tab of addressBookTabs) {
       await expect(addPage.rolesOption(offeredRoles[0])).toBeFocused();
     });
 
-    test('saving with an invalid field and no role shows only the field error', async ({ insPages, insJourney }) => {
+    test('saving with an invalid field and no role shows the field error and the roles error together, in page order', async ({
+      insPages,
+      insJourney,
+    }) => {
       const addPage = insPages.addressBookAdd;
       await insJourney.toAddressForm({ addressType });
       await addPage.fill({
@@ -90,8 +93,8 @@ for (const tab of addressBookTabs) {
 
       await addPage.saveAndContinue();
 
-      await expect(addPage.errorSummaryLinks).toHaveText([ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired]);
-      await expect(addPage.rolesGroup(legend)).toHaveAccessibleDescription(rolesQuestion.hint);
+      await expect(addPage.errorSummaryLinks).toHaveText([ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired, rolesQuestion.error]);
+      await expect(addPage.rolesGroup(legend)).toHaveAccessibleDescription(`${rolesQuestion.hint} Error: ${rolesQuestion.error}`);
     });
 
     test('ticking every offered role and saving lands on its tab, lists the address with its roles, and stores its roles and its country', async ({
