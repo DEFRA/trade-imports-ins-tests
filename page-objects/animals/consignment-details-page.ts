@@ -41,7 +41,7 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
 
   get animalsAboveMaxErrorLink(): Locator {
     return this.page.getByRole('link', {
-      name: 'Number of animals must be 9,223,372,036,854,775,807 or fewer',
+      name: 'Number of animals must be 2,147,483,647 or fewer',
     });
   }
 
