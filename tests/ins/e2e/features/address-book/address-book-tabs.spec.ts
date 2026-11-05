@@ -59,7 +59,7 @@ test.describe('Address book tabs', () => {
     await expect(insPages.addressBookList.selectedTab).toHaveText(originOrConsignorTab.label);
   });
 
-  test('each tab opens with its own panel heading, the columns Name, Type, Address, Country and Action, and exactly its runAddresses addresses with their roles', async ({
+  test('each tab opens with its own panel heading, the columns Name, Type, Address, Country and Action, and exactly the addresses the test added, with their roles', async ({
     insPages,
     insJourney,
     addressBookApi,
