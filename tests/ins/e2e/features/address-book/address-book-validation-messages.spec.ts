@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import type { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 import { traderAddress, traderAddressInUnofferedCountry } from '@domain/ins/constants/trader-address';
 import { ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
-import { addressUses } from '@domain/shared/constants/address-types';
+import { addressRoles } from '@domain/shared/constants/address-types';
 import { expectedValidationRefusalOf } from './expected-api-refusal';
 
 const expectOnlyFourMessagesAtTopAndAgainstFields = async (form: InsAddressBookFormPage): Promise<void> => {
@@ -19,7 +19,7 @@ const expectOnlyFourMessagesAtTopAndAgainstFields = async (form: InsAddressBookF
 };
 
 test.describe('Address book validation messages', () => {
-  test('saving the add form with a use ticked and name, postcode, country and phone left blank shows only those four messages, at the top and against each field', async ({
+  test('saving the add form with a role ticked and name, postcode, country and phone left blank shows only those four messages, at the top and against each field', async ({
     insPages,
     insJourney,
   }) => {
@@ -35,7 +35,7 @@ test.describe('Address book validation messages', () => {
       email: address.email,
       phone: '',
     });
-    await insPages.addressBookAdd.tickUses([addressUses.placeOfOrigin]);
+    await insPages.addressBookAdd.tickRoles([addressRoles.placeOfOrigin]);
     await insPages.addressBookAdd.saveAndContinue();
 
     await expect(insPages.addressBookAdd.heading).toBeVisible();

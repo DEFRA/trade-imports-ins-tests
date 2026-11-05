@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type AddressDocument } from '@domain/ins/models/db/address-document';
-import { addressTypes, addressUses } from '@domain/shared/constants/address-types';
+import { addressRoles } from '@domain/shared/constants/address-types';
 import { originOrConsignorTab } from '@domain/ins/constants/address-book-types';
 import { addFormAddressWithLineTwoAndCounty, addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { timeouts } from '@config/timeouts';
@@ -12,14 +12,14 @@ test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => 
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
   });
 
-  test('a created address persists with its full Standard Address Block, its address type and its ticked uses', async ({
+  test('a created address persists with its full Standard Address Block, its address type and its ticked roles', async ({
     pages,
     insPages,
     insJourney,
   }) => {
     const createdName = `Persistence Test Farm ${Date.now()}`;
     await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(createdName, 'United Kingdom'), {
-      uses: [addressUses.placeOfOrigin, addressUses.consignor],
+      roles: [addressRoles.placeOfOrigin, addressRoles.consignor],
     });
     await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrl(originOrConsignorTab));
 
@@ -33,8 +33,7 @@ test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => 
       expect(doc).toMatchObject({
         ...addressWithLineTwoAndCounty(createdName),
         countryCode: 'GB',
-        addressType: addressTypes.originOrConsignor,
-        uses: [addressUses.placeOfOrigin, addressUses.consignor],
+        roles: [addressRoles.placeOfOrigin, addressRoles.consignor],
       });
     } finally {
       await client.close();

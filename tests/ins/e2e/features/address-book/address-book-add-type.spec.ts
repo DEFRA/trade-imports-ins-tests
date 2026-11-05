@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { addressTypes, addressUses } from '@domain/shared/constants/address-types';
+import { addressTypes, addressRoles } from '@domain/shared/constants/address-types';
 import { addressTypeOptions, addressTypeQuestion } from '@domain/ins/constants/address-book-types';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
@@ -76,26 +76,26 @@ test.describe('Choosing an address type before adding an address', () => {
     });
   }
 
-  const useTickedByAddressType = {
-    [addressTypes.originOrConsignor]: addressUses.placeOfOrigin,
-    [addressTypes.destinationConsigneeOrImporter]: addressUses.consignee,
-    [addressTypes.branch]: addressUses.branchAddress,
+  const roleTickedByAddressType = {
+    [addressTypes.originOrConsignor]: addressRoles.placeOfOrigin,
+    [addressTypes.destinationConsigneeOrImporter]: addressRoles.consignee,
+    [addressTypes.branch]: addressRoles.branchAddress,
   } as const;
 
   for (const { addressType, label } of addressTypeOptions) {
-    test(`after a refused save of ${label}, choosing it again shows the address, the contact details and the ticked use entered`, async ({
+    test(`after a refused save of ${label}, choosing it again shows the address, the contact details and the ticked role entered`, async ({
       insPages,
       insJourney,
     }) => {
       const addPage = insPages.addressBookAdd;
-      const use = useTickedByAddressType[addressType];
+      const role = roleTickedByAddressType[addressType];
       const entered = {
         ...addFormAddressWithLineTwoAndCounty(`Kept Entry ${label} ${Date.now()}`, 'United Kingdom'),
         email: 'not-an-email',
       };
       await insJourney.toAddressForm({ addressType });
       await addPage.fill(entered);
-      await addPage.tickUses([use]);
+      await addPage.tickRoles([role]);
       await addPage.saveAndContinue();
       await expect(addPage.errorSummary).toBeVisible();
 
@@ -111,18 +111,18 @@ test.describe('Choosing an address type before adding an address', () => {
       await expect(addPage.selectedCountryOption).toHaveText(entered.country);
       await expect(addPage.inputEmail).toHaveValue(entered.email);
       await expect(addPage.inputPhone).toHaveValue(entered.phone);
-      await expect(addPage.usesOption(use)).toBeChecked();
+      await expect(addPage.rolesOption(role)).toBeChecked();
     });
   }
 
-  test('Add a new address from the address book list again starts with no type chosen, empty text fields and no use ticked', async ({
+  test('Add a new address from the address book list again starts with no type chosen, empty text fields and no role ticked', async ({
     insPages,
     insJourney,
   }) => {
     const addPage = insPages.addressBookAdd;
     await insJourney.toAddressFormFromList({ addressType: addressTypes.branch });
     await addPage.fill(addFormAddressWithLineTwoAndCounty(`Abandoned Entry ${Date.now()}`, 'United Kingdom'));
-    await addPage.tickUses([addressUses.branchAddress]);
+    await addPage.tickRoles([addressRoles.branchAddress]);
     await insPages.addressBookList.open();
 
     await insPages.addressBookList.btnAddNewAddress.click();
@@ -130,13 +130,13 @@ test.describe('Choosing an address type before adding an address', () => {
     await expectNoTypeChosen(insPages.addressBookAddressType);
     await insJourney.chooseAddressType(addressTypes.branch);
     await expectTextboxesEmpty(addPage);
-    await expect(addPage.usesOption(addressUses.branchAddress)).not.toBeChecked();
+    await expect(addPage.rolesOption(addressRoles.branchAddress)).not.toBeChecked();
   });
 
-  test('after a save the next add starts with no type chosen, empty text fields and no use ticked', async ({ insPages, insJourney }) => {
+  test('after a save the next add starts with no type chosen, empty text fields and no role ticked', async ({ insPages, insJourney }) => {
     const addPage = insPages.addressBookAdd;
     await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(`Type Step Farm ${Date.now()}`, 'United Kingdom'), {
-      uses: [addressUses.placeOfOrigin],
+      roles: [addressRoles.placeOfOrigin],
     });
     await insPages.addressBookList.successBanner.waitFor();
 
@@ -145,7 +145,7 @@ test.describe('Choosing an address type before adding an address', () => {
     await expectNoTypeChosen(insPages.addressBookAddressType);
     await insJourney.chooseAddressType();
     await expectTextboxesEmpty(addPage);
-    await expect(addPage.usesOption(addressUses.placeOfOrigin)).not.toBeChecked();
+    await expect(addPage.rolesOption(addressRoles.placeOfOrigin)).not.toBeChecked();
   });
 
   test('opening the add form with no type chosen lands on Choose an address type', async ({ pages, insPages }) => {

@@ -2,8 +2,8 @@ import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
 import { escapeRegex } from '@page-objects/shared/escape-regex';
 import { opensAtExpectedUrl, type OpensAtExpectedUrlOptions } from '@page-objects/shared/opens-at-expected-url';
-import type { AddressType, AddressUse } from '@domain/shared/constants/address-types';
-import { useOptionLabels, type AddressBookTab } from '@domain/ins/constants/address-book-types';
+import type { AddressType, AddressRole } from '@domain/shared/constants/address-types';
+import { roleOptionLabels, type AddressBookTab } from '@domain/ins/constants/address-book-types';
 
 type ListPageOpenOptions = Omit<OpensAtExpectedUrlOptions, 'query'> & { addressType?: AddressType };
 
@@ -80,7 +80,7 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
     return this.row(name).getByRole('cell').nth(0);
   }
 
-  usesCell(name: string): Locator {
+  rolesCell(name: string): Locator {
     return this.row(name).getByRole('cell').nth(1);
   }
 
@@ -120,16 +120,16 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
     return this.page.getByRole('link', { name: `View ${name}`, exact: true });
   }
 
-  get selectUseFilter(): Locator {
+  get selectRoleFilter(): Locator {
     return this.page.getByLabel('Type', { exact: true });
   }
 
-  get useFilterOptions(): Locator {
-    return this.selectUseFilter.locator('option');
+  get roleFilterOptions(): Locator {
+    return this.selectRoleFilter.locator('option');
   }
 
-  get selectedUseFilterOption(): Locator {
-    return this.selectUseFilter.locator('option:checked');
+  get selectedRoleFilterOption(): Locator {
+    return this.selectRoleFilter.locator('option:checked');
   }
 
   private async openFilter(): Promise<void> {
@@ -138,13 +138,13 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
     }
   }
 
-  async chooseUseFilter(use: AddressUse): Promise<void> {
+  async chooseRoleFilter(role: AddressRole): Promise<void> {
     await this.openFilter();
-    await this.selectUseFilter.selectOption({ label: useOptionLabels[use] });
+    await this.selectRoleFilter.selectOption({ label: roleOptionLabels[role] });
   }
 
-  async filter({ term, use, submitWith }: { term: string; use: AddressUse; submitWith: 'button' | 'enter' }): Promise<void> {
-    await this.chooseUseFilter(use);
+  async filter({ term, role, submitWith }: { term: string; role: AddressRole; submitWith: 'button' | 'enter' }): Promise<void> {
+    await this.chooseRoleFilter(role);
     await this.search(term, { submitWith });
   }
 

@@ -5,7 +5,7 @@ import {
   addressBookTabs,
   branchTab,
   originOrConsignorTab,
-  tabOf,
+  tabHolding,
   unsupportedAddressValue,
 } from '@domain/ins/constants/address-book-types';
 import {
@@ -14,20 +14,18 @@ import {
   ensureE2eAddressBook,
   placeOfOriginFixture,
 } from '@flows/shared/address-book-seed';
-import { addressIdsDeletedAfterEachTest, createStamped, stampedAddressesOnTab, usesLabelOf } from './stamped-addresses';
+import { addressIdsDeletedAfterEachTest, createStamped, stampedAddressesOnTab, rolesLabelOf } from './stamped-addresses';
 
 const createdAddressIds = addressIdsDeletedAfterEachTest('addressBookApi');
 
 test.describe('Address book tabs API', () => {
   const isolatedOrganisationAddressIds = addressIdsDeletedAfterEachTest('isolatedOrganisationAddressBookApi');
 
-  test('listing by an address type returns exactly the addresses holding one of its uses', async ({
-    isolatedOrganisationAddressBookApi,
-  }) => {
+  test("listing by a tab's roles returns exactly the addresses holding any of them", async ({ isolatedOrganisationAddressBookApi }) => {
     const { searchTerm, stamped } = await createStamped(isolatedOrganisationAddressBookApi, isolatedOrganisationAddressIds);
 
     for (const tab of addressBookTabs) {
-      const listed = await isolatedOrganisationAddressBookApi.listAddresses(searchTerm, { addressType: tab.addressType });
+      const listed = await isolatedOrganisationAddressBookApi.listAddresses(searchTerm, { roles: tab.roleFilterOptions });
 
       expect(listed.map(({ name }) => name).sort()).toEqual(
         stampedAddressesOnTab(stamped, tab)
@@ -37,7 +35,7 @@ test.describe('Address book tabs API', () => {
     }
   });
 
-  test('listing with no address type returns every live address', async ({ isolatedOrganisationAddressBookApi }) => {
+  test('listing with no role returns every live address', async ({ isolatedOrganisationAddressBookApi }) => {
     const { searchTerm, stamped } = await createStamped(isolatedOrganisationAddressBookApi, isolatedOrganisationAddressIds);
 
     const listed = await isolatedOrganisationAddressBookApi.listAddresses(searchTerm);
@@ -65,7 +63,7 @@ test.describe('Address book tabs', () => {
     await expect(insPages.addressBookList.selectedTab).toHaveText(originOrConsignorTab.label);
   });
 
-  test('each tab opens with its own panel heading, the columns Name, Type, Address, Country and Action, and exactly its stamped addresses with their uses', async ({
+  test('each tab opens with its own panel heading, the columns Name, Type, Address, Country and Action, and exactly its stamped addresses with their roles', async ({
     insPages,
     insJourney,
     addressBookApi,
@@ -81,20 +79,20 @@ test.describe('Address book tabs', () => {
       await expect(insPages.addressBookList.columnHeaders).toHaveText(['Name', 'Type', 'Address', 'Country', 'Action']);
       await expect(insPages.addressBookList.resultsLine).toHaveText(`Showing 1-${expected.length} of ${expected.length}`);
       await expect(insPages.addressBookList.bodyRows).toHaveCount(expected.length);
-      for (const { name, usesLabel } of expected) {
-        await expect(insPages.addressBookList.usesCell(name)).toHaveText(usesLabel);
+      for (const { name, rolesLabel } of expected) {
+        await expect(insPages.addressBookList.rolesCell(name)).toHaveText(rolesLabel);
       }
     }
   });
 
-  test('every shared fixture shows on the tab of its type with its uses label, and a branch fixture is absent from the Origin and Consignor tab', async ({
+  test('every shared fixture shows on the tab holding its roles, with its roles label, and a branch fixture is absent from the Origin and Consignor tab', async ({
     insPages,
     insJourney,
   }) => {
-    for (const { name, addressType, uses } of E2E_ADDRESS_BOOK_FIXTURES) {
-      await insJourney.toAddressBookTab(tabOf(addressType), { search: name });
+    for (const { name, roles } of E2E_ADDRESS_BOOK_FIXTURES) {
+      await insJourney.toAddressBookTab(tabHolding(roles[0]), { search: name });
 
-      await expect(insPages.addressBookList.usesCell(name)).toHaveText(usesLabelOf(uses));
+      await expect(insPages.addressBookList.rolesCell(name)).toHaveText(rolesLabelOf(roles));
     }
 
     await insJourney.toAddressBookTab(originOrConsignorTab, { search: branchAddressFixture.name });
@@ -121,7 +119,7 @@ test.describe('Address book tabs without JavaScript', () => {
 });
 
 test.describe('Address book fixture reconcile', () => {
-  test('a fixture record holding a different use is rewritten with the fixture type and uses once, and a second run leaves it untouched', async ({
+  test("a fixture record holding a different role is rewritten with the fixture's roles once, and a second run leaves it untouched", async ({
     isolatedOrganisationAddressBookApi,
   }) => {
     const { name, addressLine1, townOrCity, postcode, countryCode, phone, email } = placeOfOriginFixture;
@@ -139,8 +137,7 @@ test.describe('Address book fixture reconcile', () => {
     await ensureE2eAddressBook(isolatedOrganisationAddressBookApi);
 
     const afterFirstRun = await isolatedOrganisationAddressBookApi.findByName(name);
-    expect(afterFirstRun.addressType).toBe(placeOfOriginFixture.addressType);
-    expect(afterFirstRun.uses).toEqual(placeOfOriginFixture.uses);
+    expect(afterFirstRun.roles).toEqual(placeOfOriginFixture.roles);
 
     await ensureE2eAddressBook(isolatedOrganisationAddressBookApi);
 

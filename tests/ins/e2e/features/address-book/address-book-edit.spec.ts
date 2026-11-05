@@ -4,7 +4,7 @@ import {
   ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER,
   ADDRESS_FORM_VALIDATION_MESSAGES,
 } from '@domain/ins/constants/address-form';
-import { addressTypes, addressUses, classificationOf } from '@domain/shared/constants/address-types';
+import { addressRoles, rolesOf } from '@domain/shared/constants/address-types';
 import { expectAddressBookList } from './expect-address-book-list';
 import { expectOtherOrganisationAddressReturnsToList } from './expect-other-organisation-address-returns-to-list';
 import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
@@ -53,18 +53,18 @@ test.describe('Address book edit', () => {
     expect(stored.deleted).toBe(false);
   });
 
-  test('an edit through the edit page keeps the address type and every use', async ({ insPages, addressBookApi }) => {
+  test('an edit through the edit page keeps every role', async ({ insPages, addressBookApi }) => {
     const stamp = Date.now();
-    const classification = { addressType: addressTypes.originOrConsignor, uses: [addressUses.placeOfOrigin, addressUses.consignor] };
-    const created = await addressBookApi.createAddress({ ...traderAddress(`Edit Keeps Uses Farm ${stamp}`), ...classification });
+    const heldRoles = { roles: [addressRoles.placeOfOrigin, addressRoles.consignor] };
+    const created = await addressBookApi.createAddress({ ...traderAddress(`Edit Keeps Roles Farm ${stamp}`), ...heldRoles });
 
     await insPages.addressBookEdit.open(created.id);
-    await insPages.addressBookEdit.inputName.fill(`Edit Kept Uses Holding ${stamp}`);
+    await insPages.addressBookEdit.inputName.fill(`Edit Kept Roles Holding ${stamp}`);
     await insPages.addressBookEdit.save();
     await expect(insPages.addressBookList.successBanner).toContainText('address updated');
 
     const stored = await addressBookApi.getAddress(created.id);
-    expect(classificationOf(stored)).toEqual(classification);
+    expect(rolesOf(stored)).toEqual(heldRoles);
   });
 
   test('the address book links the new name to the edited address', async ({ insPages, addressBookApi }) => {

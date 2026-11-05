@@ -1,6 +1,6 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
 import { addressTypes } from '@domain/shared/constants/address-types';
-import { usesQuestionOptions } from '@domain/ins/constants/address-book-types';
+import { rolesQuestionOptions } from '@domain/ins/constants/address-book-types';
 import { addFormAddressWithLineTwoAndCounty, addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
@@ -8,7 +8,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     const addressType = addressTypes.originOrConsignor;
     await insJourney.toAddressForm({ addressType });
     await insPages.addressBookAdd.fill(addFormAddressWithLineTwoAndCounty(`A11y Filled Farm ${Date.now()}`, 'United Kingdom'));
-    await insPages.addressBookAdd.tickUses(usesQuestionOptions[addressType]);
+    await insPages.addressBookAdd.tickRoles(rolesQuestionOptions[addressType]);
 
     await runA11yScan();
   });

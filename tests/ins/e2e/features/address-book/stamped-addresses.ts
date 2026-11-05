@@ -2,56 +2,41 @@ import { randomUUID } from 'node:crypto';
 import { test } from '@fixtures';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import type { InsPages } from '@page-objects';
-import { addressTypes, addressUses, type AddressClassification, type AddressUse } from '@domain/shared/constants/address-types';
-import {
-  branchTab,
-  destinationConsigneeOrImporterTab,
-  originOrConsignorTab,
-  useColumnLabels,
-  type AddressBookTab,
-} from '@domain/ins/constants/address-book-types';
+import { addressRoles, type AddressRoles, type AddressRole } from '@domain/shared/constants/address-types';
+import { roleColumnLabels, tabHolding, type AddressBookTab } from '@domain/ins/constants/address-book-types';
 import { traderAddress } from '@domain/ins/constants/trader-address';
 
-export interface StampedAddress extends AddressClassification {
+export interface StampedAddress extends AddressRoles {
   name: string;
-  usesLabel: string;
-  tabs: readonly AddressBookTab[];
+  rolesLabel: string;
 }
 
 const newStampedSearchTerm = (): string => `Stamped ${randomUUID().replaceAll('-', '')}`;
 
-export const usesLabelOf = (uses: readonly AddressUse[]): string => uses.map((use) => useColumnLabels[use]).join(', ');
+export const rolesLabelOf = (roles: readonly AddressRole[]): string => roles.map((role) => roleColumnLabels[role]).join(', ');
 
 const stampedAddressesOf = (searchTerm: string) => {
   const named = (suffix: string) => `${searchTerm} ${suffix}`;
-  const stampedAddress = (address: Omit<StampedAddress, 'usesLabel'>): StampedAddress => ({
+  const stampedAddress = (address: Omit<StampedAddress, 'rolesLabel'>): StampedAddress => ({
     ...address,
-    usesLabel: usesLabelOf(address.uses),
+    rolesLabel: rolesLabelOf(address.roles),
   });
   return {
-    placeOfOriginAndConsignee: stampedAddress({
-      name: named('Origin And Consignee'),
-      addressType: addressTypes.originOrConsignor,
-      uses: [addressUses.placeOfOrigin, addressUses.consignee],
-      tabs: [originOrConsignorTab, destinationConsigneeOrImporterTab],
+    consigneeAndPlaceOfDestination: stampedAddress({
+      name: named('Consignee And Destination'),
+      roles: [addressRoles.consignee, addressRoles.placeOfDestination],
     }),
     consignor: stampedAddress({
       name: named('Consignor'),
-      addressType: addressTypes.originOrConsignor,
-      uses: [addressUses.consignor],
-      tabs: [originOrConsignorTab],
+      roles: [addressRoles.consignor],
     }),
     importer: stampedAddress({
       name: named('Importer'),
-      addressType: addressTypes.destinationConsigneeOrImporter,
-      uses: [addressUses.importer],
-      tabs: [destinationConsigneeOrImporterTab],
+      roles: [addressRoles.importer],
     }),
     branchAddress: stampedAddress({
       name: named('Branch'),
-      addressType: addressTypes.branch,
-      uses: [addressUses.branchAddress],
-      tabs: [branchTab],
+      roles: [addressRoles.branchAddress],
     }),
   };
 };
@@ -59,9 +44,9 @@ const stampedAddressesOf = (searchTerm: string) => {
 export const createAddressHolding = async (
   api: AddressBookApiClient,
   createdAddressIds: string[],
-  { name, addressType, uses }: Pick<StampedAddress, 'name' | 'addressType' | 'uses'>,
+  { name, roles }: Pick<StampedAddress, 'name' | 'roles'>,
 ): Promise<void> => {
-  createdAddressIds.push((await api.createAddress({ ...traderAddress(name), addressType, uses })).id);
+  createdAddressIds.push((await api.createAddress({ ...traderAddress(name), roles })).id);
 };
 
 export const createStamped = async (api: AddressBookApiClient, createdAddressIds: string[]) => {
@@ -74,7 +59,7 @@ export const createStamped = async (api: AddressBookApiClient, createdAddressIds
 };
 
 export const stampedAddressesOnTab = (stamped: Record<string, StampedAddress>, tab: AddressBookTab): StampedAddress[] =>
-  Object.values(stamped).filter(({ tabs }) => tabs.includes(tab));
+  Object.values(stamped).filter(({ roles }) => tabHolding(roles[0]) === tab);
 
 export const addressIdsDeletedAfterEachTest = (apiFixtureName: 'addressBookApi' | 'isolatedOrganisationAddressBookApi'): string[] => {
   const createdAddressIds: string[] = [];
@@ -87,12 +72,12 @@ export const addressIdsDeletedAfterEachTest = (apiFixtureName: 'addressBookApi' 
   return createdAddressIds;
 };
 
-export const createStampedAndFilterListByUse = async (
+export const createStampedAndFilterListByRole = async (
   { insPages, api, createdAddressIds }: { insPages: InsPages; api: AddressBookApiClient; createdAddressIds: string[] },
-  use: AddressUse,
+  role: AddressRole,
 ) => {
   const { searchTerm, stamped } = await createStamped(api, createdAddressIds);
   await insPages.addressBookList.open();
-  await insPages.addressBookList.filter({ term: searchTerm, submitWith: 'button', use });
+  await insPages.addressBookList.filter({ term: searchTerm, submitWith: 'button', role });
   return { searchTerm, stamped };
 };

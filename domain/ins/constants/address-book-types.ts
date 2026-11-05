@@ -1,12 +1,12 @@
-import { addressTypes, addressUses, type AddressType, type AddressUse } from '@domain/shared/constants/address-types';
+import { addressTypes, addressRoles, type AddressType, type AddressRole } from '@domain/shared/constants/address-types';
 
-interface UseTexts {
+interface RoleTexts {
   columnLabel: string;
   optionLabel: string;
   formLabel: string;
 }
 
-const useTexts: Record<AddressUse, UseTexts> = {
+const roleTexts: Record<AddressRole, RoleTexts> = {
   PLACE_OF_ORIGIN: { columnLabel: 'Place of origin', optionLabel: 'Place of Origin', formLabel: 'Place of origin' },
   CONSIGNOR: { columnLabel: 'Consignor', optionLabel: 'Consignor', formLabel: 'Consignor' },
   PLACE_OF_DESTINATION: { columnLabel: 'Place of destination', optionLabel: 'Place of Destination', formLabel: 'Place of destination' },
@@ -15,22 +15,22 @@ const useTexts: Record<AddressUse, UseTexts> = {
   BRANCH_ADDRESS: { columnLabel: 'Branch', optionLabel: 'Branch Address', formLabel: 'Branch address' },
 };
 
-const textsOfEachUse = (textOf: (texts: UseTexts) => string): Record<AddressUse, string> =>
-  Object.fromEntries(Object.entries(useTexts).map(([use, texts]) => [use, textOf(texts)])) as Record<AddressUse, string>;
+const textsOfEachRole = (textOf: (texts: RoleTexts) => string): Record<AddressRole, string> =>
+  Object.fromEntries(Object.entries(roleTexts).map(([role, texts]) => [role, textOf(texts)])) as Record<AddressRole, string>;
 
-export const useColumnLabels = textsOfEachUse(({ columnLabel }) => columnLabel);
+export const roleColumnLabels = textsOfEachRole(({ columnLabel }) => columnLabel);
 
-export const useOptionLabels = textsOfEachUse(({ optionLabel }) => optionLabel);
+export const roleOptionLabels = textsOfEachRole(({ optionLabel }) => optionLabel);
 
-export const usesQuestionLabels = textsOfEachUse(({ formLabel }) => formLabel);
+export const rolesQuestionLabels = textsOfEachRole(({ formLabel }) => formLabel);
 
-export const useFilterPlaceholder = 'Select one';
+export const roleFilterPlaceholder = 'Select one';
 
 export interface AddressBookTab {
   addressType: AddressType;
   label: string;
   panelHeading: string;
-  useFilterOptions: readonly AddressUse[];
+  roleFilterOptions: readonly AddressRole[];
 }
 
 export const addressBookTabs: readonly AddressBookTab[] = [
@@ -38,19 +38,19 @@ export const addressBookTabs: readonly AddressBookTab[] = [
     addressType: addressTypes.originOrConsignor,
     label: 'Origin and Consignor',
     panelHeading: 'Origin and Consignor addresses',
-    useFilterOptions: [addressUses.placeOfOrigin, addressUses.consignor],
+    roleFilterOptions: [addressRoles.placeOfOrigin, addressRoles.consignor],
   },
   {
     addressType: addressTypes.destinationConsigneeOrImporter,
     label: 'Destination, Consignee and Importer',
     panelHeading: 'Destination, Consignee and Importer addresses',
-    useFilterOptions: [addressUses.consignee, addressUses.importer, addressUses.placeOfDestination],
+    roleFilterOptions: [addressRoles.consignee, addressRoles.importer, addressRoles.placeOfDestination],
   },
   {
     addressType: addressTypes.branch,
     label: 'Branch',
     panelHeading: 'Branch addresses',
-    useFilterOptions: [addressUses.branchAddress],
+    roleFilterOptions: [addressRoles.branchAddress],
   },
 ];
 
@@ -64,14 +64,22 @@ const tabsByAddressType: Record<AddressType, AddressBookTab> = {
 
 export const tabOf = (addressType: AddressType): AddressBookTab => tabsByAddressType[addressType];
 
+export const tabHolding = (role: AddressRole): AddressBookTab => {
+  const tab = addressBookTabs.find(({ roleFilterOptions }) => roleFilterOptions.includes(role));
+  if (!tab) {
+    throw new Error(`Expected a tab holding the role ${role}`);
+  }
+  return tab;
+};
+
 export const addressBookTabLabels = addressBookTabs.map(({ label }) => label);
 
 export const unsupportedAddressValue = 'TRANSPORTER';
 
-export const usesQuestionOptions: Record<AddressType, readonly AddressUse[]> = {
-  [addressTypes.originOrConsignor]: [addressUses.placeOfOrigin, addressUses.consignor],
-  [addressTypes.destinationConsigneeOrImporter]: [addressUses.placeOfDestination, addressUses.consignee, addressUses.importer],
-  [addressTypes.branch]: [addressUses.branchAddress],
+export const rolesQuestionOptions: Record<AddressType, readonly AddressRole[]> = {
+  [addressTypes.originOrConsignor]: [addressRoles.placeOfOrigin, addressRoles.consignor],
+  [addressTypes.destinationConsigneeOrImporter]: [addressRoles.placeOfDestination, addressRoles.consignee, addressRoles.importer],
+  [addressTypes.branch]: [addressRoles.branchAddress],
 };
 
 export const addressTypesRequiringUnitedKingdom: readonly AddressType[] = [
@@ -79,7 +87,7 @@ export const addressTypesRequiringUnitedKingdom: readonly AddressType[] = [
   addressTypes.branch,
 ];
 
-const hintOf = (addressType: AddressType): string => usesQuestionOptions[addressType].map((use) => usesQuestionLabels[use]).join(', ');
+const hintOf = (addressType: AddressType): string => rolesQuestionOptions[addressType].map((role) => rolesQuestionLabels[role]).join(', ');
 
 export const addressTypeOptions: readonly { addressType: AddressType; label: string; hint: string }[] = [
   { addressType: addressTypes.originOrConsignor, label: 'Origin or Consignor', hint: hintOf(addressTypes.originOrConsignor) },
@@ -100,18 +108,18 @@ export const addressTypeQuestion = {
   error: 'Select an address type',
 };
 
-export const usesQuestion = {
+export const rolesQuestion = {
   hint: 'Select where this address can be used',
   error: 'Select what this address can be used for',
 };
 
-export const usesQuestionLegends: Record<AddressType, string> = {
+export const rolesQuestionLegends: Record<AddressType, string> = {
   ORIGIN_OR_CONSIGNOR: 'What can this address be used for?',
   DESTINATION_CONSIGNEE_OR_IMPORTER: 'Address type',
   BRANCH: 'Address type',
 };
 
-export const journeyUsesQuestion = {
+export const journeyRolesQuestion = {
   legend: 'What else should this address be used for?',
   consigneeHint: 'This address is being added as a Consignee address. Select any other roles or addresses this address should be used for.',
 };

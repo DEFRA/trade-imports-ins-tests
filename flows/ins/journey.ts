@@ -1,8 +1,8 @@
 import type { InsPages } from '@page-objects';
 import type { OpenOptions } from '@page-objects/shared/base-page';
 import type { AddressDetails } from '@page-objects/ins/address-book/form-page';
-import { addressTypes, type AddressType, type AddressUse } from '@domain/shared/constants/address-types';
-import { usesQuestionOptions, type AddressBookTab } from '@domain/ins/constants/address-book-types';
+import { addressTypes, type AddressType, type AddressRole } from '@domain/shared/constants/address-types';
+import { rolesQuestionOptions, type AddressBookTab } from '@domain/ins/constants/address-book-types';
 
 type AddressFormOptions = OpenOptions & { addressType?: AddressType };
 
@@ -54,18 +54,18 @@ export class InsJourney {
     await this.chooseAddressType(addressType);
   }
 
-  /** Adds an address from the address book list: chooses the type, fills the form, ticks the uses and saves, landing on the list. */
+  /** Adds an address from the address book list: chooses the type, fills the form, ticks the roles and saves, landing on the list. */
   async addAddressFromList(
     details: AddressDetails,
     {
       addressType = defaultAddressType,
-      uses = usesQuestionOptions[addressType].slice(0, 1),
+      roles = rolesQuestionOptions[addressType].slice(0, 1),
       ...openOptions
-    }: AddressFormOptions & { uses?: readonly AddressUse[] } = {},
+    }: AddressFormOptions & { roles?: readonly AddressRole[] } = {},
   ): Promise<void> {
     await this.toAddressFormFromList({ addressType, ...openOptions });
     await this.insPages.addressBookAdd.fill(details);
-    await this.insPages.addressBookAdd.tickUses(uses);
+    await this.insPages.addressBookAdd.tickRoles(roles);
     await this.insPages.addressBookAdd.saveAndContinue();
     await this.insPages.addressBookList.heading.waitFor();
   }

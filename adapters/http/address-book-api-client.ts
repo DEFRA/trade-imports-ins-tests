@@ -1,7 +1,7 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient } from '@adapters/http/rest-client';
 import { getAddressBookBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
-import type { AddressClassification, AddressType, AddressUse } from '@domain/shared/constants/address-types';
+import type { AddressRole } from '@domain/shared/constants/address-types';
 
 /** The organisation id that CRN 2100010101, the default E2E sign-in, belongs to. */
 export const E2E_ORGANISATION_ID = '5900001';
@@ -19,13 +19,12 @@ export interface AddressBookRecord {
   countryCode: string;
   phone: string;
   email: string;
-  addressType?: AddressType;
-  uses?: AddressUse[];
+  roles: AddressRole[];
   deleted: boolean;
   modifiedAt: string;
 }
 
-export type AddressBookEntry = Omit<AddressBookRecord, 'id' | 'deleted' | 'modifiedAt' | 'addressType' | 'uses'> & AddressClassification;
+export type AddressBookEntry = Omit<AddressBookRecord, 'id' | 'deleted' | 'modifiedAt'>;
 
 interface AddressBookPage {
   items: AddressBookRecord[];
@@ -56,18 +55,19 @@ export class AddressBookApiClient {
 
   /**
    * The first page of the organisation's live addresses matching the search, newest first.
-   * With `addressType`, only addresses of that type; with `use`, only addresses holding that use.
+   * With `roles`, only addresses holding any of them; with `searchRoles`, an address holding any of them also
+   * matches the search.
    */
   async listAddresses(
     query?: string,
-    { addressType, use }: { addressType?: AddressType; use?: AddressUse } = {},
+    { roles = [], searchRoles = [] }: { roles?: readonly AddressRole[]; searchRoles?: readonly AddressRole[] } = {},
   ): Promise<AddressBookRecord[]> {
     const params = new URLSearchParams();
-    if (addressType) {
-      params.set('addressType', addressType);
+    for (const role of roles) {
+      params.append('role', role);
     }
-    if (use) {
-      params.set('use', use);
+    for (const searchRole of searchRoles) {
+      params.append('searchRole', searchRole);
     }
     if (query) {
       params.set('q', query);

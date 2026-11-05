@@ -6,7 +6,7 @@ export const addressTypes = {
 
 export type AddressType = (typeof addressTypes)[keyof typeof addressTypes];
 
-export const addressUses = {
+export const addressRoles = {
   placeOfOrigin: 'PLACE_OF_ORIGIN',
   consignor: 'CONSIGNOR',
   placeOfDestination: 'PLACE_OF_DESTINATION',
@@ -15,41 +15,22 @@ export const addressUses = {
   branchAddress: 'BRANCH_ADDRESS',
 } as const;
 
-export type AddressUse = (typeof addressUses)[keyof typeof addressUses];
+export type AddressRole = (typeof addressRoles)[keyof typeof addressRoles];
 
-export interface AddressClassification {
-  addressType: AddressType;
-  uses: AddressUse[];
+export interface AddressRoles {
+  roles: AddressRole[];
 }
 
-export const classificationOf = ({ addressType, uses }: { addressType?: AddressType; uses?: AddressUse[] }) => ({ addressType, uses });
+export const rolesOf = ({ roles }: { roles?: AddressRole[] }) => ({ roles });
 
-export const heldAsPlaceOfOrigin: AddressClassification = {
-  addressType: addressTypes.originOrConsignor,
-  uses: [addressUses.placeOfOrigin],
-};
+export const heldAsPlaceOfOrigin: AddressRoles = { roles: [addressRoles.placeOfOrigin] };
 
-export const heldAsConsignor: AddressClassification = {
-  addressType: addressTypes.originOrConsignor,
-  uses: [addressUses.consignor],
-};
+export const heldAsConsignor: AddressRoles = { roles: [addressRoles.consignor] };
 
-export const heldAsPlaceOfDestination: AddressClassification = {
-  addressType: addressTypes.destinationConsigneeOrImporter,
-  uses: [addressUses.placeOfDestination],
-};
+export const heldAsPlaceOfDestination: AddressRoles = { roles: [addressRoles.placeOfDestination] };
 
-export const heldAsConsignee: AddressClassification = {
-  addressType: addressTypes.destinationConsigneeOrImporter,
-  uses: [addressUses.consignee],
-};
+export const heldAsConsignee: AddressRoles = { roles: [addressRoles.consignee] };
 
-export const heldAsImporter: AddressClassification = {
-  addressType: addressTypes.destinationConsigneeOrImporter,
-  uses: [addressUses.importer],
-};
+export const heldAsImporter: AddressRoles = { roles: [addressRoles.importer] };
 
-export const heldAsBranchAddress: AddressClassification = {
-  addressType: addressTypes.branch,
-  uses: [addressUses.branchAddress],
-};
+export const heldAsBranchAddress: AddressRoles = { roles: [addressRoles.branchAddress] };

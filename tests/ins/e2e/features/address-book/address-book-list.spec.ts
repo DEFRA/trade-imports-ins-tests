@@ -1,7 +1,7 @@
 import { test, expect, type PageFixtures } from '@fixtures';
 import { expectSearchedListLinks, expectNoMatchesListed } from './expect-address-book-list';
-import { destinationConsigneeOrImporterTab, originOrConsignorTab, useOptionLabels } from '@domain/ins/constants/address-book-types';
-import { addressUses } from '@domain/shared/constants/address-types';
+import { destinationConsigneeOrImporterTab, originOrConsignorTab, roleOptionLabels } from '@domain/ins/constants/address-book-types';
+import { addressRoles } from '@domain/shared/constants/address-types';
 import { addFormAddressWithLineTwoAndCounty, addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
 
 const SUBMIT_METHODS = [
@@ -65,16 +65,16 @@ test.describe('Address book list', () => {
   }) => {
     const { addressType } = destinationConsigneeOrImporterTab;
     await insPages.addressBookList.open({ addressType });
-    await insPages.addressBookList.filter({ term: `NoMatch${Date.now()}`, use: addressUses.importer, submitWith: 'button' });
+    await insPages.addressBookList.filter({ term: `NoMatch${Date.now()}`, role: addressRoles.importer, submitWith: 'button' });
 
     await insPages.addressBookList.linkClearSearch.click();
 
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}\\?`));
-    expect(Object.fromEntries(new URL(pages.page.url()).searchParams)).toEqual({ addressType, use: addressUses.importer });
+    expect(Object.fromEntries(new URL(pages.page.url()).searchParams)).toEqual({ addressType, role: addressRoles.importer });
     await expect(insPages.addressBookList.selectedTab).toHaveText(destinationConsigneeOrImporterTab.label);
     await insPages.addressBookList.filterSummary.click();
     await expect(insPages.addressBookList.inputSearch).toHaveValue('');
-    await expect(insPages.addressBookList.selectedUseFilterOption).toHaveText(useOptionLabels.IMPORTER);
+    await expect(insPages.addressBookList.selectedRoleFilterOption).toHaveText(roleOptionLabels.IMPORTER);
   });
 
   test('an address is found from the dashboard, viewed, kept on No, cancel, then deleted on Yes, delete and no longer found by search', async ({

@@ -161,7 +161,7 @@ const differsFrom = (live: AddressBookRecord, wanted: AddressBookEntry): boolean
   (Object.keys(wanted) as Array<keyof AddressBookEntry>).some((field) => !sameValue(live[field], wanted[field]));
 
 /**
- * Ensures one live record per journey fixture name, holding the fixture's details, type and uses.
+ * Ensures one live record per journey fixture name, holding the fixture's details and roles.
  * Creates a missing record, rewrites one that differs and soft-deletes any extra with the name.
  */
 export async function ensureE2eAddressBook(api: AddressBookApiClient): Promise<void> {

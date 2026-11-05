@@ -2,28 +2,27 @@ import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { addressFormCountryNames } from '@resources/reference-data/reference-data';
 import { skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
-import { expectUsesOptions } from '@utils/uses-options-assertions';
+import { expectRolesOptions } from '@utils/roles-options-assertions';
 import type { AnimalsJourney } from '@flows/animals/journey';
 import { type InsAddressBookAddPage, type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
 import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
-import { journeyUsesQuestion, usesQuestionLabels } from '@domain/ins/constants/address-book-types';
+import { journeyRolesQuestion, rolesQuestionLabels } from '@domain/ins/constants/address-book-types';
 import {
-  addressTypes,
-  addressUses,
+  addressRoles,
   heldAsConsignee,
   heldAsConsignor,
   heldAsImporter,
   heldAsPlaceOfDestination,
   heldAsPlaceOfOrigin,
-  classificationOf,
-  type AddressClassification,
+  rolesOf,
+  type AddressRoles,
 } from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage, type PartyRole } from '@page-objects/animals/addresses-page';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 
 const PARTY_ROLES: readonly PartyRole[] = ['Place of origin', 'Consignor', 'Consignee', 'Importer', 'Place of destination'];
 
-const CLASSIFICATION_BY_ROLE: Record<PartyRole, AddressClassification> = {
+const ROLES_HELD_BY_PARTY: Record<PartyRole, AddressRoles> = {
   'Place of origin': heldAsPlaceOfOrigin,
   Consignor: heldAsConsignor,
   Consignee: heldAsConsignee,
@@ -67,7 +66,7 @@ test.describe('Add an address from the journey via INS', () => {
 
   for (const role of PARTY_ROLES) {
     test(
-      `Save and select on the INS add page reached from the ${role} picker saves the address with the role's type and use, selects it for the role and lands on Roles and addresses with the added banner`,
+      `Save and select on the INS add page reached from the ${role} picker saves the address holding that role, selects it for the role and lands on Roles and addresses with the added banner`,
       { tag: ['@address-book', '@ins-frontend'] },
       async ({ animalsJourney, pages, animalsPages, insPages, addressBookApi }) => {
         const addPage = insPages.addressBookAdd;
@@ -91,7 +90,7 @@ test.describe('Add an address from the journey via INS', () => {
         await expect(animalsPages.addresses.changeParty(role)).toBeVisible();
 
         const saved = await addressBookApi.findByName(details.name);
-        expect(classificationOf(saved)).toEqual(CLASSIFICATION_BY_ROLE[role]);
+        expect(rolesOf(saved)).toEqual(ROLES_HELD_BY_PARTY[role]);
       },
     );
 
@@ -190,7 +189,7 @@ test.describe('Add an address from the journey via INS', () => {
       await expect(addPage.notificationReference).toHaveText(journeyContext.referenceNumber);
       await expect(addPage.sectionHeading('Address')).toBeVisible();
       await expect(addPage.sectionHeading('Contact details')).toBeVisible();
-      await expect(addPage.fieldLabels).toHaveText([...ADDRESS_FORM_FIELD_LABELS_IN_ORDER, usesQuestionLabels.PLACE_OF_ORIGIN]);
+      await expect(addPage.fieldLabels).toHaveText([...ADDRESS_FORM_FIELD_LABELS_IN_ORDER, rolesQuestionLabels.PLACE_OF_ORIGIN]);
       await expect(addPage.inputName).not.toHaveAttribute('autocomplete');
       await expect(addPage.inputAddressLine1).toHaveAttribute('autocomplete', 'address-line1');
       await expect(addPage.inputAddressLine2).toHaveAttribute('autocomplete', 'address-line2');
@@ -231,27 +230,26 @@ test.describe('Add an address from the journey via INS', () => {
   }
 
   test(
-    'Save and select on the INS add page reached from the Consignee picker with Importer ticked saves the address under the destination type with the consignee and importer uses',
+    'Save and select on the INS add page reached from the Consignee picker with Importer ticked saves the address under the destination type with the consignee and importer roles',
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, animalsPages, insPages, addressBookApi }) => {
       const addPage = insPages.addressBookAdd;
       const details = newAddressFor('Consignee');
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
-      await expect(addPage.usesGroup(journeyUsesQuestion.legend)).toHaveAccessibleDescription(journeyUsesQuestion.consigneeHint);
-      await expectUsesOptions(addPage, journeyUsesQuestion.legend, [addressUses.importer, addressUses.placeOfDestination]);
-      await expect(addPage.usesOption(addressUses.importer)).not.toBeChecked();
-      await expect(addPage.usesOption(addressUses.placeOfDestination)).not.toBeChecked();
+      await expect(addPage.rolesGroup(journeyRolesQuestion.legend)).toHaveAccessibleDescription(journeyRolesQuestion.consigneeHint);
+      await expectRolesOptions(addPage, journeyRolesQuestion.legend, [addressRoles.importer, addressRoles.placeOfDestination]);
+      await expect(addPage.rolesOption(addressRoles.importer)).not.toBeChecked();
+      await expect(addPage.rolesOption(addressRoles.placeOfDestination)).not.toBeChecked();
 
       await addPage.fill(details);
-      await addPage.tickUses([addressUses.importer]);
+      await addPage.tickRoles([addressRoles.importer]);
       await addPage.btnSaveAndSelect.click();
 
       await expect(animalsPages.addresses.heading).toBeVisible();
       const saved = await addressBookApi.findByName(details.name);
-      expect(classificationOf(saved)).toEqual({
-        addressType: addressTypes.destinationConsigneeOrImporter,
-        uses: [addressUses.consignee, addressUses.importer],
+      expect(rolesOf(saved)).toEqual({
+        roles: [addressRoles.consignee, addressRoles.importer],
       });
     },
   );
@@ -265,7 +263,7 @@ test.describe('Add an address from the journey via INS', () => {
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
       await addPage.fill({ ...details, addressLine1: '', townOrCity: '', postcode: '', email: '', phone: '' });
-      await addPage.tickUses([addressUses.importer]);
+      await addPage.tickRoles([addressRoles.importer]);
       await addPage.btnSaveAndReturnToAddressPage.click();
 
       await expect(addPage.heading).toBeVisible();
@@ -277,7 +275,7 @@ test.describe('Add an address from the journey via INS', () => {
         ADDRESS_FORM_VALIDATION_MESSAGES.phoneRequired,
       ]);
       await expect(addPage.inputName).toHaveValue(details.name);
-      await expect(addPage.usesOption(addressUses.importer)).toBeChecked();
+      await expect(addPage.rolesOption(addressRoles.importer)).toBeChecked();
       expect(await addressBookApi.listAddresses(details.name)).toEqual([]);
     },
   );
