@@ -2,7 +2,6 @@ import { type Locator } from '@playwright/test';
 import { speciesLabel, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { SelectedCommoditiesTable } from '@page-objects/animals/selected-commodities-table';
-import { errorSummaryOn } from '@page-objects/shared/govuk-banners';
 
 export class AnimalsConsignmentDetailsPage extends NotificationPage {
   readonly selectedCommodities = new SelectedCommoditiesTable(this.page);
@@ -23,16 +22,8 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.page.getByLabel('Number of packages (when required)');
   }
 
-  get quantityQuestionLabels(): Locator {
-    return this.page.locator('label[for^="numberOfAnimalsQuantity"], label[for^="numberOfPackages"]');
-  }
-
   get addAnotherCommodity(): Locator {
     return this.page.getByRole('link', { name: 'Add another commodity' });
-  }
-
-  get errorSummary(): Locator {
-    return errorSummaryOn(this.page);
   }
 
   get animalsRequiredErrorLink(): Locator {

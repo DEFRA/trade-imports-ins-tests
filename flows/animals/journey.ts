@@ -516,7 +516,7 @@ export class AnimalsJourney {
 
   async toAdditionalDetails(): Promise<void> {
     await this.toImportReason();
-    await this.animalsPages.importReason.reason('Internal market').check();
+    await this.animalsPages.importReason.reason(importReasons.internalMarket.display).check();
     await this.animalsPages.importReason.purpose('Breeding').check();
     await this.animalsPages.importReason.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
@@ -686,7 +686,7 @@ export class AnimalsJourney {
       internalReference: 'CATTLE-2026-01',
     });
 
-    await pages.importReason.reason('Internal market').check();
+    await pages.importReason.reason(importReasons.internalMarket.display).check();
     await pages.importReason.purpose('Breeding').check();
     await pages.importReason.saveAndContinue.click();
 
@@ -743,7 +743,7 @@ export class AnimalsJourney {
     const pages = this.animalsPages;
     const referenceNumber = await this.walkOpeningRunToImportReason({ countryCode: countryCodes.eu.ireland }, [commodityLines.horse]);
 
-    await pages.importReason.reason('Temporary admission horses').check();
+    await pages.importReason.reason(importReasons.temporaryAdmissionHorses.display).check();
     await pages.importReason.temporaryAdmissionExitDate.fill(TEMPORARY_ADMISSION_EXIT_DATE);
     await pages.importReason.selectTemporaryAdmissionPortOfExit('GB HLY');
     await pages.importReason.saveAndContinue.click();
@@ -760,7 +760,7 @@ export class AnimalsJourney {
     await pages.animalIdentification.saveAndContinue.click();
 
     await pages.additionalDetails.heading.waitFor(pageLoadWait);
-    await pages.additionalDetails.certifiedFor('Registered equine animal').check();
+    await pages.additionalDetails.certifiedFor(certificationPurposes.registeredEquineAnimal.display).check();
     await pages.additionalDetails.containsUnweanedAnimals(yesNoValues.no).check();
     await pages.additionalDetails.saveAndContinue.click();
 

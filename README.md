@@ -212,10 +212,7 @@ keeping a second copy that could go stale.
 Stored commodity names for the codes the specs drive live in
 `domain/animals/constants/commodity-names.ts`. The INS aggregated notification
 commodity label uses the first GBN-AG trade line description (for example
-`Live bovine animals`). The outbox and PIMS Dynamics specs expect
-`GBN_AG_CATTLE_COMMON_NAME` (`domain/animals/constants/gbn-ag.ts`,
-`Domestic Cattle`) because the event's Bos taurus common name differs from
-reference-data's search result for that species under `0102`.
+`Live bovine animals`).
 
 ### DLQ specs in animals-admin
 

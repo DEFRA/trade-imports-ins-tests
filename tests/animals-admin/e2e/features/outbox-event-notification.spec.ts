@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { GBN_AG_CATTLE_COMMON_NAME } from '@domain/animals/constants/gbn-ag';
 import { ALL_ANSWERS as answers, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import { yesNoValues } from '@domain/shared/constants/yes-no-values';
@@ -119,7 +119,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       expect(tradeLines).toHaveLength(1);
       const [line] = tradeLines;
       expect(line.description).toEqual([LIVE_BOVINE_LINE_DESCRIPTION]);
-      expect(line.commonName).toBe(GBN_AG_CATTLE_COMMON_NAME);
+      expect(line.commonName).toBe(commodityLines.cattle.commonName);
       expect(line.scientificName).toBe(cowLine.species.latinName);
       expect(line.specifiedLineTradeDelivery?.[0].productUnitQuantity.content).toBe(cowLine.noOfAnimals);
       expect(line.physicalReferencedLogisticsPackage?.[0].itemQuantity).toBe(cowLine.noOfPackages);

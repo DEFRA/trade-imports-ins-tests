@@ -74,12 +74,12 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
 
   test('bolds the matched text in the commodity heading and in a species label', async ({ animalsPages }) => {
     await animalsPages.commoditySelection.search(commodityLines.cattle.commodityCode);
-    await expect(animalsPages.commoditySelection.commodityGroup(commodityLines.cattle.commodityCode).locator('legend strong')).toHaveText(
+    await expect(animalsPages.commoditySelection.boldLettersOfCommodityHeading(commodityLines.cattle.commodityCode)).toHaveText(
       commodityLines.cattle.commodityCode,
     );
 
     await animalsPages.commoditySelection.search(commodityLines.cattle.searchTerm);
-    await expect(animalsPages.commoditySelection.commodityGroup(commodityLines.cattle.commodityCode).locator('label strong')).toHaveText(
+    await expect(animalsPages.commoditySelection.boldLettersOfSpeciesLabel(commodityLines.cattle)).toHaveText(
       commodityLines.cattle.latinName,
     );
   });
@@ -175,11 +175,11 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
 
     await expect(animalsPages.commoditySelection.selectedCommodityHeading(commodityLines.cattle.commodityCode)).toBeVisible();
     await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.cattle)).toBeVisible();
-    await expect(animalsPages.commoditySelection.removeSpecies(commodityLines.cattle)).toBeVisible();
+    await expect(animalsPages.commoditySelection.removeButtonFor(commodityLines.cattle)).toBeVisible();
 
     await expect(animalsPages.commoditySelection.selectedCommodityHeading(commodityLines.domesticCat.commodityCode)).toBeVisible();
     await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.domesticCat)).toBeVisible();
-    await expect(animalsPages.commoditySelection.removeSpecies(commodityLines.domesticCat)).toBeVisible();
+    await expect(animalsPages.commoditySelection.removeButtonFor(commodityLines.domesticCat)).toBeVisible();
   });
 
   test('removing one chosen species leaves the other chosen and a save persists only the one left', async ({ animalsPages }) => {

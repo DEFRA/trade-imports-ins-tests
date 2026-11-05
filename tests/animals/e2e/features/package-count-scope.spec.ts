@@ -8,12 +8,13 @@ test.describe('Number of packages scope', () => {
     { tag: '@duplicated-in-frontend' },
     async ({ animalsJourney, animalsPages }) => {
       await animalsJourney.toConsignmentDetails([commodityLines.cattle, commodityLines.ostrich]);
+      const { consignmentDetails } = animalsPages;
 
-      await expect(animalsPages.consignmentDetails.quantityQuestionLabels).toHaveText([
-        'Number of animals',
-        'Number of packages (when required)',
-        'Number of animals',
-      ]);
+      await expect(consignmentDetails.numberOfAnimals).toHaveCount(2);
+      await expect(consignmentDetails.numberOfPackages).toHaveCount(1);
+      await expect(await consignmentDetails.numberOfAnimalsFor(commodityLines.cattle)).toBeVisible();
+      await expect(await consignmentDetails.numberOfAnimalsFor(commodityLines.ostrich)).toBeVisible();
+      await expect(await consignmentDetails.numberOfPackagesFor(commodityLines.cattle)).toBeVisible();
     },
   );
 

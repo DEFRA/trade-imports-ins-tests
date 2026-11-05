@@ -1,11 +1,11 @@
 import { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
 import { formattedValue } from '@adapters/http/dataverse-client';
 import { animalsDynamics } from '@config/animals-dynamics';
-import { GBN_AG_CATTLE_COMMON_NAME } from '@domain/animals/constants/gbn-ag';
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { ALL_ANSWERS, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { test, expect } from '@fixtures';
-import { annotateDuration } from '@utils/playwright/annotate-duration';
 import { skipIfComposeEnvironment } from '@utils/playwright/environment';
+import { submittedDynamicsRow } from '@utils/playwright/submitted-dynamics-row';
 
 // This is a temporary spec file. It holds the end-to-end checks that cannot pass yet, and it is deleted once every
 // assertion has moved to notification-data.spec.ts.
@@ -73,18 +73,7 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     const consignee = await addressBookApi.findByName(answers.parties.consignee);
     const importer = await addressBookApi.findByName(answers.parties.importer);
     const contact = await addressBookApi.findByName(answers.contactAddress);
-    await animalsJourney.submitNotification(answers);
-    const referenceNumber = journeyContext.referenceNumber;
-
-    await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
-      expect
-        .poll(
-          () => dynamics.findNotifications(referenceNumber),
-          animalsDynamics.pollOptions(`Expected exactly one notification for ${referenceNumber}`),
-        )
-        .toHaveLength(1),
-    );
-    const [row] = await dynamics.findNotifications(referenceNumber);
+    const row = await submittedDynamicsRow(animalsJourney, journeyContext, dynamics, answers);
 
     // [NOT IN SCHEMA]
     // None yet.
@@ -102,7 +91,7 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     // The event carries both. Only the v0.2.0 and v0.3.0 messages do; the gateway's v0.1.0 mapper omits the species
     // names.
     expect.soft(row.defraimp_commodityspeciesname, 'species name').toBe(cowLine.species.latinName);
-    expect.soft(row.defraimp_commodityspeciescommonname, 'species common name').toBe(GBN_AG_CATTLE_COMMON_NAME);
+    expect.soft(row.defraimp_commodityspeciescommonname, 'species common name').toBe(commodityLines.cattle.commonName);
     // Each party's postalAddress.postcodeCode, and its definedContact[].telephoneUniversalCommunication and
     // emailURIUniversalCommunication.
     // The event carries them. Only the v0.2.0 and v0.3.0 messages do. The phone column is a guess: the row also has an
@@ -173,18 +162,7 @@ test.describe('PIMS Dynamics notification data not stored yet', { tag: '@dynamic
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     const answers = ALL_ANSWERS;
     const [cowLine] = answers.commodityLines;
-    await animalsJourney.submitNotification(answers);
-    const referenceNumber = journeyContext.referenceNumber;
-
-    await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
-      expect
-        .poll(
-          () => dynamics.findNotifications(referenceNumber),
-          animalsDynamics.pollOptions(`Expected exactly one notification for ${referenceNumber}`),
-        )
-        .toHaveLength(1),
-    );
-    const [row] = await dynamics.findNotifications(referenceNumber);
+    const row = await submittedDynamicsRow(animalsJourney, journeyContext, dynamics, answers);
 
     // [NOT IN SCHEMA]
     // None yet.

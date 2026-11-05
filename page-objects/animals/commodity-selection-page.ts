@@ -73,6 +73,10 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
       .getByRole('strong');
   }
 
+  boldLettersOfCommodityHeading(code: string): Locator {
+    return this.commodityGroup(code).locator('legend').getByRole('strong');
+  }
+
   async searchAndCheckSpecies(speciesList: CommodityLine[]): Promise<void> {
     for (const species of speciesList) {
       await this.search(species.searchTerm);
@@ -88,11 +92,11 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.selectedSummary.getByRole('listitem').filter({ hasText: speciesLabel(species) });
   }
 
-  removeSpecies(species: CommodityLine): Locator {
+  removeButtonFor(species: CommodityLine): Locator {
     return this.selectedSummary.getByRole('button', { name: `Remove ${speciesLabel(species)}`, exact: true });
   }
 
   async pressRemoveSpecies(species: CommodityLine): Promise<void> {
-    await this.removeSpecies(species).click();
+    await this.removeButtonFor(species).click();
   }
 }

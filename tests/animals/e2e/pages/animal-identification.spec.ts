@@ -111,9 +111,9 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await animalsPages.animalIdentification.selectedCommodities.changeLinkFor(cattle).click();
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText('3 selected');
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(cattle.latinName);
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(bison.latinName);
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(domesticCat.latinName);
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(cattle));
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(bison));
+    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(domesticCat));
 
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.raccoonDog]);
     await animalsPages.commoditySelection.saveAndContinue.click();
@@ -121,8 +121,8 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
     await expect(animalsPages.animalIdentification.selectedCommodities.bodyRows).toContainText([
       commodityLines.cattle.commodityCode,
-      commodityLines.domesticCat.latinName,
-      commodityLines.raccoonDog.latinName,
+      speciesLabel(commodityLines.domesticCat),
+      speciesLabel(commodityLines.raccoonDog),
     ]);
   });
 
