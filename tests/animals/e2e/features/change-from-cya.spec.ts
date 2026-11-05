@@ -16,7 +16,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(countryRow).toContainText('France');
     await animalsPages.notificationView.changeLink('Change import details').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
+    await expect(pages.page).toHaveURL(animalsPages.originOfImport.changeContextUrl(referenceNumber));
     await animalsPages.originOfImport.country.choose('Belgium');
     await animalsPages.originOfImport.saveAndContinue.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
@@ -27,12 +27,64 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(certifiedForRow).toContainText('Slaughter');
     await animalsPages.notificationView.changeLink('Change additional animal details').click();
     await expect(animalsPages.additionalDetails.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(/\/additional-details\?change=1$/);
+    await expect(pages.page).toHaveURL(animalsPages.additionalDetails.changeContextUrl(referenceNumber));
     await animalsPages.additionalDetails.certifiedFor('Exhibition').check();
     await animalsPages.additionalDetails.saveAndContinue.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/notification-view$/);
     await expect(certifiedForRow).toContainText('Exhibition');
+  });
+
+  test('Back from the reason for import opened by a Change link opens What are you importing? with change context', async ({
+    animalsSeededJourney,
+    pages,
+    animalsPages,
+  }) => {
+    test.slow();
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const commoditiesUrl = animalsPages.commoditySelection.changeContextUrl(referenceNumber);
+
+    await animalsPages.notificationView.changeLink('Change reason for import').click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
+    await expect(animalsPages.importReason.linkBack).toHaveAttribute('href', commoditiesUrl);
+
+    await animalsPages.importReason.linkBack.click();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(commoditiesUrl);
+  });
+
+  test('Save and continue on a page opened by a Change link returns to the review showing the changed answer', async ({
+    animalsSeededJourney,
+    pages,
+    animalsPages,
+  }) => {
+    test.slow();
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+
+    const purposeRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Purpose in the market' });
+    await expect(purposeRow).toContainText('Breeding');
+    await animalsPages.notificationView.changeLink('Change reason for import').click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
+    await animalsPages.importReason.purpose('Research').check();
+    await animalsPages.importReason.saveAndContinue.click();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/\/notification-view$/);
+    await expect(purposeRow).toContainText('Research');
+  });
+
+  test('the roles and addresses Change link opens a page whose Back link opens the overview, not check your answers', async ({
+    animalsSeededJourney,
+    animalsPages,
+  }) => {
+    test.slow();
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+
+    await animalsPages.notificationView.changeLink('Change roles and addresses').click();
+    await expect(animalsPages.addresses.heading).toBeVisible();
+    await expect(animalsPages.addresses.linkBack).toHaveAttribute('href', animalsPages.overview.expectedUrl(referenceNumber));
   });
 
   test('the documents Change link opens the page with a Back link to the review, which stays after a refusal, after Save and add another and after Remove', async ({
@@ -47,7 +99,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
 
     await animalsPages.notificationView.changeLink('Change uploaded documents').click();
     await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(/\/accompanying-documents\?change=1$/);
+    await expect(pages.page).toHaveURL(animalsPages.accompanyingDocuments.changeContextUrl(referenceNumber));
     await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);
 
     await animalsPages.accompanyingDocuments.documentReference.fill('GBHC1234567890');

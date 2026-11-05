@@ -236,6 +236,10 @@ export class NotificationPage extends BasePage {
     return `${this.setBase}/notifications/${referenceNumber}${suffix}`;
   }
 
+  changeContextUrl(referenceNumber: string): string {
+    return `${this.expectedUrl(referenceNumber)}?change=1`;
+  }
+
   referenceNumberFromUrl(): string {
     const match = new URL(this.page.url()).pathname.match(new RegExp(`^${this.setBase}/notifications/([^/]+)`));
     if (!match) {
