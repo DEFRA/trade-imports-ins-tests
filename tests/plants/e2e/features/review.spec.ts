@@ -10,6 +10,7 @@ import {
   renamedAndMovedNurseryAddress,
 } from '@flows/plants/journey';
 import type { PlantsPages, SharedPages } from '@page-objects';
+import { addressRoles } from '@domain/shared/constants/address-types';
 import { todayOrTomorrowServiceDisplayDatePattern } from '@utils/date-utils';
 
 async function expectReview(plantsPages: PlantsPages) {
@@ -612,6 +613,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     test.slow();
     const { reference } = await plantsJourney.completeNotification(addressBookApi, {
       countryCode: 'United Kingdom',
+      roles: [addressRoles.consignor],
       name: `Invalid address (country "United Kingdom" is not a code) ${randomUUID()}`,
     });
     const error = 'Correct the address details for the place of destination';
