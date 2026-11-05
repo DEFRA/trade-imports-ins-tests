@@ -4,6 +4,7 @@ import { GBN_AG_CATTLE_COMMON_NAME } from '@domain/animals/constants/gbn-ag';
 import { ALL_ANSWERS as answers, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
+import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { users } from '@config/users';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
@@ -40,7 +41,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
 
   test('records a NotificationSubmitted outbox event on UI submission', async ({ animalsJourney, journeyContext }) => {
     test.slow();
-    await animalsJourney.submitNotification(answers);
+    await animalsJourney.submitNotification({ ...answers, unweanedAnimals: yesNoValues.yes });
     const referenceNumber = journeyContext.referenceNumber;
     const aggregateId = aggregateIdFor(referenceNumber);
     const [cowLine] = answers.commodityLines;
@@ -109,6 +110,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
         expect(transitCountry).not.toHaveProperty('subordinateTradeCountrySubDivision');
         expect(transitCountry).not.toHaveProperty('regionOfOriginCode');
       }
+      expect(data.specifiedConsignment.isOrHasUnweanedAnimals).toBe(true);
       const [movement] = data.specifiedConsignment.mainCarriageLogisticsTransportMovement ?? [];
       const [transportDocument] = movement.transportContractRelatedReferencedDocument ?? [];
       expect(transportDocument.typeCode).toBe('730');

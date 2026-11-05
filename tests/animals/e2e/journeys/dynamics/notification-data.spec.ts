@@ -4,6 +4,7 @@ import { animalsDynamics } from '@config/animals-dynamics';
 import { defaultUser } from '@config/users';
 import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
+import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { test, expect } from '@fixtures';
 import { annotateDuration } from '@utils/playwright/annotate-duration';
 import { skipIfComposeEnvironment } from '@utils/playwright/environment';
@@ -92,7 +93,7 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     // answers.internalMarketPurpose: [FROM v0.1.0: OPTION NOT MATCHED?] see 'mandatory answers PIMS Dynamics does not store yet' test.
     // answers.certifiedFor: [FROM v0.1.0: OPTION NOT MATCHED?] see 'mandatory answers PIMS Dynamics does not store yet' test.
     // answers.unweanedAnimals: PIMS defaults the column to false, so a no answer proves nothing. A yes answer is asserted
-    // in 'answering yes to unweaned animals is stored in PIMS Dynamics' (gaps spec).
+    // in 'answering yes to unweaned animals is stored in PIMS Dynamics'.
     expect.soft(row.defraimp_commoditiesincludenonablactedanimals, 'unweaned animals').toBe(false);
     expect.soft(row.defraimp_consignorcompanyname, 'consignor').toBe(answers.parties.consignor);
     expect.soft(row.defraimp_consignoraddressaddressline1, 'consignor address line 1').toBe(consignor.addressLine1);
@@ -161,6 +162,26 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     expect.soft(row.defraimp_traderreference, 'internal reference').toBeNull();
     expect.soft(row.defraimp_commoditiesnumberofpackages, 'number of packages').toBeNull();
     expect.soft(row.defraimp_routetransitingstates, 'transited countries').toBeNull();
+  });
+
+  test('answering yes to unweaned animals is stored in PIMS Dynamics', async ({ animalsJourney, journeyContext, externalRequest }) => {
+    const dynamics = new AnimalsDynamicsClient(externalRequest);
+    await animalsJourney.submitNotification({ ...MANDATORY_ANSWERS, unweanedAnimals: yesNoValues.yes });
+    const referenceNumber = journeyContext.referenceNumber;
+
+    await annotateDuration(animalsDynamics.submissionPollAnnotation, () =>
+      expect
+        .poll(
+          () => dynamics.findNotifications(referenceNumber),
+          animalsDynamics.pollOptions(`Expected exactly one notification for ${referenceNumber}`),
+        )
+        .toHaveLength(1),
+    );
+
+    const [row] = await dynamics.findNotifications(referenceNumber);
+    await attachRow(row);
+
+    expect(row.defraimp_commoditiesincludenonablactedanimals).toBe(true);
   });
 
   test('a notification submitted with every answer is stored in PIMS Dynamics with its optional answers', async ({
