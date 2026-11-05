@@ -26,7 +26,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('shows the Draft strip with the notification reference', async ({ animalsPages, journeyContext }) => {
-      await expect(animalsPages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Draft');
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Draft');
       await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.referenceNumber);
     });
 
@@ -35,10 +35,10 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(animalsPages.notificationView.changeLink('Change commodity 1')).toBeVisible();
     });
 
-    test('offers submission and none of the post-submit actions', async ({ pages, animalsPages }) => {
+    test('offers submission and none of the post-submit actions', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.continueButton).toBeVisible();
-      await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toHaveCount(0);
-      await expect(pages.page.getByRole('button', { name: 'Delete' })).toHaveCount(0);
+      await expect(animalsPages.notificationView.btnCopyAsNew).toHaveCount(0);
+      await expect(animalsPages.notificationView.btnDelete).toHaveCount(0);
       await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
     });
 
@@ -78,13 +78,13 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
 
     test('lands on the view page with the Submitted strip and reference', async ({ pages, animalsPages, journeyContext }) => {
       await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(journeyContext.referenceNumber)}$`));
-      await expect(animalsPages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Submitted');
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
       await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.referenceNumber);
     });
 
-    test('offers Copy as new and Delete on the read-only view', async ({ pages, animalsPages }) => {
-      await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toBeVisible();
-      await expect(pages.page.getByRole('button', { name: 'Delete' })).toBeVisible();
+    test('offers Copy as new and Delete on the read-only view', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.btnCopyAsNew).toBeVisible();
+      await expect(animalsPages.notificationView.btnDelete).toBeVisible();
       await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
     });
 

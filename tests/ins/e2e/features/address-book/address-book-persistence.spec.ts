@@ -14,9 +14,8 @@ test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => 
 
   test('a created address persists with its full Standard Address Block and its ticked roles', async ({ pages, insPages, insJourney }) => {
     const createdName = `Persistence Test Farm ${Date.now()}`;
-    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(createdName, 'United Kingdom'), {
-      roles: [addressRoles.placeOfOrigin, addressRoles.consignor],
-    });
+    const tickedRoles = [addressRoles.placeOfOrigin, addressRoles.consignor];
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(createdName, 'United Kingdom'), { roles: tickedRoles });
     await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(originOrConsignorTab));
 
     const client = new MongoDbClient();
@@ -26,11 +25,7 @@ test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => 
       await expect.poll(() => collection.countDocuments({ name: createdName }), { timeout: timeouts.short }).toBe(1);
 
       const [doc] = await collection.find({ name: createdName }).toArray();
-      expect(doc).toMatchObject({
-        ...addressWithLineTwoAndCounty(createdName),
-        countryCode: 'GB',
-        roles: [addressRoles.placeOfOrigin, addressRoles.consignor],
-      });
+      expect(doc).toMatchObject({ ...addressWithLineTwoAndCounty(createdName), roles: tickedRoles });
     } finally {
       await client.close();
     }

@@ -19,13 +19,10 @@ test.describe('Addresses are copied, not linked', () => {
         email: 'copied@example.co.uk',
       });
 
-      await animalsJourney.startNotification();
-      await animalsJourney.answerCommodity();
+      await animalsJourney.toPartyPicker('Consignor');
 
-      await animalsPages.overview.task('Roles and addresses').click();
       const consignorAddressLines = animalsPages.addresses.partyAddressLines('Consignor');
       const chosenAddressText = AnimalsAddressesPage.expectedAddressText({ ...seeded, country: 'United Kingdom' });
-      await animalsPages.addresses.addParty('Consignor').click();
       await animalsPages.consignorSelection.select(originalName);
       await animalsPages.consignorSelection.saveAndContinue.click();
       await expect(animalsPages.addresses.heading).toBeVisible();
@@ -77,11 +74,8 @@ test.describe('Addresses are copied, not linked', () => {
     };
     await addressBookApi.createAddress(record);
 
-    await animalsJourney.startNotification();
-    await animalsJourney.answerCommodity();
+    await animalsJourney.toPartyPicker('Consignor');
 
-    await animalsPages.overview.task('Roles and addresses').click();
-    await animalsPages.addresses.addParty('Consignor').click();
     await animalsPages.consignorSelection.select(record.name);
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();

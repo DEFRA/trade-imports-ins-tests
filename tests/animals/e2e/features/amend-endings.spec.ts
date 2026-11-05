@@ -7,7 +7,7 @@ const AMENDED_REFERENCE = 'AMENDED-REF';
 const AMEND = 'Amend';
 
 test.describe('Amendment page endings', () => {
-  test('a page opened from Overview while amending ends with Save and return and Save and continue, then Save and return to overview on its own line, with no cancel link, and Back goes to Overview', async ({
+  test('a page opened from Overview while amending ends with Save and return and Save and continue, then Save and return to overview on its own line, with Cancel amend and no Cancel and return to overview, and Back goes to Overview', async ({
     animalsPages,
     animalsSeededJourney,
   }) => {
@@ -65,7 +65,7 @@ test.describe('Amendment page endings', () => {
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Internal reference number')).toHaveText(AMENDED_REFERENCE);
   });
 
-  test('Save and continue while amending goes on as it does outside an amendment, not back to the review', async ({
+  test('Save and continue while amending goes to Overview, not back to the review', async ({
     pages,
     animalsPages,
     animalsSeededJourney,
@@ -149,7 +149,7 @@ test.describe('Amendment page endings', () => {
     await expect(pages.page).toHaveURL(/\/notification-view\?refused=1$/);
     await expect(animalsPages.notificationView.errorSummary).toBeVisible();
     await expect(animalsPages.notificationView.errorSummary).toContainText('There is a problem');
-    await expect(animalsPages.notificationView.errorSummaryLink('Complete arrival details')).toBeVisible();
+    await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText(['Complete arrival details']);
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
     await expect(animalsPages.declaration.heading).not.toBeVisible();
   });

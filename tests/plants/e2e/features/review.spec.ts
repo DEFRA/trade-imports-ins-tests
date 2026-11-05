@@ -235,7 +235,8 @@ test.describe('High-risk plants check and submit section', () => {
       const originalName = address.name;
       const renamed = `Renamed Holding ${randomUUID()}`;
 
-      await addressBookApi.updateAddress(address.id, renamedAndMovedNurseryAddress(renamed));
+      const movedAddress = renamedAndMovedNurseryAddress(renamed);
+      await addressBookApi.updateAddress(address.id, movedAddress);
 
       await plantsPages.placeOfDestination.open(reference);
       await expect(plantsPages.placeOfDestination.currentAddress).toContainText(originalName);
@@ -244,10 +245,10 @@ test.describe('High-risk plants check and submit section', () => {
       await plantsPages.notificationView.open(reference);
       const destination = plantsPages.notificationView.card('Place of destination');
       await expect(destination).toContainText(originalName);
-      await expect(destination).toContainText('Perth');
-      await expect(destination).toContainText('PH1 5EX');
+      await expect(destination).toContainText(address.townOrCity);
+      await expect(destination).toContainText(address.postcode);
       await expect(destination).not.toContainText(renamed);
-      await expect(destination).not.toContainText('Dundee');
+      await expect(destination).not.toContainText(movedAddress.townOrCity);
     },
   );
 
@@ -611,9 +612,10 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     addressBookApi,
   }) => {
     test.slow();
+    const rolesStoredInAnyCountry = [addressRoles.consignor];
     const { reference } = await plantsJourney.completeNotification(addressBookApi, {
       countryCode: 'United Kingdom',
-      roles: [addressRoles.consignor],
+      roles: rolesStoredInAnyCountry,
       name: `Invalid address (country "United Kingdom" is not a code) ${randomUUID()}`,
     });
     const error = 'Correct the address details for the place of destination';

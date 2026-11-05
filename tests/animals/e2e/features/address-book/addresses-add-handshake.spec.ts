@@ -239,7 +239,7 @@ test.describe('Add an address from the journey via INS', () => {
   }
 
   test(
-    'Save and select on the INS add page reached from the Consignee picker with Importer ticked saves the address holding the consignee and importer roles',
+    'The INS add page reached from the Consignee picker asks what else the address should be used for, offering Importer and Place of destination unticked, and with Importer ticked Save and select saves the address holding the consignee and importer roles',
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, animalsPages, insPages, addressBookApi }) => {
       const addPage = insPages.addressBookAdd;

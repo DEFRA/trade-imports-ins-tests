@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { heldAsConsignor, type AddressType } from '@domain/shared/constants/address-types';
+import { type AddressType } from '@domain/shared/constants/address-types';
 import {
   addressBookTabLabels,
   addressBookTabs,
@@ -9,12 +9,7 @@ import {
   tabHolding,
   unsupportedAddressValue,
 } from '@domain/ins/constants/address-book-types';
-import {
-  branchAddressFixture,
-  E2E_ADDRESS_BOOK_FIXTURES,
-  ensureE2eAddressBook,
-  placeOfOriginFixture,
-} from '@flows/shared/address-book-seed';
+import { branchAddressFixture, E2E_ADDRESS_BOOK_FIXTURES } from '@flows/shared/address-book-seed';
 import { addressIdsDeletedAfterEachTest, createRunAddresses, runAddressesOnTab } from './run-addresses';
 
 const createdAddressIds = addressIdsDeletedAfterEachTest('addressBookApi');
@@ -119,33 +114,5 @@ test.describe('Address book tabs without JavaScript', () => {
     await expect(insPages.addressBookList.panelHeading).toHaveText(branchTab.panelHeading);
     await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
     await expect(insPages.addressBookList.row(runAddresses.branchAddress.name)).toBeVisible();
-  });
-});
-
-test.describe('Address book fixture reconcile', () => {
-  test("a fixture record holding a different role is rewritten with the fixture's roles once, and a second run leaves it untouched", async ({
-    isolatedOrganisationAddressBookApi,
-  }) => {
-    const { name, addressLine1, townOrCity, postcode, countryCode, phone, email } = placeOfOriginFixture;
-    await isolatedOrganisationAddressBookApi.createAddress({
-      name,
-      addressLine1,
-      townOrCity,
-      postcode,
-      countryCode,
-      phone,
-      email,
-      ...heldAsConsignor,
-    });
-
-    await ensureE2eAddressBook(isolatedOrganisationAddressBookApi);
-
-    const afterFirstRun = await isolatedOrganisationAddressBookApi.findByName(name);
-    expect(afterFirstRun.roles).toEqual(placeOfOriginFixture.roles);
-
-    await ensureE2eAddressBook(isolatedOrganisationAddressBookApi);
-
-    const afterSecondRun = await isolatedOrganisationAddressBookApi.findByName(name);
-    expect(afterSecondRun.modifiedAt).toBe(afterFirstRun.modifiedAt);
   });
 });

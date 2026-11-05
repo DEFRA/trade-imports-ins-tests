@@ -55,12 +55,9 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
       });
     }
 
-    await animalsJourney.startNotification();
-    await animalsJourney.answerCommodity();
+    await animalsJourney.toPartyPicker('Consignor');
 
-    await animalsPages.overview.task('Roles and addresses').click();
     const consignorAddressLines = animalsPages.addresses.partyAddressLines('Consignor');
-    await animalsPages.addresses.addParty('Consignor').click();
 
     await expect(animalsPages.consignorSelection.resultsHeading).toBeVisible();
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
@@ -106,10 +103,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     animalsJourney,
     animalsPages,
   }) => {
-    await animalsJourney.startNotification();
-    await animalsJourney.answerCommodity();
-    await animalsPages.overview.task('Roles and addresses').click();
-    await animalsPages.addresses.addParty('Consignor').click();
+    await animalsJourney.toPartyPicker('Consignor');
 
     await animalsPages.consignorSelection.saveAndContinue.click();
 

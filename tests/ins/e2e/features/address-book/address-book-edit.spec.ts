@@ -250,7 +250,9 @@ test.describe('Address book edit', () => {
 
       await expect(insPages.addressBookEdit.errorSummary).toBeVisible();
       await expect(insPages.addressBookEdit.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.countryRequired)).toBeVisible();
-      await expect(insPages.addressBookEdit.selectCountry).toHaveAccessibleDescription(/Select a country/);
+      await expect(insPages.addressBookEdit.selectCountry).toHaveAccessibleDescription(
+        new RegExp(ADDRESS_FORM_VALIDATION_MESSAGES.countryRequired),
+      );
       expect((await addressBookApi.getAddress(created.id)).countryCode).toBe(UNOFFERED_COUNTRY_CODE);
     });
   });

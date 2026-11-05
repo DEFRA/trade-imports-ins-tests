@@ -38,6 +38,17 @@ export const placeOfOriginFixture: AddressBookRequest = {
   ...heldAsPlaceOfOrigin,
 };
 
+export const consignorFixture: AddressBookRequest = {
+  name: CONSIGNOR_NAME,
+  addressLine1: '43 East Hague Extension',
+  townOrCity: 'Bern',
+  postcode: '30055',
+  countryCode: 'CH',
+  phone: '+44 1234 567890',
+  email: 'contact@example.com',
+  ...heldAsConsignor,
+};
+
 /** The shared address-book records, in creation order. */
 export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookRequest[] = [
   {
@@ -111,16 +122,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookRequest[] = [
     email: 'contact@example.com',
     ...heldAsConsignor,
   },
-  {
-    name: CONSIGNOR_NAME,
-    addressLine1: '43 East Hague Extension',
-    townOrCity: 'Bern',
-    postcode: '30055',
-    countryCode: 'CH',
-    phone: '+44 1234 567890',
-    email: 'contact@example.com',
-    ...heldAsConsignor,
-  },
+  consignorFixture,
   {
     name: DESTINATION_NAME,
     addressLine1: '18 Dockside Road',

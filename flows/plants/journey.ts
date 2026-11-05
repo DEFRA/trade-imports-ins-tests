@@ -78,7 +78,7 @@ type NotificationOptions = {
   contact?: boolean;
   /** The country the minted record carries. */
   countryCode?: string;
-  /** The roles the minted record holds. A receiving role needs countryCode 'GB'. */
+  /** The roles the minted record holds. */
   roles?: AddressRole[];
   /** The minted record's name. Must be unique: the address book is shared and never wiped. */
   name?: string;
