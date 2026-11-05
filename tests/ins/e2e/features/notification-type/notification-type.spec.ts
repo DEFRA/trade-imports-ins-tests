@@ -1,5 +1,6 @@
 import { WHOLE_REFERENCE_NUMBER_PATTERN as ANIMALS_REFERENCE } from '@domain/animals/constants/reference-number-patterns';
 import { WHOLE_REFERENCE_NUMBER_PATTERN as PLANTS_REFERENCE } from '@domain/plants/constants/reference-number-patterns';
+import type { InsNotificationTypePage } from '@page-objects/ins/notification-type-page';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { recordMainFrameNavigationPaths } from '@utils/playwright/main-frame-navigations';
@@ -23,6 +24,16 @@ const SIGN_IN_PATH = '/auth/sign-in';
 const SIGN_IN_CALLBACK_PATH = '/auth/sign-in-oidc';
 
 const originOf = (envVar: Parameters<typeof requireBaseUrl>[0]): string => new URL(requireBaseUrl(envVar)).origin;
+
+const expectOptionsListedInOrderAndUnselected = async (notificationTypePage: InsNotificationTypePage) => {
+  await expect(notificationTypePage.options).toHaveCount(OPTIONS.length);
+  expect(await notificationTypePage.options.evaluateAll((radios) => radios.map((radio) => radio.getAttribute('value')))).toEqual(
+    OPTIONS.map(({ value }) => value),
+  );
+  for (const { label } of OPTIONS) {
+    await expect(notificationTypePage.option(label)).not.toBeChecked();
+  }
+};
 
 const recordHandOverNavigations = (page: Page) => {
   const animalsOrigin = originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
@@ -59,13 +70,7 @@ test.describe('INS notification type question', { tag: ['@animals-frontend', '@p
 
     await expect(pages.page).toHaveTitle(QUESTION_TITLE);
     await expect(notificationTypePage.caption).toHaveText('About the consignment');
-    await expect(notificationTypePage.options).toHaveCount(OPTIONS.length);
-    expect(await notificationTypePage.options.evaluateAll((radios) => radios.map((radio) => radio.getAttribute('value')))).toEqual(
-      OPTIONS.map(({ value }) => value),
-    );
-    for (const { label } of OPTIONS) {
-      await expect(notificationTypePage.option(label)).not.toBeChecked();
-    }
+    await expectOptionsListedInOrderAndUnselected(notificationTypePage);
     await expect(notificationTypePage.hints).toHaveCount(0);
     await expect(notificationTypePage.buttons).toHaveCount(1);
     await expect(pages.page.locator('main').getByRole('link')).toHaveCount(0);
@@ -160,4 +165,21 @@ test.describe('INS notification type question', { tag: ['@animals-frontend', '@p
       expect(animalsNavigations).toEqual([]);
     });
   }
+});
+
+test.describe('INS home Create new', () => {
+  test('Create new on the INS home links to the question on the INS origin and shows every option unselected', async ({
+    pages,
+    insPages,
+  }) => {
+    const notificationTypePage = insPages.notificationType;
+    await insPages.dashboard.open();
+
+    await expect(insPages.dashboard.btnCreateNew).toHaveAttribute('href', notificationTypePage.expectedUrl);
+    await insPages.dashboard.btnCreateNew.click();
+
+    await expect(pages.page).toHaveURL(`${originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL')}${notificationTypePage.expectedUrl}`);
+    await expect(notificationTypePage.heading).toBeVisible();
+    await expectOptionsListedInOrderAndUnselected(notificationTypePage);
+  });
 });

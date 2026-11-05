@@ -17,6 +17,10 @@ export class InsDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: 'Search', exact: true });
   }
 
+  get btnCreateNew(): Locator {
+    return this.page.getByRole('button', { name: 'Create new', exact: true });
+  }
+
   get noSearchResults(): Locator {
     return this.page.getByTestId('dashboard-no-results');
   }
