@@ -4,7 +4,7 @@ import {
   ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER,
   ADDRESS_FORM_VALIDATION_MESSAGES,
 } from '@domain/ins/constants/address-form';
-import { addressRoles, rolesOf } from '@domain/shared/constants/address-types';
+import { addressRoles, rolesFieldOf } from '@domain/shared/constants/address-types';
 import { expectAddressBookList } from './expect-address-book-list';
 import { expectOtherOrganisationAddressReturnsToList } from './expect-other-organisation-address-returns-to-list';
 import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
@@ -64,7 +64,7 @@ test.describe('Address book edit', () => {
     await expect(insPages.addressBookList.successBanner).toContainText('address updated');
 
     const stored = await addressBookApi.getAddress(created.id);
-    expect(rolesOf(stored)).toEqual(heldRoles);
+    expect(rolesFieldOf(stored)).toEqual(heldRoles);
   });
 
   test('the address book links the new name to the edited address', async ({ insPages, addressBookApi }) => {
@@ -101,7 +101,7 @@ test.describe('Address book edit', () => {
 
     await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.fieldLabels).toHaveText(ADDRESS_FORM_FIELD_LABELS_IN_ORDER);
+    await expect(insPages.addressBookEdit.formLabels).toHaveText(ADDRESS_FORM_FIELD_LABELS_IN_ORDER);
   });
 
   test('after a refused save and Cancel, the edit page opens again with no errors and the stored name', async ({

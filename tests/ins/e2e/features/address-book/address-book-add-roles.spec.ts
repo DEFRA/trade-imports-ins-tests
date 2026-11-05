@@ -1,49 +1,20 @@
 import { test, expect } from '@fixtures';
-import { timeouts } from '@config/timeouts';
 import { expectRolesOptions } from '@utils/roles-options-assertions';
 import { ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
-import { addressTypes, addressRoles } from '@domain/shared/constants/address-types';
+import { addressTypes } from '@domain/shared/constants/address-types';
 import {
   addressBookTabs,
   addressTypeLabels,
   addressTypesRequiringUnitedKingdom,
+  rolesLabelOf,
   rolesQuestion,
-  rolesQuestionLabels,
   rolesQuestionLegends,
   rolesQuestionOptions,
 } from '@domain/ins/constants/address-book-types';
 import { expectAbove } from './expect-above';
-import { rolesLabelOf } from './stamped-addresses';
 
 const UNITED_KINGDOM = 'United Kingdom';
-
-test.describe('Adding an address with its roles', () => {
-  test('an address saved with Consignor ticked is found by searching Consignor, and one saved with only Place of origin ticked is not', async ({
-    insPages,
-    insJourney,
-  }) => {
-    const stamp = Date.now();
-    const consignorName = `Label Role Farm ${stamp}`;
-    const placeOfOriginName = `Label Role Farm ${stamp} Other`;
-    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(consignorName, UNITED_KINGDOM), {
-      roles: [addressRoles.consignor],
-    });
-    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(placeOfOriginName, UNITED_KINGDOM), {
-      roles: [addressRoles.placeOfOrigin],
-    });
-
-    await expect(async () => {
-      await insPages.addressBookList.search(rolesQuestionLabels[addressRoles.consignor], { submitWith: 'button' });
-
-      expect(await insPages.addressBookList.followResultPagesUntilRowShows(consignorName)).toBe(true);
-    }).toPass({ timeout: timeouts.medium });
-
-    await insPages.addressBookList.search(rolesQuestionLabels[addressRoles.consignor], { submitWith: 'button' });
-
-    expect(await insPages.addressBookList.followResultPagesUntilRowShows(placeOfOriginName)).toBe(false);
-  });
-});
 
 test.describe('The Country select on the add form', () => {
   for (const addressType of addressTypesRequiringUnitedKingdom) {
@@ -55,7 +26,7 @@ test.describe('The Country select on the add form', () => {
     });
   }
 
-  test(`an ${addressTypeLabels[addressTypes.originOrConsignor]} address opens on Select a country first with United Kingdom selected`, async ({
+  test(`an ${addressTypeLabels[addressTypes.originOrConsignor]} address lists Select a country first and opens with United Kingdom selected`, async ({
     insPages,
     insJourney,
   }) => {
@@ -68,11 +39,11 @@ test.describe('The Country select on the add form', () => {
 
 for (const tab of addressBookTabs) {
   const { addressType } = tab;
-  const label = addressTypeLabels[addressType];
+  const addressTypeLabel = addressTypeLabels[addressType];
   const offeredRoles = rolesQuestionOptions[addressType];
   const legend = rolesQuestionLegends[addressType];
 
-  test.describe(`Adding a ${label} address`, () => {
+  test.describe(`Adding a ${addressTypeLabel} address`, () => {
     test('opens the form with only the address and contact text fields, a section break, and the roles question with its legend, hint and options', async ({
       insPages,
       insJourney,
@@ -99,7 +70,7 @@ for (const tab of addressBookTabs) {
     }) => {
       const addPage = insPages.addressBookAdd;
       await insJourney.toAddressForm({ addressType });
-      await addPage.fill(addFormAddressWithLineTwoAndCounty(`No Role ${label} ${Date.now()}`, UNITED_KINGDOM));
+      await addPage.fill(addFormAddressWithLineTwoAndCounty(`No Role ${addressTypeLabel} ${Date.now()}`, UNITED_KINGDOM));
 
       await addPage.saveAndContinue();
 
@@ -112,7 +83,10 @@ for (const tab of addressBookTabs) {
     test('saving with an invalid field and no role shows only the field error', async ({ insPages, insJourney }) => {
       const addPage = insPages.addressBookAdd;
       await insJourney.toAddressForm({ addressType });
-      await addPage.fill({ ...addFormAddressWithLineTwoAndCounty(`Invalid Field ${label} ${Date.now()}`, UNITED_KINGDOM), name: '' });
+      await addPage.fill({
+        ...addFormAddressWithLineTwoAndCounty(`Invalid Field ${addressTypeLabel} ${Date.now()}`, UNITED_KINGDOM),
+        name: '',
+      });
 
       await addPage.saveAndContinue();
 
@@ -126,7 +100,7 @@ for (const tab of addressBookTabs) {
       insJourney,
       addressBookApi,
     }) => {
-      const name = `All Roles ${label} ${Date.now()}`;
+      const name = `All Roles ${addressTypeLabel} ${Date.now()}`;
 
       await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(name, UNITED_KINGDOM), { addressType, roles: offeredRoles });
 

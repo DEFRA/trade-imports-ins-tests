@@ -6,34 +6,38 @@ import {
   originOrConsignorTab,
   roleOptionLabels,
   roleFilterPlaceholder,
+  rolesLabelOf,
+  rolesQuestionLabels,
 } from '@domain/ins/constants/address-book-types';
 import { timeouts } from '@config/timeouts';
+import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import {
   addressIdsDeletedAfterEachTest,
   createAddressHolding,
-  createStamped,
-  createStampedAndFilterListByRole,
-  stampedAddressesOnTab,
-  rolesLabelOf,
-} from './stamped-addresses';
+  createRunAddresses,
+  createRunAddressesAndFilterListByRole,
+  runAddressesOnTab,
+} from './run-addresses';
 
 const createdAddressIds = addressIdsDeletedAfterEachTest('addressBookApi');
+
+const UNITED_KINGDOM = 'United Kingdom';
 
 const roleFilterTermOf = (scenario: string) => `Rolefilter ${scenario} ${Date.now()}`;
 
 test.describe('Address book role filter API', () => {
   const isolatedOrganisationAddressIds = addressIdsDeletedAfterEachTest('isolatedOrganisationAddressBookApi');
 
-  test('listing by a role returns exactly the stamped addresses holding it, and none for a role nothing holds', async ({
+  test('listing by a role returns exactly the test addresses holding it, and none for a role nothing holds', async ({
     isolatedOrganisationAddressBookApi,
   }) => {
-    const { searchTerm, stamped } = await createStamped(isolatedOrganisationAddressBookApi, isolatedOrganisationAddressIds);
+    const { searchTerm, runAddresses } = await createRunAddresses(isolatedOrganisationAddressBookApi, isolatedOrganisationAddressIds);
 
     for (const role of Object.values(addressRoles)) {
       const listed = await isolatedOrganisationAddressBookApi.listAddresses(searchTerm, { roles: [role] });
 
       expect(listed.map(({ name }) => name).sort()).toEqual(
-        Object.values(stamped)
+        Object.values(runAddresses)
           .filter(({ roles }) => roles.includes(role))
           .map(({ name }) => name)
           .sort(),
@@ -160,10 +164,10 @@ test.describe('Address book role filter', () => {
     addressBookApi,
     page,
   }) => {
-    const { searchTerm, stamped } = await createStamped(addressBookApi, createdAddressIds);
+    const { searchTerm, runAddresses } = await createRunAddresses(addressBookApi, createdAddressIds);
     await insPages.addressBookList.open();
     await insPages.addressBookList.search(searchTerm, { submitWith: 'button' });
-    const originAddresses = stampedAddressesOnTab(stamped, originOrConsignorTab);
+    const originAddresses = runAddressesOnTab(runAddresses, originOrConsignorTab);
     const resultsLine = `Showing 1-${originAddresses.length} of ${originAddresses.length}`;
     await expect(insPages.addressBookList.resultsLine).toHaveText(resultsLine);
     const urlBeforeChoosing = page.url();
@@ -180,22 +184,32 @@ test.describe('Address book role filter', () => {
     }
   });
 
-  test('the tab stays selected after a role filter is submitted, and following another tab keeps the search, resets the role filter and lists that tab', async ({
+  test('the tab stays selected after a role filter is submitted, listing only the address holding the role', async ({
     insPages,
     addressBookApi,
   }) => {
-    const { searchTerm, stamped } = await createStampedAndFilterListByRole(
+    const { runAddresses } = await createRunAddressesAndFilterListByRole(
       { insPages, api: addressBookApi, createdAddressIds },
       addressRoles.consignor,
     );
 
     await expect(insPages.addressBookList.selectedTab).toHaveText(originOrConsignorTab.label);
     await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
-    await expect(insPages.addressBookList.row(stamped.consignor.name)).toBeVisible();
+    await expect(insPages.addressBookList.row(runAddresses.consignor.name)).toBeVisible();
+  });
+
+  test('following another tab after a role filter keeps the search, resets the role filter and lists that tab', async ({
+    insPages,
+    addressBookApi,
+  }) => {
+    const { searchTerm, runAddresses } = await createRunAddressesAndFilterListByRole(
+      { insPages, api: addressBookApi, createdAddressIds },
+      addressRoles.consignor,
+    );
 
     await insPages.addressBookList.followTab(destinationConsigneeOrImporterTab);
 
-    const destinationAddresses = stampedAddressesOnTab(stamped, destinationConsigneeOrImporterTab);
+    const destinationAddresses = runAddressesOnTab(runAddresses, destinationConsigneeOrImporterTab);
     await expect(insPages.addressBookList.selectedTab).toHaveText(destinationConsigneeOrImporterTab.label);
     await insPages.addressBookList.filterSummary.click();
     await expect(insPages.addressBookList.inputSearch).toHaveValue(searchTerm);
@@ -206,6 +220,31 @@ test.describe('Address book role filter', () => {
     for (const { name, rolesLabel } of destinationAddresses) {
       await expect(insPages.addressBookList.rolesCell(name)).toHaveText(rolesLabel);
     }
+  });
+
+  test('an address saved with Consignor ticked is found by searching Consignor, and one saved with only Place of origin ticked is not', async ({
+    insPages,
+    insJourney,
+  }) => {
+    const nameSuffix = Date.now();
+    const consignorName = `Label Role Farm ${nameSuffix}`;
+    const placeOfOriginName = `Label Role Farm ${nameSuffix} Other`;
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(consignorName, UNITED_KINGDOM), {
+      roles: [addressRoles.consignor],
+    });
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(placeOfOriginName, UNITED_KINGDOM), {
+      roles: [addressRoles.placeOfOrigin],
+    });
+
+    await expect(async () => {
+      await insPages.addressBookList.search(rolesQuestionLabels[addressRoles.consignor], { submitWith: 'button' });
+
+      expect(await insPages.addressBookList.followResultPagesUntilRowShows(consignorName)).toBe(true);
+    }).toPass({ timeout: timeouts.medium });
+
+    await insPages.addressBookList.search(rolesQuestionLabels[addressRoles.consignor], { submitWith: 'button' });
+
+    expect(await insPages.addressBookList.followResultPagesUntilRowShows(placeOfOriginName)).toBe(false);
   });
 
   test('a search for a role label with a role filter chosen lists the address holding that role, found on whichever result page it falls', async ({
@@ -236,13 +275,13 @@ test.describe('Address book role filter without JavaScript', () => {
     insPages,
     addressBookApi,
   }) => {
-    const { stamped } = await createStampedAndFilterListByRole(
+    const { runAddresses } = await createRunAddressesAndFilterListByRole(
       { insPages, api: addressBookApi, createdAddressIds },
       addressRoles.consignor,
     );
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
     await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
-    await expect(insPages.addressBookList.row(stamped.consignor.name)).toBeVisible();
+    await expect(insPages.addressBookList.row(runAddresses.consignor.name)).toBeVisible();
   });
 });

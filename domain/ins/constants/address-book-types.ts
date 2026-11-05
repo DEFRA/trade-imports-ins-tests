@@ -20,6 +20,8 @@ const textsOfEachRole = (textOf: (texts: RoleTexts) => string): Record<AddressRo
 
 export const roleColumnLabels = textsOfEachRole(({ columnLabel }) => columnLabel);
 
+export const rolesLabelOf = (roles: readonly AddressRole[]): string => roles.map((role) => roleColumnLabels[role]).join(', ');
+
 export const roleOptionLabels = textsOfEachRole(({ optionLabel }) => optionLabel);
 
 export const rolesQuestionLabels = textsOfEachRole(({ formLabel }) => formLabel);
@@ -55,14 +57,6 @@ export const addressBookTabs: readonly AddressBookTab[] = [
 ];
 
 export const [originOrConsignorTab, destinationConsigneeOrImporterTab, branchTab] = addressBookTabs;
-
-const tabsByAddressType: Record<AddressType, AddressBookTab> = {
-  [addressTypes.originOrConsignor]: originOrConsignorTab,
-  [addressTypes.destinationConsigneeOrImporter]: destinationConsigneeOrImporterTab,
-  [addressTypes.branch]: branchTab,
-};
-
-export const tabOf = (addressType: AddressType): AddressBookTab => tabsByAddressType[addressType];
 
 export const tabHolding = (role: AddressRole): AddressBookTab => {
   const tab = addressBookTabs.find(({ roleFilterOptions }) => roleFilterOptions.includes(role));

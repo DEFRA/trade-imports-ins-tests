@@ -67,7 +67,7 @@ export class BasePage {
     return this.errorSummary.getByRole('link');
   }
 
-  /** The error summary's link to a field: a string matches the whole message, a pattern any part of it. */
+  /** The error summary's link with this message: a string matches the whole message, a pattern any part of it. */
   errorSummaryLink(message: string | RegExp): Locator {
     return this.errorSummary.getByRole('link', { name: message, exact: true });
   }

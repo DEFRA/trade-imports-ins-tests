@@ -17,20 +17,20 @@ export const addressRoles = {
 
 export type AddressRole = (typeof addressRoles)[keyof typeof addressRoles];
 
-export interface AddressRoles {
+export interface HeldRoles {
   roles: AddressRole[];
 }
 
-export const rolesOf = ({ roles }: { roles?: AddressRole[] }) => ({ roles });
+export const rolesFieldOf = ({ roles }: { roles?: AddressRole[] }) => ({ roles });
 
-export const heldAsPlaceOfOrigin: AddressRoles = { roles: [addressRoles.placeOfOrigin] };
+export const heldAsPlaceOfOrigin: HeldRoles = { roles: [addressRoles.placeOfOrigin] };
 
-export const heldAsConsignor: AddressRoles = { roles: [addressRoles.consignor] };
+export const heldAsConsignor: HeldRoles = { roles: [addressRoles.consignor] };
 
-export const heldAsPlaceOfDestination: AddressRoles = { roles: [addressRoles.placeOfDestination] };
+export const heldAsPlaceOfDestination: HeldRoles = { roles: [addressRoles.placeOfDestination] };
 
-export const heldAsConsignee: AddressRoles = { roles: [addressRoles.consignee] };
+export const heldAsConsignee: HeldRoles = { roles: [addressRoles.consignee] };
 
-export const heldAsImporter: AddressRoles = { roles: [addressRoles.importer] };
+export const heldAsImporter: HeldRoles = { roles: [addressRoles.importer] };
 
-export const heldAsBranchAddress: AddressRoles = { roles: [addressRoles.branchAddress] };
+export const heldAsBranchAddress: HeldRoles = { roles: [addressRoles.branchAddress] };

@@ -4,7 +4,8 @@ import { addressFormCountryNames } from '@resources/reference-data/reference-dat
 import { skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
 import { expectRolesOptions } from '@utils/roles-options-assertions';
 import type { AnimalsJourney } from '@flows/animals/journey';
-import { type InsAddressBookAddPage, type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
+import { type InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
+import { type AddressDetails } from '@page-objects/ins/address-book/form-page';
 import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
 import { journeyRolesQuestion, rolesQuestionLabels } from '@domain/ins/constants/address-book-types';
 import {
@@ -14,15 +15,15 @@ import {
   heldAsImporter,
   heldAsPlaceOfDestination,
   heldAsPlaceOfOrigin,
-  rolesOf,
-  type AddressRoles,
+  rolesFieldOf,
+  type HeldRoles,
 } from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage, type PartyRole } from '@page-objects/animals/addresses-page';
 import { requireBaseUrl } from '@page-objects/shared/base-page';
 
 const PARTY_ROLES: readonly PartyRole[] = ['Place of origin', 'Consignor', 'Consignee', 'Importer', 'Place of destination'];
 
-const ROLES_HELD_BY_PARTY: Record<PartyRole, AddressRoles> = {
+const ROLES_HELD_BY_PARTY: Record<PartyRole, HeldRoles> = {
   'Place of origin': heldAsPlaceOfOrigin,
   Consignor: heldAsConsignor,
   Consignee: heldAsConsignee,
@@ -30,7 +31,7 @@ const ROLES_HELD_BY_PARTY: Record<PartyRole, AddressRoles> = {
   'Place of destination': heldAsPlaceOfDestination,
 };
 
-function newAddressFor(role: PartyRole): NewAddressDetails {
+function newAddressFor(role: PartyRole): AddressDetails {
   const unique = `${Date.now()}-${randomUUID().slice(0, 8)}`;
   return {
     name: `Handshake ${role} ${unique}`,
@@ -43,7 +44,7 @@ function newAddressFor(role: PartyRole): NewAddressDetails {
   };
 }
 
-function addedBannerText(details: NewAddressDetails): string {
+function addedBannerText(details: AddressDetails): string {
   return `${details.name} address added to your address book`;
 }
 
@@ -51,7 +52,7 @@ async function arriveOnInsAddPageAndFill(
   animalsJourney: AnimalsJourney,
   addPage: InsAddressBookAddPage,
   role: PartyRole,
-  details: NewAddressDetails,
+  details: AddressDetails,
 ): Promise<void> {
   await animalsJourney.toInsAddAddressFromPicker(addPage, role);
   await addPage.fill(details);
@@ -90,7 +91,7 @@ test.describe('Add an address from the journey via INS', () => {
         await expect(animalsPages.addresses.changeParty(role)).toBeVisible();
 
         const saved = await addressBookApi.findByName(details.name);
-        expect(rolesOf(saved)).toEqual(ROLES_HELD_BY_PARTY[role]);
+        expect(rolesFieldOf(saved)).toEqual(ROLES_HELD_BY_PARTY[role]);
       },
     );
 
@@ -197,7 +198,7 @@ test.describe('Add an address from the journey via INS', () => {
       await expect(addPage.notificationReference).toHaveText(journeyContext.referenceNumber);
       await expect(addPage.sectionHeading('Address')).toBeVisible();
       await expect(addPage.sectionHeading('Contact details')).toBeVisible();
-      await expect(addPage.fieldLabels).toHaveText([...ADDRESS_FORM_FIELD_LABELS_IN_ORDER, rolesQuestionLabels.PLACE_OF_ORIGIN]);
+      await expect(addPage.formLabels).toHaveText([...ADDRESS_FORM_FIELD_LABELS_IN_ORDER, rolesQuestionLabels.PLACE_OF_ORIGIN]);
       await expect(addPage.inputName).not.toHaveAttribute('autocomplete');
       await expect(addPage.inputAddressLine1).toHaveAttribute('autocomplete', 'address-line1');
       await expect(addPage.inputAddressLine2).toHaveAttribute('autocomplete', 'address-line2');
@@ -256,7 +257,7 @@ test.describe('Add an address from the journey via INS', () => {
 
       await expect(animalsPages.addresses.heading).toBeVisible();
       const saved = await addressBookApi.findByName(details.name);
-      expect(rolesOf(saved)).toEqual({
+      expect(rolesFieldOf(saved)).toEqual({
         roles: [addressRoles.consignee, addressRoles.importer],
       });
     },

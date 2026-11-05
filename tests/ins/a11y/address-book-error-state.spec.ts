@@ -17,7 +17,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
   test('the add address form has no accessibility violations when errors are shown', async ({ insPages, insJourney, runA11yScan }) => {
     await insJourney.toAddressForm();
-    await insPages.addressBookAdd.heading.waitFor();
     await insPages.addressBookAdd.fill(addressDetailsMissingRequiredFields);
     await insPages.addressBookAdd.saveAndContinue();
     await expect(insPages.addressBookAdd.errorSummary).toBeVisible();

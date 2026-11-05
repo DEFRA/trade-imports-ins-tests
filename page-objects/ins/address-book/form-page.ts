@@ -23,13 +23,11 @@ export abstract class InsAddressBookFormPage extends BasePage {
     return this.page.getByRole('heading', { level: 2, name, exact: true });
   }
 
-  /** The form's text inputs in page order. */
   get textboxes(): Locator {
     return this.page.getByRole('main').getByRole('textbox');
   }
 
-  /** The label of every field on the form, in page order. */
-  get fieldLabels(): Locator {
+  get formLabels(): Locator {
     return this.page.getByRole('main').locator('form label');
   }
 
