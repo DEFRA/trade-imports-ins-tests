@@ -1,3 +1,4 @@
+import { escapeRegex } from '@page-objects/shared/escape-regex';
 import { test, expect } from '@fixtures';
 import { addressTypes, addressRoles } from '@domain/shared/constants/address-types';
 import { addressTypeOptions, addressTypeQuestion } from '@domain/ins/constants/address-book-types';
@@ -29,7 +30,7 @@ test.describe('Choosing an address type before adding an address', () => {
     await insJourney.toAddressTypeFromList();
 
     const typePage = insPages.addressBookAddressType;
-    await expect(pages.page).toHaveURL(new RegExp(`${typePage.expectedUrl}\\?start=true$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${escapeRegex(typePage.expectedUrl)}\\?start=true$`));
     await expect(typePage.caption).toBeVisible();
     await expect(typePage.heading).toBeVisible();
     await expect(typePage.radios).toHaveCount(addressTypeOptions.length);
@@ -151,7 +152,7 @@ test.describe('Choosing an address type before adding an address', () => {
   test('opening the add form with no type chosen lands on Choose an address type', async ({ pages, insPages }) => {
     await insPages.addressBookAdd.open();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookAddressType.expectedUrl}$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${escapeRegex(insPages.addressBookAddressType.expectedUrl)}$`));
     await expect(insPages.addressBookAddressType.heading).toBeVisible();
   });
 });

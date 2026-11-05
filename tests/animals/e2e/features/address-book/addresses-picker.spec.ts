@@ -85,7 +85,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
 
     const olderThanPageOne = animalsPages.consignorSelection.party(olderThanPageOneName);
     await expect(olderThanPageOne).toHaveCount(0);
-    await animalsPages.consignorSelection.followNextUntilListed(olderThanPageOneName);
+    await animalsPages.consignorSelection.followNextPageUntilShown(olderThanPageOne);
     await expect(olderThanPageOne).toBeVisible();
 
     await animalsPages.consignorSelection.party(olderThanPageOneName).check();

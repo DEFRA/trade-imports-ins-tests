@@ -1,17 +1,23 @@
 import { test, expect } from '@fixtures';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
+import { addressRoles } from '@domain/shared/constants/address-types';
+import { originOrConsignorTab } from '@domain/ins/constants/address-book-types';
 
 test.describe('Security scan (ins)', { tag: '@active' }, () => {
   test('routes the address book through the ZAP proxy', async ({ pages, insPages, insJourney, addressBookApi }) => {
     test.slow();
     await insPages.addressBookList.open();
 
-    await expect(pages.page).toHaveURL(insPages.addressBookList.listUrl);
+    await expect(pages.page).toHaveURL(insPages.addressBookList.listUrlPattern);
     await expect(insPages.addressBookList.heading).toBeVisible();
 
     const name = `Security Scan Farm ${Date.now()}`;
     const address = addFormAddressWithLineTwoAndCounty(name, 'United Kingdom');
     await insJourney.addAddressFromList(address);
+    await expect(insPages.addressBookList.row(name)).toBeVisible();
+
+    await insPages.addressBookList.followTab(originOrConsignorTab);
+    await insPages.addressBookList.filter({ term: name, role: addressRoles.placeOfOrigin, submitWith: 'button' });
     await expect(insPages.addressBookList.row(name)).toBeVisible();
 
     const { id } = await addressBookApi.findByName(name);

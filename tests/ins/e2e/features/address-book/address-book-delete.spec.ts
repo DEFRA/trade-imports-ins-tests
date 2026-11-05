@@ -1,3 +1,4 @@
+import { escapeRegex } from '@page-objects/shared/escape-regex';
 import { test, expect } from '@fixtures';
 import { COLD_START } from '@fixtures/auth-state';
 import { createInsPages } from '@page-objects';
@@ -54,7 +55,7 @@ test.describe('Address book delete', () => {
 
       await insPages.addressBookDelete.cancel();
 
-      await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookView.expectedUrl(created.id)}$`));
+      await expect(pages.page).toHaveURL(new RegExp(`${escapeRegex(insPages.addressBookView.expectedUrl(created.id))}$`));
       await expect(insPages.addressBookView.heading(address.name)).toBeVisible();
       expect((await addressBookApi.getAddress(created.id)).deleted).toBe(false);
       await insPages.addressBookList.open();

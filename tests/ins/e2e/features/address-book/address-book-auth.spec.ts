@@ -1,3 +1,4 @@
+import { escapeRegex } from '@page-objects/shared/escape-regex';
 import { test, expect } from '@fixtures';
 import { COLD_START } from '@fixtures/auth-state';
 
@@ -15,7 +16,7 @@ test.describe('Authentication (ins)', { tag: '@auth' }, () => {
 
   test('allows signing into a page past the address book landing page', async ({ pages, insPages }) => {
     await pages.signIn.signIn();
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookAddressType.expectedUrl}$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${escapeRegex(insPages.addressBookAddressType.expectedUrl)}$`));
     await expect(insPages.addressBookAddressType.heading).toBeVisible();
   });
 });

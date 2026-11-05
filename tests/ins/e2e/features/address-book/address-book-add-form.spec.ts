@@ -1,3 +1,4 @@
+import { escapeRegex } from '@page-objects/shared/escape-regex';
 import { test, expect } from '@fixtures';
 import { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
@@ -40,12 +41,12 @@ test.describe('The add-details form for an address entered by hand', () => {
   }) => {
     await insJourney.toAddressFormFromList();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookAdd.expectedUrl}$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${escapeRegex(insPages.addressBookAdd.expectedUrl)}$`));
     await expect(insPages.addressBookAdd.heading).toBeVisible();
 
     await insPages.addressBookAdd.linkBack.click();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookAddressType.expectedUrl}$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${escapeRegex(insPages.addressBookAddressType.expectedUrl)}$`));
     await expect(insPages.addressBookAddressType.heading).toBeVisible();
   });
 

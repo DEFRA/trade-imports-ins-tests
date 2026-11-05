@@ -1,3 +1,4 @@
+import { escapeRegex } from '@page-objects/shared/escape-regex';
 import { test, expect, type PageFixtures } from '@fixtures';
 import { expectSearchedListLinks, expectNoMatchesListed } from './expect-address-book-list';
 import { destinationConsigneeOrImporterTab, originOrConsignorTab, roleOptionLabels } from '@domain/ins/constants/address-book-types';
@@ -73,7 +74,7 @@ test.describe('Address book list', () => {
 
     await insPages.addressBookList.linkClearSearch.click();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}\\?`));
+    await expect(pages.page).toHaveURL(new RegExp(`${escapeRegex(insPages.addressBookList.expectedUrl)}\\?`));
     expect(Object.fromEntries(new URL(pages.page.url()).searchParams)).toEqual({ addressType, role: addressRoles.importer });
     await expect(insPages.addressBookList.selectedTab).toHaveText(destinationConsigneeOrImporterTab.label);
     await insPages.addressBookList.filterSummary.click();
@@ -189,7 +190,7 @@ test.describe('Address book list', () => {
 
     await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(name, 'France'));
 
-    await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrl(originOrConsignorTab));
+    await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(originOrConsignorTab));
     await expect(
       insPages.addressBookList.successBanner.getByText(`${name} address added to your address book`, { exact: true }),
     ).toBeVisible();

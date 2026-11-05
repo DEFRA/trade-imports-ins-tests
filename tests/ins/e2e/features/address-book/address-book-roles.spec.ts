@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
-import type { AddressBookEntry } from '@adapters/http/address-book-api-client';
+import type { AddressBookRequest } from '@adapters/http/address-book-api-client';
 import { traderAddress } from '@domain/ins/constants/trader-address';
 import { addressRoles, type AddressRole } from '@domain/shared/constants/address-types';
-import { unsupportedAddressValue } from '@domain/ins/constants/address-book-types';
+import { destinationConsigneeOrImporterTab, unsupportedAddressValue } from '@domain/ins/constants/address-book-types';
 import { expectedValidationRefusalOf } from './expected-api-refusal';
 
 type RefusedField = 'roles' | 'countryCode';
@@ -12,13 +12,11 @@ const expectValidationRefusalNaming = async (pending: Promise<unknown>, field: R
   expect(Object.keys(body.errors)).toEqual([field]);
 };
 
-const withoutRoles = (entry: AddressBookEntry): AddressBookEntry => {
-  const partial: Partial<AddressBookEntry> = { ...entry };
+const withoutRoles = (request: AddressBookRequest): AddressBookRequest => {
+  const partial: Partial<AddressBookRequest> = { ...request };
   delete partial.roles;
-  return partial as AddressBookEntry;
+  return partial as AddressBookRequest;
 };
-
-const receivingRoles = [addressRoles.consignee, addressRoles.importer, addressRoles.placeOfDestination];
 
 test.describe('Address book API roles', () => {
   test('an address created with roles reads back by id with the same roles', async ({ isolatedOrganisationAddressBookApi }) => {
@@ -35,7 +33,7 @@ test.describe('Address book API roles', () => {
   test('an address created with the three receiving roles, listed last to first, reads all three back in that order', async ({
     isolatedOrganisationAddressBookApi,
   }) => {
-    const receivingRolesReversed = receivingRoles.toReversed();
+    const receivingRolesReversed = destinationConsigneeOrImporterTab.roleFilterOptions.toReversed();
     const created = await isolatedOrganisationAddressBookApi.createAddress({
       ...traderAddress(`Receiving Roles Farm ${Date.now()}`),
       roles: receivingRolesReversed,

@@ -128,14 +128,14 @@ test.describe('Address book role filter', () => {
     await insPages.addressBookList.filter({ term, submitWith: 'button', role: addressRoles.consignor });
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-8 of 9');
-    const href = await insPages.addressBookList.linkNextPage.getAttribute('href');
+    const href = await insPages.addressBookList.nextPageLink.getAttribute('href');
     const next = new URL(href ?? '', page.url());
     expect(next.searchParams.get('addressType')).toBe(addressTypes.originOrConsignor);
     expect(next.searchParams.get('q')).toBe(term);
     expect(next.searchParams.get('role')).toBe(addressRoles.consignor);
     expect(next.searchParams.get('page')).toBe('2');
 
-    await insPages.addressBookList.linkNextPage.click();
+    await insPages.addressBookList.nextPageLink.click();
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 9-9 of 9');
     await expect(insPages.addressBookList.selectedTab).toHaveText(originOrConsignorTab.label);
@@ -239,12 +239,12 @@ test.describe('Address book role filter', () => {
     await expect(async () => {
       await insPages.addressBookList.search(rolesQuestionLabels[addressRoles.consignor], { submitWith: 'button' });
 
-      expect(await insPages.addressBookList.followResultPagesUntilRowShows(consignorName)).toBe(true);
+      expect(await insPages.addressBookList.followNextPageUntilShown(insPages.addressBookList.row(consignorName))).toBe(true);
     }).toPass({ timeout: timeouts.medium });
 
     await insPages.addressBookList.search(rolesQuestionLabels[addressRoles.consignor], { submitWith: 'button' });
 
-    expect(await insPages.addressBookList.followResultPagesUntilRowShows(placeOfOriginName)).toBe(false);
+    expect(await insPages.addressBookList.followNextPageUntilShown(insPages.addressBookList.row(placeOfOriginName))).toBe(false);
   });
 
   test('a search for a role label with a role filter chosen lists the address holding that role, found on whichever result page it falls', async ({
@@ -261,7 +261,7 @@ test.describe('Address book role filter', () => {
       await insPages.addressBookList.open();
       await insPages.addressBookList.filter({ term: 'consignor', submitWith: 'button', role: addressRoles.placeOfOrigin });
 
-      expect(await insPages.addressBookList.followResultPagesUntilRowShows(name)).toBe(true);
+      expect(await insPages.addressBookList.followNextPageUntilShown(insPages.addressBookList.row(name))).toBe(true);
     }).toPass({ timeout: timeouts.medium });
 
     await expect(insPages.addressBookList.rolesCell(name)).toHaveText(rolesLabelOf([addressRoles.placeOfOrigin, addressRoles.consignor]));

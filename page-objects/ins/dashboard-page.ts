@@ -33,14 +33,6 @@ export class InsDashboardPage extends BasePage {
     return this.page.getByTestId('dashboard-results-label');
   }
 
-  get pagination(): Locator {
-    return this.page.getByRole('navigation', { name: 'Pagination', exact: true });
-  }
-
-  get linkNextPage(): Locator {
-    return this.pagination.getByRole('link', { name: 'Next page', exact: true });
-  }
-
   row(referenceNumber: string): Locator {
     return this.page.getByRole('row', { name: new RegExp(referenceNumber) });
   }

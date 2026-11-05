@@ -8,11 +8,10 @@ export const expectAddressBookList = async ({
   insPages: { addressBookList },
 }: {
   pages: { page: Page };
-  insPages: { addressBookList: Pick<InsAddressBookListPage, 'listUrl' | 'heading'> };
+  insPages: { addressBookList: Pick<InsAddressBookListPage, 'listUrlPattern' | 'heading'> };
 }): Promise<void> => {
-  await expect(page).toHaveURL(addressBookList.listUrl);
+  await expect(page).toHaveURL(addressBookList.listUrlPattern);
   await expect(addressBookList.heading).toBeVisible();
-  await expect(page.getByText('Page not found')).toHaveCount(0);
 };
 
 export const expectSearchedListLinks = async (

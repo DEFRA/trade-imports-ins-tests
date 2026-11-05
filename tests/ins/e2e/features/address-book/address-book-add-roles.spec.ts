@@ -104,7 +104,7 @@ for (const tab of addressBookTabs) {
 
       await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(name, UNITED_KINGDOM), { addressType, roles: offeredRoles });
 
-      await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrl(tab));
+      await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(tab));
       await expect(insPages.addressBookList.selectedTab).toHaveText(tab.label);
       await insPages.addressBookList.search(name, { submitWith: 'button' });
       await expect(insPages.addressBookList.viewLinks.first()).toHaveText(`View ${name}`);

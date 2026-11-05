@@ -32,6 +32,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     );
     await insPages.addressBookList.open();
 
-    await scanNextPage(insPages.addressBookList.linkNextPage, runA11yScan);
+    await scanNextPage(insPages.addressBookList.nextPageLink, runA11yScan);
   });
 });

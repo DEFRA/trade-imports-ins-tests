@@ -15,7 +15,7 @@ test.describe('Address book cross-user visibility', () => {
     const createdName = `Cross User Farm ${Date.now()}`;
 
     await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(createdName, 'United Kingdom'), { userId: users.andrew.crn });
-    await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrl(originOrConsignorTab));
+    await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(originOrConsignorTab));
 
     const sarahsContext = await browser.newContext({ storageState: COLD_START });
     try {

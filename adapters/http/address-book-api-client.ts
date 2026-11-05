@@ -24,7 +24,7 @@ export interface AddressBookRecord {
   modifiedAt: string;
 }
 
-export type AddressBookEntry = Omit<AddressBookRecord, 'id' | 'deleted' | 'modifiedAt'>;
+export type AddressBookRequest = Omit<AddressBookRecord, 'id' | 'deleted' | 'modifiedAt'>;
 
 interface AddressBookPage {
   items: AddressBookRecord[];
@@ -78,8 +78,8 @@ export class AddressBookApiClient {
   }
 
   /** Saves a new address to the organisation's book. */
-  async createAddress(record: AddressBookEntry): Promise<AddressBookRecord> {
-    return this.rest.post<AddressBookRecord>(this.path(), record, this.headers);
+  async createAddress(request: AddressBookRequest): Promise<AddressBookRecord> {
+    return this.rest.post<AddressBookRecord>(this.path(), request, this.headers);
   }
 
   /** The live address with this name. Throws unless exactly one live address has it. */
@@ -92,8 +92,8 @@ export class AddressBookApiClient {
   }
 
   /** Replaces an address with the whole record given. */
-  async updateAddress(addressId: string, record: AddressBookEntry): Promise<AddressBookRecord> {
-    return this.rest.put<AddressBookRecord>(this.path(addressId), record, this.headers);
+  async updateAddress(addressId: string, request: AddressBookRequest): Promise<AddressBookRecord> {
+    return this.rest.put<AddressBookRecord>(this.path(addressId), request, this.headers);
   }
 
   /** One address by id, including a soft-deleted tombstone (`deleted: true`). */

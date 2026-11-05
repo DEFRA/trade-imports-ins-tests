@@ -17,7 +17,7 @@ test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => 
     await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(createdName, 'United Kingdom'), {
       roles: [addressRoles.placeOfOrigin, addressRoles.consignor],
     });
-    await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrl(originOrConsignorTab));
+    await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(originOrConsignorTab));
 
     const client = new MongoDbClient();
     try {

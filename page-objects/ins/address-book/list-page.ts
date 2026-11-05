@@ -15,12 +15,12 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
   }
 
   /** The URL of the list opened with no query. */
-  get listUrl(): RegExp {
+  get listUrlPattern(): RegExp {
     return new RegExp(`${escapeRegex(this.expectedUrl)}$`);
   }
 
   /** The URL of the list opened on a tab. */
-  tabUrl(tab: AddressBookTab): RegExp {
+  tabUrlPattern(tab: AddressBookTab): RegExp {
     return new RegExp(`${escapeRegex(this.expectedUrl)}\\?addressType=${tab.addressType}$`);
   }
 
@@ -62,14 +62,6 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
 
   get mainLinks(): Locator {
     return this.page.getByRole('main').getByRole('link');
-  }
-
-  get pagination(): Locator {
-    return this.page.locator('.govuk-pagination');
-  }
-
-  get linkNextPage(): Locator {
-    return this.pagination.getByRole('link', { name: 'Next page', exact: true });
   }
 
   row(name: string): Locator {
@@ -169,16 +161,6 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
         url.searchParams.get('addressType') === tab.addressType &&
         (searchTerm === undefined || url.searchParams.get('q') === searchTerm),
     );
-  }
-
-  async followResultPagesUntilRowShows(name: string): Promise<boolean> {
-    while ((await this.row(name).count()) === 0) {
-      if ((await this.linkNextPage.count()) === 0) {
-        return false;
-      }
-      await this.linkNextPage.click();
-    }
-    return true;
   }
 
   override async open({ addressType, ...options }: ListPageOpenOptions = {}): Promise<void> {

@@ -1,4 +1,4 @@
-import type { AddressBookApiClient, AddressBookEntry, AddressBookRecord } from '@adapters/http/address-book-api-client';
+import type { AddressBookApiClient, AddressBookRequest, AddressBookRecord } from '@adapters/http/address-book-api-client';
 import {
   heldAsBranchAddress,
   heldAsConsignee,
@@ -16,7 +16,7 @@ import {
   PLACE_OF_ORIGIN_NAME,
 } from '@domain/shared/constants/journey-party-names';
 
-export const branchAddressFixture: AddressBookEntry = {
+export const branchAddressFixture: AddressBookRequest = {
   name: CONTACT_ADDRESS_NAME,
   addressLine1: 'Woodham Lane',
   townOrCity: 'Addlestone',
@@ -27,7 +27,7 @@ export const branchAddressFixture: AddressBookEntry = {
   ...heldAsBranchAddress,
 };
 
-export const placeOfOriginFixture: AddressBookEntry = {
+export const placeOfOriginFixture: AddressBookRequest = {
   name: PLACE_OF_ORIGIN_NAME,
   addressLine1: '1 Farm Lane',
   townOrCity: 'Ennis',
@@ -39,7 +39,7 @@ export const placeOfOriginFixture: AddressBookEntry = {
 };
 
 /** The shared address-book records, in creation order. */
-export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
+export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookRequest[] = [
   {
     name: 'Alpine Dairy GmbH',
     addressLine1: 'Bahnhofstrasse 17',
@@ -157,8 +157,8 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookEntry[] = [
 const sameValue = (live: unknown, wanted: unknown): boolean =>
   Array.isArray(wanted) ? JSON.stringify(live) === JSON.stringify(wanted) : live === wanted;
 
-const differsFrom = (live: AddressBookRecord, wanted: AddressBookEntry): boolean =>
-  (Object.keys(wanted) as Array<keyof AddressBookEntry>).some((field) => !sameValue(live[field], wanted[field]));
+const differsFrom = (live: AddressBookRecord, wanted: AddressBookRequest): boolean =>
+  (Object.keys(wanted) as Array<keyof AddressBookRequest>).some((field) => !sameValue(live[field], wanted[field]));
 
 /**
  * Ensures one live record per journey fixture name, holding the fixture's details and roles.
