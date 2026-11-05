@@ -5,6 +5,8 @@ const WARE_POTATOES = 'Ware potatoes';
 const TREES_FOR_PLANTING = 'Trees for planting';
 const CUT_CONIFEROUS_TREES = 'Cut coniferous trees more than 3 metres high';
 
+const COMMODITY_TYPE_TASK_ROW = 'What are you importing?';
+
 const MARIS_PIPER = 'Maris Piper';
 const KING_EDWARD = 'King Edward';
 const OAK = 'Quercus (oak)';
@@ -146,6 +148,40 @@ test.describe('High-risk plants commodity section', () => {
     await expect(plantsPages.commodities.errorSummary).toContainText('Add at least one commodity');
   });
 
+  test('save and return to overview: when no type is chosen, refuses the save, shows the error beside the options and leaves the commodities row not started', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
+    const commodityTypeError = 'Select what you are importing';
+    const reference = await plantsJourney.startNotification();
+
+    await plantsPages.commodityType.saveAndReturnToOverview.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.commodityType.expectedUrl(reference));
+    await expect(plantsPages.commodityType.errorSummaryLinks).toHaveText([commodityTypeError]);
+    await expect(plantsPages.commodityType.optionsError).toContainText(commodityTypeError);
+
+    await plantsPages.overview.open(reference);
+    await expect(plantsPages.overview.taskRow(COMMODITY_TYPE_TASK_ROW)).toContainText('Not yet started');
+  });
+
+  test('save and return to overview: when a type is chosen, saves it, shows the overview and shows the type again on return', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
+    const reference = await plantsJourney.startNotification();
+
+    await plantsPages.commodityType.commodityType(WOOD_AND_CUT_TREES).check();
+    await plantsPages.commodityType.saveAndReturnToOverview.click();
+
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+
+    await plantsPages.commodityType.open(reference);
+    await expect(plantsPages.commodityType.commodityType(WOOD_AND_CUT_TREES)).toBeChecked();
+  });
+
   test('the commodities task row reads Completed once the section is answered', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.chooseCommodityType(POTATOES);
@@ -157,6 +193,6 @@ test.describe('High-risk plants commodity section', () => {
 
     await plantsPages.overview.open(reference);
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
-    await expect(plantsPages.overview.taskRow('What are you importing?')).toContainText('Completed');
+    await expect(plantsPages.overview.taskRow(COMMODITY_TYPE_TASK_ROW)).toContainText('Completed');
   });
 });
