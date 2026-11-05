@@ -17,6 +17,7 @@ import {
 } from '@domain/animals/constants/journey-options';
 import { type CommodityLineAnswer } from '@domain/animals/constants/journey-commodity-line-answers';
 import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
+import { internalMarketPurposes } from '@domain/animals/constants/internal-market-purposes';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
@@ -27,7 +28,6 @@ import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { importReasons } from '@domain/animals/constants/import-reasons';
-import { transporters } from '@domain/animals/constants/transporters';
 import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 
 export type ArrivalDetailsAnswer = {
@@ -517,7 +517,7 @@ export class AnimalsJourney {
   async toAdditionalDetails(): Promise<void> {
     await this.toImportReason();
     await this.animalsPages.importReason.reason(importReasons.internalMarket.display).check();
-    await this.animalsPages.importReason.purpose('Breeding').check();
+    await this.animalsPages.importReason.purpose(internalMarketPurposes.breeding.display).check();
     await this.animalsPages.importReason.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.openAdditionalDetailsFromOverview();
@@ -679,6 +679,35 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
+  private async walkFromTransporterToReview(
+    transporter: string,
+    document: AccompanyingDocumentAnswer,
+    { addCph }: { addCph: boolean },
+  ): Promise<void> {
+    const pages = this.animalsPages;
+
+    await pages.transporter.heading.waitFor(pageLoadWait);
+    await pages.transporter.transporter(transporter).check();
+    await pages.transporter.saveAndContinue.click();
+
+    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
+    await this.uploadDocumentAndWaitForScan(document);
+    await pages.accompanyingDocuments.continueButton.click();
+
+    await pages.addresses.heading.waitFor(pageLoadWait);
+    await this.addFiveParties();
+    if (addCph) {
+      await this.addCphAndLeaveAddresses();
+    } else {
+      await pages.addresses.continueButton.click();
+    }
+
+    await pages.contactAddress.heading.waitFor(pageLoadWait);
+    await this.chooseContactAddress();
+
+    await pages.notificationView.heading.waitFor(pageLoadWait);
+  }
+
   async walkOpeningRunCattleByAir(document: AccompanyingDocumentAnswer): Promise<string> {
     const pages = this.animalsPages;
     const referenceNumber = await this.walkOpeningRunToImportReason({
@@ -687,7 +716,7 @@ export class AnimalsJourney {
     });
 
     await pages.importReason.reason(importReasons.internalMarket.display).check();
-    await pages.importReason.purpose('Breeding').check();
+    await pages.importReason.purpose(internalMarketPurposes.breeding.display).check();
     await pages.importReason.saveAndContinue.click();
 
     await pages.consignmentDetails.heading.waitFor(pageLoadWait);
@@ -707,7 +736,7 @@ export class AnimalsJourney {
     await pages.animalIdentification.saveAndContinue.click();
 
     await pages.additionalDetails.heading.waitFor(pageLoadWait);
-    await pages.additionalDetails.certifiedFor('Further keeping').check();
+    await pages.additionalDetails.certifiedFor(certificationPurposes.furtherKeeping.display).check();
     await pages.additionalDetails.containsUnweanedAnimals(yesNoValues.no).check();
     await pages.additionalDetails.saveAndContinue.click();
 
@@ -720,22 +749,7 @@ export class AnimalsJourney {
     });
     await pages.arrivalDetails.saveAndContinue.click();
 
-    await pages.transporter.heading.waitFor(pageLoadWait);
-    await pages.transporter.transporter(MANDATORY_ANSWERS.transporter.display).check();
-    await pages.transporter.saveAndContinue.click();
-
-    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await this.uploadDocumentAndWaitForScan(document);
-    await pages.accompanyingDocuments.continueButton.click();
-
-    await pages.addresses.heading.waitFor(pageLoadWait);
-    await this.addFiveParties();
-    await this.addCphAndLeaveAddresses();
-
-    await pages.contactAddress.heading.waitFor(pageLoadWait);
-    await this.chooseContactAddress();
-
-    await pages.notificationView.heading.waitFor(pageLoadWait);
+    await this.walkFromTransporterToReview(MANDATORY_ANSWERS.transporter.display, document, { addCph: true });
     return referenceNumber;
   }
 
@@ -773,22 +787,7 @@ export class AnimalsJourney {
     });
     await pages.arrivalDetails.saveAndContinue.click();
 
-    await pages.transporter.heading.waitFor(pageLoadWait);
-    await pages.transporter.transporter(HORSE_TRANSPORTER).check();
-    await pages.transporter.saveAndContinue.click();
-
-    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await this.uploadDocumentAndWaitForScan(document);
-    await pages.accompanyingDocuments.continueButton.click();
-
-    await pages.addresses.heading.waitFor(pageLoadWait);
-    await this.addFiveParties();
-    await pages.addresses.continueButton.click();
-
-    await pages.contactAddress.heading.waitFor(pageLoadWait);
-    await this.chooseContactAddress();
-
-    await pages.notificationView.heading.waitFor(pageLoadWait);
+    await this.walkFromTransporterToReview(HORSE_TRANSPORTER, document, { addCph: false });
     return referenceNumber;
   }
 
@@ -823,22 +822,7 @@ export class AnimalsJourney {
     await pages.transitedCountries.addCountry(countryCodes.eu.france.display);
     await pages.transitedCountries.saveAndContinue.click();
 
-    await pages.transporter.heading.waitFor(pageLoadWait);
-    await pages.transporter.transporter(transporters.garciaLivestockTransport.display).check();
-    await pages.transporter.saveAndContinue.click();
-
-    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await this.uploadDocumentAndWaitForScan(document);
-    await pages.accompanyingDocuments.continueButton.click();
-
-    await pages.addresses.heading.waitFor(pageLoadWait);
-    await this.addFiveParties();
-    await this.addCphAndLeaveAddresses();
-
-    await pages.contactAddress.heading.waitFor(pageLoadWait);
-    await this.chooseContactAddress();
-
-    await pages.notificationView.heading.waitFor(pageLoadWait);
+    await this.walkFromTransporterToReview(MANDATORY_ANSWERS.transporter.display, document, { addCph: true });
     return referenceNumber;
   }
 

@@ -66,14 +66,14 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.commodityGroup(species.commodityCode).getByRole('checkbox', { name: speciesLabel(species), exact: true });
   }
 
-  boldLettersOfSpeciesLabel(species: CommodityLine): Locator {
+  boldMatchInSpeciesLabel(species: CommodityLine): Locator {
     return this.commodityGroup(species.commodityCode)
       .locator('label')
       .filter({ hasText: speciesLabel(species) })
       .getByRole('strong');
   }
 
-  boldLettersOfCommodityHeading(code: string): Locator {
+  boldMatchInCommodityHeading(code: string): Locator {
     return this.commodityGroup(code).locator('legend').getByRole('strong');
   }
 

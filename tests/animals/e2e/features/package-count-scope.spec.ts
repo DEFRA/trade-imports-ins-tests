@@ -4,7 +4,7 @@ import { test, expect } from '@fixtures';
 
 test.describe('Number of packages scope', () => {
   test(
-    'commodity details asks the listed species for a number of animals and a number of packages, and the served unlisted species for a number of animals alone',
+    'commodity details asks for a number of packages only for a commodity that requires one, and for a number of animals for every species',
     { tag: '@duplicated-in-frontend' },
     async ({ animalsJourney, animalsPages }) => {
       await animalsJourney.toConsignmentDetails([commodityLines.cattle, commodityLines.ostrich]);
@@ -18,10 +18,7 @@ test.describe('Number of packages scope', () => {
     },
   );
 
-  test("the review's species card ends with the number of packages for the listed species, and holds only its four rows for the served unlisted species", async ({
-    animalsJourney,
-    animalsPages,
-  }) => {
+  test('the review shows a number of packages row only for the commodity that requires one', async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toReviewWithAnimalCounts([
       { species: commodityLines.cattle, animalCount: 1 },
       { species: commodityLines.ostrich, animalCount: 1 },

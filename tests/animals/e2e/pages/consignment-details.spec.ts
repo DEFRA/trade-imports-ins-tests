@@ -50,11 +50,16 @@ test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () =
     await expect(animalsPages.consignmentDetails.numberOfAnimals).toHaveValue('2147483648');
   });
 
-  test('accepts a number of animals exactly at the largest the service stores', async ({ animalsPages }) => {
+  test('saves a number of animals exactly at the largest the service stores and shows it back on the page', async ({ animalsPages }) => {
     await animalsPages.consignmentDetails.numberOfAnimals.fill('2147483647');
+    await animalsPages.consignmentDetails.numberOfPackages.fill('5');
     await animalsPages.consignmentDetails.saveAndContinue.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
+
+    await animalsPages.overview.task('Commodity details').click();
+    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
+    await expect(animalsPages.consignmentDetails.numberOfAnimals).toHaveValue('2147483647');
   });
 });
 

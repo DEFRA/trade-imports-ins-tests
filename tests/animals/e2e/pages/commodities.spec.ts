@@ -74,19 +74,19 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
 
   test('bolds the matched text in the commodity heading and in a species label', async ({ animalsPages }) => {
     await animalsPages.commoditySelection.search(commodityLines.cattle.commodityCode);
-    await expect(animalsPages.commoditySelection.boldLettersOfCommodityHeading(commodityLines.cattle.commodityCode)).toHaveText(
+    await expect(animalsPages.commoditySelection.boldMatchInCommodityHeading(commodityLines.cattle.commodityCode)).toHaveText(
       commodityLines.cattle.commodityCode,
     );
 
     await animalsPages.commoditySelection.search(commodityLines.cattle.searchTerm);
-    await expect(animalsPages.commoditySelection.boldLettersOfSpeciesLabel(commodityLines.cattle)).toHaveText(
-      commodityLines.cattle.latinName,
+    await expect(animalsPages.commoditySelection.boldMatchInSpeciesLabel(commodityLines.cattle)).toHaveText(
+      commodityLines.cattle.searchTerm,
     );
   });
 
   test('bolds the matched text inside the common name when a search matches it', async ({ animalsPages }) => {
     await animalsPages.commoditySelection.search(commodityLines.raccoonDog.searchTerm);
-    await expect(animalsPages.commoditySelection.boldLettersOfSpeciesLabel(commodityLines.raccoonDog)).toHaveText('Dog');
+    await expect(animalsPages.commoditySelection.boldMatchInSpeciesLabel(commodityLines.raccoonDog)).toHaveText('Dog');
   });
 
   test('says so when nothing matches', async ({ pages, animalsPages }) => {
@@ -205,7 +205,9 @@ test.describe('Commodity selection page without JavaScript', { tag: '@duplicated
     await animalsJourney.toCommoditySelection();
   });
 
-  test('Search, one species Remove and Clear all all work', async ({ animalsPages }) => {
+  test('removing one chosen species leaves the other selected and Clear all empties the panel, with every control posting the page', async ({
+    animalsPages,
+  }) => {
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle, commodityLines.domesticCat]);
     await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
 

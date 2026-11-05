@@ -1,4 +1,5 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { OPENING_RUN_TASKS, certificateDocument } from '@flows/animals/journey';
 
@@ -33,7 +34,9 @@ test.describe('Opening run', () => {
       await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Purpose in the market')).toHaveText('Breeding');
 
       const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional animal details');
-      await expect(animalsPages.notificationView.summaryValue(additionalAnimalDetails, 'Certified for')).toHaveText('Further keeping');
+      await expect(animalsPages.notificationView.summaryValue(additionalAnimalDetails, 'Certified for')).toHaveText(
+        certificationPurposes.furtherKeeping.display,
+      );
 
       const transportDetails = animalsPages.notificationView.summaryCard('Transport details');
       await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Name')).toContainText('García Livestock Transport SL');
