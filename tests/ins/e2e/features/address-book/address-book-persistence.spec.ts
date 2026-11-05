@@ -12,11 +12,7 @@ test.describe('Address book persistence round-trip', { tag: '@mongodb' }, () => 
     skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
   });
 
-  test('a created address persists with its full Standard Address Block, its address type and its ticked roles', async ({
-    pages,
-    insPages,
-    insJourney,
-  }) => {
+  test('a created address persists with its full Standard Address Block and its ticked roles', async ({ pages, insPages, insJourney }) => {
     const createdName = `Persistence Test Farm ${Date.now()}`;
     await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(createdName, 'United Kingdom'), {
       roles: [addressRoles.placeOfOrigin, addressRoles.consignor],
