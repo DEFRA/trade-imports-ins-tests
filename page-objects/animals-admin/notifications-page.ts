@@ -1,5 +1,5 @@
 import { Locator } from '@playwright/test';
-import { BasePage } from '@page-objects/shared/base-page';
+import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
 
 export class AnimalsAdminNotificationsPage extends BasePage {
   readonly expectedUrl = '/notifications';
@@ -28,20 +28,16 @@ export class AnimalsAdminNotificationsPage extends BasePage {
     return this.page.getByRole('button', { name: 'Delete', exact: true });
   }
 
+  get deleteDialog(): Locator {
+    return this.page.getByRole('dialog', { name: 'Are you sure you want to delete the following notifications?' });
+  }
+
   get btnConfirm(): Locator {
     return this.page.getByRole('button', { name: 'Confirm' });
   }
 
   get btnCancel(): Locator {
     return this.page.getByRole('button', { name: 'Cancel' });
-  }
-
-  get alertSuccess(): Locator {
-    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
-  }
-
-  get alertImportant(): Locator {
-    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Important' }) });
   }
 
   get pagination(): Locator {
@@ -52,15 +48,8 @@ export class AnimalsAdminNotificationsPage extends BasePage {
     return this.page.getByTestId('results-count');
   }
 
-  async currentPageReferences(): Promise<string[]> {
-    return this.page.locator('.notification-checkbox').evaluateAll((elements) => (elements as HTMLInputElement[]).map((el) => el.value));
-  }
-
   async getTotalElements(): Promise<number> {
-    // Wait for the page itself to render before deciding whether the count
-    // element is absent because we're still loading, or absent because the
-    // template legitimately omitted it (empty state).
-    await this.heading.waitFor({ state: 'visible' });
+    await this.waitForPageRendered();
 
     if ((await this.resultsCount.count()) === 0) {
       return 0;
@@ -74,17 +63,22 @@ export class AnimalsAdminNotificationsPage extends BasePage {
     return Number(match[1]);
   }
 
-  async open(attemptSignIn: boolean = true): Promise<void> {
+  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.page.goto(this.expectedUrl);
-    await this.signInWhenRequested(attemptSignIn);
+    await this.signInWhenRequested(attemptSignIn, identity);
   }
 
   async deleteByReferenceNumber(): Promise<void> {
-    // The delete button's confirmation dialog is wired up by a client-side module
-    // script. Wait for the network to settle first so the click doesn't race the
-    // script attaching its listener, which would otherwise leave the dialog closed.
-    await this.page.waitForLoadState('networkidle');
+    await this.waitForDeleteDialogScript();
     await this.btnDeleteByReferenceNumber.click();
+  }
+
+  private async waitForPageRendered(): Promise<void> {
+    await this.heading.waitFor({ state: 'visible' });
+  }
+
+  private async waitForDeleteDialogScript(): Promise<void> {
+    await this.page.waitForLoadState('networkidle');
   }
 
   tableRowByReference(referenceNumber: string): Locator {
@@ -95,18 +89,14 @@ export class AnimalsAdminNotificationsPage extends BasePage {
     return this.page.getByRole('checkbox', { name: `Select notification ${referenceNumber}` });
   }
 
-  async findRowByReference(referenceNumber: string, maxPages: number = 10): Promise<void> {
-    // Absolute, like the dashboard's open: a spec in another domain has another baseURL.
+  async openPageShowingNotification(referenceNumber: string, maxPages: number = 10): Promise<void> {
     await this.navigateToAdminPortal(this.expectedUrl);
 
     const checkbox = this.checkboxNotificationByReference(referenceNumber);
     const nextLink = this.pagination.getByRole('link', { name: 'Next page' });
 
     for (let visited = 0; visited < maxPages; visited++) {
-      // isVisible() does not auto-wait, so anchor each iteration on the always-rendered
-      // heading — the page is server-rendered, so once it arrives the table (when present)
-      // is already in the DOM. The table itself only renders when notifications exist.
-      await this.heading.waitFor();
+      await this.waitForPageRendered();
       if (await checkbox.isVisible()) {
         return;
       }

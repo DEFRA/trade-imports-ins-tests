@@ -25,8 +25,4 @@ export class PlantsIdentificationNumbersPage extends PlantsNotificationPage {
   get consignment(): Locator {
     return this.page.getByLabel('Consignment number (optional)', { exact: true });
   }
-
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
 }

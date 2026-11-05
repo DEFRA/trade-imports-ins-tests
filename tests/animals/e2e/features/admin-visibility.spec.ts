@@ -16,7 +16,7 @@ test.describe('Admin visibility of animals notifications', () => {
       const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
 
       await animalsAdminNavigation.toNotifications();
-      await animalsAdminPages.notifications.findRowByReference(referenceNumber);
+      await animalsAdminPages.notifications.openPageShowingNotification(referenceNumber);
 
       await expect(animalsAdminPages.notifications.tableRowByReference(referenceNumber)).toBeVisible();
     },

@@ -24,6 +24,10 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.meansOfTransport.locator('option');
   }
 
+  async chooseMeansOfTransport(label: string): Promise<void> {
+    await this.meansOfTransport.selectOption({ label });
+  }
+
   get transportIdentificationLeadIn(): Locator {
     return this.fieldHint('transportIdentification').locator('p');
   }
@@ -44,6 +48,10 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
     return this.page.locator('input[name="arrivalDateAtPort"]');
   }
 
+  get meansOfTransportError(): Locator {
+    return this.page.locator('#meansOfTransport-error');
+  }
+
   get arrivalDateError(): Locator {
     return this.page.locator('#arrivalDateAtPort-error');
   }
@@ -54,9 +62,5 @@ export class AnimalsArrivalDetailsPage extends NotificationPage {
 
   async fillArrivalDate(date: string): Promise<void> {
     await this.arrivalDate.fill(date);
-  }
-
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
   }
 }

@@ -70,39 +70,39 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     pages,
     animalsPages,
   }) => {
-    const bosTaurus = animalsPages.animalIdentification.speciesCard(commodityLines.cattle.latinName);
-    const bisonBison = animalsPages.animalIdentification.speciesCard(commodityLines.bison.latinName);
+    const bosTaurus = animalsPages.animalIdentification.speciesCard(commodityLines.cattle);
+    const bisonBison = animalsPages.animalIdentification.speciesCard(commodityLines.bison);
     await bisonBison.getByLabel('Ear tag', { exact: true }).fill(EAR_TAG_ONE_OVER_LIMIT);
     await bosTaurus.getByLabel('Ear tag', { exact: true }).fill('UK000000000001');
     await bosTaurus.getByRole('button', { name: 'Save and add another' }).click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
-    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle.latinName, 1)).toBeVisible();
+    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 1)).toBeVisible();
     await expect(bisonBison.getByLabel('Ear tag', { exact: true })).toHaveValue('');
   });
 
   test('saves the card typed in when Enter is pressed in its field and stays on Identification details', async ({ animalsPages }) => {
     const { cattle } = commodityLines;
-    const bosTaurus = animalsPages.animalIdentification.speciesCard(cattle.latinName);
+    const bosTaurus = animalsPages.animalIdentification.speciesCard(cattle);
     const earTag = bosTaurus.getByLabel('Ear tag', { exact: true });
     await earTag.fill('UK000000000001');
     await earTag.press('Enter');
 
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
-    await expect(animalsPages.animalIdentification.savedAnimalRow(cattle.latinName, 1)).toContainText('UK000000000001');
-    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(cattle.latinName, 2, 2)).toBeVisible();
+    await expect(animalsPages.animalIdentification.savedAnimalRow(cattle, 1)).toContainText('UK000000000001');
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(cattle, 2, 2)).toBeVisible();
     await expect(earTag).toHaveValue('');
   });
 
   test('leaves a species of more than one animal unsaved when Save and continue is pressed', async ({ animalsPages }) => {
     const { domesticCat } = commodityLines;
-    await animalsPages.animalIdentification.speciesCard(domesticCat.latinName).getByLabel('Passport', { exact: true }).fill('UK123456789');
+    await animalsPages.animalIdentification.speciesCard(domesticCat).getByLabel('Passport', { exact: true }).fill('UK123456789');
     await animalsPages.animalIdentification.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.overview.task('Identification details').click();
-    const felisCatus = animalsPages.animalIdentification.speciesCard(domesticCat.latinName);
-    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(domesticCat.latinName, 1, 2)).toBeVisible();
+    const felisCatus = animalsPages.animalIdentification.speciesCard(domesticCat);
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(domesticCat, 1, 2)).toBeVisible();
     await expect(felisCatus.getByLabel('Passport', { exact: true })).toHaveValue('');
   });
 
@@ -115,14 +115,14 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText(bison.latinName);
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText(domesticCat.latinName);
 
-    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.domesticDog]);
+    await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.raccoonDog]);
     await animalsPages.commoditySelection.saveAndContinue.click();
 
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
     await expect(animalsPages.animalIdentification.selectedCommodities.bodyRows).toContainText([
       commodityLines.cattle.commodityCode,
-      commodityLines.domesticDog.latinName,
       commodityLines.domesticCat.latinName,
+      commodityLines.raccoonDog.latinName,
     ]);
   });
 

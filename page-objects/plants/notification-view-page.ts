@@ -21,9 +21,6 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
   get lateBanner(): Locator {
     return this.page.getByRole('heading', { name: 'Your notification was made outside the required timing', exact: true });
   }
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
   card(title: string): Locator {
     return this.page.locator('.govuk-summary-card').filter({ has: this.page.getByRole('heading', { name: title, exact: true }) });
   }

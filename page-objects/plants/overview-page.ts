@@ -10,10 +10,6 @@ export class PlantsOverviewPage extends PlantsNotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Overview' });
   }
 
-  get reference(): Locator {
-    return this.journeyStrip.locator('span.govuk-body');
-  }
-
   /** A govukButton with an href, which govuk-frontend renders with role="button". */
   get btnReturnToDashboard(): Locator {
     return this.page.getByRole('button', { name: 'Return to dashboard', exact: true });

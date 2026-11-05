@@ -1,6 +1,8 @@
 import { type Locator } from '@playwright/test';
+import { type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { SelectedCommoditiesTable } from '@page-objects/animals/selected-commodities-table';
+import { errorSummaryOn } from '@page-objects/shared/govuk-banners';
 
 export class AnimalsConsignmentDetailsPage extends NotificationPage {
   readonly selectedCommodities = new SelectedCommoditiesTable(this.page);
@@ -26,7 +28,7 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
   }
 
   get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
+    return errorSummaryOn(this.page);
   }
 
   get animalsRequiredErrorLink(): Locator {
@@ -41,29 +43,39 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.caption.locator('xpath=following-sibling::*[1]');
   }
 
-  async numberOfAnimalsFor(species: string): Promise<Locator> {
+  async numberOfAnimalsFor(species: CommodityLine): Promise<Locator> {
     return this.numberOfAnimals.nth(await this.speciesPosition(species));
   }
 
-  async numberOfPackagesFor(species: string): Promise<Locator> {
+  async numberOfPackagesFor(species: CommodityLine): Promise<Locator> {
     return this.numberOfPackages.nth(await this.speciesPosition(species));
   }
 
-  async fillAnimalCountFor(species: string, count: number): Promise<void> {
+  async fillAnimalCountFor(species: CommodityLine, count: number): Promise<void> {
     await (await this.numberOfAnimalsFor(species)).fill(String(count));
   }
 
-  private async speciesPosition(species: string): Promise<number> {
+  async fillPackageCountFor(species: CommodityLine, count: number): Promise<void> {
+    await (await this.numberOfPackagesFor(species)).fill(String(count));
+  }
+
+  private async speciesPosition(species: CommodityLine): Promise<number> {
     const speciesHeadings = await this.page.getByRole('heading', { level: 3 }).allTextContents();
-    const index = speciesHeadings.indexOf(species);
+    const index = speciesHeadings.indexOf(species.latinName);
     if (index === -1) {
-      throw new Error(`No "${species}" heading among: ${speciesHeadings.join(', ')}`);
+      throw new Error(`No "${species.latinName}" heading among: ${speciesHeadings.join(', ')}`);
     }
     return index;
   }
 
   async fillEveryAnimalCount(count: string): Promise<void> {
     for (const box of await this.numberOfAnimals.all()) {
+      await box.fill(count);
+    }
+  }
+
+  async fillEveryPackageCount(count: string): Promise<void> {
+    for (const box of await this.numberOfPackages.all()) {
       await box.fill(count);
     }
   }

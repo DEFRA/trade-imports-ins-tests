@@ -17,8 +17,4 @@ export class PlantsOriginPage extends PlantsNotificationPage {
   get guidance(): Locator {
     return this.page.locator('.govuk-inset-text');
   }
-
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
 }

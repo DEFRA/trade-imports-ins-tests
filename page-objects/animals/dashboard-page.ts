@@ -55,14 +55,6 @@ export class AnimalsDashboardPage extends BasePage {
 
   readonly amendRefusedMessage = AMEND_REFUSED_MESSAGE;
 
-  get amendRefusedBanner(): Locator {
-    return this.page.getByRole('region', { name: 'Important' });
-  }
-
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
-
   get notificationCards(): Locator {
     return this.page.locator('.govuk-summary-card');
   }
@@ -71,7 +63,7 @@ export class AnimalsDashboardPage extends BasePage {
     return this.notificationCards.filter({ hasText: reference });
   }
 
-  statusTag(reference: string): Locator {
+  cardStatusTag(reference: string): Locator {
     return this.cardField(this.notificationCard(reference), 'Status').locator('.govuk-tag');
   }
 

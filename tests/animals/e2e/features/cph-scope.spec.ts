@@ -13,14 +13,14 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
 
     const { cphSection, cphLinks, cphNumberText } = animalsPages.addresses;
 
-    await animalsJourney.addCommodityToCurrentNotification(commodityLines.domesticCat);
+    await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.domesticCat);
     await animalsJourney.toRolesAndAddressesOfCurrentNotification();
     await expect(cphSection).toBeHidden();
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
 
-    await animalsJourney.addCommodityToCurrentNotification(commodityLines.cattle);
+    await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.cattle);
     await animalsJourney.toRolesAndAddressesOfCurrentNotification();
     await expect(cphSection).toBeVisible();
     await expect(cphLinks).toHaveText(['Add a CPH number']);

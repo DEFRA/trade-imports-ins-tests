@@ -1,5 +1,6 @@
 import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
+import { ADDRESS_FORM_FIELD_LABELS } from '@domain/ins/constants/address-form';
 
 export type AddressDetails = {
   name: string;
@@ -15,14 +16,14 @@ export type AddressDetails = {
 
 export abstract class InsAddressBookFormPage extends BasePage {
   get inputName(): Locator {
-    return this.page.getByLabel('Name or organisation', { exact: true });
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.name, { exact: true });
   }
 
   sectionHeading(name: 'Address' | 'Contact details'): Locator {
     return this.page.getByRole('heading', { level: 2, name, exact: true });
   }
 
-  /** The form's text inputs in page order, used to pin where each field sits. */
+  /** The form's text inputs in page order. */
   get textboxes(): Locator {
     return this.page.getByRole('main').getByRole('textbox');
   }
@@ -32,54 +33,49 @@ export abstract class InsAddressBookFormPage extends BasePage {
     return this.page.getByRole('main').locator('form label');
   }
 
-  get countryOptionsIncludingPlaceholder(): Locator {
+  get countryOptions(): Locator {
     return this.selectCountry.getByRole('option');
   }
 
   get inputAddressLine1(): Locator {
-    return this.page.getByLabel('Address line 1');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.addressLine1);
   }
 
   get inputAddressLine2(): Locator {
-    return this.page.getByLabel('Address line 2 (optional)');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.addressLine2);
   }
 
   get inputTownOrCity(): Locator {
-    return this.page.getByLabel('Town or city');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.townOrCity);
   }
 
   get inputCounty(): Locator {
-    return this.page.getByLabel('County (optional)');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.county);
   }
 
   get inputPostcode(): Locator {
-    return this.page.getByLabel('Postcode or Zip code');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.postcode);
   }
 
   get selectCountry(): Locator {
-    return this.page.getByLabel('Country');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.country);
   }
 
-  // Every country offered, skipping the empty placeholder option.
-  get countryOptions(): Locator {
-    return this.selectCountry.locator('option:not([value=""])');
+  get selectedCountryOption(): Locator {
+    return this.selectCountry.locator('option:checked');
   }
 
   get inputEmail(): Locator {
-    return this.page.getByLabel('Email address');
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.email);
   }
 
   get inputPhone(): Locator {
-    return this.page.getByLabel('Phone number');
-  }
-
-  get errorSummary(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'There is a problem' });
+    return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.phone);
   }
 
   /** The error summary's link to a field, matched on the whole message. */
   errorSummaryLink(message: string): Locator {
-    return this.page.getByRole('alert').getByRole('link', { name: message, exact: true });
+    return this.errorSummary.getByRole('link', { name: message, exact: true });
   }
 
   async fill(details: AddressDetails): Promise<void> {

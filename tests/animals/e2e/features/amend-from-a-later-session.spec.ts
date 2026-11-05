@@ -31,7 +31,7 @@ test.describe('Dashboard actions in a later browser session', () => {
     expect(copiedReference).not.toEqual(reference);
     await freshPages.dashboard.open();
     await freshPages.dashboard.searchForReference(reference);
-    await expect(freshPages.dashboard.statusTag(reference)).toHaveText('Submitted');
+    await expect(freshPages.dashboard.cardStatusTag(reference)).toHaveText('Submitted');
   });
 
   test('tells the user a deleted notification could not be amended', async ({
@@ -47,6 +47,6 @@ test.describe('Dashboard actions in a later browser session', () => {
 
     await freshPages.dashboard.amend(reference).click();
 
-    await expect(freshPages.dashboard.amendRefusedBanner).toContainText(freshPages.dashboard.amendRefusedMessage);
+    await expect(freshPages.dashboard.importantBanner).toContainText(freshPages.dashboard.amendRefusedMessage);
   });
 });

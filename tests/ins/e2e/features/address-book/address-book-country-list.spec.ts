@@ -1,22 +1,18 @@
 import { test, expect } from '@fixtures';
-import { countries } from '@resources/reference-data/reference-data';
+import { addressFormCountryNames } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
-
-const ALPHABETICAL_NAMES = [...countries.map(({ name }) => name), 'United Kingdom'].toSorted((left, right) =>
-  left.localeCompare(right, 'en'),
-);
 
 test.describe('Address book country list', () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment("the list is the stub's MDM fixture, which only the compose stack is sure to serve");
   });
 
-  test("the add form's Country select lists every country reference data serves alphabetically, United Kingdom in its place", async ({
+  test("the add form's Country select lists Select a country first, then every country reference data serves alphabetically, United Kingdom in its place", async ({
     insPages,
   }) => {
     await insPages.addressBookAdd.open();
 
-    await expect(insPages.addressBookAdd.countryOptions).toHaveText(ALPHABETICAL_NAMES);
+    await expect(insPages.addressBookAdd.countryOptions).toHaveText(['Select a country', ...addressFormCountryNames]);
   });
 
   test("the edit form's Country select offers the same alphabetical list with no blank option", async ({ insPages, addressBookApi }) => {
@@ -32,6 +28,6 @@ test.describe('Address book country list', () => {
 
     await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.countryOptionsIncludingPlaceholder).toHaveText(ALPHABETICAL_NAMES);
+    await expect(insPages.addressBookEdit.countryOptions).toHaveText(addressFormCountryNames);
   });
 });

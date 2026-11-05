@@ -16,29 +16,28 @@ test.describe('Notification dashboard search', () => {
     await animalsJourney.toNotificationDashboard();
   });
 
-  test('displays the filter notifications search form', async ({ animalsPages }) => {
+  test('displays the filter notifications search form', { tag: '@cross-browser' }, async ({ animalsPages }) => {
     await expect(animalsPages.dashboard.filterHeading).toBeVisible();
     await expect(animalsPages.dashboard.searchForm).toBeVisible();
     await expect(animalsPages.dashboard.inputReferenceSearch).toBeVisible();
     await expect(animalsPages.dashboard.btnSearch).toBeVisible();
   });
 
-  test('returns matching notification when searching by complete reference number', async ({
-    pages,
-    animalsPages,
-    animalsSeededJourney,
-    animalsJourney,
-  }) => {
-    const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
-    await animalsJourney.toNotificationDashboard();
+  test(
+    'returns matching notification when searching by complete reference number',
+    { tag: '@cross-browser' },
+    async ({ pages, animalsPages, animalsSeededJourney, animalsJourney }) => {
+      const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
+      await animalsJourney.toNotificationDashboard();
 
-    await animalsPages.dashboard.searchForReference(referenceNumber);
+      await animalsPages.dashboard.searchForReference(referenceNumber);
 
-    await expect(pages.page).toHaveURL(wholeReferenceNumberParamPattern(referenceNumber));
-    await expect(animalsPages.dashboard.notificationCards).toHaveCount(1);
-    await expect(animalsPages.dashboard.notificationCardDetails(0).heading).toContainText(referenceNumber);
-    await expect(animalsPages.dashboard.resultsLabel).toHaveText('Showing 1 Result');
-  });
+      await expect(pages.page).toHaveURL(wholeReferenceNumberParamPattern(referenceNumber));
+      await expect(animalsPages.dashboard.notificationCards).toHaveCount(1);
+      await expect(animalsPages.dashboard.notificationCardDetails(0).heading).toContainText(referenceNumber);
+      await expect(animalsPages.dashboard.resultsLabel).toHaveText('Showing 1 Result');
+    },
+  );
 
   test('opens notification view when clicking View after searching by reference number', async ({
     pages,

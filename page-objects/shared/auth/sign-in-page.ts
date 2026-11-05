@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { defaultPassword, defaultUser } from '@config/users';
+import { errorSummaryOn } from '@page-objects/shared/govuk-banners';
 
 export class SignInPage {
   readonly expectedUrl = new RegExp('/dcidmtest.onmicrosoft.com/oauth2/authresp$');
@@ -24,7 +25,7 @@ export class SignInPage {
   }
 
   get errorSummary(): Locator {
-    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) });
+    return errorSummaryOn(this.page);
   }
 
   async signIn(options?: { userId?: string; password?: string }): Promise<void> {

@@ -9,6 +9,7 @@ End-to-end, accessibility and security tests for the trade imports services — 
 - [Editor Setup](#editor-setup)
 - [Running Tests](#running-tests)
 - [Local Testing](#local-testing)
+- [Cross-browser tests](#cross-browser-tests)
 - [Visual Regression Tests](#visual-regression-tests)
 - [Security Testing](#security-testing)
 - [Running Tests on GitHub](#running-tests-on-github)
@@ -56,6 +57,9 @@ End-to-end, accessibility and security tests for the trade imports services — 
    npx playwright install chromium
    ```
 
+   The Chromium-only install skips Firefox and WebKit, which the
+   [cross-browser tests](#cross-browser-tests) need.
+
 ## Editor Setup
 
 ### TypeScript version (VS Code and Cursor)
@@ -76,9 +80,11 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 | `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`           | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                    | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:dynamics`                       | Dynamics integration (`@dynamics`) test suite         | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:cross-browser`                  | Cross-browser (`@cross-browser`) suite                | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites        | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:cross-browser`   | Cross-browser (`@cross-browser`) suite                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
@@ -195,11 +201,23 @@ about a species, such as its common name, reads it from reference-data's
 commodity search through `ReferenceDataApiClient`, rather than from a copy of
 it that goes stale.
 
-A notification's commodity name carries its first line's CN code until
-EUDPA-669 brings the real commodity name. So the outbox spec expects
-`commodityLines.cattle.commodityCode` as the trade line's description and
-common name, and the aggregated notification spec expects it as the
-commodity.
+Stored commodity names for the codes the specs drive live in
+`domain/animals/constants/commodity-names.ts`. The INS aggregated notification
+commodity label uses the first GBN-AG trade line description (for example
+`Live bovine animals`). The outbox and PIMS Dynamics specs expect
+`GBN_AG_CATTLE_COMMON_NAME` (`domain/animals/constants/gbn-ag.ts`,
+`Domestic Cattle`) because the event's Bos taurus common name differs from
+reference-data's search result for that species under `0102`.
+
+### DLQ specs in animals-admin
+
+`tests/animals-admin/e2e/features/dlq-events.spec.ts` runs its tests in serial
+mode. Replay-all and delete-all each act on the whole dead-letter queue, and
+the stack has one queue, so two at once would act on each other's messages.
+The admin portal shows the "Replay-all started" or "Delete-all started" banner
+only once its call to the dynamics gateway, made with the admin secret, has
+succeeded. The banner is how these specs prove the admin portal and the
+gateway are wired together.
 
 ### Authenticated session reuse
 
@@ -258,8 +276,9 @@ npm run test:docker-compose -- tests/animals/ tests/ins/e2e/
 Always end a directory with `/`. Playwright reads the path as a regex, so
 `tests/animals` would also run `tests/animals-admin/`.
 
-A Playwright project is browser config only. Both configs have one, `chromium`,
-and it runs every domain.
+A Playwright project is browser config only. Both configs have `chromium`, which
+runs every domain, plus opt-in `firefox`, `webkit` and `mobile-webkit` projects for the
+[cross-browser tests](#cross-browser-tests).
 
 Within a domain directory, specs are grouped by test type, then by feature:
 
@@ -356,6 +375,17 @@ When running via the CDP Portal, `ENVIRONMENT` is provided by the portal; use `P
 Set `PLAYWRIGHT_WORKERS` to limit how many browsers Playwright runs at once, because the device is usually the bottleneck. Use a whole number or a percentage, for example `PLAYWRIGHT_WORKERS=2` on a 16 GB machine running the full Docker stack.
 If it is not set, Playwright's default applies (50% of cores on CI).
 
+## Cross-browser tests
+
+Tests tagged `@cross-browser` also run in Playwright's Firefox, WebKit and an
+emulated iPhone 17, to render every page in each. Each domain has its own commands:
+[animals](tests/animals/cross-browser/README.md),
+[animals-admin](tests/animals-admin/cross-browser/README.md) and
+[ins](tests/ins/cross-browser/README.md). `npm run test:docker-compose:cross-browser`
+runs them all.
+
+See [`docs/cross-browser.md`](docs/cross-browser.md) for the strategy, what is covered and how it works.
+
 ## Visual Regression Tests
 
 Visual regression tests (tagged `@visual`) guard rendered composition — layout, spacing, colour, and typography as the user sees the page. They compare screenshots against committed baseline images and fail if any pixels differ outside the masked regions.
@@ -368,7 +398,7 @@ Visual specs run headless whatever the project setting, because headed mode uses
 
 The origin of import baseline masks the whole status strip, not the notification reference alone. The strip renders from the first request and the reference inside it is minted per run, so an unmasked strip never matches the baseline twice. Masking the full-width strip keeps the masked box a fixed size, which the reference alone is not. The strip's own content is covered by `tests/animals/e2e/features/reference-strip.spec.ts`.
 
-The declaration baselines mask the date of declaration instead, because the server writes today's date into the page text. `freezeDatePickersAt` does not reach that text: it stops the browser clock and moves each date picker's served bounds, and changes nothing the server has already written. The date's strong emphasis is proved by the declaration e2e specs.
+The declaration specs set the date of declaration to a fixed string before the screenshot instead of masking it, because the server writes today's date into the page text and a mask is as wide as that text, which changes with the day and month. `freezeDatePickersAt` does not reach that text: it stops the browser clock and moves each date picker's served bounds, and changes nothing the server has already written. The date's strong emphasis is proved by the declaration e2e specs.
 
 Run against the stack with `npm run test:docker-compose:visual` (or
 `test:docker-compose:animals:visual` for `animals` alone). `animals` and `plants` have `@visual` specs.
@@ -432,13 +462,14 @@ Test Suite URL: https://portal.cdp-int.defra.cloud/test-suites/trade-imports-ins
 In the CDP Portal, provide a `PROFILE` value to choose which test suite the container runs via `entrypoint.sh`.
 If `PROFILE` is not set, the `default` profile is used.
 
-| PROFILE           | Test suite                                                                                     | NPM script              |
-| ----------------- | ---------------------------------------------------------------------------------------------- | ----------------------- |
-| `default`         | e2e test suite                                                                                 | `npm test`              |
-| `a11y`            | accessibility test suite                                                                       | `npm run test:a11y`     |
-| `dynamics`        | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics` |
-| `security`        | security test suite (ZAP passive scan)                                                         | `npm run test:security` |
-| `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                       |
+| PROFILE           | Test suite                                                                                     | NPM script                   |
+| ----------------- | ---------------------------------------------------------------------------------------------- | ---------------------------- |
+| `default`         | e2e test suite                                                                                 | `npm test`                   |
+| `a11y`            | accessibility test suite                                                                       | `npm run test:a11y`          |
+| `dynamics`        | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics`      |
+| `cross-browser`   | `@cross-browser` tests in Firefox, WebKit and iPhone 17                                        | `npm run test:cross-browser` |
+| `security`        | security test suite (ZAP passive scan)                                                         | `npm run test:security`      |
+| `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                            |
 
 The profiles above run every domain. To run one domain's suite only, prefix the
 suite with its domain name as `<domain>:<suite>`:
@@ -448,6 +479,7 @@ suite with its domain name as `<domain>:<suite>`:
 | `<domain>:e2e`             | that domain's e2e suite (`npm test -- tests/<domain>/`) |
 | `<domain>:a11y`            | that domain's accessibility suite                       |
 | `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)             |
+| `<domain>:cross-browser`   | that domain's `@cross-browser` tests                    |
 | `<domain>:security`        | that domain's security suite (ZAP passive scan)         |
 | `<domain>:security:active` | **not supported on CDP**, as `security:active`          |
 

@@ -56,7 +56,7 @@ test.describe('Address book validation messages', () => {
       email: baseAddress.email,
       phone: '',
     });
-    await insPages.addressBookAdd.save();
+    await insPages.addressBookAdd.saveAndContinue();
 
     await expect(insPages.addressBookAdd.heading).toBeVisible();
     await expectFourMessagesAtTopAndAgainstFields(insPages.addressBookAdd);

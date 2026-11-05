@@ -47,10 +47,6 @@ export class AnimalsTransitedCountriesPage extends NotificationPage {
     return this.page.getByRole('main').getByRole('paragraph');
   }
 
-  get formButtons(): Locator {
-    return this.page.locator('form').getByRole('button');
-  }
-
   get statusRegion(): Locator {
     return this.page.locator('#transit-countries-status');
   }

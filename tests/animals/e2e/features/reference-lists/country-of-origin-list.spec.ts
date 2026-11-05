@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { countryAndSubdivisionNamesWithCountry } from '@resources/reference-data/reference-data';
+import { countryAndItsSubdivisionNames, countryAndSubdivisionNamesWithCountry } from '@resources/reference-data/reference-data';
 import { ORIGIN_COUNTRY_SELECT_TEXT } from '@domain/animals/constants/origin-page';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
@@ -16,8 +16,7 @@ test.describe('Country of origin list', () => {
         animalsJourney,
         animalsPages,
       }) => {
-        await animalsJourney.startNotification();
-        await animalsPages.overview.task('Where is this consignment coming from?').click();
+        await animalsJourney.toOriginFromOverview();
 
         await expect(animalsPages.originOfImport.country.options).toHaveText([
           ORIGIN_COUNTRY_SELECT_TEXT,
@@ -29,15 +28,12 @@ test.describe('Country of origin list', () => {
 
   test.describe('with JavaScript on', () => {
     test('typing Fra lists France and the French territories, each ending (France)', async ({ animalsJourney, animalsPages }) => {
-      await animalsJourney.startNotification();
-      await animalsPages.overview.task('Where is this consignment coming from?').click();
+      await animalsJourney.toOriginFromOverview();
       const { country } = animalsPages.originOfImport;
 
       await country.search('Fra');
 
-      await expect(country.suggestions).toHaveText(
-        countryAndSubdivisionNamesWithCountry().filter((name) => name === 'France' || name.endsWith('(France)')),
-      );
+      await expect(country.suggestions).toHaveText(countryAndItsSubdivisionNames('France'));
     });
   });
 });

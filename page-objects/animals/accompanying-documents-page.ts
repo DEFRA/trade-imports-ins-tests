@@ -69,10 +69,6 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
     return this.page.getByRole('link', { name: `View file for document ${index}` });
   }
 
-  get errorSummary(): Locator {
-    return this.page.locator('.govuk-error-summary');
-  }
-
   get fileFieldError(): Locator {
     return this.page.locator('.govuk-error-message');
   }

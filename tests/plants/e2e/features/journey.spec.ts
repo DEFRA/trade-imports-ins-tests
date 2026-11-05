@@ -106,7 +106,7 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await pages.page.reload();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
       await expect(plantsPages.notificationView.heading).toBeVisible();
-      await expect(plantsPages.overview.reference).toHaveText(reference);
+      await expect(plantsPages.overview.notificationReference).toHaveText(reference);
       await expect(plantsPages.overview.statusTag).toHaveText('Submitted');
       await expect(plantsPages.notificationView.changeLinks).toHaveCount(0);
       await expect(plantsPages.notificationView.btnContinue).toHaveCount(0);
@@ -128,7 +128,7 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await plantsPages.dashboard.open();
       await plantsPages.dashboard.searchForReference(reference);
       await expect(plantsPages.dashboard.notificationCard(reference)).toBeVisible();
-      await expect(plantsPages.dashboard.statusTag(reference)).toHaveText('Submitted');
+      await expect(plantsPages.dashboard.cardStatusTag(reference)).toHaveText('Submitted');
     });
   }
 });

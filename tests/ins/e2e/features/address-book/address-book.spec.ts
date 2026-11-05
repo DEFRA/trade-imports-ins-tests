@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Address book', () => {
-  test('renders the address book after signing in', { tag: '@smoke' }, async ({ pages, insPages }) => {
+  test('renders the address book after signing in', { tag: ['@smoke', '@cross-browser'] }, async ({ pages, insPages }) => {
     await insPages.addressBookList.open();
 
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));

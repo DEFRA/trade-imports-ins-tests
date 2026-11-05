@@ -20,7 +20,7 @@ type CapturedSubDivision = CapturedCountry['subDivisions'][number];
 const readFixture = <T>(path: string): T => JSON.parse(readFileSync(path, 'utf-8')) as T;
 
 export const countries = readFixture<CapturedCountry[]>(referenceDataPaths.countries);
-export const countriesOrigin = readFixture<CapturedCountry[]>(referenceDataPaths.countriesOrigin);
+const countriesOrigin = readFixture<CapturedCountry[]>(referenceDataPaths.countriesOrigin);
 export const portsOfEntry = readFixture<CapturedPort[]>(referenceDataPaths.portsOfEntry);
 
 export function countryByCode(code: string): { value: string; display: string } {
@@ -46,10 +46,12 @@ export function subdivisionByCode(code: string): { value: string; display: strin
   throw new Error(`Subdivision ${code} is not in the captured origin list`);
 }
 
+const byName = (first: string, second: string): number => first.localeCompare(second, 'en');
+
 function countryNamesWithSubdivisions(subdivisionName: (subDivision: CapturedSubDivision, country: CapturedCountry) => string): string[] {
   return countriesOrigin
     .flatMap((country) => [country.name, ...country.subDivisions.map((subDivision) => subdivisionName(subDivision, country))])
-    .sort((first, second) => first.localeCompare(second));
+    .toSorted(byName);
 }
 
 /** Each origin country and each of its subdivisions by its own name, sorted by name. */
@@ -62,6 +64,14 @@ export function countryAndSubdivisionNamesWithCountry(): string[] {
   return countryNamesWithSubdivisions(subdivisionNamedWithCountry);
 }
 
+/** One origin country and each of its subdivisions named with the country, sorted by name. */
+export function countryAndItsSubdivisionNames(countryName: string): string[] {
+  return countryAndSubdivisionNamesWithCountry().filter((name) => name === countryName || name.endsWith(`(${countryName})`));
+}
+
+/** Every captured unfiltered country by name, plus United Kingdom, in alphabetical order. */
+export const addressFormCountryNames: string[] = [...countries.map(({ name }) => name), 'United Kingdom'].toSorted(byName);
+
 /** The label of a port, '<name> - <code>'. */
 export function portLabel(port: CapturedPort): string {
   return `${port.name} - ${port.code}`;
@@ -73,4 +83,9 @@ export function portByCode(code: string): { value: string; display: string } {
     throw new Error(`Port ${code} is not in the captured ports of entry`);
   }
   return { value: port.code, display: portLabel(port) };
+}
+
+/** The names that contain the typed text, ignoring case: what a type-ahead offers for plain ASCII text. */
+export function namesContaining(names: string[], typed: string): string[] {
+  return names.filter((name) => name.toLowerCase().includes(typed.toLowerCase()));
 }

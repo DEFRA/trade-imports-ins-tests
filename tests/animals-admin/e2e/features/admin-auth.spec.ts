@@ -14,7 +14,7 @@ test.describe('Authentication (admin)', { tag: '@auth' }, () => {
     await expect(pages.signIn.heading).toBeVisible();
   });
 
-  test('allows signing into the admin dashboard', { tag: '@smoke' }, async ({ pages, animalsAdminPages }) => {
+  test('allows signing into the admin dashboard', { tag: ['@smoke', '@cross-browser'] }, async ({ pages, animalsAdminPages }) => {
     await pages.signIn.signIn();
     await expect(pages.page).toHaveURL(animalsAdminPages.dashboard.expectedUrl);
     await expect(animalsAdminPages.dashboard.heading).toBeVisible();
@@ -54,7 +54,7 @@ test.describe('Authentication (admin)', { tag: '@auth' }, () => {
 
   test.describe('Notifications (admin) (unauthenticated entry)', () => {
     test.beforeEach(async ({ animalsJourney, animalsAdminPages }) => {
-      await animalsJourney.toSignIn((attemptSignIn) => animalsAdminPages.notifications.open(attemptSignIn));
+      await animalsJourney.toSignIn((attemptSignIn) => animalsAdminPages.notifications.open({ attemptSignIn }));
     });
 
     test('lands on the sign in page when opening a page further in the journey', async ({ pages }) => {

@@ -269,7 +269,7 @@ test.describe('High-risk plants check and submit section', () => {
       await plantsPages.identificationNumbers.saveAndContinue.click();
       await plantsPages.dashboard.open();
       await plantsPages.dashboard.searchForReference(reference);
-      await expect(plantsPages.dashboard.statusTag(reference)).toHaveText('Amend');
+      await expect(plantsPages.dashboard.cardStatusTag(reference)).toHaveText('Amend');
       if (source === 'dashboard') {
         await plantsPages.dashboard
           .notificationCard(reference)

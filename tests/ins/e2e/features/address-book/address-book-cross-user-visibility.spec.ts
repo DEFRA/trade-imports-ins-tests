@@ -17,7 +17,7 @@ test.describe('Address book cross-user visibility', () => {
       phone: '01228 555 0102',
       email: 'cross-user@example.co.uk',
     });
-    await insPages.addressBookAdd.save();
+    await insPages.addressBookAdd.saveAndContinue();
     await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
 
     // browser.newContext() inherits the test's storageState; Sarah must start cold.

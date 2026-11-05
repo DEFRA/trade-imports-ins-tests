@@ -12,7 +12,7 @@ test.describe('Import notification submitted page', { tag: '@duplicated-in-front
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.confirmation);
   });
 
-  test('lists the ITAHC as still to upload when no document was uploaded', async ({ animalsPages }) => {
+  test('lists the ITAHC as still to upload when no document was uploaded', { tag: '@cross-browser' }, async ({ animalsPages }) => {
     await expect(animalsPages.confirmation.outstandingItems).toHaveText(ITAHC_STILL_TO_UPLOAD);
   });
 

@@ -34,8 +34,8 @@ test.describe('Outbox event replay', { tag: '@compose' }, () => {
 
     await test.step('replays all events and shows success banner', async () => {
       await animalsAdminPages.outboxEvents.btnReplay.click();
-      await expect(animalsAdminPages.outboxEvents.bannerSuccess).toBeVisible();
-      await expect(animalsAdminPages.outboxEvents.bannerSuccess).toContainText(
+      await expect(animalsAdminPages.outboxEvents.successBanner).toBeVisible();
+      await expect(animalsAdminPages.outboxEvents.successBanner).toContainText(
         'All outbox events have been re-published to the SNS topic.',
       );
     });
@@ -56,7 +56,7 @@ test.describe('Outbox event replay', { tag: '@compose' }, () => {
       const replayedEventCount = await animalsAdminPages.outboxEvents.tableRows.count();
 
       await animalsAdminPages.outboxEvents.btnReplay.click();
-      await expect(animalsAdminPages.outboxEvents.bannerSuccess).toBeVisible();
+      await expect(animalsAdminPages.outboxEvents.successBanner).toBeVisible();
 
       const client = new MongoDbClient();
 
