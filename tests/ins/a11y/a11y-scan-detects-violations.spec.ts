@@ -1,24 +1,5 @@
-import type { Page } from '@playwright/test';
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
-import { scanPage } from '@utils/a11y-utils';
-
-const injectUnnamedButton = (page: Page): Promise<void> =>
-  page.evaluate(() => {
-    document.body.append(document.createElement('button'));
-  });
-
-const injectAdjacentSmallTargets = (page: Page): Promise<void> =>
-  page.evaluate(() => {
-    const smallTargets = document.createElement('div');
-    for (const name of ['first', 'second']) {
-      const target = document.createElement('a');
-      target.href = '#';
-      target.setAttribute('aria-label', `Injected ${name} small target`);
-      target.style.cssText = 'display:inline-block;width:8px;height:8px;';
-      smallTargets.append(target);
-    }
-    document.body.append(smallTargets);
-  });
+import { injectAdjacentSmallTargets, injectUnnamedButton, scanPage } from '@utils/a11y-utils';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ insPages }) => {

@@ -3,11 +3,6 @@
 REPORT_NAME="${1:-playwright-report}"
 DIRECTORY="$PWD/$REPORT_NAME"
 
-# Uploads report.zip beside the report: the report directory plus, when they
-# exist, test-results/ (traces and failure screenshots) and allure-results/,
-# so one download holds everything for debugging a CDP run. Portal serves it
-# by editing the report URL to end in report.zip. A failure here only warns —
-# the report itself has already been published and must still pass.
 publish_report_zip() {
   zip_dir="$(mktemp -d)"
   zip_file="$zip_dir/report.zip"
