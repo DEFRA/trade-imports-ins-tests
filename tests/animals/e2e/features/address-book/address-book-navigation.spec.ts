@@ -22,8 +22,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
   }) => {
     test.slow();
 
-    const animalsBaseUrl = requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
-    const animalsOrigin = new URL(animalsBaseUrl).origin;
+    const animalsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')).origin;
     const insOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_INS_FRONTEND_BASE_URL')).origin;
 
     await animalsPages.dashboard.open();
@@ -36,7 +35,9 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
 
     await insPages.addressBookList.linkDashboard.click();
     await expect(insPages.dashboard.heading).toBeVisible();
-    await pages.page.locator(`a[href^="${animalsBaseUrl}"]`).first().click();
+    await insPages.dashboard.btnCreateNew.click();
+    await insPages.notificationType.option('Live animals').check();
+    await insPages.notificationType.continueToService();
 
     await expect(pages.page).toHaveURL((url) => url.origin === animalsOrigin && url.pathname.startsWith(SET_BASES.liveAnimals));
   });
