@@ -16,7 +16,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     runA11yScan,
   }) => {
     await test.step('Origin of import', async () => {
-      await animalsPages.overview.task('Where is this consignment coming from?').click();
+      await animalsJourney.openOriginFromOverview();
       await animalsJourney.fillOriginOfImport({ requiresRegionCode: 'Yes', internalReference: 'Imports456GB' });
       await runA11yScan({ exclude: govukConditionalRevealRadioOnOrigin });
       await animalsJourney.saveOriginOfImport();

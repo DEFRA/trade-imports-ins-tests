@@ -5,12 +5,12 @@ test.describe('Admin service', () => {
     await animalsAdminNavigation.toAdminDashboard();
   });
 
-  test('lands on the admin dashboard', { tag: '@smoke' }, async ({ pages, animalsAdminPages }) => {
+  test('lands on the admin dashboard', { tag: ['@smoke', '@cross-browser'] }, async ({ pages, animalsAdminPages }) => {
     await expect(pages.page).toHaveURL(animalsAdminPages.dashboard.expectedUrl);
     await expect(animalsAdminPages.dashboard.heading).toBeVisible();
   });
 
-  test('allows navigating to notifications area', async ({ pages, animalsAdminPages }) => {
+  test('allows navigating to notifications area', { tag: '@cross-browser' }, async ({ pages, animalsAdminPages }) => {
     await animalsAdminPages.dashboard.btnNotifications.click();
     await expect(pages.page).toHaveURL(animalsAdminPages.notifications.expectedUrl);
     await expect(animalsAdminPages.notifications.heading).toBeVisible();
