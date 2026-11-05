@@ -23,6 +23,10 @@ export class SelectedCommoditiesTable {
     return this.rowFor(species).getByRole('link', { name: new RegExp(`^Change\\s+${species.commodityCode}\\b`) });
   }
 
+  removeButtonFor(species: CommodityLine): Locator {
+    return this.rowFor(species).getByRole('button', { name: new RegExp(`^Remove\\s+${species.commodityCode}\\b`) });
+  }
+
   codeCell(row: Locator): Locator {
     return row.getByRole('cell').nth(0);
   }

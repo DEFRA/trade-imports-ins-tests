@@ -75,6 +75,27 @@ test.describe('Commodity details page with two species of one commodity', { tag:
   });
 });
 
+test.describe('Commodity details page removing a line while others are typed but not saved', { tag: '@duplicated-in-frontend' }, () => {
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toConsignmentDetails([commodityLines.cattle, commodityLines.domesticCat]);
+  });
+
+  test('keeps the number typed for the surviving species after removing another commodity', async ({ animalsPages }) => {
+    const { consignmentDetails } = animalsPages;
+    await consignmentDetails.fillAnimalCountFor(commodityLines.cattle, 11);
+    await consignmentDetails.fillAnimalCountFor(commodityLines.domesticCat, 22);
+    await consignmentDetails.selectedCommodities.removeButtonFor(commodityLines.cattle).click();
+
+    await expect(consignmentDetails.selectedCommodities.bodyRows).toHaveCount(1);
+    await expect(consignmentDetails.selectedCommodities.rowFor(commodityLines.domesticCat).getByRole('cell')).toHaveText([
+      commodityLines.domesticCat.commodityCode,
+      speciesLabel(commodityLines.domesticCat),
+      `Remove ${commodityLines.domesticCat.commodityCode} ${speciesLabel(commodityLines.domesticCat)}`,
+    ]);
+    await expect(await consignmentDetails.numberOfAnimalsFor(commodityLines.domesticCat)).toHaveValue('22');
+  });
+});
+
 test.describe('Commodity details page after counts are saved', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
     await animalsJourney.toConsignmentDetailsWithSavedCounts({ animals: '2', packages: '5' });
