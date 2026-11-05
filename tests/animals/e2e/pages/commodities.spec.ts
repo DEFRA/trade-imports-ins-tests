@@ -86,7 +86,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
 
   test('bolds the matched text inside the common name when a search matches it', async ({ animalsPages }) => {
     await animalsPages.commoditySelection.search(commodityLines.raccoonDog.searchTerm);
-    await expect(animalsPages.commoditySelection.speciesLabelMatch(commodityLines.raccoonDog)).toHaveText('Dog');
+    await expect(animalsPages.commoditySelection.boldLettersOfSpeciesLabel(commodityLines.raccoonDog)).toHaveText('Dog');
   });
 
   test('says so when nothing matches', async ({ pages, animalsPages }) => {

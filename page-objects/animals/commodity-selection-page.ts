@@ -66,7 +66,7 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.commodityGroup(species.commodityCode).getByRole('checkbox', { name: speciesLabel(species), exact: true });
   }
 
-  speciesLabelMatch(species: CommodityLine): Locator {
+  boldLettersOfSpeciesLabel(species: CommodityLine): Locator {
     return this.commodityGroup(species.commodityCode)
       .locator('label')
       .filter({ hasText: speciesLabel(species) })
