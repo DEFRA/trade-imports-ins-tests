@@ -3,6 +3,7 @@ import { portByCode } from '@resources/reference-data/reference-data';
 export const pointOfEntries = {
   aberdeen: portByCode('GB DYC'),
   aberdeenHarbour: portByCode('GB ABD'),
+  doverPort: portByCode('GB DVR'),
   eastMidlandsAirport: portByCode('GB EMA'),
   edinburgh: portByCode('GB EDI'),
   heathrowAirport: portByCode('GB LHR'),

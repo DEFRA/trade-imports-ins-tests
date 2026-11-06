@@ -1,7 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
-import { errorSummaryOn } from '@page-objects/shared/govuk-banners';
-import type { CommodityLine } from '@domain/animals/constants/commodity-lines';
+import { speciesLabel, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { SEARCH_HINT } from '@domain/animals/constants/commodity-selection-page';
 
 export class AnimalsCommoditySelectionPage extends NotificationPage {
@@ -59,8 +58,23 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.getByRole('group', { name: code, exact: true });
   }
 
+  get commodityGroups(): Locator {
+    return this.page.getByRole('group', { name: /^\d+$/ });
+  }
+
   species(species: CommodityLine): Locator {
-    return this.commodityGroup(species.commodityCode).getByRole('checkbox', { name: species.latinName, exact: true });
+    return this.commodityGroup(species.commodityCode).getByRole('checkbox', { name: speciesLabel(species), exact: true });
+  }
+
+  boldMatchInSpeciesLabel(species: CommodityLine): Locator {
+    return this.commodityGroup(species.commodityCode)
+      .locator('label')
+      .filter({ hasText: speciesLabel(species) })
+      .getByRole('strong');
+  }
+
+  boldMatchInCommodityHeading(code: string): Locator {
+    return this.commodityGroup(code).locator('legend').getByRole('strong');
   }
 
   async searchAndCheckSpecies(speciesList: CommodityLine[]): Promise<void> {
@@ -70,7 +84,19 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     }
   }
 
-  get errorSummary(): Locator {
-    return errorSummaryOn(this.page);
+  selectedCommodityHeading(code: string): Locator {
+    return this.selectedSummary.getByText(`${code}:`, { exact: true });
+  }
+
+  speciesEntry(species: CommodityLine): Locator {
+    return this.selectedSummary.getByRole('listitem').filter({ hasText: speciesLabel(species) });
+  }
+
+  removeButtonFor(species: CommodityLine): Locator {
+    return this.selectedSummary.getByRole('button', { name: `Remove ${speciesLabel(species)}`, exact: true });
+  }
+
+  async pressRemoveSpecies(species: CommodityLine): Promise<void> {
+    await this.removeButtonFor(species).click();
   }
 }

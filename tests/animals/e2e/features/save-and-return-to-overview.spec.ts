@@ -3,16 +3,12 @@ import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page
 import { SELECT_COMMODITY_ERROR } from '@domain/animals/constants/commodity-selection-page';
 import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { MEANS_OF_TRANSPORT_REQUIRED_MESSAGE } from '@domain/animals/constants/means-of-transport';
+import { importReasons } from '@domain/animals/constants/import-reasons';
+import { internalMarketPurposes } from '@domain/animals/constants/internal-market-purposes';
 
 const TO_DO = 'To do';
-const COMMODITY_SELECTION_TASK = 'What are you importing?';
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
-const TRANSIT_COUNTRIES_TASK = 'Transit countries';
-const IMPOSSIBLE_ARRIVAL_DATE = '31/2/2026';
 const ARRIVAL_DATE_ERROR = 'Enter a real arrival date';
-const COMMODITY_DETAILS_TASK = 'Commodity details';
-const PORT_OF_EXIT_ERROR = 'Select a port of exit';
-const DESTINATION_COUNTRY_ERROR = 'Select a destination country';
 
 test.describe('Save and return to overview', () => {
   test('main import reason: when a required answer is missing, refuses the save, names each missing answer and keeps the answer given', async ({
@@ -26,7 +22,7 @@ test.describe('Save and return to overview', () => {
     await animalsPages.importReason.saveAndReturnToOverview.click();
 
     await expect(animalsPages.importReason.heading).toBeVisible();
-    await expect(animalsPages.importReason.errorSummaryLinks).toHaveText([PORT_OF_EXIT_ERROR, DESTINATION_COUNTRY_ERROR]);
+    await expect(animalsPages.importReason.errorSummaryLinks).toHaveText(['Select a port of exit', 'Select a destination country']);
     await expect(animalsPages.importReason.reason('Transit')).toBeChecked();
     await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, IMPORT_REASON_TASK)).toHaveText(TO_DO);
   });
@@ -37,7 +33,7 @@ test.describe('Save and return to overview', () => {
   }) => {
     await animalsJourney.toArrivalDetails();
     await animalsPages.arrivalDetails.chooseMeansOfTransport(MANDATORY_ANSWERS.meansOfTransport.display);
-    await animalsPages.arrivalDetails.fillArrivalDate(IMPOSSIBLE_ARRIVAL_DATE);
+    await animalsPages.arrivalDetails.fillArrivalDate('31/2/2026');
 
     await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
 
@@ -78,7 +74,7 @@ test.describe('Save and return to overview', () => {
     await animalsPages.transitedCountries.saveAndReturnToOverview.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
-    await animalsPages.overview.openTaskAfterReopening(referenceNumber, TRANSIT_COUNTRIES_TASK);
+    await animalsPages.overview.openTaskAfterReopening(referenceNumber, 'Transit countries');
     await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText(countryNames);
   });
 
@@ -94,7 +90,7 @@ test.describe('Save and return to overview', () => {
     await expect(animalsPages.consignmentDetails.errorSummary).toBeVisible();
     await expect(animalsPages.consignmentDetails.animalsRequiredErrorLink).toBeVisible();
     const referenceNumber = animalsPages.consignmentDetails.referenceNumberFromUrl();
-    await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, COMMODITY_DETAILS_TASK)).toHaveText(TO_DO);
+    await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, 'Commodity details')).toHaveText(TO_DO);
   });
 
   test('what are you importing: when nothing is chosen, refuses the save with "Select a commodity" and leaves the task not complete', async ({
@@ -108,6 +104,34 @@ test.describe('Save and return to overview', () => {
 
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await expect(animalsPages.commoditySelection.errorSummaryLinks).toHaveText([SELECT_COMMODITY_ERROR]);
-    await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, COMMODITY_SELECTION_TASK)).toHaveText(TO_DO);
+    await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, 'What are you importing?')).toHaveText(TO_DO);
+  });
+
+  test('additional details: accepts the save with both questions left blank and shows the task still to do', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.toAdditionalDetails();
+
+    await animalsPages.additionalDetails.saveAndReturnToOverview.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.overview.taskStatus('Additional details')).toHaveText(TO_DO);
+  });
+
+  test('main import reason: inside the opening run, saves the answer and shows the overview rather than commodity details', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    const referenceNumber = await animalsJourney.walkOpeningRunToImportReason();
+    await animalsPages.importReason.reason(importReasons.internalMarket.display).check();
+    await animalsPages.importReason.purpose(internalMarketPurposes.breeding.display).check();
+
+    await animalsPages.importReason.saveAndReturnToOverview.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.overview.openTaskAfterReopening(referenceNumber, IMPORT_REASON_TASK);
+    await expect(animalsPages.importReason.reason(importReasons.internalMarket.display)).toBeChecked();
+    await expect(animalsPages.importReason.purpose(internalMarketPurposes.breeding.display)).toBeChecked();
   });
 });

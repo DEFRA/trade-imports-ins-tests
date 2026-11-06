@@ -111,6 +111,23 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
     await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue('');
   });
 
+  test('saves a means of transport alone, leaving the other arrival answers blank', async ({ animalsPages }) => {
+    const referenceNumber = animalsPages.arrivalDetails.referenceNumberFromUrl();
+    await animalsPages.arrivalDetails.chooseMeansOfTransport(meansOfTransport.roadVehicle.display);
+    await animalsPages.arrivalDetails.saveAndContinue.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.overview.taskStatus('Arrival details')).toHaveText('To do');
+
+    await animalsPages.arrivalDetails.open(referenceNumber);
+    await expect(animalsPages.arrivalDetails.errorSummary).toHaveCount(0);
+    await expect(animalsPages.arrivalDetails.meansOfTransport).toHaveValue(meansOfTransport.roadVehicle.value);
+    await expect(animalsPages.arrivalDetails.portOfEntry.field).toHaveValue('');
+    await expect(animalsPages.arrivalDetails.arrivalDate).toHaveValue('');
+    await expect(animalsPages.arrivalDetails.transportIdentification).toHaveValue('');
+    await expect(animalsPages.arrivalDetails.transportDocumentReference).toHaveValue('');
+  });
+
   test('restricts the date picker to one week back and six months ahead', async ({ animalsPages }) => {
     await expect(animalsPages.arrivalDetails.arrivalDatePicker.root).toHaveAttribute('data-min-date', EARLIEST_ALLOWED);
     await expect(animalsPages.arrivalDetails.arrivalDatePicker.root).toHaveAttribute('data-max-date', LATEST_ALLOWED);

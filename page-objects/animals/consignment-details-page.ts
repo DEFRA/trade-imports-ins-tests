@@ -1,8 +1,7 @@
 import { type Locator } from '@playwright/test';
-import { type CommodityLine } from '@domain/animals/constants/commodity-lines';
+import { speciesLabel, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { SelectedCommoditiesTable } from '@page-objects/animals/selected-commodities-table';
-import { errorSummaryOn } from '@page-objects/shared/govuk-banners';
 
 export class AnimalsConsignmentDetailsPage extends NotificationPage {
   readonly selectedCommodities = new SelectedCommoditiesTable(this.page);
@@ -27,12 +26,14 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
     return this.page.getByRole('link', { name: 'Add another commodity' });
   }
 
-  get errorSummary(): Locator {
-    return errorSummaryOn(this.page);
-  }
-
   get animalsRequiredErrorLink(): Locator {
     return this.page.getByRole('link', { name: 'Enter the number of animals' });
+  }
+
+  get animalsAboveMaxErrorLink(): Locator {
+    return this.page.getByRole('link', {
+      name: 'Number of animals must be 2,147,483,647 or fewer',
+    });
   }
 
   get caption(): Locator {
@@ -60,10 +61,11 @@ export class AnimalsConsignmentDetailsPage extends NotificationPage {
   }
 
   private async speciesPosition(species: CommodityLine): Promise<number> {
+    const label = speciesLabel(species);
     const speciesHeadings = await this.page.getByRole('heading', { level: 3 }).allTextContents();
-    const index = speciesHeadings.indexOf(species.latinName);
+    const index = speciesHeadings.indexOf(label);
     if (index === -1) {
-      throw new Error(`No "${species.latinName}" heading among: ${speciesHeadings.join(', ')}`);
+      throw new Error(`No "${label}" heading among: ${speciesHeadings.join(', ')}`);
     }
     return index;
   }

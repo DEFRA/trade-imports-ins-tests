@@ -1,5 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
-import { type CommodityLine } from '@domain/animals/constants/commodity-lines';
+import { speciesLabel, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { type PermanentAddressAnswer } from '@domain/animals/constants/journey-commodity-line-answers';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { SelectedCommoditiesTable } from '@page-objects/animals/selected-commodities-table';
@@ -33,7 +33,7 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
 
   enterDetailsCounterHeading(species: CommodityLine, current: number, total: number): Locator {
     return this.page.getByRole('heading', {
-      name: `Enter details for ${species.latinName} ${current} of ${total}`,
+      name: `Enter details for ${speciesLabel(species)} ${current} of ${total}`,
       exact: true,
     });
   }
@@ -63,7 +63,7 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
   }
 
   speciesCard(species: CommodityLine): Locator {
-    return this.page.getByRole('region', { name: species.latinName, exact: true });
+    return this.page.getByRole('region', { name: speciesLabel(species), exact: true });
   }
 
   savedAnimalsRows(species: CommodityLine): Locator {
@@ -73,7 +73,7 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
   savedAnimalRow(species: CommodityLine, number: number): Locator {
     return this.speciesCard(species)
       .getByRole('row')
-      .filter({ has: this.page.getByRole('cell', { name: `${species.latinName} ${number}`, exact: true }) });
+      .filter({ has: this.page.getByRole('cell', { name: `${speciesLabel(species)} ${number}`, exact: true }) });
   }
 
   identifierColumn(name: string): Locator {

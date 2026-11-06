@@ -208,25 +208,30 @@ runs out, rather than to a last page worked out before it started.
 ### Commodity lines in the animals specs
 
 `domain/animals/constants/commodity-lines.ts` names each line a spec chooses
-by its CN commodity code and Latin name. The commodity page labels each tick
-box with the Latin name alone, under a heading of the code, and one Latin name
-can sit under several codes (`Bos taurus` is under four), so a line needs both.
-The stack's MDM stub answers only the searches saved from MDM, so each line's
+by its search term, its CN commodity code, its scientific name and the common
+name MDM's search gives it. The commodity page labels each tick box with the
+species' scientific name followed by its common name in round brackets, under
+a heading of the commodity code, and with the scientific name alone where the
+reference data holds no common name for that species. One scientific name can
+sit under several codes (`Bos taurus` is under four), so a line needs the code
+as well as the name. The file also owns the one helper that builds a label
+from a scientific-and-common-name pair, and the one declaration of that pair
+type, which `ReferenceDataApiClient` imports rather than redeclaring. The
+stack's MDM stub answers only the searches saved from MDM, so each line's
 `searchTerm` is a saved term whose first page of results lists that line; the
 first page is the frontend's 100 results. The
 frontend saves only a species its search showed, so a seeded journey posts the
-search before it posts the chosen species. A spec that needs what MDM says
-about a species, such as its common name, reads it from reference-data's
-commodity search through `ReferenceDataApiClient`, rather than from a copy of
-it that goes stale.
+search before it posts the chosen species. A constant line's own common name,
+copied from the stub's canned responses, is what a spec builds an expected
+label from; a spec that instead needs reference-data's own live answer for a
+species, to prove the common name still travels end to end, reads it through
+`ReferenceDataApiClient` and hands it to the same label helper, rather than
+keeping a second copy that could go stale.
 
 Stored commodity names for the codes the specs drive live in
 `domain/animals/constants/commodity-names.ts`. The INS aggregated notification
 commodity label uses the first GBN-AG trade line description (for example
-`Live bovine animals`). The outbox and PIMS Dynamics specs expect
-`GBN_AG_CATTLE_COMMON_NAME` (`domain/animals/constants/gbn-ag.ts`,
-`Domestic Cattle`) because the event's Bos taurus common name differs from
-reference-data's search result for that species under `0102`.
+`Live bovine animals`).
 
 ### DLQ specs in animals-admin
 
