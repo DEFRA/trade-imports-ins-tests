@@ -75,7 +75,10 @@ test.describe('Address book edit', () => {
     await insPages.addressBookEdit.open(created.id);
     await insPages.addressBookEdit.inputName.fill(renamed);
     await insPages.addressBookEdit.save();
+    await expect(insPages.addressBookList.successBanner).toContainText(`${renamed} address updated`);
+    await insPages.addressBookList.search(renamed, { submitWith: 'button' });
 
+    await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
     await expect(insPages.addressBookList.viewLink(renamed)).toHaveAttribute('href', `/address-book/${created.id}`);
   });
 
