@@ -4,12 +4,10 @@ import { WHOLE_REFERENCE_NUMBER_PATTERN as PLANTS_REFERENCE } from '@domain/plan
 import type { InsNotificationTypePage } from '@page-objects/ins/notification-type-page';
 import { originOf, requireBaseUrl } from '@page-objects/shared/base-page';
 import {
-  GERMINAL_PRODUCTS,
   LIVE_ANIMALS,
   NOTIFICATION_TYPE_OPTIONS,
   NOTIFICATION_TYPE_REQUIRED_ERROR,
   PLANTS_OPTIONS,
-  type NotificationTypeOption,
 } from '@domain/ins/constants/notification-types';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { recordMainFrameNavigationPaths } from '@utils/playwright/main-frame-navigations';
@@ -18,7 +16,6 @@ import type { Page } from '@playwright/test';
 
 import { test, expect } from '@fixtures';
 import { authCookieNameFor } from '@fixtures/auth-state';
-import type { PageFixtures } from '@fixtures/ui';
 
 const QUESTION_TITLE = 'What are you importing? - Import notification service - GOV.UK';
 
@@ -35,14 +32,10 @@ const expectOptionsListedInOrderAndUnselected = async (notificationTypePage: Ins
   }
 };
 
-const recordHandOverNavigations = (page: Page) => {
-  const animalsOrigin = originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
-  return {
-    animalsOrigin,
-    animalsNavigations: recordMainFrameNavigationPaths(page, animalsOrigin),
-    plantsNavigations: recordMainFrameNavigationPaths(page, originOf('TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL')),
-  };
-};
+const recordHandOverNavigations = (page: Page) => ({
+  animalsNavigations: recordMainFrameNavigationPaths(page, originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')),
+  plantsNavigations: recordMainFrameNavigationPaths(page, originOf('TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL')),
+});
 
 test.describe('INS notification type question', { tag: ['@animals-frontend', '@plants-frontend'] }, () => {
   test('Back from the question returns to the INS home and neither journey frontend is visited', async ({ pages, insPages }) => {
@@ -60,7 +53,7 @@ test.describe('INS notification type question', { tag: ['@animals-frontend', '@p
     expect(plantsNavigations).toEqual([]);
   });
 
-  test('the question offers five unselected options under the caption, one Continue button and the alpha banner', async ({
+  test('the question offers four unselected options under the caption, one Continue button and the alpha banner', async ({
     pages,
     insPages,
   }) => {
@@ -119,21 +112,6 @@ test.describe('INS notification type question', { tag: ['@animals-frontend', '@p
     expect(plantsNavigations).toEqual([]);
   });
 
-  test('choosing Germinal products goes to the germinal products start in the animals service and reaches no live animals path', async ({
-    insPages,
-    pages,
-  }) => {
-    const { animalsOrigin, animalsNavigations, plantsNavigations } = recordHandOverNavigations(pages.page);
-    const notificationTypePage = insPages.notificationType;
-    await notificationTypePage.open();
-
-    await notificationTypePage.chooseNotificationType(GERMINAL_PRODUCTS);
-
-    await expect(pages.page).toHaveURL(`${animalsOrigin}${SET_BASES.germinalProducts}/start`);
-    expect(animalsNavigations).toEqual([`${SET_BASES.germinalProducts}/start`]);
-    expect(plantsNavigations).toEqual([]);
-  });
-
   for (const plantsOption of PLANTS_OPTIONS) {
     test(`choosing ${plantsOption.label} signs the user in to the plants service and opens a new plants draft at its first page`, async ({
       insPages,
@@ -183,6 +161,7 @@ test.describe('Live animals notification started from the INS question', { tag: 
   const ORIGIN_TASK = 'Where is this consignment coming from?';
   const COMMODITY_TASK = 'What are you importing?';
   const SELECTED_SPECIES = MANDATORY_ANSWERS.commodityLines.map((line) => line.species);
+  const PLANTS_FOR_PLANTING = PLANTS_OPTIONS.find(({ value }) => value === 'plants-for-planting');
 
   test('Back from origin opens the INS question with Live animals chosen alone', async ({
     insPages,
@@ -227,54 +206,33 @@ test.describe('Live animals notification started from the INS question', { tag: 
     expect(animalsNavigations).toEqual([animalsPages.originOfImport.expectedUrl(reference)]);
   });
 
-  const landingCases: {
-    type: NotificationTypeOption;
-    expectLanding: (landing: Pick<PageFixtures, 'pages' | 'plantsPages'>) => Promise<void>;
-  }[] = [
-    {
-      type: PLANTS_OPTIONS[0],
-      expectLanding: async ({ plantsPages }) => {
-        await expect(plantsPages.commodityType.heading).toBeVisible();
-      },
-    },
-    {
-      type: GERMINAL_PRODUCTS,
-      expectLanding: async ({ pages }) => {
-        await expect(pages.page).toHaveURL(`${originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')}${SET_BASES.germinalProducts}/start`);
-      },
-    },
-  ];
+  test(`choosing ${PLANTS_FOR_PLANTING.label} instead leaves the live animals notification with its reference, Draft status and answers`, async ({
+    insPages,
+    animalsPages,
+    plantsPages,
+    animalsJourney,
+  }) => {
+    test.slow();
+    const reference = await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType, LIVE_ANIMALS);
+    await animalsJourney.answerOriginAndSelectSpecies(SELECTED_SPECIES);
+    await animalsPages.originOfImport.open(reference);
+    await animalsJourney.backToInsTypeQuestionAndChoose(insPages.notificationType, PLANTS_FOR_PLANTING);
 
-  for (const { type, expectLanding } of landingCases) {
-    test(`choosing ${type.label} instead leaves the live animals notification with its reference, Draft status and answers`, async ({
-      insPages,
-      animalsPages,
-      plantsPages,
-      animalsJourney,
-      pages,
-    }) => {
-      test.slow();
-      const reference = await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType, LIVE_ANIMALS);
-      await animalsJourney.answerOriginAndSelectSpecies(SELECTED_SPECIES);
-      await animalsPages.originOfImport.open(reference);
-      await animalsJourney.backToInsTypeQuestionAndChoose(insPages.notificationType, type);
-
-      await expectLanding({ pages, plantsPages });
-      await animalsPages.dashboard.open();
-      await animalsPages.dashboard.searchForReference(reference);
-      await expect(animalsPages.dashboard.notificationCard(reference)).toBeVisible();
-      await expect(animalsPages.dashboard.cardStatusTag(reference)).toHaveText('Draft');
-      await animalsPages.overview.open(reference);
-      await expect(animalsPages.overview.taskStatus(ORIGIN_TASK)).toHaveText('Complete');
-      await expect(animalsPages.overview.taskStatus(COMMODITY_TASK)).toHaveText('Complete');
-      await animalsPages.originOfImport.open(reference);
-      await expect(animalsPages.originOfImport.country.field).toHaveValue(MANDATORY_ANSWERS.countryCode.display);
-      await animalsPages.commoditySelection.open(reference);
-      for (const species of SELECTED_SPECIES) {
-        await expect(animalsPages.commoditySelection.selectedSummary).toContainText(species.latinName);
-      }
-    });
-  }
+    await expect(plantsPages.commodityType.heading).toBeVisible();
+    await animalsPages.dashboard.open();
+    await animalsPages.dashboard.searchForReference(reference);
+    await expect(animalsPages.dashboard.notificationCard(reference)).toBeVisible();
+    await expect(animalsPages.dashboard.cardStatusTag(reference)).toHaveText('Draft');
+    await animalsPages.overview.open(reference);
+    await expect(animalsPages.overview.taskStatus(ORIGIN_TASK)).toHaveText('Complete');
+    await expect(animalsPages.overview.taskStatus(COMMODITY_TASK)).toHaveText('Complete');
+    await animalsPages.originOfImport.open(reference);
+    await expect(animalsPages.originOfImport.country.field).toHaveValue(MANDATORY_ANSWERS.countryCode.display);
+    await animalsPages.commoditySelection.open(reference);
+    for (const species of SELECTED_SPECIES) {
+      await expect(animalsPages.commoditySelection.selectedSummary).toContainText(species.latinName);
+    }
+  });
 
   test('Create new on the INS home after the round trip shows every option unselected', async ({
     insPages,

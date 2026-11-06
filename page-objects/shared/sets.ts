@@ -1,6 +1,5 @@
 export const SET_BASES = {
   liveAnimals: '/live-animals',
-  germinalProducts: '/germinal-products',
   highRiskPlants: '/high-risk-plants',
 } as const;
 
