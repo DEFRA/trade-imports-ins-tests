@@ -12,6 +12,8 @@ export const getAnimalsFrontendBaseUrl = (): string => getServiceBaseUrl('TRADE_
 
 export const getBackendBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_ANIMALS_BACKEND_URL');
 
+export const getPlantsBackendBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_PLANTS_BACKEND_URL');
+
 export const getAddressBookBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_ADDRESS_BOOK_URL');
 
 export const getReferenceDataBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_REFERENCE_DATA_URL');
