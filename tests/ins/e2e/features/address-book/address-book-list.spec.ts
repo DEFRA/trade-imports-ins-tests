@@ -118,7 +118,7 @@ test.describe('Address book list', () => {
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-8 of 9');
     await expect(insPages.addressBookList.bodyRows).toHaveCount(8);
-    await insPages.addressBookList.pageLink(2).click();
+    await insPages.addressBookList.paginationPageLink(2).click();
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 9-9 of 9');
     await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
   });

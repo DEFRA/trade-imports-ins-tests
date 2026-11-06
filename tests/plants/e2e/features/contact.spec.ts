@@ -37,7 +37,7 @@ test.describe('High-risk plants contact', () => {
       await expect(contact.resultsSummary).toHaveText('Showing 5 out of 6 results');
       await expect(contact.address(target.name)).toHaveCount(0);
 
-      await contact.pageLink(2).click();
+      await contact.paginationPageLink(2).click();
       await expect(contact.resultsSummary).toHaveText('Showing 1 out of 6 results');
 
       await contact.address(target.name).check();
