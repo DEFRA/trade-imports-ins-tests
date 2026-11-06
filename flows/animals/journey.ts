@@ -18,6 +18,8 @@ import {
   type PartyAnswers,
 } from '@domain/animals/constants/journey-options';
 import { type CommodityLineAnswer } from '@domain/animals/constants/journey-commodity-line-answers';
+import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
+import { internalMarketPurposes } from '@domain/animals/constants/internal-market-purposes';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
@@ -27,6 +29,8 @@ import { getRelativeAppDateText } from '@utils/date-utils';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
+import { importReasons } from '@domain/animals/constants/import-reasons';
+import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 
 export type ArrivalDetailsAnswer = {
   date?: string;
@@ -63,6 +67,20 @@ export const OPENING_RUN_TASKS = [
   'Identification details',
   'Additional details',
   'Arrival details',
+  'Transport details',
+  'Upload documents',
+  'Roles and addresses',
+  'Contact address for this consignment',
+] as const;
+
+export const OPENING_RUN_TASKS_OVERLAND_WITHOUT_IDENTIFICATION = [
+  'Where is this consignment coming from?',
+  'What are you importing?',
+  IMPORT_REASON_TASK,
+  'Commodity details',
+  'Additional details',
+  'Arrival details',
+  'Transit countries',
   'Transport details',
   'Upload documents',
   'Roles and addresses',
@@ -226,6 +244,19 @@ export class AnimalsJourney {
   private async saveCountsAndReturnToOverview(): Promise<void> {
     await this.animalsPages.consignmentDetails.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+  }
+
+  private async openReviewFromOverview(): Promise<void> {
+    await this.animalsPages.overview.reviewAndSubmitButton.click();
+    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+  }
+
+  private async chooseSpeciesAndSaveAnimalCountsToOverview(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
+    await this.toConsignmentDetails(speciesCounts.map(({ species }) => species));
+    for (const { species, animalCount } of speciesCounts) {
+      await this.animalsPages.consignmentDetails.fillAnimalCountFor(species, animalCount);
+    }
+    await this.saveCountsAndReturnToOverview();
   }
 
   private currentReferenceNumber(): string {
@@ -501,12 +532,13 @@ export class AnimalsJourney {
   }
 
   async toAnimalIdentificationWithCounts(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
-    await this.toConsignmentDetails(speciesCounts.map(({ species }) => species));
-    for (const { species, animalCount } of speciesCounts) {
-      await this.animalsPages.consignmentDetails.fillAnimalCountFor(species, animalCount);
-    }
-    await this.saveCountsAndReturnToOverview();
+    await this.chooseSpeciesAndSaveAnimalCountsToOverview(speciesCounts);
     await this.openIdentificationFromOverview();
+  }
+
+  async toReviewWithAnimalCounts(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
+    await this.chooseSpeciesAndSaveAnimalCountsToOverview(speciesCounts);
+    await this.openReviewFromOverview();
   }
 
   async saveAnimalWithPermanentAddress({ passportNumber, permanentAddress }: AnimalWithPermanentAddress): Promise<void> {
@@ -525,8 +557,8 @@ export class AnimalsJourney {
 
   async toAdditionalDetails(): Promise<void> {
     await this.toImportReason();
-    await this.animalsPages.importReason.reason('Internal market').check();
-    await this.animalsPages.importReason.purpose('Breeding').check();
+    await this.animalsPages.importReason.reason(importReasons.internalMarket.display).check();
+    await this.animalsPages.importReason.purpose(internalMarketPurposes.breeding.display).check();
     await this.animalsPages.importReason.saveAndContinue.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.openAdditionalDetailsFromOverview();
@@ -627,8 +659,7 @@ export class AnimalsJourney {
   async toReview(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     if (!this.context.referenceNumber) await this.startNotification();
     await this.completeAnswerSections(answers);
-    await this.animalsPages.overview.reviewAndSubmitButton.click();
-    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.openReviewFromOverview();
   }
 
   async toDeclaration(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
@@ -642,13 +673,22 @@ export class AnimalsJourney {
     await this.confirmDeclaration();
   }
 
-  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
-    const pages = this.animalsPages;
+  async walkOpeningRunToImportReason(
+    originOptions: OriginOptions = {},
+    species: CommodityLine[] = [MANDATORY_ANSWERS.commodityLines[0].species],
+  ): Promise<string> {
     const referenceNumber = await this.createNotificationAtOrigin();
 
-    await this.answerOriginAndSelectSpecies([MANDATORY_ANSWERS.commodityLines[0].species]);
+    await this.answerOriginAndSelectSpecies(species, originOptions);
 
-    await pages.importReason.heading.waitFor(pageLoadWait);
+    await this.animalsPages.importReason.heading.waitFor(pageLoadWait);
+    return referenceNumber;
+  }
+
+  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+    const pages = this.animalsPages;
+    const referenceNumber = await this.walkOpeningRunToImportReason();
+
     await pages.importReason.saveAndContinue.click();
 
     await pages.consignmentDetails.heading.waitFor(pageLoadWait);
@@ -675,18 +715,44 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
+  private async walkFromTransporterToReview(
+    transporter: string,
+    document: AccompanyingDocumentAnswer,
+    { addCph }: { addCph: boolean },
+  ): Promise<void> {
+    const pages = this.animalsPages;
+
+    await pages.transporter.heading.waitFor(pageLoadWait);
+    await pages.transporter.transporter(transporter).check();
+    await pages.transporter.saveAndContinue.click();
+
+    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
+    await this.uploadDocumentAndWaitForScan(document);
+    await pages.accompanyingDocuments.continueButton.click();
+
+    await pages.addresses.heading.waitFor(pageLoadWait);
+    await this.addFiveParties();
+    if (addCph) {
+      await this.addCphAndLeaveAddresses();
+    } else {
+      await pages.addresses.continueButton.click();
+    }
+
+    await pages.contactAddress.heading.waitFor(pageLoadWait);
+    await this.chooseContactAddress();
+
+    await pages.notificationView.heading.waitFor(pageLoadWait);
+  }
+
   async walkOpeningRunCattleByAir(document: AccompanyingDocumentAnswer): Promise<string> {
     const pages = this.animalsPages;
-    const referenceNumber = await this.createNotificationAtOrigin();
-
-    await this.answerOriginAndSelectSpecies([MANDATORY_ANSWERS.commodityLines[0].species], {
+    const referenceNumber = await this.walkOpeningRunToImportReason({
       requiresRegionCode: 'Yes',
       internalReference: 'CATTLE-2026-01',
     });
 
-    await pages.importReason.heading.waitFor(pageLoadWait);
-    await pages.importReason.reason('Internal market').check();
-    await pages.importReason.purpose('Breeding').check();
+    await pages.importReason.reason(importReasons.internalMarket.display).check();
+    await pages.importReason.purpose(internalMarketPurposes.breeding.display).check();
     await pages.importReason.saveAndContinue.click();
 
     await pages.consignmentDetails.heading.waitFor(pageLoadWait);
@@ -706,8 +772,8 @@ export class AnimalsJourney {
     await pages.animalIdentification.saveAndContinue.click();
 
     await pages.additionalDetails.heading.waitFor(pageLoadWait);
-    await pages.additionalDetails.certifiedFor('Further keeping').check();
-    await pages.additionalDetails.containsUnweanedAnimals('No').check();
+    await pages.additionalDetails.certifiedFor(certificationPurposes.furtherKeeping.display).check();
+    await pages.additionalDetails.containsUnweanedAnimals(yesNoValues.no).check();
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
@@ -719,33 +785,15 @@ export class AnimalsJourney {
     });
     await pages.arrivalDetails.saveAndContinue.click();
 
-    await pages.transporter.heading.waitFor(pageLoadWait);
-    await pages.transporter.transporter(MANDATORY_ANSWERS.transporter.display).check();
-    await pages.transporter.saveAndContinue.click();
-
-    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await this.uploadDocumentAndWaitForScan(document);
-    await pages.accompanyingDocuments.continueButton.click();
-
-    await pages.addresses.heading.waitFor(pageLoadWait);
-    await this.addFiveParties();
-    await this.addCphAndLeaveAddresses();
-
-    await pages.contactAddress.heading.waitFor(pageLoadWait);
-    await this.chooseContactAddress();
-
-    await pages.notificationView.heading.waitFor(pageLoadWait);
+    await this.walkFromTransporterToReview(MANDATORY_ANSWERS.transporter.display, document, { addCph: true });
     return referenceNumber;
   }
 
   async walkOpeningRunHorseBySea(document: AccompanyingDocumentAnswer): Promise<string> {
     const pages = this.animalsPages;
-    const referenceNumber = await this.createNotificationAtOrigin();
+    const referenceNumber = await this.walkOpeningRunToImportReason({ countryCode: countryCodes.eu.ireland }, [commodityLines.horse]);
 
-    await this.answerOriginAndSelectSpecies([commodityLines.horse], { countryCode: countryCodes.eu.ireland });
-
-    await pages.importReason.heading.waitFor(pageLoadWait);
-    await pages.importReason.reason('Temporary admission horses').check();
+    await pages.importReason.reason(importReasons.temporaryAdmissionHorses.display).check();
     await pages.importReason.temporaryAdmissionExitDate.fill(TEMPORARY_ADMISSION_EXIT_DATE);
     await pages.importReason.selectTemporaryAdmissionPortOfExit('GB HLY');
     await pages.importReason.saveAndContinue.click();
@@ -762,7 +810,8 @@ export class AnimalsJourney {
     await pages.animalIdentification.saveAndContinue.click();
 
     await pages.additionalDetails.heading.waitFor(pageLoadWait);
-    await pages.additionalDetails.certifiedFor('Registered equine animal').check();
+    await pages.additionalDetails.certifiedFor(certificationPurposes.registeredEquineAnimal.display).check();
+    await pages.additionalDetails.containsUnweanedAnimals(yesNoValues.no).check();
     await pages.additionalDetails.saveAndContinue.click();
 
     await pages.arrivalDetails.heading.waitFor(pageLoadWait);
@@ -774,22 +823,42 @@ export class AnimalsJourney {
     });
     await pages.arrivalDetails.saveAndContinue.click();
 
-    await pages.transporter.heading.waitFor(pageLoadWait);
-    await pages.transporter.transporter(HORSE_TRANSPORTER).check();
-    await pages.transporter.saveAndContinue.click();
+    await this.walkFromTransporterToReview(HORSE_TRANSPORTER, document, { addCph: false });
+    return referenceNumber;
+  }
 
-    await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await this.uploadDocumentAndWaitForScan(document);
-    await pages.accompanyingDocuments.continueButton.click();
+  async walkOpeningRunPoultryByRail(document: AccompanyingDocumentAnswer): Promise<string> {
+    const pages = this.animalsPages;
+    const referenceNumber = await this.walkOpeningRunToImportReason({ countryCode: countryCodes.eu.germany }, [commodityLines.chicken]);
 
-    await pages.addresses.heading.waitFor(pageLoadWait);
-    await this.addFiveParties();
-    await pages.addresses.continueButton.click();
+    await pages.importReason.reason(importReasons.transit.display).check();
+    await pages.importReason.selectTransitPortOfExit('GB HLY');
+    await pages.importReason.selectTransitDestinationCountry(countryCodes.eu.ireland.value);
+    await pages.importReason.saveAndContinue.click();
 
-    await pages.contactAddress.heading.waitFor(pageLoadWait);
-    await this.chooseContactAddress();
+    await pages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await pages.consignmentDetails.numberOfAnimals.fill('400');
+    await pages.consignmentDetails.saveAndContinue.click();
 
-    await pages.notificationView.heading.waitFor(pageLoadWait);
+    await pages.additionalDetails.heading.waitFor(pageLoadWait);
+    await pages.additionalDetails.certifiedFor(certificationPurposes.slaughter.display).check();
+    await pages.additionalDetails.saveAndContinue.click();
+
+    await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await this.fillArrivalDetails({
+      port: pointOfEntries.doverPort.display,
+      means: meansOfTransport.railway.display,
+      transportId: 'WAGON-2026-0001',
+      documentReference: 'CIM-2026-0001',
+    });
+    await pages.arrivalDetails.saveAndContinue.click();
+
+    await pages.transitedCountries.heading.waitFor(pageLoadWait);
+    await pages.transitedCountries.addCountry(countryCodes.eu.belgium.display);
+    await pages.transitedCountries.addCountry(countryCodes.eu.france.display);
+    await pages.transitedCountries.saveAndContinue.click();
+
+    await this.walkFromTransporterToReview(MANDATORY_ANSWERS.transporter.display, document, { addCph: true });
     return referenceNumber;
   }
 
@@ -805,8 +874,7 @@ export class AnimalsJourney {
   }
 
   private async fromOverviewToDeclaration(): Promise<void> {
-    await this.animalsPages.overview.reviewAndSubmitButton.click();
-    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.openReviewFromOverview();
     await this.continueFromReviewToDeclaration();
   }
 

@@ -1,6 +1,7 @@
 import type { FormFields } from '@adapters/http/frontend-form-client';
 import { type CommodityLineAnswer } from '@domain/animals/constants/journey-commodity-line-answers';
 import { assertConsistentAnswers, type NotificationAnswers } from '@domain/animals/constants/journey-options';
+import { speciesCheckboxValue } from '@domain/animals/constants/commodity-lines';
 
 export type PartyRole = 'placeOfOrigin' | 'consignor' | 'consignee' | 'importer' | 'placeOfDestination' | 'contact';
 
@@ -83,7 +84,6 @@ const originStep = (answers: NotificationAnswers): SeedStep => ({
 
 const commoditySteps = (answers: NotificationAnswers): SeedStep[] => {
   const lines = answers.commodityLines;
-  const speciesCheckboxValue = ({ species }: CommodityLineAnswer): string => `${species.commodityCode}|${species.latinName}`;
   const searchSteps: SeedStep[] = lines.map((line) => ({
     slug: 'commodities',
     form: { commoditySearch: line.species.searchTerm, action: 'search' },
@@ -91,7 +91,7 @@ const commoditySteps = (answers: NotificationAnswers): SeedStep[] => {
   }));
   return [
     ...searchSteps,
-    { slug: 'commodities', form: { species: lines.map(speciesCheckboxValue) } },
+    { slug: 'commodities', form: { species: lines.map(({ species }) => speciesCheckboxValue(species)) } },
     { slug: 'consignment-details', form: consignmentDetailsForm(lines) },
     { slug: 'commodities/identification', form: identificationForm(lines) },
   ];

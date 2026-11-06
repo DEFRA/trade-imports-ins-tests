@@ -1,4 +1,4 @@
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, speciesLabel } from '@domain/animals/constants/commodity-lines';
 import { test, expect } from '@fixtures';
 
 test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () => {
@@ -25,8 +25,8 @@ test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () =
     await expect(table.getByRole('columnheader')).toHaveText(['Commodity code', 'Species', 'Actions']);
     await expect(animalsPages.consignmentDetails.selectedCommodities.rowFor(cattle).getByRole('cell')).toHaveText([
       cattle.commodityCode,
-      cattle.latinName,
-      `Remove ${cattle.commodityCode} ${cattle.latinName}`,
+      speciesLabel(cattle),
+      `Remove ${cattle.commodityCode} ${speciesLabel(cattle)}`,
     ]);
   });
 
@@ -40,6 +40,26 @@ test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () =
     await animalsPages.consignmentDetails.saveAndContinue.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
+  });
+
+  test('holds the page on a number of animals above the largest the service stores, keeping the digits typed', async ({ animalsPages }) => {
+    await animalsPages.consignmentDetails.numberOfAnimals.fill('2147483648');
+    await animalsPages.consignmentDetails.saveAndContinue.click();
+
+    await expect(animalsPages.consignmentDetails.animalsAboveMaxErrorLink).toBeVisible();
+    await expect(animalsPages.consignmentDetails.numberOfAnimals).toHaveValue('2147483648');
+  });
+
+  test('saves a number of animals exactly at the largest the service stores and shows it back on the page', async ({ animalsPages }) => {
+    await animalsPages.consignmentDetails.numberOfAnimals.fill('2147483647');
+    await animalsPages.consignmentDetails.numberOfPackages.fill('5');
+    await animalsPages.consignmentDetails.saveAndContinue.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+
+    await animalsPages.overview.task('Commodity details').click();
+    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
+    await expect(animalsPages.consignmentDetails.numberOfAnimals).toHaveValue('2147483647');
   });
 });
 
@@ -64,14 +84,35 @@ test.describe('Commodity details page with two species of one commodity', { tag:
     await expect(animalsPages.consignmentDetails.numberOfPackages.first()).toBeFocused();
   });
 
-  test("lists both species' Latin names, one per line, in the commodity's Species cell", async ({ animalsPages }) => {
+  test("lists both species' labels, one per line, in the commodity's Species cell", async ({ animalsPages }) => {
     const speciesCell = animalsPages.consignmentDetails.selectedCommodities.speciesCell(
       animalsPages.consignmentDetails.selectedCommodities.rowFor(commodityLines.cattle),
     );
 
     expect(await speciesCell.evaluate((el) => (el as HTMLElement).innerText)).toBe(
-      `${commodityLines.bison.latinName},\n${commodityLines.cattle.latinName}`,
+      `${speciesLabel(commodityLines.bison)},\n${speciesLabel(commodityLines.cattle)}`,
     );
+  });
+});
+
+test.describe('Commodity details page removing a line while others are typed but not saved', { tag: '@duplicated-in-frontend' }, () => {
+  test.beforeEach(async ({ animalsJourney }) => {
+    await animalsJourney.toConsignmentDetails([commodityLines.cattle, commodityLines.domesticCat]);
+  });
+
+  test('keeps the number typed for the surviving species after removing another commodity', async ({ animalsPages }) => {
+    const { consignmentDetails } = animalsPages;
+    await consignmentDetails.fillAnimalCountFor(commodityLines.cattle, 11);
+    await consignmentDetails.fillAnimalCountFor(commodityLines.domesticCat, 22);
+    await consignmentDetails.selectedCommodities.removeButtonFor(commodityLines.cattle).click();
+
+    await expect(consignmentDetails.selectedCommodities.bodyRows).toHaveCount(1);
+    await expect(consignmentDetails.selectedCommodities.rowFor(commodityLines.domesticCat).getByRole('cell')).toHaveText([
+      commodityLines.domesticCat.commodityCode,
+      speciesLabel(commodityLines.domesticCat),
+      `Remove ${commodityLines.domesticCat.commodityCode} ${speciesLabel(commodityLines.domesticCat)}`,
+    ]);
+    await expect(await consignmentDetails.numberOfAnimalsFor(commodityLines.domesticCat)).toHaveValue('22');
   });
 });
 

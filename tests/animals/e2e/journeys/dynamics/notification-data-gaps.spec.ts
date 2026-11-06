@@ -1,7 +1,6 @@
 import { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
 import { formattedValue } from '@adapters/http/dataverse-client';
 import { animalsDynamics, waitForNotificationRow } from '@config/animals-dynamics';
-import { GBN_AG_CATTLE_COMMON_NAME } from '@domain/animals/constants/gbn-ag';
 import { ALL_ANSWERS, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { test, expect } from '@fixtures';
 import { skipIfComposeEnvironment } from '@utils/playwright/environment';
@@ -46,7 +45,7 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     // [FROM v0.2.0]
     // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].scientificName and commonName
     expect.soft(row.defraimp_commodityspeciesname, 'species name').toBe(cowLine.species.latinName);
-    expect.soft(row.defraimp_commodityspeciescommonname, 'species common name').toBe(GBN_AG_CATTLE_COMMON_NAME);
+    expect.soft(row.defraimp_commodityspeciescommonname, 'species common name').toBe(cowLine.species.commonName);
     // Each party's postalAddress.postcodeCode, and its definedContact[].telephoneUniversalCommunication and
     // emailURIUniversalCommunication
     expect.soft(row.defraimp_consignoraddresspostalzipcode, 'consignor postcode').toBe(consignor.postcode);

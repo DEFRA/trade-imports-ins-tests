@@ -1,5 +1,5 @@
 import { MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, speciesLabel } from '@domain/animals/constants/commodity-lines';
 
 import { test, expect } from '@fixtures';
 
@@ -51,7 +51,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
 
     await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle, 1, 1)).toBeVisible();
     await expect(animalsPages.animalIdentification.earTag).toBeVisible();
-    await expect(pages.page.getByRole('heading', { name: `Enter details for ${commodityLines.ostrich.latinName}` })).toHaveCount(0);
+    await expect(pages.page.getByRole('heading', { name: `Enter details for ${speciesLabel(commodityLines.ostrich)}` })).toHaveCount(0);
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
     await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
   });
