@@ -2,8 +2,11 @@ import { test, expect } from '@fixtures';
 import { heldAsConsignor } from '@domain/shared/constants/address-types';
 import { DESTINATION_NAME } from '@domain/shared/constants/journey-party-names';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
+import { E2E_ADDRESS_BOOK_FIXTURES } from '@flows/shared/address-book-seed';
 
 const FIVE_RESULTS_SUMMARY = /^Showing 5 out of \d+ results$/;
+
+const destinationRecord = E2E_ADDRESS_BOOK_FIXTURES.find(({ name }) => name === DESTINATION_NAME);
 
 test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-book'] }, () => {
   test('the picker searches and pages the address book, and the row selected on a later page is the one that saves', async ({
@@ -65,10 +68,11 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
 
     await animalsPages.consignorSelection.searchBox.fill(DESTINATION_NAME);
     await animalsPages.consignorSelection.searchButton.click();
-    const detailLines = animalsPages.consignorSelection.partyDetailsLines(DESTINATION_NAME);
-    await expect(detailLines).toHaveCount(0);
-    await animalsPages.consignorSelection.openPartyDetails(DESTINATION_NAME);
-    await expect(detailLines.filter({ hasText: 'London' })).toBeVisible();
+    await expect(animalsPages.consignorSelection.partyAddressCell(DESTINATION_NAME)).toHaveText(
+      `${destinationRecord.addressLine1}\n${destinationRecord.townOrCity}, ${destinationRecord.postcode}`,
+      { useInnerText: true },
+    );
+    await expect(animalsPages.consignorSelection.partyRowLinks(DESTINATION_NAME)).toHaveText([`View ${DESTINATION_NAME}`]);
 
     await animalsPages.consignorSelection.searchBox.fill(runOnlySearchToken);
     await animalsPages.consignorSelection.searchButton.click();

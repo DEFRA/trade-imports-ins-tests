@@ -55,12 +55,16 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return this.page.getByRole('row').filter({ has: this.party(name) });
   }
 
-  partyDetailsLines(name: string): Locator {
-    return this.partyRow(name).getByRole('group').getByRole('listitem');
+  partyAddressCell(name: string): Locator {
+    return this.partyRow(name).getByRole('cell').nth(2);
   }
 
-  async openPartyDetails(name: string): Promise<void> {
-    await this.partyRow(name).getByText(`View details for ${name}`, { exact: true }).click();
+  partyViewLink(name: string): Locator {
+    return this.partyRow(name).getByRole('link', { name: `View ${name}`, exact: true });
+  }
+
+  partyRowLinks(name: string): Locator {
+    return this.partyRow(name).getByRole('link');
   }
 
   get noMatchesMessage(): Locator {
