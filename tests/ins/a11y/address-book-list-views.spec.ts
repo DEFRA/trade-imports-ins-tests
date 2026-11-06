@@ -5,6 +5,7 @@ import { scanNextPage } from '@utils/next-page-scan';
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('the address book has no accessibility violations when populated and after an address is added', async ({
     insPages,
+    insJourney,
     addressBookApi,
     runA11yScan,
   }) => {
@@ -18,10 +19,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Address book with the success banner', async () => {
-      await insPages.addressBookList.btnAddNewAddress.click();
-      await insPages.addressBookAdd.heading.waitFor();
-      await insPages.addressBookAdd.fill(addFormAddressWithLineTwoAndCounty(`A11y Added Farm ${Date.now()}`, 'United Kingdom'));
-      await insPages.addressBookAdd.saveAndContinue();
+      await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(`A11y Added Farm ${Date.now()}`, 'United Kingdom'));
       await insPages.addressBookList.successBanner.waitFor();
       await runA11yScan();
     });
@@ -34,6 +32,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     );
     await insPages.addressBookList.open();
 
-    await scanNextPage(insPages.addressBookList.linkNextPage, runA11yScan);
+    await scanNextPage(insPages.addressBookList.nextPageLink, runA11yScan);
   });
 });

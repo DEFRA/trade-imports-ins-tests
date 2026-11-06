@@ -63,8 +63,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     const notificationsFillingTwoPages = 26;
     await Promise.all(Array.from({ length: notificationsFillingTwoPages }, () => animalsSeededJourney.createEmptyNotification()));
     await animalsJourney.toNotificationDashboard();
-    await expect(animalsPages.dashboard.linkNextPage).toBeVisible();
+    await expect(animalsPages.dashboard.nextPageLink).toBeVisible();
 
-    await scanNextPage(animalsPages.dashboard.linkNextPage, runA11yScan);
+    await scanNextPage(animalsPages.dashboard.nextPageLink, runA11yScan);
   });
 });

@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
+import type { AddressBookRequest } from '@adapters/http/address-book-api-client';
+import { addressRoles } from '@domain/shared/constants/address-types';
 import type { Locator } from '@playwright/test';
 
 type AddressFields = {
@@ -31,7 +33,6 @@ test.describe('Addresses are copied, not linked', () => {
     plantsJourney,
     addressBookApi,
   }) => {
-    // Every field set, each value distinct, so each assert proves its own field was copied.
     const record = {
       name: `Full Detail Farm ${randomUUID()}`,
       addressLine1: '12 Primary Row',
@@ -39,12 +40,13 @@ test.describe('Addresses are copied, not linked', () => {
       townOrCity: 'Kendal',
       county: 'Westmorland',
       postcode: 'LA9 4QQ',
+      countryCode: 'GB',
       phone: '01539 555 0105',
       email: 'full.detail@example.co.uk',
-    };
-    const address = await addressBookApi.createAddress({ ...record, countryCode: 'GB' });
+      roles: [addressRoles.placeOfDestination],
+    } satisfies AddressBookRequest;
+    const address = await addressBookApi.createAddress(record);
 
-    // The same record is picked for the place of destination and the contact address.
     await plantsJourney.completeNotification(addressBookApi, { existing: address });
 
     await expectEveryField(plantsPages.notificationView.card('Place of destination'), record);

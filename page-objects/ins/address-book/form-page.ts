@@ -23,13 +23,11 @@ export abstract class InsAddressBookFormPage extends BasePage {
     return this.page.getByRole('heading', { level: 2, name, exact: true });
   }
 
-  /** The form's text inputs in page order. */
   get textboxes(): Locator {
     return this.page.getByRole('main').getByRole('textbox');
   }
 
-  /** The label of every field on the form, in page order. */
-  get fieldLabels(): Locator {
+  get formLabels(): Locator {
     return this.page.getByRole('main').locator('form label');
   }
 
@@ -71,11 +69,6 @@ export abstract class InsAddressBookFormPage extends BasePage {
 
   get inputPhone(): Locator {
     return this.page.getByLabel(ADDRESS_FORM_FIELD_LABELS.phone);
-  }
-
-  /** The error summary's link to a field, matched on the whole message. */
-  errorSummaryLink(message: string): Locator {
-    return this.errorSummary.getByRole('link', { name: message, exact: true });
   }
 
   async fill(details: AddressDetails): Promise<void> {

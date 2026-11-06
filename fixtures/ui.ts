@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { test as base, expect, type APIRequestContext, type BrowserContext, type Page, type TestInfo } from '@playwright/test';
 import {
   createAnimalsAdminPages,
@@ -16,6 +17,7 @@ import { AnimalsJourney } from '@flows/animals/journey';
 import { AnimalsNotificationActions } from '@flows/animals/notification-actions';
 import { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { AnimalsAdminNavigation } from '@flows/animals-admin/navigation';
+import { InsJourney } from '@flows/ins/journey';
 import { PlantsJourney } from '@flows/plants/journey';
 import { PlantsNotificationActions } from '@flows/plants/notification-actions';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
@@ -54,10 +56,12 @@ export interface PageFixtures {
   animalsSeededJourney: AnimalsSeededJourney;
   animalsNotificationActions: AnimalsNotificationActions;
   animalsAdminNavigation: AnimalsAdminNavigation;
+  insJourney: InsJourney;
   plantsJourney: PlantsJourney;
   plantsNotificationActions: PlantsNotificationActions;
   notificationApi: NotificationApiClient;
   addressBookApi: AddressBookApiClient;
+  isolatedOrganisationAddressBookApi: AddressBookApiClient;
   referenceDataApi: ReferenceDataApiClient;
   frontendForms: FrontendFormClient;
   externalRequest: APIRequestContext;
@@ -123,6 +127,9 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   animalsAdminNavigation: async ({ animalsAdminPages }, use) => {
     await use(new AnimalsAdminNavigation(animalsAdminPages));
   },
+  insJourney: async ({ insPages }, use) => {
+    await use(new InsJourney(insPages));
+  },
   plantsJourney: async ({ plantsPages, journeyContext }, use) => {
     await use(new PlantsJourney(plantsPages, journeyContext));
   },
@@ -134,6 +141,9 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   },
   addressBookApi: async ({ request }, use) => {
     await use(new AddressBookApiClient(request));
+  },
+  isolatedOrganisationAddressBookApi: async ({ request }, use) => {
+    await use(new AddressBookApiClient(request, `e2e-isolated-organisation-${randomUUID()}`));
   },
   referenceDataApi: async ({ request }, use) => {
     await use(new ReferenceDataApiClient(request));

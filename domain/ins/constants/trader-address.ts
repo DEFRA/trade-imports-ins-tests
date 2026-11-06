@@ -1,8 +1,10 @@
+import { heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
 import { type AddressDetails } from '@page-objects/ins/address-book/form-page';
 
 export const UNOFFERED_COUNTRY_CODE = 'XX';
 
 export const traderAddress = (name: string) => ({
+  ...heldAsPlaceOfOrigin,
   name,
   addressLine1: '1 Trader Lane',
   townOrCity: 'Carlisle',

@@ -1,5 +1,10 @@
 import { test, expect } from '@fixtures';
-import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER, ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
+import {
+  ADDRESS_FORM_FIELD_LABELS_IN_ORDER,
+  ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER,
+  ADDRESS_FORM_VALIDATION_MESSAGES,
+} from '@domain/ins/constants/address-form';
+import { addressRoles, rolesFieldOf } from '@domain/shared/constants/address-types';
 import { expectAddressBookList } from './expect-address-book-list';
 import { expectOtherOrganisationAddressReturnsToList } from './expect-other-organisation-address-returns-to-list';
 import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
@@ -37,7 +42,7 @@ test.describe('Address book edit', () => {
     await insPages.addressBookEdit.fill(detailsWithOptionalFieldsBlank);
     await insPages.addressBookEdit.save();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await expectAddressBookList({ pages, insPages });
     await expect(insPages.addressBookList.successBanner).toContainText(`${renamed} address updated`);
 
     const stored = await addressBookApi.getAddress(created.id);
@@ -46,6 +51,20 @@ test.describe('Address book edit', () => {
     expect(stored.county ?? '').toBe('');
     expect(stored.townOrCity).toBe(original.townOrCity);
     expect(stored.deleted).toBe(false);
+  });
+
+  test('an edit through the edit page keeps every role', async ({ insPages, addressBookApi }) => {
+    const stamp = Date.now();
+    const heldRoles = { roles: [addressRoles.placeOfOrigin, addressRoles.consignor] };
+    const created = await addressBookApi.createAddress({ ...traderAddress(`Edit Keeps Roles Farm ${stamp}`), ...heldRoles });
+
+    await insPages.addressBookEdit.open(created.id);
+    await insPages.addressBookEdit.inputName.fill(`Edit Kept Roles Holding ${stamp}`);
+    await insPages.addressBookEdit.save();
+    await expect(insPages.addressBookList.successBanner).toContainText('address updated');
+
+    const stored = await addressBookApi.getAddress(created.id);
+    expect(rolesFieldOf(stored)).toEqual(heldRoles);
   });
 
   test('the address book links the new name to the edited address', async ({ insPages, addressBookApi }) => {
@@ -82,7 +101,7 @@ test.describe('Address book edit', () => {
 
     await insPages.addressBookEdit.open(created.id);
 
-    await expect(insPages.addressBookEdit.fieldLabels).toHaveText(ADDRESS_FORM_FIELD_LABELS_IN_ORDER);
+    await expect(insPages.addressBookEdit.formLabels).toHaveText(ADDRESS_FORM_FIELD_LABELS_IN_ORDER);
   });
 
   test('after a refused save and Cancel, the edit page opens again with no errors and the stored name', async ({
@@ -184,8 +203,8 @@ test.describe('Address book edit', () => {
       await expect(pages.page).toHaveURL(new RegExp(`${viewUrl}$`));
     });
 
-    test("another organisation's address returns to the address book", async ({ pages, insPages, request }) => {
-      await expectOtherOrganisationAddressReturnsToList({ pages, insPages, request }, (addressId) =>
+    test("another organisation's address returns to the address book", async ({ pages, insPages, isolatedOrganisationAddressBookApi }) => {
+      await expectOtherOrganisationAddressReturnsToList({ pages, insPages, isolatedOrganisationAddressBookApi }, (addressId) =>
         insPages.addressBookEdit.open(addressId),
       );
     });
@@ -230,8 +249,10 @@ test.describe('Address book edit', () => {
       await insPages.addressBookEdit.save();
 
       await expect(insPages.addressBookEdit.errorSummary).toBeVisible();
-      await expect(insPages.addressBookEdit.errorSummaryLink('Select a country')).toBeVisible();
-      await expect(insPages.addressBookEdit.selectCountry).toHaveAccessibleDescription(/Select a country/);
+      await expect(insPages.addressBookEdit.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.countryRequired)).toBeVisible();
+      await expect(insPages.addressBookEdit.selectCountry).toHaveAccessibleDescription(
+        new RegExp(ADDRESS_FORM_VALIDATION_MESSAGES.countryRequired),
+      );
       expect((await addressBookApi.getAddress(created.id)).countryCode).toBe(UNOFFERED_COUNTRY_CODE);
     });
   });

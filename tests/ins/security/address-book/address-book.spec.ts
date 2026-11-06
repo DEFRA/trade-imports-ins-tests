@@ -1,26 +1,23 @@
 import { test, expect } from '@fixtures';
-
-const address = {
-  addressLine1: '9 Proxy Lane',
-  townOrCity: 'Carlisle',
-  postcode: 'CA1 9ZZ',
-  country: 'United Kingdom',
-  phone: '01228 555 0199',
-  email: 'security-scan@example.co.uk',
-};
+import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
+import { addressRoles } from '@domain/shared/constants/address-types';
+import { originOrConsignorTab } from '@domain/ins/constants/address-book-types';
 
 test.describe('Security scan (ins)', { tag: '@active' }, () => {
-  test('routes the address book through the ZAP proxy', async ({ pages, insPages, addressBookApi }) => {
+  test('routes the address book through the ZAP proxy', async ({ pages, insPages, insJourney, addressBookApi }) => {
     test.slow();
     await insPages.addressBookList.open();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await expect(pages.page).toHaveURL(insPages.addressBookList.listUrlPattern);
     await expect(insPages.addressBookList.heading).toBeVisible();
 
     const name = `Security Scan Farm ${Date.now()}`;
-    await insPages.addressBookAdd.open();
-    await insPages.addressBookAdd.fill({ name, ...address });
-    await insPages.addressBookAdd.saveAndContinue();
+    const address = addFormAddressWithLineTwoAndCounty(name, 'United Kingdom');
+    await insJourney.addAddressFromList(address);
+    await expect(insPages.addressBookList.row(name)).toBeVisible();
+
+    await insPages.addressBookList.followTab(originOrConsignorTab);
+    await insPages.addressBookList.filter({ term: name, role: addressRoles.placeOfOrigin, submitWith: 'button' });
     await expect(insPages.addressBookList.row(name)).toBeVisible();
 
     const { id } = await addressBookApi.findByName(name);
@@ -29,7 +26,7 @@ test.describe('Security scan (ins)', { tag: '@active' }, () => {
     await expect(insPages.addressBookView.heading(name)).toBeVisible();
 
     await insPages.addressBookEdit.open(id);
-    await insPages.addressBookEdit.fill({ name, ...address, townOrCity: 'Penrith' });
+    await insPages.addressBookEdit.fill({ ...address, townOrCity: 'Penrith' });
     await insPages.addressBookEdit.save();
     await expect(insPages.addressBookList.row(name)).toBeVisible();
 

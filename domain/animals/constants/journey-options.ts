@@ -14,13 +14,14 @@ import { type PointOfEntry, pointOfEntries } from '@domain/animals/constants/poi
 import { type YesNoValue, yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { getRelativeAppDateText } from '@utils/date-utils';
-
-export const PLACE_OF_ORIGIN_NAME = 'Origin Farm';
-export const CONSIGNOR_NAME = 'Astra Rosales';
-export const CONSIGNEE_NAME = 'British Livestock Ltd';
-export const IMPORTER_NAME = 'Import Co UK';
-export const DESTINATION_NAME = 'Tech Imports Ltd';
-export const CONTACT_ADDRESS_NAME = 'Animal and Plant Health Agency';
+import {
+  CONSIGNEE_NAME,
+  CONSIGNOR_NAME,
+  CONTACT_ADDRESS_NAME,
+  DESTINATION_NAME,
+  IMPORTER_NAME,
+  PLACE_OF_ORIGIN_NAME,
+} from '@domain/shared/constants/journey-party-names';
 
 // Inside the arrival-date window (1 week back to 6 months ahead) wherever the
 // wall clock happens to be, in the unpadded d/m/yyyy the app itself renders —

@@ -1,6 +1,8 @@
+import { escapeRegex } from '@page-objects/shared/escape-regex';
 import { test, expect, type PageFixtures } from '@fixtures';
-import { expectAddressBookList, expectNoMatchesListed } from './expect-address-book-list';
-import { type AddressDetails } from '@page-objects/ins/address-book/form-page';
+import { expectSearchedListLinks, expectNoMatchesListed } from './expect-address-book-list';
+import { destinationConsigneeOrImporterTab, originOrConsignorTab, roleOptionLabels } from '@domain/ins/constants/address-book-types';
+import { addressRoles } from '@domain/shared/constants/address-types';
 import { addFormAddressWithLineTwoAndCounty, addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
 
 const SUBMIT_METHODS = [
@@ -28,14 +30,7 @@ const addAddressAndExpectSearchToListIt = async (
   await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
   await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
   await expect(insPages.addressBookList.row(name)).toBeVisible();
-  await expect(insPages.addressBookList.mainLinks).toHaveText(['Clear search', `View ${name}`]);
-};
-
-const addAddressThroughForm = async ({ insPages }: Pick<PageFixtures, 'insPages'>, details: AddressDetails) => {
-  await insPages.addressBookList.open();
-  await insPages.addressBookList.btnAddNewAddress.click();
-  await insPages.addressBookAdd.fill(details);
-  await insPages.addressBookAdd.saveAndContinue();
+  await expectSearchedListLinks(insPages.addressBookList, `View ${name}`);
 };
 
 test.describe('Address book list', () => {
@@ -59,7 +54,7 @@ test.describe('Address book list', () => {
     });
   }
 
-  test('a search matching nothing shows Showing 0 of 0, the column headers, no rows and Clear search as the only link', async ({
+  test('a search matching nothing shows Showing 0 of 0, the column headers, no rows and Clear search as the only link below the tabs', async ({
     insPages,
   }) => {
     await insPages.addressBookList.open();
@@ -67,6 +62,24 @@ test.describe('Address book list', () => {
     await insPages.addressBookList.search(`NoMatch${Date.now()}`, { submitWith: 'button' });
 
     await expectNoMatchesListed(insPages.addressBookList);
+  });
+
+  test('Clear search returns to the searched tab with its Type filter kept, no search applied and the Search field empty', async ({
+    pages,
+    insPages,
+  }) => {
+    const { addressType } = destinationConsigneeOrImporterTab;
+    await insPages.addressBookList.open({ addressType });
+    await insPages.addressBookList.filter({ term: `NoMatch${Date.now()}`, role: addressRoles.importer, submitWith: 'button' });
+
+    await insPages.addressBookList.linkClearSearch.click();
+
+    await expect(pages.page).toHaveURL(new RegExp(`${escapeRegex(insPages.addressBookList.expectedUrl)}\\?`));
+    expect(Object.fromEntries(new URL(pages.page.url()).searchParams)).toEqual({ addressType, role: addressRoles.importer });
+    await expect(insPages.addressBookList.selectedTab).toHaveText(destinationConsigneeOrImporterTab.label);
+    await insPages.addressBookList.filterSummary.click();
+    await expect(insPages.addressBookList.inputSearch).toHaveValue('');
+    await expect(insPages.addressBookList.selectedRoleFilterOption).toHaveText(roleOptionLabels.IMPORTER);
   });
 
   test('an address is found from the dashboard, viewed, kept on No, cancel, then deleted on Yes, delete and no longer found by search', async ({
@@ -168,15 +181,16 @@ test.describe('Address book list', () => {
     });
   });
 
-  test('an address added through the form lands on the list with its success banner, its address and country, and a View link to its own page', async ({
+  test('an address added through the form lands on the Origin and Consignor tab of the list with its success banner, its address and country, and a View link to its own page', async ({
     pages,
     insPages,
+    insJourney,
   }) => {
     const name = `Added Farm ${Date.now()}`;
 
-    await addAddressThroughForm({ insPages }, addFormAddressWithLineTwoAndCounty(name, 'France'));
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(name, 'France'));
 
-    await expectAddressBookList({ pages, insPages });
+    await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(originOrConsignorTab));
     await expect(
       insPages.addressBookList.successBanner.getByText(`${name} address added to your address book`, { exact: true }),
     ).toBeVisible();
@@ -193,6 +207,7 @@ test.describe('Address book list', () => {
 
   test('an address added through the form lands on the list with its success banner, and is listed ahead of an older address', async ({
     insPages,
+    insJourney,
     addressBookApi,
   }) => {
     const stamp = Date.now();
@@ -200,7 +215,7 @@ test.describe('Address book list', () => {
     const newerName = `Newest first ${stamp} newer`;
     await addressBookApi.createAddress(traderAddress(olderName));
 
-    await addAddressThroughForm({ insPages }, addFormAddressWithLineTwoAndCounty(newerName, 'France'));
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(newerName, 'France'));
     await expect(insPages.addressBookList.successBanner).toContainText(`${newerName} address added to your address book`);
     await insPages.addressBookList.search(`Newest first ${stamp}`, { submitWith: 'button' });
 
@@ -210,11 +225,12 @@ test.describe('Address book list', () => {
 
   test('an address added through the form is found by a search on its name, part of its address and part of its country name', async ({
     insPages,
+    insJourney,
   }) => {
     const stamp = Date.now();
     const name = `Findable Farm ${stamp}`;
     const details = { ...addFormAddressWithLineTwoAndCounty(name, 'France'), addressLine1: `${stamp} Drover Lane` };
-    await addAddressThroughForm({ insPages }, details);
+    await insJourney.addAddressFromList(details);
 
     for (const term of [name, `${stamp} drover`, 'fran']) {
       await insPages.addressBookList.search(term, { submitWith: 'button' });

@@ -1,10 +1,10 @@
 import { Locator } from '@playwright/test';
-import { type OpenOptions } from '@page-objects/shared/base-page';
-import { type AddressDetails, InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
+import { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
+import { opensAtExpectedUrl } from '@page-objects/shared/opens-at-expected-url';
+import type { AddressRole } from '@domain/shared/constants/address-types';
+import { rolesQuestionLabels } from '@domain/ins/constants/address-book-types';
 
-export type NewAddressDetails = AddressDetails;
-
-export class InsAddressBookAddPage extends InsAddressBookFormPage {
+export class InsAddressBookAddPage extends opensAtExpectedUrl(InsAddressBookFormPage) {
   readonly expectedUrl = '/address-book/add';
 
   get heading(): Locator {
@@ -39,9 +39,26 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
     return this.page.getByRole('link', { name: 'Cancel and return to hub', exact: true });
   }
 
-  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
-    await this.page.goto(this.expectedUrl);
-    await this.signInWhenRequested(attemptSignIn, identity);
+  rolesGroup(legend: string): Locator {
+    return this.page.getByRole('group', { name: legend, exact: true });
+  }
+
+  get sectionBreak(): Locator {
+    return this.page.getByRole('separator');
+  }
+
+  rolesOptions(legend: string): Locator {
+    return this.rolesGroup(legend).getByRole('checkbox');
+  }
+
+  rolesOption(role: AddressRole): Locator {
+    return this.page.getByRole('checkbox', { name: rolesQuestionLabels[role], exact: true });
+  }
+
+  async tickRoles(roles: readonly AddressRole[]): Promise<void> {
+    for (const role of roles) {
+      await this.rolesOption(role).check();
+    }
   }
 
   async saveAndContinue(): Promise<void> {
