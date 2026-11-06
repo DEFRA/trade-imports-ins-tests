@@ -15,7 +15,6 @@ export class PlantsConfirmationPage extends PlantsNotificationPage {
   get notificationDate(): Locator {
     return this.page.getByText(/Date of notification/).first();
   }
-  /** Main content region, for assertions that span the caption and its value. */
   get content(): Locator {
     return this.page.getByRole('main');
   }

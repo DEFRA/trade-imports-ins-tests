@@ -1,29 +1,25 @@
 import { type Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
 
-/**
- * The journey's entry question and the opening run's first step, so the create
- * POST lands here rather than on the Overview.
- */
 export class PlantsCommodityTypePage extends PlantsNotificationPage {
+  private readonly question = 'What are you importing?';
+
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
     super(page, 'commodity-type');
   }
 
-  /** The fieldset legend is the page heading — a single-question radios page. */
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'What are you importing?' });
+    return this.page.getByRole('heading', { level: 1, name: this.question });
   }
 
   commodityType(name: string): Locator {
     return this.page.getByRole('radio', { name, exact: true });
   }
 
-  /**
-   * The govukWarningText the page carries only while the notification holds
-   * commodity lines — the categories partition by type, so a change of answer
-   * removes every line the new type cannot hold.
-   */
+  get optionsError(): Locator {
+    return this.radiosError(this.question);
+  }
+
   get linesWarning(): Locator {
     return this.page.getByText('Changing your answer will remove the commodities you have already added.');
   }

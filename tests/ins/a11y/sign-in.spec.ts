@@ -11,7 +11,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     insPages,
     runA11yScan,
   }) => {
-    await insPages.dashboard.open(false);
+    await insPages.dashboard.open({ attemptSignIn: false });
 
     await test.step('Sign in', async () => {
       await pages.signIn.heading.waitFor();

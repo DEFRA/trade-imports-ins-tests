@@ -19,7 +19,6 @@ export class PlantsDeleteNotificationPage extends PlantsNotificationPage {
     return deleteNotificationConfirm(this.page);
   }
 
-  /** A govukButton with an href, so it is a link that reports role="button". */
   get btnNo(): Locator {
     return this.page.getByRole('button', { name: 'No, return to dashboard', exact: true });
   }

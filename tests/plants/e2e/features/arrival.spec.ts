@@ -2,14 +2,12 @@ import { test, expect } from '@fixtures';
 import { portByCode } from '@resources/reference-data/reference-data';
 import { POTATOES } from '@flows/plants/journey';
 import { PLACE_OF_LANDING_SEARCH_PLACEHOLDER } from '@domain/plants/constants/arrival-details-page';
+import { ALREADY_ARRIVED, NOT_YET_ARRIVED } from '@domain/plants/constants/arrival-status-page';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
 const FRANCE = 'France';
 
 const ARRIVAL_TASK_ROW = 'Arrival details';
-
-const ALREADY_ARRIVED = 'Yes, it has already arrived';
-const NOT_YET_ARRIVED = 'No, it has not arrived yet';
 
 const ARRIVAL_STATUS_ERROR = 'Select whether the consignment has arrived';
 

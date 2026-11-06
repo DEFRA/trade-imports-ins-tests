@@ -21,6 +21,10 @@ export function requireBaseUrl(
   return baseUrl;
 }
 
+export function originOf(envVar: Parameters<typeof requireBaseUrl>[0]): string {
+  return new URL(requireBaseUrl(envVar)).origin;
+}
+
 export type SignInIdentity = { userId?: string; organisationSbi?: string };
 export type OpenOptions = SignInIdentity & { attemptSignIn?: boolean };
 
@@ -61,6 +65,10 @@ export class BasePage {
 
   get errorSummary(): Locator {
     return errorSummaryOn(this.page);
+  }
+
+  radiosError(legend: string | RegExp): Locator {
+    return this.page.getByRole('group', { name: legend }).locator('.govuk-error-message');
   }
 
   get errorSummaryLinks(): Locator {
@@ -142,6 +150,11 @@ export class BasePage {
   async navigateToPlantsFrontend(path: string = '/'): Promise<void> {
     const baseUrl = requireBaseUrl('TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL');
     await this.page.goto(`${baseUrl}${path}`);
+  }
+
+  protected async leaveOriginThenSignIn(origin: string, activate: () => Promise<void>): Promise<void> {
+    await Promise.all([this.page.waitForURL((url) => url.origin !== origin), activate()]);
+    await this.completeSignInIfRequested();
   }
 
   async completeSignInIfRequested(options?: SignInIdentity): Promise<void> {
@@ -269,6 +282,10 @@ export class NotificationPage extends BasePage {
   expectedUrl(referenceNumber: string): string {
     const suffix = this.slug ? `/${this.slug}` : '';
     return `${this.setBase}/notifications/${referenceNumber}${suffix}`;
+  }
+
+  changeContextUrl(referenceNumber: string): string {
+    return `${this.expectedUrl(referenceNumber)}?change=1`;
   }
 
   referenceNumberFromUrl(): string {

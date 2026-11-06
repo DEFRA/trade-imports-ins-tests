@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { expectOtherOrganisationAddressReturnsToList } from './expect-other-organisation-address-returns-to-list';
-import { requireBaseUrl } from '@page-objects/shared/base-page';
+import { originOf } from '@page-objects/shared/base-page';
 import { expectAddressBookList } from './expect-address-book-list';
 import { MALFORMED_ADDRESS_ID, UNKNOWN_ADDRESS_ID } from './unknown-address-id';
 import { addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
@@ -60,7 +60,7 @@ test.describe('Address book view', () => {
 
     test('a return on another frontend is ignored', async ({ pages, insPages, addressBookApi }) => {
       const created = await addressBookApi.createAddress(traderAddress(`View Plants Return Farm ${Date.now()}`));
-      const plantsOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL')).origin;
+      const plantsOrigin = originOf('TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL');
 
       await insPages.addressBookView.openWithReturn(created.id, `${plantsOrigin}/high-risk-plants`);
       await insPages.addressBookView.linkBack.click();

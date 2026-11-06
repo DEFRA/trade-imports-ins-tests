@@ -25,6 +25,7 @@ test.describe('Address book cross-user visibility', () => {
         userId: users.sarah.crn,
         organisationSbi: users.sarah.organisations.gatwickAirport,
       });
+      await sarahsInsPages.addressBookList.search(createdName, { submitWith: 'button' });
 
       await expect(sarahsInsPages.addressBookList.row(createdName)).toBeVisible();
     } finally {

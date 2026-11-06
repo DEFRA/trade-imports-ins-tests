@@ -6,7 +6,7 @@ test.use({ storageState: COLD_START });
 
 test.describe('Authentication (admin)', { tag: '@auth' }, () => {
   test.beforeEach(async ({ animalsJourney, animalsAdminPages }) => {
-    await animalsJourney.toSignIn((attemptSignIn) => animalsAdminPages.dashboard.open(attemptSignIn));
+    await animalsJourney.toSignIn((attemptSignIn) => animalsAdminPages.dashboard.open({ attemptSignIn }));
   });
 
   test('lands on the sign in page when opening the admin dashboard', async ({ pages }) => {
@@ -47,7 +47,7 @@ test.describe('Authentication (admin)', { tag: '@auth' }, () => {
   test('lands on the sign in page when reopening the admin dashboard after sign out', async ({ pages, animalsAdminPages }) => {
     await pages.signIn.signIn();
     await animalsAdminPages.dashboard.linkSignOut.click();
-    await animalsAdminPages.dashboard.open(false);
+    await animalsAdminPages.dashboard.open({ attemptSignIn: false });
     await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);
     await expect(pages.signIn.heading).toBeVisible();
   });

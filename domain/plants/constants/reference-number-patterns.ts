@@ -1,0 +1,1 @@
+export const WHOLE_REFERENCE_NUMBER_PATTERN = /^GBN-HRP-\d{2}-[0-9A-HJ-KM-NP-TV-Z]{6}$/;

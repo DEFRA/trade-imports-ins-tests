@@ -1,10 +1,9 @@
 import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, plantsLine } from '@flows/plants/journey';
+import { NOT_YET_ARRIVED } from '@domain/plants/constants/arrival-status-page';
 
 const ARRIVAL_TASK_ROW = 'Arrival details';
 const COMMODITIES_TASK_ROW = 'What are you importing?';
-
-const NOT_YET_ARRIVED = 'No, it has not arrived yet';
 
 const ARRIVING_ON = '27/3/2027';
 

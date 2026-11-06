@@ -1,6 +1,6 @@
 import { type Locator } from '@playwright/test';
 import type { DashboardSortValue } from '@domain/ins/constants/dashboard-sort-values';
-import { BasePage } from '@page-objects/shared/base-page';
+import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
 
 export class InsDashboardPage extends BasePage {
   readonly expectedUrl = '/';
@@ -15,6 +15,10 @@ export class InsDashboardPage extends BasePage {
 
   get btnSearch(): Locator {
     return this.page.getByRole('button', { name: 'Search', exact: true });
+  }
+
+  get btnCreateNew(): Locator {
+    return this.page.getByRole('button', { name: 'Create new', exact: true });
   }
 
   get noSearchResults(): Locator {
@@ -51,9 +55,9 @@ export class InsDashboardPage extends BasePage {
     await this.btnUpdateSort.click();
   }
 
-  async open(attemptSignIn: boolean = true): Promise<void> {
+  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.navigateToInsFrontend(this.expectedUrl);
-    await this.signInWhenRequested(attemptSignIn);
+    await this.signInWhenRequested(attemptSignIn, identity);
     if (attemptSignIn) await this.heading.waitFor();
   }
 }

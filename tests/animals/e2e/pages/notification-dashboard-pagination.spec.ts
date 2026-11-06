@@ -7,7 +7,7 @@ test.describe('Dashboard pagination', () => {
     for (let index = 0; index < 26; index += 1) {
       await animalsPages.dashboard.btnCreateNewNotification.click();
       await animalsPages.originOfImport.heading.waitFor();
-      await animalsPages.dashboard.open(false);
+      await animalsPages.dashboard.open({ attemptSignIn: false });
     }
 
     await expect(animalsPages.dashboard.totalResults).toHaveText(/^Showing 1 to 25 of \d+ Results$/);

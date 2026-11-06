@@ -3,6 +3,8 @@ import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { Locator } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
+import type { InsNotificationTypePage } from '@page-objects/ins/notification-type-page';
+import { LIVE_ANIMALS, type NotificationTypeOption } from '@domain/ins/constants/notification-types';
 import type { PartyRole } from '@page-objects/animals/addresses-page';
 import type { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
 import {
@@ -119,6 +121,10 @@ export class AnimalsJourney {
     await this.toNotificationDashboard();
     await this.animalsPages.dashboard.btnCreateNewNotification.click();
     await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
+    return this.recordReferenceNumberFromUrl();
+  }
+
+  private recordReferenceNumberFromUrl(): string {
     const referenceNumber = this.animalsPages.originOfImport.referenceNumberFromUrl();
     this.context.recordReferenceNumber(referenceNumber);
     return referenceNumber;
@@ -132,6 +138,37 @@ export class AnimalsJourney {
     await this.animalsPages.overview.open(referenceNumber);
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     return referenceNumber;
+  }
+
+  async startNotificationFromInsTypeQuestion(notificationTypePage: InsNotificationTypePage, type: NotificationTypeOption): Promise<string> {
+    await notificationTypePage.open();
+    await notificationTypePage.chooseNotificationType(type);
+    await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
+    return this.recordReferenceNumberFromUrl();
+  }
+
+  async backToInsTypeQuestion(): Promise<void> {
+    await this.animalsPages.originOfImport.followBackToInsTypeQuestion();
+  }
+
+  /** Starts a live animals draft from the INS question, follows origin's Back link to the question and returns the draft's reference. */
+  async toInsTypeQuestionFromNewLiveAnimalsOrigin(notificationTypePage: InsNotificationTypePage): Promise<string> {
+    const reference = await this.startNotificationFromInsTypeQuestion(notificationTypePage, LIVE_ANIMALS);
+    await this.backToInsTypeQuestion();
+    return reference;
+  }
+
+  async backToInsTypeQuestionAndChoose(notificationTypePage: InsNotificationTypePage, type: NotificationTypeOption): Promise<void> {
+    await this.backToInsTypeQuestion();
+    await notificationTypePage.chooseNotificationType(type);
+  }
+
+  async answerOriginAndSelectSpecies(speciesList: CommodityLine[], options: OriginOptions = {}): Promise<void> {
+    await this.fillOriginOfImport(options);
+    await this.saveOriginOfImport();
+    await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
+    await this.checkSpeciesAndSave(speciesList);
+    await this.animalsPages.commoditySelection.heading.waitFor({ ...pageLoadWait, state: 'hidden' });
   }
 
   async startNotificationAtOrigin(): Promise<string> {
@@ -183,9 +220,13 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  private async chooseSpeciesAndOpenDetails(speciesList: CommodityLine[]): Promise<void> {
+  private async checkSpeciesAndSave(speciesList: CommodityLine[]): Promise<void> {
     await this.animalsPages.commoditySelection.searchAndCheckSpecies(speciesList);
     await this.animalsPages.commoditySelection.saveAndContinue.click();
+  }
+
+  private async chooseSpeciesAndOpenDetails(speciesList: CommodityLine[]): Promise<void> {
+    await this.checkSpeciesAndSave(speciesList);
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.openCommodityDetailsFromOverview();
   }
@@ -638,12 +679,7 @@ export class AnimalsJourney {
   ): Promise<string> {
     const referenceNumber = await this.createNotificationAtOrigin();
 
-    await this.fillOriginOfImport(originOptions);
-    await this.saveOriginOfImport();
-
-    await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
-    await this.animalsPages.commoditySelection.searchAndCheckSpecies(species);
-    await this.animalsPages.commoditySelection.saveAndContinue.click();
+    await this.answerOriginAndSelectSpecies(species, originOptions);
 
     await this.animalsPages.importReason.heading.waitFor(pageLoadWait);
     return referenceNumber;

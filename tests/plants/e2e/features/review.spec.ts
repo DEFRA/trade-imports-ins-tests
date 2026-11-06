@@ -1,4 +1,3 @@
-import { SET_BASES } from '@page-objects/shared/sets';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import {
@@ -57,7 +56,7 @@ test.describe('High-risk plants check and submit section', () => {
     plantsJourney,
     addressBookApi,
   }) => {
-    const { address } = await plantsJourney.completeNotification(addressBookApi);
+    const { address, reference } = await plantsJourney.completeNotification(addressBookApi);
     await expectReview(plantsPages);
     await expect(pages.page.getByRole('heading', { level: 2, name: /^[1-3]\. / })).toHaveText([
       '1. About the consignment',
@@ -71,10 +70,11 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(contact).toContainText('01738 555 0143');
     await expect(contact).toContainText('review@example.co.uk');
     await plantsPages.notificationView.change('Change country of origin (Import details)').click();
-    await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
+    await expect(pages.page).toHaveURL(plantsPages.origin.changeContextUrl(reference));
     await plantsPages.origin.country.choose('Germany');
     await plantsPages.origin.saveAndContinue.click();
     await expect(plantsPages.notificationView.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
     await expect(plantsPages.notificationView.card('Import details')).toContainText('Germany');
     await plantsPages.notificationView.change('Change Commodity 1 (Commodity 1)').click();
     await plantsPages.commodityDetails.field('Quantity').fill('300');
@@ -83,6 +83,23 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(plantsPages.notificationView.heading).toBeVisible();
     await pages.page.reload();
     await expect(plantsPages.notificationView.card('Commodity 1')).toContainText('300');
+  });
+
+  test('the country of origin Change link opens a page whose Back link opens the commodities list with change context', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
+    await expectReview(plantsPages);
+
+    await plantsPages.notificationView.change('Change country of origin (Import details)').click();
+    await expect(plantsPages.origin.linkBack).toHaveAttribute('href', plantsPages.commodities.changeContextUrl(reference));
+
+    await plantsPages.origin.linkBack.click();
+    await expect(plantsPages.commodities.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(plantsPages.commodities.changeContextUrl(reference));
   });
 
   test('declaration is required and submission produces a read-only notification and Submitted dashboard card', async ({
@@ -199,10 +216,10 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
     const correction = plantsPages.notificationView.errorSummaryLink(/Poland/);
-    await expect(correction).toHaveAttribute('href', `${SET_BASES.highRiskPlants}/notifications/${reference}/origin?change=1`);
+    await expect(correction).toHaveAttribute('href', plantsPages.origin.changeContextUrl(reference));
     await expect(plantsPages.overview.statusTag).toHaveText('Draft');
     await correction.click();
-    await expect(pages.page).toHaveURL(/\/origin\?change=1$/);
+    await expect(pages.page).toHaveURL(plantsPages.origin.changeContextUrl(reference));
   });
 
   test('a destination deleted from the address book keeps its copy on CYA and submits', async ({
@@ -392,7 +409,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('AMENDED1');
   });
 
-  test('while amending, a question page opened from a Change link on the review returns to the review showing the change', async ({
+  test('while amending, a question page opened from a Change link on the review keeps its Back link to the overview and returns to the review showing the change', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -410,6 +427,7 @@ test.describe('High-risk plants check and submit section', () => {
       .click();
     await expect(plantsPages.identificationNumbers.heading).toBeVisible();
     await expect(plantsPages.identificationNumbers.saveAndReturn).toBeVisible();
+    await expect(plantsPages.identificationNumbers.linkBack).toHaveAttribute('href', plantsPages.overview.expectedUrl(reference));
 
     await plantsPages.identificationNumbers.producer.fill('CHANGED2');
     await plantsPages.identificationNumbers.saveAndReturn.click();

@@ -1,12 +1,12 @@
 import { Locator } from '@playwright/test';
-import { BasePage } from '@page-objects/shared/base-page';
+import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
 
 export class AnimalsAdminDlqEventsPage extends BasePage {
   readonly expectedUrl = '/dlq-events';
 
-  async open(attemptSignIn: boolean = true): Promise<void> {
+  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.navigateToAdminPortal(this.expectedUrl);
-    await this.signInWhenRequested(attemptSignIn);
+    await this.signInWhenRequested(attemptSignIn, identity);
   }
 
   get heading(): Locator {

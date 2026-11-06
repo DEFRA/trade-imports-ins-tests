@@ -1,9 +1,8 @@
 import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, POTATOES, nurseryAddress } from '@flows/plants/journey';
+import { ALREADY_ARRIVED } from '@domain/plants/constants/arrival-status-page';
 
 const DESTINATION_TASK_ROW = 'Place of destination';
-
-const ALREADY_ARRIVED = 'Yes, it has already arrived';
 
 const PRE_ARRIVAL_DESTINATION_HEADING = 'Place of destination';
 const POST_ARRIVAL_DESTINATION_HEADING = 'Where is the consignment now?';

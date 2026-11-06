@@ -1,6 +1,6 @@
 import { type Locator } from '@playwright/test';
 import type { SortByValue } from '@domain/animals/constants/sort-by-values';
-import { BasePage } from '@page-objects/shared/base-page';
+import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
 import { AMEND_REFUSED_MESSAGE } from '@page-objects/shared/dashboard-copy';
 import { SET_BASES } from '@page-objects/shared/sets';
 
@@ -214,9 +214,9 @@ export class AnimalsDashboardPage extends BasePage {
     });
   }
 
-  async open(attemptSignIn: boolean = true): Promise<void> {
+  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.navigateToFrontend(this.expectedUrl);
-    await this.signInWhenRequested(attemptSignIn);
+    await this.signInWhenRequested(attemptSignIn, identity);
 
     if (attemptSignIn) {
       try {

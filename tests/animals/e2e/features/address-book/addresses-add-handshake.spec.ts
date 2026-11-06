@@ -19,7 +19,7 @@ import {
   type HeldRoles,
 } from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage, type PartyRole } from '@page-objects/animals/addresses-page';
-import { requireBaseUrl } from '@page-objects/shared/base-page';
+import { originOf } from '@page-objects/shared/base-page';
 
 const PARTY_ROLES: readonly PartyRole[] = ['Place of origin', 'Consignor', 'Consignee', 'Importer', 'Place of destination'];
 
@@ -31,16 +31,33 @@ const ROLES_HELD_BY_PARTY: Record<PartyRole, HeldRoles> = {
   'Place of destination': heldAsPlaceOfDestination,
 };
 
-function newAddressFor(role: PartyRole): AddressDetails {
-  const unique = `${Date.now()}-${randomUUID().slice(0, 8)}`;
+function uniqueToken(): string {
+  return `${Date.now()}-${randomUUID().slice(0, 8)}`;
+}
+
+const HANDSHAKE_ADDRESS = {
+  addressLine1: '9 Handshake Lane',
+  townOrCity: 'Carlisle',
+  postcode: 'CA2 7AA',
+  phone: '01228 555 0199',
+};
+
+function newAddressFor(role: PartyRole, token: string = uniqueToken()): AddressDetails {
   return {
-    name: `Handshake ${role} ${unique}`,
-    addressLine1: '9 Handshake Lane',
-    townOrCity: 'Carlisle',
-    postcode: 'CA2 7AA',
+    ...HANDSHAKE_ADDRESS,
+    name: `Handshake ${role} ${token}`,
     country: 'United Kingdom',
-    phone: '01228 555 0199',
-    email: `handshake-${unique}@example.co.uk`,
+    email: `handshake-${token}@example.co.uk`,
+  };
+}
+
+function addressAlreadyInTheBookFor(role: PartyRole, token: string) {
+  return {
+    ...ROLES_HELD_BY_PARTY[role],
+    ...HANDSHAKE_ADDRESS,
+    name: `Already in the book ${role} ${token}`,
+    countryCode: 'GB',
+    email: `already-${token}@example.co.uk`,
   };
 }
 
@@ -72,7 +89,7 @@ test.describe('Add an address from the journey via INS', () => {
       async ({ animalsJourney, pages, animalsPages, insPages, addressBookApi }) => {
         const addPage = insPages.addressBookAdd;
         const details = newAddressFor(role);
-        const insOrigin = new URL(requireBaseUrl('TRADE_IMPORTS_INS_FRONTEND_BASE_URL')).origin;
+        const insOrigin = originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL');
 
         await arriveOnInsAddPageAndFill(animalsJourney, addPage, role, details);
         await expect(pages.page).toHaveURL((url) => url.origin === insOrigin && url.pathname === '/address-book/add' && url.search !== '');
@@ -98,27 +115,27 @@ test.describe('Add an address from the journey via INS', () => {
     test(
       `Save and return to address page on the INS add page reached from the ${role} picker lands on the picker with the added banner, the new address listed first and nothing selected`,
       { tag: ['@address-book', '@ins-frontend'] },
-      async ({ animalsJourney, insPages }) => {
+      async ({ animalsJourney, insPages, addressBookApi }) => {
         const addPage = insPages.addressBookAdd;
         const picker = animalsJourney.partyPicker(role);
-        const details = newAddressFor(role);
+        const token = uniqueToken();
+        const details = newAddressFor(role, token);
+        const alreadyInTheBook = await addressBookApi.createAddress(addressAlreadyInTheBookFor(role, token));
 
         await animalsJourney.toPartyPicker(role);
-        const partyIdsListedBeforeTheAdd = await picker.listedPartyIds();
         await animalsJourney.openInsAddAddressFromPicker(addPage, role);
         await addPage.fill(details);
         await addPage.btnSaveAndReturnToAddressPage.click();
 
         await expect(picker.heading).toBeVisible();
         await expect(picker.successBanner.getByText(addedBannerText(details), { exact: true })).toBeVisible();
-        await expect(picker.party(details.name)).toHaveCount(1);
         await expect(picker.checkedParties).toHaveCount(0);
-        const newPartyId = await picker.party(details.name).inputValue();
-        await expect
-          .poll(async () =>
-            (await picker.listedPartyIds()).find((partyId) => partyId === newPartyId || partyIdsListedBeforeTheAdd.includes(partyId)),
-          )
-          .toBe(newPartyId);
+
+        const added = await addressBookApi.findByName(details.name);
+        await picker.search(token);
+        await expect(picker.listedParties).toHaveCount(2);
+        expect(await picker.listedPartyIds()).toEqual([added.id, alreadyInTheBook.id]);
+        await expect(picker.checkedParties).toHaveCount(0);
       },
     );
 
@@ -153,13 +170,14 @@ test.describe('Add an address from the journey via INS', () => {
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, pages, animalsPages, insPages }) => {
       const addPage = insPages.addressBookAdd;
+
       const details = newAddressFor('Consignor');
-      const addedBanner = animalsPages.addresses.successBanner.getByText(addedBannerText(details), { exact: true });
 
       await arriveOnInsAddPageAndFill(animalsJourney, addPage, 'Consignor', details);
       await pages.page.clock.install();
       await addPage.btnSaveAndSelect.click();
       await expect(animalsPages.addresses.heading).toBeVisible();
+      const addedBanner = animalsPages.addresses.successBanner.getByText(addedBannerText(details), { exact: true });
       await expect(addedBanner).toBeVisible();
 
       await pages.page.clock.runFor(10_000);
