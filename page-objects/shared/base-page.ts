@@ -83,6 +83,14 @@ export class BasePage {
     return this.pagination.getByRole('link', { name: `Page ${pageNumber}`, exact: true });
   }
 
+  get paginationItems(): Locator {
+    return this.pagination.getByRole('listitem');
+  }
+
+  get currentPaginationPageLink(): Locator {
+    return this.pagination.locator('[aria-current="page"]');
+  }
+
   /** From page 1, follows Next until the target shows, waiting for each page to load; false once the last page passes without it. */
   async followNextPageUntilShown(target: Locator): Promise<boolean> {
     for (let pageNumber = 2; (await target.count()) === 0; pageNumber += 1) {
@@ -90,7 +98,7 @@ export class BasePage {
         return false;
       }
       await this.nextPageLink.click();
-      await this.paginationPageLink(pageNumber).and(this.page.locator('[aria-current="page"]')).waitFor();
+      await this.paginationPageLink(pageNumber).and(this.currentPaginationPageLink).waitFor();
     }
     return true;
   }

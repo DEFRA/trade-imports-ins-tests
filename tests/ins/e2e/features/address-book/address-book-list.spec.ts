@@ -123,6 +123,32 @@ test.describe('Address book list', () => {
     await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
   });
 
+  test('a search over five pages links the first, current, neighbouring and last pages, with an ellipsis for each gap', async ({
+    insPages,
+    addressBookApi,
+  }) => {
+    const stamp = Date.now();
+    const { addressBookList } = insPages;
+    await Promise.all(
+      Array.from({ length: 33 }, (_, index) => addressBookApi.createAddress(traderAddress(`Truncated Farm ${stamp} number ${index}`))),
+    );
+    await addressBookList.open();
+
+    await addressBookList.search(`Truncated Farm ${stamp}`, { submitWith: 'button' });
+
+    await expect(addressBookList.resultsLine).toHaveText('Showing 1-8 of 33');
+    await expect(addressBookList.paginationItems).toHaveText(['1', '2', '⋯', '5']);
+    await expect(addressBookList.currentPaginationPageLink).toHaveText('1');
+    await addressBookList.paginationPageLink(5).click();
+    await expect(addressBookList.resultsLine).toHaveText('Showing 33-33 of 33');
+    await expect(addressBookList.paginationItems).toHaveText(['1', '⋯', '4', '5']);
+    await expect(addressBookList.currentPaginationPageLink).toHaveText('5');
+    await addressBookList.paginationPageLink(4).click();
+    await expect(addressBookList.resultsLine).toHaveText('Showing 25-32 of 33');
+    await expect(addressBookList.paginationItems).toHaveText(['1', '⋯', '3', '4', '5']);
+    await expect(addressBookList.currentPaginationPageLink).toHaveText('4');
+  });
+
   for (const { field, label } of SEARCHED_ADDRESS_FIELDS) {
     test(`a search finds an address by a lower-case word inside its ${label}`, async ({ insPages, addressBookApi }) => {
       const stamp = Date.now();
