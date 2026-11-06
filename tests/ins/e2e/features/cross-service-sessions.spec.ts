@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { COLD_START, authCookieNameFor } from '@fixtures/auth-state';
-import { requireBaseUrl } from '@page-objects/shared/base-page';
+import { originOf, requireBaseUrl } from '@page-objects/shared/base-page';
 import { SET_BASES } from '@page-objects/shared/sets';
 
 test.use({ storageState: COLD_START });
@@ -25,17 +25,21 @@ test.describe('Sessions across services', { tag: '@compose' }, () => {
     await expect(plantsPages.dashboard.heading).toBeVisible();
 
     await animalsPages.dashboard.open({ attemptSignIn: false });
-    await expect(pages.page).toHaveURL((url) => url.origin === new URL(animalsBaseUrl).origin && url.pathname === SET_BASES.liveAnimals);
+    await expect(pages.page).toHaveURL(
+      (url) => url.origin === originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL') && url.pathname === SET_BASES.liveAnimals,
+    );
     await expect(animalsPages.dashboard.heading).toBeVisible();
 
     await insPages.dashboard.open({ attemptSignIn: false });
     await expect(pages.page).toHaveURL(
-      (url) => url.origin === new URL(insBaseUrl).origin && url.pathname === insPages.dashboard.expectedUrl,
+      (url) => url.origin === originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL') && url.pathname === insPages.dashboard.expectedUrl,
     );
     await expect(insPages.dashboard.heading).toBeVisible();
 
     await plantsPages.dashboard.open({ attemptSignIn: false });
-    await expect(pages.page).toHaveURL((url) => url.origin === new URL(plantsBaseUrl).origin && url.pathname === SET_BASES.highRiskPlants);
+    await expect(pages.page).toHaveURL(
+      (url) => url.origin === originOf('TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL') && url.pathname === SET_BASES.highRiskPlants,
+    );
     await expect(plantsPages.dashboard.heading).toBeVisible();
 
     const cookieNames = (await pages.page.context().cookies()).map(({ name }) => name);

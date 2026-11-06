@@ -17,7 +17,7 @@ export class PlantsCommodityTypePage extends PlantsNotificationPage {
   }
 
   get optionsError(): Locator {
-    return this.page.getByRole('group', { name: this.question }).locator('.govuk-error-message');
+    return this.radiosError(this.question);
   }
 
   get linesWarning(): Locator {

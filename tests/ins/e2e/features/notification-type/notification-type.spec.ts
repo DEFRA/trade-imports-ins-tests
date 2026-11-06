@@ -3,7 +3,13 @@ import { WHOLE_REFERENCE_NUMBER_PATTERN as ANIMALS_REFERENCE } from '@domain/ani
 import { WHOLE_REFERENCE_NUMBER_PATTERN as PLANTS_REFERENCE } from '@domain/plants/constants/reference-number-patterns';
 import type { InsNotificationTypePage } from '@page-objects/ins/notification-type-page';
 import { originOf, requireBaseUrl } from '@page-objects/shared/base-page';
-import { GERMINAL_PRODUCTS, LIVE_ANIMALS, NOTIFICATION_TYPE_OPTIONS, PLANTS_OPTIONS } from '@domain/ins/constants/notification-types';
+import {
+  GERMINAL_PRODUCTS,
+  LIVE_ANIMALS,
+  NOTIFICATION_TYPE_OPTIONS,
+  PLANTS_OPTIONS,
+  type NotificationTypeOption,
+} from '@domain/ins/constants/notification-types';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { recordMainFrameNavigationPaths } from '@utils/playwright/main-frame-navigations';
 
@@ -11,6 +17,7 @@ import type { Page } from '@playwright/test';
 
 import { test, expect } from '@fixtures';
 import { authCookieNameFor } from '@fixtures/auth-state';
+import type { PageFixtures } from '@fixtures/ui';
 
 const QUESTION_TITLE = 'What are you importing? - Import notification service - GOV.UK';
 
@@ -204,6 +211,7 @@ test.describe('Live animals notification started from the INS question', { tag: 
     test.slow();
     const reference = await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType, LIVE_ANIMALS);
     await animalsPages.originOfImport.followBackToInsTypeQuestion();
+    const animalsNavigations = recordMainFrameNavigationPaths(pages.page, originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL'));
 
     await insPages.notificationType.continueToService();
 
@@ -215,16 +223,28 @@ test.describe('Live animals notification started from the INS question', { tag: 
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await expect(animalsPages.originOfImport.statusTag).toHaveText('Draft');
     await expect(animalsPages.originOfImport.notificationReference).toContainText(reference);
-    await animalsPages.dashboard.open();
-    await animalsPages.dashboard.searchForReference(reference);
-    await expect(animalsPages.dashboard.notificationCards).toHaveCount(1);
-    await expect(animalsPages.dashboard.cardStatusTag(reference)).toHaveText('Draft');
+    expect(animalsNavigations).toEqual([animalsPages.originOfImport.expectedUrl(reference)]);
   });
 
-  for (const { type, destination } of [
-    { type: PLANTS_OPTIONS[0], destination: 'plants' },
-    { type: GERMINAL_PRODUCTS, destination: 'germinal' },
-  ] as const) {
+  const landingCases: {
+    type: NotificationTypeOption;
+    expectLanding: (landing: Pick<PageFixtures, 'pages' | 'plantsPages'>) => Promise<void>;
+  }[] = [
+    {
+      type: PLANTS_OPTIONS[0],
+      expectLanding: async ({ plantsPages }) => {
+        await expect(plantsPages.commodityType.heading).toBeVisible();
+      },
+    },
+    {
+      type: GERMINAL_PRODUCTS,
+      expectLanding: async ({ pages }) => {
+        await expect(pages.page).toHaveURL(`${originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')}${SET_BASES.germinalProducts}/start`);
+      },
+    },
+  ];
+
+  for (const { type, expectLanding } of landingCases) {
     test(`choosing ${type.label} instead leaves the live animals notification with its reference, Draft status and answers`, async ({
       insPages,
       animalsPages,
@@ -238,11 +258,7 @@ test.describe('Live animals notification started from the INS question', { tag: 
       await animalsPages.originOfImport.open(reference);
       await animalsJourney.backToInsTypeQuestionAndChoose(insPages.notificationType, type);
 
-      if (destination === 'plants') {
-        await expect(plantsPages.commodityType.heading).toBeVisible();
-      } else {
-        await expect(pages.page).toHaveURL(`${originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL')}${SET_BASES.germinalProducts}/start`);
-      }
+      await expectLanding({ pages, plantsPages });
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(reference);
       await expect(animalsPages.dashboard.notificationCard(reference)).toBeVisible();

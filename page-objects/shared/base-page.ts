@@ -67,6 +67,10 @@ export class BasePage {
     return errorSummaryOn(this.page);
   }
 
+  radiosError(legend: string | RegExp): Locator {
+    return this.page.getByRole('group', { name: legend }).locator('.govuk-error-message');
+  }
+
   get linkBack(): Locator {
     return this.page.getByRole('link', { name: 'Back', exact: true });
   }

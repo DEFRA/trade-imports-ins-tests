@@ -20,7 +20,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.originOfImport.country.choose('Belgium');
     await animalsPages.originOfImport.saveAndContinue.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(/\/notification-view$/);
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrl(referenceNumber));
     await expect(countryRow).toContainText('Belgium');
 
     const certifiedForRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Certified for' });
@@ -31,7 +31,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.additionalDetails.certifiedFor('Exhibition').check();
     await animalsPages.additionalDetails.saveAndContinue.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(/\/notification-view$/);
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrl(referenceNumber));
     await expect(certifiedForRow).toContainText('Exhibition');
   });
 
@@ -63,15 +63,18 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
 
-    const purposeRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Purpose in the market' });
-    await expect(purposeRow).toContainText('Breeding');
+    const purposeValue = animalsPages.notificationView.summaryValue(
+      animalsPages.notificationView.summaryCard('Reason for import'),
+      'Purpose in the market',
+    );
+    await expect(purposeValue).toContainText('Breeding');
     await animalsPages.notificationView.changeLink('Change reason for import').click();
     await expect(animalsPages.importReason.heading).toBeVisible();
     await animalsPages.importReason.purpose('Research').check();
     await animalsPages.importReason.saveAndContinue.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(/\/notification-view$/);
-    await expect(purposeRow).toContainText('Research');
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrl(referenceNumber));
+    await expect(purposeValue).toContainText('Research');
   });
 
   test('the roles and addresses Change link opens a page whose Back link opens the overview, not check your answers', async ({

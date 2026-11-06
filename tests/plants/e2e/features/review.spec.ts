@@ -66,6 +66,7 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.origin.country.choose('Germany');
     await plantsPages.origin.saveAndContinue.click();
     await expect(plantsPages.notificationView.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
     await expect(plantsPages.notificationView.card('Import details')).toContainText('Germany');
     await plantsPages.notificationView.change('Change Commodity 1 (Commodity 1)').click();
     await plantsPages.commodityDetails.field('Quantity').fill('300');
@@ -76,7 +77,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(plantsPages.notificationView.card('Commodity 1')).toContainText('300');
   });
 
-  test('the country of origin Change link opens a page whose Back link opens the commodities list with change context, and Save and continue returns to check your answers showing the new country', async ({
+  test('the country of origin Change link opens a page whose Back link opens the commodities list with change context', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -91,13 +92,6 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.origin.linkBack.click();
     await expect(plantsPages.commodities.heading).toBeVisible();
     await expect(pages.page).toHaveURL(plantsPages.commodities.changeContextUrl(reference));
-
-    await plantsPages.notificationView.open(reference);
-    await plantsPages.notificationView.change('Change country of origin (Import details)').click();
-    await plantsPages.origin.country.choose('Germany');
-    await plantsPages.origin.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
-    await expect(plantsPages.notificationView.card('Import details')).toContainText('Germany');
   });
 
   test('declaration is required and submission produces a read-only notification and Submitted dashboard card', async ({

@@ -11,8 +11,6 @@ import {
 } from '@page-objects/shared/address-picker-results';
 
 export class AnimalsPartyPickerPage extends NotificationPage {
-  private static readonly SELECT_PREFIX = 'Select ';
-
   constructor(
     page: Page,
     slug: string,
@@ -50,7 +48,7 @@ export class AnimalsPartyPickerPage extends NotificationPage {
   }
 
   party(name: string): Locator {
-    return this.page.getByRole('radio', { name: `${AnimalsPartyPickerPage.SELECT_PREFIX}${name}`, exact: true });
+    return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
   }
 
   get noMatchesMessage(): Locator {

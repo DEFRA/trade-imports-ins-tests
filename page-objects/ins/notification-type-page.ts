@@ -38,7 +38,7 @@ export class InsNotificationTypePage extends BasePage {
   }
 
   get optionsError(): Locator {
-    return this.page.getByRole('group', { name: /What are you importing\?/ }).locator('.govuk-error-message');
+    return this.radiosError(/What are you importing\?/);
   }
 
   get hints(): Locator {
