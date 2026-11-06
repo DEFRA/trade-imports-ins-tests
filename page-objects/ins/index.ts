@@ -1,5 +1,6 @@
 import { type Page } from '@playwright/test';
 import { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
+import { InsAddressBookAddressTypePage } from '@page-objects/ins/address-book/address-type-page';
 import { InsAddressBookDeletePage } from '@page-objects/ins/address-book/delete-page';
 import { InsAddressBookEditPage } from '@page-objects/ins/address-book/edit-page';
 import { InsAddressBookListPage } from '@page-objects/ins/address-book/list-page';
@@ -13,6 +14,7 @@ export function createInsPages(page: Page) {
     notificationType: new InsNotificationTypePage(page),
     addressBookList: new InsAddressBookListPage(page),
     addressBookAdd: new InsAddressBookAddPage(page),
+    addressBookAddressType: new InsAddressBookAddressTypePage(page),
     addressBookView: new InsAddressBookViewPage(page),
     addressBookEdit: new InsAddressBookEditPage(page),
     addressBookDelete: new InsAddressBookDeletePage(page),

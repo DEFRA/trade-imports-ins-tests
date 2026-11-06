@@ -7,6 +7,7 @@ import {
   GERMINAL_PRODUCTS,
   LIVE_ANIMALS,
   NOTIFICATION_TYPE_OPTIONS,
+  NOTIFICATION_TYPE_REQUIRED_ERROR,
   PLANTS_OPTIONS,
   type NotificationTypeOption,
 } from '@domain/ins/constants/notification-types';
@@ -88,8 +89,8 @@ test.describe('INS notification type question', { tag: ['@animals-frontend', '@p
     await notificationTypePage.btnContinue.click();
 
     await expect(notificationTypePage.errorSummary).toContainText('There is a problem');
-    await expect(notificationTypePage.errorSummaryLink).toHaveAttribute('href', '#notificationType');
-    await expect(notificationTypePage.optionsError).toContainText('Select what you are importing');
+    await expect(notificationTypePage.errorSummaryLink(NOTIFICATION_TYPE_REQUIRED_ERROR)).toHaveAttribute('href', '#notificationType');
+    await expect(notificationTypePage.optionsError).toContainText(NOTIFICATION_TYPE_REQUIRED_ERROR);
     await expect(pages.page).toHaveTitle(`Error: ${QUESTION_TITLE}`);
   });
 

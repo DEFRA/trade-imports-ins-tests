@@ -2,19 +2,40 @@ import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { addressFormCountryNames } from '@resources/reference-data/reference-data';
 import { skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
+import { expectRolesOptions } from '@utils/roles-options-assertions';
 import type { AnimalsJourney } from '@flows/animals/journey';
-import { type InsAddressBookAddPage, type NewAddressDetails } from '@page-objects/ins/address-book/add-page';
-import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
+import { type InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
+import { type AddressDetails } from '@page-objects/ins/address-book/form-page';
+import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
+import { journeyRolesQuestion, rolesQuestionLabels } from '@domain/ins/constants/address-book-types';
+import {
+  addressRoles,
+  heldAsConsignee,
+  heldAsConsignor,
+  heldAsImporter,
+  heldAsPlaceOfDestination,
+  heldAsPlaceOfOrigin,
+  rolesFieldOf,
+  type HeldRoles,
+} from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage, type PartyRole } from '@page-objects/animals/addresses-page';
 import { originOf } from '@page-objects/shared/base-page';
 
 const PARTY_ROLES: readonly PartyRole[] = ['Place of origin', 'Consignor', 'Consignee', 'Importer', 'Place of destination'];
 
+const ROLES_HELD_BY_PARTY: Record<PartyRole, HeldRoles> = {
+  'Place of origin': heldAsPlaceOfOrigin,
+  Consignor: heldAsConsignor,
+  Consignee: heldAsConsignee,
+  Importer: heldAsImporter,
+  'Place of destination': heldAsPlaceOfDestination,
+};
+
 function uniqueToken(): string {
   return `${Date.now()}-${randomUUID().slice(0, 8)}`;
 }
 
-function newAddressFor(role: PartyRole, token: string = uniqueToken()): NewAddressDetails {
+function newAddressFor(role: PartyRole, token: string = uniqueToken()): AddressDetails {
   return {
     name: `Handshake ${role} ${token}`,
     addressLine1: '9 Handshake Lane',
@@ -28,6 +49,7 @@ function newAddressFor(role: PartyRole, token: string = uniqueToken()): NewAddre
 
 function addressAlreadyInTheBookFor(role: PartyRole, token: string) {
   return {
+    ...ROLES_HELD_BY_PARTY[role],
     name: `Already in the book ${role} ${token}`,
     addressLine1: '9 Handshake Lane',
     townOrCity: 'Carlisle',
@@ -38,7 +60,7 @@ function addressAlreadyInTheBookFor(role: PartyRole, token: string) {
   };
 }
 
-function addedBannerText(details: NewAddressDetails): string {
+function addedBannerText(details: AddressDetails): string {
   return `${details.name} address added to your address book`;
 }
 
@@ -46,7 +68,7 @@ async function arriveOnInsAddPageAndFill(
   animalsJourney: AnimalsJourney,
   addPage: InsAddressBookAddPage,
   role: PartyRole,
-  details: NewAddressDetails,
+  details: AddressDetails,
 ): Promise<void> {
   await animalsJourney.toInsAddAddressFromPicker(addPage, role);
   await addPage.fill(details);
@@ -61,9 +83,9 @@ test.describe('Add an address from the journey via INS', () => {
 
   for (const role of PARTY_ROLES) {
     test(
-      `Save and select on the INS add page reached from the ${role} picker saves the address, selects it for the role and lands on Roles and addresses with the added banner`,
+      `Save and select on the INS add page reached from the ${role} picker saves the address holding that role, selects it for the role and lands on Roles and addresses with the added banner`,
       { tag: ['@address-book', '@ins-frontend'] },
-      async ({ animalsJourney, pages, animalsPages, insPages }) => {
+      async ({ animalsJourney, pages, animalsPages, insPages, addressBookApi }) => {
         const addPage = insPages.addressBookAdd;
         const details = newAddressFor(role);
         const insOrigin = originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL');
@@ -83,6 +105,9 @@ test.describe('Add an address from the journey via INS', () => {
           useInnerText: true,
         });
         await expect(animalsPages.addresses.changeParty(role)).toBeVisible();
+
+        const saved = await addressBookApi.findByName(details.name);
+        expect(rolesFieldOf(saved)).toEqual(ROLES_HELD_BY_PARTY[role]);
       },
     );
 
@@ -190,7 +215,7 @@ test.describe('Add an address from the journey via INS', () => {
       await expect(addPage.notificationReference).toHaveText(journeyContext.referenceNumber);
       await expect(addPage.sectionHeading('Address')).toBeVisible();
       await expect(addPage.sectionHeading('Contact details')).toBeVisible();
-      await expect(addPage.fieldLabels).toHaveText(ADDRESS_FORM_FIELD_LABELS_IN_ORDER);
+      await expect(addPage.formLabels).toHaveText([...ADDRESS_FORM_FIELD_LABELS_IN_ORDER, rolesQuestionLabels.PLACE_OF_ORIGIN]);
       await expect(addPage.inputName).not.toHaveAttribute('autocomplete');
       await expect(addPage.inputAddressLine1).toHaveAttribute('autocomplete', 'address-line1');
       await expect(addPage.inputAddressLine2).toHaveAttribute('autocomplete', 'address-line2');
@@ -231,11 +256,61 @@ test.describe('Add an address from the journey via INS', () => {
   }
 
   test(
+    'The INS add page reached from the Consignee picker asks what else the address should be used for, offering Importer and Place of destination unticked, and with Importer ticked Save and select saves the address holding the consignee and importer roles',
+    { tag: ['@address-book', '@ins-frontend'] },
+    async ({ animalsJourney, animalsPages, insPages, addressBookApi }) => {
+      const addPage = insPages.addressBookAdd;
+      const details = newAddressFor('Consignee');
+
+      await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
+      await expect(addPage.rolesGroup(journeyRolesQuestion.legend)).toHaveAccessibleDescription(journeyRolesQuestion.consigneeHint);
+      await expectRolesOptions(addPage, journeyRolesQuestion.legend, [addressRoles.importer, addressRoles.placeOfDestination]);
+      await expect(addPage.rolesOption(addressRoles.importer)).not.toBeChecked();
+      await expect(addPage.rolesOption(addressRoles.placeOfDestination)).not.toBeChecked();
+
+      await addPage.fill(details);
+      await addPage.tickRoles([addressRoles.importer]);
+      await addPage.btnSaveAndSelect.click();
+
+      await expect(animalsPages.addresses.heading).toBeVisible();
+      const saved = await addressBookApi.findByName(details.name);
+      expect(rolesFieldOf(saved)).toEqual({
+        roles: [addressRoles.consignee, addressRoles.importer],
+      });
+    },
+  );
+
+  test(
+    'Save and return to address page on the INS add page reached from the Consignee picker with answers missing keeps the page, lists each error in field order, keeps the name and the Importer tick and saves nothing',
+    { tag: ['@address-book', '@ins-frontend'] },
+    async ({ animalsJourney, insPages, addressBookApi }) => {
+      const addPage = insPages.addressBookAdd;
+      const details = newAddressFor('Consignee');
+
+      await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
+      await addPage.fill({ ...details, addressLine1: '', townOrCity: '', postcode: '', email: '', phone: '' });
+      await addPage.tickRoles([addressRoles.importer]);
+      await addPage.btnSaveAndReturnToAddressPage.click();
+
+      await expect(addPage.heading).toBeVisible();
+      await expect(addPage.errorSummaryLinks).toHaveText([
+        ADDRESS_FORM_VALIDATION_MESSAGES.addressLine1Required,
+        ADDRESS_FORM_VALIDATION_MESSAGES.townOrCityRequired,
+        ADDRESS_FORM_VALIDATION_MESSAGES.postcodeRequired,
+        ADDRESS_FORM_VALIDATION_MESSAGES.emailRequired,
+        ADDRESS_FORM_VALIDATION_MESSAGES.phoneRequired,
+      ]);
+      await expect(addPage.inputName).toHaveValue(details.name);
+      await expect(addPage.rolesOption(addressRoles.importer)).toBeChecked();
+      expect(await addressBookApi.listAddresses(details.name)).toEqual([]);
+    },
+  );
+
+  test(
     'saving the INS add page with a blank name keeps the page with the name error in the summary and on the field',
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, insPages }) => {
       const addPage = insPages.addressBookAdd;
-      const blankNameMessage = 'Enter a name or organisation';
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
 
@@ -251,8 +326,8 @@ test.describe('Add an address from the journey via INS', () => {
       await addPage.btnSaveAndSelect.click();
 
       await expect(addPage.heading).toBeVisible();
-      await expect(addPage.errorSummaryLink(blankNameMessage)).toBeVisible();
-      await expect(addPage.inputName).toHaveAccessibleDescription(`Error: ${blankNameMessage}`);
+      await expect(addPage.errorSummaryLink(ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired)).toBeVisible();
+      await expect(addPage.inputName).toHaveAccessibleDescription(`Error: ${ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired}`);
     },
   );
 });

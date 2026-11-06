@@ -2,37 +2,33 @@ import { test, expect } from '@fixtures';
 import { COLD_START } from '@fixtures/auth-state';
 import { createInsPages } from '@page-objects';
 import { users } from '@config/users';
+import { originOrConsignorTab } from '@domain/ins/constants/address-book-types';
+import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 
 test.describe('Address book cross-user visibility', () => {
-  test('an address added by one user is visible to another user in the same organisation', async ({ browser, pages, insPages }) => {
+  test('an address added by one user is visible to another user in the same organisation', async ({
+    browser,
+    pages,
+    insPages,
+    insJourney,
+  }) => {
     const createdName = `Cross User Farm ${Date.now()}`;
 
-    await insPages.addressBookAdd.open({ userId: users.andrew.crn });
-    await insPages.addressBookAdd.fill({
-      name: createdName,
-      addressLine1: '2 Test Lane',
-      townOrCity: 'Carlisle',
-      postcode: 'CA1 1AA',
-      country: 'United Kingdom',
-      phone: '01228 555 0102',
-      email: 'cross-user@example.co.uk',
-    });
-    await insPages.addressBookAdd.saveAndContinue();
-    await expect(pages.page).toHaveURL(new RegExp(`${insPages.addressBookList.expectedUrl}$`));
+    await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(createdName, 'United Kingdom'), { userId: users.andrew.crn });
+    await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(originOrConsignorTab));
 
-    // browser.newContext() inherits the test's storageState; Sarah must start cold.
-    const contextB = await browser.newContext({ storageState: COLD_START });
+    const sarahsContext = await browser.newContext({ storageState: COLD_START });
     try {
-      const insPagesB = createInsPages(await contextB.newPage());
+      const sarahsInsPages = createInsPages(await sarahsContext.newPage());
 
-      await insPagesB.addressBookList.open({
+      await sarahsInsPages.addressBookList.open({
         userId: users.sarah.crn,
         organisationSbi: users.sarah.organisations.gatwickAirport,
       });
 
-      await expect(insPagesB.addressBookList.row(createdName)).toBeVisible();
+      await expect(sarahsInsPages.addressBookList.row(createdName)).toBeVisible();
     } finally {
-      await contextB.close();
+      await sarahsContext.close();
     }
   });
 });

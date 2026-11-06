@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { traderAddress } from '@domain/ins/constants/trader-address';
 import { addressFormCountryNames } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
@@ -9,8 +10,9 @@ test.describe('Address book country list', () => {
 
   test("the add form's Country select lists Select a country first, then every country reference data serves alphabetically, United Kingdom in its place", async ({
     insPages,
+    insJourney,
   }) => {
-    await insPages.addressBookAdd.open();
+    await insJourney.toAddressForm();
 
     await expect(insPages.addressBookAdd.countryOptions).toHaveText(['Select a country', ...addressFormCountryNames]);
   });
@@ -19,15 +21,7 @@ test.describe('Address book country list', () => {
     insPages,
     addressBookApi,
   }) => {
-    const created = await addressBookApi.createAddress({
-      name: `Country Order Farm ${Date.now()}`,
-      addressLine1: '7 Order Lane',
-      townOrCity: 'Carlisle',
-      postcode: 'CA1 6FF',
-      countryCode: 'GB',
-      phone: '01228 555 0130',
-      email: 'order@example.co.uk',
-    });
+    const created = await addressBookApi.createAddress(traderAddress(`Country Order Farm ${Date.now()}`));
 
     await insPages.addressBookEdit.open(created.id);
 

@@ -3,6 +3,7 @@ import type { PlantsPages } from '@page-objects';
 import type { PlantsAddressBookPickerPage } from '@page-objects/plants/address-book-picker-page';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
+import { addressRoles, type AddressRole } from '@domain/shared/constants/address-types';
 import { portByCode } from '@resources/reference-data/reference-data';
 import { ALREADY_ARRIVED, NOT_YET_ARRIVED } from '@domain/plants/constants/arrival-status-page';
 
@@ -26,7 +27,8 @@ export const plantsLine = {
   'EPPO code': 'QUERO',
 };
 
-export const nurseryAddress = (name: string, countryCode = 'GB') => ({
+export const nurseryAddress = (name: string, countryCode = 'GB', roles: AddressRole[] = [addressRoles.placeOfDestination]) => ({
+  roles,
   name,
   addressLine1: '4 Nursery Lane',
   townOrCity: 'Perth',
@@ -35,6 +37,12 @@ export const nurseryAddress = (name: string, countryCode = 'GB') => ({
   countryCode,
   phone: '01738 555 0143',
   email: 'review@example.co.uk',
+});
+
+export const renamedAndMovedNurseryAddress = (name: string) => ({
+  ...nurseryAddress(name),
+  townOrCity: 'Dundee',
+  postcode: 'DD1 1AA',
 });
 
 export function arrivalDate(days: number): string {
@@ -53,6 +61,7 @@ type NotificationOptions = {
   days?: number;
   contact?: boolean;
   countryCode?: string;
+  roles?: AddressRole[];
   name?: string;
   existing?: AddressBookRecord;
 };
@@ -247,11 +256,12 @@ export class PlantsJourney {
       days = 7,
       contact = true,
       countryCode = 'GB',
+      roles,
       name = `Review Nursery ${randomUUID()}`,
       existing,
     }: NotificationOptions = {},
   ): Promise<{ reference: string; address: AddressBookRecord }> {
-    const address = existing ?? (await api.createAddress(nurseryAddress(name, countryCode)));
+    const address = existing ?? (await api.createAddress(nurseryAddress(name, countryCode, roles)));
     const reference = await this.toDestinationOfNewNotification(type, { arrivalStatus: ALREADY_ARRIVED, days });
     await this.chooseDestination(address.name);
     if (type === PLANTS_FOR_PLANTING) {

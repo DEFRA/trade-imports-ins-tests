@@ -64,12 +64,12 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       .poll(
         async () => {
           await insPages.dashboard.open();
-          return insPages.dashboard.linkNextPage.isVisible();
+          return insPages.dashboard.nextPageLink.isVisible();
         },
         { timeout: timeouts.long },
       )
       .toBe(true);
 
-    await scanNextPage(insPages.dashboard.linkNextPage, runA11yScan);
+    await scanNextPage(insPages.dashboard.nextPageLink, runA11yScan);
   });
 });

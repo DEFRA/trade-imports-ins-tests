@@ -1,11 +1,27 @@
 import { Locator } from '@playwright/test';
-import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
+import { BasePage } from '@page-objects/shared/base-page';
+import { escapeRegex } from '@page-objects/shared/escape-regex';
+import { opensAtExpectedUrl, type OpensAtExpectedUrlOptions } from '@page-objects/shared/opens-at-expected-url';
+import type { AddressType, AddressRole } from '@domain/shared/constants/address-types';
+import { roleOptionLabels, type AddressBookTab } from '@domain/ins/constants/address-book-types';
 
-export class InsAddressBookListPage extends BasePage {
+type ListPageOpenOptions = Omit<OpensAtExpectedUrlOptions, 'query'> & { addressType?: AddressType };
+
+export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
   readonly expectedUrl = '/address-book';
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Address book' });
+  }
+
+  /** The URL of the list opened with no query. */
+  get listUrlPattern(): RegExp {
+    return new RegExp(`${escapeRegex(this.expectedUrl)}$`);
+  }
+
+  /** The URL of the list opened on a tab. */
+  tabUrlPattern(tab: AddressBookTab): RegExp {
+    return new RegExp(`${escapeRegex(this.expectedUrl)}\\?addressType=${tab.addressType}$`);
   }
 
   get intro(): Locator {
@@ -40,16 +56,12 @@ export class InsAddressBookListPage extends BasePage {
     return this.page.getByRole('row').filter({ has: this.page.getByRole('cell') });
   }
 
+  get linkClearSearch(): Locator {
+    return this.page.getByRole('link', { name: 'Clear search', exact: true });
+  }
+
   get mainLinks(): Locator {
     return this.page.getByRole('main').getByRole('link');
-  }
-
-  get pagination(): Locator {
-    return this.page.locator('.govuk-pagination');
-  }
-
-  get linkNextPage(): Locator {
-    return this.pagination.getByRole('link', { name: 'Next page', exact: true });
   }
 
   row(name: string): Locator {
@@ -60,12 +72,32 @@ export class InsAddressBookListPage extends BasePage {
     return this.row(name).getByRole('cell').nth(0);
   }
 
-  addressCell(name: string): Locator {
+  rolesCell(name: string): Locator {
     return this.row(name).getByRole('cell').nth(1);
   }
 
-  countryCell(name: string): Locator {
+  addressCell(name: string): Locator {
     return this.row(name).getByRole('cell').nth(2);
+  }
+
+  countryCell(name: string): Locator {
+    return this.row(name).getByRole('cell').nth(3);
+  }
+
+  get tabLinks(): Locator {
+    return this.page.getByRole('navigation', { name: 'Address types' }).getByRole('link');
+  }
+
+  get selectedTab(): Locator {
+    return this.tabLinks.and(this.page.locator('[aria-current="page"]'));
+  }
+
+  get panelHeading(): Locator {
+    return this.page.getByRole('main').getByRole('heading', { level: 2 });
+  }
+
+  tabLink(label: string): Locator {
+    return this.tabLinks.filter({ hasText: new RegExp(`^${escapeRegex(label)}$`) });
   }
 
   get viewLinks(): Locator {
@@ -80,8 +112,36 @@ export class InsAddressBookListPage extends BasePage {
     return this.page.getByRole('link', { name: `View ${name}`, exact: true });
   }
 
+  get selectRoleFilter(): Locator {
+    return this.page.getByLabel('Type', { exact: true });
+  }
+
+  get roleFilterOptions(): Locator {
+    return this.selectRoleFilter.locator('option');
+  }
+
+  get selectedRoleFilterOption(): Locator {
+    return this.selectRoleFilter.locator('option:checked');
+  }
+
+  private async openFilter(): Promise<void> {
+    if (!(await this.inputSearch.isVisible())) {
+      await this.filterSummary.click();
+    }
+  }
+
+  async chooseRoleFilter(role: AddressRole): Promise<void> {
+    await this.openFilter();
+    await this.selectRoleFilter.selectOption({ label: roleOptionLabels[role] });
+  }
+
+  async filter({ term, role, submitWith }: { term: string; role: AddressRole; submitWith: 'button' | 'enter' }): Promise<void> {
+    await this.chooseRoleFilter(role);
+    await this.search(term, { submitWith });
+  }
+
   async search(term: string, { submitWith }: { submitWith: 'button' | 'enter' }): Promise<void> {
-    await this.filterSummary.click();
+    await this.openFilter();
     await this.inputSearch.fill(term);
     if (submitWith === 'enter') {
       await this.inputSearch.press('Enter');
@@ -90,8 +150,20 @@ export class InsAddressBookListPage extends BasePage {
     }
   }
 
-  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
-    await this.page.goto(this.expectedUrl);
-    await this.signInWhenRequested(attemptSignIn, identity);
+  async followTab(tab: AddressBookTab): Promise<void> {
+    await this.tabLink(tab.label).click();
+  }
+
+  async waitForTabListing(tab: AddressBookTab, { searchTerm }: { searchTerm?: string } = {}): Promise<void> {
+    await this.page.waitForURL(
+      (url) =>
+        url.pathname === this.expectedUrl &&
+        url.searchParams.get('addressType') === tab.addressType &&
+        (searchTerm === undefined || url.searchParams.get('q') === searchTerm),
+    );
+  }
+
+  override async open({ addressType, ...options }: ListPageOpenOptions = {}): Promise<void> {
+    await super.open({ ...options, query: addressType ? { addressType } : undefined });
   }
 }

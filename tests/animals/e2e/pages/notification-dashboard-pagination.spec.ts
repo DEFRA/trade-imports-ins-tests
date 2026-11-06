@@ -11,12 +11,12 @@ test.describe('Dashboard pagination', () => {
     }
 
     await expect(animalsPages.dashboard.totalResults).toHaveText(/^Showing 1 to 25 of \d+ Results$/);
-    await expect(animalsPages.dashboard.linkNextPage).toBeVisible();
+    await expect(animalsPages.dashboard.nextPageLink).toBeVisible();
 
     const firstPageReference = await animalsPages.dashboard.notificationCards.first().getByRole('heading').textContent();
-    await animalsPages.dashboard.linkNextPage.click();
+    await animalsPages.dashboard.nextPageLink.click();
     await expect(pages.page).toHaveURL(/[?&]page=2(?:&|$)/);
-    await expect(animalsPages.dashboard.linkPreviousPage).toBeVisible();
+    await expect(animalsPages.dashboard.previousPageLink).toBeVisible();
     await expect(animalsPages.dashboard.totalResults).toHaveText(/^Showing 26(?: to \d+)? of \d+ Results$/);
 
     const secondPageReference = await animalsPages.dashboard.notificationCards.first().getByRole('heading').textContent();

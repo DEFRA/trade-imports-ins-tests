@@ -3,9 +3,20 @@ import { traderAddress } from '@domain/ins/constants/trader-address';
 import { addressDetailsMissingRequiredFields } from '@domain/ins/constants/address-details';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test('the add address form has no accessibility violations when errors are shown', async ({ insPages, runA11yScan }) => {
-    await insPages.addressBookAdd.open();
-    await insPages.addressBookAdd.heading.waitFor();
+  test('the Choose an address type page has no accessibility violations when the error is shown', async ({
+    insPages,
+    insJourney,
+    runA11yScan,
+  }) => {
+    await insJourney.toAddressType();
+    await insPages.addressBookAddressType.continue();
+    await expect(insPages.addressBookAddressType.errorSummary).toBeVisible();
+
+    await runA11yScan();
+  });
+
+  test('the add address form has no accessibility violations when errors are shown', async ({ insPages, insJourney, runA11yScan }) => {
+    await insJourney.toAddressForm();
     await insPages.addressBookAdd.fill(addressDetailsMissingRequiredFields);
     await insPages.addressBookAdd.saveAndContinue();
     await expect(insPages.addressBookAdd.errorSummary).toBeVisible();

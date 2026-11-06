@@ -10,3 +10,5 @@ export type NotificationTypeOption = (typeof NOTIFICATION_TYPE_OPTIONS)[number];
 
 export const [LIVE_ANIMALS, GERMINAL_PRODUCTS] = NOTIFICATION_TYPE_OPTIONS;
 export const PLANTS_OPTIONS = NOTIFICATION_TYPE_OPTIONS.filter((option) => option.service === 'plants');
+
+export const NOTIFICATION_TYPE_REQUIRED_ERROR = 'Select what you are importing';

@@ -42,16 +42,17 @@ const encodeFormBody = (fields: FormFields): string => {
 };
 
 export class FrontendFormClient {
-  private crumb: string | undefined;
+  private crumb: Promise<string> | undefined;
 
   constructor(private readonly request: APIRequestContext) {}
 
-  // @hapi/crumb (non-restful mode) matches the posted "crumb" field against the "crumb" cookie — the two names below must stay identical.
-  private async crumbToken(): Promise<string> {
-    if (this.crumb) {
-      return this.crumb;
-    }
+  private crumbToken(): Promise<string> {
+    this.crumb ??= this.mintCrumb();
+    return this.crumb;
+  }
 
+  // @hapi/crumb (non-restful mode) matches the posted "crumb" field against the "crumb" cookie — the two names below must stay identical.
+  private async mintCrumb(): Promise<string> {
     const landing = await this.request.get(CRUMB_MINT_PATH, { maxRedirects: 0, maxRetries: GET_RETRIES_AFTER_RESET });
     if (landing.status() !== HTTP_STATUS_OK) {
       throw new Error(
@@ -66,7 +67,6 @@ export class FrontendFormClient {
       throw new Error(`GET ${CRUMB_MINT_PATH} minted no "crumb" cookie, so no form post can pass CSRF validation.`);
     }
 
-    this.crumb = minted;
     return minted;
   }
 

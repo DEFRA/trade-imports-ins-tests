@@ -124,15 +124,15 @@ export class AnimalsDashboardPage extends BasePage {
     return `Showing ${start} to ${end} of ${total} Results`;
   }
 
-  get pagination(): Locator {
+  override get pagination(): Locator {
     return this.page.locator('.govuk-pagination');
   }
 
-  get linkNextPage(): Locator {
+  override get nextPageLink(): Locator {
     return this.pagination.getByRole('link', { name: 'Next', exact: true });
   }
 
-  get linkPreviousPage(): Locator {
+  override get previousPageLink(): Locator {
     return this.pagination.getByRole('link', { name: 'Previous', exact: true });
   }
 
