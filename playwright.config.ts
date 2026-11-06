@@ -21,6 +21,7 @@ applyDomainBaseUrls(
 
 const cdpConfig = withServiceBaseUrls(sharedConfig, {
   TRADE_IMPORTS_ANIMALS_BACKEND_URL: cdpServiceUrl('trade-imports-animals-backend', environment),
+  TRADE_IMPORTS_PLANTS_BACKEND_URL: cdpServiceUrl('trade-imports-plants-backend', environment),
   TRADE_IMPORTS_ADDRESS_BOOK_URL: cdpServiceUrl('trade-imports-address-book', environment),
   TRADE_IMPORTS_REFERENCE_DATA_URL: cdpServiceUrl('trade-imports-reference-data', environment),
 });

@@ -2,8 +2,8 @@ import type { PlaywrightTestConfig } from '@playwright/test';
 
 /**
  * Sets env vars for backend services reached directly by adapters (fetch),
- * bypassing the frontend — e.g. TRADE_IMPORTS_ANIMALS_BACKEND_URL for
- * NotificationApiClient. Unlike frontend/admin base URLs these aren't scoped
+ * bypassing the frontend — e.g. TRADE_IMPORTS_ANIMALS_BACKEND_URL and
+ * TRADE_IMPORTS_PLANTS_BACKEND_URL for NotificationApiClient. Unlike frontend/admin base URLs these aren't scoped
  * per domain — a given service has the same URL regardless of which
  * domain's spec runs. Keyed by env var name so a new
  * service is just another map entry, not a new function.
