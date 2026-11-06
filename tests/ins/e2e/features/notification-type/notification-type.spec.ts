@@ -16,7 +16,7 @@ import { recordMainFrameNavigationPaths } from '@utils/playwright/main-frame-nav
 import type { Page } from '@playwright/test';
 
 import { test, expect } from '@fixtures';
-import { authCookieNameFor } from '@fixtures/auth-state';
+import { clearAuthCookieFor } from '@fixtures/auth-state';
 
 const QUESTION_TITLE = 'What are you importing? - Import notification service - GOV.UK';
 
@@ -243,7 +243,7 @@ test.describe('Live animals notification started from the INS question', { tag: 
     const insBaseUrl = requireBaseUrl('TRADE_IMPORTS_INS_FRONTEND_BASE_URL');
     await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType, LIVE_ANIMALS);
     const insNavigations = recordMainFrameNavigationPaths(pages.page, originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL'));
-    await pages.page.context().clearCookies({ name: authCookieNameFor('ins', insBaseUrl) });
+    await clearAuthCookieFor(pages.page.context(), 'ins', insBaseUrl);
 
     await animalsJourney.backToInsTypeQuestion();
 
@@ -267,7 +267,7 @@ test.describe('Live animals notification started from the INS question', { tag: 
     const animalsBaseUrl = requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
     const reference = await animalsJourney.toInsTypeQuestionFromNewLiveAnimalsOrigin(insPages.notificationType);
     const animalsNavigations = recordMainFrameNavigationPaths(pages.page, originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL'));
-    await pages.page.context().clearCookies({ name: authCookieNameFor('animals', animalsBaseUrl) });
+    await clearAuthCookieFor(pages.page.context(), 'animals', animalsBaseUrl);
 
     await insPages.notificationType.continueToService();
 

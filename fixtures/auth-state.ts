@@ -40,6 +40,10 @@ export const authCookieNameFor = (targetName: string, baseURL?: string): string 
   return AUTH_COOKIE_NAME;
 };
 
+export const clearAuthCookieFor = async (context: BrowserContext, targetName: string, baseURL: string): Promise<void> => {
+  await context.clearCookies({ name: authCookieNameFor(targetName, baseURL), domain: new URL(baseURL).hostname });
+};
+
 export const LANDING_TIMEOUT_MS = 20_000;
 const SIGN_IN_ATTEMPTS = 2;
 
