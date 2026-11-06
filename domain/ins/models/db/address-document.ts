@@ -1,6 +1,7 @@
 import type { ObjectId } from 'mongodb';
+import type { HeldRoles } from '@domain/shared/constants/address-types';
 
-export type AddressDocument = {
+export type AddressDocument = Partial<HeldRoles> & {
   _id: ObjectId;
   name: string;
   addressLine1: string;

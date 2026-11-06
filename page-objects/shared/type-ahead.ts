@@ -1,6 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
-
-const escapeRegExp = (text: string): string => text.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+import { escapeRegex } from '@page-objects/shared/escape-regex';
 
 /** iOS adds a hidden "1 of 7" to each suggestion's accessible name. */
 const OPTIONAL_POSITION = String.raw`( \d+ of \d+)?`;
@@ -40,7 +39,7 @@ export class TypeAhead {
   }
 
   announcement(text: string): Locator {
-    const exactText = new RegExp(`^${escapeRegExp(text)}\\s*$`);
+    const exactText = new RegExp(`^${escapeRegex(text)}\\s*$`);
     return this.page.locator(`#${this.fieldId}__status--A, #${this.fieldId}__status--B`).filter({ hasText: exactText });
   }
 
@@ -61,7 +60,7 @@ export class TypeAhead {
   }
 
   option(name: string): Locator {
-    return this.page.getByRole('option', { name: new RegExp(`^${escapeRegExp(name)}${OPTIONAL_POSITION}$`) });
+    return this.page.getByRole('option', { name: new RegExp(`^${escapeRegex(name)}${OPTIONAL_POSITION}$`) });
   }
 
   boldLettersOf(name: string): Locator {

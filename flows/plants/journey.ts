@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { PlantsPages } from '@page-objects';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
+import { addressRoles, type AddressRole } from '@domain/shared/constants/address-types';
 import { portByCode } from '@resources/reference-data/reference-data';
 
 /** One commodity line's answers, keyed by field label. The fields a line needs depend on its category. */
@@ -42,7 +43,8 @@ const DEFAULT_LINE_BY_COMMODITY_TYPE: Record<string, CategorisedLine> = {
 const ALREADY_ARRIVED = 'Yes, it has already arrived';
 const NOT_YET_ARRIVED = 'No, it has not arrived yet';
 
-export const nurseryAddress = (name: string, countryCode = 'GB') => ({
+export const nurseryAddress = (name: string, countryCode = 'GB', roles: AddressRole[] = [addressRoles.placeOfDestination]) => ({
+  roles,
   name,
   addressLine1: '4 Nursery Lane',
   townOrCity: 'Perth',
@@ -51,6 +53,12 @@ export const nurseryAddress = (name: string, countryCode = 'GB') => ({
   countryCode,
   phone: '01738 555 0143',
   email: 'review@example.co.uk',
+});
+
+export const renamedAndMovedNurseryAddress = (name: string) => ({
+  ...nurseryAddress(name),
+  townOrCity: 'Dundee',
+  postcode: 'DD1 1AA',
 });
 
 export function arrivalDate(days: number): string {
@@ -70,6 +78,8 @@ type NotificationOptions = {
   contact?: boolean;
   /** The country the minted record carries. */
   countryCode?: string;
+  /** The roles the minted record holds. */
+  roles?: AddressRole[];
   /** The minted record's name. Must be unique: the address book is shared and never wiped. */
   name?: string;
   /** A record to pick instead of minting one, so two notifications can copy the same address. */
@@ -246,11 +256,12 @@ export class PlantsJourney {
       days = 7,
       contact = true,
       countryCode = 'GB',
+      roles,
       name = `Review Nursery ${randomUUID()}`,
       existing,
     }: NotificationOptions = {},
   ): Promise<{ reference: string; address: AddressBookRecord }> {
-    const address = existing ?? (await api.createAddress(nurseryAddress(name, countryCode)));
+    const address = existing ?? (await api.createAddress(nurseryAddress(name, countryCode, roles)));
     const reference = await this.toDestinationOfNewNotification(type, { arrivalStatus: ALREADY_ARRIVED, days });
     await this.chooseDestination(address.name);
     if (type === PLANTS_FOR_PLANTING) {

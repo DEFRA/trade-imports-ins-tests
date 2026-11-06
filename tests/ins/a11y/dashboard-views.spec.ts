@@ -1,7 +1,6 @@
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 import { dashboardSortValues } from '@domain/ins/constants/dashboard-sort-values';
 import { timeouts } from '@config/timeouts';
-import { scanNextPage } from '@utils/next-page-scan';
 
 const noMatchReferenceNumber = 'GBN-AG-26-ZZZZZZ';
 
@@ -56,20 +55,19 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
   });
 
-  test('the dashboard has no accessibility violations when paginated', async ({ insPages, runA11yScan, animalsSeededJourney }) => {
-    test.slow();
-    const notificationsFillingTwoPages = 26;
-    await Promise.all(Array.from({ length: notificationsFillingTwoPages }, () => animalsSeededJourney.createEmptyNotification()));
-    await expect
-      .poll(
-        async () => {
-          await insPages.dashboard.open();
-          return insPages.dashboard.linkNextPage.isVisible();
-        },
-        { timeout: timeouts.long },
-      )
-      .toBe(true);
+  test.describe('pagination', () => {
+    test.beforeEach(async ({ insPages }) => {
+      const hasPagination = await insPages.dashboard.pagination.isVisible();
+      test.skip(
+        !hasPagination,
+        'Requires more than one page of notifications (seeded in compose; CDP environments normally have sufficient data).',
+      );
+    });
 
-    await scanNextPage(insPages.dashboard.linkNextPage, runA11yScan);
+    test('the dashboard has no accessibility violations when paginated', async ({ insPages, runA11yScan }) => {
+      await insPages.dashboard.nextPageLink.click();
+      await insPages.dashboard.heading.waitFor();
+      await runA11yScan();
+    });
   });
 });

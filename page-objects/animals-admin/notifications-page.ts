@@ -1,7 +1,8 @@
 import { Locator } from '@playwright/test';
-import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
+import { BasePage } from '@page-objects/shared/base-page';
+import { opensAtExpectedUrl } from '@page-objects/shared/opens-at-expected-url';
 
-export class AnimalsAdminNotificationsPage extends BasePage {
+export class AnimalsAdminNotificationsPage extends opensAtExpectedUrl(BasePage) {
   readonly expectedUrl = '/notifications';
 
   get heading(): Locator {
@@ -61,11 +62,6 @@ export class AnimalsAdminNotificationsPage extends BasePage {
       throw new Error(`Could not parse totalElements from results-count text: "${text}"`);
     }
     return Number(match[1]);
-  }
-
-  async open({ attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
-    await this.page.goto(this.expectedUrl);
-    await this.signInWhenRequested(attemptSignIn, identity);
   }
 
   async deleteByReferenceNumber(): Promise<void> {

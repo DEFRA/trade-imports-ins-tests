@@ -63,6 +63,43 @@ export class BasePage {
     return errorSummaryOn(this.page);
   }
 
+  get errorSummaryLinks(): Locator {
+    return this.errorSummary.getByRole('link');
+  }
+
+  get pagination(): Locator {
+    return this.page.getByRole('navigation', { name: 'Pagination', exact: true });
+  }
+
+  get nextPageLink(): Locator {
+    return this.pagination.getByRole('link', { name: 'Next page', exact: true });
+  }
+
+  get previousPageLink(): Locator {
+    return this.pagination.getByRole('link', { name: 'Previous page', exact: true });
+  }
+
+  paginationPageLink(pageNumber: number): Locator {
+    return this.pagination.getByRole('link', { name: `Page ${pageNumber}`, exact: true });
+  }
+
+  /** From page 1, follows Next until the target shows, waiting for each page to load; false once the last page passes without it. */
+  async followNextPageUntilShown(target: Locator): Promise<boolean> {
+    for (let pageNumber = 2; (await target.count()) === 0; pageNumber += 1) {
+      if ((await this.nextPageLink.count()) === 0) {
+        return false;
+      }
+      await this.nextPageLink.click();
+      await this.paginationPageLink(pageNumber).and(this.page.locator('[aria-current="page"]')).waitFor();
+    }
+    return true;
+  }
+
+  /** The error summary's link with this message: a string matches the whole message, a pattern any part of it. */
+  errorSummaryLink(message: string | RegExp): Locator {
+    return this.errorSummary.getByRole('link', { name: message, exact: true });
+  }
+
   get linkBack(): Locator {
     return this.page.getByRole('link', { name: 'Back', exact: true });
   }
@@ -191,10 +228,6 @@ export class NotificationPage extends BasePage {
 
   get cancelAmend(): Locator {
     return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
-  }
-
-  get errorSummaryLinks(): Locator {
-    return this.errorSummary.getByRole('link');
   }
 
   get saveAndContinue(): Locator {
