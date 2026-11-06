@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import type { PlantsPages } from '@page-objects';
 import type { PlantsAddressBookPickerPage } from '@page-objects/plants/address-book-picker-page';
+import type { InsNotificationTypePage } from '@page-objects/ins/notification-type-page';
+import type { NotificationTypeOption } from '@domain/ins/constants/notification-types';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { addressRoles, type AddressRole } from '@domain/shared/constants/address-types';
@@ -81,6 +83,16 @@ export class PlantsJourney {
   async startNotification(): Promise<string> {
     await this.toDashboard();
     await this.plantsPages.dashboard.btnStartNewNotification.click();
+    await this.plantsPages.commodityType.heading.waitFor();
+    const referenceNumber = this.plantsPages.commodityType.referenceNumberFromUrl();
+    this.context.recordReferenceNumber(referenceNumber);
+    return referenceNumber;
+  }
+
+  /** Chooses `type` on the INS question, lands on the commodity-type page and returns the new notification's reference number. */
+  async startNotificationFromInsTypeQuestion(notificationTypePage: InsNotificationTypePage, type: NotificationTypeOption): Promise<string> {
+    await notificationTypePage.open();
+    await notificationTypePage.chooseNotificationType(type);
     await this.plantsPages.commodityType.heading.waitFor();
     const referenceNumber = this.plantsPages.commodityType.referenceNumberFromUrl();
     this.context.recordReferenceNumber(referenceNumber);

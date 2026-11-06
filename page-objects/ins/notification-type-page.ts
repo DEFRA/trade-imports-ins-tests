@@ -33,6 +33,10 @@ export class InsNotificationTypePage extends BasePage {
     return this.page.locator('main').getByRole('button');
   }
 
+  get links(): Locator {
+    return this.page.locator('main').getByRole('link');
+  }
+
   get optionsError(): Locator {
     return this.radiosError(/What are you importing\?/);
   }

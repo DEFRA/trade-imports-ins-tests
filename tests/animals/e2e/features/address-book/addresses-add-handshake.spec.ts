@@ -35,14 +35,18 @@ function uniqueToken(): string {
   return `${Date.now()}-${randomUUID().slice(0, 8)}`;
 }
 
+const HANDSHAKE_ADDRESS = {
+  addressLine1: '9 Handshake Lane',
+  townOrCity: 'Carlisle',
+  postcode: 'CA2 7AA',
+  phone: '01228 555 0199',
+};
+
 function newAddressFor(role: PartyRole, token: string = uniqueToken()): AddressDetails {
   return {
+    ...HANDSHAKE_ADDRESS,
     name: `Handshake ${role} ${token}`,
-    addressLine1: '9 Handshake Lane',
-    townOrCity: 'Carlisle',
-    postcode: 'CA2 7AA',
     country: 'United Kingdom',
-    phone: '01228 555 0199',
     email: `handshake-${token}@example.co.uk`,
   };
 }
@@ -50,12 +54,9 @@ function newAddressFor(role: PartyRole, token: string = uniqueToken()): AddressD
 function addressAlreadyInTheBookFor(role: PartyRole, token: string) {
   return {
     ...ROLES_HELD_BY_PARTY[role],
+    ...HANDSHAKE_ADDRESS,
     name: `Already in the book ${role} ${token}`,
-    addressLine1: '9 Handshake Lane',
-    townOrCity: 'Carlisle',
-    postcode: 'CA2 7AA',
     countryCode: 'GB',
-    phone: '01228 555 0199',
     email: `already-${token}@example.co.uk`,
   };
 }
