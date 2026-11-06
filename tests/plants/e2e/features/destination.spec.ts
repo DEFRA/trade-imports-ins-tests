@@ -105,7 +105,7 @@ test.describe('High-risk plants destination section', () => {
     await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText('Showing 5 out of 6 results');
     await expect(plantsPages.placeOfDestination.address(target)).toHaveCount(0);
 
-    await plantsPages.placeOfDestination.pageLink(2).click();
+    await plantsPages.placeOfDestination.paginationPageLink(2).click();
     await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText('Showing 1 out of 6 results');
 
     await plantsPages.placeOfDestination.address(target).check();

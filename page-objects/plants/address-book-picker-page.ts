@@ -64,10 +64,6 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
     return this.currentAddress.getByRole('link', { name: /^Edit details/ });
   }
 
-  pageLink(number: number): Locator {
-    return this.page.getByRole('link', { name: `Page ${number}`, exact: true });
-  }
-
   async searchFor(term: string): Promise<void> {
     await this.searchBox.fill(term);
     await this.searchButton.click();

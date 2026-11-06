@@ -104,10 +104,6 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
     return this.mainLinks.filter({ hasText: /^View / });
   }
 
-  pageLink(pageNumber: number): Locator {
-    return this.page.getByRole('link', { name: `Page ${pageNumber}`, exact: true });
-  }
-
   viewLink(name: string): Locator {
     return this.page.getByRole('link', { name: `View ${name}`, exact: true });
   }
