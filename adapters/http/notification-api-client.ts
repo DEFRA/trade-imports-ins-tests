@@ -1,5 +1,6 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient, RestClientError } from '@adapters/http/rest-client';
+import { E2E_ORGANISATION_ID } from '@adapters/http/address-book-api-client';
 import { getBackendBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
 import type { NotificationFulfilments } from '@domain/animals/models/api/notification-fulfilments';
 import type { Notification } from '@domain/animals/models/api/notification';
@@ -10,18 +11,29 @@ import type { Notification } from '@domain/animals/models/api/notification';
 const OUTBOX_LOCK_RETRY_ATTEMPTS = 3;
 const OUTBOX_LOCK_RETRY_BASE_MS = 500;
 
+const ORGANISATION_ID_HEADER = 'Trade-Imports-Organisation-Id';
+
 /**
  * HTTP client for the notification api.
  */
 export class NotificationApiClient {
   private readonly rest: RestClient;
 
-  constructor(request: APIRequestContext, baseUrl: string = getBackendBaseUrl(), apiKey: string | undefined = getDeveloperApiKey()) {
+  constructor(
+    request: APIRequestContext,
+    baseUrl: string = getBackendBaseUrl(),
+    apiKey: string | undefined = getDeveloperApiKey(),
+    private readonly organisationId: string = E2E_ORGANISATION_ID,
+  ) {
     this.rest = new RestClient(baseUrl, request, apiKey);
   }
 
+  private get headers(): Record<string, string> {
+    return { [ORGANISATION_ID_HEADER]: this.organisationId };
+  }
+
   async getNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
-    return this.rest.get<NotificationFulfilments>(`/notifications/${id}/fulfilments`);
+    return this.rest.get<NotificationFulfilments>(`/notifications/${id}/fulfilments`, this.headers);
   }
 
   /**
@@ -30,10 +42,14 @@ export class NotificationApiClient {
    * Body shape is {@code SaveNotificationDto}: `{ notification, actor? }`.
    */
   async createNotification(notification: Record<string, unknown> = {}, actor?: Record<string, unknown>): Promise<Notification> {
-    return this.rest.post<Notification>('/notifications', {
-      notification,
-      ...(actor ? { actor } : {}),
-    });
+    return this.rest.post<Notification>(
+      '/notifications',
+      {
+        notification,
+        ...(actor ? { actor } : {}),
+      },
+      this.headers,
+    );
   }
 
   /**
@@ -48,32 +64,36 @@ export class NotificationApiClient {
     notification: Record<string, unknown> = {},
     actor?: Record<string, unknown>,
   ): Promise<Notification> {
-    return this.rest.put<Notification>(`/notifications/${id}`, {
-      notification: { referenceNumber: id, concurrencyToken, ...notification },
-      ...(actor ? { actor } : {}),
-    });
+    return this.rest.put<Notification>(
+      `/notifications/${id}`,
+      {
+        notification: { referenceNumber: id, concurrencyToken, ...notification },
+        ...(actor ? { actor } : {}),
+      },
+      this.headers,
+    );
   }
 
   async submitNotification(id: string, concurrencyToken: number): Promise<Notification> {
     return this.retryOnTransientOutboxLock(() =>
-      this.rest.post<Notification>(`/notifications/${id}/submit?concurrencyToken=${concurrencyToken}`),
+      this.rest.post<Notification>(`/notifications/${id}/submit?concurrencyToken=${concurrencyToken}`, undefined, this.headers),
     );
   }
 
   async amendNotification(id: string): Promise<Notification> {
-    return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/amend`));
+    return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/amend`, undefined, this.headers));
   }
 
   async cancelAmendNotification(id: string): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`);
+    return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`, undefined, this.headers);
   }
 
   async copyNotification(id: string, concurrencyToken: number): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/copy?concurrencyToken=${concurrencyToken}`);
+    return this.rest.post<Notification>(`/notifications/${id}/copy?concurrencyToken=${concurrencyToken}`, undefined, this.headers);
   }
 
   async softDeleteNotification(id: string): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/soft-delete`);
+    return this.rest.post<Notification>(`/notifications/${id}/soft-delete`, undefined, this.headers);
   }
 
   private async retryOnTransientOutboxLock<T>(action: () => Promise<T>): Promise<T> {

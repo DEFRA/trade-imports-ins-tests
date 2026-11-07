@@ -21,6 +21,7 @@ import { InsJourney } from '@flows/ins/journey';
 import { PlantsJourney } from '@flows/plants/journey';
 import { PlantsNotificationActions } from '@flows/plants/notification-actions';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
+import { getPlantsBackendBaseUrl } from '@config/service-base-urls';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { ReferenceDataApiClient } from '@adapters/http/reference-data-api-client';
 import { FrontendFormClient } from '@adapters/http/frontend-form-client';
@@ -60,6 +61,7 @@ export interface PageFixtures {
   plantsJourney: PlantsJourney;
   plantsNotificationActions: PlantsNotificationActions;
   notificationApi: NotificationApiClient;
+  plantsNotificationApi: NotificationApiClient;
   addressBookApi: AddressBookApiClient;
   isolatedOrganisationAddressBookApi: AddressBookApiClient;
   referenceDataApi: ReferenceDataApiClient;
@@ -138,6 +140,9 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   },
   notificationApi: async ({ request }, use) => {
     await use(new NotificationApiClient(request));
+  },
+  plantsNotificationApi: async ({ request }, use) => {
+    await use(new NotificationApiClient(request, getPlantsBackendBaseUrl()));
   },
   addressBookApi: async ({ request }, use) => {
     await use(new AddressBookApiClient(request));
