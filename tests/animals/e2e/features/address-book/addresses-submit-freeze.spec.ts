@@ -47,7 +47,6 @@ test.describe('Submitted addresses keep their copy', () => {
     await expect(originRow).not.toContainText('Penrith');
 
     await animalsNotificationActions.amendNotification(referenceNumber);
-    await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
     await expect(originRow).toContainText(originalName);
@@ -97,7 +96,6 @@ test.describe('Submitted addresses keep their copy', () => {
     await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
 
     await animalsNotificationActions.amendNotification(referenceNumber);
-    await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');

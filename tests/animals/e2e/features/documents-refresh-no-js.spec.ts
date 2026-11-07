@@ -17,7 +17,8 @@ test.describe('Documents scan refresh without JavaScript', { tag: '@duplicated-i
       await pages.page.getByLabel('Country of origin').selectOption('FR');
       await pages.page.getByRole('radio', { name: 'No' }).check();
       await animalsPages.originOfImport.saveAndContinue.click();
-      await expect(animalsPages.overview.heading).toBeVisible();
+      await expect(animalsPages.commoditySelection.heading).toBeVisible();
+      await animalsJourney.openCurrentOverview();
 
       await animalsJourney.answerCommodity();
       await animalsPages.overview.task('Upload documents').click();

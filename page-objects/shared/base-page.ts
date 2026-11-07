@@ -267,10 +267,6 @@ export class NotificationPage extends BasePage {
     return this.page.locator('form').getByRole('link');
   }
 
-  get saveAndReturn(): Locator {
-    return this.page.getByRole('button', { name: 'Save and return', exact: true });
-  }
-
   get cancelAndReturnToOverview(): Locator {
     return this.page.getByRole('link', { name: 'Cancel and return to overview', exact: true });
   }

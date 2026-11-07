@@ -38,13 +38,13 @@ test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, ()
     await animalsJourney.toAdditionalDetailsOfCurrentNotification();
     await animalsPages.additionalDetails.certifiedFor('Slaughter').check();
     await animalsPages.additionalDetails.containsUnweanedAnimals('Yes').check();
-    await animalsPages.additionalDetails.saveAndContinue.click();
+    await animalsPages.additionalDetails.saveAndReturnToOverview.click();
     await animalsPages.overview.heading.waitFor();
 
     await animalsPages.overview.task('What are you importing?').click();
     await animalsPages.commoditySelection.clearAll.click();
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.domesticCat]);
-    await animalsPages.commoditySelection.saveAndContinue.click();
+    await animalsPages.commoditySelection.saveAndReturnToOverview.click();
     await animalsPages.overview.heading.waitFor();
     await animalsPages.overview.reviewAndSubmitButton.click();
 

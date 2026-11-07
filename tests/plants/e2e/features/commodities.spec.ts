@@ -148,7 +148,7 @@ test.describe('High-risk plants commodity section', () => {
     await expect(plantsPages.commodities.errorSummary).toContainText('Add at least one commodity');
   });
 
-  test('save and return to overview: when no type is chosen, refuses the save, shows the error beside the options and leaves the commodities row not started', async ({
+  test('save and return to overview: when no type is chosen, refuses the save, shows the error beside the options and leaves Overview showing the first page', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -163,7 +163,7 @@ test.describe('High-risk plants commodity section', () => {
     await expect(plantsPages.commodityType.optionsError).toContainText(commodityTypeError);
 
     await plantsPages.overview.open(reference);
-    await expect(plantsPages.overview.taskRow(COMMODITY_TYPE_TASK_ROW)).toContainText('Not yet started');
+    await expect(plantsPages.commodityType.heading).toBeVisible();
   });
 
   test('save and return to overview: when a type is chosen, saves it, shows the overview and shows the type again on return', async ({

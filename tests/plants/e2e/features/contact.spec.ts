@@ -42,7 +42,8 @@ test.describe('High-risk plants contact', () => {
 
       await contact.address(target.name).check();
       await contact.saveAndContinue.click();
-      await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+      await plantsPages.overview.open(reference);
       await expect(plantsPages.overview.taskRow(CONTACT)).toContainText('Completed');
       const review = pages.page.getByRole('listitem').filter({ hasText: 'Check and submit' });
       await expect(review).toContainText('Cannot start yet');
@@ -104,7 +105,9 @@ test.describe('High-risk plants contact', () => {
       const contact = plantsPages.consignmentContactSelect;
       const button = action === 'continue' ? contact.saveAndContinue : contact.saveAndReturnToOverview;
       await button.click();
-      await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+      const landing = action === 'continue' ? plantsPages.notificationView : plantsPages.overview;
+      await expect(pages.page).toHaveURL(landing.expectedUrl(reference));
+      await plantsPages.overview.open(reference);
       await expect(plantsPages.overview.taskRow(CONTACT)).toContainText('Not yet started');
       await contact.open(reference);
       await expect(contact.heading).toBeVisible();

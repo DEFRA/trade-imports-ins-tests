@@ -88,7 +88,7 @@ export class AnimalsSeededJourney {
     await this.forms.postForm(
       `${CREATE_PATH}/${referenceNumber}/amend`,
       {},
-      { redirectsTo: new RegExp(`^${CREATE_PATH}/${referenceNumber}$`) },
+      { redirectsTo: new RegExp(`^${CREATE_PATH}/${referenceNumber}/notification-view$`) },
     );
   }
 
@@ -123,6 +123,8 @@ export class AnimalsSeededJourney {
     await animalsPages.addresses.heading.waitFor(pageLoadWait);
     await this.choosePartyInUi(animalsPages, 'Place of origin', animalsPages.placeOfOriginSelection, placeOfOriginName);
     await animalsPages.addresses.continueButton.click();
+    await animalsPages.contactAddress.heading.waitFor(pageLoadWait);
+    await animalsPages.contactAddress.saveAndContinue.click();
     await animalsPages.notificationView.heading.waitFor(pageLoadWait);
     await animalsPages.notificationView.continueButton.click();
     await animalsPages.declaration.heading.waitFor(pageLoadWait);

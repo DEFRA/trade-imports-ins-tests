@@ -17,7 +17,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await animalsJourney.toRolesAndAddressesOfCurrentNotification();
     await expect(cphSection).toBeHidden();
     await animalsPages.addresses.continueButton.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.contactAddress.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
 
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.cattle);
@@ -26,7 +26,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await expect(cphLinks).toHaveText(['Add a CPH number']);
   });
 
-  test('a saved CPH number shows as 123456789 on the addresses page, Change pre-fills county, parish and holding, and Back returns to the addresses page, whose Continue reaches the overview', async ({
+  test('a saved CPH number shows as 123456789 on the addresses page, Change pre-fills county, parish and holding, and Back returns to the addresses page, whose Continue reaches the contact address', async ({
     animalsJourney,
     animalsPages,
   }) => {
@@ -54,7 +54,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await expect(animalsPages.addresses.heading).toBeVisible();
 
     await animalsPages.addresses.continueButton.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.contactAddress.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
   });
 });

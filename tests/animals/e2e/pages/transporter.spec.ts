@@ -28,7 +28,7 @@ test.describe('Transporter list page', { tag: '@duplicated-in-frontend' }, () =>
 
   test('accepts a transporter picked from the list', async ({ pages, animalsPages }) => {
     await animalsPages.transporter.transporter(COMMERCIAL_TRANSPORTER).check();
-    await animalsPages.transporter.saveAndContinue.click();
+    await animalsPages.transporter.saveAndReturnToOverview.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
     await expect(animalsPages.overview.heading).toBeVisible();
@@ -51,7 +51,7 @@ test.describe('Transporter list page', { tag: '@duplicated-in-frontend' }, () =>
 
     await animalsPages.transporter.searchBox.fill('aberdeen');
     await expect(animalsPages.transporter.transporter(COMMERCIAL_TRANSPORTER)).toBeHidden();
-    await animalsPages.transporter.saveAndContinue.click();
+    await animalsPages.transporter.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.overview.task('Transport details').click();

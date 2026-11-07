@@ -21,12 +21,10 @@ test.describe('Amend resubmission', () => {
     test.slow();
     await animalsJourney.submitNotification();
 
-    // Enter amend from the dashboard (SUBMITTED → AMEND) — re-enters at the hub.
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
-    await expect(animalsPages.overview.statusTag).toHaveText('Amend');
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
 
     // Change the country of origin through the amending check your answers page.
-    await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
     await expect(animalsPages.notificationView.changeLink('Change commodity 1')).toBeVisible();

@@ -19,6 +19,8 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(pages.page).toHaveURL(animalsPages.originOfImport.changeContextUrl(referenceNumber));
     await animalsPages.originOfImport.country.choose('Belgium');
     await animalsPages.originOfImport.saveAndContinue.click();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+    await animalsPages.notificationView.open(referenceNumber);
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrl(referenceNumber));
     await expect(countryRow).toContainText('Belgium');
@@ -30,6 +32,8 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(pages.page).toHaveURL(animalsPages.additionalDetails.changeContextUrl(referenceNumber));
     await animalsPages.additionalDetails.certifiedFor('Exhibition').check();
     await animalsPages.additionalDetails.saveAndContinue.click();
+    await expect(animalsPages.arrivalDetails.heading).toBeVisible();
+    await animalsPages.notificationView.open(referenceNumber);
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrl(referenceNumber));
     await expect(certifiedForRow).toContainText('Exhibition');
@@ -54,7 +58,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(pages.page).toHaveURL(commoditiesUrl);
   });
 
-  test('Save and continue on a page opened by a Change link returns to the review showing the changed answer', async ({
+  test('Save and continue on a page opened by a Change link goes on, and the review shows the changed answer', async ({
     animalsSeededJourney,
     pages,
     animalsPages,
@@ -72,6 +76,8 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(animalsPages.importReason.heading).toBeVisible();
     await animalsPages.importReason.purpose('Research').check();
     await animalsPages.importReason.saveAndContinue.click();
+    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
+    await animalsPages.notificationView.open(referenceNumber);
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrl(referenceNumber));
     await expect(purposeValue).toContainText('Research');

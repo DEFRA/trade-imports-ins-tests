@@ -99,9 +99,10 @@ export class PlantsJourney {
     return referenceNumber;
   }
 
-  /** Leaves the commodity-type page for the Overview by Cancel, which saves nothing. */
-  async toOverview(): Promise<void> {
-    await this.plantsPages.commodityType.cancelAndReturnToOverview.click();
+  async toOverviewWithCommodityTypeSaved(commodityType: string): Promise<void> {
+    const reference = this.plantsPages.commodityType.referenceNumberFromUrl();
+    await this.chooseCommodityType(commodityType);
+    await this.plantsPages.overview.open(reference);
     await this.plantsPages.overview.heading.waitFor();
   }
 

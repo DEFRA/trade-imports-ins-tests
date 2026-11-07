@@ -97,7 +97,7 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
   test('leaves a species of more than one animal unsaved when Save and continue is pressed', async ({ animalsPages }) => {
     const { domesticCat } = commodityLines;
     await animalsPages.animalIdentification.speciesCard(domesticCat).getByLabel('Passport', { exact: true }).fill('UK123456789');
-    await animalsPages.animalIdentification.saveAndContinue.click();
+    await animalsPages.animalIdentification.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.overview.task('Identification details').click();

@@ -62,7 +62,7 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
     const referenceNumber = animalsPages.transitedCountries.referenceNumberFromUrl();
     await animalsPages.transitedCountries.addCountry(display);
     await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText([display]);
-    await animalsPages.transitedCountries.saveAndContinue.click();
+    await animalsPages.transitedCountries.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.errorSummary).toHaveCount(0);
 
@@ -78,9 +78,12 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
     await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText(['Belgium']);
   });
 
-  test('transit countries are optional: continuing with none saves and returns to the overview', async ({ pages, animalsPages }) => {
+  test('transit countries are optional: Save and return to overview with none added saves and opens Overview', async ({
+    pages,
+    animalsPages,
+  }) => {
     const referenceNumber = animalsPages.transitedCountries.referenceNumberFromUrl();
-    await animalsPages.transitedCountries.saveAndContinue.click();
+    await animalsPages.transitedCountries.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 

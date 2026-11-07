@@ -15,23 +15,23 @@ test.describe('Reason and purpose scope', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await animalsPages.importReason.reason('Internal market').check();
     await animalsPages.importReason.purpose('Breeding').check();
-    await animalsPages.importReason.saveAndContinue.click();
+    await animalsPages.importReason.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Additional details').click();
     await expect(animalsPages.additionalDetails.heading).toBeVisible();
     await animalsPages.additionalDetails.certifiedFor('Slaughter').check();
-    await animalsPages.additionalDetails.saveAndContinue.click();
+    await animalsPages.additionalDetails.saveAndReturnToOverview.click();
     await expect(reasonRow).toContainText('Complete');
 
     await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await animalsPages.importReason.reason('Transit').check();
     await animalsPages.importReason.selectTransitPortOfExitByIndex(2);
     await animalsPages.importReason.selectTransitDestinationCountry('FR');
-    await animalsPages.importReason.saveAndContinue.click();
+    await animalsPages.importReason.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Additional details').click();
     await expect(animalsPages.additionalDetails.heading).toBeVisible();
-    await animalsPages.additionalDetails.saveAndContinue.click();
+    await animalsPages.additionalDetails.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(reasonRow).toContainText('Complete');
 
@@ -46,11 +46,11 @@ test.describe('Reason and purpose scope', { tag: '@duplicated-in-frontend' }, ()
 
     await animalsPages.importReason.reason('Internal market').check();
     await animalsPages.importReason.purpose('Breeding').check();
-    await animalsPages.importReason.saveAndContinue.click();
+    await animalsPages.importReason.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Additional details').click();
     await expect(animalsPages.additionalDetails.heading).toBeVisible();
-    await animalsPages.additionalDetails.saveAndContinue.click();
+    await animalsPages.additionalDetails.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(reasonRow).toContainText('Complete');
   });

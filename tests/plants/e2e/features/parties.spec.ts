@@ -60,14 +60,14 @@ test.describe('High-risk plants consignment parties section', () => {
       await numbers.open(reference);
       if (type === PLANTS_FOR_PLANTING) await expect(numbers.supplier).toHaveValue('GB-12345');
       await numbers.consignment.fill('SHIP_2027_001');
-      await numbers.saveAndContinue.click();
+      await numbers.saveAndReturnToOverview.click();
       await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
       await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText('Completed');
       await numbers.open(reference);
       await expect(numbers.consignment).toHaveValue('SHIP_2027_001');
       if (type === WOOD_AND_CUT_TREES) {
         await numbers.consignment.clear();
-        await numbers.saveAndContinue.click();
+        await numbers.saveAndReturnToOverview.click();
         await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
         await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText('Optional');
         await numbers.open(reference);
@@ -76,7 +76,7 @@ test.describe('High-risk plants consignment parties section', () => {
     });
   }
 
-  test('consignor opened from the overview returns to the overview on Save and continue, not to identification numbers', async ({
+  test('consignor opened from the overview goes on to identification numbers on Save and continue', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -100,7 +100,8 @@ test.describe('High-risk plants consignment parties section', () => {
     await consignor.searchFor(name);
     await consignor.address(name).check();
     await consignor.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrl(reference));
+    await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRow(CONSIGNOR)).toContainText('Completed');
   });
 
@@ -206,7 +207,7 @@ test.describe('High-risk plants consignment parties section', () => {
     await expect(numbers.supplier).toHaveCount(0);
     await numbers.producer.fill('PRODUCER_123');
     await numbers.crop.fill('CROP_456');
-    await numbers.saveAndContinue.click();
+    await numbers.saveAndReturnToOverview.click();
     await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
     await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText('Completed');
 
