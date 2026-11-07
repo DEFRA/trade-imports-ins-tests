@@ -1,0 +1,263 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: animals/e2e/journeys/back.spec.ts >> Back on the review page >> after a page opened by a Change link is refreshed, its Back still opens the review
+- Location: tests/animals/e2e/journeys/back.spec.ts:65:3
+
+# Error details
+
+```
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByRole('heading', { name: 'Review your notification', level: 1 })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByRole('heading', { name: 'Review your notification', level: 1 }) with timeout 5000ms
+  - waiting for getByRole('heading', { name: 'Review your notification', level: 1 })
+
+```
+
+```yaml
+- link "Skip to main content":
+  - /url: "#main-content"
+- banner:
+  - link "GOV.UK":
+    - /url: https://www.gov.uk/
+    - img "GOV.UK"
+  - region "Service information":
+    - link "Import notification service":
+      - /url: /live-animals
+    - navigation "Menu":
+      - list:
+        - listitem:
+          - link "Dashboard":
+            - /url: /live-animals
+            - strong: Dashboard
+        - listitem:
+          - link "Address book":
+            - /url: http://localhost:3002/address-book
+        - listitem:
+          - link "Manage account":
+            - /url: "#"
+        - listitem:
+          - link "Log out":
+            - /url: /auth/sign-out
+- paragraph:
+  - strong: Alpha
+  - text: This is a new service. Help us improve it and
+  - link "give your feedback by email":
+    - /url: mailto:APHAServiceDesk@apha.gov.uk
+  - text: .
+- paragraph:
+  - strong: "This page’s status: Detailing ."
+  - text: We’re keeping this page. We’re still working out the detail.
+- main:
+  - strong: Draft
+  - text: GBN-AG-26-K6R00T
+  - heading "Overview" [level=1]
+  - heading "Your commodities" [level=2]
+  - paragraph: "1"
+  - heading "Animals" [level=3]
+  - paragraph: Total number of animals in this consignment
+  - paragraph: "0"
+  - heading "Packages/boxes" [level=3]
+  - paragraph: Total number of packages in this consignment
+  - heading "Notification tasklist" [level=2]
+  - heading "1. About the consignment" [level=3]
+  - list:
+    - listitem:
+      - link "Where is this consignment coming from?":
+        - /url: /live-animals/notifications/GBN-AG-26-K6R00T/origin
+      - strong: Complete
+    - listitem:
+      - link "What are you importing?":
+        - /url: /live-animals/notifications/GBN-AG-26-K6R00T/commodities
+      - strong: Complete
+    - listitem:
+      - link "Main import reason":
+        - /url: /live-animals/notifications/GBN-AG-26-K6R00T/import-reason
+      - strong: Complete
+  - heading "2. Description of the goods" [level=3]
+  - list:
+    - listitem:
+      - link "Commodity details":
+        - /url: /live-animals/notifications/GBN-AG-26-K6R00T/consignment-details
+      - strong: Complete
+    - listitem:
+      - link "Identification details":
+        - /url: /live-animals/notifications/GBN-AG-26-K6R00T/commodities/identification
+      - strong: Complete
+    - listitem:
+      - link "Additional details":
+        - /url: /live-animals/notifications/GBN-AG-26-K6R00T/additional-details
+      - strong: Complete
+  - heading "3. Transport and arrival" [level=3]
+  - list:
+    - listitem:
+      - link "Arrival details":
+        - /url: /live-animals/notifications/GBN-AG-26-K6R00T/port-of-entry
+      - strong: Complete
+    - listitem:
+      - link "Transit countries":
+        - /url: /live-animals/notifications/GBN-AG-26-K6R00T/transit-countries
+      - strong: To do
+    - listitem:
+      - link "Transport details":
+        - /url: /live-animals/notifications/GBN-AG-26-K6R00T/transporters
+      - strong: Complete
+  - heading "4. Documents" [level=3]
+  - list:
+    - listitem:
+      - link "Upload documents":
+        - /url: /live-animals/notifications/GBN-AG-26-K6R00T/accompanying-documents
+      - strong: To do
+  - heading "5. Consignment parties" [level=3]
+  - list:
+    - listitem:
+      - link "Roles and addresses":
+        - /url: /live-animals/notifications/GBN-AG-26-K6R00T/addresses
+      - text: Consignor or Exporter, Consignee, Importer and Place of Destination
+      - strong: Complete
+  - heading "6. Contact address" [level=3]
+  - list:
+    - listitem:
+      - link "Contact address for this consignment":
+        - /url: /live-animals/notifications/GBN-AG-26-K6R00T/consignment/contact/select
+      - strong: Complete
+  - button "Review and submit"
+  - button "Return to dashboard"
+- contentinfo:
+  - heading "Support links" [level=2]
+  - list:
+    - listitem:
+      - link "Privacy":
+        - /url: https://www.gov.uk/help/privacy-notice
+    - listitem:
+      - link "Cookies":
+        - /url: https://www.gov.uk/help/cookies
+    - listitem:
+      - link "Accessibility statement":
+        - /url: https://www.gov.uk/help/accessibility-statement
+  - text: All content is available under the
+  - link "Open Government Licence v3.0":
+    - /url: https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+  - text: ", except where otherwise stated"
+  - link "© Crown copyright":
+    - /url: https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/
+```
+
+# Test source
+
+```ts
+  1   | import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
+  2   | 
+  3   | import { test, expect } from '@fixtures';
+  4   | 
+  5   | test.describe('Back on the review page', () => {
+  6   |   test('after Save and continue from the contact address it opens the contact address, whose Back opens Overview', async ({
+  7   |     animalsJourney,
+  8   |     animalsPages,
+  9   |   }) => {
+  10  |     test.slow();
+  11  |     await animalsJourney.toContactAddress();
+  12  |     await animalsPages.contactAddress.saveAndContinue.click();
+  13  |     await expect(animalsPages.notificationView.heading).toBeVisible();
+  14  | 
+  15  |     await animalsPages.notificationView.linkBack.click();
+  16  |     await expect(animalsPages.contactAddress.heading).toBeVisible();
+  17  | 
+  18  |     await animalsPages.contactAddress.linkBack.click();
+  19  |     await expect(animalsPages.overview.heading).toBeVisible();
+  20  |   });
+  21  | 
+  22  |   test('opened from the Overview review button it opens Overview', async ({ animalsSeededJourney, animalsPages }) => {
+  23  |     test.slow();
+  24  |     const reference = await animalsSeededJourney.createDraftNotification();
+  25  |     await animalsPages.overview.open(reference);
+  26  | 
+  27  |     await animalsPages.overview.reviewAndSubmitButton.click();
+  28  |     await expect(animalsPages.notificationView.heading).toBeVisible();
+  29  | 
+  30  |     await animalsPages.notificationView.linkBack.click();
+  31  |     await expect(animalsPages.overview.heading).toBeVisible();
+  32  |   });
+  33  | 
+  34  |   test('opened from a submitted notification dashboard card it opens the dashboard', async ({ animalsSeededJourney, animalsPages }) => {
+  35  |     test.slow();
+  36  |     const reference = await animalsSeededJourney.createSubmittedNotification();
+  37  |     await animalsPages.dashboard.openAndSearchFor(reference);
+  38  | 
+  39  |     await animalsPages.dashboard.view(reference).click();
+  40  |     await expect(animalsPages.notificationView.heading).toBeVisible();
+  41  | 
+  42  |     await animalsPages.notificationView.linkBack.click();
+  43  |     await expect(animalsPages.dashboard.heading).toBeVisible();
+  44  |   });
+  45  | 
+  46  |   test('opened by Amend on the dashboard it opens the dashboard, before and after a Change link round trip', async ({
+  47  |     animalsSeededJourney,
+  48  |     animalsPages,
+  49  |   }) => {
+  50  |     test.slow();
+  51  |     const reference = await animalsSeededJourney.createSubmittedNotification();
+  52  |     await animalsPages.dashboard.openAndSearchFor(reference);
+  53  |     await animalsPages.dashboard.amend(reference).click();
+  54  |     await expect(animalsPages.notificationView.heading).toBeVisible();
+  55  | 
+  56  |     await animalsPages.notificationView.changeLink('Change import details').click();
+  57  |     await expect(animalsPages.originOfImport.heading).toBeVisible();
+  58  |     await animalsPages.originOfImport.linkBack.click();
+  59  |     await expect(animalsPages.notificationView.heading).toBeVisible();
+  60  | 
+  61  |     await animalsPages.notificationView.linkBack.click();
+  62  |     await expect(animalsPages.dashboard.heading).toBeVisible();
+  63  |   });
+  64  | 
+  65  |   test('after a page opened by a Change link is refreshed, its Back still opens the review', async ({
+  66  |     animalsSeededJourney,
+  67  |     animalsPages,
+  68  |     pages,
+  69  |   }) => {
+  70  |     test.slow();
+  71  |     const reference = await animalsSeededJourney.createDraftNotification();
+  72  |     await animalsPages.notificationView.open(reference);
+  73  |     await animalsPages.notificationView.changeLink('Change import details').click();
+  74  |     await expect(animalsPages.originOfImport.heading).toBeVisible();
+  75  | 
+  76  |     await pages.page.reload();
+  77  |     await animalsPages.originOfImport.linkBack.click();
+  78  | 
+> 79  |     await expect(animalsPages.notificationView.heading).toBeVisible();
+      |                                                         ^ Error: expect(locator).toBeVisible() failed
+  80  |   });
+  81  | });
+  82  | 
+  83  | test.describe('Back through the journey pages', () => {
+  84  |   test('a page opened from Overview goes Back to Overview, and the page Save and continue opened goes Back to it', async ({
+  85  |     animalsJourney,
+  86  |     animalsPages,
+  87  |   }) => {
+  88  |     test.slow();
+  89  |     await animalsJourney.toArrivalDetails();
+  90  |     await animalsPages.arrivalDetails.linkBack.click();
+  91  |     await expect(animalsPages.overview.heading).toBeVisible();
+  92  | 
+  93  |     await animalsJourney.toArrivalDetails();
+  94  |     await animalsPages.arrivalDetails.chooseMeansOfTransport(meansOfTransport.roadVehicle.display);
+  95  |     await animalsPages.arrivalDetails.saveAndContinue.click();
+  96  |     await expect(animalsPages.transitedCountries.heading).toBeVisible();
+  97  | 
+  98  |     await animalsPages.transitedCountries.linkBack.click();
+  99  |     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
+  100 |   });
+  101 | });
+  102 | 
+```
