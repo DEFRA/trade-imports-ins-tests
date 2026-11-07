@@ -21,6 +21,17 @@ test.describe('Transporter list page', { tag: '@duplicated-in-frontend' }, () =>
     await expect(animalsPages.transporter.transporter(PRIVATE_TRANSPORTER)).toBeVisible();
   });
 
+  test('shows the Select a transporter heading and offers the choices as one group of that name', async ({ animalsPages }) => {
+    await expect(animalsPages.transporter.resultsHeading).toBeVisible();
+    await expect(animalsPages.transporter.resultsGroup).toBeVisible();
+  });
+
+  test('shows Not applicable in the Approval number column for a transporter with no approval number', async ({ animalsPages }) => {
+    const row = animalsPages.transporter.rowFor(PRIVATE_TRANSPORTER);
+
+    await expect(animalsPages.transporter.approvalNumberCell(row)).toHaveText('Not applicable');
+  });
+
   test('leaves every transporter unchecked on load', async ({ animalsPages }) => {
     await expect(animalsPages.transporter.transporter(COMMERCIAL_TRANSPORTER)).not.toBeChecked();
     await expect(animalsPages.transporter.transporter(PRIVATE_TRANSPORTER)).not.toBeChecked();

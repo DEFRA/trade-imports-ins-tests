@@ -11,8 +11,24 @@ export class AnimalsTransporterPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Transporter details' });
   }
 
+  get resultsHeading(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: 'Select a transporter' });
+  }
+
+  get resultsGroup(): Locator {
+    return this.page.getByRole('group', { name: 'Select a transporter' });
+  }
+
   transporter(name: string): Locator {
     return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
+  }
+
+  rowFor(name: string): Locator {
+    return this.page.getByRole('row').filter({ has: this.page.getByRole('cell', { name, exact: true }) });
+  }
+
+  approvalNumberCell(row: Locator): Locator {
+    return row.getByRole('cell').nth(3);
   }
 
   get searchBox(): Locator {
