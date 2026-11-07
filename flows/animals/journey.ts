@@ -439,7 +439,7 @@ export class AnimalsJourney {
     await this.animalsPages.transporter.addTransporter.click();
     await this.animalsPages.transporterAdd.heading.waitFor(pageLoadWait);
     await this.animalsPages.transporterAdd.transporterType(type).check();
-    await this.animalsPages.transporterAdd.saveAndContinue.click();
+    await this.animalsPages.transporterAdd.continueButton.click();
   }
 
   async answerTransport(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
@@ -619,10 +619,7 @@ export class AnimalsJourney {
 
   async toCommercialTransporter(): Promise<void> {
     await this.toTransporter();
-    await this.animalsPages.transporter.addTransporter.click();
-    await this.animalsPages.transporterAdd.heading.waitFor(pageLoadWait);
-    await this.animalsPages.transporterAdd.transporterType('Commercial').check();
-    await this.animalsPages.transporterAdd.saveAndContinue.click();
+    await this.chooseTransporterType('Commercial');
     await this.animalsPages.commercialTransporter.heading.waitFor(pageLoadWait);
   }
 

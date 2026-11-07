@@ -44,7 +44,7 @@ test.describe('Security scan (frontend, conditional pages)', { tag: '@active' },
     await animalsPages.transporter.addTransporter.click();
     await animalsPages.transporterAdd.heading.waitFor();
     await animalsPages.transporterAdd.transporterType('Private').check();
-    await animalsPages.transporterAdd.saveAndContinue.click();
+    await animalsPages.transporterAdd.continueButton.click();
 
     await expect(animalsPages.privateTransporter.heading).toBeVisible();
     await animalsPages.privateTransporter.fill(PRIVATE_TRANSPORTER);

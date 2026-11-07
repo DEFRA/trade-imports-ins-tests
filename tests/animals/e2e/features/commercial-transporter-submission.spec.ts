@@ -16,8 +16,6 @@ test.describe('Commercial transporter journeys', () => {
     'a trader can submit a notification using a hand-added commercial transporter',
     { tag: '@cross-browser' },
     async ({ animalsSeededJourney, pages, animalsPages }) => {
-      // Everything up to transport is seeded through the API — only the
-      // scenario under test (transit countries onward) is driven through the UI.
       const referenceNumber = await animalsSeededJourney.createDraftNotification('partial');
       await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.transitedCountries);
 
@@ -31,7 +29,7 @@ test.describe('Commercial transporter journeys', () => {
       await animalsPages.transporter.addTransporter.click();
       await animalsPages.transporterAdd.heading.waitFor();
       await animalsPages.transporterAdd.transporterType('Commercial').check();
-      await animalsPages.transporterAdd.saveAndContinue.click();
+      await animalsPages.transporterAdd.continueButton.click();
       await animalsPages.commercialTransporter.heading.waitFor();
       await animalsPages.commercialTransporter.fill(transporter);
       await animalsPages.commercialTransporter.saveAndContinue.click();

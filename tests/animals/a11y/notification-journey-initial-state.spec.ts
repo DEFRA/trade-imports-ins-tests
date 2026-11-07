@@ -147,7 +147,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.transporterAdd.heading.waitFor();
       await runA11yScan();
       await animalsPages.transporterAdd.transporterType('Commercial').check();
-      await animalsPages.transporterAdd.saveAndContinue.click();
+      await animalsPages.transporterAdd.continueButton.click();
     });
 
     await test.step('Add commercial transporter', async () => {
