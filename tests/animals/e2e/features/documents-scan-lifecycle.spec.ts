@@ -39,7 +39,7 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     ).toBeVisible();
 
     await animalsPages.accompanyingDocuments.removeDocument(1).click();
-    await animalsPages.accompanyingDocuments.saveAndContinue.click();
+    await animalsPages.accompanyingDocuments.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
   });
 
@@ -58,7 +58,7 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     }
     await expect(animalsPages.accompanyingDocuments.removeDocument(1)).toBeVisible();
 
-    await animalsPages.accompanyingDocuments.saveAndContinue.click();
+    await animalsPages.accompanyingDocuments.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.overview.task('Upload documents').click();

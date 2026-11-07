@@ -7,7 +7,7 @@ test.describe('Import notification service dashboard', () => {
   test('starts a journey at the origin page and lists the draft', async ({ animalsJourney, pages, animalsPages }) => {
     const referenceNumber = await animalsJourney.startNotification();
 
-    await expect(pages.page).toHaveURL(animalsPages.overview.expectedUrl(referenceNumber));
+    await expect(pages.page).toHaveURL(animalsPages.overview.expectedUrlPattern(referenceNumber));
     await expect(animalsPages.overview.heading).toBeVisible();
 
     const card = animalsPages.dashboard.notificationCard(referenceNumber);

@@ -20,7 +20,7 @@ test.describe('High-risk plants destination section', () => {
   test('the question is asked in the state the arrival answer put the notification in', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
 
-    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrlPattern(reference));
     await expect(plantsPages.placeOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
     await expect(plantsPages.placeOfDestination.descriptionNamed(INTENDED_DESTINATION_DESCRIPTION)).toBeVisible();
 
@@ -35,7 +35,7 @@ test.describe('High-risk plants destination section', () => {
   test('a potato notification is asked for the place of destination', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.toDestinationOfNewNotification(POTATOES);
 
-    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrlPattern(reference));
     await expect(plantsPages.placeOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
     await expect(plantsPages.placeOfDestination.descriptionNamed(INTENDED_DESTINATION_DESCRIPTION)).toBeVisible();
   });
@@ -49,7 +49,7 @@ test.describe('High-risk plants destination section', () => {
 
     await plantsPages.placeOfDestination.saveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrlPattern(reference));
     await expect(plantsPages.consignorSelect.heading).toBeVisible();
 
     await plantsPages.overview.open(reference);
@@ -110,7 +110,7 @@ test.describe('High-risk plants destination section', () => {
     await plantsPages.placeOfDestination.address(target).check();
     await plantsPages.placeOfDestination.saveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrlPattern(reference));
 
     await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRow(DESTINATION_TASK_ROW)).toContainText('Completed');
@@ -131,7 +131,7 @@ test.describe('High-risk plants destination section', () => {
       const reference = await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
       await plantsJourney.chooseDestination(name);
 
-      await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.consignorSelect.expectedUrlPattern(reference));
 
       await addressBookApi.deleteAddress(record.id);
 
@@ -173,7 +173,7 @@ test.describe('High-risk plants destination section', () => {
     await form.fill({ name: editedName, townOrCity: 'Dundee' });
     await form.saveChanges.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrlPattern(reference));
     await expect(plantsPages.placeOfDestination.currentAddress).toContainText(editedName);
     await expect(plantsPages.placeOfDestination.currentAddress).toContainText('Dundee');
 

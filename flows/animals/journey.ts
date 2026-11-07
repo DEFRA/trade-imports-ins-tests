@@ -1,6 +1,6 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
-import type { Locator } from '@playwright/test';
+import { expect, type Locator } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
 import type { InsNotificationTypePage } from '@page-objects/ins/notification-type-page';
@@ -117,7 +117,7 @@ export class AnimalsJourney {
     await this.animalsPages.dashboard.heading.waitFor(pageLoadWait);
   }
 
-  private async createNotificationAtOrigin(): Promise<string> {
+  async createNotificationAtOrigin(): Promise<string> {
     await this.toNotificationDashboard();
     await this.animalsPages.dashboard.btnCreateNewNotification.click();
     await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
@@ -171,13 +171,6 @@ export class AnimalsJourney {
     await this.animalsPages.commoditySelection.heading.waitFor({ ...pageLoadWait, state: 'hidden' });
   }
 
-  async startNotificationAtOrigin(): Promise<string> {
-    const referenceNumber = await this.createNotificationAtOrigin();
-    await this.animalsPages.overview.open(referenceNumber);
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-    return referenceNumber;
-  }
-
   async toOriginOfImport(): Promise<void> {
     await this.createNotificationAtOrigin();
   }
@@ -217,16 +210,20 @@ export class AnimalsJourney {
     await this.openOriginFromOverview();
     await this.fillOriginOfImport(answers);
     await this.saveOriginOfImport();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
+    await this.openCurrentOverview();
   }
 
-  private async checkSpeciesAndSave(speciesList: CommodityLine[]): Promise<void> {
+  private async checkSpeciesAndSave(
+    speciesList: CommodityLine[],
+    saveControl: Locator = this.animalsPages.commoditySelection.saveAndContinue,
+  ): Promise<void> {
     await this.animalsPages.commoditySelection.searchAndCheckSpecies(speciesList);
-    await this.animalsPages.commoditySelection.saveAndContinue.click();
+    await saveControl.click();
   }
 
   private async chooseSpeciesAndOpenDetails(speciesList: CommodityLine[]): Promise<void> {
-    await this.checkSpeciesAndSave(speciesList);
+    await this.checkSpeciesAndSave(speciesList, this.animalsPages.commoditySelection.saveAndReturnToOverview);
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.openCommodityDetailsFromOverview();
   }
@@ -242,7 +239,7 @@ export class AnimalsJourney {
   }
 
   private async saveCountsAndReturnToOverview(): Promise<void> {
-    await this.animalsPages.consignmentDetails.saveAndContinue.click();
+    await this.animalsPages.consignmentDetails.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -265,7 +262,7 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
-  private async openCurrentOverview(): Promise<void> {
+  async openCurrentOverview(): Promise<void> {
     await this.animalsPages.overview.open(this.currentReferenceNumber());
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
@@ -285,7 +282,7 @@ export class AnimalsJourney {
         await this.animalsPages.consignmentDetails.fillPackageCountFor(line.species, line.noOfPackages);
       }
     }
-    await this.animalsPages.consignmentDetails.saveAndContinue.click();
+    await this.animalsPages.consignmentDetails.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -311,7 +308,7 @@ export class AnimalsJourney {
         await identification.fillPermanentAddress(line.permanentAddress, card);
       }
     }
-    await identification.saveAndContinue.click();
+    await identification.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -319,12 +316,12 @@ export class AnimalsJourney {
     await this.animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await this.animalsPages.importReason.reason(answers.importReason.display).check();
     await this.animalsPages.importReason.purpose(answers.internalMarketPurpose.display).check();
-    await this.animalsPages.importReason.saveAndContinue.click();
+    await this.animalsPages.importReason.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.openAdditionalDetailsFromOverview();
     await this.animalsPages.additionalDetails.certifiedFor(answers.certifiedFor.display).check();
     await this.animalsPages.additionalDetails.containsUnweanedAnimals(answers.unweanedAnimals).check();
-    await this.animalsPages.additionalDetails.saveAndContinue.click();
+    await this.animalsPages.additionalDetails.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -373,12 +370,14 @@ export class AnimalsJourney {
     await this.animalsPages.cphNumber.saveAndContinue.click();
     await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     await this.animalsPages.addresses.continueButton.click();
+    await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
   }
 
   async answerAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Roles and addresses').click();
     await this.addFiveParties(answers.parties);
     await this.addCphAndLeaveAddresses(answers.cph);
+    await this.animalsPages.contactAddress.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -420,12 +419,17 @@ export class AnimalsJourney {
     await this.animalsPages.contactAddress.saveAndContinue.click();
   }
 
+  private async saveContactAddressToOverview(name: string): Promise<void> {
+    await this.animalsPages.contactAddress.address(name).check();
+    await this.animalsPages.contactAddress.saveAndReturnToOverview.click();
+  }
+
   async reachTransporterFromHub(): Promise<void> {
     await this.saveArrivalDetailsFromOverview();
     await this.animalsPages.overview.task('Transit countries').click();
     await this.animalsPages.transitedCountries.heading.waitFor(pageLoadWait);
     await this.animalsPages.transitedCountries.addCountry(ALL_ANSWERS.transitedCountries[0].display);
-    await this.animalsPages.transitedCountries.saveAndContinue.click();
+    await this.animalsPages.transitedCountries.saveAndReturnToOverview.click();
     await this.openTransporterFromOverview();
   }
 
@@ -433,6 +437,12 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
+  }
+
+  async saveTransporterDetailsToOverview(form: { saveAndContinue: Locator }): Promise<void> {
+    await form.saveAndContinue.click();
+    await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
+    await this.openCurrentOverview();
   }
 
   async chooseTransporterType(type: 'Commercial' | 'Private'): Promise<void> {
@@ -457,19 +467,19 @@ export class AnimalsJourney {
       for (const country of answers.transitedCountries) {
         await this.animalsPages.transitedCountries.addCountry(country.display);
       }
-      await this.animalsPages.transitedCountries.saveAndContinue.click();
+      await this.animalsPages.transitedCountries.saveAndReturnToOverview.click();
       await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     }
     await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
     await this.animalsPages.transporter.transporter(answers.transporter.display).check();
-    await this.animalsPages.transporter.saveAndContinue.click();
+    await this.animalsPages.transporter.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
   async answerContact(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Contact address for this consignment').click();
-    await this.chooseContactAddress(answers.contactAddress);
+    await this.saveContactAddressToOverview(answers.contactAddress);
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -478,8 +488,7 @@ export class AnimalsJourney {
     await this.animalsPages.overview.task('Upload documents').click();
     await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
     await this.uploadDocumentAndWaitForScan(answers.accompanyingDocument);
-    await this.animalsPages.overview.open(this.animalsPages.accompanyingDocuments.referenceNumberFromUrl());
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.openCurrentOverview();
   }
 
   async completeAnswerSections(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
@@ -559,7 +568,7 @@ export class AnimalsJourney {
     await this.toImportReason();
     await this.animalsPages.importReason.reason(importReasons.internalMarket.display).check();
     await this.animalsPages.importReason.purpose(internalMarketPurposes.breeding.display).check();
-    await this.animalsPages.importReason.saveAndContinue.click();
+    await this.animalsPages.importReason.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.openAdditionalDetailsFromOverview();
   }
@@ -596,7 +605,7 @@ export class AnimalsJourney {
   async saveArrivalDetailsOnOpenPage(answer: ArrivalDetailsAnswer): Promise<void> {
     await this.animalsPages.arrivalDetails.heading.waitFor(pageLoadWait);
     await this.fillArrivalDetails(answer);
-    await this.animalsPages.arrivalDetails.saveAndContinue.click();
+    await this.animalsPages.arrivalDetails.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -611,7 +620,7 @@ export class AnimalsJourney {
   async toTransporter(): Promise<void> {
     await this.toTransitedCountries();
     await this.animalsPages.transitedCountries.addCountry(ALL_ANSWERS.transitedCountries[0].display);
-    await this.animalsPages.transitedCountries.saveAndContinue.click();
+    await this.animalsPages.transitedCountries.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.animalsPages.overview.task('Transport details').click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
@@ -860,6 +869,15 @@ export class AnimalsJourney {
 
     await this.walkFromTransporterToReview(MANDATORY_ANSWERS.transporter.display, document, { addCph: true });
     return referenceNumber;
+  }
+
+  /** Opens a finished notification's Overview, checks every task in `tasks` reads Complete and opens the review from it. */
+  async reviewCompleteOverview(referenceNumber: string, tasks: readonly string[]): Promise<void> {
+    await this.animalsPages.overview.open(referenceNumber);
+    await expect(this.animalsPages.overview.taskNames).toHaveText(tasks);
+    await expect(this.animalsPages.overview.taskStatuses).toHaveText(tasks.map(() => 'Complete'));
+    await this.animalsPages.overview.reviewAndSubmitButton.click();
+    await expect(this.animalsPages.notificationView.heading).toBeVisible();
   }
 
   async toDeclarationOfCurrentNotification(): Promise<void> {

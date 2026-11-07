@@ -1,5 +1,7 @@
+import type { PlantsPages } from '@page-objects';
 import { WHOLE_REFERENCE_NUMBER_PATTERN } from '@domain/plants/constants/reference-number-patterns';
 import { SET_BASES } from '@page-objects/shared/sets';
+import { POTATOES } from '@flows/plants/journey';
 import { test, expect } from '@fixtures';
 
 test.describe('High-risk plants start section', () => {
@@ -22,12 +24,44 @@ test.describe('High-risk plants start section', () => {
 
     expect(reference).toMatch(WHOLE_REFERENCE_NUMBER_PATTERN);
     expect(journeyContext.referenceNumber).toBe(reference);
-    await expect(pages.page).toHaveURL(plantsPages.commodityType.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.commodityType.expectedUrlPattern(reference));
     await expect(plantsPages.commodityType.heading).toBeVisible();
     await expect(plantsPages.commodityType.commodityType('Potatoes (seed or ware)')).toBeVisible();
 
     await expect(plantsPages.commodityType.linkBack).toHaveAttribute('href', plantsPages.dashboard.expectedUrl);
   });
+
+  test("on a brand-new notification the first page's Cancel and return to overview opens the dashboard, and once the commodity type is saved it opens Overview", async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+  }) => {
+    const reference = await plantsJourney.startNotification();
+    await plantsPages.commodityType.cancelAndReturnToOverview.click();
+    await expect(pages.page).toHaveURL(plantsPages.dashboard.expectedUrl);
+
+    await plantsPages.commodityType.open(reference);
+    await plantsJourney.chooseCommodityType(POTATOES);
+    await plantsPages.commodityType.open(reference);
+    await plantsPages.commodityType.cancelAndReturnToOverview.click();
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrlPattern(reference));
+  });
+
+  for (const [name, open] of [
+    ['Overview', (pagesOf: PlantsPages, reference: string) => pagesOf.overview.open(reference)],
+    ['the review page', (pagesOf: PlantsPages, reference: string) => pagesOf.notificationView.open(reference)],
+    ['the declaration', (pagesOf: PlantsPages, reference: string) => pagesOf.declaration.open(reference)],
+    ['the confirmation page', (pagesOf: PlantsPages, reference: string) => pagesOf.confirmation.open(reference)],
+  ] as const) {
+    test(`${name} of a notification with nothing saved shows the first page`, async ({ pages, plantsPages, plantsJourney }) => {
+      const reference = await plantsJourney.startNotification();
+
+      await open(plantsPages, reference);
+
+      await expect(pages.page).toHaveURL(plantsPages.commodityType.expectedUrlPattern(reference));
+      await expect(plantsPages.commodityType.heading).toBeVisible();
+    });
+  }
 
   test('the Overview shows the journey strip, the Draft status, the four group captions and each task row state', async ({
     pages,
@@ -35,9 +69,9 @@ test.describe('High-risk plants start section', () => {
     plantsJourney,
   }) => {
     const reference = await plantsJourney.startNotification();
-    await plantsJourney.toOverview();
+    await plantsJourney.toOverviewWithCommodityTypeSaved(POTATOES);
 
-    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrlPattern(reference));
     await expect(plantsPages.overview.heading).toBeVisible();
 
     await expect(plantsPages.overview.journeyStrip).toBeVisible();
@@ -54,9 +88,9 @@ test.describe('High-risk plants start section', () => {
     ]);
     await expect(plantsPages.overview.taskRowLink('What are you importing?')).toHaveAttribute(
       'href',
-      `${SET_BASES.highRiskPlants}/notifications/${reference}/commodity-type`,
+      `${SET_BASES.highRiskPlants}/notifications/${reference}/commodity-type?from=overview`,
     );
-    await expect(plantsPages.overview.taskRow('What are you importing?')).toContainText('Not yet started');
+    await expect(plantsPages.overview.taskRow('What are you importing?')).toContainText('In progress');
 
     await expect(plantsPages.overview.taskRowByTitle('Arrival details')).toContainText('Cannot start yet');
     await expect(plantsPages.overview.taskRowLink('Arrival details')).toHaveCount(0);
@@ -74,7 +108,7 @@ test.describe('High-risk plants start section', () => {
 
   test('the new draft is listed on the dashboard and Resume reopens it', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
-    await plantsJourney.toOverview();
+    await plantsJourney.toOverviewWithCommodityTypeSaved(POTATOES);
     await plantsJourney.returnToDashboard();
     await plantsPages.dashboard.searchForReference(reference);
 
@@ -83,17 +117,17 @@ test.describe('High-risk plants start section', () => {
 
     await plantsPages.dashboard.resume(reference).click();
 
-    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrlPattern(reference));
     await expect(plantsPages.overview.heading).toBeVisible();
   });
 
   test('No, return to dashboard leaves the notification untouched', async ({ pages, plantsPages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
-    await plantsJourney.toOverview();
+    await plantsJourney.toOverviewWithCommodityTypeSaved(POTATOES);
     await plantsJourney.returnToDashboard();
     await plantsJourney.deleteFromDashboard(reference);
 
-    await expect(pages.page).toHaveURL(plantsPages.deleteNotification.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.deleteNotification.expectedUrlPattern(reference));
     await expect(plantsPages.deleteNotification.heading).toBeVisible();
     await expect(plantsPages.deleteNotification.body).toBeVisible();
     await expect(plantsPages.deleteNotification.btnNo).toHaveAttribute('href', plantsPages.dashboard.expectedUrl);
@@ -114,7 +148,7 @@ test.describe('High-risk plants start section', () => {
     plantsJourney,
   }) => {
     const reference = await plantsJourney.startNotification();
-    await plantsJourney.toOverview();
+    await plantsJourney.toOverviewWithCommodityTypeSaved(POTATOES);
     await plantsJourney.returnToDashboard();
     await plantsJourney.deleteFromDashboard(reference);
 

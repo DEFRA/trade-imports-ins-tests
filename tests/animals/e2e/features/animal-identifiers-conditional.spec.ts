@@ -63,12 +63,12 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
   }) => {
     await animalsJourney.toConsignmentDetails([commodityLines.ostrich]);
     await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
-    await animalsPages.consignmentDetails.saveAndContinue.click();
+    await animalsPages.consignmentDetails.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     const referenceNumber = animalsPages.overview.referenceNumberFromUrl();
     await animalsPages.animalIdentification.open(referenceNumber);
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.additionalDetails.heading).toBeVisible();
     await expect(animalsPages.animalIdentification.heading).toHaveCount(0);
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
     await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);

@@ -34,7 +34,7 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
       await animalsPages.privateTransporter.country.selectOption(transporter.address.country);
       await animalsPages.privateTransporter.phone.fill(transporter.address.telephoneNumber);
       await animalsPages.privateTransporter.email.fill(transporter.address.emailAddress);
-      await animalsPages.privateTransporter.saveAndContinue.click();
+      await animalsJourney.saveTransporterDetailsToOverview(animalsPages.privateTransporter);
       await expect(animalsPages.overview.heading).toBeVisible();
 
       await animalsJourney.openTransporterFromOverview();
@@ -42,12 +42,12 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
       await expect(animalsPages.privateTransporter.heading).toBeVisible();
       await expect(animalsPages.privateTransporter.name).toHaveValue(transporter.name);
       await expect(animalsPages.privateTransporter.country).toHaveValue(transporter.address.country);
-      await animalsPages.privateTransporter.saveAndContinue.click();
+      await animalsJourney.saveTransporterDetailsToOverview(animalsPages.privateTransporter);
 
       await animalsJourney.openTransporterFromOverview();
       await animalsJourney.chooseTransporterType('Commercial');
       await expect(animalsPages.commercialTransporter.heading).toBeVisible();
-      await animalsPages.commercialTransporter.saveAndContinue.click();
+      await animalsJourney.saveTransporterDetailsToOverview(animalsPages.commercialTransporter);
       await expect(animalsPages.overview.heading).toBeVisible();
 
       await animalsJourney.openTransporterFromOverview();

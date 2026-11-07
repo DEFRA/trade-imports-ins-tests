@@ -230,7 +230,6 @@ test.describe('Origin of the import page', { tag: '@duplicated-in-frontend' }, (
 
 test.describe('Origin of the import page opened from the overview', { tag: '@duplicated-in-frontend' }, () => {
   const setUps = [
-    { title: 'before any answer is saved', start: 'startNotificationAtOrigin' },
     { title: 'when the page is opened from the overview after origin answers are saved', start: 'startNotification' },
   ] as const;
 
@@ -242,7 +241,7 @@ test.describe('Origin of the import page opened from the overview', { tag: '@dup
       await animalsPages.originOfImport.linkBack.click();
 
       await expect(animalsPages.overview.heading).toBeVisible();
-      await expect(pages.page).toHaveURL(animalsPages.overview.expectedUrl(referenceNumber));
+      await expect(pages.page).toHaveURL(animalsPages.overview.expectedUrlPattern(referenceNumber));
     });
   }
 });

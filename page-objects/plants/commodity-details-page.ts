@@ -1,5 +1,6 @@
 import { type Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
+import { urlPatternWithTrail } from '@page-objects/shared/base-page';
 import { TypeAhead } from '@page-objects/shared/type-ahead';
 
 export class PlantsCommodityDetailsPage extends PlantsNotificationPage {
@@ -38,8 +39,9 @@ export class PlantsCommodityDetailsPage extends PlantsNotificationPage {
     return this.page.getByRole('button', { name: 'Save and add another', exact: true });
   }
 
-  editUrl(referenceNumber: string, index: number): string {
-    return `${this.expectedUrl(referenceNumber)}?index=${index}`;
+  /** Matches the address of the line at `index`, with or without a trail after it. */
+  editUrlPattern(referenceNumber: string, index: number): RegExp {
+    return urlPatternWithTrail(this.expectedUrl(referenceNumber), `?index=${index}`);
   }
 
   async selectGenus(label: string): Promise<void> {

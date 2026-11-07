@@ -119,7 +119,7 @@ test.describe('Save and return to overview', () => {
     await expect(animalsPages.overview.taskStatus('Additional details')).toHaveText(TO_DO);
   });
 
-  test('main import reason: inside the opening run, saves the answer and shows the overview rather than commodity details', async ({
+  test('main import reason: on a new notification, saves the answer and shows the overview rather than commodity details', async ({
     animalsJourney,
     animalsPages,
   }) => {

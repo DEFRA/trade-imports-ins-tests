@@ -47,7 +47,7 @@ test.describe('Destination country answer', () => {
     await animalsPages.importReason.reason('Transhipment or onward travel').check();
     const territory = await animalsPages.importReason.transhipmentTerritoryOptions.first().getAttribute('value');
     await animalsPages.importReason.selectTranshipmentDestinationCountry(territory);
-    await animalsPages.importReason.saveAndContinue.click();
+    await animalsPages.importReason.saveAndReturnToOverview.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
 
@@ -65,7 +65,7 @@ test.describe('Destination country answer', () => {
     await animalsPages.importReason.reason('Transit').check();
     await animalsPages.importReason.selectTransitPortOfExitByIndex(1);
     await animalsPages.importReason.selectTransitDestinationCountry(france);
-    await animalsPages.importReason.saveAndContinue.click();
+    await animalsPages.importReason.saveAndReturnToOverview.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task(IMPORT_REASON_TASK).click();

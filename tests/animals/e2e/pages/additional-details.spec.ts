@@ -23,7 +23,7 @@ test.describe('Additional details page', { tag: '@duplicated-in-frontend' }, () 
   test('accepts valid additional details and returns to the overview', async ({ animalsPages }) => {
     await animalsPages.additionalDetails.certifiedFor('Slaughter').check();
     await animalsPages.additionalDetails.containsUnweanedAnimals('No').check();
-    await animalsPages.additionalDetails.saveAndContinue.click();
+    await animalsPages.additionalDetails.saveAndReturnToOverview.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
   });

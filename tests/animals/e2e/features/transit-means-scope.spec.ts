@@ -36,7 +36,7 @@ test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () 
       await expect(animalsPages.transitedCountries.heading).toBeVisible();
       await animalsPages.transitedCountries.addCountry('France');
       await animalsPages.transitedCountries.addCountry('Belgium');
-      await animalsPages.transitedCountries.saveAndContinue.click();
+      await animalsPages.transitedCountries.saveAndReturnToOverview.click();
       await expect(animalsPages.overview.heading).toBeVisible();
       await expect(animalsPages.overview.taskStatus('Transit countries')).toHaveText('Complete');
 

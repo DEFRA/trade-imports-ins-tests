@@ -93,20 +93,20 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await plantsPages.consignmentContactSelect.searchFor(address.name);
       await plantsPages.consignmentContactSelect.address(address.name).check();
       await plantsPages.consignmentContactSelect.saveAndContinue.click();
-      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
       await expect(plantsPages.notificationView.heading).toBeVisible();
       await plantsPages.notificationView.btnContinue.click();
-      await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrlPattern(reference));
       await plantsPages.declaration.checkbox.check();
       await plantsPages.declaration.btnContinue.click();
 
-      await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrlPattern(reference));
       await expect(plantsPages.confirmation.heading).toBeVisible();
       await expect(plantsPages.confirmation.panel).toContainText(reference);
       await expect(plantsPages.confirmation.lateBanner).toHaveCount(scenario.late ? 1 : 0);
       await plantsPages.confirmation.viewNotification.click();
       await pages.page.reload();
-      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
       await expect(plantsPages.notificationView.heading).toBeVisible();
       await expect(plantsPages.overview.notificationReference).toHaveText(reference);
       await expect(plantsPages.overview.statusTag).toHaveText('Submitted');

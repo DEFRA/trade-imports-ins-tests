@@ -93,14 +93,12 @@ for (const [mode, javaScriptEnabled] of [
       await expect(animalsPages.accompanyingDocuments.addedDocumentsTable).toHaveCount(0);
     });
 
-    test('Save and continue: an untouched form shows Overview and adds no document', async ({ animalsJourney, animalsPages }) => {
+    test('Save and continue: an untouched form shows Roles and addresses', async ({ animalsJourney, animalsPages }) => {
       await animalsJourney.toAccompanyingDocuments();
 
       await animalsPages.accompanyingDocuments.saveAndContinue.click();
 
-      await expect(animalsPages.overview.heading).toBeVisible();
-      await animalsPages.overview.task('Upload documents').click();
-      await expect(animalsPages.accompanyingDocuments.addedDocumentsTable).toHaveCount(0);
+      await expect(animalsPages.addresses.heading).toBeVisible();
     });
   });
 }

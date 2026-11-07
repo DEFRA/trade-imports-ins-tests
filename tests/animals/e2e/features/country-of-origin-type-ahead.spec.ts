@@ -34,7 +34,8 @@ test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }
 
       await animalsPages.originOfImport.radioRequiresOriginCode('No').check();
       await animalsPages.originOfImport.saveAndContinue.click();
-      await expect(animalsPages.overview.heading).toBeVisible();
+      await expect(animalsPages.commoditySelection.heading).toBeVisible();
+      await animalsJourney.openCurrentOverview();
 
       await animalsJourney.openOriginFromOverview();
       await expect(fallback).toHaveValue('BE');

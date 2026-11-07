@@ -5,21 +5,17 @@ import { OPENING_RUN_TASKS, certificateDocument } from '@flows/animals/journey';
 
 import { test, expect } from '@fixtures';
 
-test.describe('Opening run', () => {
+test.describe('Save and continue through a new notification', () => {
   test(
-    'walks a cattle-by-air notification through every opening-run task, from create to submitted',
+    'walks a cattle-by-air notification through every task with Save and continue, from create to submitted',
     { tag: '@cross-browser' },
     async ({ animalsJourney, animalsPages, pages }) => {
       test.slow();
 
       const referenceNumber = await animalsJourney.walkOpeningRunCattleByAir(certificateDocument('AWBDOC'));
-      await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
+      await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
 
-      await animalsPages.overview.open(referenceNumber);
-      await expect(animalsPages.overview.taskNames).toHaveText(OPENING_RUN_TASKS);
-      await expect(animalsPages.overview.taskStatuses).toHaveText(OPENING_RUN_TASKS.map(() => 'Complete'));
-      await animalsPages.overview.reviewAndSubmitButton.click();
-      await expect(animalsPages.notificationView.heading).toBeVisible();
+      await animalsJourney.reviewCompleteOverview(referenceNumber, OPENING_RUN_TASKS);
 
       const importDetails = animalsPages.notificationView.summaryCard('Import details');
       await expect(animalsPages.notificationView.regionOfOriginCode).toHaveText('FR-75');
@@ -65,7 +61,7 @@ test.describe('Opening run', () => {
     await expect(animalsPages.importReason.heading).toBeVisible();
   });
 
-  test('ends the opening run on the review page, naming what is outstanding, when the notification is incomplete', async ({
+  test('ends on the review page after Save and continue, naming what is outstanding, when the notification is incomplete', async ({
     animalsJourney,
     animalsPages,
     pages,
@@ -83,7 +79,7 @@ test.describe('Opening run', () => {
     await animalsPages.contactAddress.saveAndContinue.click();
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete reason for import');
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete roles and addresses');
 

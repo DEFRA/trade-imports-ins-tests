@@ -99,7 +99,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     test.slow();
 
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle, commodityLines.domesticCat]);
-    await animalsPages.commoditySelection.saveAndContinue.click();
+    await animalsPages.commoditySelection.saveAndReturnToOverview.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
     await expect(animalsPages.overview.heading).toBeVisible();
@@ -149,7 +149,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
   test.describe('after a saved selection is cleared and save and return to overview is chosen', () => {
     test.beforeEach(async ({ animalsPages }) => {
       await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
-      await animalsPages.commoditySelection.saveAndContinue.click();
+      await animalsPages.commoditySelection.saveAndReturnToOverview.click();
       await expect(animalsPages.overview.heading).toBeVisible();
       await animalsPages.overview.task('What are you importing?').click();
       await animalsPages.commoditySelection.clearAll.click();
@@ -190,7 +190,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText('1 selected');
     await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.domesticCat)).toBeVisible();
 
-    await animalsPages.commoditySelection.saveAndContinue.click();
+    await animalsPages.commoditySelection.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('What are you importing?').click();
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText('1 selected');

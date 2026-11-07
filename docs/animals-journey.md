@@ -5,7 +5,7 @@ Why the animals flows and page objects are written the way they are. The code ca
 ## Starting a notification
 
 - `startNotification` answers origin and then opens the overview.
-- `startNotificationAtOrigin` leaves origin unanswered. The entry guard is satisfied by the opening-run marker set when the notification is created, not by answering origin.
+- `createNotificationAtOrigin` ends on the origin page with nothing answered. The entry guard admits a notification on an answer the user entered, so opening its overview before origin is saved shows origin again.
 - `toOriginOfImport` shows origin unanswered, as a brand-new notification first shows it.
 - `startNotification` waits for the origin page to leave before it opens the overview. Opening the overview regardless hides a failed save: the run then fails several steps later on a task stuck at "Not yet started", pointing at the wrong page.
 
