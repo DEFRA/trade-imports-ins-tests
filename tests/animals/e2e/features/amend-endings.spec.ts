@@ -11,12 +11,11 @@ const AMEND = 'Amend';
 const openOriginFromImportDetailsChangeLink = async (
   animalsPages: AnimalsPages,
   animalsSeededJourney: AnimalsSeededJourney,
-): Promise<string> => {
+): Promise<void> => {
   const reference = await animalsSeededJourney.createAmendNotification();
   await animalsPages.notificationView.open(reference);
   await animalsPages.notificationView.changeLink(CHANGE_IMPORT_DETAILS).click();
   await expect(animalsPages.originOfImport.heading).toBeVisible();
-  return reference;
 };
 
 test.describe('Amendment page endings', () => {
@@ -29,7 +28,7 @@ test.describe('Amendment page endings', () => {
     const reference = await animalsSeededJourney.createSubmittedNotification();
     await animalsNotificationActions.amendNotification(reference);
 
-    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(reference));
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
     await expect(animalsPages.notificationView.referenceNumberCaption).toContainText(reference);
     await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
@@ -88,9 +87,9 @@ test.describe('Amendment page endings', () => {
     animalsPages,
     animalsSeededJourney,
   }) => {
-    const reference = await openOriginFromImportDetailsChangeLink(animalsPages, animalsSeededJourney);
+    await openOriginFromImportDetailsChangeLink(animalsPages, animalsSeededJourney);
 
-    await expect(pages.page).toHaveURL(animalsPages.originOfImport.changeContextUrl(reference));
+    await animalsPages.originOfImport.expectReviewIsLastOnTrail();
     await animalsPages.originOfImport.internalReference.fill(AMENDED_REFERENCE);
     await animalsPages.originOfImport.saveAndContinue.click();
 

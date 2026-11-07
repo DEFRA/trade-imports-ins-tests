@@ -80,7 +80,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await expect(animalsPages.dashboard.heading).toBeVisible();
   });
 
-  test('Back from an amendment review opens the overview', async ({
+  test('Back from an amendment review opened by Amend on the dashboard opens the dashboard', async ({
     animalsJourney,
     journeyContext,
     animalsPages,
@@ -92,6 +92,6 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await animalsPages.notificationView.linkBack.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.dashboard.heading).toBeVisible();
   });
 });

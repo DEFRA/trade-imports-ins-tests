@@ -24,7 +24,7 @@ test.describe('High-risk plants start section', () => {
 
     expect(reference).toMatch(WHOLE_REFERENCE_NUMBER_PATTERN);
     expect(journeyContext.referenceNumber).toBe(reference);
-    await expect(pages.page).toHaveURL(plantsPages.commodityType.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.commodityType.expectedUrlPattern(reference));
     await expect(plantsPages.commodityType.heading).toBeVisible();
     await expect(plantsPages.commodityType.commodityType('Potatoes (seed or ware)')).toBeVisible();
 
@@ -44,7 +44,7 @@ test.describe('High-risk plants start section', () => {
     await plantsJourney.chooseCommodityType(POTATOES);
     await plantsPages.commodityType.open(reference);
     await plantsPages.commodityType.cancelAndReturnToOverview.click();
-    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrlPattern(reference));
   });
 
   for (const [name, open] of [
@@ -58,7 +58,7 @@ test.describe('High-risk plants start section', () => {
 
       await open(plantsPages, reference);
 
-      await expect(pages.page).toHaveURL(plantsPages.commodityType.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.commodityType.expectedUrlPattern(reference));
       await expect(plantsPages.commodityType.heading).toBeVisible();
     });
   }
@@ -71,7 +71,7 @@ test.describe('High-risk plants start section', () => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.toOverviewWithCommodityTypeSaved(POTATOES);
 
-    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrlPattern(reference));
     await expect(plantsPages.overview.heading).toBeVisible();
 
     await expect(plantsPages.overview.journeyStrip).toBeVisible();
@@ -88,7 +88,7 @@ test.describe('High-risk plants start section', () => {
     ]);
     await expect(plantsPages.overview.taskRowLink('What are you importing?')).toHaveAttribute(
       'href',
-      `${SET_BASES.highRiskPlants}/notifications/${reference}/commodity-type`,
+      `${SET_BASES.highRiskPlants}/notifications/${reference}/commodity-type?from=overview`,
     );
     await expect(plantsPages.overview.taskRow('What are you importing?')).toContainText('In progress');
 
@@ -117,7 +117,7 @@ test.describe('High-risk plants start section', () => {
 
     await plantsPages.dashboard.resume(reference).click();
 
-    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrlPattern(reference));
     await expect(plantsPages.overview.heading).toBeVisible();
   });
 
@@ -127,7 +127,7 @@ test.describe('High-risk plants start section', () => {
     await plantsJourney.returnToDashboard();
     await plantsJourney.deleteFromDashboard(reference);
 
-    await expect(pages.page).toHaveURL(plantsPages.deleteNotification.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.deleteNotification.expectedUrlPattern(reference));
     await expect(plantsPages.deleteNotification.heading).toBeVisible();
     await expect(plantsPages.deleteNotification.body).toBeVisible();
     await expect(plantsPages.deleteNotification.btnNo).toHaveAttribute('href', plantsPages.dashboard.expectedUrl);

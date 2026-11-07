@@ -17,7 +17,7 @@ test.describe('Save and continue from Overview', () => {
 
     await plantsPages.commodities.btnAddAnother.click();
     await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine);
-    await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrlPattern(reference));
     await expect(plantsPages.commodities.lineRows).toHaveCount(2);
 
     await plantsPages.commodities.btnRemove(2).click();
@@ -26,7 +26,7 @@ test.describe('Save and continue from Overview', () => {
     await expect(pages.page).toHaveURL(new RegExp(`/notifications/${reference}/commodities`));
 
     await plantsPages.commodities.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrlPattern(reference));
   });
 
   test('a task opened from its Overview row opens its own page, and Save and continue goes to the next page in the journey order', async ({
@@ -39,10 +39,10 @@ test.describe('Save and continue from Overview', () => {
     await plantsPages.overview.open(reference);
 
     await plantsPages.overview.taskRowLink('Identification numbers').click();
-    await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrlPattern(reference));
 
     await plantsPages.identificationNumbers.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrlPattern(reference));
   });
 });
 
@@ -67,6 +67,6 @@ test.describe('Save and continue to the next page', () => {
     await plantsPages.consignmentContactSelect.open(reference);
     await plantsPages.consignmentContactSelect.saveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
   });
 });

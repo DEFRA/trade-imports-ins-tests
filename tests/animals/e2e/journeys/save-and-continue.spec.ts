@@ -29,14 +29,14 @@ test.describe('Save and continue from Overview', () => {
     test.slow();
     await animalsJourney.toImportReason();
     const reference = animalsPages.importReason.referenceNumberFromUrl();
-    await expect(pages.page).toHaveURL(animalsPages.importReason.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(animalsPages.importReason.expectedUrlPattern(reference));
 
     await animalsPages.importReason.reason(MANDATORY_ANSWERS.importReason.display).check();
     await animalsPages.importReason.purpose(MANDATORY_ANSWERS.internalMarketPurpose.display).check();
     await animalsPages.importReason.saveAndContinue.click();
 
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(animalsPages.consignmentDetails.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(animalsPages.consignmentDetails.expectedUrlPattern(reference));
   });
 });
 

@@ -30,7 +30,7 @@ test.describe('High-risk plants contact', () => {
 
       const reference = await openContact(plantsPages, plantsJourney);
       const contact = plantsPages.consignmentContactSelect;
-      await expect(pages.page).toHaveURL(contact.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(contact.expectedUrlPattern(reference));
       await expect(contact.heading).toBeVisible();
 
       await contact.searchFor(token);
@@ -42,7 +42,7 @@ test.describe('High-risk plants contact', () => {
 
       await contact.address(target.name).check();
       await contact.saveAndContinue.click();
-      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
       await plantsPages.overview.open(reference);
       await expect(plantsPages.overview.taskRow(CONTACT)).toContainText('Completed');
       const review = pages.page.getByRole('listitem').filter({ hasText: 'Check and submit' });
@@ -81,12 +81,12 @@ test.describe('High-risk plants contact', () => {
     await plantsPages.identificationNumbers.saveAndContinue.click();
     await plantsPages.overview.open(reference);
     await pages.page.getByRole('link', { name: 'Check and submit', exact: true }).click();
-    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
     await pages.page.getByRole('button', { name: 'Continue', exact: true }).click();
-    await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrlPattern(reference));
     await expect(pages.page.getByRole('heading', { name: 'Declaration', level: 1 })).toBeVisible();
     await pages.page.getByRole('link', { name: 'Back', exact: true }).click();
-    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
     await pages.page.getByRole('button', { name: 'Continue', exact: true }).click();
     await pages.page
       .getByRole('checkbox', {
@@ -94,7 +94,7 @@ test.describe('High-risk plants contact', () => {
       })
       .check();
     await pages.page.getByRole('button', { name: 'Continue', exact: true }).click();
-    await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrlPattern(reference));
     await expect(pages.page.getByRole('heading', { name: 'Notification submitted', level: 1 })).toBeVisible();
     await expect(pages.page.getByText('Your notification reference', { exact: false })).toContainText(reference);
   });
@@ -106,7 +106,7 @@ test.describe('High-risk plants contact', () => {
       const button = action === 'continue' ? contact.saveAndContinue : contact.saveAndReturnToOverview;
       await button.click();
       const landing = action === 'continue' ? plantsPages.notificationView : plantsPages.overview;
-      await expect(pages.page).toHaveURL(landing.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(landing.expectedUrlPattern(reference));
       await plantsPages.overview.open(reference);
       await expect(plantsPages.overview.taskRow(CONTACT)).toContainText('Not yet started');
       await contact.open(reference);

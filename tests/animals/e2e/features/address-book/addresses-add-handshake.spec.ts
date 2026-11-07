@@ -84,7 +84,7 @@ test.describe('Add an address from the journey via INS', () => {
 
   for (const role of PARTY_ROLES) {
     test(
-      `Save and select on the INS add page reached from the ${role} picker saves the address holding that role, selects it for the role and lands on Roles and addresses with the added banner`,
+      `Save and select on the INS add page reached from the ${role} picker saves the address holding that role, selects it for the role and lands on Roles and addresses with the added banner, whose Back opens the Overview`,
       { tag: ['@address-book', '@ins-frontend'] },
       async ({ animalsJourney, pages, animalsPages, insPages, addressBookApi }) => {
         const addPage = insPages.addressBookAdd;
@@ -109,6 +109,9 @@ test.describe('Add an address from the journey via INS', () => {
 
         const saved = await addressBookApi.findByName(details.name);
         expect(rolesFieldOf(saved)).toEqual(ROLES_HELD_BY_PARTY[role]);
+
+        await animalsPages.addresses.linkBack.click();
+        await expect(animalsPages.overview.heading).toBeVisible();
       },
     );
 

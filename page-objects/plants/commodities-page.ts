@@ -1,5 +1,6 @@
 import { type Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
+import { urlPatternWithTrail } from '@page-objects/shared/base-page';
 
 export class PlantsCommoditiesPage extends PlantsNotificationPage {
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
@@ -38,7 +39,8 @@ export class PlantsCommoditiesPage extends PlantsNotificationPage {
     return this.page.getByRole('region', { name: 'Commodities removed' });
   }
 
-  removedUrl(referenceNumber: string, removed: number): string {
-    return `${this.expectedUrl(referenceNumber)}?removed=${removed}`;
+  /** Matches the list address that reports `removed` removed lines, with or without a trail after it. */
+  removedUrlPattern(referenceNumber: string, removed: number): RegExp {
+    return urlPatternWithTrail(this.expectedUrl(referenceNumber), `?removed=${removed}`);
   }
 }

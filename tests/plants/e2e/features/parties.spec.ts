@@ -16,10 +16,10 @@ test.describe('High-risk plants consignment parties section', () => {
       const { reference } = await plantsJourney.toConsignorOfNewNotification(addressBookApi, type);
       const consignor = plantsPages.consignorSelect;
 
-      await expect(pages.page).toHaveURL(consignor.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(consignor.expectedUrlPattern(reference));
       await expect(consignor.heading).toBeVisible();
       await consignor.saveAndContinue.click();
-      await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrlPattern(reference));
       await plantsPages.overview.open(reference);
       await expect(plantsPages.overview.taskRow(CONSIGNOR)).toContainText('Not yet started');
     });
@@ -37,7 +37,7 @@ test.describe('High-risk plants consignment parties section', () => {
       await consignor.searchFor(name);
       await consignor.address(name).check();
       await consignor.saveAndContinue.click();
-      await expect(pages.page).toHaveURL(numbers.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(numbers.expectedUrlPattern(reference));
       await expect(numbers.heading).toBeVisible();
       await expect(numbers.producer).toHaveCount(0);
       await expect(numbers.crop).toHaveCount(0);
@@ -49,9 +49,9 @@ test.describe('High-risk plants consignment parties section', () => {
         await expect(numbers.supplier).toHaveCount(0);
       }
       await numbers.saveAndContinue.click();
-      await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrlPattern(reference));
       await plantsPages.consignmentContactSelect.saveAndContinue.click();
-      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
       await plantsPages.overview.open(reference);
       await expect(plantsPages.overview.taskRow(CONSIGNOR)).toContainText('Completed');
       await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText(type === WOOD_AND_CUT_TREES ? 'Optional' : 'Completed');
@@ -61,14 +61,14 @@ test.describe('High-risk plants consignment parties section', () => {
       if (type === PLANTS_FOR_PLANTING) await expect(numbers.supplier).toHaveValue('GB-12345');
       await numbers.consignment.fill('SHIP_2027_001');
       await numbers.saveAndReturnToOverview.click();
-      await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+      await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrlPattern(reference));
       await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText('Completed');
       await numbers.open(reference);
       await expect(numbers.consignment).toHaveValue('SHIP_2027_001');
       if (type === WOOD_AND_CUT_TREES) {
         await numbers.consignment.clear();
         await numbers.saveAndReturnToOverview.click();
-        await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+        await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrlPattern(reference));
         await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText('Optional');
         await numbers.open(reference);
         await expect(numbers.consignment).toHaveValue('');
@@ -91,16 +91,16 @@ test.describe('High-risk plants consignment parties section', () => {
     await consignor.searchFor(name);
     await consignor.address(name).check();
     await consignor.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrlPattern(reference));
 
     await plantsPages.overview.open(reference);
     await plantsPages.overview.taskRowLink(CONSIGNOR).click();
-    await expect(pages.page).toHaveURL(consignor.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(consignor.expectedUrlPattern(reference));
 
     await consignor.searchFor(name);
     await consignor.address(name).check();
     await consignor.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrlPattern(reference));
     await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRow(CONSIGNOR)).toContainText('Completed');
   });
@@ -111,7 +111,7 @@ test.describe('High-risk plants consignment parties section', () => {
     const reference = await plantsJourney.toDestinationOfNewNotification(POTATOES);
     await plantsJourney.chooseDestination(name);
     const numbers = plantsPages.identificationNumbers;
-    await expect(pages.page).toHaveURL(numbers.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(numbers.expectedUrlPattern(reference));
     await expect(numbers.heading).toBeVisible();
     await expect(numbers.supplier).toHaveCount(0);
     await expect(numbers.producer).toBeVisible();
@@ -128,9 +128,9 @@ test.describe('High-risk plants consignment parties section', () => {
     await numbers.producer.fill('P'.repeat(58));
     await numbers.crop.fill('C'.repeat(58));
     await numbers.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrlPattern(reference));
     await plantsPages.consignmentContactSelect.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
     await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRowByTitle(CONSIGNOR)).toHaveCount(0);
     await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText('Completed');
@@ -154,7 +154,7 @@ test.describe('High-risk plants consignment parties section', () => {
     await consignor.searchFor(name);
     await consignor.address(name).check();
     await consignor.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(numbers.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(numbers.expectedUrlPattern(reference));
     await numbers.saveAndContinue.click();
     await expect(numbers.errorSummary).toContainText('Enter the identification number of the supplier');
     await numbers.supplier.fill('S'.repeat(59));
@@ -168,9 +168,9 @@ test.describe('High-risk plants consignment parties section', () => {
     await expect(numbers.errorSummary).toContainText('Consignment number must only contain letters, numbers and underscores');
     await numbers.consignment.fill('N'.repeat(58));
     await numbers.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrlPattern(reference));
     await plantsPages.consignmentContactSelect.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
     await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText('Completed');
     await numbers.open(reference);
@@ -196,9 +196,9 @@ test.describe('High-risk plants consignment parties section', () => {
     await numbers.supplier.fill('GB-12345');
     await numbers.consignment.fill('SHIP_2027');
     await numbers.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrlPattern(reference));
     await plantsPages.consignmentContactSelect.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
 
     await plantsJourney.changeCommodityType(reference, POTATOES);
     await plantsPages.overview.open(reference);
@@ -208,7 +208,7 @@ test.describe('High-risk plants consignment parties section', () => {
     await numbers.producer.fill('PRODUCER_123');
     await numbers.crop.fill('CROP_456');
     await numbers.saveAndReturnToOverview.click();
-    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrlPattern(reference));
     await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText('Completed');
 
     await plantsJourney.changeCommodityType(reference, PLANTS_FOR_PLANTING);

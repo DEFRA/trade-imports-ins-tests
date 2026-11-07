@@ -43,7 +43,7 @@ test.describe('Cancel amendment through the UI', () => {
         await animalsPages.overview.open(reference);
         await animalsPages.overview.cancelAmend.click();
 
-        await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationCancelAmend.expectedUrl(reference)}$`));
+        await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(reference));
         await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
       },
     );
@@ -51,9 +51,7 @@ test.describe('Cancel amendment through the UI', () => {
     test('opens the confirmation page when Cancel amend is selected', async ({ pages, animalsPages, journeyContext }) => {
       await animalsPages.notificationView.cancelAmend.click();
 
-      await expect(pages.page).toHaveURL(
-        new RegExp(`${animalsPages.notificationCancelAmend.expectedUrl(journeyContext.referenceNumber)}$`),
-      );
+      await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(journeyContext.referenceNumber));
       await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
       await expect(
         pages.page.getByText('Your changes since you started amending will be discarded and the submitted version restored.'),
@@ -68,7 +66,7 @@ test.describe('Cancel amendment through the UI', () => {
       await animalsPages.notificationView.cancelAmend.click();
       await animalsPages.notificationCancelAmend.reject.click();
 
-      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(journeyContext.referenceNumber)}$`));
+      await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(journeyContext.referenceNumber));
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
       await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
       await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
@@ -84,12 +82,12 @@ test.describe('Cancel amendment through the UI', () => {
 
       await animalsPages.originOfImport.cancelAmend.click();
 
-      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationCancelAmend.expectedUrl(reference)}$`));
+      await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(reference));
       await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
 
       await animalsPages.notificationCancelAmend.reject.click();
 
-      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(reference)}$`));
+      await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(reference));
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
       await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
     });

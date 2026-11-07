@@ -135,7 +135,7 @@ export class PlantsJourney {
     await this.addCommodityLine(category, values);
   }
 
-  /** Continues from the commodities list to origin. Works only while the opening run is still open. */
+  /** Continues from the commodities list to origin. */
   async toOrigin(): Promise<void> {
     await this.plantsPages.commodities.saveAndContinue.click();
     await this.plantsPages.origin.heading.waitFor();

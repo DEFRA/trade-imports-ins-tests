@@ -204,7 +204,7 @@ test.describe('Live animals notification started from the INS question', { tag: 
     const SELECTED_SPECIES = MANDATORY_ANSWERS.commodityLines.map((line) => line.species);
     const reference = await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType, LIVE_ANIMALS);
     await animalsJourney.answerOriginAndSelectSpecies(SELECTED_SPECIES);
-    await animalsPages.originOfImport.open(reference);
+    await animalsPages.originOfImport.openOnTrail(reference, ['ins']);
     await animalsJourney.backToInsTypeQuestionAndChoose(insPages.notificationType, PLANTS_FOR_PLANTING);
 
     await expect(plantsPages.commodityType.heading).toBeVisible();

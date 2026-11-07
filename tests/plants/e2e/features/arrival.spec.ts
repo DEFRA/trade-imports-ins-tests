@@ -55,7 +55,7 @@ test.describe('High-risk plants arrival section', () => {
   }) => {
     const reference = await plantsJourney.toArrivalStatusOfNewPlantsNotification();
 
-    await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrlPattern(reference));
     await expect(plantsPages.arrivalStatus.heading).toBeVisible();
     await expect(plantsPages.arrivalStatus.arrivalStatus(ALREADY_ARRIVED)).not.toBeChecked();
     await expect(plantsPages.arrivalStatus.arrivalStatus(NOT_YET_ARRIVED)).not.toBeChecked();
@@ -68,7 +68,7 @@ test.describe('High-risk plants arrival section', () => {
 
     await plantsPages.arrivalStatus.saveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.arrivalStatus.expectedUrlPattern(reference));
     await expect(plantsPages.arrivalStatus.errorSummary).toContainText(ARRIVAL_STATUS_ERROR);
   });
 
@@ -82,7 +82,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsPages.arrivalStatus.arrivalStatus(ALREADY_ARRIVED).check();
     await plantsPages.arrivalStatus.saveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrlPattern(reference));
 
     await plantsPages.arrivalStatus.open(reference);
     await expect(plantsPages.arrivalStatus.arrivalStatus(ALREADY_ARRIVED)).toBeChecked();
@@ -104,7 +104,7 @@ test.describe('High-risk plants arrival section', () => {
 
     await plantsPages.arrivalDetails.saveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrlPattern(reference));
     await expect(plantsPages.arrivalDetails.errorSummary).toContainText(ARRIVAL_DATE_ERROR);
   });
 
@@ -120,7 +120,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVED_ON);
     await plantsPages.arrivalDetails.saveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrlPattern(reference));
     await expect(plantsPages.placeOfDestination.headingNamed(POST_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
 
     await plantsPages.overview.open(reference);
@@ -139,13 +139,13 @@ test.describe('High-risk plants arrival section', () => {
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVED_ON);
     await plantsPages.arrivalDetails.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrlPattern(reference));
 
     await plantsPages.arrivalStatus.open(reference);
     await plantsPages.arrivalStatus.arrivalStatus(NOT_YET_ARRIVED).check();
     await plantsPages.arrivalStatus.saveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrlPattern(reference));
     await expect(plantsPages.arrivalDetails.dateQuestionLabelled(PRE_ARRIVAL_DATE_LABEL)).toBeVisible();
     await expect(plantsPages.arrivalDetails.arrivalDate).toHaveValue(ARRIVED_ON);
   });
@@ -157,7 +157,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsPages.arrivalDetails.arrivalDate.fill(NOT_A_REAL_DATE);
     await plantsPages.arrivalDetails.saveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrlPattern(reference));
     await expect(plantsPages.arrivalDetails.errorSummary).toContainText(REAL_ARRIVAL_DATE_ERROR);
     await expect(plantsPages.arrivalDetails.errorSummary).not.toContainText(ARRIVAL_DATE_ERROR);
   });
@@ -171,13 +171,13 @@ test.describe('High-risk plants arrival section', () => {
 
     await plantsJourney.toArrivalDetails(FRANCE);
 
-    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrlPattern(reference));
     await expect(plantsPages.arrivalDetails.dateQuestionLabelled(POTATO_DATE_LABEL)).toBeVisible();
 
     await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRowLink(ARRIVAL_TASK_ROW)).toHaveAttribute(
       'href',
-      plantsPages.arrivalDetails.expectedUrl(reference),
+      `${plantsPages.arrivalDetails.expectedUrl(reference)}?from=overview`,
     );
   });
 
@@ -190,7 +190,7 @@ test.describe('High-risk plants arrival section', () => {
 
     await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrlPattern(reference));
     await expect(plantsPages.arrivalDetails.errorSummaryLinks).toHaveText([
       'Enter the arrival date',
       'Enter the expected time of arrival',
@@ -212,7 +212,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsPages.arrivalDetails.placeOfLanding.choose(ABERDEEN_HARBOUR);
     await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.arrivalDetails.expectedUrlPattern(reference));
     await expect(plantsPages.arrivalDetails.errorSummary).toContainText(REAL_TIME_ERROR);
 
     await plantsPages.overview.open(reference);
@@ -233,7 +233,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsPages.arrivalDetails.arrivalDate.fill(ARRIVED_ON);
     await plantsPages.arrivalDetails.saveAndReturnToOverview.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrlPattern(reference));
 
     await plantsPages.arrivalDetails.open(reference);
     await expect(plantsPages.arrivalDetails.arrivalDate).toHaveValue(ARRIVED_ON);
@@ -257,7 +257,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsPages.arrivalDetails.placeOfLanding.choose(ABERDEEN_HARBOUR);
     await plantsPages.arrivalDetails.saveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrlPattern(reference));
     await expect(plantsPages.placeOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
 
     await plantsPages.overview.open(reference);
