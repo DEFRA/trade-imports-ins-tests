@@ -1,9 +1,9 @@
 import { test, expect } from '@fixtures';
 import { addressTypes, addressRoles, heldAsConsignor, heldAsImporter, heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
 import {
-  addressBookTabs,
   destinationConsigneeOrImporterTab,
   originOrConsignorTab,
+  roleBackedAddressBookTabs,
   roleOptionLabels,
   roleFilterPlaceholder,
   rolesLabelOf,
@@ -66,11 +66,11 @@ test.describe('Address book role filter API', () => {
 });
 
 test.describe('Address book role filter', () => {
-  test('each tab, reached through its link, offers Select one with no value and then only its own roles', async ({
+  test('each role-backed tab, reached through its link, offers Select one with no value and then only its own roles', async ({
     insPages,
     insJourney,
   }) => {
-    for (const tab of addressBookTabs) {
+    for (const tab of roleBackedAddressBookTabs) {
       await insJourney.toAddressBookTab(tab);
 
       await expect(insPages.addressBookList.selectedTab).toHaveText(tab.label);

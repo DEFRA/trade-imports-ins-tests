@@ -2,6 +2,7 @@ import type { APIRequestContext } from '@playwright/test';
 import { RestClient } from '@adapters/http/rest-client';
 import { getAddressBookBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
 import type { AddressRole } from '@domain/shared/constants/address-types';
+import type { TransporterType } from '@domain/ins/constants/transporter-types';
 
 /** The organisation id that CRN 2100010101, the default E2E sign-in, belongs to. */
 export const E2E_ORGANISATION_ID = '5900001';
@@ -31,6 +32,30 @@ interface AddressBookPage {
   totalItems: number;
 }
 
+export interface TransporterRecord {
+  id: string;
+  name: string;
+  addressLine1: string;
+  addressLine2?: string;
+  townOrCity: string;
+  county?: string;
+  postcode: string;
+  countryCode: string;
+  phone: string;
+  email: string;
+  type: TransporterType;
+  approvalNumber?: string;
+  deleted: boolean;
+  modifiedAt: string;
+}
+
+export type TransporterRequest = Omit<TransporterRecord, 'id' | 'deleted' | 'modifiedAt'>;
+
+interface TransporterPage {
+  items: TransporterRecord[];
+  totalItems: number;
+}
+
 /** Direct HTTP access to one organisation's address book. */
 export class AddressBookApiClient {
   private readonly rest: RestClient;
@@ -51,6 +76,11 @@ export class AddressBookApiClient {
   private path(addressId?: string): string {
     const base = `/organisation/${this.organisationId}/addresses`;
     return addressId ? `${base}/${addressId}` : base;
+  }
+
+  private transporterPath(transporterId?: string): string {
+    const base = `/organisation/${this.organisationId}/transporters`;
+    return transporterId ? `${base}/${transporterId}` : base;
   }
 
   /**
@@ -104,5 +134,36 @@ export class AddressBookApiClient {
   /** Soft-deletes an address. Deleting an address already deleted succeeds. */
   async deleteAddress(addressId: string): Promise<void> {
     await this.rest.delete(this.path(addressId), this.headers);
+  }
+
+  /** The first page of the organisation's live transporters matching the search, newest first. */
+  async listTransporters(query?: string): Promise<TransporterRecord[]> {
+    const search = query ? `?${new URLSearchParams({ q: query })}` : '';
+    const page = await this.rest.get<TransporterPage>(`${this.transporterPath()}${search}`, this.headers);
+    return page.items;
+  }
+
+  /** Saves a new transporter to the organisation's book. */
+  async createTransporter(request: TransporterRequest): Promise<TransporterRecord> {
+    return this.rest.post<TransporterRecord>(this.transporterPath(), request, this.headers);
+  }
+
+  /** The live transporter with this name. Throws unless exactly one live transporter has it. */
+  async findTransporterByName(name: string): Promise<TransporterRecord> {
+    const matches = (await this.listTransporters(name)).filter((record) => record.name === name);
+    if (matches.length !== 1) {
+      throw new Error(`Expected exactly one transporter named "${name}", found ${matches.length}`);
+    }
+    return matches[0];
+  }
+
+  /** One transporter by id, including a soft-deleted tombstone (`deleted: true`). */
+  async getTransporter(transporterId: string): Promise<TransporterRecord> {
+    return this.rest.get<TransporterRecord>(this.transporterPath(transporterId), this.headers);
+  }
+
+  /** Soft-deletes a transporter. Deleting a transporter already deleted succeeds. */
+  async deleteTransporter(transporterId: string): Promise<void> {
+    await this.rest.delete(this.transporterPath(transporterId), this.headers);
   }
 }

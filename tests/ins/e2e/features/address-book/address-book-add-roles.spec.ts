@@ -4,9 +4,9 @@ import { ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES 
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { addressTypes } from '@domain/shared/constants/address-types';
 import {
-  addressBookTabs,
   addressTypeLabels,
   addressTypesRequiringUnitedKingdom,
+  roleBackedAddressBookTabs,
   rolesLabelOf,
   rolesQuestion,
   rolesQuestionLegends,
@@ -37,7 +37,7 @@ test.describe('The Country select on the add form', () => {
   });
 });
 
-for (const tab of addressBookTabs) {
+for (const tab of roleBackedAddressBookTabs) {
   const { addressType } = tab;
   const addressTypeLabel = addressTypeLabels[addressType];
   const offeredRoles = rolesQuestionOptions[addressType];

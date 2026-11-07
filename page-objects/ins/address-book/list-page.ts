@@ -84,6 +84,19 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
     return this.row(name).getByRole('cell').nth(3);
   }
 
+  /** The Transporter tab's own column order: Name, Address, Approval number, Type. */
+  transporterAddressCell(name: string): Locator {
+    return this.row(name).getByRole('cell').nth(1);
+  }
+
+  transporterApprovalNumberCell(name: string): Locator {
+    return this.row(name).getByRole('cell').nth(2);
+  }
+
+  transporterTypeCell(name: string): Locator {
+    return this.row(name).getByRole('cell').nth(3);
+  }
+
   get tabLinks(): Locator {
     return this.page.getByRole('navigation', { name: 'Address types' }).getByRole('link');
   }
