@@ -64,8 +64,8 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
       await animalsJourney.openTransporterFromOverview();
       await animalsJourney.chooseTransporterType('Commercial');
       await expect(animalsPages.commercialTransporter.heading).toBeVisible();
-      await animalsPages.commercialTransporter.saveAndContinue.click();
-      await expect(animalsPages.overview.heading).toBeVisible();
+      await animalsPages.commercialTransporter.cancelAndReturnToDashboard.click();
+      await animalsPages.overview.open(referenceNumber);
 
       await animalsJourney.openTransporterFromOverview();
       await animalsJourney.chooseTransporterType('Private');
