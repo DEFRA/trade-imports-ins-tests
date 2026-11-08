@@ -9,6 +9,8 @@ import type { PartyRole } from '@page-objects/animals/addresses-page';
 import type { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
 import type { CommercialTransporterDetails } from '@page-objects/animals/commercial-transporter-page';
 import type { PrivateTransporterDetails } from '@page-objects/animals/private-transporter-page';
+import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
+import { handTypedPrivateTransporter } from '@domain/animals/constants/transporters';
 import {
   ALL_ANSWERS,
   MANDATORY_ANSWERS,
@@ -631,6 +633,21 @@ export class AnimalsJourney {
     await this.animalsPages.privateTransporter.fill(details);
     await this.animalsPages.privateTransporter.saveAndContinue.click();
     await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
+  }
+
+  /** Fills and saves the open private transporter add form under a run-unique name,
+   * registering the saved record for deletion after the test. Lands back on the
+   * transporter list. */
+  async savePrivateTransporterTrackedForDeletion(
+    addressBookApi: AddressBookApiClient,
+    namePrefix: string,
+    createdTransporterIds: string[],
+  ): Promise<{ name: string; id: string }> {
+    const name = `${namePrefix} ${Date.now()}`;
+    await this.fillAndSavePrivateTransporterAddForm(handTypedPrivateTransporter(name));
+    const stored = await addressBookApi.findTransporterByName(name);
+    createdTransporterIds.push(stored.id);
+    return { name, id: stored.id };
   }
 
   async fillAndSaveCommercialTransporterAddFormToOverview(details: CommercialTransporterDetails): Promise<void> {

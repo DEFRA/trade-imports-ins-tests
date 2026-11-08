@@ -1,10 +1,14 @@
 import { test, expect } from '@fixtures';
 import { handTypedCommercialTransporter } from '@domain/animals/constants/transporters';
+import { transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
 
 test.describe('Commercial transporter scope', { tag: '@duplicated-in-frontend' }, () => {
+  const createdTransporterIds = transporterIdsDeletedAfterEachTest();
+
   test('commercial transporter is owed only for the commercial type and is wiped when the type changes', async ({
     animalsJourney,
     animalsPages,
+    addressBookApi,
   }) => {
     await animalsJourney.startNotification();
     await animalsJourney.answerCommodity();
@@ -27,7 +31,13 @@ test.describe('Commercial transporter scope', { tag: '@duplicated-in-frontend' }
     await animalsJourney.openTransporterFromOverview();
     await animalsJourney.chooseTransporterType('Private');
     await expect(animalsPages.privateTransporter.heading).toBeVisible();
-    await animalsPages.privateTransporter.saveAndContinue.click();
+    await animalsJourney.savePrivateTransporterTrackedForDeletion(
+      addressBookApi,
+      'Commercial scope private transporter',
+      createdTransporterIds,
+    );
+    await expect(animalsPages.transporter.heading).toBeVisible();
+    await animalsPages.transporter.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsJourney.openTransporterFromOverview();

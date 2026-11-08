@@ -6,7 +6,7 @@ const transporter = { name, address };
 
 test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, () => {
   test(
-    'keyed-in details are owed only for the private type; a partial fill blocks the save; changing the type wipes them',
+    'opens under its own browser title with the Country select on the United Kingdom; a wholly blank save is refused naming every required field; keyed-in details are owed only for the private type, and changing the type restores the United Kingdom default',
     { tag: '@cross-browser' },
     async ({ animalsJourney, pages, animalsPages }) => {
       await animalsJourney.startNotification();
@@ -15,6 +15,20 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
       await animalsJourney.reachTransporterFromHub();
       await animalsJourney.chooseTransporterType('Private');
       await expect(animalsPages.privateTransporter.heading).toBeVisible();
+      await expect(pages.page).toHaveTitle('Add a private transporter - Import notification service - GOV.UK');
+      await expect(animalsPages.privateTransporter.country).toHaveValue('United Kingdom');
+
+      await animalsPages.privateTransporter.saveAndContinue.click();
+      await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
+      await expect(animalsPages.privateTransporter.errorSummaryLinks).toHaveText([
+        'Enter a name or organisation name',
+        'Enter address line 1',
+        'Enter a town or city',
+        'Enter a postcode or Zip code',
+        'Enter an email address',
+        'Enter a phone number',
+      ]);
+
       await animalsPages.privateTransporter.name.fill(transporter.name);
       await animalsPages.privateTransporter.saveAndContinue.click();
       await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
@@ -50,7 +64,7 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
       await animalsJourney.chooseTransporterType('Private');
       await expect(animalsPages.privateTransporter.heading).toBeVisible();
       await expect(animalsPages.privateTransporter.name).toHaveValue('');
-      await expect(animalsPages.privateTransporter.country).toHaveValue('');
+      await expect(animalsPages.privateTransporter.country).toHaveValue('United Kingdom');
     },
   );
 });
