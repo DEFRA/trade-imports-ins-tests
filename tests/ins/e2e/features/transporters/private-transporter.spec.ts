@@ -2,11 +2,8 @@ import { test, expect } from '@fixtures';
 import { transporterTypes } from '@domain/ins/constants/transporter-types';
 import { privateTransporterDetails } from '@domain/ins/constants/trader-transporter';
 import { transporterTab } from '@domain/ins/constants/address-book-types';
-import {
-  expectCancelAddsNoTransporter,
-  expectOpensTypeQuestionWithNoTypeChosen,
-  transporterIdsDeletedAfterEachTest,
-} from './run-transporters';
+import { expectCancelAddsNoTransporter, expectOpensTypeQuestionWithNoTypeChosen } from './run-transporters';
+import { transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
 
 const createdTransporterIds = transporterIdsDeletedAfterEachTest();
 

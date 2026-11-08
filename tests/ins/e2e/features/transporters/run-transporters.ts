@@ -1,22 +1,10 @@
 import { type Locator } from '@playwright/test';
-import { test, expect } from '@fixtures';
+import { expect } from '@fixtures';
 import type { InsPages } from '@page-objects';
 import type { SharedPages } from '@page-objects';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { escapeRegex } from '@page-objects/shared/escape-regex';
 import { transporterTab } from '@domain/ins/constants/address-book-types';
-
-/** Registers an `afterEach` that soft-deletes every transporter id pushed onto the returned array,
- * the transporter mirror of `run-addresses.ts`'s `addressIdsDeletedAfterEachTest`. */
-export const transporterIdsDeletedAfterEachTest = (): string[] => {
-  const createdTransporterIds: string[] = [];
-  test.afterEach(async ({ addressBookApi }) => {
-    for (const transporterId of createdTransporterIds.splice(0)) {
-      await addressBookApi.deleteTransporter(transporterId);
-    }
-  });
-  return createdTransporterIds;
-};
 
 /** A transporter form page: the private and commercial pages share this much. */
 export interface TransporterFormPage {

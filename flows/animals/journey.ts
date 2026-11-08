@@ -7,6 +7,8 @@ import type { InsNotificationTypePage } from '@page-objects/ins/notification-typ
 import { LIVE_ANIMALS, type NotificationTypeOption } from '@domain/ins/constants/notification-types';
 import type { PartyRole } from '@page-objects/animals/addresses-page';
 import type { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
+import type { CommercialTransporterDetails } from '@page-objects/animals/commercial-transporter-page';
+import type { PrivateTransporterDetails } from '@page-objects/animals/private-transporter-page';
 import {
   ALL_ANSWERS,
   MANDATORY_ANSWERS,
@@ -621,6 +623,22 @@ export class AnimalsJourney {
     await this.toTransporter();
     await this.chooseTransporterType('Commercial');
     await this.animalsPages.commercialTransporter.heading.waitFor(pageLoadWait);
+  }
+
+  /** Fills and saves the open private transporter add form, landing back on the
+   * transporter list with the saved transporter first and already chosen. */
+  async fillAndSavePrivateTransporterAddForm(details: PrivateTransporterDetails): Promise<void> {
+    await this.animalsPages.privateTransporter.fill(details);
+    await this.animalsPages.privateTransporter.saveAndContinue.click();
+    await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
+  }
+
+  async fillAndSaveCommercialTransporterAddFormToOverview(details: CommercialTransporterDetails): Promise<void> {
+    await this.animalsPages.commercialTransporter.fill(details);
+    await this.animalsPages.commercialTransporter.saveAndContinue.click();
+    await this.animalsPages.transporter.heading.waitFor(pageLoadWait);
+    await this.animalsPages.transporter.saveAndContinue.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
   async toContactAddress(): Promise<void> {

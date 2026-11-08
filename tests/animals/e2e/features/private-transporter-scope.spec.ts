@@ -1,16 +1,8 @@
 import { test, expect } from '@fixtures';
+import { handTypedPrivateTransporter } from '@domain/animals/constants/transporters';
 
-const transporter = {
-  name: 'Jean Dupont',
-  address: {
-    addressLine1: '12 Rue des Fermes',
-    townOrCity: 'Amiens',
-    postalOrZipCode: '80000',
-    country: 'France',
-    telephoneNumber: '+33 3 22 55 01 44',
-    emailAddress: 'jean.dupont@example.fr',
-  },
-};
+const { name, ...address } = handTypedPrivateTransporter('Jean Dupont');
+const transporter = { name, address };
 
 test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, () => {
   test(
@@ -35,6 +27,8 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
       await animalsPages.privateTransporter.phone.fill(transporter.address.telephoneNumber);
       await animalsPages.privateTransporter.email.fill(transporter.address.emailAddress);
       await animalsPages.privateTransporter.saveAndContinue.click();
+      await expect(animalsPages.transporter.heading).toBeVisible();
+      await animalsPages.transporter.saveAndContinue.click();
       await expect(animalsPages.overview.heading).toBeVisible();
 
       await animalsJourney.openTransporterFromOverview();
@@ -43,6 +37,8 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
       await expect(animalsPages.privateTransporter.name).toHaveValue(transporter.name);
       await expect(animalsPages.privateTransporter.country).toHaveValue(transporter.address.country);
       await animalsPages.privateTransporter.saveAndContinue.click();
+      await expect(animalsPages.transporter.heading).toBeVisible();
+      await animalsPages.transporter.saveAndContinue.click();
 
       await animalsJourney.openTransporterFromOverview();
       await animalsJourney.chooseTransporterType('Commercial');

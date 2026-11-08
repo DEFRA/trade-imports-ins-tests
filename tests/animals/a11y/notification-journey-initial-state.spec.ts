@@ -153,7 +153,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Add commercial transporter', async () => {
       await animalsPages.commercialTransporter.heading.waitFor();
       await runA11yScan();
-      await animalsPages.commercialTransporter.fill({
+      await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview({
         approvalNumber: 'NI/TA/2026/0041',
         name: 'Lough Neagh Livestock Haulage Ltd',
         addressLine1: '4 Shore Road',
@@ -162,8 +162,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
         emailAddress: 'ops@loughneagh.example',
         telephoneNumber: '+44 28 9446 1200',
       });
-      await animalsPages.commercialTransporter.saveAndContinue.click();
-      await animalsPages.overview.heading.waitFor();
     });
 
     await test.step('Contact address', async () => {

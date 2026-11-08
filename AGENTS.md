@@ -13,7 +13,7 @@ Playwright end-to-end, accessibility and security suite for the trade imports se
 | `fixtures`       | Playwright fixtures that hand specs their pages, flows and API clients                      |
 | `adapters`       | Clients for the services' HTTP APIs, MongoDB and SQS                                        |
 | `resources`      | Canned data: reference data, upload files and outbox events                                 |
-| `utils`          | Helpers for dates, accessibility, ZAP and Playwright config                                 |
+| `utils`          | Cross-domain helpers for dates, accessibility, ZAP, Playwright config and per-test cleanup  |
 
 ## Writing specs
 

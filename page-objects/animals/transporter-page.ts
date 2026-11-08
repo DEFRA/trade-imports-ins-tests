@@ -43,6 +43,11 @@ export class AnimalsTransporterPage extends NotificationPage {
     return this.page.getByRole('row').filter({ has: this.page.getByRole('radio') });
   }
 
+  /** The name each listed row shows, in the order the rows are shown. */
+  get listedTransporterNames(): Locator {
+    return this.listedTransporters.locator('td:nth-child(2)');
+  }
+
   get addTransporter(): Locator {
     return this.page.getByRole('button', { name: 'Add a transporter' });
   }
