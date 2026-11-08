@@ -6,7 +6,7 @@ const transporter = { name, address };
 
 test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, () => {
   test(
-    'opens under its own browser title with the Country select on the United Kingdom; a wholly blank save is refused naming every required field; keyed-in details are owed only for the private type, and changing the type restores the United Kingdom default',
+    "opens under its own browser title with the Country select on the United Kingdom; a wholly blank save is refused naming every required field; the saved country shows on the review's Transport details card; keyed-in details are owed only for the private type, and changing the type restores the United Kingdom default",
     { tag: '@cross-browser' },
     async ({ animalsJourney, pages, animalsPages }) => {
       await animalsJourney.startNotification();
@@ -44,6 +44,13 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
       await expect(animalsPages.transporter.heading).toBeVisible();
       await animalsPages.transporter.saveAndContinue.click();
       await expect(animalsPages.overview.heading).toBeVisible();
+
+      const referenceNumber = animalsPages.overview.referenceNumberFromUrl();
+      await animalsJourney.openReviewFromOverview();
+      await expect(
+        animalsPages.notificationView.summaryValue(animalsPages.notificationView.summaryCard('Transport details'), 'Country'),
+      ).toHaveText(transporter.address.country);
+      await animalsPages.overview.open(referenceNumber);
 
       await animalsJourney.openTransporterFromOverview();
       await animalsJourney.chooseTransporterType('Private');

@@ -28,8 +28,7 @@ test.describe('Commercial transporter journeys', () => {
       await animalsPages.contactAddress.saveAndContinue.click();
       await animalsPages.overview.heading.waitFor();
 
-      await animalsPages.overview.reviewAndSubmitButton.click();
-      await animalsPages.notificationView.heading.waitFor();
+      await animalsJourney.openReviewFromOverview();
       await animalsPages.notificationView.continueButton.click();
       await animalsPages.declaration.heading.waitFor();
       await animalsPages.declaration.confirmation.check();

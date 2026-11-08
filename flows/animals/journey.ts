@@ -250,7 +250,7 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  private async openReviewFromOverview(): Promise<void> {
+  async openReviewFromOverview(): Promise<void> {
     await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
