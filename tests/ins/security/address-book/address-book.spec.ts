@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { addressRoles } from '@domain/shared/constants/address-types';
-import { originOrConsignorTab } from '@domain/ins/constants/address-book-types';
+import { originOrConsignorTab, roleOptionLabels } from '@domain/ins/constants/address-book-types';
 
 test.describe('Security scan (ins)', { tag: '@active' }, () => {
   test('routes the address book through the ZAP proxy', async ({ pages, insPages, insJourney, addressBookApi }) => {
@@ -17,7 +17,7 @@ test.describe('Security scan (ins)', { tag: '@active' }, () => {
     await expect(insPages.addressBookList.row(name)).toBeVisible();
 
     await insPages.addressBookList.followTab(originOrConsignorTab);
-    await insPages.addressBookList.filter({ term: name, role: addressRoles.placeOfOrigin, submitWith: 'button' });
+    await insPages.addressBookList.filter({ term: name, label: roleOptionLabels[addressRoles.placeOfOrigin], submitWith: 'button' });
     await expect(insPages.addressBookList.row(name)).toBeVisible();
 
     const { id } = await addressBookApi.findByName(name);

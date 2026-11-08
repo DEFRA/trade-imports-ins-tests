@@ -10,9 +10,9 @@ import {
   transporterTab,
   unsupportedAddressType,
 } from '@domain/ins/constants/address-book-types';
-import { transporterTypes } from '@domain/ins/constants/transporter-types';
 import { branchAddressFixture, E2E_ADDRESS_BOOK_FIXTURES } from '@flows/shared/address-book-seed';
 import { addressIdsDeletedAfterEachTest, createRunAddresses, runAddressesOnTab } from './run-addresses';
+import { commercialTransporterRequest } from './run-transporters';
 
 const createdAddressIds = addressIdsDeletedAfterEachTest('addressBookApi');
 
@@ -89,17 +89,7 @@ test.describe('Address book tabs', () => {
     addressBookApi,
   }) => {
     const name = `Tabs Transporter ${Date.now()}`;
-    await addressBookApi.createTransporter({
-      name,
-      addressLine1: '4 Shore Road',
-      townOrCity: 'Antrim',
-      postcode: 'BT41 4LB',
-      countryCode: 'GB-NIR',
-      phone: '+44 28 9446 1200',
-      email: 'ops@shoreroad.example',
-      type: transporterTypes.commercial,
-      approvalNumber: 'NI/TA/2026/0099',
-    });
+    await addressBookApi.createTransporter(commercialTransporterRequest(name, 'NI/TA/2026/0099'));
 
     await insJourney.toAddressBookTab(transporterTab, { search: name });
 

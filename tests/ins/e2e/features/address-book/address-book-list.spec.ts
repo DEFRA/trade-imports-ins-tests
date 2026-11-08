@@ -70,7 +70,11 @@ test.describe('Address book list', () => {
   }) => {
     const { addressType } = destinationConsigneeOrImporterTab;
     await insPages.addressBookList.open({ addressType });
-    await insPages.addressBookList.filter({ term: `NoMatch${Date.now()}`, role: addressRoles.importer, submitWith: 'button' });
+    await insPages.addressBookList.filter({
+      term: `NoMatch${Date.now()}`,
+      label: roleOptionLabels[addressRoles.importer],
+      submitWith: 'button',
+    });
 
     await insPages.addressBookList.linkClearSearch.click();
 
@@ -79,7 +83,7 @@ test.describe('Address book list', () => {
     await expect(insPages.addressBookList.selectedTab).toHaveText(destinationConsigneeOrImporterTab.label);
     await insPages.addressBookList.filterSummary.click();
     await expect(insPages.addressBookList.inputSearch).toHaveValue('');
-    await expect(insPages.addressBookList.selectedRoleFilterOption).toHaveText(roleOptionLabels.IMPORTER);
+    await expect(insPages.addressBookList.selectedTypeFilterOption).toHaveText(roleOptionLabels.IMPORTER);
   });
 
   test('an address is found from the dashboard, viewed, kept on No, cancel, then deleted on Yes, delete and no longer found by search', async ({

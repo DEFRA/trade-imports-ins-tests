@@ -5,6 +5,7 @@ import {
   type AddressRole,
   type AddressTypeAskingRoles,
 } from '@domain/shared/constants/address-types';
+import { transporterTypes, type TransporterType } from './transporter-types';
 
 interface RoleTexts {
   columnLabel: string;
@@ -32,15 +33,21 @@ export const roleOptionLabels = textsOfEachRole(({ optionLabel }) => optionLabel
 
 export const rolesQuestionLabels = textsOfEachRole(({ formLabel }) => formLabel);
 
-export const roleFilterPlaceholder = 'Select one';
+export const typeFilterPlaceholder = 'Select one';
 
-/** Every tab carries its address type, its label and its panel heading; only a role-backed tab
- * carries role filter options, which the Transporter tab has none of. */
+export const transporterTypeOptionLabels: Record<TransporterType, string> = {
+  [transporterTypes.commercial]: 'Commercial',
+  [transporterTypes.private]: 'Private',
+};
+
+/** Every tab carries its address type, its label and its panel heading; a role-backed tab's Type
+ * filter offers its roles, and the Transporter tab's offers its transporter types. */
 export interface AddressBookTab {
   addressType: AddressType;
   label: string;
   panelHeading: string;
   roleFilterOptions?: readonly AddressRole[];
+  typeFilterOptions?: readonly TransporterType[];
 }
 
 /** A tab that lists by role: its address type is one that asks the roles question, and its role
@@ -67,7 +74,8 @@ export const destinationConsigneeOrImporterTab: RoleBackedAddressBookTab = {
 export const transporterTab: AddressBookTab = {
   addressType: addressTypes.transporter,
   label: 'Transporter',
-  panelHeading: 'Transporters',
+  panelHeading: 'Transporter addresses',
+  typeFilterOptions: [transporterTypes.commercial, transporterTypes.private],
 };
 
 export const branchTab: RoleBackedAddressBookTab = {
