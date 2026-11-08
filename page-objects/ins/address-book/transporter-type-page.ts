@@ -15,7 +15,7 @@ export class InsTransporterTypePage extends opensAtExpectedUrl(BasePage) {
   }
 
   get warning(): Locator {
-    return this.page.getByText('Check the transporter list before adding new transporters to avoid duplicates.', { exact: true });
+    return this.page.getByText('Check the transporter list before adding new transporters to avoid duplicates.');
   }
 
   get radioGroup(): Locator {
