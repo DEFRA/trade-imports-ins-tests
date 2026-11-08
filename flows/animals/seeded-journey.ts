@@ -20,7 +20,7 @@ import { SET_BASES } from '@page-objects/shared/sets';
 import { OPTIONAL_TRAIL_PATTERN } from '@page-objects/shared/base-page';
 
 export const CREATE_PATH = `${SET_BASES.liveAnimals}/notifications`;
-const CREATED_AT_ORIGIN = new RegExp(`^${CREATE_PATH}/(?<referenceNumber>[^/?]+)/origin${OPTIONAL_TRAIL_PATTERN}$`);
+export const CREATED_AT_ORIGIN = new RegExp(`^${CREATE_PATH}/(?<referenceNumber>[^/?]+)/origin${OPTIONAL_TRAIL_PATTERN}$`);
 const CONCURRENCY_TOKEN_FIELD = /name="concurrencyToken" value="(?<token>[^"]+)"/;
 
 const concurrencyTokenIn = (html: string, slug: string): string => {

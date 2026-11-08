@@ -3,22 +3,16 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type NotificationDocument } from '@domain/animals/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
-import { CREATE_PATH } from '@flows/animals/seeded-journey';
+import { CREATE_PATH, CREATED_AT_ORIGIN } from '@flows/animals/seeded-journey';
 import { CPH_NUMBER, MANDATORY_ANSWERS as answers } from '@domain/animals/constants/journey-options';
 import { commodityNames } from '@domain/animals/constants/commodity-names';
 
-const CREATED_AT_ORIGIN = new RegExp(`^${CREATE_PATH}/([^/]+)/origin$`);
-
-// Matched against the set base rather than read from a fixed path segment: the
-// set prefix shifts every index by one, and `split('/')[2]` answered
-// "notifications" rather than failing, which surfaced later as a 500 on a
-// doubled path.
 const referenceNumberFrom = (redirectPath: string): string => {
-  const match = redirectPath.match(CREATED_AT_ORIGIN);
-  if (!match) {
+  const referenceNumber = CREATED_AT_ORIGIN.exec(redirectPath)?.groups?.referenceNumber;
+  if (!referenceNumber) {
     throw new Error(`Expected a redirect to the origin page under ${CREATE_PATH}, got "${redirectPath}".`);
   }
-  return match[1];
+  return referenceNumber;
 };
 
 // Auth state is minted per Playwright project, so this proof only holds from the admin
