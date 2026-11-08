@@ -4,10 +4,9 @@ import { getAddressBookBaseUrl, getDeveloperApiKey } from '@config/service-base-
 import type { AddressRole } from '@domain/shared/constants/address-types';
 import type { TransporterType } from '@domain/ins/constants/transporter-types';
 
-/** The organisation id that CRN 2100010101, the default E2E sign-in, belongs to. */
-export const E2E_ORGANISATION_ID = '5900001';
+import { E2E_ORGANISATION_ID, ORGANISATION_ID_HEADER } from '@adapters/http/trader-api-headers';
 
-const ORGANISATION_ID_HEADER = 'Trade-Imports-Organisation-Id';
+export { E2E_ORGANISATION_ID };
 
 interface StandardAddressBlockRecord {
   id: string;

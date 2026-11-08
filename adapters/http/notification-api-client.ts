@@ -1,6 +1,6 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient, RestClientError } from '@adapters/http/rest-client';
-import { E2E_ORGANISATION_ID } from '@adapters/http/address-book-api-client';
+import { E2E_ORGANISATION_ID, ORGANISATION_ID_HEADER } from '@adapters/http/trader-api-headers';
 import { getBackendBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
 import type { NotificationFulfilments } from '@domain/animals/models/api/notification-fulfilments';
 import type { Notification } from '@domain/animals/models/api/notification';
@@ -10,8 +10,6 @@ import type { Notification } from '@domain/animals/models/api/notification';
 // never race like this; back-to-back API calls in a test do.
 const OUTBOX_LOCK_RETRY_ATTEMPTS = 3;
 const OUTBOX_LOCK_RETRY_BASE_MS = 500;
-
-const ORGANISATION_ID_HEADER = 'Trade-Imports-Organisation-Id';
 
 /**
  * HTTP client for the notification api.
@@ -94,6 +92,11 @@ export class NotificationApiClient {
 
   async softDeleteNotification(id: string): Promise<Notification> {
     return this.rest.post<Notification>(`/notifications/${id}/soft-delete`, undefined, this.headers);
+  }
+
+  async listNotifications(referenceNumber?: string): Promise<{ totalElements: number }> {
+    const path = referenceNumber === undefined ? '/notifications' : `/notifications?referenceNumber=${encodeURIComponent(referenceNumber)}`;
+    return this.rest.get<{ totalElements: number }>(path, this.headers);
   }
 
   private async retryOnTransientOutboxLock<T>(action: () => Promise<T>): Promise<T> {
