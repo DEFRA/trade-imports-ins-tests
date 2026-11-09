@@ -63,14 +63,12 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
     await expect(animalsPages.consignorSelection.resultsGroup.getByRole('radio')).toHaveCount(5);
 
-    await animalsPages.consignorSelection.searchBox.fill(runOnlySearchToken);
-    await animalsPages.consignorSelection.searchButton.click();
+    await animalsPages.consignorSelection.search(runOnlySearchToken);
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText('Showing 2 out of 2 results');
     await expect(animalsPages.consignorSelection.party(searchMatches[1])).toBeVisible();
     await expect(animalsPages.consignorSelection.paginationPageLink(2)).toHaveCount(0);
 
-    await animalsPages.consignorSelection.searchBox.fill('');
-    await animalsPages.consignorSelection.searchButton.click();
+    await animalsPages.consignorSelection.search('');
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
 
     const olderThanPageOne = animalsPages.consignorSelection.party(olderThanPageOneName);
@@ -98,8 +96,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
   }) => {
     await animalsJourney.toPartyPicker('Consignor');
 
-    await animalsPages.consignorSelection.searchBox.fill(destinationFixture.name);
-    await animalsPages.consignorSelection.searchButton.click();
+    await animalsPages.consignorSelection.search(destinationFixture.name);
     await expect(animalsPages.consignorSelection.partyAddressCell(destinationFixture.name)).toHaveText(
       `${destinationFixture.addressLine1}\n${destinationFixture.townOrCity}, ${destinationFixture.postcode}`,
       { useInnerText: true },
