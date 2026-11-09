@@ -1,4 +1,5 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { transporters } from '@domain/animals/constants/transporters';
 import { OVERLAND_WITHOUT_IDENTIFICATION_OVERVIEW_TASKS, certificateDocument } from '@flows/animals/journey';
@@ -16,7 +17,12 @@ test.describe('Poultry by rail in transit', () => {
     const referenceNumber = await animalsJourney.walkPoultryByRail(certificateDocument('RAILDOC'));
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
 
-    await animalsJourney.reviewCompleteOverview(referenceNumber, OVERLAND_WITHOUT_IDENTIFICATION_OVERVIEW_TASKS);
+    await openReviewFromCompleteOverview(
+      animalsPages.overview,
+      animalsJourney,
+      referenceNumber,
+      OVERLAND_WITHOUT_IDENTIFICATION_OVERVIEW_TASKS,
+    );
 
     const importDetails = animalsPages.notificationView.summaryCard('Import details');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Germany');

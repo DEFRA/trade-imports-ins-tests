@@ -1,8 +1,8 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
-import { SET_BASES } from '@page-objects/shared/sets';
 import { AIR_OR_SEA_OVERVIEW_TASKS, certificateDocument } from '@flows/animals/journey';
 
 import { test, expect } from '@fixtures';
@@ -17,7 +17,7 @@ test.describe('Save and continue through a new notification', () => {
       const referenceNumber = await animalsJourney.walkCattleByAir(certificateDocument('AWBDOC'));
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
 
-      await animalsJourney.reviewCompleteOverview(referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
+      await openReviewFromCompleteOverview(animalsPages.overview, animalsJourney, referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
 
       const importDetails = animalsPages.notificationView.summaryCard('Import details');
       await expect(animalsPages.notificationView.regionOfOriginCode).toHaveText('FR-75');
@@ -75,7 +75,7 @@ test.describe('Save and continue through a new notification', () => {
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.contactAddress.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/consignment/contact/select`));
+    await expect(pages.page).toHaveURL(animalsPages.contactAddress.expectedUrlPattern(referenceNumber));
 
     await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
     await animalsPages.contactAddress.saveAndContinue.click();

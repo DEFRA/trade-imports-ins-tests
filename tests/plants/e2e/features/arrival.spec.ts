@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { portByCode } from '@resources/reference-data/reference-data';
+import { TRAIL_START } from '@page-objects/shared/base-page';
 import { POTATOES } from '@flows/plants/journey';
 import { PLACE_OF_LANDING_SEARCH_PLACEHOLDER } from '@domain/plants/constants/arrival-details-page';
 import { ALREADY_ARRIVED, NOT_YET_ARRIVED } from '@domain/plants/constants/arrival-status-page';
@@ -177,7 +178,7 @@ test.describe('High-risk plants arrival section', () => {
     await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRowLink(ARRIVAL_TASK_ROW)).toHaveAttribute(
       'href',
-      `${plantsPages.arrivalDetails.expectedUrl(reference)}?from=overview`,
+      plantsPages.arrivalDetails.expectedUrlOnTrail(reference, [TRAIL_START.overview]),
     );
   });
 

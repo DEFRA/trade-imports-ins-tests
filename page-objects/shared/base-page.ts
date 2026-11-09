@@ -1,4 +1,4 @@
-import { Browser, expect, Page, Locator } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 import { defaultUser } from '@config/users';
 import { pageLoadWait } from '@config/timeouts';
 import { SignInPage } from '@page-objects/shared/auth/sign-in-page';
@@ -24,7 +24,12 @@ export function requireBaseUrl(
 
 export const TRAIL_PARAMETER = 'from';
 export const OPTIONAL_TRAIL_PATTERN = `(?:[?&]${TRAIL_PARAMETER}=[^#]*)?`;
-const REVIEW_SLUG = 'notification-view';
+export const TRAIL_START = { overview: 'overview', dashboard: 'dashboard', ins: 'ins' } as const;
+
+/** `?from=` followed by `places`, newest last, URI-encoded and joined by commas. */
+export function trailQuery(places: string[]): string {
+  return `?${TRAIL_PARAMETER}=${encodeURIComponent(places.join(','))}`;
+}
 
 /** Matches `url` and the optional `query` that follows it, with or without a trail after them. */
 export function urlPatternWithTrail(url: string, query = ''): RegExp {
@@ -290,32 +295,19 @@ export class NotificationPage extends BasePage {
     return `${this.setBase}/notifications/${referenceNumber}${suffix}`;
   }
 
-  /** Matches the open page's address with or without a trail after it. */
+  /** Matches the open page's address, whichever trail it carries: answers which page is open, not how it was reached. */
   expectedUrlPattern(referenceNumber: string): RegExp {
     return urlPatternWithTrail(this.expectedUrl(referenceNumber));
   }
 
-  /** The Back link href of this page opened at `search` in a browser context holding only the signed-in session. */
-  async backHrefInFreshContext(browser: Browser, referenceNumber: string, search: string): Promise<string | null> {
-    const context = await browser.newContext({ storageState: await this.page.context().storageState() });
-    try {
-      const freshPage = await context.newPage();
-      await freshPage.goto(`${this.expectedUrl(referenceNumber)}${search}`);
-      return await freshPage.getByRole('link', { name: 'Back', exact: true }).getAttribute('href');
-    } finally {
-      await context.close();
-    }
+  /** This page's address carrying exactly `places` as its trail, newest last. */
+  expectedUrlOnTrail(referenceNumber: string, places: string[]): string {
+    return `${this.expectedUrl(referenceNumber)}${trailQuery(places)}`;
   }
 
-  /** Waits until the review page is the newest place on the open page's trail. */
-  async expectReviewIsLastOnTrail(): Promise<void> {
-    await expect.poll(() => this.placesOnTrail().at(-1)).toBe(REVIEW_SLUG);
-  }
-
-  /** The places the address of the open page says the trader came from, newest last; empty when it carries none. */
-  placesOnTrail(): string[] {
-    const trail = new URL(this.page.url()).searchParams.get(TRAIL_PARAMETER);
-    return trail ? trail.split(',') : [];
+  /** Matches the open page's whole address, carrying exactly `places` as its trail and nothing after it. */
+  expectedUrlPatternOnTrail(referenceNumber: string, places: string[]): RegExp {
+    return new RegExp(`^[a-z]+://[^/]+${escapeRegex(this.expectedUrlOnTrail(referenceNumber, places))}$`);
   }
 
   referenceNumberFromUrl(): string {
@@ -343,7 +335,7 @@ export class NotificationPage extends BasePage {
 
   /** Opens this page at its address with `places` as the trail the trader came by. */
   async openOnTrail(referenceNumber: string, places: string[]): Promise<void> {
-    await this.navigateToService(`${this.expectedUrl(referenceNumber)}?${TRAIL_PARAMETER}=${places.join(',')}`);
+    await this.navigateToService(this.expectedUrlOnTrail(referenceNumber, places));
     await this.signInWhenRequested(true, {});
   }
 }

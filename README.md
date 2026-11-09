@@ -275,6 +275,14 @@ The `docker-compose` config targets `localhost:3000` / `localhost:3001` /
 runs `npm run test:docker-compose:ci` against that stack via the workspace
 reusable workflow.
 
+### Asserting which journey page is open
+
+- Which page is open: the page object's `expectedUrlPattern(reference)`. It matches the page whichever trail its address carries.
+- The exact trail: the page object's `expectedUrlPatternOnTrail(reference, places)` for a `toHaveURL` matcher, or `expectedUrlOnTrail(reference, places)` for an exact `href` value. Pass the page objects' own `slug`s and the `TRAIL_START` places. A spec never types a `?from=` query.
+- Opening a page on a trail: `openOnTrail(reference, places)` builds its address the same way.
+- An assertion two specs share lives in a `*-checks.ts` module under `page-objects/shared/` (`journey-checks.ts`, `type-ahead-checks.ts`). A flow or page object holds no assertion.
+- A new browser session for a Back check uses `openFreshSession`, described under "Authenticated session reuse".
+
 ### Domains, test suites and projects
 
 Tests are split into four domains, each a functional area of the product. One

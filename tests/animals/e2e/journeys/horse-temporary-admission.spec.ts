@@ -1,4 +1,5 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import {
   HORSE_TRANSPORT_ID,
@@ -20,7 +21,7 @@ test.describe('Horse by sea under temporary admission', () => {
       const referenceNumber = await animalsJourney.walkHorseBySea(certificateDocument('SEADOC'));
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
 
-      await animalsJourney.reviewCompleteOverview(referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
+      await openReviewFromCompleteOverview(animalsPages.overview, animalsJourney, referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
 
       const importDetails = animalsPages.notificationView.summaryCard('Import details');
       await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Ireland');

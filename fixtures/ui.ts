@@ -75,6 +75,8 @@ export interface PageFixtures {
   submitPlantsNotificationThenOpenFreshSession: () => Promise<FreshSessionAfterSubmit<PlantsPages>>;
   saveAnimalsOriginThenOpenFreshSession: () => Promise<FreshSessionOnDraft<AnimalsPages>>;
   savePlantsCommoditiesThenOpenFreshSession: () => Promise<FreshSessionOnDraft<PlantsPages>>;
+  completeAnimalsNotificationThenOpenFreshSession: () => Promise<FreshSessionOnDraft<AnimalsPages>>;
+  completePlantsNotificationThenOpenFreshSession: () => Promise<FreshSessionOnDraft<PlantsPages>>;
 }
 
 export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
@@ -196,6 +198,21 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   savePlantsCommoditiesThenOpenFreshSession: async ({ plantsJourney, openFreshSession }, use) => {
     await use(async () => {
       const reference = await plantsJourney.saveSeedPotatoLine();
+      const freshPage = await openFreshSession();
+      return { reference, freshPages: createPlantsPages(freshPage) };
+    });
+  },
+  completeAnimalsNotificationThenOpenFreshSession: async ({ animalsSeededJourney, animalsPages, openFreshSession }, use) => {
+    await use(async () => {
+      const reference = await animalsSeededJourney.createDraftNotification();
+      await animalsPages.notificationView.open(reference);
+      const freshPage = await openFreshSession();
+      return { reference, freshPages: createAnimalsPages(freshPage) };
+    });
+  },
+  completePlantsNotificationThenOpenFreshSession: async ({ plantsJourney, addressBookApi, openFreshSession }, use) => {
+    await use(async () => {
+      const { reference } = await plantsJourney.completeNotification(addressBookApi);
       const freshPage = await openFreshSession();
       return { reference, freshPages: createPlantsPages(freshPage) };
     });

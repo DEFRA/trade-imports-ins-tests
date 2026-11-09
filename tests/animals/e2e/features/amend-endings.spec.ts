@@ -1,6 +1,7 @@
 import type { AnimalsPages } from '@page-objects';
 import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { test, expect } from '@fixtures';
+import { expectOpenFromReview } from '@page-objects/shared/journey-checks';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
@@ -11,11 +12,12 @@ const AMEND = 'Amend';
 const openOriginFromImportDetailsChangeLink = async (
   animalsPages: AnimalsPages,
   animalsSeededJourney: AnimalsSeededJourney,
-): Promise<void> => {
+): Promise<string> => {
   const reference = await animalsSeededJourney.createAmendNotification();
   await animalsPages.notificationView.open(reference);
   await animalsPages.notificationView.changeLink(CHANGE_IMPORT_DETAILS).click();
   await expect(animalsPages.originOfImport.heading).toBeVisible();
+  return reference;
 };
 
 test.describe('Amendment page endings', () => {
@@ -87,14 +89,19 @@ test.describe('Amendment page endings', () => {
     animalsPages,
     animalsSeededJourney,
   }) => {
-    await openOriginFromImportDetailsChangeLink(animalsPages, animalsSeededJourney);
+    const reference = await openOriginFromImportDetailsChangeLink(animalsPages, animalsSeededJourney);
 
-    await animalsPages.originOfImport.expectReviewIsLastOnTrail();
+    await expectOpenFromReview(pages.page, animalsPages.originOfImport, reference, animalsPages.notificationView.slug);
     await animalsPages.originOfImport.internalReference.fill(AMENDED_REFERENCE);
     await animalsPages.originOfImport.saveAndContinue.click();
 
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
-    await expect(pages.page).not.toHaveURL(/\/notification-view/);
+    await expect(pages.page).toHaveURL(
+      animalsPages.commoditySelection.expectedUrlPatternOnTrail(reference, [
+        animalsPages.notificationView.slug,
+        animalsPages.originOfImport.slug,
+      ]),
+    );
   });
 
   test('while amending, the origin page and the CPH number page end with Save and continue alone, and the contact address page ends as it does on a draft', async ({

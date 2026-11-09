@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { TRAIL_START } from '@page-objects/shared/base-page';
 
 test.describe('Back on the review page by where the trader came from', () => {
   test('after an amendment is cancelled the review opens the dashboard', async ({
@@ -16,17 +17,14 @@ test.describe('Back on the review page by where the trader came from', () => {
     await expect(animalsPages.dashboard.heading).toBeVisible();
   });
 
-  test('opened in a fresh browser context on a trail address, the review keeps its Back link', async ({
-    browser,
-    animalsSeededJourney,
-    animalsPages,
+  test('opened in a new session holding only the sign-in cookie on the overview trail, the review links Back to the overview', async ({
+    completeAnimalsNotificationThenOpenFreshSession,
   }) => {
     test.slow();
-    const reference = await animalsSeededJourney.createDraftNotification();
-    await animalsPages.notificationView.open(reference);
+    const { reference, freshPages } = await completeAnimalsNotificationThenOpenFreshSession();
 
-    const backHref = await animalsPages.notificationView.backHrefInFreshContext(browser, reference, '?from=overview');
+    await freshPages.notificationView.openOnTrail(reference, [TRAIL_START.overview]);
 
-    expect(backHref).toMatch(animalsPages.overview.expectedUrlPattern(reference));
+    await expect(freshPages.notificationView.linkBack).toHaveAttribute('href', freshPages.overview.expectedUrl(reference));
   });
 });

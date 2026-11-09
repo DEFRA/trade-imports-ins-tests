@@ -1,6 +1,6 @@
 import type { PlantsPages } from '@page-objects';
 import { WHOLE_REFERENCE_NUMBER_PATTERN } from '@domain/plants/constants/reference-number-patterns';
-import { SET_BASES } from '@page-objects/shared/sets';
+import { TRAIL_START } from '@page-objects/shared/base-page';
 import { POTATOES } from '@flows/plants/journey';
 import { test, expect } from '@fixtures';
 
@@ -83,7 +83,7 @@ test.describe('High-risk plants start section', () => {
     ]);
     await expect(plantsPages.overview.taskRowLink('What are you importing?')).toHaveAttribute(
       'href',
-      `${SET_BASES.highRiskPlants}/notifications/${reference}/commodity-type?from=overview`,
+      plantsPages.commodityType.expectedUrlOnTrail(reference, [TRAIL_START.overview]),
     );
     await expect(plantsPages.overview.taskRow('What are you importing?')).toContainText('In progress');
 

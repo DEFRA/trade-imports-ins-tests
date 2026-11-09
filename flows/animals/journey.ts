@@ -1,6 +1,6 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
-import { expect, type Locator } from '@playwright/test';
+import { type Locator } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
 import type { InsNotificationTypePage } from '@page-objects/ins/notification-type-page';
@@ -251,7 +251,7 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  private async openReviewFromOverview(): Promise<void> {
+  async openReviewFromOverview(): Promise<void> {
     await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
@@ -877,15 +877,6 @@ export class AnimalsJourney {
 
     await this.walkFromTransporterToReview(MANDATORY_ANSWERS.transporter.display, document, { addCph: true });
     return referenceNumber;
-  }
-
-  /** Opens a finished notification's Overview, checks every task in `tasks` reads Complete and opens the review from it. */
-  async reviewCompleteOverview(referenceNumber: string, tasks: readonly string[]): Promise<void> {
-    await this.animalsPages.overview.open(referenceNumber);
-    await expect(this.animalsPages.overview.taskNames).toHaveText(tasks);
-    await expect(this.animalsPages.overview.taskStatuses).toHaveText(tasks.map(() => 'Complete'));
-    await this.animalsPages.overview.reviewAndSubmitButton.click();
-    await expect(this.animalsPages.notificationView.heading).toBeVisible();
   }
 
   async toDeclarationOfCurrentNotification(): Promise<void> {

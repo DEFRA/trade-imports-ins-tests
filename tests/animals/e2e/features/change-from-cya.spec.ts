@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
+import { expectOpenFromReview, expectSaveAndContinueWalk } from '@page-objects/shared/journey-checks';
 import { DOCUMENT_ISSUE_DATE } from '@resources/file-upload/constants';
 
 test.describe('Change from check your answers', { tag: '@duplicated-in-frontend' }, () => {
@@ -16,7 +17,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(countryRow).toContainText('France');
     await animalsPages.notificationView.changeLink('Change import details').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
-    await animalsPages.originOfImport.expectReviewIsLastOnTrail();
+    await expectOpenFromReview(pages.page, animalsPages.originOfImport, referenceNumber, animalsPages.notificationView.slug);
     await animalsPages.originOfImport.country.choose('Belgium');
     await animalsPages.originOfImport.saveAndContinue.click();
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
@@ -29,7 +30,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(certifiedForRow).toContainText('Slaughter');
     await animalsPages.notificationView.changeLink('Change additional animal details').click();
     await expect(animalsPages.additionalDetails.heading).toBeVisible();
-    await animalsPages.additionalDetails.expectReviewIsLastOnTrail();
+    await expectOpenFromReview(pages.page, animalsPages.additionalDetails, referenceNumber, animalsPages.notificationView.slug);
     await animalsPages.additionalDetails.certifiedFor('Exhibition').check();
     await animalsPages.additionalDetails.saveAndContinue.click();
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
@@ -68,11 +69,24 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.notificationView.changeLink('Change reason for import').click();
     await expect(animalsPages.importReason.heading).toBeVisible();
     await animalsPages.importReason.purpose('Research').check();
-    await animalsPages.importReason.saveAndContinue.click();
-    await expect(animalsPages.consignmentDetails.heading).toBeVisible();
-    await animalsPages.notificationView.open(referenceNumber);
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
+    await expectSaveAndContinueWalk(
+      pages.page,
+      referenceNumber,
+      [animalsPages.notificationView.slug],
+      [
+        animalsPages.importReason,
+        animalsPages.consignmentDetails,
+        animalsPages.animalIdentification,
+        animalsPages.additionalDetails,
+        animalsPages.arrivalDetails,
+        animalsPages.transitedCountries,
+        animalsPages.transporter,
+        animalsPages.accompanyingDocuments,
+        animalsPages.addresses,
+        animalsPages.contactAddress,
+      ],
+      animalsPages.notificationView,
+    );
     await expect(purposeValue).toContainText('Research');
   });
 
@@ -92,6 +106,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
 
   test('the documents Change link opens the page with a Back link to the review, which stays after a refusal, after Save and add another and after Remove', async ({
     animalsSeededJourney,
+    pages,
     animalsPages,
   }) => {
     test.slow();
@@ -101,7 +116,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
 
     await animalsPages.notificationView.changeLink('Change uploaded documents').click();
     await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
-    await animalsPages.accompanyingDocuments.expectReviewIsLastOnTrail();
+    await expectOpenFromReview(pages.page, animalsPages.accompanyingDocuments, referenceNumber, animalsPages.notificationView.slug);
     await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);
 
     await animalsPages.accompanyingDocuments.documentReference.fill('GBHC1234567890');

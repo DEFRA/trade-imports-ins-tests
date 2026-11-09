@@ -9,6 +9,8 @@ import {
   renamedAndMovedNurseryAddress,
 } from '@flows/plants/journey';
 import type { PlantsPages, SharedPages } from '@page-objects';
+import { TRAIL_START } from '@page-objects/shared/base-page';
+import { expectOpenFromReview, expectSaveAndContinueWalk } from '@page-objects/shared/journey-checks';
 import { addressRoles } from '@domain/shared/constants/address-types';
 import { todayOrTomorrowServiceDisplayDatePattern } from '@utils/date-utils';
 
@@ -79,9 +81,9 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(contact).toContainText('4 Nursery Lane, Perth, Perthshire, PH1 5EX');
     await expect(contact).toContainText('01738 555 0143');
     await expect(contact).toContainText('review@example.co.uk');
+    await plantsPages.notificationView.openOnTrail(reference, [TRAIL_START.overview]);
     await plantsPages.notificationView.change('Change country of origin (Import details)').click();
-    await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrlPattern(reference));
-    await plantsPages.origin.expectReviewIsLastOnTrail();
+    await expectOpenFromReview(pages.page, plantsPages.origin, reference, plantsPages.notificationView.slug, [TRAIL_START.overview]);
     await plantsPages.origin.country.choose('Germany');
     await plantsPages.origin.saveAndContinue.click();
     await expect(plantsPages.arrivalDetails.heading).toBeVisible();
@@ -90,8 +92,7 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.notificationView.change('Change Commodity 1 (Commodity 1)').click();
     await plantsPages.commodityDetails.field('Quantity').fill('300');
     await plantsPages.commodityDetails.saveAndContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.commodities.expectedUrlPattern(reference));
-    await plantsPages.commodities.expectReviewIsLastOnTrail();
+    await expectOpenFromReview(pages.page, plantsPages.commodities, reference, plantsPages.notificationView.slug);
     await plantsPages.commodities.saveAndContinue.click();
     await expect(plantsPages.origin.heading).toBeVisible();
     await plantsPages.notificationView.open(reference);
@@ -231,8 +232,7 @@ test.describe('High-risk plants check and submit section', () => {
     const correction = plantsPages.notificationView.errorSummaryLink(/Poland/);
     await expect(plantsPages.overview.statusTag).toHaveText('Draft');
     await correction.click();
-    await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrlPattern(reference));
-    await plantsPages.origin.expectReviewIsLastOnTrail();
+    await expectOpenFromReview(pages.page, plantsPages.origin, reference, plantsPages.notificationView.slug);
   });
 
   test('a destination deleted from the address book keeps its copy on CYA and submits', async ({
@@ -431,11 +431,13 @@ test.describe('High-risk plants check and submit section', () => {
 
     test('goes on through the journey with Save and continue to the review showing the change', async ({ pages, plantsPages }) => {
       await plantsPages.identificationNumbers.producer.fill('CHANGED2');
-      await plantsPages.identificationNumbers.saveAndContinue.click();
-      await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrlPattern(reference));
-      await plantsPages.consignmentContactSelect.saveAndContinue.click();
-
-      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
+      await expectSaveAndContinueWalk(
+        pages.page,
+        reference,
+        [plantsPages.notificationView.slug],
+        [plantsPages.identificationNumbers, plantsPages.consignmentContactSelect],
+        plantsPages.notificationView,
+      );
       await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('CHANGED2');
     });
   });
