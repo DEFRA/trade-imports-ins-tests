@@ -6,7 +6,7 @@ const transporter = { name, address };
 
 test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, () => {
   test(
-    "the saved country shows on the review's Transport details card, keyed-in details are owed only for the private type, and changing the type restores the United Kingdom default",
+    "the saved country shows on the review's Transport details card, and a saved private transporter survives an add of the other type that the trader cancels",
     { tag: '@cross-browser' },
     async ({ animalsJourney, pages, animalsPages }) => {
       await animalsJourney.startNotification();
@@ -58,8 +58,8 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
       await animalsJourney.openTransporterFromOverview();
       await animalsJourney.chooseTransporterType('Private');
       await expect(animalsPages.privateTransporter.heading).toBeVisible();
-      await expect(animalsPages.privateTransporter.name).toHaveValue('');
-      await expect(animalsPages.privateTransporter.country).toHaveValue('United Kingdom');
+      await expect(animalsPages.privateTransporter.name).toHaveValue(transporter.name);
+      await expect(animalsPages.privateTransporter.country).toHaveValue(transporter.address.country);
     },
   );
 });

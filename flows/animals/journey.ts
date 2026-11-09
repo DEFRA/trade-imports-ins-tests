@@ -727,6 +727,7 @@ export class AnimalsJourney {
     await pages.arrivalDetails.saveAndContinue.click();
 
     await pages.transporter.heading.waitFor(pageLoadWait);
+    await pages.transporter.transporter(MANDATORY_ANSWERS.transporter.display).check();
     await pages.transporter.saveAndContinue.click();
 
     await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
