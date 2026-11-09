@@ -3,6 +3,7 @@ import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/add
 import { originOf } from '@page-objects/shared/base-page';
 import { LIVE_ANIMALS } from '@domain/ins/constants/notification-types';
 import { traderAddress } from '@domain/ins/constants/trader-address';
+import { heldAsConsignor } from '@domain/shared/constants/address-types';
 import { SET_BASES } from '@page-objects/shared/sets';
 
 const createReturnFarm = (addressBookApi: AddressBookApiClient, name = `Return Farm ${Date.now()}`): Promise<AddressBookRecord> =>
@@ -72,6 +73,78 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       await expect(pages.page).toHaveURL(journeyPageUrl);
       await expect(animalsPages.overview.heading).toBeVisible();
       await expect.poll(async () => (await addressBookApi.getAddress(createdAddress.id)).deleted).toBe(true);
+    },
+  );
+
+  test(
+    "a picker row's View link opens the address in the INS address book, whose Back returns to the same picker with the search kept",
+    { tag: '@address-book' },
+    async ({ pages, animalsJourney, animalsPages, insPages, addressBookApi }) => {
+      test.slow();
+
+      const name = `Picker View Farm ${Date.now()}`;
+      await addressBookApi.createAddress({ ...traderAddress(name), ...heldAsConsignor });
+      await animalsJourney.toPartyPicker('Consignor');
+      await animalsPages.consignorSelection.search(name);
+      const { origin: pickerOrigin, pathname: pickerPath } = new URL(pages.page.url());
+
+      await animalsPages.consignorSelection.partyViewLink(name).click();
+      await insPages.addressBookView.completeSignInIfRequested();
+      await expect(insPages.addressBookView.heading(name)).toBeVisible();
+      await insPages.addressBookView.linkBack.click();
+
+      await expect(pages.page).toHaveURL(
+        (url) => url.origin === pickerOrigin && url.pathname === pickerPath && url.searchParams.get('q') === name,
+      );
+      await expect(animalsPages.consignorSelection.party(name)).toBeVisible();
+    },
+  );
+
+  test(
+    "a later picker page's View link, opened while changing an answer, Backs to that page with the chosen address still selected, and saving returns to the roles and addresses page in change context",
+    { tag: '@address-book' },
+    async ({ pages, animalsSeededJourney, animalsPages, insPages, addressBookApi }) => {
+      test.slow();
+
+      const stamp = Date.now();
+      const chosenName = `Changed Consignor ${stamp}`;
+      const chosenRecord = traderAddress(chosenName);
+      await addressBookApi.createAddress({ ...chosenRecord, ...heldAsConsignor });
+      for (let i = 0; i < 5; i += 1) {
+        await addressBookApi.createAddress({ ...traderAddress(`Newer Consignor ${stamp} ${i}`), ...heldAsConsignor });
+      }
+      const referenceNumber = await animalsSeededJourney.createDraftNotification();
+      await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+      await animalsPages.notificationView.changeLink('Change roles and addresses').click();
+      await animalsPages.addresses.changeParty('Consignor').click();
+      const picker = animalsPages.consignorSelection;
+      await picker.select(chosenName);
+      await picker.search('');
+      const chosenRow = picker.party(chosenName);
+      await picker.followNextPageUntilShown(chosenRow);
+      await expect(picker.currentPaginationPageLink).not.toHaveText('1');
+      const laterPageUrl = new URL(pages.page.url());
+
+      await picker.partyViewLink(chosenName).click();
+      await insPages.addressBookView.completeSignInIfRequested();
+      await expect(insPages.addressBookView.heading(chosenName)).toBeVisible();
+      await insPages.addressBookView.linkBack.click();
+
+      await expect(pages.page).toHaveURL(
+        (url) =>
+          url.origin === laterPageUrl.origin &&
+          url.pathname === laterPageUrl.pathname &&
+          url.searchParams.get('page') === laterPageUrl.searchParams.get('page') &&
+          url.searchParams.get('change') === '1',
+      );
+      await expect(picker.currentPaginationPageLink).toHaveText(laterPageUrl.searchParams.get('page') ?? '');
+      await expect(chosenRow).toBeChecked();
+      await expect(picker.selectedAddress).toHaveText(`Selected address: ${chosenName}`);
+
+      await picker.saveAndContinue.click();
+
+      await expect(pages.page).toHaveURL(animalsPages.addresses.changeContextUrl(referenceNumber));
+      await expect(animalsPages.addresses.partyAddressLines('Consignor')).toContainText(chosenName);
     },
   );
 
