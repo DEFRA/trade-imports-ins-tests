@@ -66,14 +66,6 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
     await expect(animalsPages.consignorSelection.resultsGroup.getByRole('radio')).toHaveCount(5);
 
-    await animalsPages.consignorSelection.searchBox.fill(DESTINATION_NAME);
-    await animalsPages.consignorSelection.searchButton.click();
-    await expect(animalsPages.consignorSelection.partyAddressCell(DESTINATION_NAME)).toHaveText(
-      `${destinationRecord.addressLine1}\n${destinationRecord.townOrCity}, ${destinationRecord.postcode}`,
-      { useInnerText: true },
-    );
-    await expect(animalsPages.consignorSelection.partyActionCell(DESTINATION_NAME)).toHaveText(`View ${DESTINATION_NAME}`);
-
     await animalsPages.consignorSelection.searchBox.fill(runOnlySearchToken);
     await animalsPages.consignorSelection.searchButton.click();
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText('Showing 2 out of 2 results');
@@ -101,6 +93,21 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(consignorAddressLines).toHaveText(olderThanPageOneAddressText, { useInnerText: true });
+  });
+
+  test('a picker row shows the street line, then town and postcode on one line, and ends with only a View link', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.toPartyPicker('Consignor');
+
+    await animalsPages.consignorSelection.searchBox.fill(DESTINATION_NAME);
+    await animalsPages.consignorSelection.searchButton.click();
+    await expect(animalsPages.consignorSelection.partyAddressCell(DESTINATION_NAME)).toHaveText(
+      `${destinationRecord.addressLine1}\n${destinationRecord.townOrCity}, ${destinationRecord.postcode}`,
+      { useInnerText: true },
+    );
+    await expect(animalsPages.consignorSelection.partyActionCell(DESTINATION_NAME)).toHaveText(`View ${DESTINATION_NAME}`);
   });
 
   test('saving with nothing ticked returns to the roles and addresses page with the consignor section offering only its add link', async ({
