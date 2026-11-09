@@ -33,6 +33,8 @@ Why the animals flows and page objects are written the way they are. The code ca
 - `reachTransporterFromHub` goes back to the transporter list from the hub within a journey that is already unlocked. The page saves through unfilled. Arrival details are filled on the way because the default means, Road, keeps transited countries in scope, and transit countries are answered next.
 - `chooseTransporterType` adds a transporter of the given type from the transporter list.
 - `toCommercialTransporter` follows the add route's commercial arm: the list first, then the transporter type question, then the form for a commercial transporter that is not on the list.
+- `fillAndSavePrivateTransporterAddForm` fills the open private transporter form with the details given and saves it, waiting for the transporter list the save lands back on with the new transporter first and chosen.
+- `fillAndSaveCommercialTransporterAddFormToOverview` fills and saves the open commercial transporter form, then saves the transporter list it lands on, reaching the overview — the one path specs that only need the overview, not the list's own state, take through the save.
 
 ## The overview task list
 

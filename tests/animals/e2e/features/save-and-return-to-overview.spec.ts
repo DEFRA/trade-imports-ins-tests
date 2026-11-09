@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { SELECT_COMMODITY_ERROR } from '@domain/animals/constants/commodity-selection-page';
+import { SELECT_TRANSPORTER_ERROR } from '@domain/animals/constants/transporters';
 import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { MEANS_OF_TRANSPORT_REQUIRED_MESSAGE } from '@domain/animals/constants/means-of-transport';
 import { importReasons } from '@domain/animals/constants/import-reasons';
@@ -91,6 +92,17 @@ test.describe('Save and return to overview', () => {
     await expect(animalsPages.consignmentDetails.animalsRequiredErrorLink).toBeVisible();
     const referenceNumber = animalsPages.consignmentDetails.referenceNumberFromUrl();
     await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, 'Commodity details')).toHaveText(TO_DO);
+  });
+
+  test('transporter list: when nothing is chosen, refuses the save and leaves the task to do', async ({ animalsJourney, animalsPages }) => {
+    await animalsJourney.toTransporter();
+    const referenceNumber = animalsPages.transporter.referenceNumberFromUrl();
+
+    await animalsPages.transporter.saveAndReturnToOverview.click();
+
+    await expect(animalsPages.transporter.heading).toBeVisible();
+    await expect(animalsPages.transporter.errorSummaryLinks).toHaveText([SELECT_TRANSPORTER_ERROR]);
+    await expect(await animalsPages.overview.taskStatusAfterReopening(referenceNumber, 'Transport details')).toHaveText(TO_DO);
   });
 
   test('what are you importing: when nothing is chosen, refuses the save with "Select a commodity" and leaves the task not complete', async ({

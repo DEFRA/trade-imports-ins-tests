@@ -286,6 +286,10 @@ export class NotificationPage extends BasePage {
     return this.page.getByRole('link', { name: 'Cancel and return to overview', exact: true });
   }
 
+  get cancelAndReturnToDashboard(): Locator {
+    return this.page.getByRole('button', { name: 'Cancel and return to dashboard', exact: true });
+  }
+
   get saveAndReturnToOverview(): Locator {
     return this.page.getByRole('button', { name: 'Save and return to overview', exact: true });
   }

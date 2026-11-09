@@ -1,6 +1,6 @@
 import { escapeRegex } from '@page-objects/shared/escape-regex';
 import { test, expect } from '@fixtures';
-import { addressTypes, addressRoles } from '@domain/shared/constants/address-types';
+import { addressTypes, addressRoles, addressTypesAskingRoles, type AddressTypeAskingRoles } from '@domain/shared/constants/address-types';
 import { addressTypeOptions, addressTypeQuestion } from '@domain/ins/constants/address-book-types';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
@@ -22,7 +22,7 @@ const expectTextboxesEmpty = async (form: InsAddressBookFormPage): Promise<void>
 };
 
 test.describe('Choosing an address type before adding an address', () => {
-  test('Add a new address opens Choose an address type with its caption, the three types and their hints in order, Continue and Back to the address book', async ({
+  test('Add a new address opens Choose an address type with its caption, the four types and their hints in order, Continue and Back to the address book', async ({
     pages,
     insPages,
     insJourney,
@@ -60,7 +60,12 @@ test.describe('Choosing an address type before adding an address', () => {
     await expect(typePage.radio(addressTypes.originOrConsignor)).toBeFocused();
   });
 
-  for (const { addressType, label } of addressTypeOptions) {
+  const opensAddForm = (option: (typeof addressTypeOptions)[number]): option is typeof option & { addressType: AddressTypeAskingRoles } =>
+    (addressTypesAskingRoles as readonly string[]).includes(option.addressType);
+
+  const addFormOptions = addressTypeOptions.filter(opensAddForm);
+
+  for (const { addressType, label } of addFormOptions) {
     test(`choosing ${label} opens the add form with its caption and heading and no status tag, and Back shows the type chosen`, async ({
       insPages,
       insJourney,
@@ -83,7 +88,7 @@ test.describe('Choosing an address type before adding an address', () => {
     [addressTypes.branch]: addressRoles.branchAddress,
   } as const;
 
-  for (const { addressType, label } of addressTypeOptions) {
+  for (const { addressType, label } of addFormOptions) {
     test(`after a refused save of ${label}, choosing it again shows the address, the contact details and the ticked role entered`, async ({
       insPages,
       insJourney,

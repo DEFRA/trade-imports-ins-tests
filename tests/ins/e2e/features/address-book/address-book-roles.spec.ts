@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import type { AddressBookRequest } from '@adapters/http/address-book-api-client';
 import { traderAddress } from '@domain/ins/constants/trader-address';
 import { addressRoles, type AddressRole } from '@domain/shared/constants/address-types';
-import { destinationConsigneeOrImporterTab, unsupportedAddressValue } from '@domain/ins/constants/address-book-types';
+import { destinationConsigneeOrImporterTab, unsupportedRole } from '@domain/ins/constants/address-book-types';
 import { expectedValidationRefusalOf } from './expected-api-refusal';
 
 type RefusedField = 'roles' | 'countryCode';
@@ -95,7 +95,7 @@ test.describe('Address book API roles', () => {
     await expectValidationRefusalNaming(
       isolatedOrganisationAddressBookApi.createAddress({
         ...address,
-        roles: [addressRoles.consignor, unsupportedAddressValue as AddressRole],
+        roles: [addressRoles.consignor, unsupportedRole as AddressRole],
       }),
       'roles',
     );
@@ -109,7 +109,7 @@ test.describe('Address book API roles', () => {
     const created = await isolatedOrganisationAddressBookApi.createAddress({ ...address, roles: [addressRoles.placeOfOrigin] });
 
     await expectValidationRefusalNaming(
-      isolatedOrganisationAddressBookApi.updateAddress(created.id, { ...address, roles: [unsupportedAddressValue as AddressRole] }),
+      isolatedOrganisationAddressBookApi.updateAddress(created.id, { ...address, roles: [unsupportedRole as AddressRole] }),
       'roles',
     );
     expect((await isolatedOrganisationAddressBookApi.getAddress(created.id)).roles).toEqual([addressRoles.placeOfOrigin]);

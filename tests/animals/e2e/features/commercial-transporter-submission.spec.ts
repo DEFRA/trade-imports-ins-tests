@@ -1,23 +1,11 @@
 import { test, expect } from '@fixtures';
-
-// Canned commercial-transporter record — mirrors commercial-transporter-scope.spec.ts.
-const transporter = {
-  approvalNumber: 'NI/TA/2026/0041',
-  name: 'Lough Neagh Livestock Haulage Ltd',
-  addressLine1: '4 Shore Road',
-  townOrCity: 'Antrim',
-  postalOrZipCode: 'BT41 4LB',
-  emailAddress: 'ops@loughneagh.example',
-  telephoneNumber: '+44 28 9446 1200',
-};
+import { handTypedCommercialTransporter } from '@domain/animals/constants/transporters';
 
 test.describe('Commercial transporter journeys', () => {
   test(
     'a trader can submit a notification using a hand-added commercial transporter',
     { tag: '@cross-browser' },
-    async ({ animalsSeededJourney, pages, animalsPages }) => {
-      // Everything up to transport is seeded through the API — only the
-      // scenario under test (transit countries onward) is driven through the UI.
+    async ({ animalsSeededJourney, animalsJourney, pages, animalsPages }) => {
       const referenceNumber = await animalsSeededJourney.createDraftNotification('partial');
       await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.transitedCountries);
 
@@ -31,21 +19,16 @@ test.describe('Commercial transporter journeys', () => {
       await animalsPages.transporter.addTransporter.click();
       await animalsPages.transporterAdd.heading.waitFor();
       await animalsPages.transporterAdd.transporterType('Commercial').check();
-      await animalsPages.transporterAdd.saveAndContinue.click();
+      await animalsPages.transporterAdd.continueButton.click();
       await animalsPages.commercialTransporter.heading.waitFor();
-      await animalsPages.commercialTransporter.fill(transporter);
-      await animalsPages.commercialTransporter.saveAndContinue.click();
-      await animalsPages.accompanyingDocuments.heading.waitFor();
-      await animalsPages.overview.open(referenceNumber);
+      await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(handTypedCommercialTransporter);
 
-      await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Contact address for this consignment').click();
       await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
       await animalsPages.contactAddress.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
 
-      await animalsPages.overview.reviewAndSubmitButton.click();
-      await animalsPages.notificationView.heading.waitFor();
+      await animalsJourney.openReviewFromOverview();
       await animalsPages.notificationView.continueButton.click();
       await animalsPages.declaration.heading.waitFor();
       await animalsPages.declaration.confirmation.check();

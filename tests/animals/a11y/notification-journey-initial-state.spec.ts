@@ -1,4 +1,5 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { handTypedCommercialTransporter } from '@domain/animals/constants/transporters';
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
@@ -147,23 +148,13 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.transporterAdd.heading.waitFor();
       await runA11yScan();
       await animalsPages.transporterAdd.transporterType('Commercial').check();
-      await animalsPages.transporterAdd.saveAndContinue.click();
+      await animalsPages.transporterAdd.continueButton.click();
     });
 
-    await test.step('Add commercial transporter', async () => {
+    await test.step('Add a commercial transporter', async () => {
       await animalsPages.commercialTransporter.heading.waitFor();
       await runA11yScan();
-      await animalsPages.commercialTransporter.fill({
-        approvalNumber: 'NI/TA/2026/0041',
-        name: 'Lough Neagh Livestock Haulage Ltd',
-        addressLine1: '4 Shore Road',
-        townOrCity: 'Antrim',
-        postalOrZipCode: 'BT41 4LB',
-        emailAddress: 'ops@loughneagh.example',
-        telephoneNumber: '+44 28 9446 1200',
-      });
-      await animalsPages.commercialTransporter.saveAndContinue.click();
-      await animalsPages.overview.heading.waitFor();
+      await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(handTypedCommercialTransporter);
     });
 
     await test.step('Contact address', async () => {
