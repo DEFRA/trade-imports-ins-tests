@@ -1,12 +1,9 @@
 import { test, expect } from '@fixtures';
 import { heldAsConsignor } from '@domain/shared/constants/address-types';
-import { DESTINATION_NAME } from '@domain/shared/constants/journey-party-names';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
-import { E2E_ADDRESS_BOOK_FIXTURES } from '@flows/shared/address-book-seed';
+import { destinationFixture } from '@flows/shared/address-book-seed';
 
 const FIVE_RESULTS_SUMMARY = /^Showing 5 out of \d+ results$/;
-
-const destinationRecord = E2E_ADDRESS_BOOK_FIXTURES.find(({ name }) => name === DESTINATION_NAME);
 
 test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-book'] }, () => {
   test('the picker searches and pages the address book, and the row selected on a later page is the one that saves', async ({
@@ -101,13 +98,13 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
   }) => {
     await animalsJourney.toPartyPicker('Consignor');
 
-    await animalsPages.consignorSelection.searchBox.fill(DESTINATION_NAME);
+    await animalsPages.consignorSelection.searchBox.fill(destinationFixture.name);
     await animalsPages.consignorSelection.searchButton.click();
-    await expect(animalsPages.consignorSelection.partyAddressCell(DESTINATION_NAME)).toHaveText(
-      `${destinationRecord.addressLine1}\n${destinationRecord.townOrCity}, ${destinationRecord.postcode}`,
+    await expect(animalsPages.consignorSelection.partyAddressCell(destinationFixture.name)).toHaveText(
+      `${destinationFixture.addressLine1}\n${destinationFixture.townOrCity}, ${destinationFixture.postcode}`,
       { useInnerText: true },
     );
-    await expect(animalsPages.consignorSelection.partyActionCell(DESTINATION_NAME)).toHaveText(`View ${DESTINATION_NAME}`);
+    await expect(animalsPages.consignorSelection.partyActionCell(destinationFixture.name)).toHaveText(`View ${destinationFixture.name}`);
   });
 
   test('saving with nothing ticked returns to the roles and addresses page with the consignor section offering only its add link', async ({
