@@ -1,5 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
-import { NotificationPage } from '@page-objects/shared/base-page';
+import { NotificationPage, originOf } from '@page-objects/shared/base-page';
 import { pickerSearchBox, pickerSearchButton } from '@page-objects/shared/address-picker-results';
 
 export class AnimalsTransporterPage extends NotificationPage {
@@ -33,6 +33,11 @@ export class AnimalsTransporterPage extends NotificationPage {
 
   viewDetailsLink(name: string): Locator {
     return this.rowFor(name).getByRole('link', { name: `View details ${name}`, exact: true });
+  }
+
+  /** Follows View details out of the animals service, then completes any sign-in the receiving service asks for. */
+  async viewDetails(name: string): Promise<void> {
+    await this.leaveOriginThenSignIn(originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL'), () => this.viewDetailsLink(name).click());
   }
 
   get searchBox(): Locator {

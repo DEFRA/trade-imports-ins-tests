@@ -1,7 +1,6 @@
 import { test, expect } from '@fixtures';
 import type { TransporterRequest } from '@adapters/http/address-book-api-client';
 import { transporterTypes } from '@domain/ins/constants/transporter-types';
-import { originOf } from '@page-objects/shared/base-page';
 
 const commercialTransporter: Omit<TransporterRequest, 'name'> = {
   addressLine1: '7 Dockside Way',
@@ -56,13 +55,8 @@ test.describe('A transporter added through the INS address book', { tag: ['@addr
     await animalsJourney.answerCommodity();
     await animalsJourney.reachTransporterFromHub();
     const listUrl = pages.page.url();
-    const animalsOrigin = originOf('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
 
-    await Promise.all([
-      pages.page.waitForURL((url) => url.origin !== animalsOrigin),
-      animalsPages.transporter.viewDetailsLink(name).click(),
-    ]);
-    await insPages.addressBookView.completeSignInIfRequested();
+    await animalsPages.transporter.viewDetails(name);
 
     await expect(insPages.addressBookView.heading(name)).toBeVisible();
     await insPages.addressBookView.linkBack.click();
