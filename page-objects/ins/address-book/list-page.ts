@@ -2,8 +2,8 @@ import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
 import { escapeRegex } from '@page-objects/shared/escape-regex';
 import { opensAtExpectedUrl, type OpensAtExpectedUrlOptions } from '@page-objects/shared/opens-at-expected-url';
-import type { AddressType, AddressRole } from '@domain/shared/constants/address-types';
-import { roleOptionLabels, type AddressBookTab } from '@domain/ins/constants/address-book-types';
+import type { AddressType } from '@domain/shared/constants/address-types';
+import { type AddressBookTab } from '@domain/ins/constants/address-book-types';
 
 type ListPageOpenOptions = Omit<OpensAtExpectedUrlOptions, 'query'> & { addressType?: AddressType };
 
@@ -84,6 +84,19 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
     return this.row(name).getByRole('cell').nth(3);
   }
 
+  /** The Transporter tab's own column order: Name, Address, Approval number, Type. */
+  transporterAddressCell(name: string): Locator {
+    return this.row(name).getByRole('cell').nth(1);
+  }
+
+  transporterApprovalNumberCell(name: string): Locator {
+    return this.row(name).getByRole('cell').nth(2);
+  }
+
+  transporterTypeCell(name: string): Locator {
+    return this.row(name).getByRole('cell').nth(3);
+  }
+
   get tabLinks(): Locator {
     return this.page.getByRole('navigation', { name: 'Address types' }).getByRole('link');
   }
@@ -108,16 +121,16 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
     return this.page.getByRole('link', { name: `View ${name}`, exact: true });
   }
 
-  get selectRoleFilter(): Locator {
+  get selectTypeFilter(): Locator {
     return this.page.getByLabel('Type', { exact: true });
   }
 
-  get roleFilterOptions(): Locator {
-    return this.selectRoleFilter.locator('option');
+  get typeFilterOptions(): Locator {
+    return this.selectTypeFilter.locator('option');
   }
 
-  get selectedRoleFilterOption(): Locator {
-    return this.selectRoleFilter.locator('option:checked');
+  get selectedTypeFilterOption(): Locator {
+    return this.selectTypeFilter.locator('option:checked');
   }
 
   private async openFilter(): Promise<void> {
@@ -126,13 +139,13 @@ export class InsAddressBookListPage extends opensAtExpectedUrl(BasePage) {
     }
   }
 
-  async chooseRoleFilter(role: AddressRole): Promise<void> {
+  async chooseTypeFilter(label: string): Promise<void> {
     await this.openFilter();
-    await this.selectRoleFilter.selectOption({ label: roleOptionLabels[role] });
+    await this.selectTypeFilter.selectOption({ label });
   }
 
-  async filter({ term, role, submitWith }: { term: string; role: AddressRole; submitWith: 'button' | 'enter' }): Promise<void> {
-    await this.chooseRoleFilter(role);
+  async filter({ term, label, submitWith }: { term: string; label: string; submitWith: 'button' | 'enter' }): Promise<void> {
+    await this.chooseTypeFilter(label);
     await this.search(term, { submitWith });
   }
 

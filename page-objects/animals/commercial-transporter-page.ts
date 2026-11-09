@@ -14,8 +14,7 @@ export type CommercialTransporterDetails = {
 /**
  * The commercial arm of the add route — the form a trader fills in for a
  * commercial transporter that is not on the list, giving its authorisation
- * number, name, address and contact details. The country is fixed to Northern
- * Ireland rather than asked, so there is nothing to fill in for it.
+ * number, name, address and contact details.
  */
 export class AnimalsCommercialTransporterPage extends NotificationPage {
   constructor(page: Page) {
@@ -23,7 +22,7 @@ export class AnimalsCommercialTransporterPage extends NotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Add commercial transporter' });
+    return this.page.getByRole('heading', { level: 1, name: 'Add a commercial transporter' });
   }
 
   get approvalNumber(): Locator {
@@ -34,18 +33,37 @@ export class AnimalsCommercialTransporterPage extends NotificationPage {
     return this.page.getByLabel('Name or organisation name');
   }
 
-  /** Shown and fixed, never asked — a disabled select carrying Northern Ireland. */
+  get addressLine1(): Locator {
+    return this.page.getByLabel('Address line 1');
+  }
+
+  get townOrCity(): Locator {
+    return this.page.getByLabel('Town or city');
+  }
+
+  get postcode(): Locator {
+    return this.page.getByLabel('Postcode or Zip code');
+  }
+
   get country(): Locator {
     return this.page.getByLabel('Country');
+  }
+
+  get email(): Locator {
+    return this.page.getByLabel('Email address');
+  }
+
+  get phone(): Locator {
+    return this.page.getByLabel('Phone number');
   }
 
   async fill(details: CommercialTransporterDetails): Promise<void> {
     await this.approvalNumber.fill(details.approvalNumber);
     await this.nameOrOrganisationName.fill(details.name);
-    await this.page.getByLabel('Address line 1').fill(details.addressLine1);
-    await this.page.getByLabel('Town or city').fill(details.townOrCity);
-    await this.page.getByLabel('Postcode or zip code').fill(details.postalOrZipCode);
-    await this.page.getByLabel('Email address').fill(details.emailAddress);
-    await this.page.getByLabel('Phone number').fill(details.telephoneNumber);
+    await this.addressLine1.fill(details.addressLine1);
+    await this.townOrCity.fill(details.townOrCity);
+    await this.postcode.fill(details.postalOrZipCode);
+    await this.email.fill(details.emailAddress);
+    await this.phone.fill(details.telephoneNumber);
   }
 }

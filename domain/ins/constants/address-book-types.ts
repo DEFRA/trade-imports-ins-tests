@@ -1,4 +1,11 @@
-import { addressTypes, addressRoles, type AddressType, type AddressRole } from '@domain/shared/constants/address-types';
+import {
+  addressTypes,
+  addressRoles,
+  type AddressType,
+  type AddressRole,
+  type AddressTypeAskingRoles,
+} from '@domain/shared/constants/address-types';
+import { transporterTypes, type TransporterType } from './transporter-types';
 
 interface RoleTexts {
   columnLabel: string;
@@ -26,40 +33,81 @@ export const roleOptionLabels = textsOfEachRole(({ optionLabel }) => optionLabel
 
 export const rolesQuestionLabels = textsOfEachRole(({ formLabel }) => formLabel);
 
-export const roleFilterPlaceholder = 'Select one';
+export const typeFilterPlaceholder = 'Select one';
 
+export const transporterTypeFilterLabels: Record<TransporterType, string> = {
+  [transporterTypes.commercial]: 'Commercial',
+  [transporterTypes.private]: 'Private',
+};
+
+/** Every tab carries its address type, its label and its panel heading; a role-backed tab's Type
+ * filter offers its roles, and the Transporter tab's offers its transporter types. */
 export interface AddressBookTab {
   addressType: AddressType;
   label: string;
   panelHeading: string;
-  roleFilterOptions: readonly AddressRole[];
+  roleFilterOptions?: readonly AddressRole[];
+  typeFilterOptions?: readonly TransporterType[];
 }
 
+/** A tab that lists by role: its address type is one that asks the roles question, and its role
+ * filter options are always present. */
+export type RoleBackedAddressBookTab = Omit<AddressBookTab, 'addressType' | 'roleFilterOptions'> & {
+  addressType: AddressTypeAskingRoles;
+  roleFilterOptions: readonly AddressRole[];
+};
+
+export const originOrConsignorTab: RoleBackedAddressBookTab = {
+  addressType: addressTypes.originOrConsignor,
+  label: 'Origin and Consignor',
+  panelHeading: 'Origin and Consignor addresses',
+  roleFilterOptions: [addressRoles.placeOfOrigin, addressRoles.consignor],
+};
+
+export const destinationConsigneeOrImporterTab: RoleBackedAddressBookTab = {
+  addressType: addressTypes.destinationConsigneeOrImporter,
+  label: 'Destination, Consignee and Importer',
+  panelHeading: 'Destination, Consignee and Importer addresses',
+  roleFilterOptions: [addressRoles.consignee, addressRoles.importer, addressRoles.placeOfDestination],
+};
+
+/** A tab that lists by transporter type: its address type is the transporter one, and its type
+ * filter options are always present. */
+export type TypeBackedAddressBookTab = Omit<AddressBookTab, 'addressType' | 'typeFilterOptions'> & {
+  addressType: typeof addressTypes.transporter;
+  typeFilterOptions: readonly TransporterType[];
+};
+
+export const transporterTab: TypeBackedAddressBookTab = {
+  addressType: addressTypes.transporter,
+  label: 'Transporter',
+  panelHeading: 'Transporter addresses',
+  typeFilterOptions: [transporterTypes.commercial, transporterTypes.private],
+};
+
+export const branchTab: RoleBackedAddressBookTab = {
+  addressType: addressTypes.branch,
+  label: 'Branch',
+  panelHeading: 'Branch addresses',
+  roleFilterOptions: [addressRoles.branchAddress],
+};
+
 export const addressBookTabs: readonly AddressBookTab[] = [
-  {
-    addressType: addressTypes.originOrConsignor,
-    label: 'Origin and Consignor',
-    panelHeading: 'Origin and Consignor addresses',
-    roleFilterOptions: [addressRoles.placeOfOrigin, addressRoles.consignor],
-  },
-  {
-    addressType: addressTypes.destinationConsigneeOrImporter,
-    label: 'Destination, Consignee and Importer',
-    panelHeading: 'Destination, Consignee and Importer addresses',
-    roleFilterOptions: [addressRoles.consignee, addressRoles.importer, addressRoles.placeOfDestination],
-  },
-  {
-    addressType: addressTypes.branch,
-    label: 'Branch',
-    panelHeading: 'Branch addresses',
-    roleFilterOptions: [addressRoles.branchAddress],
-  },
+  originOrConsignorTab,
+  destinationConsigneeOrImporterTab,
+  transporterTab,
+  branchTab,
 ];
 
-export const [originOrConsignorTab, destinationConsigneeOrImporterTab, branchTab] = addressBookTabs;
+/** The tabs that list by role, for a loop that only makes sense against one. */
+export const roleBackedAddressBookTabs: readonly RoleBackedAddressBookTab[] = [
+  originOrConsignorTab,
+  destinationConsigneeOrImporterTab,
+  branchTab,
+];
 
-export const tabHolding = (role: AddressRole): AddressBookTab => {
-  const tab = addressBookTabs.find(({ roleFilterOptions }) => roleFilterOptions.includes(role));
+export const tabHolding = (role: AddressRole): RoleBackedAddressBookTab => {
+  const tab = roleBackedAddressBookTabs.find(({ roleFilterOptions }) => roleFilterOptions.includes(role));
   if (!tab) {
     throw new Error(`Expected a tab holding the role ${role}`);
   }
@@ -68,20 +116,27 @@ export const tabHolding = (role: AddressRole): AddressBookTab => {
 
 export const addressBookTabLabels = addressBookTabs.map(({ label }) => label);
 
-export const unsupportedAddressValue = 'TRANSPORTER';
+/** A value that is neither a member of the address type values nor a tab any of them opens, for a
+ * test proving an unknown tab falls back to the default. */
+export const unsupportedAddressType = 'UNSUPPORTED_ADDRESS_TYPE';
 
-export const rolesQuestionOptions: Record<AddressType, readonly AddressRole[]> = {
+/** A value that is neither a member of the role values nor a role any address type groups, for a
+ * test proving a role outside the six is refused. */
+export const unsupportedRole = 'UNSUPPORTED_ROLE';
+
+export const rolesQuestionOptions: Record<AddressTypeAskingRoles, readonly AddressRole[]> = {
   [addressTypes.originOrConsignor]: [addressRoles.placeOfOrigin, addressRoles.consignor],
   [addressTypes.destinationConsigneeOrImporter]: [addressRoles.placeOfDestination, addressRoles.consignee, addressRoles.importer],
   [addressTypes.branch]: [addressRoles.branchAddress],
 };
 
-export const addressTypesRequiringUnitedKingdom: readonly AddressType[] = [
+export const addressTypesRequiringUnitedKingdom: readonly AddressTypeAskingRoles[] = [
   addressTypes.destinationConsigneeOrImporter,
   addressTypes.branch,
 ];
 
-const hintOf = (addressType: AddressType): string => rolesQuestionOptions[addressType].map((role) => rolesQuestionLabels[role]).join(', ');
+const hintOf = (addressType: AddressTypeAskingRoles): string =>
+  rolesQuestionOptions[addressType].map((role) => rolesQuestionLabels[role]).join(', ');
 
 export const addressTypeOptions: readonly { addressType: AddressType; label: string; hint: string }[] = [
   { addressType: addressTypes.originOrConsignor, label: 'Origin or Consignor', hint: hintOf(addressTypes.originOrConsignor) },
@@ -90,6 +145,7 @@ export const addressTypeOptions: readonly { addressType: AddressType; label: str
     label: 'Destination, Consignee or Importer',
     hint: hintOf(addressTypes.destinationConsigneeOrImporter),
   },
+  { addressType: addressTypes.transporter, label: 'Transporter', hint: 'Private, Commercial' },
   { addressType: addressTypes.branch, label: 'Branch', hint: hintOf(addressTypes.branch) },
 ];
 
@@ -107,7 +163,7 @@ export const rolesQuestion = {
   error: 'Select what this address can be used for',
 };
 
-export const rolesQuestionLegends: Record<AddressType, string> = {
+export const rolesQuestionLegends: Record<AddressTypeAskingRoles, string> = {
   ORIGIN_OR_CONSIGNOR: 'What can this address be used for?',
   DESTINATION_CONSIGNEE_OR_IMPORTER: 'Address type',
   BRANCH: 'Address type',

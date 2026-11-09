@@ -59,7 +59,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.transporterAdd.heading.waitFor();
       await animalsPages.transporterAdd.transporterType('Private').check();
       await runA11yScan();
-      await animalsPages.transporterAdd.saveAndContinue.click();
+      await animalsPages.transporterAdd.continueButton.click();
       await animalsPages.privateTransporter.heading.waitFor();
       await runA11yScan();
       await animalsPages.privateTransporter.name.fill(PRIVATE_TRANSPORTER.name);

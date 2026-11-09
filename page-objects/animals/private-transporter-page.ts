@@ -17,7 +17,7 @@ export class AnimalsPrivateTransporterPage extends NotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Add private transporter' });
+    return this.page.getByRole('heading', { level: 1, name: 'Add a private transporter' });
   }
 
   get name(): Locator {

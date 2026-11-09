@@ -1,20 +1,12 @@
 import { test, expect } from '@fixtures';
+import { handTypedPrivateTransporter } from '@domain/animals/constants/transporters';
 
-const transporter = {
-  name: 'Jean Dupont',
-  address: {
-    addressLine1: '12 Rue des Fermes',
-    townOrCity: 'Amiens',
-    postalOrZipCode: '80000',
-    country: 'France',
-    telephoneNumber: '+33 3 22 55 01 44',
-    emailAddress: 'jean.dupont@example.fr',
-  },
-};
+const { name, ...address } = handTypedPrivateTransporter('Jean Dupont');
+const transporter = { name, address };
 
 test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, () => {
   test(
-    'keyed-in details are owed only for the private type; a partial fill blocks the save; changing the type wipes them',
+    "the saved country shows on the review's Transport details card, and a saved private transporter survives an add of the other type that the trader cancels",
     { tag: '@cross-browser' },
     async ({ animalsJourney, pages, animalsPages }) => {
       await animalsJourney.startNotification();
@@ -23,6 +15,8 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
       await animalsJourney.reachTransporterFromHub();
       await animalsJourney.chooseTransporterType('Private');
       await expect(animalsPages.privateTransporter.heading).toBeVisible();
+      await expect(animalsPages.privateTransporter.country).toHaveValue('United Kingdom');
+
       await animalsPages.privateTransporter.name.fill(transporter.name);
       await animalsPages.privateTransporter.saveAndContinue.click();
       await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
@@ -35,7 +29,16 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
       await animalsPages.privateTransporter.phone.fill(transporter.address.telephoneNumber);
       await animalsPages.privateTransporter.email.fill(transporter.address.emailAddress);
       await animalsPages.privateTransporter.saveAndContinue.click();
+      await expect(animalsPages.transporter.heading).toBeVisible();
+      await animalsPages.transporter.saveAndContinue.click();
       await expect(animalsPages.overview.heading).toBeVisible();
+
+      const referenceNumber = animalsPages.overview.referenceNumberFromUrl();
+      await animalsJourney.openReviewFromOverview();
+      await expect(
+        animalsPages.notificationView.summaryValue(animalsPages.notificationView.summaryCard('Transport details'), 'Country'),
+      ).toHaveText(transporter.address.country);
+      await animalsPages.overview.open(referenceNumber);
 
       await animalsJourney.openTransporterFromOverview();
       await animalsJourney.chooseTransporterType('Private');
@@ -43,18 +46,20 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
       await expect(animalsPages.privateTransporter.name).toHaveValue(transporter.name);
       await expect(animalsPages.privateTransporter.country).toHaveValue(transporter.address.country);
       await animalsPages.privateTransporter.saveAndContinue.click();
+      await expect(animalsPages.transporter.heading).toBeVisible();
+      await animalsPages.transporter.saveAndContinue.click();
 
       await animalsJourney.openTransporterFromOverview();
       await animalsJourney.chooseTransporterType('Commercial');
       await expect(animalsPages.commercialTransporter.heading).toBeVisible();
-      await animalsPages.commercialTransporter.saveAndContinue.click();
-      await expect(animalsPages.overview.heading).toBeVisible();
+      await animalsPages.commercialTransporter.cancelAndReturnToDashboard.click();
+      await animalsPages.overview.open(referenceNumber);
 
       await animalsJourney.openTransporterFromOverview();
       await animalsJourney.chooseTransporterType('Private');
       await expect(animalsPages.privateTransporter.heading).toBeVisible();
-      await expect(animalsPages.privateTransporter.name).toHaveValue('');
-      await expect(animalsPages.privateTransporter.country).toHaveValue('');
+      await expect(animalsPages.privateTransporter.name).toHaveValue(transporter.name);
+      await expect(animalsPages.privateTransporter.country).toHaveValue(transporter.address.country);
     },
   );
 });

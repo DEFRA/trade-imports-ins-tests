@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { handTypedCommercialTransporter } from '@domain/animals/constants/transporters';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
 import { getRelativeDatePickerValue } from '@utils/date-utils';
@@ -173,29 +174,19 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.transporter.addTransporter.click();
       await animalsPages.transporterAdd.heading.waitFor();
       await animalsPages.transporterAdd.transporterType('Commercial').check();
-      await animalsPages.transporterAdd.saveAndContinue.click();
+      await animalsPages.transporterAdd.continueButton.click();
     });
 
     await test.step('Commercial transporter with validation errors', async () => {
       await animalsPages.commercialTransporter.heading.waitFor();
-      await animalsPages.commercialTransporter.nameOrOrganisationName.fill('Lough Neagh Livestock Haulage Ltd');
+      await animalsPages.commercialTransporter.nameOrOrganisationName.fill(handTypedCommercialTransporter.name);
       await animalsPages.commercialTransporter.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
     });
 
     await test.step('Continue to declaration', async () => {
-      await animalsPages.commercialTransporter.fill({
-        approvalNumber: 'NI/TA/2026/0041',
-        name: 'Lough Neagh Livestock Haulage Ltd',
-        addressLine1: '4 Shore Road',
-        townOrCity: 'Antrim',
-        postalOrZipCode: 'BT41 4LB',
-        emailAddress: 'ops@loughneagh.example',
-        telephoneNumber: '+44 28 9446 1200',
-      });
-      await animalsPages.commercialTransporter.saveAndContinue.click();
-      await animalsPages.overview.heading.waitFor();
+      await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(handTypedCommercialTransporter);
       await animalsJourney.answerContact();
       await animalsPages.overview.reviewAndSubmitButton.click();
       await animalsPages.notificationView.heading.waitFor();

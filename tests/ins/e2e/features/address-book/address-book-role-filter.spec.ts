@@ -1,23 +1,18 @@
 import { test, expect } from '@fixtures';
 import { addressTypes, addressRoles, heldAsConsignor, heldAsImporter, heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
 import {
-  addressBookTabs,
   destinationConsigneeOrImporterTab,
   originOrConsignorTab,
+  roleBackedAddressBookTabs,
   roleOptionLabels,
-  roleFilterPlaceholder,
+  typeFilterPlaceholder,
   rolesLabelOf,
   rolesQuestionLabels,
 } from '@domain/ins/constants/address-book-types';
 import { timeouts } from '@config/timeouts';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
-import {
-  addressIdsDeletedAfterEachTest,
-  createAddressHolding,
-  createRunAddresses,
-  createRunAddressesAndFilterListByRole,
-  runAddressesOnTab,
-} from './run-addresses';
+import { addressIdsDeletedAfterEachTest } from '@utils/address-book-cleanup';
+import { createAddressHolding, createRunAddresses, createRunAddressesAndFilterListByRole, runAddressesOnTab } from './run-addresses';
 
 const createdAddressIds = addressIdsDeletedAfterEachTest('addressBookApi');
 
@@ -66,19 +61,19 @@ test.describe('Address book role filter API', () => {
 });
 
 test.describe('Address book role filter', () => {
-  test('each tab, reached through its link, offers Select one with no value and then only its own roles', async ({
+  test('each role-backed tab, reached through its link, offers Select one with no value and then only its own roles', async ({
     insPages,
     insJourney,
   }) => {
-    for (const tab of addressBookTabs) {
+    for (const tab of roleBackedAddressBookTabs) {
       await insJourney.toAddressBookTab(tab);
 
       await expect(insPages.addressBookList.selectedTab).toHaveText(tab.label);
-      await expect(insPages.addressBookList.roleFilterOptions).toHaveText([
-        roleFilterPlaceholder,
+      await expect(insPages.addressBookList.typeFilterOptions).toHaveText([
+        typeFilterPlaceholder,
         ...tab.roleFilterOptions.map((role) => roleOptionLabels[role]),
       ]);
-      await expect(insPages.addressBookList.roleFilterOptions.first()).toHaveAttribute('value', '');
+      await expect(insPages.addressBookList.typeFilterOptions.first()).toHaveAttribute('value', '');
     }
   });
 
@@ -102,7 +97,7 @@ test.describe('Address book role filter', () => {
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-8 of 11');
 
-    await insPages.addressBookList.filter({ term, submitWith: 'button', role: addressRoles.consignor });
+    await insPages.addressBookList.filter({ term, submitWith: 'button', label: roleOptionLabels[addressRoles.consignor] });
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-2 of 2');
     await expect(insPages.addressBookList.bodyRows).toHaveCount(2);
@@ -125,7 +120,7 @@ test.describe('Address book role filter', () => {
     }
     await insPages.addressBookList.open();
 
-    await insPages.addressBookList.filter({ term, submitWith: 'button', role: addressRoles.consignor });
+    await insPages.addressBookList.filter({ term, submitWith: 'button', label: roleOptionLabels[addressRoles.consignor] });
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-8 of 9');
     const href = await insPages.addressBookList.nextPageLink.getAttribute('href');
@@ -139,7 +134,7 @@ test.describe('Address book role filter', () => {
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 9-9 of 9');
     await expect(insPages.addressBookList.selectedTab).toHaveText(originOrConsignorTab.label);
-    await expect(insPages.addressBookList.selectedRoleFilterOption).toHaveText(roleOptionLabels.CONSIGNOR);
+    await expect(insPages.addressBookList.selectedTypeFilterOption).toHaveText(roleOptionLabels.CONSIGNOR);
   });
 
   test('a role filter matching one address counts one', async ({ insPages, addressBookApi }) => {
@@ -154,7 +149,7 @@ test.describe('Address book role filter', () => {
     });
     await insPages.addressBookList.open();
 
-    await insPages.addressBookList.filter({ term, submitWith: 'button', role: addressRoles.placeOfOrigin });
+    await insPages.addressBookList.filter({ term, submitWith: 'button', label: roleOptionLabels[addressRoles.placeOfOrigin] });
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-1 of 1');
   });
@@ -172,9 +167,9 @@ test.describe('Address book role filter', () => {
     await expect(insPages.addressBookList.resultsLine).toHaveText(resultsLine);
     const urlBeforeChoosing = page.url();
 
-    await insPages.addressBookList.chooseRoleFilter(addressRoles.consignor);
+    await insPages.addressBookList.chooseTypeFilter(roleOptionLabels[addressRoles.consignor]);
 
-    await expect(insPages.addressBookList.selectedRoleFilterOption).toHaveText(roleOptionLabels.CONSIGNOR);
+    await expect(insPages.addressBookList.selectedTypeFilterOption).toHaveText(roleOptionLabels.CONSIGNOR);
     await expect(page).toHaveURL(urlBeforeChoosing);
     expect(new URL(page.url()).searchParams.get('role')).toBe('');
     await expect(insPages.addressBookList.resultsLine).toHaveText(resultsLine);
@@ -213,7 +208,7 @@ test.describe('Address book role filter', () => {
     await expect(insPages.addressBookList.selectedTab).toHaveText(destinationConsigneeOrImporterTab.label);
     await insPages.addressBookList.filterSummary.click();
     await expect(insPages.addressBookList.inputSearch).toHaveValue(searchTerm);
-    await expect(insPages.addressBookList.selectedRoleFilterOption).toHaveText(roleFilterPlaceholder);
+    await expect(insPages.addressBookList.selectedTypeFilterOption).toHaveText(typeFilterPlaceholder);
     await expect(insPages.addressBookList.resultsLine).toHaveText(
       `Showing 1-${destinationAddresses.length} of ${destinationAddresses.length}`,
     );
@@ -259,7 +254,11 @@ test.describe('Address book role filter', () => {
 
     await expect(async () => {
       await insPages.addressBookList.open();
-      await insPages.addressBookList.filter({ term: 'consignor', submitWith: 'button', role: addressRoles.placeOfOrigin });
+      await insPages.addressBookList.filter({
+        term: 'consignor',
+        submitWith: 'button',
+        label: roleOptionLabels[addressRoles.placeOfOrigin],
+      });
 
       expect(await insPages.addressBookList.followNextPageUntilShown(insPages.addressBookList.row(name))).toBe(true);
     }).toPass({ timeout: timeouts.medium });

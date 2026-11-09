@@ -10,6 +10,14 @@ export class AnimalsTransporterAddPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Choose a transporter type' });
   }
 
+  get warning(): Locator {
+    return this.page.getByText('Check the transporter list before adding new transporters to avoid duplicates.');
+  }
+
+  get continueButton(): Locator {
+    return this.page.getByRole('button', { name: 'Continue', exact: true });
+  }
+
   transporterType(name: 'Commercial' | 'Private'): Locator {
     const RADIO_LABEL_BY_TYPE = {
       Commercial: 'Commercial',

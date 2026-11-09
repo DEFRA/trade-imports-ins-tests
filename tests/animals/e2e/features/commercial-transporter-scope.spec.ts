@@ -1,19 +1,14 @@
 import { test, expect } from '@fixtures';
-
-const transporter = {
-  approvalNumber: 'NI/TA/2026/0041',
-  name: 'Lough Neagh Livestock Haulage Ltd',
-  addressLine1: '4 Shore Road',
-  townOrCity: 'Antrim',
-  postalOrZipCode: 'BT41 4LB',
-  emailAddress: 'ops@loughneagh.example',
-  telephoneNumber: '+44 28 9446 1200',
-};
+import { handTypedCommercialTransporter, handTypedPrivateTransporter } from '@domain/animals/constants/transporters';
+import { trackTransporterForDeletion, transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
 
 test.describe('Commercial transporter scope', { tag: '@duplicated-in-frontend' }, () => {
+  const createdTransporterIds = transporterIdsDeletedAfterEachTest();
+
   test('commercial transporter is owed only for the commercial type and is wiped when the type changes', async ({
     animalsJourney,
     animalsPages,
+    addressBookApi,
   }) => {
     await animalsJourney.startNotification();
     await animalsJourney.answerCommodity();
@@ -22,21 +17,26 @@ test.describe('Commercial transporter scope', { tag: '@duplicated-in-frontend' }
     await animalsJourney.chooseTransporterType('Commercial');
     await expect(animalsPages.commercialTransporter.heading).toBeVisible();
     await expect(animalsPages.commercialTransporter.country).toHaveValue('Northern Ireland');
-    await animalsPages.commercialTransporter.fill(transporter);
-    await animalsPages.commercialTransporter.saveAndContinue.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
+
+    await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(handTypedCommercialTransporter);
 
     await animalsJourney.openTransporterFromOverview();
     await animalsJourney.chooseTransporterType('Commercial');
     await expect(animalsPages.commercialTransporter.heading).toBeVisible();
-    await expect(animalsPages.commercialTransporter.approvalNumber).toHaveValue(transporter.approvalNumber);
-    await expect(animalsPages.commercialTransporter.nameOrOrganisationName).toHaveValue(transporter.name);
+    await expect(animalsPages.commercialTransporter.approvalNumber).toHaveValue(handTypedCommercialTransporter.approvalNumber);
+    await expect(animalsPages.commercialTransporter.nameOrOrganisationName).toHaveValue(handTypedCommercialTransporter.name);
     await animalsPages.commercialTransporter.saveAndContinue.click();
+    await expect(animalsPages.transporter.heading).toBeVisible();
+    await animalsPages.transporter.saveAndContinue.click();
 
     await animalsJourney.openTransporterFromOverview();
     await animalsJourney.chooseTransporterType('Private');
     await expect(animalsPages.privateTransporter.heading).toBeVisible();
-    await animalsPages.privateTransporter.saveAndContinue.click();
+    const privateTransporterName = `Commercial scope private transporter ${Date.now()}`;
+    await animalsJourney.fillAndSavePrivateTransporterAddForm(handTypedPrivateTransporter(privateTransporterName));
+    await trackTransporterForDeletion(addressBookApi, privateTransporterName, createdTransporterIds);
+    await expect(animalsPages.transporter.heading).toBeVisible();
+    await animalsPages.transporter.saveAndContinue.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsJourney.openTransporterFromOverview();
