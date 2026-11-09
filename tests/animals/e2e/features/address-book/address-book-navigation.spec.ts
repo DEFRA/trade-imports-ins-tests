@@ -87,7 +87,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       await addressBookApi.createAddress(record);
       await animalsJourney.toPartyPicker('Consignor');
       await animalsPages.consignorSelection.search(name);
-      const pickerPath = new URL(pages.page.url()).pathname;
+      const { origin: pickerOrigin, pathname: pickerPath } = new URL(pages.page.url());
 
       await expect(animalsPages.consignorSelection.partyAddressCell(name)).toHaveText(
         `${record.addressLine1}\n${record.addressLine2}\n${record.townOrCity}, ${record.county}, ${record.postcode}`,
@@ -98,7 +98,9 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       await expect(insPages.addressBookView.heading(name)).toBeVisible();
       await insPages.addressBookView.linkBack.click();
 
-      await expect(pages.page).toHaveURL((url) => url.pathname === pickerPath && url.searchParams.get('q') === name);
+      await expect(pages.page).toHaveURL(
+        (url) => url.origin === pickerOrigin && url.pathname === pickerPath && url.searchParams.get('q') === name,
+      );
       await expect(animalsPages.consignorSelection.party(name)).toBeVisible();
     },
   );
