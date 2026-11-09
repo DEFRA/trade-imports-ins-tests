@@ -10,7 +10,20 @@ import {
   pickerSearchRow,
 } from '@page-objects/shared/address-picker-results';
 
+export type AddressCellParts = {
+  addressLine1: string;
+  addressLine2?: string;
+  townOrCity: string;
+  county?: string;
+  postcode: string;
+};
+
 export class AnimalsPartyPickerPage extends NotificationPage {
+  static expectedAddressCellText({ addressLine1, addressLine2, townOrCity, county, postcode }: AddressCellParts): string {
+    const placeLine = [townOrCity, county, postcode].filter(Boolean).join(', ');
+    return [addressLine1, addressLine2, placeLine].filter(Boolean).join('\n');
+  }
+
   constructor(
     page: Page,
     slug: string,
@@ -55,12 +68,20 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return this.page.getByRole('row').filter({ has: this.party(name) });
   }
 
-  partyDetailsLines(name: string): Locator {
-    return this.partyRow(name).getByRole('group').getByRole('listitem');
+  partyAddressCell(name: string): Locator {
+    return this.partyRow(name).getByRole('cell').nth(2);
   }
 
-  async openPartyDetails(name: string): Promise<void> {
-    await this.partyRow(name).getByText(`View details for ${name}`, { exact: true }).click();
+  partyAddressCellText(name: string): Promise<string> {
+    return this.partyAddressCell(name).evaluate((cell) => (cell as HTMLElement).innerText);
+  }
+
+  partyViewLink(name: string): Locator {
+    return this.partyRow(name).getByRole('link', { name: `View ${name}`, exact: true });
+  }
+
+  partyActionCell(name: string): Locator {
+    return this.partyRow(name).getByRole('cell').last();
   }
 
   get noMatchesMessage(): Locator {

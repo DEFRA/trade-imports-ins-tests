@@ -1,7 +1,9 @@
 import { test, expect } from '@fixtures';
 import { heldAsConsignor } from '@domain/shared/constants/address-types';
-import { DESTINATION_NAME } from '@domain/shared/constants/journey-party-names';
+import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
+import { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
+import { destinationFixture } from '@flows/shared/address-book-seed';
 
 const FIVE_RESULTS_SUMMARY = /^Showing 5 out of \d+ results$/;
 
@@ -63,21 +65,12 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
     await expect(animalsPages.consignorSelection.resultsGroup.getByRole('radio')).toHaveCount(5);
 
-    await animalsPages.consignorSelection.searchBox.fill(DESTINATION_NAME);
-    await animalsPages.consignorSelection.searchButton.click();
-    const detailLines = animalsPages.consignorSelection.partyDetailsLines(DESTINATION_NAME);
-    await expect(detailLines).toHaveCount(0);
-    await animalsPages.consignorSelection.openPartyDetails(DESTINATION_NAME);
-    await expect(detailLines.filter({ hasText: 'London' })).toBeVisible();
-
-    await animalsPages.consignorSelection.searchBox.fill(runOnlySearchToken);
-    await animalsPages.consignorSelection.searchButton.click();
+    await animalsPages.consignorSelection.search(runOnlySearchToken);
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText('Showing 2 out of 2 results');
     await expect(animalsPages.consignorSelection.party(searchMatches[1])).toBeVisible();
     await expect(animalsPages.consignorSelection.paginationPageLink(2)).toHaveCount(0);
 
-    await animalsPages.consignorSelection.searchBox.fill('');
-    await animalsPages.consignorSelection.searchButton.click();
+    await animalsPages.consignorSelection.search('');
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
 
     const olderThanPageOne = animalsPages.consignorSelection.party(olderThanPageOneName);
@@ -97,6 +90,35 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(consignorAddressLines).toHaveText(olderThanPageOneAddressText, { useInnerText: true });
+  });
+
+  test('a picker row shows the street line, then town and postcode on one line, and ends with only a View link', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.toPartyPicker('Consignor');
+
+    await animalsPages.consignorSelection.search(destinationFixture.name);
+    await expect
+      .poll(() => animalsPages.consignorSelection.partyAddressCellText(destinationFixture.name))
+      .toBe(AnimalsPartyPickerPage.expectedAddressCellText(destinationFixture));
+    await expect(animalsPages.consignorSelection.partyActionCell(destinationFixture.name)).toHaveText(`View ${destinationFixture.name}`);
+  });
+
+  test('a picker row with a second street line and a county shows each street line on its own line, then town, county and postcode on one line', async ({
+    animalsJourney,
+    animalsPages,
+    addressBookApi,
+  }) => {
+    const record = { ...addressWithLineTwoAndCounty(`Picker County Farm ${Date.now()}`), ...heldAsConsignor };
+    await addressBookApi.createAddress(record);
+    await animalsJourney.toPartyPicker('Consignor');
+
+    await animalsPages.consignorSelection.search(record.name);
+
+    await expect
+      .poll(() => animalsPages.consignorSelection.partyAddressCellText(record.name))
+      .toBe(AnimalsPartyPickerPage.expectedAddressCellText(record));
   });
 
   test('saving with nothing ticked returns to the roles and addresses page with the consignor section offering only its add link', async ({
