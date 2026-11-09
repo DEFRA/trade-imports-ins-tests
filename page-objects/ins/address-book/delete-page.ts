@@ -1,7 +1,7 @@
 import { Locator } from '@playwright/test';
-import { InsAddressBookAddressPage } from '@page-objects/ins/address-book/address-page';
+import { InsAddressBookRecordPage } from '@page-objects/ins/address-book/record-page';
 
-export class InsAddressBookDeletePage extends InsAddressBookAddressPage {
+export class InsAddressBookDeletePage extends InsAddressBookRecordPage {
   expectedUrl(addressId: string): string {
     return `/address-book/${addressId}/delete`;
   }

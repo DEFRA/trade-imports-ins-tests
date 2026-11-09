@@ -1,7 +1,7 @@
 import { Locator } from '@playwright/test';
-import { InsAddressBookAddressPage } from '@page-objects/ins/address-book/address-page';
+import { InsAddressBookRecordPage } from '@page-objects/ins/address-book/record-page';
 
-export class InsAddressBookViewPage extends InsAddressBookAddressPage {
+export class InsAddressBookViewPage extends InsAddressBookRecordPage {
   expectedUrl(addressId: string): string {
     return `/address-book/${addressId}`;
   }

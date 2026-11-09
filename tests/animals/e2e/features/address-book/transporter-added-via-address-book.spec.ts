@@ -60,8 +60,8 @@ test.describe('A transporter added through the INS address book', { tag: ['@addr
 
     await animalsPages.transporter.viewDetails(name);
 
-    await expect(insPages.addressBookView.heading(name)).toBeVisible();
-    await insPages.addressBookView.linkBack.click();
+    await expect(insPages.addressBookTransporterView.heading(name)).toBeVisible();
+    await insPages.addressBookTransporterView.linkBack.click();
 
     await expect(pages.page).toHaveURL(listUrl);
     await expect(animalsPages.transporter.heading).toBeVisible();
