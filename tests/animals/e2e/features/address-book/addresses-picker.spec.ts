@@ -99,10 +99,9 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await animalsJourney.toPartyPicker('Consignor');
 
     await animalsPages.consignorSelection.search(destinationFixture.name);
-    await expect(animalsPages.consignorSelection.partyAddressCell(destinationFixture.name)).toHaveText(
-      AnimalsPartyPickerPage.expectedAddressCellText(destinationFixture),
-      { useInnerText: true },
-    );
+    await expect
+      .poll(() => animalsPages.consignorSelection.partyAddressCellText(destinationFixture.name))
+      .toBe(AnimalsPartyPickerPage.expectedAddressCellText(destinationFixture));
     await expect(animalsPages.consignorSelection.partyActionCell(destinationFixture.name)).toHaveText(`View ${destinationFixture.name}`);
   });
 
@@ -117,10 +116,9 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
 
     await animalsPages.consignorSelection.search(record.name);
 
-    await expect(animalsPages.consignorSelection.partyAddressCell(record.name)).toHaveText(
-      AnimalsPartyPickerPage.expectedAddressCellText(record),
-      { useInnerText: true },
-    );
+    await expect
+      .poll(() => animalsPages.consignorSelection.partyAddressCellText(record.name))
+      .toBe(AnimalsPartyPickerPage.expectedAddressCellText(record));
   });
 
   test('saving with nothing ticked returns to the roles and addresses page with the consignor section offering only its add link', async ({

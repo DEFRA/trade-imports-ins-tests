@@ -72,6 +72,10 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return this.partyRow(name).getByRole('cell').nth(2);
   }
 
+  partyAddressCellText(name: string): Promise<string> {
+    return this.partyAddressCell(name).evaluate((cell) => (cell as HTMLElement).innerText);
+  }
+
   partyViewLink(name: string): Locator {
     return this.partyRow(name).getByRole('link', { name: `View ${name}`, exact: true });
   }
