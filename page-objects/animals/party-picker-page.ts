@@ -63,8 +63,8 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return this.partyRow(name).getByRole('link', { name: `View ${name}`, exact: true });
   }
 
-  partyRowLinks(name: string): Locator {
-    return this.partyRow(name).getByRole('link');
+  partyActionCell(name: string): Locator {
+    return this.partyRow(name).getByRole('cell').last();
   }
 
   get noMatchesMessage(): Locator {

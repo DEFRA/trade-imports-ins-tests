@@ -72,7 +72,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
       `${destinationRecord.addressLine1}\n${destinationRecord.townOrCity}, ${destinationRecord.postcode}`,
       { useInnerText: true },
     );
-    await expect(animalsPages.consignorSelection.partyRowLinks(DESTINATION_NAME)).toHaveText([`View ${DESTINATION_NAME}`]);
+    await expect(animalsPages.consignorSelection.partyActionCell(DESTINATION_NAME)).toHaveText(`View ${DESTINATION_NAME}`);
 
     await animalsPages.consignorSelection.searchBox.fill(runOnlySearchToken);
     await animalsPages.consignorSelection.searchButton.click();
