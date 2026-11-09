@@ -5,6 +5,7 @@ import { LIVE_ANIMALS } from '@domain/ins/constants/notification-types';
 import { traderAddress } from '@domain/ins/constants/trader-address';
 import { heldAsConsignor } from '@domain/shared/constants/address-types';
 import { SET_BASES } from '@page-objects/shared/sets';
+import { expectOpenFromReview } from '@page-objects/shared/journey-checks';
 
 const createReturnFarm = (addressBookApi: AddressBookApiClient, name = `Return Farm ${Date.now()}`): Promise<AddressBookRecord> =>
   addressBookApi.createAddress(traderAddress(name));
@@ -101,7 +102,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
   );
 
   test(
-    "a later picker page's View link, opened while changing an answer, Backs to that page with the chosen address still selected, and saving returns to the roles and addresses page in change context",
+    "a later picker page's View link, opened while changing an answer, Backs to that page with the chosen address still selected and the trail kept, and saving returns to the roles and addresses page carrying the trail from the review",
     { tag: '@address-book' },
     async ({ pages, animalsSeededJourney, animalsPages, insPages, addressBookApi }) => {
       test.slow();
@@ -135,7 +136,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
           url.origin === laterPageUrl.origin &&
           url.pathname === laterPageUrl.pathname &&
           url.searchParams.get('page') === laterPageUrl.searchParams.get('page') &&
-          url.searchParams.get('change') === '1',
+          url.searchParams.get('from') === laterPageUrl.searchParams.get('from'),
       );
       await expect(picker.currentPaginationPageLink).toHaveText(laterPageUrl.searchParams.get('page') ?? '');
       await expect(chosenRow).toBeChecked();
@@ -143,7 +144,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
 
       await picker.saveAndContinue.click();
 
-      await expect(pages.page).toHaveURL(animalsPages.addresses.changeContextUrl(referenceNumber));
+      await expectOpenFromReview(pages.page, animalsPages.addresses, referenceNumber, animalsPages.notificationView.slug);
       await expect(animalsPages.addresses.partyAddressLines('Consignor')).toContainText(chosenName);
     },
   );
