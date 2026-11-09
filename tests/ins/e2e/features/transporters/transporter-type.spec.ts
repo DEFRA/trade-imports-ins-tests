@@ -14,7 +14,7 @@ test.describe('Choosing Transporter on the address type question', () => {
     await insJourney.chooseAddressType(addressTypes.transporter);
 
     const typePage = insPages.transporterType;
-    await expect(pages.page).toHaveURL(new RegExp(`${escapeRegex(typePage.expectedUrl)}$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${escapeRegex(typePage.expectedUrl)}\\?start=true$`));
     await expect(typePage.caption).toBeVisible();
     await expect(typePage.heading).toBeVisible();
     await expect(typePage.warning).toBeVisible();
