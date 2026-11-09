@@ -135,6 +135,13 @@ export class PlantsJourney {
     await this.addCommodityLine(category, values);
   }
 
+  async saveSeedPotatoLine(): Promise<string> {
+    const reference = await this.startNotification();
+    await this.chooseCommodityType(POTATOES);
+    await this.addCommodityLine(SEED_POTATOES, potatoLine);
+    return reference;
+  }
+
   /** Continues from the commodities list to origin. */
   async toOrigin(): Promise<void> {
     await this.plantsPages.commodities.saveAndContinue.click();

@@ -59,7 +59,7 @@ export type SpeciesAnimalCount = {
   animalCount: number;
 };
 
-export const OPENING_RUN_TASKS = [
+export const AIR_OR_SEA_OVERVIEW_TASKS = [
   'Where is this consignment coming from?',
   'What are you importing?',
   IMPORT_REASON_TASK,
@@ -73,7 +73,7 @@ export const OPENING_RUN_TASKS = [
   'Contact address for this consignment',
 ] as const;
 
-export const OPENING_RUN_TASKS_OVERLAND_WITHOUT_IDENTIFICATION = [
+export const OVERLAND_WITHOUT_IDENTIFICATION_OVERVIEW_TASKS = [
   'Where is this consignment coming from?',
   'What are you importing?',
   IMPORT_REASON_TASK,
@@ -127,6 +127,14 @@ export class AnimalsJourney {
   private recordReferenceNumberFromUrl(): string {
     const referenceNumber = this.animalsPages.originOfImport.referenceNumberFromUrl();
     this.context.recordReferenceNumber(referenceNumber);
+    return referenceNumber;
+  }
+
+  async saveOrigin(): Promise<string> {
+    const referenceNumber = await this.createNotificationAtOrigin();
+    await this.fillOriginOfImport();
+    await this.saveOriginOfImport();
+    await this.animalsPages.commoditySelection.heading.waitFor();
     return referenceNumber;
   }
 
@@ -682,7 +690,7 @@ export class AnimalsJourney {
     await this.confirmDeclaration();
   }
 
-  async walkOpeningRunToImportReason(
+  async walkToImportReason(
     originOptions: OriginOptions = {},
     species: CommodityLine[] = [MANDATORY_ANSWERS.commodityLines[0].species],
   ): Promise<string> {
@@ -694,9 +702,9 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
-  async walkOpeningRunToRolesAndAddressesWithoutCph(): Promise<string> {
+  async walkToRolesAndAddressesWithoutCph(): Promise<string> {
     const pages = this.animalsPages;
-    const referenceNumber = await this.walkOpeningRunToImportReason();
+    const referenceNumber = await this.walkToImportReason();
 
     await pages.importReason.saveAndContinue.click();
 
@@ -753,9 +761,9 @@ export class AnimalsJourney {
     await pages.notificationView.heading.waitFor(pageLoadWait);
   }
 
-  async walkOpeningRunCattleByAir(document: AccompanyingDocumentAnswer): Promise<string> {
+  async walkCattleByAir(document: AccompanyingDocumentAnswer): Promise<string> {
     const pages = this.animalsPages;
-    const referenceNumber = await this.walkOpeningRunToImportReason({
+    const referenceNumber = await this.walkToImportReason({
       requiresRegionCode: 'Yes',
       internalReference: 'CATTLE-2026-01',
     });
@@ -798,9 +806,9 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
-  async walkOpeningRunHorseBySea(document: AccompanyingDocumentAnswer): Promise<string> {
+  async walkHorseBySea(document: AccompanyingDocumentAnswer): Promise<string> {
     const pages = this.animalsPages;
-    const referenceNumber = await this.walkOpeningRunToImportReason({ countryCode: countryCodes.eu.ireland }, [commodityLines.horse]);
+    const referenceNumber = await this.walkToImportReason({ countryCode: countryCodes.eu.ireland }, [commodityLines.horse]);
 
     await pages.importReason.reason(importReasons.temporaryAdmissionHorses.display).check();
     await pages.importReason.temporaryAdmissionExitDate.fill(TEMPORARY_ADMISSION_EXIT_DATE);
@@ -836,9 +844,9 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
-  async walkOpeningRunPoultryByRail(document: AccompanyingDocumentAnswer): Promise<string> {
+  async walkPoultryByRail(document: AccompanyingDocumentAnswer): Promise<string> {
     const pages = this.animalsPages;
-    const referenceNumber = await this.walkOpeningRunToImportReason({ countryCode: countryCodes.eu.germany }, [commodityLines.chicken]);
+    const referenceNumber = await this.walkToImportReason({ countryCode: countryCodes.eu.germany }, [commodityLines.chicken]);
 
     await pages.importReason.reason(importReasons.transit.display).check();
     await pages.importReason.selectTransitPortOfExit('GB HLY');

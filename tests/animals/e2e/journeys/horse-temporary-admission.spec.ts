@@ -3,7 +3,7 @@ import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import {
   HORSE_TRANSPORT_ID,
   HORSE_TRANSPORTER,
-  OPENING_RUN_TASKS,
+  AIR_OR_SEA_OVERVIEW_TASKS,
   TEMPORARY_ADMISSION_EXIT_DATE,
   certificateDocument,
 } from '@flows/animals/journey';
@@ -17,10 +17,10 @@ test.describe('Horse by sea under temporary admission', () => {
     async ({ animalsJourney, animalsPages, pages }) => {
       test.slow();
 
-      const referenceNumber = await animalsJourney.walkOpeningRunHorseBySea(certificateDocument('SEADOC'));
+      const referenceNumber = await animalsJourney.walkHorseBySea(certificateDocument('SEADOC'));
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
 
-      await animalsJourney.reviewCompleteOverview(referenceNumber, OPENING_RUN_TASKS);
+      await animalsJourney.reviewCompleteOverview(referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
 
       const importDetails = animalsPages.notificationView.summaryCard('Import details');
       await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Ireland');

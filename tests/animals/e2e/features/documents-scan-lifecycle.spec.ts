@@ -43,7 +43,7 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     await expect(animalsPages.overview.heading).toBeVisible();
   });
 
-  test('clean upload: Save and continue reaches the overview, and the row settles to Check completed with a view link on reopening', async ({
+  test('clean upload: Save and return to overview reaches the overview, and the row settles to Check completed with a view link on reopening', async ({
     animalsPages,
   }) => {
     test.slow();

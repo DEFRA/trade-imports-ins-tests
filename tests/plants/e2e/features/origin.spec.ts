@@ -59,7 +59,7 @@ test.describe('High-risk plants origin section', () => {
     await expect(plantsPages.origin.country.field).toHaveValue(FRANCE);
   });
 
-  test('following Back from origin to the commodities list and choosing Save and continue returns to origin, not the overview', async ({
+  test('following Back from origin to the commodities list and choosing Save and continue returns to origin', async ({
     pages,
     plantsPages,
     plantsJourney,

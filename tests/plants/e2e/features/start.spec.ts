@@ -14,12 +14,7 @@ test.describe('High-risk plants start section', () => {
     await expect(plantsPages.dashboard.errorSummary).not.toBeVisible();
   });
 
-  test('starting a notification opens the run on the commodity-type page', async ({
-    pages,
-    plantsPages,
-    plantsJourney,
-    journeyContext,
-  }) => {
+  test('starting a notification opens the commodity-type page', async ({ pages, plantsPages, plantsJourney, journeyContext }) => {
     const reference = await plantsJourney.startNotification();
 
     expect(reference).toMatch(WHOLE_REFERENCE_NUMBER_PATTERN);

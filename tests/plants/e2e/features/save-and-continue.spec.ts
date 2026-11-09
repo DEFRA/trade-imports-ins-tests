@@ -56,6 +56,17 @@ test.describe('Save and continue to the next page', () => {
     await expect(plantsPages.arrivalDetails.heading).toBeVisible();
   });
 
+  test('Save and continue on the commodities page in a fresh browser session goes on to origin', async ({
+    savePlantsCommoditiesThenOpenFreshSession,
+  }) => {
+    const { reference, freshPages } = await savePlantsCommoditiesThenOpenFreshSession();
+
+    await freshPages.commodities.open(reference);
+    await freshPages.commodities.saveAndContinue.click();
+
+    await expect(freshPages.origin.heading).toBeVisible();
+  });
+
   test('contact address saved with nothing chosen goes to check your answers', async ({
     pages,
     plantsPages,
