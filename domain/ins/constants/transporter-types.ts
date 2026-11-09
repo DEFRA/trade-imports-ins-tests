@@ -21,11 +21,9 @@ export const transporterTypeOptions: readonly { transporterType: TransporterType
   },
 ];
 
-export const transporterTypeLabels = Object.fromEntries(
+export const transporterTypeRadioLabels = Object.fromEntries(
   transporterTypeOptions.map(({ transporterType, label }) => [transporterType, label]),
 ) as Record<TransporterType, string>;
-
-export const transporterAddedCaption = 'Add a new transporter';
 
 export const transporterCancelLabel = 'Cancel and return to address book';
 

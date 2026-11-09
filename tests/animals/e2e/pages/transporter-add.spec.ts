@@ -1,12 +1,12 @@
 import { test, expect } from '@fixtures';
 import { type AnimalsPages } from '@page-objects';
 
-async function choosePrivateTransporterAndGetReference(animalsPages: AnimalsPages): Promise<string> {
+const choosePrivateTransporterAndGetReference = async (animalsPages: AnimalsPages): Promise<string> => {
   await animalsPages.transporterAdd.transporterType('Private').check();
   await animalsPages.transporterAdd.continueButton.click();
   await animalsPages.privateTransporter.heading.waitFor();
   return animalsPages.privateTransporter.referenceNumberFromUrl();
-}
+};
 
 test.describe('Transporter type page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney, animalsPages }) => {

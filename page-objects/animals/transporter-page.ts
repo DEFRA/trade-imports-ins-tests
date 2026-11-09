@@ -27,8 +27,8 @@ export class AnimalsTransporterPage extends NotificationPage {
     return this.page.getByRole('row').filter({ has: this.page.getByRole('cell', { name, exact: true }) });
   }
 
-  approvalNumberCell(row: Locator): Locator {
-    return row.getByRole('cell').nth(3);
+  approvalNumberCell(name: string): Locator {
+    return this.rowFor(name).getByRole('cell').nth(3);
   }
 
   viewDetailsLink(name: string): Locator {

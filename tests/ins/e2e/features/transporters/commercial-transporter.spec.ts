@@ -1,9 +1,13 @@
 import { test, expect } from '@fixtures';
-import { transporterTypes, COMMERCIAL_TRANSPORTER_COUNTRY_NAME } from '@domain/ins/constants/transporter-types';
+import {
+  transporterTypes,
+  COMMERCIAL_TRANSPORTER_COUNTRY_CODE,
+  COMMERCIAL_TRANSPORTER_COUNTRY_NAME,
+} from '@domain/ins/constants/transporter-types';
 import { commercialTransporterDetails } from '@domain/ins/constants/trader-transporter';
-import { transporterTab } from '@domain/ins/constants/address-book-types';
+import { transporterTab, transporterTypeFilterLabels } from '@domain/ins/constants/address-book-types';
 import { expectCancelAddsNoTransporter, expectOpensTypeQuestionWithNoTypeChosen } from './run-transporters';
-import { transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
+import { trackTransporterForDeletion, transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
 
 const createdTransporterIds = transporterIdsDeletedAfterEachTest();
 
@@ -56,15 +60,14 @@ test.describe('The commercial transporter form', () => {
 
     await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(transporterTab));
     await expect(insPages.addressBookList.successBanner).toContainText(`${name} added to your address book`);
-    const stored = await addressBookApi.findTransporterByName(name);
-    createdTransporterIds.push(stored.id);
+    const stored = await trackTransporterForDeletion(addressBookApi, name, createdTransporterIds);
     expect(stored.type).toBe(transporterTypes.commercial);
     expect(stored.approvalNumber).toBe(approvalNumber);
-    expect(stored.countryCode).toBe('GB-NIR');
+    expect(stored.countryCode).toBe(COMMERCIAL_TRANSPORTER_COUNTRY_CODE);
 
     await insPages.addressBookList.search(name, { submitWith: 'button' });
     await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
-    await expect(insPages.addressBookList.transporterTypeCell(name)).toHaveText('Commercial');
+    await expect(insPages.addressBookList.transporterTypeCell(name)).toHaveText(transporterTypeFilterLabels.COMMERCIAL);
     await expect(insPages.addressBookList.transporterApprovalNumberCell(name)).toHaveText(approvalNumber);
 
     expect(await isolatedOrganisationAddressBookApi.listTransporters(name)).toEqual([]);
@@ -78,8 +81,7 @@ test.describe('The commercial transporter form', () => {
     const name = `Searched Commercial Transporter ${Date.now()}`;
     const approvalNumber = `NI/TA/${Date.now()}`;
     await insJourney.addCommercialTransporterFromList(commercialTransporterDetails(name, approvalNumber));
-    const stored = await addressBookApi.findTransporterByName(name);
-    createdTransporterIds.push(stored.id);
+    await trackTransporterForDeletion(addressBookApi, name, createdTransporterIds);
 
     for (const term of [name, 'Commercial', 'Shore Road', approvalNumber, COMMERCIAL_TRANSPORTER_COUNTRY_NAME]) {
       await insPages.addressBookList.open({ addressType: transporterTab.addressType });

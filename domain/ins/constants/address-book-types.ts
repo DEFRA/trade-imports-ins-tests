@@ -35,7 +35,7 @@ export const rolesQuestionLabels = textsOfEachRole(({ formLabel }) => formLabel)
 
 export const typeFilterPlaceholder = 'Select one';
 
-export const transporterTypeOptionLabels: Record<TransporterType, string> = {
+export const transporterTypeFilterLabels: Record<TransporterType, string> = {
   [transporterTypes.commercial]: 'Commercial',
   [transporterTypes.private]: 'Private',
 };
@@ -71,7 +71,14 @@ export const destinationConsigneeOrImporterTab: RoleBackedAddressBookTab = {
   roleFilterOptions: [addressRoles.consignee, addressRoles.importer, addressRoles.placeOfDestination],
 };
 
-export const transporterTab: AddressBookTab = {
+/** A tab that lists by transporter type: its address type is the transporter one, and its type
+ * filter options are always present. */
+export type TypeBackedAddressBookTab = Omit<AddressBookTab, 'addressType' | 'typeFilterOptions'> & {
+  addressType: typeof addressTypes.transporter;
+  typeFilterOptions: readonly TransporterType[];
+};
+
+export const transporterTab: TypeBackedAddressBookTab = {
   addressType: addressTypes.transporter,
   label: 'Transporter',
   panelHeading: 'Transporter addresses',

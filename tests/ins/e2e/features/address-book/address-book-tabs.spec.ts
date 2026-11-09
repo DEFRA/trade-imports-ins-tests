@@ -8,11 +8,14 @@ import {
   rolesLabelOf,
   tabHolding,
   transporterTab,
+  transporterTypeFilterLabels,
   unsupportedAddressType,
 } from '@domain/ins/constants/address-book-types';
 import { branchAddressFixture, E2E_ADDRESS_BOOK_FIXTURES } from '@flows/shared/address-book-seed';
-import { addressIdsDeletedAfterEachTest, createRunAddresses, runAddressesOnTab } from './run-addresses';
-import { commercialTransporterRequest } from './run-transporters';
+import { commercialTransporterDetails, transporterRequestOf } from '@domain/ins/constants/trader-transporter';
+import { transporterTypes } from '@domain/ins/constants/transporter-types';
+import { addressIdsDeletedAfterEachTest } from '@utils/address-book-cleanup';
+import { createRunAddresses, runAddressesOnTab } from './run-addresses';
 
 const createdAddressIds = addressIdsDeletedAfterEachTest('addressBookApi');
 
@@ -89,7 +92,9 @@ test.describe('Address book tabs', () => {
     addressBookApi,
   }) => {
     const name = `Tabs Transporter ${Date.now()}`;
-    await addressBookApi.createTransporter(commercialTransporterRequest(name, 'NI/TA/2026/0099'));
+    await addressBookApi.createTransporter(
+      transporterRequestOf(commercialTransporterDetails(name, 'NI/TA/2026/0099'), transporterTypes.commercial),
+    );
 
     await insJourney.toAddressBookTab(transporterTab, { search: name });
 
@@ -98,7 +103,7 @@ test.describe('Address book tabs', () => {
     await expect(insPages.addressBookList.columnHeaders).toHaveText(['Name', 'Address', 'Approval number', 'Type', 'Action']);
     await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
     await expect(insPages.addressBookList.transporterApprovalNumberCell(name)).toHaveText('NI/TA/2026/0099');
-    await expect(insPages.addressBookList.transporterTypeCell(name)).toHaveText('Commercial');
+    await expect(insPages.addressBookList.transporterTypeCell(name)).toHaveText(transporterTypeFilterLabels.COMMERCIAL);
   });
 
   test('every shared fixture shows on the tab holding its roles, with its roles label, and a branch fixture is absent from the Origin and Consignor tab', async ({

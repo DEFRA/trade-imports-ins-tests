@@ -1,17 +1,17 @@
 import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/shared/base-page';
 import { opensAtExpectedUrl } from '@page-objects/shared/opens-at-expected-url';
-import { transporterTypeLabels, type TransporterType } from '@domain/ins/constants/transporter-types';
+import { transporterTypeQuestion, transporterTypeRadioLabels, type TransporterType } from '@domain/ins/constants/transporter-types';
 
 export class InsTransporterTypePage extends opensAtExpectedUrl(BasePage) {
   readonly expectedUrl = '/address-book/add/transporter';
 
   get caption(): Locator {
-    return this.page.getByText('Add a new transporter', { exact: true });
+    return this.page.getByText(transporterTypeQuestion.caption, { exact: true });
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Choose a transporter type' });
+    return this.page.getByRole('heading', { level: 1, name: transporterTypeQuestion.title });
   }
 
   get warning(): Locator {
@@ -19,7 +19,7 @@ export class InsTransporterTypePage extends opensAtExpectedUrl(BasePage) {
   }
 
   get radioGroup(): Locator {
-    return this.page.getByRole('group', { name: 'Choose a transporter type' });
+    return this.page.getByRole('group', { name: transporterTypeQuestion.title });
   }
 
   get radios(): Locator {
@@ -31,7 +31,7 @@ export class InsTransporterTypePage extends opensAtExpectedUrl(BasePage) {
   }
 
   radio(transporterType: TransporterType): Locator {
-    return this.radioGroup.getByRole('radio', { name: transporterTypeLabels[transporterType], exact: true });
+    return this.radioGroup.getByRole('radio', { name: transporterTypeRadioLabels[transporterType], exact: true });
   }
 
   async choose(transporterType: TransporterType): Promise<void> {

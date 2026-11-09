@@ -1,18 +1,10 @@
 import { Locator } from '@playwright/test';
-import { InsTransporterFormPage } from '@page-objects/ins/address-book/transporter-form-page';
+import { InsTransporterFormPage, type TransporterSharedDetails } from '@page-objects/ins/address-book/transporter-form-page';
 import { opensAtExpectedUrl } from '@page-objects/shared/opens-at-expected-url';
-import { TRANSPORTER_FORM_FIELD_LABELS } from '@domain/ins/constants/transporter-form';
+import { TRANSPORTER_APPROVAL_NUMBER_LABEL } from '@domain/ins/constants/transporter-form';
 
-export interface CommercialTransporterDetails {
-  name: string;
+export interface CommercialTransporterDetails extends TransporterSharedDetails {
   approvalNumber: string;
-  addressLine1: string;
-  addressLine2?: string;
-  townOrCity: string;
-  county?: string;
-  postcode: string;
-  email: string;
-  phone: string;
 }
 
 export class InsCommercialTransporterPage extends opensAtExpectedUrl(InsTransporterFormPage) {
@@ -23,7 +15,7 @@ export class InsCommercialTransporterPage extends opensAtExpectedUrl(InsTranspor
   }
 
   get inputApprovalNumber(): Locator {
-    return this.page.getByLabel(TRANSPORTER_FORM_FIELD_LABELS.approvalNumber, { exact: true });
+    return this.page.getByLabel(TRANSPORTER_APPROVAL_NUMBER_LABEL, { exact: true });
   }
 
   /** The country select is disabled and fixed: this reads the Northern Ireland label it shows. */

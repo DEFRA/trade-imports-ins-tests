@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { SELECT_TRANSPORTER_ERROR } from '@domain/animals/constants/transporters';
+import { notApplicableApprovalNumber } from '@domain/ins/constants/transporter-types';
 
 const COMMERCIAL_TRANSPORTER = 'García Livestock Transport SL';
 const PRIVATE_TRANSPORTER = 'Aberdeen Livestock Ltd';
@@ -28,9 +29,7 @@ test.describe('Transporter list page', { tag: '@duplicated-in-frontend' }, () =>
   });
 
   test('shows Not applicable in the Approval number column for a transporter with no approval number', async ({ animalsPages }) => {
-    const row = animalsPages.transporter.rowFor(PRIVATE_TRANSPORTER);
-
-    await expect(animalsPages.transporter.approvalNumberCell(row)).toHaveText('Not applicable');
+    await expect(animalsPages.transporter.approvalNumberCell(PRIVATE_TRANSPORTER)).toHaveText(notApplicableApprovalNumber);
   });
 
   test("names the transporter in a commercial and a private row's View details link", async ({ animalsPages }) => {

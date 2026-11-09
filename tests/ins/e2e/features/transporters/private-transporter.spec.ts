@@ -1,9 +1,10 @@
 import { test, expect } from '@fixtures';
-import { transporterTypes } from '@domain/ins/constants/transporter-types';
+import { notApplicableApprovalNumber, transporterTypes } from '@domain/ins/constants/transporter-types';
+import { transporterTypeFilterLabels } from '@domain/ins/constants/address-book-types';
 import { privateTransporterDetails } from '@domain/ins/constants/trader-transporter';
 import { transporterTab } from '@domain/ins/constants/address-book-types';
 import { expectCancelAddsNoTransporter, expectOpensTypeQuestionWithNoTypeChosen } from './run-transporters';
-import { transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
+import { trackTransporterForDeletion, transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
 
 const createdTransporterIds = transporterIdsDeletedAfterEachTest();
 
@@ -56,16 +57,15 @@ test.describe('The private transporter form', () => {
 
     await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(transporterTab));
     await expect(insPages.addressBookList.successBanner).toContainText(`${name} added to your address book`);
-    const stored = await addressBookApi.findTransporterByName(name);
-    createdTransporterIds.push(stored.id);
+    const stored = await trackTransporterForDeletion(addressBookApi, name, createdTransporterIds);
     expect(stored.type).toBe(transporterTypes.private);
     expect(stored.approvalNumber).toBeFalsy();
     expect(stored.countryCode).toBe('GB');
 
     await insPages.addressBookList.search(name, { submitWith: 'button' });
     await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
-    await expect(insPages.addressBookList.transporterTypeCell(name)).toHaveText('Private');
-    await expect(insPages.addressBookList.transporterApprovalNumberCell(name)).toHaveText('Not applicable');
+    await expect(insPages.addressBookList.transporterTypeCell(name)).toHaveText(transporterTypeFilterLabels.PRIVATE);
+    await expect(insPages.addressBookList.transporterApprovalNumberCell(name)).toHaveText(notApplicableApprovalNumber);
 
     expect(await isolatedOrganisationAddressBookApi.listTransporters(name)).toEqual([]);
   });
@@ -77,8 +77,7 @@ test.describe('The private transporter form', () => {
   }) => {
     const name = `Searched Private Transporter ${Date.now()}`;
     await insJourney.addPrivateTransporterFromList(privateTransporterDetails(name));
-    const stored = await addressBookApi.findTransporterByName(name);
-    createdTransporterIds.push(stored.id);
+    await trackTransporterForDeletion(addressBookApi, name, createdTransporterIds);
 
     for (const term of [name, 'Private', 'Carrier Close', 'United Kingdom']) {
       await insPages.addressBookList.open({ addressType: transporterTab.addressType });

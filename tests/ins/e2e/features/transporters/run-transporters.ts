@@ -11,7 +11,7 @@ export interface TransporterFormPage {
   readonly expectedUrl: string;
   open(): Promise<void>;
   readonly inputName: Locator;
-  readonly linkCancelAndReturnToAddressBook: Locator;
+  readonly cancelAndReturnToAddressBook: Locator;
 }
 
 /** Proves opening a transporter form with no transporter type chosen returns to the transporter
@@ -38,7 +38,7 @@ export const expectCancelAddsNoTransporter = async (
 ): Promise<void> => {
   await formPage.inputName.fill(name);
 
-  await formPage.linkCancelAndReturnToAddressBook.click();
+  await formPage.cancelAndReturnToAddressBook.click();
 
   await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(transporterTab));
   expect(await addressBookApi.listTransporters(name)).toEqual([]);

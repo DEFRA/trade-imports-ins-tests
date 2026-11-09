@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto';
-import { test } from '@fixtures';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import type { InsPages } from '@page-objects';
 import { addressRoles, type HeldRoles, type AddressRole } from '@domain/shared/constants/address-types';
@@ -58,17 +57,6 @@ export const createRunAddresses = async (api: AddressBookApiClient, createdAddre
 
 export const runAddressesOnTab = (runAddresses: Record<string, RunAddress>, tab: AddressBookTab): RunAddress[] =>
   Object.values(runAddresses).filter(({ roles }) => tabHolding(roles[0]) === tab);
-
-export const addressIdsDeletedAfterEachTest = (apiFixtureName: 'addressBookApi' | 'isolatedOrganisationAddressBookApi'): string[] => {
-  const createdAddressIds: string[] = [];
-  test.afterEach(async ({ addressBookApi, isolatedOrganisationAddressBookApi }) => {
-    const api = apiFixtureName === 'addressBookApi' ? addressBookApi : isolatedOrganisationAddressBookApi;
-    for (const addressId of createdAddressIds.splice(0)) {
-      await api.deleteAddress(addressId);
-    }
-  });
-  return createdAddressIds;
-};
 
 export const createRunAddressesAndFilterListByRole = async (
   { insPages, api, createdAddressIds }: { insPages: InsPages; api: AddressBookApiClient; createdAddressIds: string[] },

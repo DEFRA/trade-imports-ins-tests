@@ -11,13 +11,8 @@ import {
 } from '@domain/ins/constants/address-book-types';
 import { timeouts } from '@config/timeouts';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
-import {
-  addressIdsDeletedAfterEachTest,
-  createAddressHolding,
-  createRunAddresses,
-  createRunAddressesAndFilterListByRole,
-  runAddressesOnTab,
-} from './run-addresses';
+import { addressIdsDeletedAfterEachTest } from '@utils/address-book-cleanup';
+import { createAddressHolding, createRunAddresses, createRunAddressesAndFilterListByRole, runAddressesOnTab } from './run-addresses';
 
 const createdAddressIds = addressIdsDeletedAfterEachTest('addressBookApi');
 

@@ -1,12 +1,13 @@
 import { test, expect } from '@fixtures';
 import type { TransporterRequest } from '@adapters/http/address-book-api-client';
-import { transporterTypes } from '@domain/ins/constants/transporter-types';
+import { COMMERCIAL_TRANSPORTER_COUNTRY_CODE, transporterTypes } from '@domain/ins/constants/transporter-types';
+import { transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
 
 const commercialTransporter: Omit<TransporterRequest, 'name'> = {
   addressLine1: '7 Dockside Way',
   townOrCity: 'Belfast',
   postcode: 'BT1 1AA',
-  countryCode: 'GB-NIR',
+  countryCode: COMMERCIAL_TRANSPORTER_COUNTRY_CODE,
   phone: '+44 28 9000 1122',
   email: 'ops@crossservice.example',
   type: transporterTypes.commercial,
@@ -14,6 +15,8 @@ const commercialTransporter: Omit<TransporterRequest, 'name'> = {
 };
 
 test.describe('A transporter added through the INS address book', { tag: ['@address-book', '@ins-frontend'] }, () => {
+  const createdTransporterIds = transporterIdsDeletedAfterEachTest();
+
   test("is on the transporter list of the organisation's next notification, with its approval number, and can be picked and saved", async ({
     animalsJourney,
     animalsPages,
@@ -21,14 +24,14 @@ test.describe('A transporter added through the INS address book', { tag: ['@addr
   }) => {
     const name = `Cross Service Haulage Ltd ${Date.now()}`;
     const created = await addressBookApi.createTransporter({ ...commercialTransporter, name });
+    createdTransporterIds.push(created.id);
 
     await animalsJourney.startNotification();
     await animalsJourney.answerCommodity();
     await animalsJourney.reachTransporterFromHub();
 
     await expect(animalsPages.transporter.transporter(name)).toBeVisible();
-    const row = animalsPages.transporter.rowFor(name);
-    await expect(animalsPages.transporter.approvalNumberCell(row)).toHaveText(created.approvalNumber ?? '');
+    await expect(animalsPages.transporter.approvalNumberCell(name)).toHaveText(created.approvalNumber ?? '');
 
     await animalsPages.transporter.transporter(name).check();
     await animalsPages.transporter.saveAndContinue.click();
@@ -37,8 +40,6 @@ test.describe('A transporter added through the INS address book', { tag: ['@addr
 
     await animalsJourney.openTransporterFromOverview();
     await expect(animalsPages.transporter.transporter(name)).toBeChecked();
-
-    await addressBookApi.deleteTransporter(created.id);
   });
 
   test("its View details link opens the transporter's address book record, and Back returns to this list", async ({
@@ -50,6 +51,7 @@ test.describe('A transporter added through the INS address book', { tag: ['@addr
   }) => {
     const name = `Returning Haulage Ltd ${Date.now()}`;
     const created = await addressBookApi.createTransporter({ ...commercialTransporter, name });
+    createdTransporterIds.push(created.id);
 
     await animalsJourney.startNotification();
     await animalsJourney.answerCommodity();
@@ -63,7 +65,5 @@ test.describe('A transporter added through the INS address book', { tag: ['@addr
 
     await expect(pages.page).toHaveURL(listUrl);
     await expect(animalsPages.transporter.heading).toBeVisible();
-
-    await addressBookApi.deleteTransporter(created.id);
   });
 });

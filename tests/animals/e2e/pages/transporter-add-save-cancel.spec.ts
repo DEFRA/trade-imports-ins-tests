@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
-import { transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
-import { transporters } from '@domain/animals/constants/transporters';
+import { trackTransporterForDeletion, transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
+import { handTypedPrivateTransporter, transporters } from '@domain/animals/constants/transporters';
 
 test.describe('Saving and cancelling a transporter add form', () => {
   const createdTransporterIds = transporterIdsDeletedAfterEachTest();
@@ -16,11 +16,9 @@ test.describe('Saving and cancelling a transporter add form', () => {
 
     await animalsJourney.chooseTransporterType('Private');
     await animalsPages.privateTransporter.heading.waitFor();
-    const { name } = await animalsJourney.savePrivateTransporterTrackedForDeletion(
-      addressBookApi,
-      'Saved private transporter',
-      createdTransporterIds,
-    );
+    const name = `Saved private transporter ${Date.now()}`;
+    await animalsJourney.fillAndSavePrivateTransporterAddForm(handTypedPrivateTransporter(name));
+    await trackTransporterForDeletion(addressBookApi, name, createdTransporterIds);
 
     await expect(animalsPages.transporter.heading).toBeVisible();
     await expect(animalsPages.transporter.successBanner).toContainText(`${name} transporter added`);

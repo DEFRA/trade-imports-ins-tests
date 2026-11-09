@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { transporterTab, typeFilterPlaceholder, transporterTypeOptionLabels } from '@domain/ins/constants/address-book-types';
+import { transporterTab, typeFilterPlaceholder, transporterTypeFilterLabels } from '@domain/ins/constants/address-book-types';
+import { commercialTransporterDetails, privateTransporterDetails, transporterRequestOf } from '@domain/ins/constants/trader-transporter';
+import { transporterTypes } from '@domain/ins/constants/transporter-types';
 import { transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
-import { commercialTransporterRequest, privateTransporterRequest } from './run-transporters';
 
 const createdTransporterIds = transporterIdsDeletedAfterEachTest();
 
@@ -14,7 +15,7 @@ test.describe('Transporter tab Type filter', () => {
 
     await expect(insPages.addressBookList.typeFilterOptions).toHaveText([
       typeFilterPlaceholder,
-      ...transporterTab.typeFilterOptions.map((type) => transporterTypeOptionLabels[type]),
+      ...transporterTab.typeFilterOptions.map((type) => transporterTypeFilterLabels[type]),
     ]);
     await expect(insPages.addressBookList.typeFilterOptions.first()).toHaveAttribute('value', '');
   });
@@ -27,12 +28,14 @@ test.describe('Transporter tab Type filter', () => {
     const term = transporterTypeFilterTermOf('beyond first page');
     for (const suffix of ['First Commercial', 'Second Commercial']) {
       const transporter = await addressBookApi.createTransporter(
-        commercialTransporterRequest(`${term} ${suffix}`, `NI/TA/${randomUUID()}`),
+        transporterRequestOf(commercialTransporterDetails(`${term} ${suffix}`, `NI/TA/${randomUUID()}`), transporterTypes.commercial),
       );
       createdTransporterIds.push(transporter.id);
     }
     for (let index = 1; index <= 9; index++) {
-      const transporter = await addressBookApi.createTransporter(privateTransporterRequest(`${term} Private ${index}`));
+      const transporter = await addressBookApi.createTransporter(
+        transporterRequestOf(privateTransporterDetails(`${term} Private ${index}`), transporterTypes.private),
+      );
       createdTransporterIds.push(transporter.id);
     }
 
@@ -40,7 +43,7 @@ test.describe('Transporter tab Type filter', () => {
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-8 of 11');
 
-    await insPages.addressBookList.filter({ term, submitWith: 'button', label: transporterTypeOptionLabels.COMMERCIAL });
+    await insPages.addressBookList.filter({ term, submitWith: 'button', label: transporterTypeFilterLabels.COMMERCIAL });
 
     await expect(insPages.addressBookList.resultsLine).toHaveText('Showing 1-2 of 2');
     await expect(insPages.addressBookList.bodyRows).toHaveCount(2);
