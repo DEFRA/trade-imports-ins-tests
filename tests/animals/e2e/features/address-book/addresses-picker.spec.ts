@@ -1,6 +1,8 @@
 import { test, expect } from '@fixtures';
 import { heldAsConsignor } from '@domain/shared/constants/address-types';
+import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
+import { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
 import { destinationFixture } from '@flows/shared/address-book-seed';
 
 const FIVE_RESULTS_SUMMARY = /^Showing 5 out of \d+ results$/;
@@ -98,10 +100,27 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
 
     await animalsPages.consignorSelection.search(destinationFixture.name);
     await expect(animalsPages.consignorSelection.partyAddressCell(destinationFixture.name)).toHaveText(
-      `${destinationFixture.addressLine1}\n${destinationFixture.townOrCity}, ${destinationFixture.postcode}`,
+      AnimalsPartyPickerPage.expectedAddressCellText(destinationFixture),
       { useInnerText: true },
     );
     await expect(animalsPages.consignorSelection.partyActionCell(destinationFixture.name)).toHaveText(`View ${destinationFixture.name}`);
+  });
+
+  test('a picker row with a second street line and a county shows each street line on its own line, then town, county and postcode on one line', async ({
+    animalsJourney,
+    animalsPages,
+    addressBookApi,
+  }) => {
+    const record = { ...addressWithLineTwoAndCounty(`Picker County Farm ${Date.now()}`), ...heldAsConsignor };
+    await addressBookApi.createAddress(record);
+    await animalsJourney.toPartyPicker('Consignor');
+
+    await animalsPages.consignorSelection.search(record.name);
+
+    await expect(animalsPages.consignorSelection.partyAddressCell(record.name)).toHaveText(
+      AnimalsPartyPickerPage.expectedAddressCellText(record),
+      { useInnerText: true },
+    );
   });
 
   test('saving with nothing ticked returns to the roles and addresses page with the consignor section offering only its add link', async ({

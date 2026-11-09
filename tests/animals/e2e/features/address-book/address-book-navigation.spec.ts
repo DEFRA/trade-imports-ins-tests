@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { originOf } from '@page-objects/shared/base-page';
 import { LIVE_ANIMALS } from '@domain/ins/constants/notification-types';
-import { addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constants/trader-address';
+import { traderAddress } from '@domain/ins/constants/trader-address';
 import { heldAsConsignor } from '@domain/shared/constants/address-types';
 import { SET_BASES } from '@page-objects/shared/sets';
 
@@ -77,22 +77,17 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
   );
 
   test(
-    'a picker row shows the address with its town, county and postcode on one line, and its View link opens it in the INS address book, whose Back returns to the same picker with the search kept',
+    "a picker row's View link opens the address in the INS address book, whose Back returns to the same picker with the search kept",
     { tag: '@address-book' },
     async ({ pages, animalsJourney, animalsPages, insPages, addressBookApi }) => {
       test.slow();
 
       const name = `Picker View Farm ${Date.now()}`;
-      const record = { ...addressWithLineTwoAndCounty(name), ...heldAsConsignor };
-      await addressBookApi.createAddress(record);
+      await addressBookApi.createAddress({ ...traderAddress(name), ...heldAsConsignor });
       await animalsJourney.toPartyPicker('Consignor');
       await animalsPages.consignorSelection.search(name);
       const { origin: pickerOrigin, pathname: pickerPath } = new URL(pages.page.url());
 
-      await expect(animalsPages.consignorSelection.partyAddressCell(name)).toHaveText(
-        `${record.addressLine1}\n${record.addressLine2}\n${record.townOrCity}, ${record.county}, ${record.postcode}`,
-        { useInnerText: true },
-      );
       await animalsPages.consignorSelection.partyViewLink(name).click();
       await insPages.addressBookView.completeSignInIfRequested();
       await expect(insPages.addressBookView.heading(name)).toBeVisible();

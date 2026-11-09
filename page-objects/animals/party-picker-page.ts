@@ -10,7 +10,20 @@ import {
   pickerSearchRow,
 } from '@page-objects/shared/address-picker-results';
 
+export type AddressCellParts = {
+  addressLine1: string;
+  addressLine2?: string;
+  townOrCity: string;
+  county?: string;
+  postcode: string;
+};
+
 export class AnimalsPartyPickerPage extends NotificationPage {
+  static expectedAddressCellText({ addressLine1, addressLine2, townOrCity, county, postcode }: AddressCellParts): string {
+    const placeLine = [townOrCity, county, postcode].filter(Boolean).join(', ');
+    return [addressLine1, addressLine2, placeLine].filter(Boolean).join('\n');
+  }
+
   constructor(
     page: Page,
     slug: string,
