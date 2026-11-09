@@ -59,9 +59,6 @@ test.describe('A transporter added through the INS address book', { tag: ['@addr
     const listUrl = pages.page.url();
 
     await animalsPages.transporter.viewDetails(name);
-    // The link crosses from the animals frontend to the INS front door, which
-    // holds its own session, so a deployed environment asks to sign in again.
-    await insPages.addressBookTransporterView.completeSignInIfRequested();
 
     await expect(insPages.addressBookTransporterView.heading(name)).toBeVisible();
     await insPages.addressBookTransporterView.linkBack.click();
