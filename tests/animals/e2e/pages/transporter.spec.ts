@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { SELECT_TRANSPORTER_ERROR } from '@domain/animals/constants/transporters';
 
 const COMMERCIAL_TRANSPORTER = 'García Livestock Transport SL';
 const PRIVATE_TRANSPORTER = 'Aberdeen Livestock Ltd';
@@ -48,6 +49,14 @@ test.describe('Transporter list page', { tag: '@duplicated-in-frontend' }, () =>
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
     await expect(animalsPages.overview.heading).toBeVisible();
+  });
+
+  test('refuses Save and continue with nothing chosen and keeps the trader on the list', async ({ animalsPages }) => {
+    await animalsPages.transporter.saveAndContinue.click();
+
+    await expect(animalsPages.transporter.heading).toBeVisible();
+    await expect(animalsPages.overview.heading).toHaveCount(0);
+    await expect(animalsPages.transporter.errorSummaryLinks).toHaveText([SELECT_TRANSPORTER_ERROR]);
   });
 
   test('narrows the listed transporters to the match as the trader types, with no new page', async ({ pages, animalsPages }) => {

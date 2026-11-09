@@ -2,6 +2,8 @@ export const transporters = {
   garciaLivestockTransport: { value: 'garcia-livestock-transport', display: 'García Livestock Transport SL' },
 } as const;
 
+export const SELECT_TRANSPORTER_ERROR = 'Select a transporter from the list';
+
 export type Transporter = (typeof transporters)[keyof typeof transporters];
 
 export const handTypedPrivateTransporter = (name: string) => ({
