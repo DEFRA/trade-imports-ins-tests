@@ -53,6 +53,11 @@ test.describe('A transporter added through the INS address book', { tag: ['@addr
     const created = await addressBookApi.createTransporter({ ...commercialTransporter, name });
     createdTransporterIds.push(created.id);
 
+    // A worker mints one session per domain, taken from the spec's path, and this spec is an
+    // animals one. The front door this test crosses to has no session until it is asked for, so
+    // sign in to it before leaving the animals service rather than on arrival.
+    await insPages.addressBookList.open();
+
     await animalsJourney.startNotification();
     await animalsJourney.answerCommodity();
     await animalsJourney.reachTransporterFromHub();
