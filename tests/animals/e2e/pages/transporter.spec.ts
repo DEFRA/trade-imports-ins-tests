@@ -32,6 +32,11 @@ test.describe('Transporter list page', { tag: '@duplicated-in-frontend' }, () =>
     await expect(animalsPages.transporter.approvalNumberCell(row)).toHaveText('Not applicable');
   });
 
+  test("names the transporter in a commercial and a private row's View details link", async ({ animalsPages }) => {
+    await expect(animalsPages.transporter.viewDetailsLink(COMMERCIAL_TRANSPORTER)).toBeVisible();
+    await expect(animalsPages.transporter.viewDetailsLink(PRIVATE_TRANSPORTER)).toBeVisible();
+  });
+
   test('leaves every transporter unchecked on load', async ({ animalsPages }) => {
     await expect(animalsPages.transporter.transporter(COMMERCIAL_TRANSPORTER)).not.toBeChecked();
     await expect(animalsPages.transporter.transporter(PRIVATE_TRANSPORTER)).not.toBeChecked();

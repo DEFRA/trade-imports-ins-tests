@@ -40,4 +40,30 @@ test.describe('A transporter added through the INS address book', { tag: ['@addr
 
     await addressBookApi.deleteTransporter(created.id);
   });
+
+  test("its View details link opens the transporter's address book record, and Back returns to this list", async ({
+    pages,
+    animalsJourney,
+    animalsPages,
+    insPages,
+    addressBookApi,
+  }) => {
+    const name = `Returning Haulage Ltd ${Date.now()}`;
+    const created = await addressBookApi.createTransporter({ ...commercialTransporter, name });
+
+    await animalsJourney.startNotification();
+    await animalsJourney.answerCommodity();
+    await animalsJourney.reachTransporterFromHub();
+    const listUrl = pages.page.url();
+
+    await animalsPages.transporter.viewDetailsLink(name).click();
+
+    await expect(insPages.addressBookView.heading(name)).toBeVisible();
+    await insPages.addressBookView.linkBack.click();
+
+    await expect(pages.page).toHaveURL(listUrl);
+    await expect(animalsPages.transporter.heading).toBeVisible();
+
+    await addressBookApi.deleteTransporter(created.id);
+  });
 });

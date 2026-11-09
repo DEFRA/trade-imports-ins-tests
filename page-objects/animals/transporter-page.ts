@@ -31,6 +31,10 @@ export class AnimalsTransporterPage extends NotificationPage {
     return row.getByRole('cell').nth(3);
   }
 
+  viewDetailsLink(name: string): Locator {
+    return this.rowFor(name).getByRole('link', { name: `View details ${name}`, exact: true });
+  }
+
   get searchBox(): Locator {
     return pickerSearchBox(this.page);
   }
