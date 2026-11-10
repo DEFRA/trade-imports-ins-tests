@@ -143,28 +143,22 @@ test.describe('Address book API roles', () => {
     expect((await isolatedOrganisationAddressBookApi.getAddress(created.id)).roles).toEqual([addressRoles.importer]);
   });
 
-  test('a create holding a receiving role outside the United Kingdom is refused naming the country and saves nothing', async ({
-    isolatedOrganisationAddressBookApi,
-  }) => {
-    const address = { ...traderAddress(`Abroad Consignee Farm ${Date.now()}`), countryCode: 'FR' };
+  for (const [group, roles] of [
+    ['sending', [addressRoles.placeOfOrigin, addressRoles.consignor]],
+    ['receiving', [addressRoles.consignee, addressRoles.importer, addressRoles.placeOfDestination]],
+    ['branch', [addressRoles.branchAddress]],
+  ] as const) {
+    test(`an address holding ${group} roles outside the United Kingdom is saved`, async ({ isolatedOrganisationAddressBookApi }) => {
+      const created = await isolatedOrganisationAddressBookApi.createAddress({
+        ...traderAddress(`Abroad ${group} Farm ${Date.now()}`),
+        countryCode: 'FR',
+        roles: [...roles],
+      });
 
-    await expectValidationRefusalNaming(
-      isolatedOrganisationAddressBookApi.createAddress({ ...address, roles: [addressRoles.consignee] }),
-      'countryCode',
-    );
-    expect(await isolatedOrganisationAddressBookApi.listAddresses(address.name)).toEqual([]);
-  });
+      const read = await isolatedOrganisationAddressBookApi.getAddress(created.id);
 
-  test('an address holding sending roles outside the United Kingdom is saved', async ({ isolatedOrganisationAddressBookApi }) => {
-    const created = await isolatedOrganisationAddressBookApi.createAddress({
-      ...traderAddress(`Abroad Consignor Farm ${Date.now()}`),
-      countryCode: 'FR',
-      roles: [addressRoles.placeOfOrigin, addressRoles.consignor],
+      expect(read.countryCode).toBe('FR');
+      expect(read.roles).toEqual(roles);
     });
-
-    const read = await isolatedOrganisationAddressBookApi.getAddress(created.id);
-
-    expect(read.countryCode).toBe('FR');
-    expect(read.roles).toEqual([addressRoles.placeOfOrigin, addressRoles.consignor]);
-  });
+  }
 });

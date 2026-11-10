@@ -130,11 +130,6 @@ export const rolesQuestionOptions: Record<AddressTypeAskingRoles, readonly Addre
   [addressTypes.branch]: [addressRoles.branchAddress],
 };
 
-export const addressTypesRequiringUnitedKingdom: readonly AddressTypeAskingRoles[] = [
-  addressTypes.destinationConsigneeOrImporter,
-  addressTypes.branch,
-];
-
 const hintOf = (addressType: AddressTypeAskingRoles): string =>
   rolesQuestionOptions[addressType].map((role) => rolesQuestionLabels[role]).join(', ');
 

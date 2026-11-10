@@ -2,10 +2,8 @@ import { test, expect } from '@fixtures';
 import { expectRolesOptions } from '@utils/roles-options-assertions';
 import { ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
-import { addressTypes } from '@domain/shared/constants/address-types';
 import {
   addressTypeLabels,
-  addressTypesRequiringUnitedKingdom,
   roleBackedAddressBookTabs,
   rolesLabelOf,
   rolesQuestion,
@@ -17,24 +15,17 @@ import { expectAbove } from './expect-above';
 const UNITED_KINGDOM = 'United Kingdom';
 
 test.describe('The Country select on the add form', () => {
-  for (const addressType of addressTypesRequiringUnitedKingdom) {
-    test(`a ${addressTypeLabels[addressType]} address offers United Kingdom alone, selected`, async ({ insPages, insJourney }) => {
+  for (const { addressType } of roleBackedAddressBookTabs) {
+    test(`a ${addressTypeLabels[addressType]} address lists Select a country first and opens with United Kingdom selected`, async ({
+      insPages,
+      insJourney,
+    }) => {
       await insJourney.toAddressForm({ addressType });
 
-      await expect(insPages.addressBookAdd.countryOptions).toHaveText([UNITED_KINGDOM]);
+      await expect(insPages.addressBookAdd.countryOptions.first()).toHaveText('Select a country');
       await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText(UNITED_KINGDOM);
     });
   }
-
-  test(`an ${addressTypeLabels[addressTypes.originOrConsignor]} address lists Select a country first and opens with United Kingdom selected`, async ({
-    insPages,
-    insJourney,
-  }) => {
-    await insJourney.toAddressForm({ addressType: addressTypes.originOrConsignor });
-
-    await expect(insPages.addressBookAdd.countryOptions.first()).toHaveText('Select a country');
-    await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText(UNITED_KINGDOM);
-  });
 });
 
 for (const tab of roleBackedAddressBookTabs) {

@@ -228,14 +228,14 @@ test.describe('Add an address from the journey via INS', () => {
   );
 
   test(
-    'the INS add page reached from the Consignee picker offers United Kingdom alone, already selected',
+    'the INS add page reached from the Consignee picker opens on United Kingdom and offers every captured country, alphabetically',
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, insPages }) => {
       const addPage = insPages.addressBookAdd;
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
 
-      await expect(addPage.countryOptions).toHaveText(['United Kingdom']);
+      await expect(addPage.countryOptions).toHaveText(['Select a country', ...addressFormCountryNames]);
       await expect(addPage.selectedCountryOption).toHaveText('United Kingdom');
     },
   );
