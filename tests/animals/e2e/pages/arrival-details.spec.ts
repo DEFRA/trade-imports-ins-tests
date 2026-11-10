@@ -67,6 +67,7 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
 
   test('leaves the arrival details unanswered on load', async ({ animalsPages }) => {
     await expect(animalsPages.arrivalDetails.portOfEntry.field).toBeVisible();
+    await expect(animalsPages.arrivalDetails.portOfEntry.field).toHaveValue('');
     await expect(animalsPages.arrivalDetails.meansOfTransport).toBeVisible();
     await expect(animalsPages.arrivalDetails.meansOfTransport).toHaveValue('');
   });

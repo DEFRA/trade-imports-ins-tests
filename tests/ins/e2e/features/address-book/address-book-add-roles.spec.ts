@@ -12,7 +12,7 @@ import {
   rolesQuestionLegends,
   rolesQuestionOptions,
 } from '@domain/ins/constants/address-book-types';
-import { expectAbove } from './expect-above';
+import { expectAbove } from '@page-objects/shared/layout-checks';
 
 const UNITED_KINGDOM = 'United Kingdom';
 

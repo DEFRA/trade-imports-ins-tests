@@ -110,6 +110,10 @@ test.describe('Add an address from the journey via INS', () => {
         const saved = await addressBookApi.findByName(details.name);
         expect(rolesFieldOf(saved)).toEqual(ROLES_HELD_BY_PARTY[role]);
 
+        await expect(animalsPages.addresses.linkBack).toHaveAttribute(
+          'href',
+          animalsPages.overview.expectedUrl(animalsPages.addresses.referenceNumberFromUrl()),
+        );
         await animalsPages.addresses.linkBack.click();
         await expect(animalsPages.overview.heading).toBeVisible();
       },

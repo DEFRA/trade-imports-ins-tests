@@ -16,8 +16,9 @@ test.describe('Animal identification page', { tag: '@duplicated-in-frontend' }, 
     await expect(animalsPages.animalIdentification.saveAndContinue).toBeVisible();
   });
 
-  test('leaves the ear tag empty on load', async ({ animalsPages }) => {
+  test('leaves the ear tag and the passport number empty on load', async ({ animalsPages }) => {
     await expect(animalsPages.animalIdentification.earTag).toHaveValue('');
+    await expect(animalsPages.animalIdentification.passportNumber).toHaveValue('');
   });
 
   test('accepts a valid ear tag', async ({ pages, animalsPages }) => {

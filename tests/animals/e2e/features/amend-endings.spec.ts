@@ -2,6 +2,7 @@ import type { AnimalsPages } from '@page-objects';
 import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { test, expect } from '@fixtures';
 import { expectOpenFromReview, expectSaveAndContinueWalk } from '@page-objects/shared/journey-checks';
+import { expectEntirelyAbove } from '@page-objects/shared/layout-checks';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
@@ -51,8 +52,10 @@ test.describe('Amendment page endings', () => {
       ]);
     });
 
-    test('shows Cancel and return to overview on its own line', async ({ animalsPages }) => {
-      await expect(animalsPages.arrivalDetails.cancelAndReturnToOverview).toBeVisible();
+    test('shows Cancel and return to overview on its own line below the two buttons', async ({ animalsPages }) => {
+      const saveButtons = animalsPages.arrivalDetails.buttonGroup.filter({ has: animalsPages.arrivalDetails.saveAndContinue });
+
+      await expectEntirelyAbove(saveButtons, animalsPages.arrivalDetails.cancelAndReturnToOverview);
     });
 
     test('shows Cancel amend in the strip', async ({ animalsPages }) => {
@@ -69,7 +72,7 @@ test.describe('Amendment page endings', () => {
     await expect(animalsPages.overview.cancelAmend).toBeVisible();
   });
 
-  test('Cancel and return to overview while amending opens Overview and keeps the saved value', async ({
+  test('Cancel and return to overview while amending opens Overview with the Amend status and Cancel amend, and keeps the saved value', async ({
     animalsPages,
     animalsSeededJourney,
   }) => {
@@ -80,6 +83,8 @@ test.describe('Amendment page endings', () => {
     await animalsPages.arrivalDetails.cancelAndReturnToOverview.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.overview.statusTag).toHaveText(AMEND);
+    await expect(animalsPages.overview.cancelAmend).toBeVisible();
     await animalsPages.arrivalDetails.open(reference);
     await expect(animalsPages.arrivalDetails.transportIdentification).toHaveValue(MANDATORY_ANSWERS.transportIdentification);
   });
