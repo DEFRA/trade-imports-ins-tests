@@ -58,12 +58,16 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     await this.searchButton.click();
   }
 
+  commodityHeading(code: string): RegExp {
+    return new RegExp(`^(.+ \\()?${code}\\)?$`);
+  }
+
   commodityGroup(code: string): Locator {
-    return this.page.getByRole('group', { name: code, exact: true });
+    return this.page.getByRole('group', { name: this.commodityHeading(code) });
   }
 
   get commodityGroups(): Locator {
-    return this.page.getByRole('group', { name: /^\d+$/ });
+    return this.page.getByRole('group', { name: this.commodityHeading('\\d+') });
   }
 
   species(species: CommodityLine): Locator {
