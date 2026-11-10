@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 import type { NotificationPage } from '@page-objects/shared/base-page';
+import { expectEntirelyAbove } from '@page-objects/shared/layout-checks';
 
 type OverviewTasks = { taskNames: Locator; taskStatuses: Locator; open(referenceNumber: string): Promise<void> };
 
@@ -61,4 +62,15 @@ export async function expectOpenFromReview(
 async function expectOpenOnTrail(page: Page, referenceNumber: string, journeyPage: JourneyPage, trail: string[]): Promise<void> {
   await expect(page).toHaveURL(journeyPage.expectedUrlPatternOnTrail(referenceNumber, trail));
   await expect(journeyPage.heading).toBeVisible();
+}
+
+/**
+ * Checks the button group holding Save and continue holds exactly Save and continue then Save and return to overview, and sits
+ * entirely above the Cancel and return to overview link.
+ */
+export async function expectSaveControlsLayout(journeyPage: NotificationPage): Promise<void> {
+  const saveButtons = journeyPage.buttonGroup.filter({ has: journeyPage.saveAndContinue });
+
+  await expect(saveButtons.getByRole('button')).toHaveText(['Save and continue', 'Save and return to overview']);
+  await expectEntirelyAbove(saveButtons, journeyPage.cancelAndReturnToOverview);
 }

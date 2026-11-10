@@ -10,7 +10,7 @@ import {
 } from '@flows/plants/journey';
 import type { PlantsPages, SharedPages } from '@page-objects';
 import { TRAIL_START } from '@page-objects/shared/base-page';
-import { expectOpenFromReview, expectSaveAndContinueWalk } from '@page-objects/shared/journey-checks';
+import { expectOpenFromReview, expectSaveAndContinueWalk, expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 import { addressRoles } from '@domain/shared/constants/address-types';
 import { todayOrTomorrowServiceDisplayDatePattern } from '@utils/date-utils';
 
@@ -215,24 +215,37 @@ test.describe('High-risk plants check and submit section', () => {
     });
   }
 
-  test('a saved French origin becomes invalid when a ware-potato line is added and prevents submission', async ({
-    pages,
-    plantsPages,
-    plantsJourney,
-    addressBookApi,
-  }) => {
-    const { reference } = await plantsJourney.completeNotification(addressBookApi);
-    await plantsPages.commodities.open(reference);
-    await plantsJourney.addAnotherCommodityLine('Ware potatoes', { ...potatoLine, 'Intended use': 'Consumption' });
-    await plantsPages.notificationView.open(reference);
-    await expect(plantsPages.notificationView.card('Import details')).toContainText('France');
-    await plantsPages.notificationView.btnContinue.click();
-    await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-    await expect(plantsPages.notificationView.heading).toBeVisible();
-    const correction = plantsPages.notificationView.errorSummaryLink(/Poland/);
-    await expect(plantsPages.overview.statusTag).toHaveText('Draft');
-    await correction.click();
-    await expectOpenFromReview(pages.page, plantsPages.origin, reference, plantsPages.notificationView.slug);
+  test.describe('a saved French origin made invalid by an added ware-potato line', () => {
+    let reference: string;
+
+    test.beforeEach(async ({ plantsPages, plantsJourney, addressBookApi }) => {
+      ({ reference } = await plantsJourney.completeNotification(addressBookApi));
+      await plantsPages.commodities.open(reference);
+      await plantsJourney.addAnotherCommodityLine('Ware potatoes', { ...potatoLine, 'Intended use': 'Consumption' });
+    });
+
+    test('a saved French origin becomes invalid when a ware-potato line is added and prevents submission', async ({
+      pages,
+      plantsPages,
+    }) => {
+      await plantsPages.notificationView.open(reference);
+      await expect(plantsPages.notificationView.card('Import details')).toContainText('France');
+      await plantsPages.notificationView.btnContinue.click();
+      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
+      await expect(plantsPages.notificationView.heading).toBeVisible();
+      const correction = plantsPages.notificationView.errorSummaryLink(/Poland/);
+      await expect(plantsPages.overview.statusTag).toHaveText('Draft');
+      await correction.click();
+      await expectOpenFromReview(pages.page, plantsPages.origin, reference, plantsPages.notificationView.slug);
+    });
+
+    test("Back from the origin opened from the review's error summary opens the review", async ({ pages, plantsPages }) => {
+      await plantsPages.notificationView.open(reference);
+      await plantsPages.notificationView.btnContinue.click();
+      await plantsPages.notificationView.errorSummaryLink(/Poland/).click();
+      await plantsPages.origin.linkBack.click();
+      await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
+    });
   });
 
   test('a destination deleted from the address book keeps its copy on CYA and submits', async ({
@@ -412,8 +425,8 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.overview.open(reference);
     await plantsPages.overview.taskRowLink('Identification numbers').click();
     await expect(plantsPages.identificationNumbers.heading).toBeVisible();
-    await expect(plantsPages.identificationNumbers.formButtons).toHaveText(['Save and continue', 'Save and return to overview']);
     await expect(plantsPages.identificationNumbers.cancelAndReturnToOverview).toBeVisible();
+    await expectSaveControlsLayout(plantsPages.identificationNumbers);
   });
 
   test.describe('an amended completed notification, opened from a Change link on the review', () => {

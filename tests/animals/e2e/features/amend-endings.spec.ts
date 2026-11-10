@@ -1,8 +1,7 @@
 import type { AnimalsPages } from '@page-objects';
 import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { test, expect } from '@fixtures';
-import { expectOpenFromReview, expectSaveAndContinueWalk } from '@page-objects/shared/journey-checks';
-import { expectEntirelyAbove } from '@page-objects/shared/layout-checks';
+import { expectOpenFromReview, expectSaveAndContinueWalk, expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
@@ -53,9 +52,7 @@ test.describe('Amendment page endings', () => {
     });
 
     test('shows Cancel and return to overview on its own line below the two buttons', async ({ animalsPages }) => {
-      const saveButtons = animalsPages.arrivalDetails.buttonGroup.filter({ has: animalsPages.arrivalDetails.saveAndContinue });
-
-      await expectEntirelyAbove(saveButtons, animalsPages.arrivalDetails.cancelAndReturnToOverview);
+      await expectSaveControlsLayout(animalsPages.arrivalDetails);
     });
 
     test('shows Cancel amend in the strip', async ({ animalsPages }) => {

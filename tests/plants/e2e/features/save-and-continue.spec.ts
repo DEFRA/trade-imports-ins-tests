@@ -67,7 +67,7 @@ test.describe('Save and continue to the next page', () => {
     await expect(freshPages.origin.heading).toBeVisible();
   });
 
-  test('contact address saved with nothing chosen goes to check your answers', async ({
+  test('contact address saved with nothing chosen goes to check your answers, naming the contact as outstanding', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -79,5 +79,6 @@ test.describe('Save and continue to the next page', () => {
     await plantsPages.consignmentContactSelect.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
+    await expect(plantsPages.notificationView.errorSummaryLinks).toHaveText(['Complete contact']);
   });
 });
