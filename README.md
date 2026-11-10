@@ -192,9 +192,7 @@ alongside it reads those. A spec that checks a copied address against the
 notification's rules makes a record whose country is a country name rather
 than a listed code: the address book checks only that a country is present,
 so that is the one way through the services alone to copy an address the
-notification refuses. The address book refuses a consignee, importer or place
-of destination outside the United Kingdom, so that record is minted with a
-sending role.
+notification refuses.
 
 The address book is shared and, locally, never wiped, so a spec that counts
 rows either searches for a token only its own run created, or uses
