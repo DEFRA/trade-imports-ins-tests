@@ -5,11 +5,9 @@ import { addressRoles, type AddressRole } from '@domain/shared/constants/address
 import { destinationConsigneeOrImporterTab, unsupportedRole } from '@domain/ins/constants/address-book-types';
 import { expectedValidationRefusalOf } from './expected-api-refusal';
 
-type RefusedField = 'roles' | 'countryCode';
-
-const expectValidationRefusalNaming = async (pending: Promise<unknown>, field: RefusedField): Promise<void> => {
+const expectValidationRefusalNamingRoles = async (pending: Promise<unknown>): Promise<void> => {
   const body = await expectedValidationRefusalOf(pending);
-  expect(Object.keys(body.errors)).toEqual([field]);
+  expect(Object.keys(body.errors)).toEqual(['roles']);
 };
 
 const withoutRoles = (request: AddressBookRequest): AddressBookRequest => {
@@ -60,7 +58,7 @@ test.describe('Address book API roles', () => {
   test('a create without roles is refused naming the roles and saves nothing', async ({ isolatedOrganisationAddressBookApi }) => {
     const address = traderAddress(`No Roles Farm ${Date.now()}`);
 
-    await expectValidationRefusalNaming(isolatedOrganisationAddressBookApi.createAddress(withoutRoles(address)), 'roles');
+    await expectValidationRefusalNamingRoles(isolatedOrganisationAddressBookApi.createAddress(withoutRoles(address)));
     expect(await isolatedOrganisationAddressBookApi.listAddresses(address.name)).toEqual([]);
   });
 
@@ -69,7 +67,7 @@ test.describe('Address book API roles', () => {
   }) => {
     const address = traderAddress(`Empty Roles Farm ${Date.now()}`);
 
-    await expectValidationRefusalNaming(isolatedOrganisationAddressBookApi.createAddress({ ...address, roles: [] }), 'roles');
+    await expectValidationRefusalNamingRoles(isolatedOrganisationAddressBookApi.createAddress({ ...address, roles: [] }));
     expect(await isolatedOrganisationAddressBookApi.listAddresses(address.name)).toEqual([]);
   });
 
@@ -79,7 +77,7 @@ test.describe('Address book API roles', () => {
     const address = { ...traderAddress(`Kept Roles Farm ${Date.now()}`), roles: [addressRoles.consignee, addressRoles.importer] };
     const created = await isolatedOrganisationAddressBookApi.createAddress(address);
 
-    await expectValidationRefusalNaming(isolatedOrganisationAddressBookApi.updateAddress(created.id, withoutRoles(address)), 'roles');
+    await expectValidationRefusalNamingRoles(isolatedOrganisationAddressBookApi.updateAddress(created.id, withoutRoles(address)));
 
     expect((await isolatedOrganisationAddressBookApi.getAddress(created.id)).roles).toEqual([
       addressRoles.consignee,
@@ -92,12 +90,11 @@ test.describe('Address book API roles', () => {
   }) => {
     const address = traderAddress(`Unknown Role Farm ${Date.now()}`);
 
-    await expectValidationRefusalNaming(
+    await expectValidationRefusalNamingRoles(
       isolatedOrganisationAddressBookApi.createAddress({
         ...address,
         roles: [addressRoles.consignor, unsupportedRole as AddressRole],
       }),
-      'roles',
     );
     expect(await isolatedOrganisationAddressBookApi.listAddresses(address.name)).toEqual([]);
   });
@@ -108,9 +105,8 @@ test.describe('Address book API roles', () => {
     const address = traderAddress(`Kept Known Roles Farm ${Date.now()}`);
     const created = await isolatedOrganisationAddressBookApi.createAddress({ ...address, roles: [addressRoles.placeOfOrigin] });
 
-    await expectValidationRefusalNaming(
+    await expectValidationRefusalNamingRoles(
       isolatedOrganisationAddressBookApi.updateAddress(created.id, { ...address, roles: [unsupportedRole as AddressRole] }),
-      'roles',
     );
     expect((await isolatedOrganisationAddressBookApi.getAddress(created.id)).roles).toEqual([addressRoles.placeOfOrigin]);
   });
@@ -120,9 +116,8 @@ test.describe('Address book API roles', () => {
   }) => {
     const address = traderAddress(`Mixed Roles Farm ${Date.now()}`);
 
-    await expectValidationRefusalNaming(
+    await expectValidationRefusalNamingRoles(
       isolatedOrganisationAddressBookApi.createAddress({ ...address, roles: [addressRoles.placeOfOrigin, addressRoles.consignee] }),
-      'roles',
     );
     expect(await isolatedOrganisationAddressBookApi.listAddresses(address.name)).toEqual([]);
   });
@@ -133,12 +128,11 @@ test.describe('Address book API roles', () => {
     const address = traderAddress(`Kept Receiving Roles Farm ${Date.now()}`);
     const created = await isolatedOrganisationAddressBookApi.createAddress({ ...address, roles: [addressRoles.importer] });
 
-    await expectValidationRefusalNaming(
+    await expectValidationRefusalNamingRoles(
       isolatedOrganisationAddressBookApi.updateAddress(created.id, {
         ...address,
         roles: [addressRoles.importer, addressRoles.branchAddress],
       }),
-      'roles',
     );
     expect((await isolatedOrganisationAddressBookApi.getAddress(created.id)).roles).toEqual([addressRoles.importer]);
   });
