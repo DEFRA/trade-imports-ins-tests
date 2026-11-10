@@ -11,9 +11,11 @@ import {
   rolesQuestionLegends,
   rolesQuestionOptions,
 } from '@domain/ins/constants/address-book-types';
+import { countryByCode } from '@resources/reference-data/reference-data';
 import { expectAbove } from './expect-above';
 
 const UNITED_KINGDOM = 'United Kingdom';
+const FRANCE = countryByCode('FR');
 
 for (const tab of roleBackedAddressBookTabs) {
   const { addressType } = tab;
@@ -83,7 +85,7 @@ for (const tab of roleBackedAddressBookTabs) {
     }) => {
       const name = `All Roles ${addressTypeLabel} ${Date.now()}`;
 
-      await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(name, UNITED_KINGDOM), { addressType, roles: offeredRoles });
+      await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(name, FRANCE.display), { addressType, roles: offeredRoles });
 
       await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(tab));
       await expect(insPages.addressBookList.selectedTab).toHaveText(tab.label);
@@ -93,7 +95,7 @@ for (const tab of roleBackedAddressBookTabs) {
       await expect(insPages.addressBookList.rolesCell(name)).toHaveText(rolesLabelOf(stored.roles));
       expect({ roles: [...stored.roles].sort(), countryCode: stored.countryCode }).toEqual({
         roles: [...offeredRoles].sort(),
-        countryCode: 'GB',
+        countryCode: FRANCE.value,
       });
     });
   });
