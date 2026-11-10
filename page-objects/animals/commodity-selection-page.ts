@@ -93,11 +93,14 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
   }
 
   speciesEntry(species: CommodityLine): Locator {
-    return this.selectedSummary.getByRole('listitem').filter({ hasText: speciesLabel(species) });
+    return this.selectedSummary.getByRole('listitem').filter({
+      has: this.page.getByText(species.latinName, { exact: true }),
+      hasNot: this.page.getByRole('listitem'),
+    });
   }
 
   removeButtonFor(species: CommodityLine): Locator {
-    return this.selectedSummary.getByRole('button', { name: `Remove ${speciesLabel(species)}`, exact: true });
+    return this.selectedSummary.getByRole('button', { name: `Remove ${species.latinName}`, exact: true });
   }
 
   async pressRemoveSpecies(species: CommodityLine): Promise<void> {

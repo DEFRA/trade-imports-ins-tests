@@ -112,9 +112,9 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await animalsPages.animalIdentification.selectedCommodities.changeLinkFor(cattle).click();
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText('3 selected');
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(cattle));
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(bison));
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(domesticCat));
+    await expect(animalsPages.commoditySelection.speciesEntry(cattle)).toBeVisible();
+    await expect(animalsPages.commoditySelection.speciesEntry(bison)).toBeVisible();
+    await expect(animalsPages.commoditySelection.speciesEntry(domesticCat)).toBeVisible();
 
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.raccoonDog]);
     await animalsPages.commoditySelection.saveAndContinue.click();
