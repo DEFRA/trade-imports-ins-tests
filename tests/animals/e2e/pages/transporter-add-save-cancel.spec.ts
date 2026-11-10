@@ -41,7 +41,7 @@ test.describe('Saving and cancelling a transporter add form', () => {
 
     await animalsJourney.toTransporter();
     await animalsPages.transporter.transporter(chosen).check();
-    await animalsPages.transporter.saveAndContinue.click();
+    await animalsPages.transporter.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.overview.task('Transport details').click();

@@ -34,7 +34,7 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await expect(card.getByRole('link')).toHaveText([/^Change number of animals/]);
     await expect(animalsPages.animalIdentification.savedAnimalsRows(commodityLines.cattle)).toHaveCount(2);
 
-    await animalsPages.animalIdentification.saveAndContinue.click();
+    await animalsPages.animalIdentification.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
@@ -55,12 +55,12 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 2).getByRole('button', { name: 'Remove' }).click();
     await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle, 2, 2)).toBeVisible();
 
-    await animalsPages.animalIdentification.saveAndContinue.click();
+    await animalsPages.animalIdentification.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Commodity details').click();
     await expect(animalsPages.consignmentDetails.heading).toBeVisible();
     await animalsPages.consignmentDetails.numberOfAnimals.fill('1');
-    await animalsPages.consignmentDetails.saveAndContinue.click();
+    await animalsPages.consignmentDetails.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
   });
 });

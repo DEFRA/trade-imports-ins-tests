@@ -15,7 +15,7 @@ const IDENTIFIER_MAX_LENGTH = 58;
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
-    await animalsJourney.startNotificationAtOrigin();
+    await animalsJourney.createNotificationAtOrigin();
   });
 
   test('each notification journey page with validation has no accessibility violations when errors are shown', async ({

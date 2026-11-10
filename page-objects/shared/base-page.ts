@@ -6,6 +6,7 @@ import { SignInErrorPage } from '@page-objects/shared/auth/sign-in-error-page';
 import { OrganisationPickerPage } from '@page-objects/shared/auth/organisation-picker-page';
 import { SET_BASES, SetBase } from '@page-objects/shared/sets';
 import { errorSummaryOn, notificationBannerTitled } from '@page-objects/shared/govuk-banners';
+import { escapeRegex } from '@page-objects/shared/escape-regex';
 
 export function requireBaseUrl(
   envVar:
@@ -19,6 +20,20 @@ export function requireBaseUrl(
     throw new Error(`${envVar} is not set. Ensure Playwright config applies project base URLs before running tests.`);
   }
   return baseUrl;
+}
+
+export const TRAIL_PARAMETER = 'from';
+export const OPTIONAL_TRAIL_PATTERN = `(?:[?&]${TRAIL_PARAMETER}=[^#]*)?`;
+export const TRAIL_START = { overview: 'overview', dashboard: 'dashboard', ins: 'ins' } as const;
+
+/** `?from=` followed by `places`, newest last, URI-encoded and joined by commas. */
+export function trailQuery(places: string[]): string {
+  return `?${TRAIL_PARAMETER}=${encodeURIComponent(places.join(','))}`;
+}
+
+/** Matches `url` and the optional `query` that follows it, with or without a trail after them. */
+export function urlPatternWithTrail(url: string, query = ''): RegExp {
+  return new RegExp(`${escapeRegex([url, query].join(''))}${OPTIONAL_TRAIL_PATTERN}$`);
 }
 
 export function originOf(envVar: Parameters<typeof requireBaseUrl>[0]): string {
@@ -267,10 +282,6 @@ export class NotificationPage extends BasePage {
     return this.page.locator('form').getByRole('link');
   }
 
-  get saveAndReturn(): Locator {
-    return this.page.getByRole('button', { name: 'Save and return', exact: true });
-  }
-
   get cancelAndReturnToOverview(): Locator {
     return this.page.getByRole('link', { name: 'Cancel and return to overview', exact: true });
   }
@@ -288,8 +299,19 @@ export class NotificationPage extends BasePage {
     return `${this.setBase}/notifications/${referenceNumber}${suffix}`;
   }
 
-  changeContextUrl(referenceNumber: string): string {
-    return `${this.expectedUrl(referenceNumber)}?change=1`;
+  /** Matches the open page's address, whichever trail it carries: answers which page is open, not how it was reached. */
+  expectedUrlPattern(referenceNumber: string): RegExp {
+    return urlPatternWithTrail(this.expectedUrl(referenceNumber));
+  }
+
+  /** This page's address carrying exactly `places` as its trail, newest last. */
+  expectedUrlOnTrail(referenceNumber: string, places: string[]): string {
+    return `${this.expectedUrl(referenceNumber)}${trailQuery(places)}`;
+  }
+
+  /** Matches the open page's whole address, carrying exactly `places` as its trail and nothing after it. */
+  expectedUrlPatternOnTrail(referenceNumber: string, places: string[]): RegExp {
+    return new RegExp(`^[a-z]+://[^/]+${escapeRegex(this.expectedUrlOnTrail(referenceNumber, places))}$`);
   }
 
   referenceNumberFromUrl(): string {
@@ -313,5 +335,11 @@ export class NotificationPage extends BasePage {
   async open(referenceNumber: string, { attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await this.navigateToService(this.expectedUrl(referenceNumber));
     await this.signInWhenRequested(attemptSignIn, identity);
+  }
+
+  /** Opens this page at its address with `places` as the trail the trader came by. */
+  async openOnTrail(referenceNumber: string, places: string[]): Promise<void> {
+    await this.navigateToService(this.expectedUrlOnTrail(referenceNumber, places));
+    await this.signInWhenRequested(true, {});
   }
 }

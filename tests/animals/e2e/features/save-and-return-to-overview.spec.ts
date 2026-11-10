@@ -131,11 +131,8 @@ test.describe('Save and return to overview', () => {
     await expect(animalsPages.overview.taskStatus('Additional details')).toHaveText(TO_DO);
   });
 
-  test('main import reason: inside the opening run, saves the answer and shows the overview rather than commodity details', async ({
-    animalsJourney,
-    animalsPages,
-  }) => {
-    const referenceNumber = await animalsJourney.walkOpeningRunToImportReason();
+  test('main import reason: on a new notification, saves the answer and shows the overview', async ({ animalsJourney, animalsPages }) => {
+    const referenceNumber = await animalsJourney.walkToImportReason();
     await animalsPages.importReason.reason(importReasons.internalMarket.display).check();
     await animalsPages.importReason.purpose(internalMarketPurposes.breeding.display).check();
 

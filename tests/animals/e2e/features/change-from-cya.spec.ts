@@ -1,9 +1,11 @@
 import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
+import { expectOpenFromReview, expectSaveAndContinueWalk } from '@page-objects/shared/journey-checks';
 import { DOCUMENT_ISSUE_DATE } from '@resources/file-upload/constants';
+import { CONSIGNEE_NAME, CONTACT_ADDRESS_NAME } from '@domain/shared/constants/journey-party-names';
 
 test.describe('Change from check your answers', { tag: '@duplicated-in-frontend' }, () => {
-  test('a Change link opens the answering page with change context and the save returns to check your answers with the new value', async ({
+  test('a Change link opens the answering page with the review on the trail, and the review shows the new value after the save', async ({
     animalsSeededJourney,
     pages,
     animalsPages,
@@ -16,46 +18,44 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(countryRow).toContainText('France');
     await animalsPages.notificationView.changeLink('Change import details').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(animalsPages.originOfImport.changeContextUrl(referenceNumber));
+    await expectOpenFromReview(pages.page, animalsPages.originOfImport, referenceNumber, animalsPages.notificationView.slug);
     await animalsPages.originOfImport.country.choose('Belgium');
     await animalsPages.originOfImport.saveAndContinue.click();
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+    await animalsPages.notificationView.open(referenceNumber);
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrl(referenceNumber));
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(countryRow).toContainText('Belgium');
 
     const certifiedForRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Certified for' });
     await expect(certifiedForRow).toContainText('Slaughter');
     await animalsPages.notificationView.changeLink('Change additional animal details').click();
     await expect(animalsPages.additionalDetails.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(animalsPages.additionalDetails.changeContextUrl(referenceNumber));
+    await expectOpenFromReview(pages.page, animalsPages.additionalDetails, referenceNumber, animalsPages.notificationView.slug);
     await animalsPages.additionalDetails.certifiedFor('Exhibition').check();
     await animalsPages.additionalDetails.saveAndContinue.click();
+    await expect(animalsPages.arrivalDetails.heading).toBeVisible();
+    await animalsPages.notificationView.open(referenceNumber);
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrl(referenceNumber));
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(certifiedForRow).toContainText('Exhibition');
   });
 
-  test('Back from the reason for import opened by a Change link opens What are you importing? with change context', async ({
-    animalsSeededJourney,
-    pages,
-    animalsPages,
-  }) => {
+  test('Back from the reason for import opened by a Change link opens the review', async ({ animalsSeededJourney, animalsPages }) => {
     test.slow();
     const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
-    const commoditiesUrl = animalsPages.commoditySelection.changeContextUrl(referenceNumber);
 
     await animalsPages.notificationView.changeLink('Change reason for import').click();
     await expect(animalsPages.importReason.heading).toBeVisible();
-    await expect(animalsPages.importReason.linkBack).toHaveAttribute('href', commoditiesUrl);
 
     await animalsPages.importReason.linkBack.click();
-    await expect(animalsPages.commoditySelection.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(commoditiesUrl);
+    await expect(animalsPages.notificationView.heading).toBeVisible();
   });
 
-  test('Save and continue on a page opened by a Change link returns to the review showing the changed answer', async ({
+  test('Save and continue on a page opened by a Change link goes on, and the review shows the changed answer', async ({
     animalsSeededJourney,
+    animalsJourney,
     pages,
     animalsPages,
   }) => {
@@ -71,13 +71,69 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.notificationView.changeLink('Change reason for import').click();
     await expect(animalsPages.importReason.heading).toBeVisible();
     await animalsPages.importReason.purpose('Research').check();
-    await animalsPages.importReason.saveAndContinue.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrl(referenceNumber));
+    await expectSaveAndContinueWalk(
+      pages.page,
+      referenceNumber,
+      [animalsPages.notificationView.slug],
+      animalsJourney.saveAndContinueStopsFrom(animalsPages.importReason),
+      animalsPages.notificationView,
+    );
     await expect(purposeValue).toContainText('Research');
   });
 
-  test('the roles and addresses Change link opens a page whose Back link opens the overview, not check your answers', async ({
+  test('the contact address Change link opens the page on the review trail, and choosing another address and Save and continue returns to the review showing it', async ({
+    animalsSeededJourney,
+    pages,
+    animalsPages,
+  }) => {
+    test.slow();
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const contactAddressValue = animalsPages.notificationView.summaryValue(
+      animalsPages.notificationView.summaryCard('Contact address for this consignment'),
+      'Contact address',
+    );
+    await expect(contactAddressValue).toContainText(CONTACT_ADDRESS_NAME);
+
+    await animalsPages.notificationView.changeLink(/^Change contact address/).click();
+    await expect(animalsPages.contactAddress.heading).toBeVisible();
+    await expectOpenFromReview(pages.page, animalsPages.contactAddress, referenceNumber, animalsPages.notificationView.slug);
+    await animalsPages.contactAddress.address(CONSIGNEE_NAME).check();
+    await animalsPages.contactAddress.saveAndContinue.click();
+
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(
+      animalsPages.notificationView.expectedUrlPatternOnTrail(referenceNumber, [
+        animalsPages.notificationView.slug,
+        animalsPages.contactAddress.slug,
+      ]),
+    );
+    await expect(contactAddressValue).toContainText(CONSIGNEE_NAME);
+  });
+
+  test('the documents Change link opens Upload documents on the review trail, and Save and continue walks each later page back to the review', async ({
+    animalsSeededJourney,
+    animalsJourney,
+    pages,
+    animalsPages,
+  }) => {
+    test.slow();
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+
+    await animalsPages.notificationView.changeLink('Change uploaded documents').click();
+    await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
+    await expectOpenFromReview(pages.page, animalsPages.accompanyingDocuments, referenceNumber, animalsPages.notificationView.slug);
+    await expectSaveAndContinueWalk(
+      pages.page,
+      referenceNumber,
+      [animalsPages.notificationView.slug],
+      animalsJourney.saveAndContinueStopsFrom(animalsPages.accompanyingDocuments),
+      animalsPages.notificationView,
+    );
+  });
+
+  test('the roles and addresses Change link opens a page whose Back link opens the review', async ({
     animalsSeededJourney,
     animalsPages,
   }) => {
@@ -87,7 +143,8 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
 
     await animalsPages.notificationView.changeLink('Change roles and addresses').click();
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await expect(animalsPages.addresses.linkBack).toHaveAttribute('href', animalsPages.overview.expectedUrl(referenceNumber));
+    await animalsPages.addresses.linkBack.click();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
   });
 
   test('the documents Change link opens the page with a Back link to the review, which stays after a refusal, after Save and add another and after Remove', async ({
@@ -98,11 +155,11 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     test.slow();
     const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
-    const reviewUrl = animalsPages.notificationView.expectedUrl(referenceNumber);
+    const reviewUrl = animalsPages.notificationView.expectedUrlPattern(referenceNumber);
 
     await animalsPages.notificationView.changeLink('Change uploaded documents').click();
     await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(animalsPages.accompanyingDocuments.changeContextUrl(referenceNumber));
+    await expectOpenFromReview(pages.page, animalsPages.accompanyingDocuments, referenceNumber, animalsPages.notificationView.slug);
     await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);
 
     await animalsPages.accompanyingDocuments.documentReference.fill('GBHC1234567890');

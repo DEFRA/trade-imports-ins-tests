@@ -1,8 +1,8 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { transporters } from '@domain/animals/constants/transporters';
-import { SET_BASES } from '@page-objects/shared/sets';
-import { OPENING_RUN_TASKS_OVERLAND_WITHOUT_IDENTIFICATION, certificateDocument } from '@flows/animals/journey';
+import { OVERLAND_WITHOUT_IDENTIFICATION_OVERVIEW_TASKS, certificateDocument } from '@flows/animals/journey';
 
 import { test, expect } from '@fixtures';
 
@@ -14,14 +14,15 @@ test.describe('Poultry by rail in transit', () => {
   }) => {
     test.slow();
 
-    const referenceNumber = await animalsJourney.walkOpeningRunPoultryByRail(certificateDocument('RAILDOC'));
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
+    const referenceNumber = await animalsJourney.walkPoultryByRail(certificateDocument('RAILDOC'));
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
 
-    await animalsPages.overview.open(referenceNumber);
-    await expect(animalsPages.overview.taskNames).toHaveText(OPENING_RUN_TASKS_OVERLAND_WITHOUT_IDENTIFICATION);
-    await expect(animalsPages.overview.taskStatuses).toHaveText(OPENING_RUN_TASKS_OVERLAND_WITHOUT_IDENTIFICATION.map(() => 'Complete'));
-    await animalsPages.overview.reviewAndSubmitButton.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await openReviewFromCompleteOverview(
+      animalsPages.overview,
+      animalsJourney,
+      referenceNumber,
+      OVERLAND_WITHOUT_IDENTIFICATION_OVERVIEW_TASKS,
+    );
 
     const importDetails = animalsPages.notificationView.summaryCard('Import details');
     await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Germany');

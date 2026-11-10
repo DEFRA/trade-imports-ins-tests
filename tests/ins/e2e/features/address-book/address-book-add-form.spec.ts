@@ -3,7 +3,7 @@ import { test, expect } from '@fixtures';
 import { InsAddressBookFormPage } from '@page-objects/ins/address-book/form-page';
 import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { ADDRESS_FORM_FIELD_LABELS, ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER } from '@domain/ins/constants/address-form';
-import { expectAbove } from './expect-above';
+import { expectAbove } from '@page-objects/shared/layout-checks';
 import { expectAddressBookList } from './expect-address-book-list';
 
 async function expectFieldsGroupedUnderSections(form: InsAddressBookFormPage): Promise<void> {

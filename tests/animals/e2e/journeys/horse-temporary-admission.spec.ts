@@ -1,10 +1,10 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
-import { SET_BASES } from '@page-objects/shared/sets';
 import {
   HORSE_TRANSPORT_ID,
   HORSE_TRANSPORTER,
-  OPENING_RUN_TASKS,
+  AIR_OR_SEA_OVERVIEW_TASKS,
   TEMPORARY_ADMISSION_EXIT_DATE,
   certificateDocument,
 } from '@flows/animals/journey';
@@ -18,14 +18,10 @@ test.describe('Horse by sea under temporary admission', () => {
     async ({ animalsJourney, animalsPages, pages }) => {
       test.slow();
 
-      const referenceNumber = await animalsJourney.walkOpeningRunHorseBySea(certificateDocument('SEADOC'));
-      await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
+      const referenceNumber = await animalsJourney.walkHorseBySea(certificateDocument('SEADOC'));
+      await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
 
-      await animalsPages.overview.open(referenceNumber);
-      await expect(animalsPages.overview.taskNames).toHaveText(OPENING_RUN_TASKS);
-      await expect(animalsPages.overview.taskStatuses).toHaveText(OPENING_RUN_TASKS.map(() => 'Complete'));
-      await animalsPages.overview.reviewAndSubmitButton.click();
-      await expect(animalsPages.notificationView.heading).toBeVisible();
+      await openReviewFromCompleteOverview(animalsPages.overview, animalsJourney, referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
 
       const importDetails = animalsPages.notificationView.summaryCard('Import details');
       await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Ireland');

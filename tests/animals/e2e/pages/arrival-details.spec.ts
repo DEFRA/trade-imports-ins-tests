@@ -67,13 +67,14 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
 
   test('leaves the arrival details unanswered on load', async ({ animalsPages }) => {
     await expect(animalsPages.arrivalDetails.portOfEntry.field).toBeVisible();
+    await expect(animalsPages.arrivalDetails.portOfEntry.field).toHaveValue('');
     await expect(animalsPages.arrivalDetails.meansOfTransport).toBeVisible();
     await expect(animalsPages.arrivalDetails.meansOfTransport).toHaveValue('');
   });
 
   test('accepts valid arrival details and completes the Arrival details task', async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.fillArrivalDetails();
-    await animalsPages.arrivalDetails.saveAndContinue.click();
+    await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.taskStatus('Arrival details')).toHaveText('Complete');
@@ -114,7 +115,7 @@ test.describe('Arrival details page', { tag: '@duplicated-in-frontend' }, () => 
   test('saves a means of transport alone, leaving the other arrival answers blank', async ({ animalsPages }) => {
     const referenceNumber = animalsPages.arrivalDetails.referenceNumberFromUrl();
     await animalsPages.arrivalDetails.chooseMeansOfTransport(meansOfTransport.roadVehicle.display);
-    await animalsPages.arrivalDetails.saveAndContinue.click();
+    await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.taskStatus('Arrival details')).toHaveText('To do');

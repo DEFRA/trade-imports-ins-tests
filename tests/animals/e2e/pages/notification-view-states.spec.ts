@@ -84,7 +84,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('lands on the view page with the Submitted strip and reference', async ({ pages, animalsPages, journeyContext }) => {
-      await expect(pages.page).toHaveURL(new RegExp(`${animalsPages.notificationView.expectedUrl(journeyContext.referenceNumber)}$`));
+      await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(journeyContext.referenceNumber));
       await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
       await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.referenceNumber);
     });

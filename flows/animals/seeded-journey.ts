@@ -17,9 +17,10 @@ import {
 import { MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { SET_BASES } from '@page-objects/shared/sets';
+import { OPTIONAL_TRAIL_PATTERN } from '@page-objects/shared/base-page';
 
 export const CREATE_PATH = `${SET_BASES.liveAnimals}/notifications`;
-const CREATED_AT_ORIGIN = new RegExp(`^${CREATE_PATH}/(?<referenceNumber>[^/]+)/origin$`);
+export const CREATED_AT_ORIGIN = new RegExp(`^${CREATE_PATH}/(?<referenceNumber>[^/?]+)/origin${OPTIONAL_TRAIL_PATTERN}$`);
 const CONCURRENCY_TOKEN_FIELD = /name="concurrencyToken" value="(?<token>[^"]+)"/;
 
 const concurrencyTokenIn = (html: string, slug: string): string => {
@@ -88,7 +89,7 @@ export class AnimalsSeededJourney {
     await this.forms.postForm(
       `${CREATE_PATH}/${referenceNumber}/amend`,
       {},
-      { redirectsTo: new RegExp(`^${CREATE_PATH}/${referenceNumber}$`) },
+      { redirectsTo: new RegExp(`^${CREATE_PATH}/${referenceNumber}/notification-view${OPTIONAL_TRAIL_PATTERN}$`) },
     );
   }
 
@@ -123,6 +124,8 @@ export class AnimalsSeededJourney {
     await animalsPages.addresses.heading.waitFor(pageLoadWait);
     await this.choosePartyInUi(animalsPages, 'Place of origin', animalsPages.placeOfOriginSelection, placeOfOriginName);
     await animalsPages.addresses.continueButton.click();
+    await animalsPages.contactAddress.heading.waitFor(pageLoadWait);
+    await animalsPages.contactAddress.saveAndContinue.click();
     await animalsPages.notificationView.heading.waitFor(pageLoadWait);
     await animalsPages.notificationView.continueButton.click();
     await animalsPages.declaration.heading.waitFor(pageLoadWait);

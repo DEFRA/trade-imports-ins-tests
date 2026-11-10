@@ -17,7 +17,7 @@ export class PlantsNotificationActions {
     await this.plantsPages.dashboard.open();
     await this.plantsPages.dashboard.searchForReference(referenceNumber);
     await this.plantsPages.dashboard.amend(referenceNumber).click();
-    await this.plantsPages.overview.heading.waitFor(pageLoadWait);
+    await this.plantsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
   async amendCompletedNotification(

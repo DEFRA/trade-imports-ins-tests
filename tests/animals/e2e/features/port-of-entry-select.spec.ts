@@ -26,7 +26,7 @@ test.describe('Port of entry type-ahead', { tag: '@duplicated-in-frontend' }, ()
     await expect(combobox).toHaveValue(PORT_OPTION);
     await animalsPages.arrivalDetails.fillArrivalDate(getRelativeDatePickerValue({ monthOffset: 1 }));
     await animalsPages.arrivalDetails.chooseMeansOfTransport(MANDATORY_ANSWERS.meansOfTransport.display);
-    await animalsPages.arrivalDetails.saveAndContinue.click();
+    await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.arrivalDetails.open(referenceNumber);

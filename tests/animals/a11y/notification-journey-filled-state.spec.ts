@@ -150,7 +150,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.commercialTransporter.saveAndContinue.click();
       await animalsPages.transporter.heading.waitFor();
       await runA11yScan();
-      await animalsPages.transporter.saveAndContinue.click();
+      await animalsPages.transporter.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
     });
 

@@ -25,9 +25,7 @@ test.describe('Commercial transporter scope', { tag: '@duplicated-in-frontend' }
     await expect(animalsPages.commercialTransporter.heading).toBeVisible();
     await expect(animalsPages.commercialTransporter.approvalNumber).toHaveValue(handTypedCommercialTransporter.approvalNumber);
     await expect(animalsPages.commercialTransporter.nameOrOrganisationName).toHaveValue(handTypedCommercialTransporter.name);
-    await animalsPages.commercialTransporter.saveAndContinue.click();
-    await expect(animalsPages.transporter.heading).toBeVisible();
-    await animalsPages.transporter.saveAndContinue.click();
+    await animalsJourney.saveTransporterDetailsToOverview(animalsPages.commercialTransporter);
 
     await animalsJourney.openTransporterFromOverview();
     await animalsJourney.chooseTransporterType('Private');
@@ -36,7 +34,7 @@ test.describe('Commercial transporter scope', { tag: '@duplicated-in-frontend' }
     await animalsJourney.fillAndSavePrivateTransporterAddForm(handTypedPrivateTransporter(privateTransporterName));
     await trackTransporterForDeletion(addressBookApi, privateTransporterName, createdTransporterIds);
     await expect(animalsPages.transporter.heading).toBeVisible();
-    await animalsPages.transporter.saveAndContinue.click();
+    await animalsPages.transporter.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsJourney.openTransporterFromOverview();

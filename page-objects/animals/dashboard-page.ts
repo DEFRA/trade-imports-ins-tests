@@ -95,6 +95,11 @@ export class AnimalsDashboardPage extends BasePage {
     await this.page.getByLabel('Keyword or reference').waitFor();
   }
 
+  async openAndSearchFor(referenceNumber: string): Promise<void> {
+    await this.open();
+    await this.searchForReference(referenceNumber);
+  }
+
   async searchForReference(referenceNumber: string): Promise<void> {
     await this.inputReferenceSearch.fill(referenceNumber);
     await Promise.all([

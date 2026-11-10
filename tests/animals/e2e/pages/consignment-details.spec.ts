@@ -37,7 +37,7 @@ test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () =
   test('accepts valid consignment details', async ({ animalsPages }) => {
     await animalsPages.consignmentDetails.numberOfAnimals.fill('1');
     await animalsPages.consignmentDetails.numberOfPackages.fill('5');
-    await animalsPages.consignmentDetails.saveAndContinue.click();
+    await animalsPages.consignmentDetails.saveAndReturnToOverview.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
   });
@@ -53,7 +53,7 @@ test.describe('Commodity details page', { tag: '@duplicated-in-frontend' }, () =
   test('saves a number of animals exactly at the largest the service stores and shows it back on the page', async ({ animalsPages }) => {
     await animalsPages.consignmentDetails.numberOfAnimals.fill('2147483647');
     await animalsPages.consignmentDetails.numberOfPackages.fill('5');
-    await animalsPages.consignmentDetails.saveAndContinue.click();
+    await animalsPages.consignmentDetails.saveAndReturnToOverview.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
 

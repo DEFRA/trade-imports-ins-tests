@@ -99,9 +99,10 @@ export class PlantsJourney {
     return referenceNumber;
   }
 
-  /** Leaves the commodity-type page for the Overview by Cancel, which saves nothing. */
-  async toOverview(): Promise<void> {
-    await this.plantsPages.commodityType.cancelAndReturnToOverview.click();
+  async toOverviewWithCommodityTypeSaved(commodityType: string): Promise<void> {
+    const reference = this.plantsPages.commodityType.referenceNumberFromUrl();
+    await this.chooseCommodityType(commodityType);
+    await this.plantsPages.overview.open(reference);
     await this.plantsPages.overview.heading.waitFor();
   }
 
@@ -134,7 +135,14 @@ export class PlantsJourney {
     await this.addCommodityLine(category, values);
   }
 
-  /** Continues from the commodities list to origin. Works only while the opening run is still open. */
+  async saveSeedPotatoLine(): Promise<string> {
+    const reference = await this.startNotification();
+    await this.chooseCommodityType(POTATOES);
+    await this.addCommodityLine(SEED_POTATOES, potatoLine);
+    return reference;
+  }
+
+  /** Continues from the commodities list to origin. */
   async toOrigin(): Promise<void> {
     await this.plantsPages.commodities.saveAndContinue.click();
     await this.plantsPages.origin.heading.waitFor();

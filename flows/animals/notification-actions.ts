@@ -14,12 +14,15 @@ export class AnimalsNotificationActions {
     await this.animalsPages.notificationView.open(referenceNumber);
   }
 
-  /** From the notification view, changes the country of origin and returns to the view. */
+  /** From the notification view, changes the country of origin, saves it and opens the notification view again. */
   async changeCountryOfOrigin(country: string): Promise<void> {
     await this.animalsPages.notificationView.changeLink('Change import details').click();
     await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
+    const referenceNumber = this.animalsPages.originOfImport.referenceNumberFromUrl();
     await this.animalsPages.originOfImport.country.choose(country);
-    await this.animalsPages.originOfImport.saveAndReturn.click();
+    await this.animalsPages.originOfImport.saveAndContinue.click();
+    await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
+    await this.animalsPages.notificationView.open(referenceNumber);
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
@@ -27,13 +30,12 @@ export class AnimalsNotificationActions {
     await this.animalsPages.dashboard.open();
     await this.animalsPages.dashboard.searchForReference(referenceNumber);
     await this.animalsPages.dashboard.amend(referenceNumber).click();
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
   /** Amends a submitted notification's country of origin and resubmits it, landing on the submitted confirmation. */
   async amendCountryOfOriginAndResubmit(referenceNumber: string, country: CountryCode): Promise<void> {
     await this.amendNotification(referenceNumber);
-    await this.animalsPages.overview.reviewAndSubmitButton.click();
     await this.changeCountryOfOrigin(country.display);
     await this.animalsPages.notificationView.continueButton.click();
     await this.animalsPages.declaration.heading.waitFor(pageLoadWait);

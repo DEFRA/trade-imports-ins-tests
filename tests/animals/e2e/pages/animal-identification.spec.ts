@@ -16,8 +16,9 @@ test.describe('Animal identification page', { tag: '@duplicated-in-frontend' }, 
     await expect(animalsPages.animalIdentification.saveAndContinue).toBeVisible();
   });
 
-  test('leaves the ear tag empty on load', async ({ animalsPages }) => {
+  test('leaves the ear tag and the passport number empty on load', async ({ animalsPages }) => {
     await expect(animalsPages.animalIdentification.earTag).toHaveValue('');
+    await expect(animalsPages.animalIdentification.passportNumber).toHaveValue('');
   });
 
   test('accepts a valid ear tag', async ({ pages, animalsPages }) => {
@@ -97,7 +98,7 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
   test('leaves a species of more than one animal unsaved when Save and continue is pressed', async ({ animalsPages }) => {
     const { domesticCat } = commodityLines;
     await animalsPages.animalIdentification.speciesCard(domesticCat).getByLabel('Passport', { exact: true }).fill('UK123456789');
-    await animalsPages.animalIdentification.saveAndContinue.click();
+    await animalsPages.animalIdentification.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.overview.task('Identification details').click();
@@ -137,6 +138,7 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await animalsPages.commoditySelection.saveAndContinue.click();
 
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
-    await expect(animalsPages.animalIdentification.selectedCommodities.bodyRows).toContainText([commodityLines.cattle.commodityCode]);
+    await expect(animalsPages.animalIdentification.selectedCommodities.bodyRows).toHaveCount(1);
+    await expect(animalsPages.animalIdentification.selectedCommodities.rowFor(commodityLines.cattle)).toBeVisible();
   });
 });

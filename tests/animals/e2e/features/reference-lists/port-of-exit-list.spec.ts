@@ -48,7 +48,7 @@ test.describe('Port of exit answer', () => {
     const [{ code: firstPortCode }] = portsOfEntry;
     await animalsPages.importReason.selectTransitPortOfExitByIndex(1);
     await animalsPages.importReason.selectTransitDestinationCountry(countryCodes.eu.france.value);
-    await animalsPages.importReason.saveAndContinue.click();
+    await animalsPages.importReason.saveAndReturnToOverview.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task(IMPORT_REASON_TASK).click();

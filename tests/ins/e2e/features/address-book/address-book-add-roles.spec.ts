@@ -12,7 +12,7 @@ import {
   rolesQuestionOptions,
 } from '@domain/ins/constants/address-book-types';
 import { countryByCode } from '@resources/reference-data/reference-data';
-import { expectAbove } from './expect-above';
+import { expectAbove } from '@page-objects/shared/layout-checks';
 
 const UNITED_KINGDOM = 'United Kingdom';
 const FRANCE = countryByCode('FR');

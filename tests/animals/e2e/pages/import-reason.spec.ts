@@ -23,7 +23,7 @@ test.describe('Import reason page', { tag: '@duplicated-in-frontend' }, () => {
 
   test('accepts a valid import reason and returns to the overview', async ({ animalsPages }) => {
     await animalsPages.importReason.reason('Re-entry').check();
-    await animalsPages.importReason.saveAndContinue.click();
+    await animalsPages.importReason.saveAndReturnToOverview.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
   });
@@ -35,7 +35,7 @@ test.describe('Import reason page', { tag: '@duplicated-in-frontend' }, () => {
     await expect(animalsPages.importReason.purpose('Breeding')).not.toBeChecked();
 
     await animalsPages.importReason.purpose('Breeding').check();
-    await animalsPages.importReason.saveAndContinue.click();
+    await animalsPages.importReason.saveAndReturnToOverview.click();
 
     await expect(animalsPages.overview.heading).toBeVisible();
   });

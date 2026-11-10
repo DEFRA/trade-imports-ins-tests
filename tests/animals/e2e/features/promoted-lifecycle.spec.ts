@@ -45,7 +45,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     expect(repeatDelete.status).toBe(notificationStatuses.deleted);
   });
 
-  test('renders a submitted notification read-only and re-enters an amendment at Overview', async ({
+  test('renders a submitted notification read-only and opens an amendment at the review page', async ({
     animalsJourney,
     journeyContext,
     pages,
@@ -59,10 +59,9 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
-
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
-    await expect(animalsPages.overview.heading).toBeVisible();
-    await expect(animalsPages.overview.statusTag).toHaveText('Amend');
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
   });
 
   test("Back from a submitted notification's view opens the notification list", async ({
@@ -81,7 +80,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await expect(animalsPages.dashboard.heading).toBeVisible();
   });
 
-  test('Back from an amendment review opens the overview', async ({
+  test('Back from an amendment review opened by Amend on the dashboard opens the dashboard', async ({
     animalsJourney,
     journeyContext,
     animalsPages,
@@ -91,9 +90,8 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await animalsJourney.submitNotification();
 
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
-    await animalsPages.overview.reviewAndSubmitButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await animalsPages.notificationView.linkBack.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.dashboard.heading).toBeVisible();
   });
 });

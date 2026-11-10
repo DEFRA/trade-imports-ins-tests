@@ -36,7 +36,7 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
     await plantsPages.placeOfDestinationEdit.fill({ name: editedName });
     await plantsPages.placeOfDestinationEdit.saveChanges.click();
 
-    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrlPattern(reference));
     await expect(plantsPages.placeOfDestination.currentAddress).toContainText(editedName);
     await expect(plantsPages.placeOfDestination.selectedAddressInset).toHaveCount(0);
 
@@ -58,7 +58,7 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
         const { searchTerm } = await plantsJourney.createSearchTickThenDeleteAddress(addressBookApi, picker);
         await save.click();
 
-        await expect(pages.page).toHaveURL(picker.expectedUrl(reference));
+        await expect(pages.page).toHaveURL(picker.expectedUrlPattern(reference));
         await expect(picker.errorSummaryLinks).toHaveText([errorText]);
         await expect(picker.searchBox).toHaveValue(searchTerm);
       }

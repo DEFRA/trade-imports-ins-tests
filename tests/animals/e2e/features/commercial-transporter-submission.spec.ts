@@ -11,7 +11,7 @@ test.describe('Commercial transporter journeys', () => {
 
       await animalsPages.transitedCountries.addCountry('France');
       await animalsPages.transitedCountries.addCountry('Belgium');
-      await animalsPages.transitedCountries.saveAndContinue.click();
+      await animalsPages.transitedCountries.saveAndReturnToOverview.click();
 
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Transport details').click();
@@ -25,7 +25,7 @@ test.describe('Commercial transporter journeys', () => {
 
       await animalsPages.overview.task('Contact address for this consignment').click();
       await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
-      await animalsPages.contactAddress.saveAndContinue.click();
+      await animalsPages.contactAddress.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
 
       await animalsJourney.openReviewFromOverview();
