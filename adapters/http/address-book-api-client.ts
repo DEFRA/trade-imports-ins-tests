@@ -4,10 +4,7 @@ import { getAddressBookBaseUrl, getDeveloperApiKey } from '@config/service-base-
 import type { AddressRole } from '@domain/shared/constants/address-types';
 import type { TransporterType } from '@domain/ins/constants/transporter-types';
 
-/** The organisation id that CRN 2100010101, the default E2E sign-in, belongs to. */
-export const E2E_ORGANISATION_ID = '5900001';
-
-const ORGANISATION_ID_HEADER = 'Trade-Imports-Organisation-Id';
+import { E2E_ORGANISATION_ID, organisationHeaders, type TraderApiClientOptions } from '@adapters/http/organisation';
 
 interface StandardAddressBlockRecord {
   id: string;
@@ -45,18 +42,12 @@ interface ApiPage<T> {
 /** Direct HTTP access to one organisation's address book. */
 export class AddressBookApiClient {
   private readonly rest: RestClient;
+  private readonly organisationId: string;
 
-  constructor(
-    request: APIRequestContext,
-    private readonly organisationId: string = E2E_ORGANISATION_ID,
-    baseUrl: string = getAddressBookBaseUrl(),
-    apiKey: string | undefined = getDeveloperApiKey(),
-  ) {
+  constructor(request: APIRequestContext, options: TraderApiClientOptions = {}) {
+    const { organisationId = E2E_ORGANISATION_ID, baseUrl = getAddressBookBaseUrl(), apiKey = getDeveloperApiKey() } = options;
+    this.organisationId = organisationId;
     this.rest = new RestClient(baseUrl, request, apiKey);
-  }
-
-  private get headers(): Record<string, string> {
-    return { [ORGANISATION_ID_HEADER]: this.organisationId };
   }
 
   private path(addressId?: string): string {
@@ -89,13 +80,13 @@ export class AddressBookApiClient {
       params.set('q', query);
     }
     const search = params.size ? `?${params}` : '';
-    const page = await this.rest.get<ApiPage<AddressBookRecord>>(`${this.path()}${search}`, this.headers);
+    const page = await this.rest.get<ApiPage<AddressBookRecord>>(`${this.path()}${search}`, organisationHeaders(this.organisationId));
     return page.items;
   }
 
   /** Saves a new address to the organisation's book. */
   async createAddress(request: AddressBookRequest): Promise<AddressBookRecord> {
-    return this.rest.post<AddressBookRecord>(this.path(), request, this.headers);
+    return this.rest.post<AddressBookRecord>(this.path(), request, organisationHeaders(this.organisationId));
   }
 
   /** The live address with this name. Throws unless exactly one live address has it. */
@@ -109,29 +100,32 @@ export class AddressBookApiClient {
 
   /** Replaces an address with the whole record given. */
   async updateAddress(addressId: string, request: AddressBookRequest): Promise<AddressBookRecord> {
-    return this.rest.put<AddressBookRecord>(this.path(addressId), request, this.headers);
+    return this.rest.put<AddressBookRecord>(this.path(addressId), request, organisationHeaders(this.organisationId));
   }
 
   /** One address by id, including a soft-deleted tombstone (`deleted: true`). */
   async getAddress(addressId: string): Promise<AddressBookRecord> {
-    return this.rest.get<AddressBookRecord>(this.path(addressId), this.headers);
+    return this.rest.get<AddressBookRecord>(this.path(addressId), organisationHeaders(this.organisationId));
   }
 
   /** Soft-deletes an address. Deleting an address already deleted succeeds. */
   async deleteAddress(addressId: string): Promise<void> {
-    await this.rest.delete(this.path(addressId), this.headers);
+    await this.rest.delete(this.path(addressId), organisationHeaders(this.organisationId));
   }
 
   /** The first page of the organisation's live transporters matching the search, newest first. */
   async listTransporters(query?: string): Promise<TransporterRecord[]> {
     const search = query ? `?${new URLSearchParams({ q: query })}` : '';
-    const page = await this.rest.get<ApiPage<TransporterRecord>>(`${this.transporterPath()}${search}`, this.headers);
+    const page = await this.rest.get<ApiPage<TransporterRecord>>(
+      `${this.transporterPath()}${search}`,
+      organisationHeaders(this.organisationId),
+    );
     return page.items;
   }
 
   /** Saves a new transporter to the organisation's book. */
   async createTransporter(request: TransporterRequest): Promise<TransporterRecord> {
-    return this.rest.post<TransporterRecord>(this.transporterPath(), request, this.headers);
+    return this.rest.post<TransporterRecord>(this.transporterPath(), request, organisationHeaders(this.organisationId));
   }
 
   /** The live transporter with this name. Throws unless exactly one live transporter has it. */
@@ -145,6 +139,6 @@ export class AddressBookApiClient {
 
   /** Soft-deletes a transporter. Deleting a transporter already deleted succeeds. */
   async deleteTransporter(transporterId: string): Promise<void> {
-    await this.rest.delete(this.transporterPath(transporterId), this.headers);
+    await this.rest.delete(this.transporterPath(transporterId), organisationHeaders(this.organisationId));
   }
 }

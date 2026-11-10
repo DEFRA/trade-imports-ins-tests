@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 import sharedConfig from './utils/playwright/shared-config';
 import { getEnvironment } from './utils/playwright/environment';
 import { applyDomainBaseUrls } from './utils/playwright/domain-base-urls';
-import { withServiceBaseUrls } from './utils/playwright/with-service-base-urls';
+import { applyServiceBaseUrls } from './utils/playwright/apply-service-base-urls';
 import { cdpServiceUrl } from './utils/playwright/cdp-service-url';
 import { withZapProxy } from './utils/playwright/with-zap-proxy';
 import { sessionReuseEnabled } from './utils/playwright/session-reuse';
@@ -19,11 +19,14 @@ applyDomainBaseUrls(
   'cdp',
 );
 
-const cdpConfig = withServiceBaseUrls(sharedConfig, {
+applyServiceBaseUrls({
   TRADE_IMPORTS_ANIMALS_BACKEND_URL: cdpServiceUrl('trade-imports-animals-backend', environment),
+  TRADE_IMPORTS_PLANTS_BACKEND_URL: cdpServiceUrl('trade-imports-plants-backend', environment),
   TRADE_IMPORTS_ADDRESS_BOOK_URL: cdpServiceUrl('trade-imports-address-book', environment),
   TRADE_IMPORTS_REFERENCE_DATA_URL: cdpServiceUrl('trade-imports-reference-data', environment),
 });
+
+const cdpConfig = sharedConfig;
 
 const CDP_TEST_TIMEOUT_MS = 60_000;
 const CDP_EXPECT_TIMEOUT_MS = 15_000;

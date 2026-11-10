@@ -21,6 +21,8 @@ import { InsJourney } from '@flows/ins/journey';
 import { PlantsJourney } from '@flows/plants/journey';
 import { PlantsNotificationActions } from '@flows/plants/notification-actions';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
+import { OTHER_ORGANISATION_ID } from '@adapters/http/organisation';
+import { getPlantsBackendBaseUrl } from '@config/service-base-urls';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { ReferenceDataApiClient } from '@adapters/http/reference-data-api-client';
 import { FrontendFormClient } from '@adapters/http/frontend-form-client';
@@ -65,6 +67,9 @@ export interface PageFixtures {
   plantsJourney: PlantsJourney;
   plantsNotificationActions: PlantsNotificationActions;
   notificationApi: NotificationApiClient;
+  otherOrganisationNotificationApi: NotificationApiClient;
+  plantsNotificationApi: NotificationApiClient;
+  otherOrganisationPlantsNotificationApi: NotificationApiClient;
   addressBookApi: AddressBookApiClient;
   isolatedOrganisationAddressBookApi: AddressBookApiClient;
   referenceDataApi: ReferenceDataApiClient;
@@ -148,11 +153,25 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   notificationApi: async ({ request }, use) => {
     await use(new NotificationApiClient(request));
   },
+  otherOrganisationNotificationApi: async ({ request }, use) => {
+    await use(new NotificationApiClient(request, { organisationId: OTHER_ORGANISATION_ID }));
+  },
+  plantsNotificationApi: async ({ request }, use) => {
+    await use(new NotificationApiClient(request, { baseUrl: getPlantsBackendBaseUrl() }));
+  },
+  otherOrganisationPlantsNotificationApi: async ({ request }, use) => {
+    await use(
+      new NotificationApiClient(request, {
+        baseUrl: getPlantsBackendBaseUrl(),
+        organisationId: OTHER_ORGANISATION_ID,
+      }),
+    );
+  },
   addressBookApi: async ({ request }, use) => {
     await use(new AddressBookApiClient(request));
   },
   isolatedOrganisationAddressBookApi: async ({ request }, use) => {
-    await use(new AddressBookApiClient(request, `e2e-isolated-organisation-${randomUUID()}`));
+    await use(new AddressBookApiClient(request, { organisationId: `e2e-isolated-organisation-${randomUUID()}` }));
   },
   referenceDataApi: async ({ request }, use) => {
     await use(new ReferenceDataApiClient(request));
