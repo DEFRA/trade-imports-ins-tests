@@ -2,40 +2,20 @@ import { test, expect } from '@fixtures';
 import { expectRolesOptions } from '@utils/roles-options-assertions';
 import { ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
-import { addressTypes } from '@domain/shared/constants/address-types';
 import {
+  addFormNameOf,
   addressTypeLabels,
-  addressTypesRequiringUnitedKingdom,
   roleBackedAddressBookTabs,
   rolesLabelOf,
   rolesQuestion,
   rolesQuestionLegends,
   rolesQuestionOptions,
 } from '@domain/ins/constants/address-book-types';
+import { countryByCode } from '@resources/reference-data/reference-data';
 import { expectAbove } from '@page-objects/shared/layout-checks';
 
 const UNITED_KINGDOM = 'United Kingdom';
-
-test.describe('The Country select on the add form', () => {
-  for (const addressType of addressTypesRequiringUnitedKingdom) {
-    test(`a ${addressTypeLabels[addressType]} address offers United Kingdom alone, selected`, async ({ insPages, insJourney }) => {
-      await insJourney.toAddressForm({ addressType });
-
-      await expect(insPages.addressBookAdd.countryOptions).toHaveText([UNITED_KINGDOM]);
-      await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText(UNITED_KINGDOM);
-    });
-  }
-
-  test(`an ${addressTypeLabels[addressTypes.originOrConsignor]} address lists Select a country first and opens with United Kingdom selected`, async ({
-    insPages,
-    insJourney,
-  }) => {
-    await insJourney.toAddressForm({ addressType: addressTypes.originOrConsignor });
-
-    await expect(insPages.addressBookAdd.countryOptions.first()).toHaveText('Select a country');
-    await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText(UNITED_KINGDOM);
-  });
-});
+const FRANCE = countryByCode('FR');
 
 for (const tab of roleBackedAddressBookTabs) {
   const { addressType } = tab;
@@ -43,7 +23,7 @@ for (const tab of roleBackedAddressBookTabs) {
   const offeredRoles = rolesQuestionOptions[addressType];
   const legend = rolesQuestionLegends[addressType];
 
-  test.describe(`Adding a ${addressTypeLabel} address`, () => {
+  test.describe(`The ${addFormNameOf(addressType)}`, () => {
     test('opens the form with only the address and contact text fields, a section break, and the roles question with its legend, hint and options', async ({
       insPages,
       insJourney,
@@ -105,7 +85,7 @@ for (const tab of roleBackedAddressBookTabs) {
     }) => {
       const name = `All Roles ${addressTypeLabel} ${Date.now()}`;
 
-      await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(name, UNITED_KINGDOM), { addressType, roles: offeredRoles });
+      await insJourney.addAddressFromList(addFormAddressWithLineTwoAndCounty(name, FRANCE.display), { addressType, roles: offeredRoles });
 
       await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(tab));
       await expect(insPages.addressBookList.selectedTab).toHaveText(tab.label);
@@ -115,7 +95,7 @@ for (const tab of roleBackedAddressBookTabs) {
       await expect(insPages.addressBookList.rolesCell(name)).toHaveText(rolesLabelOf(stored.roles));
       expect({ roles: [...stored.roles].sort(), countryCode: stored.countryCode }).toEqual({
         roles: [...offeredRoles].sort(),
-        countryCode: 'GB',
+        countryCode: FRANCE.value,
       });
     });
   });

@@ -666,10 +666,9 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     addressBookApi,
   }) => {
     test.slow();
-    const rolesStoredInAnyCountry = [addressRoles.consignor];
     const { reference } = await plantsJourney.completeNotification(addressBookApi, {
       countryCode: 'United Kingdom',
-      roles: rolesStoredInAnyCountry,
+      roles: [addressRoles.consignor],
       name: `Invalid address (country "United Kingdom" is not a code) ${randomUUID()}`,
     });
     const error = 'Correct the address details for the place of destination';

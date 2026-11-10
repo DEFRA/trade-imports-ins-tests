@@ -192,9 +192,7 @@ alongside it reads those. A spec that checks a copied address against the
 notification's rules makes a record whose country is a country name rather
 than a listed code: the address book checks only that a country is present,
 so that is the one way through the services alone to copy an address the
-notification refuses. The address book refuses a consignee, importer or place
-of destination outside the United Kingdom, so that record is minted with a
-sending role.
+notification refuses.
 
 The address book is shared and, locally, never wiped, so a spec that counts
 rows either searches for a token only its own run created, or uses
@@ -309,7 +307,7 @@ Always end a directory with `/`. Playwright reads the path as a regex, so
 `tests/animals` would also run `tests/animals-admin/`.
 
 A Playwright project is browser config only. Both configs have `chromium`, which
-runs every domain, plus opt-in `firefox`, `webkit` and `mobile-webkit` projects for the
+runs every domain, plus opt-in `firefox`, `webkit`, `mobile-webkit` and `mobile-chromium` projects for the
 [cross-browser tests](#cross-browser-tests).
 
 Within a domain directory, specs are grouped by test type, then by feature:
@@ -409,8 +407,8 @@ If it is not set, Playwright's default applies (50% of cores on CI).
 
 ## Cross-browser tests
 
-Tests tagged `@cross-browser` also run in Playwright's Firefox, WebKit and an
-emulated iPhone 17, to render every page in each. Each domain has its own commands:
+Tests tagged `@cross-browser` also run in Playwright's Firefox, WebKit, an
+emulated iPhone 17 and an emulated Pixel 10, to render every page in each. Each domain has its own commands:
 [animals](tests/animals/cross-browser/README.md),
 [animals-admin](tests/animals-admin/cross-browser/README.md) and
 [ins](tests/ins/cross-browser/README.md). `npm run test:docker-compose:cross-browser`
@@ -499,7 +497,7 @@ If `PROFILE` is not set, the `default` profile is used.
 | `default`         | e2e test suite                                                                                 | `npm test`                   |
 | `a11y`            | accessibility test suite                                                                       | `npm run test:a11y`          |
 | `dynamics`        | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics`      |
-| `cross-browser`   | `@cross-browser` tests in Firefox, WebKit and iPhone 17                                        | `npm run test:cross-browser` |
+| `cross-browser`   | `@cross-browser` tests in Firefox, WebKit, iPhone 17 and Pixel 10                              | `npm run test:cross-browser` |
 | `security`        | security test suite (ZAP passive scan)                                                         | `npm run test:security`      |
 | `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                            |
 
