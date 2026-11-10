@@ -340,7 +340,7 @@ test.describe('The country list on the INS add page reached from the journey', (
 
   for (const role of ['Place of origin', 'Consignor', 'Consignee'] as const) {
     test(
-      `the INS add page reached from the ${role} picker offers Select a country, then every captured country, alphabetically`,
+      `the INS add page reached from the ${role} picker lists Select a country first, then every country reference data serves alphabetically, United Kingdom in its place`,
       { tag: ['@address-book', '@ins-frontend'] },
       async ({ animalsJourney, insPages }) => {
         const addPage = insPages.addressBookAdd;
