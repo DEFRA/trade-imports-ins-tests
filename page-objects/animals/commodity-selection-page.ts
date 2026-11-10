@@ -37,6 +37,10 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.locator('#commodity-selection');
   }
 
+  get noResults(): Locator {
+    return this.page.locator('#commodity-search-results').getByText('No results found', { exact: true });
+  }
+
   get clearAll(): Locator {
     return this.page.getByRole('button', { name: 'Clear all' });
   }

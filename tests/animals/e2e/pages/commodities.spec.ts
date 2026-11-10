@@ -91,7 +91,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
 
   test('says so when nothing matches', async ({ pages, animalsPages }) => {
     await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
-    await expect(pages.page.getByText('No results found')).toBeVisible();
+    await expect(animalsPages.commoditySelection.noResults).toBeVisible();
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
   });
 
@@ -154,6 +154,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
       await animalsPages.overview.task('What are you importing?').click();
       await animalsPages.commoditySelection.clearAll.click();
       await animalsPages.commoditySelection.saveAndReturnToOverview.click();
+      await expect(animalsPages.commoditySelection.errorSummaryLinks).toBeVisible();
     });
 
     test('refuses the save with "Select a commodity" and stays on the page', async ({ animalsPages }) => {
