@@ -50,7 +50,7 @@ env:
         dataDrivenNodes:
           - name: addressId
             regex: '(.*/address-book/)([^/]+)'
-    - name: backend
+    - name: animals-backend
       urls:
         - ${ZAP_TRADE_IMPORTS_ANIMALS_BACKEND_URL}
       excludePaths:
@@ -78,7 +78,7 @@ env:
         dataDrivenNodes:
           - name: referenceNumber
             regex: '(.*/notifications/)([^/]+)'
-    # Same actuator surface as backend (confirmed in address-book's own
+    # Same actuator surface as animals-backend (confirmed in address-book's own
     # application.yml: base-path "/", health/info/metrics/cache/env).
     - name: address-book
       urls:

@@ -10,7 +10,7 @@ const getServiceBaseUrl = (envVar: string): string => {
 
 export const getAnimalsFrontendBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
 
-export const getBackendBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_ANIMALS_BACKEND_URL');
+export const getAnimalsBackendBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_ANIMALS_BACKEND_URL');
 
 export const getPlantsBackendBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_PLANTS_BACKEND_URL');
 

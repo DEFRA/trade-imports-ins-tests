@@ -49,7 +49,7 @@ esac
 # resolves them from its own process environment, so they have to be
 # exported before zap.sh starts, not computed by the Node/tsx side (that
 # would only land in the Playwright child process's own env, never back up
-# to this shell). All four are reached directly, built straight from the
+# to this shell). Each is reached directly, built straight from the
 # same ENVIRONMENT CDP already sets — unlike cdpServiceUrl() (used by the
 # laptop-targeting-CDP path outside this script), there's no CDP_LOCAL
 # branch here: this script only ever runs as a CDP-hosted job, already

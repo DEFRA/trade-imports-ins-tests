@@ -1,44 +1,31 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient, RestClientError } from '@adapters/http/rest-client';
-import { E2E_ORGANISATION_ID, ORGANISATION_ID_HEADER } from '@adapters/http/trader-api-headers';
-import { getBackendBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
+import { E2E_ORGANISATION_ID, organisationHeaders, type TraderApiClientOptions } from '@adapters/http/organisation';
+import { getAnimalsBackendBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
 import type { NotificationFulfilments } from '@domain/animals/models/api/notification-fulfilments';
 import type { Notification } from '@domain/animals/models/api/notification';
 
-// Per-aggregate outbox lock (NotificationService.writeWithOutbox via ShedLock) fails a
-// second submit/amend that lands inside the first's lock window with a 500. Human clicks
-// never race like this; back-to-back API calls in a test do.
-const OUTBOX_LOCK_RETRY_ATTEMPTS = 3;
-const OUTBOX_LOCK_RETRY_BASE_MS = 500;
+const SUBMIT_RETRY_ATTEMPTS = 3;
+const SUBMIT_RETRY_BASE_MS = 500;
 
 /**
  * HTTP client for the notification api.
  */
 export class NotificationApiClient {
   private readonly rest: RestClient;
+  private readonly organisationId: string;
 
-  constructor(
-    request: APIRequestContext,
-    baseUrl: string = getBackendBaseUrl(),
-    apiKey: string | undefined = getDeveloperApiKey(),
-    private readonly organisationId: string = E2E_ORGANISATION_ID,
-  ) {
+  constructor(request: APIRequestContext, options: TraderApiClientOptions = {}) {
+    const { baseUrl = getAnimalsBackendBaseUrl(), apiKey = getDeveloperApiKey(), organisationId = E2E_ORGANISATION_ID } = options;
+    this.organisationId = organisationId;
     this.rest = new RestClient(baseUrl, request, apiKey);
   }
 
-  private get headers(): Record<string, string> {
-    return { [ORGANISATION_ID_HEADER]: this.organisationId };
-  }
-
   async getNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
-    return this.rest.get<NotificationFulfilments>(`/notifications/${id}/fulfilments`, this.headers);
+    return this.rest.get<NotificationFulfilments>(`/notifications/${id}/fulfilments`, organisationHeaders(this.organisationId));
   }
 
-  /**
-   * Mint a new notification. Empty nested notification → server mints the
-   * reference number via ReferenceNumberGenerator and returns it in the response.
-   * Body shape is {@code SaveNotificationDto}: `{ notification, actor? }`.
-   */
+  /** POST /notifications — returns the created notification including its reference number. */
   async createNotification(notification: Record<string, unknown> = {}, actor?: Record<string, unknown>): Promise<Notification> {
     return this.rest.post<Notification>(
       '/notifications',
@@ -46,16 +33,11 @@ export class NotificationApiClient {
         notification,
         ...(actor ? { actor } : {}),
       },
-      this.headers,
+      organisationHeaders(this.organisationId),
     );
   }
 
-  /**
-   * Whole-record replace of an existing notification via PUT /notifications/{id}.
-   * 404 if the reference is unknown, 400 without a matching concurrencyToken. The
-   * optional actor supplies organisationId so address-book party references
-   * resolve onto the NotificationEdited event.
-   */
+  /** PUT /notifications/{id} — whole-record replace; optional actor metadata. */
   async saveNotification(
     id: string,
     concurrencyToken: number,
@@ -68,35 +50,46 @@ export class NotificationApiClient {
         notification: { referenceNumber: id, concurrencyToken, ...notification },
         ...(actor ? { actor } : {}),
       },
-      this.headers,
+      organisationHeaders(this.organisationId),
     );
   }
 
   async submitNotification(id: string, concurrencyToken: number): Promise<Notification> {
     return this.retryOnTransientOutboxLock(() =>
-      this.rest.post<Notification>(`/notifications/${id}/submit?concurrencyToken=${concurrencyToken}`, undefined, this.headers),
+      this.rest.post<Notification>(
+        `/notifications/${id}/submit?concurrencyToken=${concurrencyToken}`,
+        undefined,
+        organisationHeaders(this.organisationId),
+      ),
     );
   }
 
   async amendNotification(id: string): Promise<Notification> {
-    return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/amend`, undefined, this.headers));
+    return this.retryOnTransientOutboxLock(() =>
+      this.rest.post<Notification>(`/notifications/${id}/amend`, undefined, organisationHeaders(this.organisationId)),
+    );
   }
 
   async cancelAmendNotification(id: string): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`, undefined, this.headers);
+    return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`, undefined, organisationHeaders(this.organisationId));
   }
 
   async copyNotification(id: string, concurrencyToken: number): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/copy?concurrencyToken=${concurrencyToken}`, undefined, this.headers);
+    return this.rest.post<Notification>(
+      `/notifications/${id}/copy?concurrencyToken=${concurrencyToken}`,
+      undefined,
+      organisationHeaders(this.organisationId),
+    );
   }
 
   async softDeleteNotification(id: string): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/soft-delete`, undefined, this.headers);
+    return this.rest.post<Notification>(`/notifications/${id}/soft-delete`, undefined, organisationHeaders(this.organisationId));
   }
 
-  async listNotifications(referenceNumber?: string): Promise<{ totalElements: number }> {
+  async countNotifications(referenceNumber?: string): Promise<number> {
     const path = referenceNumber === undefined ? '/notifications' : `/notifications?referenceNumber=${encodeURIComponent(referenceNumber)}`;
-    return this.rest.get<{ totalElements: number }>(path, this.headers);
+    const page = await this.rest.get<{ totalElements: number }>(path, organisationHeaders(this.organisationId));
+    return page.totalElements;
   }
 
   private async retryOnTransientOutboxLock<T>(action: () => Promise<T>): Promise<T> {
@@ -105,8 +98,8 @@ export class NotificationApiClient {
         return await action();
       } catch (error) {
         const transientLock = error instanceof RestClientError && error.status === 500;
-        if (!transientLock || attempt >= OUTBOX_LOCK_RETRY_ATTEMPTS) throw error;
-        await new Promise((resolve) => setTimeout(resolve, OUTBOX_LOCK_RETRY_BASE_MS * attempt));
+        if (!transientLock || attempt >= SUBMIT_RETRY_ATTEMPTS) throw error;
+        await new Promise((resolve) => setTimeout(resolve, SUBMIT_RETRY_BASE_MS * attempt));
       }
     }
   }

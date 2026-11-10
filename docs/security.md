@@ -48,17 +48,18 @@ ZAP runs as part of the shared workspace stack (`docker/stack/security.compose.y
 
 ## What gets scanned
 
-| Service                          | Local port | ZAP context    |
-| -------------------------------- | ---------- | -------------- |
-| `trade-imports-animals-frontend` | 3000       | `frontend`     |
-| `trade-imports-animals-admin`    | 3001       | `admin`        |
-| `trade-imports-ins-frontend`     | 3002       | `ins`          |
-| `trade-imports-animals-backend`  | 8085       | `backend`      |
-| `trade-imports-address-book`     | 8089       | `address-book` |
+| Service                          | Local port | ZAP context       |
+| -------------------------------- | ---------- | ----------------- |
+| `trade-imports-animals-frontend` | 3000       | `frontend`        |
+| `trade-imports-animals-admin`    | 3001       | `admin`           |
+| `trade-imports-ins-frontend`     | 3002       | `ins`             |
+| `trade-imports-animals-backend`  | 8085       | `animals-backend` |
+| `trade-imports-plants-backend`   | 8091       | `plants-backend`  |
+| `trade-imports-address-book`     | 8089       | `address-book`    |
 
-The `@active` corpus is written against the three frontends. The two APIs are scanned all the same: every API client here is built from Playwright's own `request` fixture, which inherits the project's proxy, so the specs' seeding and assertion calls reach ZAP as real traffic.
+The `@active` corpus is written against the three frontends. The three APIs are scanned all the same: every API client here is built from Playwright's own `request` fixture, which inherits the project's proxy, so the specs' seeding and assertion calls reach ZAP as real traffic.
 
-Ports are the compose stack's; on CDP each service is a per-service subdomain. Diagnostics are excluded rather than scanned: `/health` and static assets on the Node contexts, and the full actuator set (`/health`, `/info`, `/metrics`, `/cache`, `/env`) on the two Java services.
+Ports are the compose stack's; on CDP each service is a per-service subdomain. Diagnostics are excluded rather than scanned: `/health` and static assets on the Node contexts, and the full actuator set (`/health`, `/info`, `/metrics`, `/cache`, `/env`) on the three Java services.
 
 ### What is not, and why
 
