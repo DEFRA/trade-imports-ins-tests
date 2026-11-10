@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 import sharedConfig from './utils/playwright/shared-config';
 import { withContainerHostResolver } from './utils/playwright/with-container-host-resolver';
 import { applyDomainBaseUrls } from './utils/playwright/domain-base-urls';
-import { withServiceBaseUrls } from './utils/playwright/with-service-base-urls';
+import { applyServiceBaseUrls } from './utils/playwright/apply-service-base-urls';
 import { withZapProxy } from './utils/playwright/with-zap-proxy';
 
 applyDomainBaseUrls(
@@ -15,9 +15,10 @@ applyDomainBaseUrls(
   'docker-compose',
 );
 
-const dockerComposeConfig = withServiceBaseUrls(sharedConfig, {
+applyServiceBaseUrls({
   MONGODB_URI: process.env.MONGODB_URI ?? 'mongodb://localhost:27017',
   TRADE_IMPORTS_ANIMALS_BACKEND_URL: process.env.TRADE_IMPORTS_ANIMALS_BACKEND_URL ?? 'http://localhost:8085',
+  TRADE_IMPORTS_PLANTS_BACKEND_URL: process.env.TRADE_IMPORTS_PLANTS_BACKEND_URL ?? 'http://localhost:8091',
   TRADE_IMPORTS_ADDRESS_BOOK_URL: process.env.TRADE_IMPORTS_ADDRESS_BOOK_URL ?? 'http://localhost:8089',
   TRADE_IMPORTS_REFERENCE_DATA_URL: process.env.TRADE_IMPORTS_REFERENCE_DATA_URL ?? 'http://localhost:8086',
   AWS_SQS_ENDPOINT: process.env.AWS_SQS_ENDPOINT ?? 'http://localhost:4566',
@@ -25,6 +26,8 @@ const dockerComposeConfig = withServiceBaseUrls(sharedConfig, {
     process.env.NOTIFICATION_SQS_DLQ_URL ??
     'http://localhost:4566/000000000000/trade_imports_animals_eu_notifications_gateway-deadletter.fifo',
 });
+
+const dockerComposeConfig = sharedConfig;
 
 /**
  * e2e against the workspace docker-compose stack (local dev, CI, and containerised runs).

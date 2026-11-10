@@ -36,9 +36,10 @@ export const zapProfile: 'active' | 'passive' = isActiveProfile ? 'active' : 'pa
 // set by test:docker-compose:<domain>:security:active. Full
 // security:active leaves this unset so every declared context is gated.
 const ZAP_SCOPE_CONTEXTS: Record<string, readonly string[]> = {
-  animals: ['frontend', 'backend'],
+  animals: ['frontend', 'animals-backend'],
   'animals-admin': ['admin'],
   ins: ['ins', 'address-book'],
+  plants: ['plants-backend'],
 };
 
 export type ZapScope = { domain: string; contexts: readonly string[] };

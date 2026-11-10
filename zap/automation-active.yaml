@@ -66,7 +66,7 @@ env:
     # /notifications, same fragmentation frontend/journeyId had — this is
     # the DB-backed API doing real lookups by reference number, so it's the
     # highest-value place for this id to actually be fuzzed.
-    - name: backend
+    - name: animals-backend
       urls:
         - ${ZAP_TRADE_IMPORTS_ANIMALS_BACKEND_URL}
       excludePaths:
@@ -81,7 +81,20 @@ env:
             regex: '(.*/notifications/)([^/]+)'
           - name: uploadId
             regex: '(.*/document-uploads/)([^/]+)'
-    # Same actuator surface as backend (confirmed in address-book's own
+    - name: plants-backend
+      urls:
+        - ${ZAP_TRADE_IMPORTS_PLANTS_BACKEND_URL}
+      excludePaths:
+        - '.*/health$'
+        - '.*/info$'
+        - '.*/metrics$'
+        - '.*/cache$'
+        - '.*/env$'
+      structure:
+        dataDrivenNodes:
+          - name: referenceNumber
+            regex: '(.*/notifications/)([^/]+)'
+    # Same actuator surface as animals-backend (confirmed in address-book's own
     # application.yml: base-path "/", health/info/metrics/cache/env).
     # OperatorController: /organisation/{orgId}/addresses[/{operator-id}] —
     # both ids folded so activeScan fuzzes them (IDOR-style) instead of
@@ -125,7 +138,7 @@ jobs:
       # it. 60 is ~4.5x the slowest, leaving room for CI (2 vCPU, ~2-3x local)
       # and for the corpus to roughly double.
       #
-      # Change this, the four below, and ACTIVE_SCAN_CAP_MINS in
+      # Change this, the six below, and ACTIVE_SCAN_CAP_MINS in
       # utils/zap/run-and-gate.ts together — they must match exactly.
       maxScanDurationInMins: 60
     # DOM XSS needs a real browser via Selenium, which the plain ZAP image
@@ -167,7 +180,19 @@ jobs:
 
   - type: activeScan
     parameters:
-      context: backend
+      context: animals-backend
+      # See the frontend activeScan job above for the cap's reasoning.
+      maxScanDurationInMins: 60
+    # DOM XSS disabled — see the frontend activeScan job above for why.
+    policyDefinition:
+      rules:
+        - id: 40026
+          name: Cross Site Scripting (DOM Based)
+          threshold: Off
+
+  - type: activeScan
+    parameters:
+      context: plants-backend
       # See the frontend activeScan job above for the cap's reasoning.
       maxScanDurationInMins: 60
     # DOM XSS disabled — see the frontend activeScan job above for why.
