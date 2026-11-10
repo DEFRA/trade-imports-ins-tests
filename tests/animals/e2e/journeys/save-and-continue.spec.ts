@@ -1,5 +1,6 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
+import { TRAIL_START } from '@page-objects/shared/base-page';
 import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
@@ -121,7 +122,7 @@ test.describe('Save and continue from Overview', () => {
     await expect(animalsPages.transporter.heading).toBeVisible();
   });
 
-  test('a task opened from its Overview row opens its own page, and Save and continue goes to the next page in the journey order', async ({
+  test('a task opened from its Overview row opens its own page carrying only the Overview mark in its address, and Save and continue goes to the next page in the journey order', async ({
     pages,
     animalsJourney,
     animalsPages,
@@ -129,7 +130,7 @@ test.describe('Save and continue from Overview', () => {
     test.slow();
     await animalsJourney.toImportReason();
     const reference = animalsPages.importReason.referenceNumberFromUrl();
-    await expect(pages.page).toHaveURL(animalsPages.importReason.expectedUrlPattern(reference));
+    await expect(pages.page).toHaveURL(animalsPages.importReason.expectedUrlPatternOnTrail(reference, [TRAIL_START.overview]));
 
     await animalsPages.importReason.reason(MANDATORY_ANSWERS.importReason.display).check();
     await animalsPages.importReason.purpose(MANDATORY_ANSWERS.internalMarketPurpose.display).check();

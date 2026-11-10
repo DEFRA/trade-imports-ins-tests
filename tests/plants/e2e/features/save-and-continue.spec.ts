@@ -1,3 +1,4 @@
+import { TRAIL_START } from '@page-objects/shared/base-page';
 import { POTATOES, SEED_POTATOES, potatoLine } from '@flows/plants/journey';
 
 import { test, expect } from '@fixtures';
@@ -29,7 +30,7 @@ test.describe('Save and continue from Overview', () => {
     await expect(pages.page).toHaveURL(plantsPages.origin.expectedUrlPattern(reference));
   });
 
-  test('a task opened from its Overview row opens its own page, and Save and continue goes to the next page in the journey order', async ({
+  test('a task opened from its Overview row opens its own page carrying only the Overview mark in its address, and Save and continue goes to the next page in the journey order', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -39,7 +40,7 @@ test.describe('Save and continue from Overview', () => {
     await plantsPages.overview.open(reference);
 
     await plantsPages.overview.taskRowLink('Identification numbers').click();
-    await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrlPattern(reference));
+    await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrlPatternOnTrail(reference, [TRAIL_START.overview]));
 
     await plantsPages.identificationNumbers.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.consignmentContactSelect.expectedUrlPattern(reference));
