@@ -116,7 +116,10 @@ export class AddressBookApiClient {
   /** The first page of the organisation's live transporters matching the search, newest first. */
   async listTransporters(query?: string): Promise<TransporterRecord[]> {
     const search = query ? `?${new URLSearchParams({ q: query })}` : '';
-    const page = await this.rest.get<ApiPage<TransporterRecord>>(`${this.transporterPath()}${search}`, organisationHeaders(this.organisationId));
+    const page = await this.rest.get<ApiPage<TransporterRecord>>(
+      `${this.transporterPath()}${search}`,
+      organisationHeaders(this.organisationId),
+    );
     return page.items;
   }
 
