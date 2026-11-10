@@ -17,7 +17,7 @@ const commercialTransporter: Omit<TransporterRequest, 'name'> = {
 test.describe('A transporter added through the INS address book', { tag: ['@address-book', '@ins-frontend'] }, () => {
   const createdTransporterIds = transporterIdsDeletedAfterEachTest();
 
-  test("is on the transporter list of the organisation's next notification, with its approval number, and can be picked and saved", async ({
+  test("is on the transporter list of the organisation's next notification, tagged New, with its approval number, and can be picked and saved", async ({
     animalsJourney,
     animalsPages,
     addressBookApi,
@@ -32,6 +32,7 @@ test.describe('A transporter added through the INS address book', { tag: ['@addr
 
     await expect(animalsPages.transporter.transporter(name)).toBeVisible();
     await expect(animalsPages.transporter.approvalNumberCell(name)).toHaveText(created.approvalNumber ?? '');
+    await expect(animalsPages.transporter.rowStatusTag(name)).toHaveText('New');
 
     await animalsPages.transporter.transporter(name).check();
     await animalsPages.transporter.saveAndReturnToOverview.click();

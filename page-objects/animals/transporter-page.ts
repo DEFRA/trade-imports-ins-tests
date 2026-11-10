@@ -31,6 +31,10 @@ export class AnimalsTransporterPage extends NotificationPage {
     return this.rowFor(name).getByRole('cell').nth(3);
   }
 
+  rowStatusTag(name: string): Locator {
+    return this.rowFor(name).locator('.govuk-tag');
+  }
+
   viewDetailsLink(name: string): Locator {
     return this.rowFor(name).getByRole('link', { name: `View details ${name}`, exact: true });
   }
