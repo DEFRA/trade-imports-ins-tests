@@ -14,20 +14,6 @@ import { expectAbove } from './expect-above';
 
 const UNITED_KINGDOM = 'United Kingdom';
 
-test.describe('The Country select on the add form', () => {
-  for (const { addressType } of roleBackedAddressBookTabs) {
-    test(`a ${addressTypeLabels[addressType]} address lists Select a country first and opens with United Kingdom selected`, async ({
-      insPages,
-      insJourney,
-    }) => {
-      await insJourney.toAddressForm({ addressType });
-
-      await expect(insPages.addressBookAdd.countryOptions.first()).toHaveText('Select a country');
-      await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText(UNITED_KINGDOM);
-    });
-  }
-});
-
 for (const tab of roleBackedAddressBookTabs) {
   const { addressType } = tab;
   const addressTypeLabel = addressTypeLabels[addressType];

@@ -10,13 +10,14 @@ test.describe('Address book country list', () => {
   });
 
   for (const { addressType } of roleBackedAddressBookTabs) {
-    test(`the add form's Country select for a ${addressTypeLabels[addressType]} address lists Select a country first, then every country reference data serves alphabetically, United Kingdom in its place`, async ({
+    test(`the add form's Country select for a ${addressTypeLabels[addressType]} address opens on United Kingdom and lists Select a country first, then every country reference data serves alphabetically, United Kingdom in its place`, async ({
       insPages,
       insJourney,
     }) => {
       await insJourney.toAddressForm({ addressType });
 
       await expect(insPages.addressBookAdd.countryOptions).toHaveText(['Select a country', ...addressFormCountryNames]);
+      await expect(insPages.addressBookAdd.selectedCountryOption).toHaveText('United Kingdom');
     });
   }
 
