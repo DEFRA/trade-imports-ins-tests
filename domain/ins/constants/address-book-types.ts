@@ -130,11 +130,6 @@ export const rolesQuestionOptions: Record<AddressTypeAskingRoles, readonly Addre
   [addressTypes.branch]: [addressRoles.branchAddress],
 };
 
-export const addressTypesRequiringUnitedKingdom: readonly AddressTypeAskingRoles[] = [
-  addressTypes.destinationConsigneeOrImporter,
-  addressTypes.branch,
-];
-
 const hintOf = (addressType: AddressTypeAskingRoles): string =>
   rolesQuestionOptions[addressType].map((role) => rolesQuestionLabels[role]).join(', ');
 
@@ -153,6 +148,8 @@ export const addressTypeLabels = Object.fromEntries(addressTypeOptions.map(({ ad
   AddressType,
   string
 >;
+
+export const addFormNameOf = (addressType: AddressType): string => `${addressTypeLabels[addressType]} add form`;
 
 export const addressTypeQuestion = {
   error: 'Select an address type',

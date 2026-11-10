@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { addressFormCountryNames } from '@resources/reference-data/reference-data';
-import { skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
+import { skipUnlessComposeEnvironment, skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
 import { expectRolesOptions } from '@utils/roles-options-assertions';
 import type { AnimalsJourney } from '@flows/animals/journey';
 import { type InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
@@ -228,21 +228,21 @@ test.describe('Add an address from the journey via INS', () => {
   );
 
   test(
-    'the INS add page reached from the Consignee picker offers United Kingdom alone, already selected',
+    'the INS add page reached from the Consignee picker opens on United Kingdom and lists Select a country first',
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, insPages }) => {
       const addPage = insPages.addressBookAdd;
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
 
-      await expect(addPage.countryOptions).toHaveText(['United Kingdom']);
+      await expect(addPage.countryOptions.first()).toHaveText('Select a country');
       await expect(addPage.selectedCountryOption).toHaveText('United Kingdom');
     },
   );
 
   for (const role of ['Place of origin', 'Consignor'] as const) {
     test(
-      `the INS add page reached from the ${role} picker opens on Select a country and offers every captured country, alphabetically, as a plain select`,
+      `the INS add page reached from the ${role} picker opens a plain Country select on Select a country, listed first`,
       { tag: ['@address-book', '@ins-frontend'] },
       async ({ animalsJourney, insPages }) => {
         const addPage = insPages.addressBookAdd;
@@ -251,7 +251,7 @@ test.describe('Add an address from the journey via INS', () => {
 
         await expect(addPage.selectCountry).toHaveJSProperty('tagName', 'SELECT');
         await expect(addPage.selectCountry).toHaveValue('');
-        await expect(addPage.countryOptions).toHaveText(['Select a country', ...addressFormCountryNames]);
+        await expect(addPage.countryOptions.first()).toHaveText('Select a country');
       },
     );
   }
@@ -331,4 +331,24 @@ test.describe('Add an address from the journey via INS', () => {
       await expect(addPage.inputName).toHaveAccessibleDescription(`Error: ${ADDRESS_FORM_VALIDATION_MESSAGES.nameRequired}`);
     },
   );
+});
+
+test.describe('The country list on the INS add page reached from the journey', () => {
+  test.beforeEach(() => {
+    skipUnlessComposeEnvironment("the list is the stub's MDM fixture, which only the compose stack is sure to serve");
+  });
+
+  for (const role of ['Place of origin', 'Consignor', 'Consignee'] as const) {
+    test(
+      `the INS add page reached from the ${role} picker lists Select a country first, then every country reference data serves alphabetically, United Kingdom in its place`,
+      { tag: ['@address-book', '@ins-frontend'] },
+      async ({ animalsJourney, insPages }) => {
+        const addPage = insPages.addressBookAdd;
+
+        await animalsJourney.toInsAddAddressFromPicker(addPage, role);
+
+        await expect(addPage.countryOptions).toHaveText(['Select a country', ...addressFormCountryNames]);
+      },
+    );
+  }
 });
