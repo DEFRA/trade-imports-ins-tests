@@ -106,8 +106,8 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.overview.task('What are you importing?').click();
 
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText('2 selected');
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(commodityLines.cattle));
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(commodityLines.domesticCat));
+    await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.cattle)).toBeVisible();
+    await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.domesticCat)).toBeVisible();
 
     await animalsPages.commoditySelection.search(commodityLines.cattle.searchTerm);
     await expect(animalsPages.commoditySelection.species(commodityLines.cattle)).toBeChecked();
@@ -119,7 +119,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText('1 selected');
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(commodityLines.cattle));
+    await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.cattle)).toBeVisible();
 
     await animalsPages.commoditySelection.clearAll.click();
     await expect(animalsPages.commoditySelection.selectedSummary).toHaveCount(0);
@@ -166,7 +166,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     test('keeps the saved selection when the page is reopened', async ({ animalsPages }) => {
       const referenceNumber = animalsPages.commoditySelection.referenceNumberFromUrl();
       await animalsPages.overview.openTaskAfterReopening(referenceNumber, 'What are you importing?');
-      await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(commodityLines.cattle));
+      await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.cattle)).toBeVisible();
     });
   });
 
