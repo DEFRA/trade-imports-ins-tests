@@ -149,6 +149,8 @@ export const addressTypeLabels = Object.fromEntries(addressTypeOptions.map(({ ad
   string
 >;
 
+export const addFormNameOf = (addressType: AddressType): string => `${addressTypeLabels[addressType]} add form`;
+
 export const addressTypeQuestion = {
   error: 'Select an address type',
 };

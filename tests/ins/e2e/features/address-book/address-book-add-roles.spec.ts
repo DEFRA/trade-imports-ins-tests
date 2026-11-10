@@ -3,6 +3,7 @@ import { expectRolesOptions } from '@utils/roles-options-assertions';
 import { ADDRESS_FORM_TEXTBOX_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } from '@domain/ins/constants/address-form';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import {
+  addFormNameOf,
   addressTypeLabels,
   roleBackedAddressBookTabs,
   rolesLabelOf,
@@ -20,7 +21,7 @@ for (const tab of roleBackedAddressBookTabs) {
   const offeredRoles = rolesQuestionOptions[addressType];
   const legend = rolesQuestionLegends[addressType];
 
-  test.describe(`Adding a ${addressTypeLabel} address`, () => {
+  test.describe(`The ${addFormNameOf(addressType)}`, () => {
     test('opens the form with only the address and contact text fields, a section break, and the roles question with its legend, hint and options', async ({
       insPages,
       insJourney,

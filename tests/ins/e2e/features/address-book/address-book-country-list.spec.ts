@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { addressTypeLabels, roleBackedAddressBookTabs } from '@domain/ins/constants/address-book-types';
+import { addFormNameOf, roleBackedAddressBookTabs } from '@domain/ins/constants/address-book-types';
 import { traderAddress } from '@domain/ins/constants/trader-address';
 import { addressFormCountryNames } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
@@ -10,7 +10,7 @@ test.describe('Address book country list', () => {
   });
 
   for (const { addressType } of roleBackedAddressBookTabs) {
-    test(`the add form's Country select for a ${addressTypeLabels[addressType]} address opens on United Kingdom and lists Select a country first, then every country reference data serves alphabetically, United Kingdom in its place`, async ({
+    test(`the ${addFormNameOf(addressType)}'s Country select opens on United Kingdom and lists Select a country first, then every country reference data serves alphabetically, United Kingdom in its place`, async ({
       insPages,
       insJourney,
     }) => {
