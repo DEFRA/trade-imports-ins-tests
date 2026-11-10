@@ -47,7 +47,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
 
-  // firefox, webkit, mobile-webkit and mobile-chrome have default: false, so they run only when --project names them.
+  // firefox, webkit, mobile-webkit and mobile-chromium have default: false, so they run only when --project names them.
   projects: [
     {
       name: 'chromium',
@@ -78,7 +78,7 @@ export default defineConfig({
       use: devices['iPhone 17'],
     },
     {
-      name: 'mobile-chrome',
+      name: 'mobile-chromium',
       default: false,
       use: devices['Pixel 10'],
     },

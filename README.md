@@ -301,7 +301,7 @@ Always end a directory with `/`. Playwright reads the path as a regex, so
 `tests/animals` would also run `tests/animals-admin/`.
 
 A Playwright project is browser config only. Both configs have `chromium`, which
-runs every domain, plus opt-in `firefox`, `webkit`, `mobile-webkit` and `mobile-chrome` projects for the
+runs every domain, plus opt-in `firefox`, `webkit`, `mobile-webkit` and `mobile-chromium` projects for the
 [cross-browser tests](#cross-browser-tests).
 
 Within a domain directory, specs are grouped by test type, then by feature:
