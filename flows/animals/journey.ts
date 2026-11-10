@@ -2,6 +2,7 @@ import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { type Locator } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
+import type { SaveAndContinueStop } from '@page-objects/shared/journey-checks';
 import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
 import type { InsNotificationTypePage } from '@page-objects/ins/notification-type-page';
 import { LIVE_ANIMALS, type NotificationTypeOption } from '@domain/ins/constants/notification-types';
@@ -109,6 +110,23 @@ export class AnimalsJourney {
     private readonly pages: SharedPages,
     private readonly context: JourneyContext,
   ) {}
+
+  /** The pages Save and continue goes through from the main import reason to the contact address, in order, starting at `first`. */
+  saveAndContinueStopsFrom(first: SaveAndContinueStop): SaveAndContinueStop[] {
+    const stops: SaveAndContinueStop[] = [
+      this.animalsPages.importReason,
+      this.animalsPages.consignmentDetails,
+      this.animalsPages.animalIdentification,
+      this.animalsPages.additionalDetails,
+      this.animalsPages.arrivalDetails,
+      this.animalsPages.transitedCountries,
+      this.animalsPages.transporter,
+      this.animalsPages.accompanyingDocuments,
+      this.animalsPages.addresses,
+      this.animalsPages.contactAddress,
+    ];
+    return stops.slice(stops.indexOf(first));
+  }
 
   async toSignIn(open: (attemptSignIn: boolean) => Promise<void>): Promise<void> {
     await open(false);

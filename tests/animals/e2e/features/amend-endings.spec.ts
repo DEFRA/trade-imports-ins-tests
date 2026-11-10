@@ -1,7 +1,7 @@
 import type { AnimalsPages } from '@page-objects';
 import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { test, expect } from '@fixtures';
-import { expectOpenFromReview } from '@page-objects/shared/journey-checks';
+import { expectOpenFromReview, expectSaveAndContinueWalk } from '@page-objects/shared/journey-checks';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
@@ -102,6 +102,28 @@ test.describe('Amendment page endings', () => {
         animalsPages.originOfImport.slug,
       ]),
     );
+  });
+
+  test('the reason for import Change link opens the main import reason on the review trail, and Save and continue walks each later page back to the amend review', async ({
+    pages,
+    animalsPages,
+    animalsSeededJourney,
+    animalsJourney,
+  }) => {
+    test.slow();
+    const reference = await animalsSeededJourney.createAmendNotification();
+    await animalsPages.notificationView.open(reference);
+    await animalsPages.notificationView.changeLink('Change reason for import').click();
+    await expect(animalsPages.importReason.heading).toBeVisible();
+
+    await expectSaveAndContinueWalk(
+      pages.page,
+      reference,
+      [animalsPages.notificationView.slug],
+      animalsJourney.saveAndContinueStopsFrom(animalsPages.importReason),
+      animalsPages.notificationView,
+    );
+    await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
   });
 
   test('while amending, the origin page and the CPH number page end with Save and continue alone, and the contact address page ends as it does on a draft', async ({

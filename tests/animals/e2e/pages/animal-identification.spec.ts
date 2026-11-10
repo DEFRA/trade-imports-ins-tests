@@ -137,6 +137,7 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await animalsPages.commoditySelection.saveAndContinue.click();
 
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
-    await expect(animalsPages.animalIdentification.selectedCommodities.bodyRows).toContainText([commodityLines.cattle.commodityCode]);
+    await expect(animalsPages.animalIdentification.selectedCommodities.bodyRows).toHaveCount(1);
+    await expect(animalsPages.animalIdentification.selectedCommodities.rowFor(commodityLines.cattle)).toBeVisible();
   });
 });

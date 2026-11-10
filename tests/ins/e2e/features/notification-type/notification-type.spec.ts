@@ -88,7 +88,7 @@ test.describe('INS notification type question', { tag: ['@animals-frontend', '@p
     await expect(pages.page).toHaveTitle(`Error: ${QUESTION_TITLE}`);
   });
 
-  test('choosing Live animals signs the user in to the animals service and opens a new draft at Origin of the import', async ({
+  test('choosing Live animals signs the user in to the animals service and opens a new draft at Origin of the import, whose Save and continue opens What are you importing?', async ({
     insPages,
     animalsPages,
     animalsJourney,
@@ -111,6 +111,12 @@ test.describe('INS notification type question', { tag: ['@animals-frontend', '@p
       `${SET_BASES.liveAnimals}/notifications/${reference}/origin`,
     ]);
     expect(plantsNavigations).toEqual([]);
+
+    await animalsJourney.fillOriginOfImport();
+    await animalsJourney.saveOriginOfImport();
+
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(animalsPages.commoditySelection.expectedUrlPattern(reference));
   });
 
   for (const plantsOption of PLANTS_OPTIONS) {

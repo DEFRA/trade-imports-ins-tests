@@ -4,7 +4,7 @@ import { certificationPurposes } from '@domain/animals/constants/certification-p
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { AIR_OR_SEA_OVERVIEW_TASKS, certificateDocument } from '@flows/animals/journey';
-
+import { expectEmptyTransitList } from '@utils/transit-countries-assertions';
 import { test, expect } from '@fixtures';
 
 test.describe('Save and continue through a new notification', () => {
@@ -141,22 +141,44 @@ test.describe('Save and continue from Overview', () => {
 });
 
 test.describe('Save and continue to the next page', () => {
-  test('transit countries saved with no country added goes to the transporter list', async ({ animalsJourney, animalsPages }) => {
+  test('transit countries saved with no country added goes to the transporter list, and reopening transit countries lists none', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
     test.slow();
     await animalsJourney.toTransitedCountries();
+    const referenceNumber = animalsPages.transitedCountries.referenceNumberFromUrl();
 
     await animalsPages.transitedCountries.saveAndContinue.click();
 
     await expect(animalsPages.transporter.heading).toBeVisible();
+
+    await animalsPages.transitedCountries.open(referenceNumber);
+    await expectEmptyTransitList(animalsPages.transitedCountries);
+    await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText([]);
   });
 
-  test('contact address saved with no address chosen goes to check your answers', async ({ animalsJourney, animalsPages }) => {
+  test('contact address saved with no address chosen goes to check your answers, naming what is outstanding', async ({
+    animalsJourney,
+    animalsPages,
+    pages,
+  }) => {
     test.slow();
     await animalsJourney.toContactAddress();
+    const referenceNumber = animalsPages.contactAddress.referenceNumberFromUrl();
 
     await animalsPages.contactAddress.saveAndContinue.click();
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
+    await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText([
+      'Complete reason for import',
+      'Complete additional animal details',
+      'Complete arrival details',
+      'Complete transport details',
+      'Complete roles and addresses',
+      'Complete contact address for this consignment',
+    ]);
   });
 
   test('a draft with nothing saved, resumed from the dashboard, opens at the first page', async ({ animalsJourney, animalsPages }) => {
