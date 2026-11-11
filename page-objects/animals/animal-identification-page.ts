@@ -1,6 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
 import { speciesLabel, type CommodityLine } from '@domain/animals/constants/commodity-lines';
-import { type PermanentAddressAnswer } from '@domain/animals/constants/journey-commodity-line-answers';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { SelectedCommoditiesTable } from '@page-objects/animals/selected-commodities-table';
 
@@ -36,26 +35,6 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
       name: `Enter details for ${speciesLabel(species)} ${current} of ${total}`,
       exact: true,
     });
-  }
-
-  get permanentAddressName(): Locator {
-    return this.page.getByLabel('Name or organisation name', { exact: true });
-  }
-
-  async fillPermanentAddress(address: PermanentAddressAnswer, scope: Page | Locator = this.page): Promise<void> {
-    const field = (label: string): Locator => scope.getByLabel(label, { exact: true });
-    await field('Name or organisation name').fill(address.nameOrOrganisationName);
-    await field('Address line 1').fill(address.addressLine1);
-    if (address.addressLine2) {
-      await field('Address line 2 (optional)').fill(address.addressLine2);
-    }
-    await field('Town or city').fill(address.townOrCity);
-    if (address.county) {
-      await field('County (optional)').fill(address.county);
-    }
-    await field('Postcode or Zip code').fill(address.postcode);
-    await field('Phone number').fill(address.phone);
-    await field('Email address').fill(address.email);
   }
 
   commodityHeading(heading: string): Locator {

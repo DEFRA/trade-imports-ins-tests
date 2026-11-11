@@ -4,7 +4,7 @@ import { commodityLines, speciesLabel } from '@domain/animals/constants/commodit
 import { test, expect } from '@fixtures';
 
 test.describe('Animal identifiers — conditional identifier surface', { tag: '@duplicated-in-frontend' }, () => {
-  test("a domestic cat's unit form asks for passport, tattoo and a permanent address, and refuses a partial address", async ({
+  test("a domestic cat's unit form asks for microchip, passport and tattoo, with no address field", async ({
     animalsJourney,
     pages,
     animalsPages,
@@ -12,31 +12,22 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await animalsJourney.toAnimalIdentificationWithCounts([{ species: commodityLines.domesticCat, animalCount: 2 }]);
     await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.domesticCat, 1, 2)).toBeVisible();
 
+    await expect(animalsPages.animalIdentification.microchip).toBeVisible();
     await expect(animalsPages.animalIdentification.passportNumber).toBeVisible();
     await expect(pages.page.getByLabel('Tattoo')).toBeVisible();
     await expect(animalsPages.animalIdentification.earTag).toBeHidden();
     await expect(pages.page.getByLabel('Horse name')).toBeHidden();
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
     await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
-    await expect(pages.page.getByLabel('Name or organisation name')).toBeVisible();
+    await expect(pages.page.getByLabel('Name or organisation name')).toHaveCount(0);
     await expect(pages.page.getByLabel('Country')).toHaveCount(0);
 
     const catLine = MANDATORY_COMMODITY_LINES.domesticCat;
-    const { passportNumber, permanentAddress } = catLine;
-
-    await animalsPages.animalIdentification.passportNumber.fill(passportNumber);
-    await animalsPages.animalIdentification.permanentAddressName.fill(permanentAddress.nameOrOrganisationName);
-    await animalsPages.animalIdentification.saveAndAddAnother.click();
-    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
-    await expect(pages.page.getByRole('link', { name: 'Enter address line 1' })).toBeVisible();
-
-    await animalsJourney.saveAnimalWithPermanentAddress(catLine);
+    await animalsJourney.saveAnimalWithPassport(catLine);
 
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
     const unitRow = animalsPages.animalIdentification.savedAnimalRow(catLine.species, 1);
-    await expect(animalsPages.animalIdentification.identifierColumn('Permanent address')).toBeVisible();
-    await expect(unitRow.getByRole('cell', { name: passportNumber, exact: true })).toBeVisible();
-    await expect(unitRow.getByRole('cell', { name: permanentAddress.nameOrOrganisationName, exact: true })).toBeVisible();
+    await expect(unitRow.getByRole('cell', { name: catLine.passportNumber, exact: true })).toBeVisible();
   });
 
   test('a commodity with no identifier type of its own gets no card, while the lines that have one keep theirs', async ({

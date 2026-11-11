@@ -4,6 +4,7 @@ import { NotificationPage } from '@page-objects/shared/base-page';
 export type PartyRole = 'Consignor' | 'Place of destination' | 'Place of origin' | 'Consignee' | 'Importer';
 
 const CPH_SECTION_HEADING = 'County parish holding (CPH) number';
+const PERMANENT_ADDRESS_SECTION_HEADING = 'Permanent address';
 
 const ADD_LINK_BY_ROLE: Record<PartyRole, string> = {
   Consignor: 'Add a consignor',
@@ -93,6 +94,22 @@ export class AnimalsAddressesPage extends NotificationPage {
 
   get changeCph(): Locator {
     return this.cphSection.getByRole('link', { name: 'Change' });
+  }
+
+  get permanentAddressSection(): Locator {
+    return this.page.getByRole('region', { name: PERMANENT_ADDRESS_SECTION_HEADING, exact: true });
+  }
+
+  get addPermanentAddress(): Locator {
+    return this.permanentAddressSection.getByRole('link', { name: 'Add a permanent address', exact: true });
+  }
+
+  get changePermanentAddress(): Locator {
+    return this.permanentAddressSection.getByRole('link', { name: 'Change' });
+  }
+
+  get permanentAddressNames(): Locator {
+    return this.permanentAddressSection.locator('.govuk-inset-text');
   }
 
   get continueButton(): Locator {

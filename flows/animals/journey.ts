@@ -55,7 +55,7 @@ const PARTY_PICKER_KEYS: Record<PartyRole, PartyPickerKey> = {
   Importer: 'importerSelection',
 };
 
-type AnimalWithPermanentAddress = Required<Pick<CommodityLineAnswer, 'passportNumber' | 'permanentAddress'>>;
+type AnimalWithPassport = Required<Pick<CommodityLineAnswer, 'passportNumber'>>;
 
 export type SpeciesAnimalCount = {
   species: CommodityLine;
@@ -332,9 +332,6 @@ export class AnimalsJourney {
       if (line.tattoo) {
         await card.getByLabel('Tattoo', { exact: true }).fill(line.tattoo);
       }
-      if (line.permanentAddress) {
-        await identification.fillPermanentAddress(line.permanentAddress, card);
-      }
     }
     await identification.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
@@ -404,6 +401,7 @@ export class AnimalsJourney {
   async answerAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Roles and addresses').click();
     await this.addFiveParties(answers.parties);
+    await this.answerPermanentAddresses(answers);
     await this.addCphAndLeaveAddresses(answers.cph);
     await this.animalsPages.contactAddress.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
@@ -579,11 +577,47 @@ export class AnimalsJourney {
     await this.openReviewFromOverview();
   }
 
-  async saveAnimalWithPermanentAddress({ passportNumber, permanentAddress }: AnimalWithPermanentAddress): Promise<void> {
+  async saveAnimalWithPassport({ passportNumber }: AnimalWithPassport): Promise<void> {
     const identification = this.animalsPages.animalIdentification;
     await identification.passportNumber.fill(passportNumber);
-    await identification.fillPermanentAddress(permanentAddress);
     await identification.saveAndAddAnother.click();
+  }
+
+  /** Answers the permanent address page for every animal on a line that needs one, applying that
+   * line's one answer to each of its animals, then saves back to the consignment addresses page. */
+  async answerPermanentAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
+    const linesNeedingAddress = answers.commodityLines.filter((line) => line.permanentAddress);
+    if (linesNeedingAddress.length === 0) {
+      return;
+    }
+    await this.animalsPages.addresses.addPermanentAddress.click();
+    const { permanentAddress: addressPage } = this.animalsPages;
+    await addressPage.heading.waitFor(pageLoadWait);
+    for (const line of linesNeedingAddress) {
+      const address = line.permanentAddress;
+      const cardCount = await addressPage.cardsFor(line.species).count();
+      for (let animal = 1; animal <= cardCount; animal += 1) {
+        const card = addressPage.card(line.species, animal);
+        if (address.origin === 'placeOfDestination') {
+          await addressPage.selectPlaceOfDestination(card);
+        } else {
+          await addressPage.selectNewAddress(card);
+          await addressPage.fillNewAddress(address, card);
+        }
+      }
+    }
+    await addressPage.saveAndContinue.click();
+    await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
+  }
+
+  async toRolesAndAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS, afterCommodity?: () => Promise<void>): Promise<void> {
+    await this.startNotification();
+    await this.answerCommodity(answers);
+    if (afterCommodity) {
+      await afterCommodity();
+    }
+    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
   }
 
   async toImportReason(): Promise<void> {

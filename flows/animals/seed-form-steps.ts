@@ -53,20 +53,34 @@ const identificationForm = (lines: CommodityLineAnswer[]): FormFields => {
     if (line.tattoo) {
       form[`animalIdentifierTattoo-${index}`] = line.tattoo;
     }
-    if (line.permanentAddress) {
-      const { permanentAddress: address } = line;
-      form[`nameOrOrganisationName-${index}`] = address.nameOrOrganisationName;
-      form[`addressLine1-${index}`] = address.addressLine1;
-      if (address.addressLine2) {
-        form[`addressLine2-${index}`] = address.addressLine2;
+  });
+  return form;
+};
+
+const permanentAddressForm = (lines: CommodityLineAnswer[]): FormFields => {
+  const form: FormFields = {};
+  lines.forEach((line, lineIndex) => {
+    if (!line.permanentAddress) {
+      return;
+    }
+    const { permanentAddress: address } = line;
+    for (let unitIndex = 0; unitIndex < line.noOfAnimals; unitIndex += 1) {
+      const key = `${lineIndex}-${unitIndex}`;
+      form[`option-${key}`] = address.origin;
+      if (address.origin === 'newAddress') {
+        form[`nameOrOrganisationName-${key}`] = address.nameOrOrganisationName;
+        form[`addressLine1-${key}`] = address.addressLine1;
+        if (address.addressLine2) {
+          form[`addressLine2-${key}`] = address.addressLine2;
+        }
+        form[`townOrCity-${key}`] = address.townOrCity;
+        if (address.county) {
+          form[`county-${key}`] = address.county;
+        }
+        form[`postcode-${key}`] = address.postcode;
+        form[`email-${key}`] = address.email;
+        form[`phone-${key}`] = address.phone;
       }
-      form[`townOrCity-${index}`] = address.townOrCity;
-      if (address.county) {
-        form[`county-${index}`] = address.county;
-      }
-      form[`postcode-${index}`] = address.postcode;
-      form[`phone-${index}`] = address.phone;
-      form[`email-${index}`] = address.email;
     }
   });
   return form;
@@ -94,6 +108,7 @@ const commoditySteps = (answers: NotificationAnswers): SeedStep[] => {
     { slug: 'commodities', form: { species: lines.map(({ species }) => speciesCheckboxValue(species)) } },
     { slug: 'consignment-details', form: consignmentDetailsForm(lines) },
     { slug: 'commodities/identification', form: identificationForm(lines) },
+    { slug: 'permanent-address', form: permanentAddressForm(lines) },
   ];
 };
 

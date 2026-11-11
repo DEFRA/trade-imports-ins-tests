@@ -12,7 +12,7 @@ export type CommodityLineAnswer = {
   permanentAddress?: PermanentAddressAnswer;
 };
 
-export type PermanentAddressAnswer = {
+export type NewPermanentAddressFields = {
   nameOrOrganisationName: string;
   addressLine1: string;
   townOrCity: string;
@@ -22,6 +22,9 @@ export type PermanentAddressAnswer = {
   addressLine2?: string;
   county?: string;
 };
+
+/** Each animal that needs one answers the permanent address page with either option. */
+export type PermanentAddressAnswer = { origin: 'placeOfDestination' } | ({ origin: 'newAddress' } & NewPermanentAddressFields);
 
 /** One animal per line, answering only what the frontend requires of that species. */
 export const MANDATORY_COMMODITY_LINES = {
@@ -35,6 +38,7 @@ export const MANDATORY_COMMODITY_LINES = {
     noOfAnimals: 1,
     passportNumber: 'UK123456789',
     permanentAddress: {
+      origin: 'newAddress',
       nameOrOrganisationName: 'Pet Owner',
       addressLine1: '1 Farm Lane',
       townOrCity: 'Skipton',
