@@ -57,24 +57,33 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
 
       const [doc] = await collection.find({ referenceNumber }).toArray();
       const { notification } = doc;
-      const commodities = notification.commodities;
-      expect(commodities).toHaveLength(1);
-      const cow = commodities[0];
-      const [species] = cow.species;
-
       expect(doc.referenceNumber).toBe(referenceNumber);
       expect(doc.status).toBe('SUBMITTED');
       expect(notification.origin.countryCode).toBe(answers.countryCode.value);
       expect(notification.origin.requiresRegionCode).toBe('yes');
       expect(notification.origin.regionOfOriginCode).toBe(`${answers.countryCode.value}-${answers.regionCode}`);
       expect(notification.origin.internalReference).toBe(answers.internalReference);
-      expect(cow.name).toBe(commodityNames[cowLine.species.commodityCode]);
-      expect(cow.commodityCode).toBe(cowLine.species.commodityCode);
-      expect(species.text).toBe(cowLine.species.latinName);
-      expect(species.earTag).toBe(cowLine.earTag);
-      expect(species.animalIdentifiers).toEqual([{ earTag: cowLine.earTag, passport: cowLine.passportNumber }]);
-      expect(cow.totalNoOfAnimals).toBe(cowLine.noOfAnimals);
-      expect(cow.totalNoOfPackages).toBe(cowLine.noOfPackages);
+      expect(notification.commodities).toEqual([
+        {
+          name: commodityNames[cowLine.species.commodityCode],
+          commodityCode: cowLine.species.commodityCode,
+          description: 'Live bovine animals',
+          totalNoOfAnimals: cowLine.noOfAnimals,
+          totalNoOfPackages: cowLine.noOfPackages,
+          species: [
+            {
+              value: cowLine.species.latinName,
+              text: cowLine.species.latinName,
+              commonName: cowLine.species.commonName,
+              noOfAnimals: cowLine.noOfAnimals,
+              noOfPackages: cowLine.noOfPackages,
+              earTag: cowLine.earTag,
+              passport: cowLine.passportNumber,
+              animalIdentifiers: [{ earTag: cowLine.earTag, passport: cowLine.passportNumber }],
+            },
+          ],
+        },
+      ]);
       expect(notification.reasonForImport).toBe(answers.importReason.value);
       expect(notification.purposeInInternalMarket).toBe(answers.internalMarketPurpose.value);
       expect(notification.additionalDetails.certifiedFor).toBe(answers.certifiedFor.value);
