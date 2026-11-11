@@ -6,6 +6,7 @@ import { traderAddress } from '@domain/ins/constants/trader-address';
 import { heldAsConsignor } from '@domain/shared/constants/address-types';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { expectOpenFromReview } from '@page-objects/shared/journey-checks';
+import { uniqueToken } from '@utils/unique-token';
 
 const createReturnFarm = (addressBookApi: AddressBookApiClient, name = `Return Farm ${Date.now()}`): Promise<AddressBookRecord> =>
   addressBookApi.createAddress(traderAddress(name));
@@ -107,12 +108,12 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
     async ({ pages, animalsSeededJourney, animalsPages, insPages, addressBookApi }) => {
       test.slow();
 
-      const stamp = Date.now();
-      const chosenName = `Changed Consignor ${stamp}`;
+      const token = uniqueToken();
+      const chosenName = `Changed Consignor ${token}`;
       const chosenRecord = traderAddress(chosenName);
       await addressBookApi.createAddress({ ...chosenRecord, ...heldAsConsignor });
       for (let i = 0; i < 5; i += 1) {
-        await addressBookApi.createAddress({ ...traderAddress(`Newer Consignor ${stamp} ${i}`), ...heldAsConsignor });
+        await addressBookApi.createAddress({ ...traderAddress(`Newer Consignor ${token} ${i}`), ...heldAsConsignor });
       }
       const referenceNumber = await animalsSeededJourney.createDraftNotification();
       await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
@@ -120,7 +121,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       await animalsPages.addresses.changeParty('Consignor').click();
       const picker = animalsPages.consignorSelection;
       await picker.select(chosenName);
-      await picker.search('');
+      await picker.search(token);
       const chosenRow = picker.party(chosenName);
       await picker.followNextPageUntilShown(chosenRow);
       await expect(picker.currentPaginationPageLink).not.toHaveText('1');
@@ -135,6 +136,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
         (url) =>
           url.origin === laterPageUrl.origin &&
           url.pathname === laterPageUrl.pathname &&
+          url.searchParams.get('q') === token &&
           url.searchParams.get('page') === laterPageUrl.searchParams.get('page') &&
           url.searchParams.get('from') === laterPageUrl.searchParams.get('from'),
       );
