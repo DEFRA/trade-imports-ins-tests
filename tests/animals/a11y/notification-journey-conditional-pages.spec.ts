@@ -31,11 +31,11 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importReason.selectTransitPortOfExitByIndex(2);
       await animalsPages.importReason.selectTransitDestinationCountry('FR');
       await runA11yScan({ exclude: govukConditionalRevealRadiosOnReason });
-      await animalsPages.importReason.saveAndContinue.click();
+      await animalsPages.importReason.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Additional details').click();
       await animalsPages.additionalDetails.heading.waitFor();
-      await animalsPages.additionalDetails.saveAndContinue.click();
+      await animalsPages.additionalDetails.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
     });
 
@@ -45,11 +45,11 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
       await animalsPages.importReason.selectTemporaryAdmissionPortOfExitByIndex(2);
       await runA11yScan({ exclude: govukConditionalRevealRadiosOnReason });
-      await animalsPages.importReason.saveAndContinue.click();
+      await animalsPages.importReason.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Additional details').click();
       await animalsPages.additionalDetails.heading.waitFor();
-      await animalsPages.additionalDetails.saveAndContinue.click();
+      await animalsPages.additionalDetails.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
     });
 
@@ -86,8 +86,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.consignmentDetails.fillAnimalCountFor(horse, 1);
       await animalsPages.consignmentDetails.fillAnimalCountFor(domesticCat, 1);
       await animalsPages.consignmentDetails.saveAndContinue.click();
-      await animalsPages.overview.heading.waitFor();
-      await animalsPages.overview.task('Identification details').click();
     });
 
     await test.step('Identification details for the horse and cat identifier sets', async () => {

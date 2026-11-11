@@ -1,5 +1,5 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
-import { handTypedCommercialTransporter } from '@domain/animals/constants/transporters';
+import { uniquelyNamedCommercialTransporter } from '@domain/animals/constants/transporters';
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
@@ -28,6 +28,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       const referenceNumber = animalsPages.originOfImport.referenceNumberFromUrl();
       await animalsJourney.fillOriginOfImport();
       await animalsJourney.saveOriginOfImport();
+      await animalsPages.commoditySelection.heading.waitFor();
       await animalsPages.overview.open(referenceNumber);
       await animalsPages.overview.heading.waitFor();
       await runA11yScan();
@@ -38,7 +39,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.commoditySelection.heading.waitFor();
       await runA11yScan();
       await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
-      await animalsPages.commoditySelection.saveAndContinue.click();
+      await animalsPages.commoditySelection.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Commodity details').click();
     });
@@ -48,7 +49,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsPages.consignmentDetails.numberOfAnimals.fill('1');
       await animalsPages.consignmentDetails.numberOfPackages.fill('5');
-      await animalsPages.consignmentDetails.saveAndContinue.click();
+      await animalsPages.consignmentDetails.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
     });
 
@@ -57,7 +58,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.animalIdentification.heading.waitFor();
       await runA11yScan();
       await animalsPages.animalIdentification.earTag.fill('UK123456789012');
-      await animalsPages.animalIdentification.saveAndContinue.click();
+      await animalsPages.animalIdentification.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
     });
 
@@ -67,7 +68,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan({ exclude: govukConditionalRevealRadiosOnReason });
       await animalsPages.importReason.reason('Internal market').check();
       await animalsPages.importReason.purpose('Breeding').check();
-      await animalsPages.importReason.saveAndContinue.click();
+      await animalsPages.importReason.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Additional details').click();
     });
@@ -77,7 +78,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsPages.additionalDetails.certifiedFor('Slaughter').check();
       await animalsPages.additionalDetails.containsUnweanedAnimals('No').check();
-      await animalsPages.additionalDetails.saveAndContinue.click();
+      await animalsPages.additionalDetails.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
     });
 
@@ -116,6 +117,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.cphNumber.saveAndContinue.click();
       await animalsPages.addresses.heading.waitFor();
       await animalsPages.addresses.continueButton.click();
+      await animalsPages.contactAddress.heading.waitFor();
+      await animalsPages.overview.open(animalsPages.contactAddress.referenceNumberFromUrl());
       await animalsPages.overview.heading.waitFor();
     });
 
@@ -124,7 +127,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.arrivalDetails.heading.waitFor();
       await runA11yScan();
       await animalsJourney.fillArrivalDetails();
-      await animalsPages.arrivalDetails.saveAndContinue.click();
+      await animalsPages.arrivalDetails.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Transit countries').click();
     });
@@ -133,7 +136,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.transitedCountries.heading.waitFor();
       await runA11yScan();
       await animalsPages.transitedCountries.addCountry('France');
-      await animalsPages.transitedCountries.saveAndContinue.click();
+      await animalsPages.transitedCountries.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
       await animalsPages.overview.task('Transport details').click();
     });
@@ -154,7 +157,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Add a commercial transporter', async () => {
       await animalsPages.commercialTransporter.heading.waitFor();
       await runA11yScan();
-      await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(handTypedCommercialTransporter);
+      await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(uniquelyNamedCommercialTransporter());
     });
 
     await test.step('Contact address', async () => {
@@ -162,7 +165,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.contactAddress.heading.waitFor();
       await runA11yScan();
       await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
-      await animalsPages.contactAddress.saveAndContinue.click();
+      await animalsPages.contactAddress.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
     });
 
