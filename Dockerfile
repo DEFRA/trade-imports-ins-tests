@@ -17,6 +17,11 @@ ENV CI=true
 
 USER root
 
+# The base image points apt at Ubuntu's Azure mirrors, which GitHub's
+# builders cannot always resolve. Use Ubuntu's own mirrors instead.
+RUN find /etc/apt -name '*.list' -o -name '*.sources' \
+    | xargs sed -i 's/azure\.archive\.ubuntu\.com/archive.ubuntu.com/g; s/azure\.ports\.ubuntu\.com/ports.ubuntu.com/g'
+
 # System dependencies needed by tests and tools (curl/zip/Java)
 RUN apt-get update -qq \
     && apt-get install -qqy \
