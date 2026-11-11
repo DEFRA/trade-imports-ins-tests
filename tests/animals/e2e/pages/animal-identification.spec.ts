@@ -82,6 +82,37 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await expect(bisonBison.getByLabel('Ear tag', { exact: true })).toHaveValue('');
   });
 
+  test('refuses a blank card on its own Save and add another beside a filled sibling, and focuses that card on the error link', async ({
+    pages,
+    animalsPages,
+  }) => {
+    const bosTaurus = animalsPages.animalIdentification.speciesCard(commodityLines.cattle);
+    const bisonBison = animalsPages.animalIdentification.speciesCard(commodityLines.bison);
+    await bosTaurus.getByLabel('Ear tag', { exact: true }).fill('UK000000000001');
+    await bisonBison.getByRole('button', { name: 'Save and add another' }).click();
+
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
+    await expect(animalsPages.animalIdentification.errorSummaryLinks).toHaveText(['Enter at least one identifier for this animal']);
+    await animalsPages.animalIdentification.errorSummaryLinks.click();
+    await expect(bisonBison.getByLabel('Ear tag', { exact: true })).toBeFocused();
+    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.bison, 1)).toHaveCount(0);
+  });
+
+  test('saves no animal and shows no error when Save and return to overview is pressed with every identifier blank', async ({
+    pages,
+    animalsPages,
+  }) => {
+    const { cattle } = commodityLines;
+    await animalsPages.animalIdentification.saveAndReturnToOverview.click();
+
+    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+
+    await animalsPages.overview.task('Identification details').click();
+    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(cattle, 1, 2)).toBeVisible();
+    await expect(animalsPages.animalIdentification.savedAnimalRow(cattle, 1)).toHaveCount(0);
+  });
+
   test('saves the card typed in when Enter is pressed in its field and stays on Identification details', async ({ animalsPages }) => {
     const { cattle } = commodityLines;
     const bosTaurus = animalsPages.animalIdentification.speciesCard(cattle);
@@ -98,7 +129,10 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
   test('leaves a species of more than one animal unsaved when Save and continue is pressed', async ({ animalsPages }) => {
     const { domesticCat } = commodityLines;
     await animalsPages.animalIdentification.speciesCard(domesticCat).getByLabel('Passport', { exact: true }).fill('UK123456789');
-    await animalsPages.animalIdentification.saveAndReturnToOverview.click();
+    await animalsPages.animalIdentification.saveAndContinue.click();
+    await expect(animalsPages.additionalDetails.heading).toBeVisible();
+
+    await animalsPages.additionalDetails.cancelAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.overview.task('Identification details').click();
