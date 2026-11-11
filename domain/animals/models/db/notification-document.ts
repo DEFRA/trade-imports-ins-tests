@@ -37,7 +37,6 @@ type StoredSpecies = {
   value: string;
   text: string;
   commonName?: string;
-  typeOfCommodity?: string;
   noOfAnimals: number;
   noOfPackages: number;
   earTag?: string;
@@ -50,7 +49,6 @@ type StoredCommodityComplement = {
   name: string;
   commodityCode?: string;
   description?: string;
-  typeOfCommodity?: string;
   totalNoOfAnimals: number;
   totalNoOfPackages?: number;
   species: StoredSpecies[];

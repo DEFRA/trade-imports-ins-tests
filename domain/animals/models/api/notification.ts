@@ -61,7 +61,6 @@ export type SpeciesEntry = {
 };
 
 export type CommodityComplement = {
-  typeOfCommodity: string;
   species: SpeciesEntry[];
   totalNoOfAnimals?: number;
   totalNoOfPackages?: number;
