@@ -70,6 +70,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
 
     const donkeyLine = MANDATORY_COMMODITY_LINES.donkey;
     await animalsJourney.saveAnimalWithPassport(donkeyCard, donkeyLine);
+    await animalsJourney.saveAnimalWithPassport(horseCard, { passportNumber: 'UK135792468' });
 
     await expect(identification.cardColumnHeadings(donkeyCard)).toHaveText(['Animal', 'Microchip', 'Passport', 'Actions']);
     await expect(identification.cardColumnHeadings(horseCard)).toHaveText(['Animal', 'Microchip', 'Passport', 'Horse name', 'Actions']);
