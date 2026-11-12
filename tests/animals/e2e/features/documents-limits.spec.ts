@@ -3,13 +3,14 @@ import { fileUploadPaths } from '@resources/file-upload/paths';
 import { writePaddedPdf } from '@resources/file-upload/padded-pdf';
 import { DOCUMENT_ISSUE_DATE, MAX_FILE_SIZE_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-upload/constants';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
+import { setTestTimeout } from '@utils/playwright/test-timeout';
 
 const maximumDocuments = 15;
 const maximumDocumentsMessage = `You can upload a maximum of ${maximumDocuments} files`;
 
 test.describe('Documents limits', { tag: '@duplicated-in-frontend' }, () => {
   test('accepts a fifteenth document and then shuts the add control, naming the cap', async ({ animalsPages, animalsJourney }) => {
-    test.setTimeout(120_000);
+    setTestTimeout(120_000);
     await animalsJourney.toAccompanyingDocuments();
 
     for (let index = 1; index <= maximumDocuments; index += 1) {

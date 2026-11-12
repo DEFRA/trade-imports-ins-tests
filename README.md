@@ -590,7 +590,7 @@ Ensure TypeScript is properly installed and `tsconfig.json` is configured correc
 
 ### Tests timeout
 
-Increase timeout in `playwright.config.ts` or in individual tests using `test.setTimeout()`.
+Raise the run-wide timeout in `playwright.config.ts`. Raise a single test's timeout with `setTestTimeout` from `@utils/playwright/test-timeout`, which leaves a test with no timeout, as in debug mode, with none.
 
 ### Apple Silicon Docker build fails
 
