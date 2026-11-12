@@ -67,6 +67,10 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
       .filter({ has: this.page.getByRole('cell', { name: `${speciesLabel(species)} ${number}`, exact: true }) });
   }
 
+  removeButton(species: CommodityLine, number: number): Locator {
+    return this.savedAnimalRow(species, number).getByRole('button', { name: 'Remove' });
+  }
+
   identifierColumn(name: string): Locator {
     return this.page.getByRole('columnheader', { name, exact: true });
   }
@@ -105,6 +109,10 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
 
   cardColumnHeadings(card: Locator): Locator {
     return card.getByRole('columnheader');
+  }
+
+  cardEntryLabels(card: Locator): Locator {
+    return card.locator('label[for$="-0"]');
   }
 
   cardSaveControl(card: Locator): Locator {

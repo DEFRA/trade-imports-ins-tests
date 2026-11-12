@@ -4,9 +4,8 @@ import { commodityLines, speciesLabel } from '@domain/animals/constants/commodit
 import { test, expect } from '@fixtures';
 
 test.describe('Animal identifiers — conditional identifier surface', { tag: '@duplicated-in-frontend' }, () => {
-  test("a domestic cat's unit form asks for microchip, passport and tattoo, with no address field", async ({
+  test("a domestic cat's unit form asks for microchip, passport and tattoo, and its saved-animals table heads only those identifiers", async ({
     animalsJourney,
-    pages,
     animalsPages,
   }) => {
     await animalsJourney.toAnimalIdentificationWithCounts([{ species: commodityLines.domesticCat, animalCount: 2 }]);
@@ -17,16 +16,21 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await expect(animalsPages.animalIdentification.tattoo).toBeVisible();
     await expect(animalsPages.animalIdentification.earTag).toBeHidden();
     await expect(animalsPages.animalIdentification.horseName).toBeHidden();
-    await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
-    await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
-    await expect(pages.page.getByLabel('Name or organisation name')).toHaveCount(0);
-    await expect(pages.page.getByLabel('Country')).toHaveCount(0);
+
+    const catCard = animalsPages.animalIdentification.speciesCard(commodityLines.domesticCat);
+    await expect(animalsPages.animalIdentification.cardEntryLabels(catCard)).toHaveText(['Microchip', 'Passport', 'Tattoo']);
 
     const catLine = MANDATORY_COMMODITY_LINES.domesticCat;
-    const catCard = animalsPages.animalIdentification.speciesCard(commodityLines.domesticCat);
     await animalsJourney.saveAnimalWithPassport(catCard, catLine);
 
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
+    await expect(animalsPages.animalIdentification.cardColumnHeadings(catCard)).toHaveText([
+      'Animal',
+      'Microchip',
+      'Passport',
+      'Tattoo',
+      'Actions',
+    ]);
     const unitRow = animalsPages.animalIdentification.savedAnimalRow(catLine.species, 1);
     await expect(unitRow.getByRole('cell', { name: catLine.passportNumber, exact: true })).toBeVisible();
   });
