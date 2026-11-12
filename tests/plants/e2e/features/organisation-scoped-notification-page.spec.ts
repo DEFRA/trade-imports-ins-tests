@@ -16,7 +16,8 @@ test.describe('Another organisation opens a notification by its URL', () => {
       });
 
       const page = sarahsPages.commodityType.heading.page();
-      await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
+      await expect(page.getByRole('heading', { level: 1, name: '404' })).toBeVisible();
+      await expect(page.getByText('Page not found', { exact: true })).toBeVisible();
       await expect(sarahsPages.commodityType.heading).toBeHidden();
       await expect(page.getByText(reference)).toBeHidden();
     } finally {
