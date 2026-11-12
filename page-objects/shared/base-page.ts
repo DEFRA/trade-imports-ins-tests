@@ -23,7 +23,9 @@ export function requireBaseUrl(
 }
 
 export const TRAIL_PARAMETER = 'from';
-export const OPTIONAL_TRAIL_PATTERN = `(?:[?&]${TRAIL_PARAMETER}=[^#]*)?`;
+const RETURN_PARAMETER = 'return';
+/** An optional `return=` marker, as a hub's add/change link carries it, followed by an optional trail. */
+export const OPTIONAL_TRAIL_PATTERN = `(?:[?&]${RETURN_PARAMETER}=[^&#]*)?(?:[?&]${TRAIL_PARAMETER}=[^#]*)?`;
 export const TRAIL_START = { overview: 'overview', dashboard: 'dashboard', ins: 'ins' } as const;
 
 /** `?from=` followed by `places`, newest last, URI-encoded and joined by commas. */
