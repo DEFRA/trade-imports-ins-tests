@@ -1,13 +1,15 @@
 import { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
 import { formattedValue } from '@adapters/http/dataverse-client';
-import { animalsDynamics, waitForNotificationRow } from '@config/animals-dynamics';
+import { dynamicsBaseTestTimeoutMs } from '@config/dynamics';
 import { defaultUser } from '@config/users';
 import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
 import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { test, expect } from '@fixtures';
 import { parseAppDateText, toIsoDate } from '@utils/date-utils';
+import { waitForAnimalsDynamicsNotification } from '@utils/dynamics/animals-polls';
 import { skipIfComposeEnvironment } from '@utils/playwright/environment';
+import { setTestTimeout } from '@utils/playwright/test-timeout';
 
 // Traces record APIRequestContext calls with their headers and form bodies: the bearer token and client secret.
 // Top level because Playwright rejects test.use({ trace }) inside a describe group.
@@ -32,9 +34,6 @@ const attachRow = (row: AnimalsDynamicsImporterNotification): Promise<void> =>
 test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
   test.beforeEach(() => {
     skipIfComposeEnvironment('the compose stack has no PIMS Dynamics');
-    // The slowed UI journey plus the PIMS Dynamics poll.
-    test.slow();
-    test.setTimeout(test.info().timeout + animalsDynamics.arrivalTimeoutMs);
   });
 
   test('a notification submitted with only the mandatory answers is stored in PIMS Dynamics', async ({
@@ -43,6 +42,8 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     externalRequest,
     addressBookApi,
   }) => {
+    setTestTimeout(dynamicsBaseTestTimeoutMs);
+    test.slow();
     // Built first: a missing ANIMALS_DYNAMICS_URL / DATAVERSE_* secret fails here, before the journey.
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     const answers = MANDATORY_ANSWERS;
@@ -53,7 +54,7 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     const importer = await addressBookApi.findByName(answers.parties.importer);
     await animalsJourney.submitNotification(answers);
     const referenceNumber = journeyContext.referenceNumber;
-    const row = await waitForNotificationRow(dynamics, referenceNumber);
+    const row = await waitForAnimalsDynamicsNotification(dynamics, referenceNumber);
     await attachRow(row);
 
     expect.soft(row.defraimp_name, 'reference number').toBe(referenceNumber);
@@ -113,9 +114,11 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
 
   test('answering yes to unweaned animals is stored in PIMS Dynamics', async ({ animalsJourney, journeyContext, externalRequest }) => {
     test.fixme(true, 'PIMS Dynamics does not yet write isOrHasUnweanedAnimals from the 0.1.0 message to the record');
+    setTestTimeout(dynamicsBaseTestTimeoutMs);
+    test.slow();
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     await animalsJourney.submitNotification({ ...MANDATORY_ANSWERS, unweanedAnimals: yesNoValues.yes });
-    const row = await waitForNotificationRow(dynamics, journeyContext.referenceNumber);
+    const row = await waitForAnimalsDynamicsNotification(dynamics, journeyContext.referenceNumber);
     await attachRow(row);
 
     expect(row.defraimp_commoditiesincludenonablactedanimals).toBe(true);
@@ -126,12 +129,12 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     journeyContext,
     externalRequest,
   }) => {
-    // The accompanying document is uploaded and virus-scanned before the journey can submit.
-    test.setTimeout(test.info().timeout + 2 * 60_000);
+    setTestTimeout(dynamicsBaseTestTimeoutMs);
+    test.slow();
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     const answers = ALL_ANSWERS;
     await animalsJourney.submitNotification(answers);
-    const row = await waitForNotificationRow(dynamics, journeyContext.referenceNumber);
+    const row = await waitForAnimalsDynamicsNotification(dynamics, journeyContext.referenceNumber);
     await attachRow(row);
 
     expect.soft(row.defraimp_traderreference, 'internal reference').toBe(answers.internalReference);

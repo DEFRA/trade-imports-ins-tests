@@ -1,9 +1,11 @@
 import { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
 import { formattedValue } from '@adapters/http/dataverse-client';
-import { animalsDynamics, waitForNotificationRow } from '@config/animals-dynamics';
+import { dynamicsBaseTestTimeoutMs } from '@config/dynamics';
 import { ALL_ANSWERS, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { test, expect } from '@fixtures';
+import { waitForAnimalsDynamicsNotification } from '@utils/dynamics/animals-polls';
 import { skipIfComposeEnvironment } from '@utils/playwright/environment';
+import { setTestTimeout } from '@utils/playwright/test-timeout';
 
 // Traces record APIRequestContext calls with their headers and form bodies: the bearer token and client secret.
 // Top level because Playwright rejects test.use({ trace }) inside a describe group.
@@ -12,9 +14,6 @@ test.use({ trace: 'off' });
 test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics' }, () => {
   test.beforeEach(() => {
     skipIfComposeEnvironment('the compose stack has no PIMS Dynamics');
-    // The slowed UI journey plus the PIMS Dynamics poll.
-    test.slow();
-    test.setTimeout(test.info().timeout + animalsDynamics.arrivalTimeoutMs);
   });
 
   test('the contact address, species names, party postcodes, phones and emails, CPH number, transport document and identification, reason for import, internal market purpose, certified for, number of animals and ear tag are stored in PIMS Dynamics', async ({
@@ -24,6 +23,8 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     addressBookApi,
   }) => {
     test.fixme(true, 'PIMS Dynamics leaves these mandatory answers empty; the likely cause of each is in the comments');
+    setTestTimeout(dynamicsBaseTestTimeoutMs);
+    test.slow();
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     const answers = MANDATORY_ANSWERS;
     const [cowLine] = answers.commodityLines;
@@ -34,7 +35,7 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     const importer = await addressBookApi.findByName(answers.parties.importer);
     const contact = await addressBookApi.findByName(answers.contactAddress);
     await animalsJourney.submitNotification(answers);
-    const row = await waitForNotificationRow(dynamics, journeyContext.referenceNumber);
+    const row = await waitForAnimalsDynamicsNotification(dynamics, journeyContext.referenceNumber);
 
     // [FROM v0.3.0]
     // exchangedDocument.issuer.postalAddress
@@ -94,13 +95,13 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     externalRequest,
   }) => {
     test.fixme(true, 'PIMS Dynamics leaves these optional answers empty; the likely cause of each is in the comments');
-    // The accompanying document is uploaded and virus-scanned before the journey can submit.
-    test.setTimeout(test.info().timeout + 2 * 60_000);
+    setTestTimeout(dynamicsBaseTestTimeoutMs);
+    test.slow();
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     const answers = ALL_ANSWERS;
     const [cowLine] = answers.commodityLines;
     await animalsJourney.submitNotification(answers);
-    const row = await waitForNotificationRow(dynamics, journeyContext.referenceNumber);
+    const row = await waitForAnimalsDynamicsNotification(dynamics, journeyContext.referenceNumber);
 
     // [FROM v0.3.0]
     // specifiedConsignment.originCountry.regionOfOriginCode
