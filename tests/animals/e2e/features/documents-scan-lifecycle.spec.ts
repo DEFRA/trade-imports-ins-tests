@@ -1,8 +1,7 @@
-import path from 'node:path';
 import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
-import { writeEicarPdfFile } from '@utils/eicar-file-writer';
+import { eicarPdfUpload } from '@utils/eicar-upload';
 import { firstScanStatus } from '@utils/scan-status';
 
 const issueDate = '03/01/2026';
@@ -15,12 +14,12 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
   test('infected upload: accepted while scanning, then Virus found with error summary blocking Save and continue until it is removed', async ({
     pages,
     animalsPages,
-  }, testInfo) => {
+  }) => {
     test.slow();
-    const eicar = await writeEicarPdfFile(path.join(testInfo.outputDir, 'file-upload'));
+    const eicar = eicarPdfUpload();
 
     const reference = `PWVIRUS${Date.now()}`;
-    await animalsPages.accompanyingDocuments.fillDocument(reference, issueDate, eicar.filePath);
+    await animalsPages.accompanyingDocuments.fillDocument(reference, issueDate, eicar);
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     const row = animalsPages.accompanyingDocuments.documentRow(reference);
@@ -29,13 +28,13 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(
-      pages.page.getByText(`${eicar.fileName} cannot be used. Remove it and try again with a different file.`).first(),
+      pages.page.getByText(`${eicar.name} cannot be used. Remove it and try again with a different file.`).first(),
     ).toBeVisible();
     await expect(animalsPages.accompanyingDocuments.viewFile(1)).toHaveCount(0);
 
     await animalsPages.accompanyingDocuments.saveAndContinue.click();
     await expect(
-      pages.page.getByText(`${eicar.fileName} cannot be used. Remove it and try again with a different file.`).first(),
+      pages.page.getByText(`${eicar.name} cannot be used. Remove it and try again with a different file.`).first(),
     ).toBeVisible();
 
     await animalsPages.accompanyingDocuments.removeDocument(1).click();
