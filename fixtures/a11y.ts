@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 import { test as base, expect } from '@fixtures';
 import { scanPage, formatSummaries, type A11yScanOptions, type ViolationSummary } from '@utils/a11y-utils';
+import { setTestTimeout } from '@utils/playwright/test-timeout';
 
 /**
  * Couples the WCAG 2.2 AA name with axe's tags so describe titles and the
@@ -63,7 +64,7 @@ export interface A11yFixtures {
 export const test = base.extend<A11yFixtures>({
   runA11yScan: async ({ page }, use, testInfo) => {
     // Before test: extend the timeout
-    testInfo.setTimeout(A11Y_SCAN_TIMEOUT_MS);
+    setTestTimeout(A11Y_SCAN_TIMEOUT_MS);
 
     // Before test: initialise results collection
     const results: ViolationSummary[] = [];

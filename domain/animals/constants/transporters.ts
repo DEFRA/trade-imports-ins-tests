@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 export const transporters = {
   garciaLivestockTransport: { value: 'garcia-livestock-transport', display: 'García Livestock Transport SL' },
 } as const;
@@ -25,3 +27,9 @@ export const handTypedCommercialTransporter = {
   emailAddress: 'ops@loughneagh.example',
   telephoneNumber: '+44 28 9446 1200',
 } as const;
+
+/** Tests run in parallel and can start in the same millisecond, so the name takes a random part. */
+export const uniquelyNamedCommercialTransporter = () => ({
+  ...handTypedCommercialTransporter,
+  name: `${handTypedCommercialTransporter.name} ${randomUUID().slice(0, 8)}`,
+});

@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { handTypedCommercialTransporter } from '@domain/animals/constants/transporters';
+import { uniquelyNamedCommercialTransporter } from '@domain/animals/constants/transporters';
 
 test.describe('Commercial transporter journeys', () => {
   test(
@@ -21,7 +21,7 @@ test.describe('Commercial transporter journeys', () => {
       await animalsPages.transporterAdd.transporterType('Commercial').check();
       await animalsPages.transporterAdd.continueButton.click();
       await animalsPages.commercialTransporter.heading.waitFor();
-      await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(handTypedCommercialTransporter);
+      await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(uniquelyNamedCommercialTransporter());
 
       await animalsPages.overview.task('Contact address for this consignment').click();
       await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();

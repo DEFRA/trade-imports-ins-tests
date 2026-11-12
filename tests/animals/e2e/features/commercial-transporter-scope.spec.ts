@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { handTypedCommercialTransporter, handTypedPrivateTransporter } from '@domain/animals/constants/transporters';
+import { handTypedPrivateTransporter, uniquelyNamedCommercialTransporter } from '@domain/animals/constants/transporters';
 import { trackTransporterForDeletion, transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
 
 test.describe('Commercial transporter scope', { tag: '@duplicated-in-frontend' }, () => {
@@ -10,6 +10,7 @@ test.describe('Commercial transporter scope', { tag: '@duplicated-in-frontend' }
     animalsPages,
     addressBookApi,
   }) => {
+    const commercialTransporter = uniquelyNamedCommercialTransporter();
     await animalsJourney.startNotification();
     await animalsJourney.answerCommodity();
 
@@ -18,13 +19,13 @@ test.describe('Commercial transporter scope', { tag: '@duplicated-in-frontend' }
     await expect(animalsPages.commercialTransporter.heading).toBeVisible();
     await expect(animalsPages.commercialTransporter.country).toHaveValue('Northern Ireland');
 
-    await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(handTypedCommercialTransporter);
+    await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(commercialTransporter);
 
     await animalsJourney.openTransporterFromOverview();
     await animalsJourney.chooseTransporterType('Commercial');
     await expect(animalsPages.commercialTransporter.heading).toBeVisible();
-    await expect(animalsPages.commercialTransporter.approvalNumber).toHaveValue(handTypedCommercialTransporter.approvalNumber);
-    await expect(animalsPages.commercialTransporter.nameOrOrganisationName).toHaveValue(handTypedCommercialTransporter.name);
+    await expect(animalsPages.commercialTransporter.approvalNumber).toHaveValue(commercialTransporter.approvalNumber);
+    await expect(animalsPages.commercialTransporter.nameOrOrganisationName).toHaveValue(commercialTransporter.name);
     await animalsJourney.saveTransporterDetailsToOverview(animalsPages.commercialTransporter);
 
     await animalsJourney.openTransporterFromOverview();

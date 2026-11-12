@@ -35,6 +35,7 @@ Why the animals flows and page objects are written the way they are. The code ca
 - `toCommercialTransporter` follows the add route's commercial arm: the list first, then the transporter type question, then the form for a commercial transporter that is not on the list.
 - `fillAndSavePrivateTransporterAddForm` fills the open private transporter form with the details given and saves it, waiting for the transporter list the save lands back on with the new transporter first and chosen.
 - `fillAndSaveCommercialTransporterAddFormToOverview` fills and saves the open commercial transporter form, then saves the transporter list it lands on, reaching the overview — the one path specs that only need the overview, not the list's own state, take through the save.
+- `uniquelyNamedCommercialTransporter` (in `domain/animals/constants/transporters.ts`) is the hand-typed commercial transporter with a name no other running test uses. Every test signs in to the same organisation, and its transporter list shows only the newest address-book entry of each name. When two tests add a transporter of the same name at once, the later add replaces the entry the earlier test's list chose, and that list's save is refused with "Select a transporter from the list". The accessibility journey specs add a transporter and then save the list while running in parallel, so they use this.
 
 ## The overview task list
 
