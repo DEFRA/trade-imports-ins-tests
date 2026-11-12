@@ -52,6 +52,11 @@ export const MANDATORY_COMMODITY_LINES = {
     noOfAnimals: 1,
     passportNumber: 'UK987654321',
   },
+  horse: {
+    species: commodityLines.horse,
+    noOfAnimals: 1,
+    passportNumber: 'UK135792468',
+  },
 } satisfies Record<string, CommodityLineAnswer>;
 
 /** One animal per line, answering every field the frontend offers that species. */
