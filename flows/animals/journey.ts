@@ -391,11 +391,13 @@ export class AnimalsJourney {
   }
 
   async addCphAndLeaveAddresses(cph: CphAnswer = MANDATORY_ANSWERS.cph): Promise<void> {
-    await this.animalsPages.addresses.addCph.click();
-    await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
-    await this.animalsPages.cphNumber.fillCphNumber(cph);
-    await this.animalsPages.cphNumber.saveAndContinue.click();
-    await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
+    if (await this.animalsPages.addresses.addCph.isVisible()) {
+      await this.animalsPages.addresses.addCph.click();
+      await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
+      await this.animalsPages.cphNumber.fillCphNumber(cph);
+      await this.animalsPages.cphNumber.saveAndContinue.click();
+      await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
+    }
     await this.animalsPages.addresses.continueButton.click();
     await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
   }
