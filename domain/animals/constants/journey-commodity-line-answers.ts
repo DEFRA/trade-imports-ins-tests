@@ -65,6 +65,7 @@ export const ALL_COMMODITY_LINES = {
     ...MANDATORY_COMMODITY_LINES.cattle,
     noOfPackages: 5,
     passportNumber: 'PASSPORT-0001',
+    tattoo: 'CT1234',
   },
   domesticCat: {
     ...MANDATORY_COMMODITY_LINES.domesticCat,

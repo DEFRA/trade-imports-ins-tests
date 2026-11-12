@@ -31,7 +31,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await expect(unitRow.getByRole('cell', { name: catLine.passportNumber, exact: true })).toBeVisible();
   });
 
-  test('a commodity with no identifier type of its own gets no card, while the lines that have one keep theirs', async ({
+  test('a commodity with no identifier type of its own gets no card, while a cattle line keeps its ear tag, passport and tattoo', async ({
     animalsJourney,
     pages,
     animalsPages,
@@ -43,6 +43,8 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
 
     await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle, 1, 1)).toBeVisible();
     await expect(animalsPages.animalIdentification.earTag).toBeVisible();
+    await expect(animalsPages.animalIdentification.passportNumber).toBeVisible();
+    await expect(animalsPages.animalIdentification.tattoo).toBeVisible();
     await expect(pages.page.getByRole('heading', { name: `Enter details for ${speciesLabel(commodityLines.ostrich)}` })).toHaveCount(0);
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
     await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);

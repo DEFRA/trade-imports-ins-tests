@@ -105,9 +105,11 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(value(speciesCard, 'Number of packages')).toHaveText(String(cowLine.noOfPackages));
     await expect(speciesCard.getByRole('heading', { name: 'Animal details' })).toBeVisible();
     await expect(speciesCard.getByRole('columnheader', { name: 'Ear tag' })).toBeVisible();
+    await expect(speciesCard.getByRole('columnheader', { name: 'Tattoo' })).toBeVisible();
     await expect(speciesCard.getByRole('cell', { name: 'Animal 1' })).toBeVisible();
     await expect(speciesCard.getByRole('cell', { name: cowLine.earTag })).toBeVisible();
     await expect(speciesCard.getByRole('cell', { name: cowLine.passportNumber })).toBeVisible();
+    await expect(speciesCard.getByRole('cell', { name: cowLine.tattoo })).toBeVisible();
 
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(value(arrivalDetails, 'Port of entry')).toHaveText(answers.pointOfEntry.display);
