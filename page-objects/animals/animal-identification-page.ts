@@ -3,6 +3,14 @@ import { speciesLabel, type CommodityLine } from '@domain/animals/constants/comm
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { SelectedCommoditiesTable } from '@page-objects/animals/selected-commodities-table';
 
+const EAR_TAG_LABEL = 'Ear tag';
+const PASSPORT_LABEL = 'Passport';
+const MICROCHIP_LABEL = 'Microchip';
+const HORSE_NAME_LABEL = 'Horse name';
+const TATTOO_LABEL = 'Tattoo';
+const SAVE_AND_ADD_ANOTHER = 'Save and add another';
+const SAVE_AND_FINISH = 'Save and finish';
+
 export class AnimalsAnimalIdentificationPage extends NotificationPage {
   readonly selectedCommodities = new SelectedCommoditiesTable(this.page);
 
@@ -15,19 +23,23 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
   }
 
   get earTag(): Locator {
-    return this.page.getByLabel('Ear tag', { exact: true });
+    return this.page.getByLabel(EAR_TAG_LABEL, { exact: true });
   }
 
   get passportNumber(): Locator {
-    return this.page.getByLabel('Passport', { exact: true });
+    return this.page.getByLabel(PASSPORT_LABEL, { exact: true });
   }
 
   get microchip(): Locator {
-    return this.page.getByLabel('Microchip', { exact: true });
+    return this.page.getByLabel(MICROCHIP_LABEL, { exact: true });
   }
 
   get horseName(): Locator {
-    return this.page.getByLabel('Horse name', { exact: true });
+    return this.page.getByLabel(HORSE_NAME_LABEL, { exact: true });
+  }
+
+  get tattoo(): Locator {
+    return this.page.getByLabel(TATTOO_LABEL, { exact: true });
   }
 
   enterDetailsCounterHeading(species: CommodityLine, current: number, total: number): Locator {
@@ -60,10 +72,42 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
   }
 
   get saveAndAddAnother(): Locator {
-    return this.page.getByRole('button', { name: 'Save and add another' });
+    return this.page.getByRole('button', { name: SAVE_AND_ADD_ANOTHER });
   }
 
   get saveAndFinish(): Locator {
-    return this.page.getByRole('button', { name: 'Save and finish' });
+    return this.page.getByRole('button', { name: SAVE_AND_FINISH });
+  }
+
+  private cardField(card: Locator, label: string): Locator {
+    return card.getByLabel(label, { exact: true });
+  }
+
+  cardEarTag(card: Locator): Locator {
+    return this.cardField(card, EAR_TAG_LABEL);
+  }
+
+  cardPassport(card: Locator): Locator {
+    return this.cardField(card, PASSPORT_LABEL);
+  }
+
+  cardMicrochip(card: Locator): Locator {
+    return this.cardField(card, MICROCHIP_LABEL);
+  }
+
+  cardHorseName(card: Locator): Locator {
+    return this.cardField(card, HORSE_NAME_LABEL);
+  }
+
+  cardTattoo(card: Locator): Locator {
+    return this.cardField(card, TATTOO_LABEL);
+  }
+
+  cardColumnHeadings(card: Locator): Locator {
+    return card.getByRole('columnheader');
+  }
+
+  cardSaveControl(card: Locator): Locator {
+    return card.getByRole('button', { name: SAVE_AND_ADD_ANOTHER }).or(card.getByRole('button', { name: SAVE_AND_FINISH }));
   }
 }

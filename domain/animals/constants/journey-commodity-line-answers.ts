@@ -47,6 +47,11 @@ export const MANDATORY_COMMODITY_LINES = {
       email: 'owner@example.co.uk',
     },
   },
+  donkey: {
+    species: commodityLines.donkey,
+    noOfAnimals: 1,
+    passportNumber: 'UK987654321',
+  },
 } satisfies Record<string, CommodityLineAnswer>;
 
 /** One animal per line, answering every field the frontend offers that species. */

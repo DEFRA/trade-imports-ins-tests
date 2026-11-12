@@ -14,16 +14,17 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
 
     await expect(animalsPages.animalIdentification.microchip).toBeVisible();
     await expect(animalsPages.animalIdentification.passportNumber).toBeVisible();
-    await expect(pages.page.getByLabel('Tattoo')).toBeVisible();
+    await expect(animalsPages.animalIdentification.tattoo).toBeVisible();
     await expect(animalsPages.animalIdentification.earTag).toBeHidden();
-    await expect(pages.page.getByLabel('Horse name')).toBeHidden();
+    await expect(animalsPages.animalIdentification.horseName).toBeHidden();
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
     await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
     await expect(pages.page.getByLabel('Name or organisation name')).toHaveCount(0);
     await expect(pages.page.getByLabel('Country')).toHaveCount(0);
 
     const catLine = MANDATORY_COMMODITY_LINES.domesticCat;
-    await animalsJourney.saveAnimalWithPassport(catLine);
+    const catCard = animalsPages.animalIdentification.speciesCard(commodityLines.domesticCat);
+    await animalsJourney.saveAnimalWithPassport(catCard, catLine);
 
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
     const unitRow = animalsPages.animalIdentification.savedAnimalRow(catLine.species, 1);
@@ -45,6 +46,36 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await expect(pages.page.getByRole('heading', { name: `Enter details for ${speciesLabel(commodityLines.ostrich)}` })).toHaveCount(0);
     await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
     await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
+  });
+
+  test('a horse card is asked for a horse name and a donkey card on the same commodity code is not, while both are asked for a microchip and a passport', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.toAnimalIdentificationWithCounts([
+      { species: commodityLines.horse, animalCount: 2 },
+      { species: commodityLines.donkey, animalCount: 2 },
+    ]);
+    const identification = animalsPages.animalIdentification;
+    const horseCard = identification.speciesCard(commodityLines.horse);
+    const donkeyCard = identification.speciesCard(commodityLines.donkey);
+
+    await expect(identification.cardMicrochip(horseCard)).toBeVisible();
+    await expect(identification.cardPassport(horseCard)).toBeVisible();
+    await expect(identification.cardHorseName(horseCard)).toBeVisible();
+
+    await expect(identification.cardMicrochip(donkeyCard)).toBeVisible();
+    await expect(identification.cardPassport(donkeyCard)).toBeVisible();
+    await expect(identification.cardHorseName(donkeyCard)).toHaveCount(0);
+
+    const donkeyLine = MANDATORY_COMMODITY_LINES.donkey;
+    await animalsJourney.saveAnimalWithPassport(donkeyCard, donkeyLine);
+
+    await expect(identification.cardColumnHeadings(donkeyCard)).toHaveText(['Animal', 'Microchip', 'Passport', 'Actions']);
+    await expect(identification.cardColumnHeadings(horseCard)).toHaveText(['Animal', 'Microchip', 'Passport', 'Horse name', 'Actions']);
+
+    const savedRow = identification.savedAnimalRow(commodityLines.donkey, 1);
+    await expect(savedRow.getByRole('cell', { name: donkeyLine.passportNumber, exact: true })).toBeVisible();
   });
 
   test('a consignment where no commodity has an identifier type never reaches the identification page', async ({

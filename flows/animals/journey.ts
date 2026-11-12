@@ -321,16 +321,16 @@ export class AnimalsJourney {
     for (const line of lines) {
       const card = identification.speciesCard(line.species);
       if (line.earTag) {
-        await card.getByLabel('Ear tag', { exact: true }).fill(line.earTag);
+        await identification.cardEarTag(card).fill(line.earTag);
       }
       if (line.passportNumber) {
-        await card.getByLabel('Passport', { exact: true }).fill(line.passportNumber);
+        await identification.cardPassport(card).fill(line.passportNumber);
       }
       if (line.microchip) {
-        await card.getByLabel('Microchip', { exact: true }).fill(line.microchip);
+        await identification.cardMicrochip(card).fill(line.microchip);
       }
       if (line.tattoo) {
-        await card.getByLabel('Tattoo', { exact: true }).fill(line.tattoo);
+        await identification.cardTattoo(card).fill(line.tattoo);
       }
     }
     await identification.saveAndReturnToOverview.click();
@@ -577,10 +577,10 @@ export class AnimalsJourney {
     await this.openReviewFromOverview();
   }
 
-  async saveAnimalWithPassport({ passportNumber }: AnimalWithPassport): Promise<void> {
+  async saveAnimalWithPassport(card: Locator, { passportNumber }: AnimalWithPassport): Promise<void> {
     const identification = this.animalsPages.animalIdentification;
-    await identification.passportNumber.fill(passportNumber);
-    await identification.saveAndAddAnother.click();
+    await identification.cardPassport(card).fill(passportNumber);
+    await identification.cardSaveControl(card).click();
   }
 
   /** Answers the permanent address page for every animal on a line that needs one, applying that
