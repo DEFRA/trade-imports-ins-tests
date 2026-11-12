@@ -24,8 +24,8 @@ export function requireBaseUrl(
 
 export const TRAIL_PARAMETER = 'from';
 const RETURN_PARAMETER = 'return';
-/** An optional `return=` marker, as a hub's add/change link carries it, followed by an optional trail. */
-export const OPTIONAL_TRAIL_PATTERN = `(?:[?&]${RETURN_PARAMETER}=[^&#]*)?(?:[?&]${TRAIL_PARAMETER}=[^#]*)?`;
+/** An optional `return=` marker followed by an optional trail. */
+export const OPTIONAL_RETURN_AND_TRAIL_PATTERN = `(?:[?&]${RETURN_PARAMETER}=[^&#]*)?(?:[?&]${TRAIL_PARAMETER}=[^#]*)?`;
 export const TRAIL_START = { overview: 'overview', dashboard: 'dashboard', ins: 'ins' } as const;
 
 /** `?from=` followed by `places`, newest last, URI-encoded and joined by commas. */
@@ -35,7 +35,7 @@ export function trailQuery(places: string[]): string {
 
 /** Matches `url` and the optional `query` that follows it, with or without a trail after them. */
 export function urlPatternWithTrail(url: string, query = ''): RegExp {
-  return new RegExp(`${escapeRegex([url, query].join(''))}${OPTIONAL_TRAIL_PATTERN}$`);
+  return new RegExp(`${escapeRegex([url, query].join(''))}${OPTIONAL_RETURN_AND_TRAIL_PATTERN}$`);
 }
 
 export function originOf(envVar: Parameters<typeof requireBaseUrl>[0]): string {
