@@ -1,5 +1,5 @@
-import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
+import { uniqueToken } from '@utils/unique-token';
 import { addressFormCountryNames } from '@resources/reference-data/reference-data';
 import { skipUnlessComposeEnvironment, skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
 import { expectRolesOptions } from '@utils/roles-options-assertions';
@@ -30,10 +30,6 @@ const ROLES_HELD_BY_PARTY: Record<PartyRole, HeldRoles> = {
   Importer: heldAsImporter,
   'Place of destination': heldAsPlaceOfDestination,
 };
-
-function uniqueToken(): string {
-  return `${Date.now()}-${randomUUID().slice(0, 8)}`;
-}
 
 const HANDSHAKE_ADDRESS = {
   addressLine1: '9 Handshake Lane',
