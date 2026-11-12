@@ -25,3 +25,8 @@ export const handTypedCommercialTransporter = {
   emailAddress: 'ops@loughneagh.example',
   telephoneNumber: '+44 28 9446 1200',
 } as const;
+
+export const uniquelyNamedCommercialTransporter = () => ({
+  ...handTypedCommercialTransporter,
+  name: `${handTypedCommercialTransporter.name} ${Date.now()}`,
+});
