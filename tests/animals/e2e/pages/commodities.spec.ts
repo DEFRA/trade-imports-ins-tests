@@ -40,7 +40,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
   });
 
-  test("lists reference-data's groups by commodity heading and each group's species by label, in that order", async ({
+  test("lists reference-data's groups by commodity code and each group's species by label, in that order", async ({
     pages,
     animalsPages,
     referenceDataApi,
