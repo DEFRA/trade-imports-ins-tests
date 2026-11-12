@@ -46,4 +46,25 @@ export class AnimalsPermanentAddressPage extends NotificationPage {
     await field('Email address').fill(address.email);
     await field('Phone number').fill(address.phone);
   }
+
+  /** The inline message shown on one of a card's own address fields. */
+  async fieldErrorMessage(card: Locator, label: string): Promise<Locator> {
+    const fieldId = await card.getByLabel(label, { exact: true }).getAttribute('id');
+    return card.locator(`#${fieldId}-error`);
+  }
+
+  /**
+   * Presses Save and continue and answers with the HTTP status of the
+   * response to that submit, matched by this page's own address and a
+   * document request.
+   */
+  async saveAndReadStatus(referenceNumber: string): Promise<number> {
+    const urlPattern = this.expectedUrlPattern(referenceNumber);
+    const responsePromise = this.page.waitForResponse(
+      (response) => urlPattern.test(response.url()) && response.request().resourceType() === 'document',
+    );
+    await this.saveAndContinue.click();
+    const response = await responsePromise;
+    return response.status();
+  }
 }

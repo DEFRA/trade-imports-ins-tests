@@ -59,4 +59,34 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
 
     await expect(animalsPages.addresses.heading).toBeVisible();
   });
+
+  test('refuses a blank new address with HTTP 400, names the animal in the summary while the field message stays plain, and the consignment addresses page still offers to add one afterwards', async ({
+    animalsJourney,
+    animalsPages,
+    journeyContext,
+    pages,
+  }) => {
+    await animalsJourney.toRolesAndAddresses(CAT_ANSWERS, () => animalsJourney.answerAnimalIdentification(CAT_ANSWERS));
+    const referenceNumber = journeyContext.referenceNumber;
+
+    await animalsPages.addresses.addPermanentAddress.click();
+    await expect(animalsPages.permanentAddress.heading).toBeVisible();
+
+    const card = animalsPages.permanentAddress.card(commodityLines.domesticCat, 1);
+    await animalsPages.permanentAddress.selectNewAddress(card);
+
+    const status = await animalsPages.permanentAddress.saveAndReadStatus(referenceNumber);
+
+    expect(status).toBe(400);
+    await expect(pages.page).toHaveTitle(/^Error: /);
+    await expect(animalsPages.permanentAddress.errorSummaryLink('Enter a name or organisation name for Felis catus 1')).toBeVisible();
+    const fieldError = await animalsPages.permanentAddress.fieldErrorMessage(card, 'Name or organisation name');
+    await expect(fieldError).toHaveText('Error: Enter a name or organisation name');
+    await expect(card.getByRole('radio', { name: 'Enter a new address' })).toBeChecked();
+
+    await animalsPages.permanentAddress.linkBack.click();
+
+    await expect(animalsPages.addresses.heading).toBeVisible();
+    await expect(animalsPages.addresses.addPermanentAddress).toBeVisible();
+  });
 });
