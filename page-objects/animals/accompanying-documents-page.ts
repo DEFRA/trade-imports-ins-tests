@@ -85,10 +85,15 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
     return this.page.getByRole('link', { name: /Refresh/ });
   }
 
-  async fillDocument(reference: string, issueDate: string, filePath: string, documentType: string = 'ITAHC'): Promise<void> {
+  async fillDocument(
+    reference: string,
+    issueDate: string,
+    file: Parameters<Locator['setInputFiles']>[0],
+    documentType: string = 'ITAHC',
+  ): Promise<void> {
     await this.documentReference.fill(reference);
     await this.documentType.selectOption(documentType);
     await this.dateOfIssue.fill(issueDate);
-    await this.fileUpload.setInputFiles(filePath);
+    await this.fileUpload.setInputFiles(file);
   }
 }
