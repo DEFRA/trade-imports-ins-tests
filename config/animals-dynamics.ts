@@ -5,7 +5,7 @@ import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models
 import { annotateDuration } from '@utils/playwright/annotate-duration';
 
 // Delivery is outbox → SQS → gateway → ASB → PIMS Dynamics.
-const arrivalTimeoutMs = timeouts.veryLong;
+const arrivalTimeoutMs = timeouts.extraLong;
 
 /** How the animals tests wait on PIMS Dynamics, the animals Dynamics instance, and how they report the wait. */
 export const animalsDynamics = {

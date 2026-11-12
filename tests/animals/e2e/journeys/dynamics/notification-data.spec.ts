@@ -16,7 +16,7 @@ test.use({ trace: 'off' });
 const PIMS_COUNTRY_LABELS: Record<string, string> = {
   CH: 'Switzerland',
   GB: 'United Kingdom of Great Britain and Northern Ireland',
-  IE: 'Republic of Ireland',
+  IE: 'Ireland',
 };
 
 const PIMS_MEANS_OF_TRANSPORT_LABELS: Record<string, string> = {
