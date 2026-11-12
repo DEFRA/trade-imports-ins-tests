@@ -39,6 +39,7 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
         postcode: address.postcode,
         country: 'United Kingdom',
       }),
+      { useInnerText: true },
     );
 
     await animalsPages.addresses.changePermanentAddress.click();
