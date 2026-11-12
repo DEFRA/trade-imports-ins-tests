@@ -345,7 +345,9 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.openAdditionalDetailsFromOverview();
     await this.animalsPages.additionalDetails.certifiedFor(answers.certifiedFor.display).check();
-    await this.animalsPages.additionalDetails.containsUnweanedAnimals(answers.unweanedAnimals).check();
+    if (await this.animalsPages.additionalDetails.unweanedAnimalsQuestion.isVisible()) {
+      await this.animalsPages.additionalDetails.containsUnweanedAnimals(answers.unweanedAnimals).check();
+    }
     await this.animalsPages.additionalDetails.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
