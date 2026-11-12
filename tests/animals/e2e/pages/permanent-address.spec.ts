@@ -1,6 +1,7 @@
 import { MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 import { MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 
 import { test, expect } from '@fixtures';
 
@@ -30,7 +31,15 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
     await animalsPages.permanentAddress.saveAndContinue.click();
 
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await expect(animalsPages.addresses.permanentAddressNames).toHaveText(address.nameOrOrganisationName);
+    await expect(animalsPages.addresses.permanentAddressText).toHaveText(
+      AnimalsAddressesPage.expectedAddressText({
+        name: address.nameOrOrganisationName,
+        addressLine1: address.addressLine1,
+        townOrCity: address.townOrCity,
+        postcode: address.postcode,
+        country: 'United Kingdom',
+      }),
+    );
 
     await animalsPages.addresses.changePermanentAddress.click();
     await expect(animalsPages.permanentAddress.heading).toBeVisible();

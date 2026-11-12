@@ -108,7 +108,7 @@ export class AnimalsAddressesPage extends NotificationPage {
     return this.permanentAddressSection.getByRole('link', { name: 'Change' });
   }
 
-  get permanentAddressNames(): Locator {
+  get permanentAddressText(): Locator {
     return this.permanentAddressSection.locator('.govuk-inset-text');
   }
 
