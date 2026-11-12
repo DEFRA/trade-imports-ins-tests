@@ -101,7 +101,7 @@ the same suite as the all-domain script, limited to that domain's `tests/<domain
 | `animals`       | `test:docker-compose:animals`       | `test:docker-compose:animals:a11y`       | `test:docker-compose:animals:visual` | `test:docker-compose:animals:security`       | `test:docker-compose:animals:security:active`       |
 | `animals-admin` | `test:docker-compose:animals-admin` | `test:docker-compose:animals-admin:a11y` | —                                    | `test:docker-compose:animals-admin:security` | `test:docker-compose:animals-admin:security:active` |
 | `ins`           | `test:docker-compose:ins`           | —                                        | —                                    | `test:docker-compose:ins:security`           | `test:docker-compose:ins:security:active`           |
-| `plants`        | `test:docker-compose:plants`        | —                                        | —                                    | —                                            | —                                                   |
+| `plants`        | `test:docker-compose:plants`        | —                                        | `test:docker-compose:plants:visual`  | —                                            | —                                                   |
 
 A dash means the domain has no specs of that test type yet.
 
@@ -431,7 +431,7 @@ The origin of import baseline masks the whole status strip, not the notification
 The declaration specs set the date of declaration to a fixed string before the screenshot instead of masking it, because the server writes today's date into the page text and a mask is as wide as that text, which changes with the day and month. `freezeDatePickersAt` does not reach that text: it stops the browser clock and moves each date picker's served bounds, and changes nothing the server has already written. The date's strong emphasis is proved by the declaration e2e specs.
 
 Run against the stack with `npm run test:docker-compose:visual` (or
-`test:docker-compose:animals:visual` for `animals` alone). `animals` and `plants` have `@visual` specs.
+`test:docker-compose:animals:visual` for `animals` alone, `test:docker-compose:plants:visual` for `plants` alone). `animals` and `plants` have `@visual` specs.
 
 Regenerate the E2E baseline against the stack frontend with
 `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
