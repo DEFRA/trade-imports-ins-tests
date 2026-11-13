@@ -1,6 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { speciesLabel, type CommodityLine } from '@domain/animals/constants/commodity-lines';
+import { resultsGroupCommodityNames } from '@domain/animals/constants/commodity-names';
 import { SEARCH_HINT } from '@domain/animals/constants/commodity-selection-page';
 
 export class AnimalsCommoditySelectionPage extends NotificationPage {
@@ -59,8 +60,7 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
   }
 
   commodityGroupName(code: string): string {
-    const commodityNamesByCode: Readonly<Record<string, string>> = { '0101': 'Horse', '0102': 'Cattle', '0301': 'Fish' };
-    const name = commodityNamesByCode[code];
+    const name = resultsGroupCommodityNames[code];
     return name ? `${name} (${code})` : code;
   }
 
