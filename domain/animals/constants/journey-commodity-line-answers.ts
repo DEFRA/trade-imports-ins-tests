@@ -9,6 +9,8 @@ export type CommodityLineAnswer = {
   passportNumber?: string;
   microchip?: string;
   tattoo?: string;
+  identificationDetails?: string;
+  description?: string;
   permanentAddress?: PermanentAddressAnswer;
 };
 
@@ -56,6 +58,11 @@ export const MANDATORY_COMMODITY_LINES = {
     species: commodityLines.horse,
     noOfAnimals: 1,
     passportNumber: 'UK135792468',
+  },
+  ostrich: {
+    species: commodityLines.ostrich,
+    noOfAnimals: 1,
+    identificationDetails: 'Scar on left wing',
   },
 } satisfies Record<string, CommodityLineAnswer>;
 

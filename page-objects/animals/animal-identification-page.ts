@@ -8,6 +8,8 @@ const PASSPORT_LABEL = 'Passport';
 const MICROCHIP_LABEL = 'Microchip';
 const HORSE_NAME_LABEL = 'Horse name';
 const TATTOO_LABEL = 'Tattoo';
+const IDENTIFICATION_DETAILS_LABEL = 'Identification details';
+const DESCRIPTION_LABEL = 'Description';
 const SAVE_AND_ADD_ANOTHER = 'Save and add another';
 const SAVE_AND_FINISH = 'Save and finish';
 
@@ -40,6 +42,14 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
 
   get tattoo(): Locator {
     return this.page.getByLabel(TATTOO_LABEL, { exact: true });
+  }
+
+  get identificationDetails(): Locator {
+    return this.page.getByLabel(IDENTIFICATION_DETAILS_LABEL, { exact: true });
+  }
+
+  get description(): Locator {
+    return this.page.getByLabel(DESCRIPTION_LABEL, { exact: true });
   }
 
   enterDetailsCounterHeading(species: CommodityLine, current: number, total: number): Locator {
@@ -105,6 +115,14 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
 
   cardTattoo(card: Locator): Locator {
     return this.cardField(card, TATTOO_LABEL);
+  }
+
+  cardIdentificationDetails(card: Locator): Locator {
+    return this.cardField(card, IDENTIFICATION_DETAILS_LABEL);
+  }
+
+  cardDescription(card: Locator): Locator {
+    return this.cardField(card, DESCRIPTION_LABEL);
   }
 
   cardColumnHeadings(card: Locator): Locator {

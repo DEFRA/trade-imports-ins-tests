@@ -41,6 +41,8 @@ export type AnimalIdentifier = {
   tattoo?: string;
   earTag?: string;
   horseName?: string;
+  identificationDetails?: string;
+  description?: string;
   permanentAddress?: ConsignmentParty;
 };
 

@@ -1,5 +1,5 @@
 import { MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
-import { commodityLines, speciesLabel } from '@domain/animals/constants/commodity-lines';
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 
 import { test, expect } from '@fixtures';
 
@@ -35,23 +35,44 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await expect(unitRow.getByRole('cell', { name: catLine.passportNumber, exact: true })).toBeVisible();
   });
 
-  test('a commodity with no identifier type of its own gets no card, while a cattle line keeps its ear tag, passport and tattoo', async ({
+  test('a commodity with no identifier type of its own asks for identification details then description, refuses an over-long identification details value, and shows both saved values when the notification is reopened, while a cattle line keeps its ear tag, passport and tattoo', async ({
     animalsJourney,
-    pages,
     animalsPages,
   }) => {
+    const ostrichLine = MANDATORY_COMMODITY_LINES.ostrich;
     await animalsJourney.toAnimalIdentificationWithCounts([
       { species: commodityLines.cattle, animalCount: 1 },
-      { species: commodityLines.ostrich, animalCount: 1 },
+      { species: ostrichLine.species, animalCount: 1 },
     ]);
+    const identification = animalsPages.animalIdentification;
 
-    await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle, 1, 1)).toBeVisible();
-    await expect(animalsPages.animalIdentification.earTag).toBeVisible();
-    await expect(animalsPages.animalIdentification.passportNumber).toBeVisible();
-    await expect(animalsPages.animalIdentification.tattoo).toBeVisible();
-    await expect(pages.page.getByRole('heading', { name: `Enter details for ${speciesLabel(commodityLines.ostrich)}` })).toHaveCount(0);
-    await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
-    await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
+    await expect(identification.enterDetailsCounterHeading(commodityLines.cattle, 1, 1)).toBeVisible();
+    await expect(identification.earTag).toBeVisible();
+    await expect(identification.passportNumber).toBeVisible();
+    await expect(identification.tattoo).toBeVisible();
+
+    const ostrichCard = identification.speciesCard(ostrichLine.species);
+    await expect(identification.cardEntryLabels(ostrichCard)).toHaveText(['Identification details', 'Description']);
+
+    const overLongValue = 'D'.repeat(59);
+    await identification.cardIdentificationDetails(ostrichCard).fill(overLongValue);
+    await identification.cardSaveControl(ostrichCard).click();
+    const lengthError = 'Identification details must be 58 characters or less';
+    await expect(identification.errorSummaryLink(lengthError)).toBeVisible();
+    await identification.cardIdentificationDetails(ostrichCard).fill(ostrichLine.identificationDetails);
+    await animalsJourney.saveAnimalWithFallbackDetails(ostrichCard, { description: 'Dark plumage' });
+
+    await expect(identification.cardColumnHeadings(ostrichCard)).toHaveText(['Animal', 'Identification details', 'Description', 'Actions']);
+    const ostrichRow = identification.savedAnimalRow(ostrichLine.species, 1);
+    await expect(ostrichRow.getByRole('cell', { name: ostrichLine.identificationDetails, exact: true })).toBeVisible();
+    await expect(ostrichRow.getByRole('cell', { name: 'Dark plumage', exact: true })).toBeVisible();
+    await expect(identification.removeButton(ostrichLine.species, 1)).toBeVisible();
+
+    const referenceNumber = identification.referenceNumberFromUrl();
+    await identification.open(referenceNumber);
+    const reopenedRow = identification.savedAnimalRow(ostrichLine.species, 1);
+    await expect(reopenedRow.getByRole('cell', { name: ostrichLine.identificationDetails, exact: true })).toBeVisible();
+    await expect(reopenedRow.getByRole('cell', { name: 'Dark plumage', exact: true })).toBeVisible();
   });
 
   test('a horse card is asked for a horse name and a donkey card on the same commodity code is not, while both are asked for a microchip and a passport', async ({
@@ -85,21 +106,14 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await expect(savedRow.getByRole('cell', { name: donkeyLine.passportNumber, exact: true })).toBeVisible();
   });
 
-  test('a consignment where no commodity has an identifier type never reaches the identification page', async ({
+  test('a notification with no commodity line that asks for the identification page is sent to commodity selection', async ({
     animalsJourney,
-    pages,
     animalsPages,
   }) => {
-    await animalsJourney.toConsignmentDetails([commodityLines.ostrich]);
-    await animalsPages.consignmentDetails.numberOfAnimals.fill('2');
-    await animalsPages.consignmentDetails.saveAndReturnToOverview.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
-
-    const referenceNumber = animalsPages.overview.referenceNumberFromUrl();
+    const referenceNumber = await animalsJourney.startNotification();
     await animalsPages.animalIdentification.open(referenceNumber);
-    await expect(animalsPages.additionalDetails.heading).toBeVisible();
+
+    await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await expect(animalsPages.animalIdentification.heading).toHaveCount(0);
-    await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
-    await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
   });
 });

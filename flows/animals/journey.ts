@@ -61,6 +61,8 @@ const PARTY_PICKER_KEYS: Record<PartyRole, PartyPickerKey> = {
 
 type AnimalWithPassport = Required<Pick<CommodityLineAnswer, 'passportNumber'>>;
 
+type AnimalWithFallbackDetails = Partial<Pick<CommodityLineAnswer, 'identificationDetails' | 'description'>>;
+
 export type SpeciesAnimalCount = {
   species: CommodityLine;
   animalCount: number;
@@ -80,11 +82,12 @@ export const AIR_OR_SEA_OVERVIEW_TASKS = [
   'Contact address for this consignment',
 ] as const;
 
-export const OVERLAND_WITHOUT_IDENTIFICATION_OVERVIEW_TASKS = [
+export const OVERLAND_OVERVIEW_TASKS = [
   'Where is this consignment coming from?',
   'What are you importing?',
   IMPORT_REASON_TASK,
   'Commodity details',
+  'Identification details',
   'Additional details',
   'Arrival details',
   'Transit countries',
@@ -591,6 +594,17 @@ export class AnimalsJourney {
     await identification.cardSaveControl(card).click();
   }
 
+  async saveAnimalWithFallbackDetails(card: Locator, answer: AnimalWithFallbackDetails): Promise<void> {
+    const identification = this.animalsPages.animalIdentification;
+    if (answer.identificationDetails !== undefined) {
+      await identification.cardIdentificationDetails(card).fill(answer.identificationDetails);
+    }
+    if (answer.description !== undefined) {
+      await identification.cardDescription(card).fill(answer.description);
+    }
+    await identification.cardSaveControl(card).click();
+  }
+
   /** Answers the permanent address page for every animal that needs one, applying each animal's
    * own answer when the caller gives one and otherwise that line's single answer, then saves
    * back to the consignment addresses page. */
@@ -945,6 +959,9 @@ export class AnimalsJourney {
     await pages.consignmentDetails.heading.waitFor(pageLoadWait);
     await pages.consignmentDetails.numberOfAnimals.fill('400');
     await pages.consignmentDetails.saveAndContinue.click();
+
+    await pages.animalIdentification.heading.waitFor(pageLoadWait);
+    await pages.animalIdentification.saveAndContinue.click();
 
     await pages.additionalDetails.heading.waitFor(pageLoadWait);
     await pages.additionalDetails.certifiedFor(certificationPurposes.slaughter.display).check();
