@@ -1,10 +1,9 @@
 import { test, expect } from '@fixtures';
+import { DOCUMENT_ISSUE_DATE } from '@resources/file-upload/constants';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { eicarPdfUpload } from '@utils/eicar-upload';
 import { firstScanStatus } from '@utils/scan-status';
-
-const issueDate = '03/01/2026';
 
 test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -17,23 +16,20 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
   }) => {
     test.slow();
     const eicar = eicarPdfUpload();
+    const infectedFileError = pages.page.getByText(`${eicar.name} cannot be used. Remove it and try again with a different file.`).first();
 
     const reference = `PWVIRUS${Date.now()}`;
-    await animalsPages.accompanyingDocuments.fillDocument(reference, issueDate, eicar);
+    await animalsPages.accompanyingDocuments.fillDocument(reference, DOCUMENT_ISSUE_DATE, eicar);
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     const row = animalsPages.accompanyingDocuments.documentRow(reference);
     await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
-    await expect(
-      pages.page.getByText(`${eicar.name} cannot be used. Remove it and try again with a different file.`).first(),
-    ).toBeVisible();
+    await expect(infectedFileError).toBeVisible();
     await expect(animalsPages.accompanyingDocuments.viewFile(1)).toHaveCount(0);
 
     await animalsPages.accompanyingDocuments.saveAndContinue.click();
-    await expect(
-      pages.page.getByText(`${eicar.name} cannot be used. Remove it and try again with a different file.`).first(),
-    ).toBeVisible();
+    await expect(infectedFileError).toBeVisible();
 
     await animalsPages.accompanyingDocuments.removeDocument(1).click();
     await animalsPages.accompanyingDocuments.saveAndContinue.click();
@@ -45,7 +41,7 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
   }) => {
     test.slow();
     const reference = `PWSCAN${Date.now()}`;
-    await animalsPages.accompanyingDocuments.fillDocument(reference, issueDate, fileUploadPaths.safeFile1kbPdf);
+    await animalsPages.accompanyingDocuments.fillDocument(reference, DOCUMENT_ISSUE_DATE, fileUploadPaths.safeFile1kbPdf);
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     const row = animalsPages.accompanyingDocuments.documentRow(reference);
