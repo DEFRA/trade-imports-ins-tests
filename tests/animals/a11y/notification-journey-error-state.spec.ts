@@ -45,6 +45,15 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
       await animalsPages.commoditySelection.saveAndReturnToOverview.click();
       await animalsPages.overview.heading.waitFor();
+    });
+
+    await test.step('Review your notification with validation errors', async () => {
+      await animalsPages.overview.reviewAndSubmitButton.click();
+      await animalsPages.notificationView.heading.waitFor();
+      await animalsPages.notificationView.continueButton.click();
+      await expect(errorSummaryHeading).toBeVisible();
+      await runA11yScan();
+      await animalsJourney.openCurrentOverview();
       await animalsPages.overview.task('Commodity details').click();
     });
 
@@ -166,9 +175,32 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.overview.task('Transport details').click();
     });
 
-    await test.step('Continue to commercial transporter', async () => {
+    await test.step('Transporter list with validation errors', async () => {
       await animalsPages.transporter.heading.waitFor();
+      await animalsPages.transporter.saveAndContinue.click();
+      await expect(errorSummaryHeading).toBeVisible();
+      await runA11yScan();
+    });
+
+    await test.step('Transporter type with validation errors', async () => {
       await animalsPages.transporter.addTransporter.click();
+      await animalsPages.transporterAdd.heading.waitFor();
+      await animalsPages.transporterAdd.continueButton.click();
+      await expect(errorSummaryHeading).toBeVisible();
+      await runA11yScan();
+    });
+
+    await test.step('Private transporter with validation errors', async () => {
+      await animalsPages.transporterAdd.transporterType('Private').check();
+      await animalsPages.transporterAdd.continueButton.click();
+      await animalsPages.privateTransporter.heading.waitFor();
+      await animalsPages.privateTransporter.saveAndContinue.click();
+      await expect(errorSummaryHeading).toBeVisible();
+      await runA11yScan();
+    });
+
+    await test.step('Continue to commercial transporter', async () => {
+      await animalsPages.transporterAdd.open(animalsPages.privateTransporter.referenceNumberFromUrl());
       await animalsPages.transporterAdd.heading.waitFor();
       await animalsPages.transporterAdd.transporterType('Commercial').check();
       await animalsPages.transporterAdd.continueButton.click();
