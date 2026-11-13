@@ -122,7 +122,7 @@ export class AnimalsPartyPickerPage extends NotificationPage {
 
   async search(term: string): Promise<void> {
     await this.searchBox.fill(term);
-    await this.searchButton.click();
+    await Promise.all([this.page.waitForURL((url) => (url.searchParams.get('q') ?? '') === term), this.searchButton.click()]);
   }
 
   async select(name: string): Promise<void> {
