@@ -16,7 +16,7 @@ export class AnimalsNotificationActions {
 
   /** From the notification view, changes the country of origin, saves it and opens the notification view again. */
   async changeCountryOfOrigin(country: string): Promise<void> {
-    await this.animalsPages.notificationView.changeLink('Change import details').click();
+    await this.animalsPages.notificationView.changeLink('Change origin of import').click();
     await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
     const referenceNumber = this.animalsPages.originOfImport.referenceNumberFromUrl();
     await this.animalsPages.originOfImport.country.choose(country);

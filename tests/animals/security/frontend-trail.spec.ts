@@ -13,7 +13,7 @@ test.describe('Security scan (frontend, trail)', { tag: '@active' }, () => {
     const reference = animalsPages.notificationView.referenceNumberFromUrl();
     await animalsPages.notificationView.openOnTrail(reference, [TRAIL_START.overview]);
 
-    await animalsPages.notificationView.changeLink('Change import details').click();
+    await animalsPages.notificationView.changeLink('Change origin of import').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await expectOpenFromReview(pages.page, animalsPages.originOfImport, reference, animalsPages.notificationView.slug, [
       TRAIL_START.overview,

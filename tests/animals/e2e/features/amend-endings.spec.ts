@@ -5,17 +5,17 @@ import { expectOpenFromReview, expectSaveAndContinueWalk, expectSaveControlsLayo
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
-const CHANGE_IMPORT_DETAILS = 'Change import details';
+const CHANGE_ORIGIN_OF_IMPORT = 'Change origin of import';
 const AMENDED_REFERENCE = 'AMENDED-REF';
 const AMEND = 'Amend';
 
-const openOriginFromImportDetailsChangeLink = async (
+const openOriginFromOriginOfImportChangeLink = async (
   animalsPages: AnimalsPages,
   animalsSeededJourney: AnimalsSeededJourney,
 ): Promise<string> => {
   const reference = await animalsSeededJourney.createAmendNotification();
   await animalsPages.notificationView.open(reference);
-  await animalsPages.notificationView.changeLink(CHANGE_IMPORT_DETAILS).click();
+  await animalsPages.notificationView.changeLink(CHANGE_ORIGIN_OF_IMPORT).click();
   await expect(animalsPages.originOfImport.heading).toBeVisible();
   return reference;
 };
@@ -91,7 +91,7 @@ test.describe('Amendment page endings', () => {
     animalsPages,
     animalsSeededJourney,
   }) => {
-    const reference = await openOriginFromImportDetailsChangeLink(animalsPages, animalsSeededJourney);
+    const reference = await openOriginFromOriginOfImportChangeLink(animalsPages, animalsSeededJourney);
 
     await expectOpenFromReview(pages.page, animalsPages.originOfImport, reference, animalsPages.notificationView.slug);
     await animalsPages.originOfImport.internalReference.fill(AMENDED_REFERENCE);
@@ -106,7 +106,7 @@ test.describe('Amendment page endings', () => {
     );
   });
 
-  test('the reason for import Change link opens the main import reason on the review trail, and Save and continue walks each later page back to the amend review', async ({
+  test('the main import reason Change link opens the main import reason on the review trail, and Save and continue walks each later page back to the amend review', async ({
     pages,
     animalsPages,
     animalsSeededJourney,
@@ -115,7 +115,7 @@ test.describe('Amendment page endings', () => {
     test.slow();
     const reference = await animalsSeededJourney.createAmendNotification();
     await animalsPages.notificationView.open(reference);
-    await animalsPages.notificationView.changeLink('Change reason for import').click();
+    await animalsPages.notificationView.changeLink('Change main import reason').click();
     await expect(animalsPages.importReason.heading).toBeVisible();
 
     await expectSaveAndContinueWalk(

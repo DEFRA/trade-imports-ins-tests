@@ -33,7 +33,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   }
 
   summaryCard(name: string): Locator {
-    return this.page.locator('.govuk-summary-card', { hasText: name });
+    return this.page.getByRole('heading', { name, exact: true }).locator('xpath=ancestor::*[.//dl][1]');
   }
 
   speciesCard(line: CommodityLine): Locator {
@@ -42,18 +42,20 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   summaryValue(card: Locator, key: string): Locator {
     return card
-      .locator('.govuk-summary-list__row', { has: this.page.getByText(key, { exact: true }) })
-      .locator('.govuk-summary-list__value');
+      .getByRole('term')
+      .filter({ has: this.page.getByText(key, { exact: true }) })
+      .locator('xpath=following-sibling::dd[1]');
   }
 
   get regionOfOriginCode(): Locator {
-    return this.summaryValue(this.summaryCard('Import details'), 'Region of origin code');
+    return this.summaryValue(this.summaryCard('Origin of import'), 'Region of origin code');
   }
 
   partyRow(card: string, role: string): Locator {
     return this.summaryCard(card)
-      .locator('.govuk-summary-list__row')
-      .filter({ has: this.page.getByRole('term').and(this.page.getByText(role, { exact: true })) });
+      .getByRole('term')
+      .and(this.page.getByText(role, { exact: true }))
+      .locator('xpath=..');
   }
 
   editPartyDetails(card: string, role: string): Locator {

@@ -23,23 +23,23 @@ test.describe('Horse by sea under temporary admission', () => {
 
       await openReviewFromCompleteOverview(animalsPages.overview, animalsJourney, referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
 
-      const importDetails = animalsPages.notificationView.summaryCard('Import details');
-      await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Ireland');
+      const originOfImport = animalsPages.notificationView.summaryCard('Origin of import');
+      await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Country of origin')).toHaveText('Ireland');
 
       const speciesCard = animalsPages.notificationView.speciesCard(commodityLines.horse);
       await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText(commodityLines.horse.latinName);
       await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('1');
 
-      const reasonForImport = animalsPages.notificationView.summaryCard('Reason for import');
-      await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Reason for import')).toHaveText(
+      const mainImportReason = animalsPages.notificationView.summaryCard('Main import reason');
+      await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Main import reason')).toHaveText(
         'Temporary admission horses',
       );
-      await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Exit date')).toHaveText(TEMPORARY_ADMISSION_EXIT_DATE);
-      await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Port of exit')).toContainText('Holyhead Port');
+      await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Exit date')).toHaveText(TEMPORARY_ADMISSION_EXIT_DATE);
+      await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Port of exit')).toContainText('Holyhead Port');
 
-      const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional animal details');
-      await expect(additionalAnimalDetails.getByRole('term')).toHaveText(['Certified for', 'Includes unweaned animals']);
-      await expect(additionalAnimalDetails.getByRole('definition')).toHaveText(['Registered equine animal', 'No']);
+      const additionalDetails = animalsPages.notificationView.summaryCard('Additional details');
+      await expect(additionalDetails.getByRole('term')).toHaveText(['Certified for', 'Includes unweaned animals']);
+      await expect(additionalDetails.getByRole('definition')).toHaveText(['Registered equine animal', 'No']);
 
       const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
       await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Port of entry')).toContainText('Holyhead Port');

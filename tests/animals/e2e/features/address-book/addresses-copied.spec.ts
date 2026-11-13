@@ -44,7 +44,7 @@ test.describe('Addresses are copied, not linked', () => {
 
       const referenceNumber = animalsPages.addresses.referenceNumberFromUrl();
       await animalsPages.notificationView.open(referenceNumber);
-      const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+      const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
       await expect(consignorCyaRow).toContainText(originalName);
       await expect(consignorCyaRow).toContainText('Carlisle');
       await expect(consignorCyaRow).toContainText('CA1 1AA');
@@ -82,7 +82,7 @@ test.describe('Addresses are copied, not linked', () => {
 
     const referenceNumber = animalsPages.addresses.referenceNumberFromUrl();
     await animalsPages.notificationView.open(referenceNumber);
-    const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+    const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
     await expect(consignorCyaRow).toContainText(record.name);
     await expect(consignorCyaRow).toContainText(record.addressLine1);
     await expect(consignorCyaRow).toContainText(record.addressLine2);
@@ -124,7 +124,7 @@ test.describe('Addresses are copied, not linked', () => {
       await expect(animalsPages.addresses.partyLinks('Consignor')).toHaveText([change, editDetails]);
 
       await animalsPages.notificationView.open(referenceNumber);
-      const consignorCyaRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+      const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
       await expect(consignorCyaRow).toContainText(name);
       await expect(consignorCyaRow).toContainText('Carlisle');
       await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
@@ -166,9 +166,9 @@ test.describe('Addresses are copied, not linked', () => {
 
     await animalsPages.notificationView.open(referenceNumber);
     const message = 'Correct the address details for the consignor';
-    const consignorRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+    const consignorRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
     await expect(animalsPages.notificationView.errorSummary).toContainText(message);
-    await expect(animalsPages.notificationView.partyError('Roles and addresses', 'Consignor')).toContainText(message);
+    await expect(animalsPages.notificationView.partyError('Addresses', 'Consignor')).toContainText(message);
     await expect(consignorRow).toContainText(name);
     await expect(consignorRow).toContainText('Carlisle');
 

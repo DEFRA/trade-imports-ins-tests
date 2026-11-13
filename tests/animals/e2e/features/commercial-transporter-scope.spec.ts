@@ -10,6 +10,8 @@ test.describe('Commercial transporter scope', { tag: '@duplicated-in-frontend' }
     animalsPages,
     addressBookApi,
   }) => {
+    test.slow();
+
     const commercialTransporter = uniquelyNamedCommercialTransporter();
     await animalsJourney.startNotification();
     await animalsJourney.answerCommodity();

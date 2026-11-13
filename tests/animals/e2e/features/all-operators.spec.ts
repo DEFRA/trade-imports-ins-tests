@@ -7,17 +7,13 @@ test.describe('All operator addresses', { tag: '@duplicated-in-frontend' }, () =
   test(
     'check your answers lists all six operators with the picked name and country',
     { tag: '@cross-browser' },
-    async ({ animalsJourney, pages, animalsPages }) => {
+    async ({ animalsJourney, animalsPages }) => {
       test.slow();
 
       await animalsJourney.toReview();
 
-      const card = animalsPages.notificationView.summaryCard('Roles and addresses');
-      const operator = (key: string) =>
-        card
-          .locator('.govuk-summary-list__row')
-          .filter({ has: pages.page.locator('dt', { hasText: key }) })
-          .locator('.govuk-summary-list__value');
+      const addresses = animalsPages.notificationView.summaryCard('Addresses');
+      const operator = (key: string) => animalsPages.notificationView.summaryValue(addresses, key);
 
       await expect(operator('Place of origin')).toContainText('Origin Farm');
       await expect(operator('Place of origin')).toContainText('Ireland');

@@ -24,17 +24,17 @@ test.describe('Poultry by rail in transit', () => {
       OVERLAND_WITHOUT_IDENTIFICATION_OVERVIEW_TASKS,
     );
 
-    const importDetails = animalsPages.notificationView.summaryCard('Import details');
-    await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Germany');
+    const originOfImport = animalsPages.notificationView.summaryCard('Origin of import');
+    await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Country of origin')).toHaveText('Germany');
 
     const speciesCard = animalsPages.notificationView.speciesCard(commodityLines.chicken);
     await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText(commodityLines.chicken.latinName);
     await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('400');
 
-    const reasonForImport = animalsPages.notificationView.summaryCard('Reason for import');
-    await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Reason for import')).toHaveText('Transit');
-    await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Destination country')).toHaveText('Ireland');
-    await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Port of exit')).toContainText('Holyhead Port');
+    const mainImportReason = animalsPages.notificationView.summaryCard('Main import reason');
+    await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Main import reason')).toHaveText('Transit');
+    await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Destination country')).toHaveText('Ireland');
+    await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Port of exit')).toContainText('Holyhead Port');
 
     const transitCountries = animalsPages.notificationView.summaryCard('Transit countries');
     await expect(

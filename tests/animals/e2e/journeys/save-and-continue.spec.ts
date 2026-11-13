@@ -20,30 +20,28 @@ test.describe('Save and continue through a new notification', () => {
 
       await openReviewFromCompleteOverview(animalsPages.overview, animalsJourney, referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
 
-      const importDetails = animalsPages.notificationView.summaryCard('Import details');
+      const originOfImport = animalsPages.notificationView.summaryCard('Origin of import');
       await expect(animalsPages.notificationView.regionOfOriginCode).toHaveText('FR-75');
-      await expect(animalsPages.notificationView.summaryValue(importDetails, 'Internal reference number')).toHaveText('CATTLE-2026-01');
+      await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Internal reference number')).toHaveText('CATTLE-2026-01');
 
       const speciesCard = animalsPages.notificationView.speciesCard(commodityLines.cattle);
       await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText(commodityLines.cattle.latinName);
       await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('2');
 
-      const reasonForImport = animalsPages.notificationView.summaryCard('Reason for import');
-      await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Reason for import')).toHaveText('Internal market');
-      await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Purpose in the market')).toHaveText('Breeding');
+      const mainImportReason = animalsPages.notificationView.summaryCard('Main import reason');
+      await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Main import reason')).toHaveText('Internal market');
+      await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Purpose in the market')).toHaveText('Breeding');
 
-      const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional animal details');
-      await expect(animalsPages.notificationView.summaryValue(additionalAnimalDetails, 'Certified for')).toHaveText(
+      const additionalDetails = animalsPages.notificationView.summaryCard('Additional details');
+      await expect(animalsPages.notificationView.summaryValue(additionalDetails, 'Certified for')).toHaveText(
         certificationPurposes.furtherKeeping.display,
       );
 
       const transportDetails = animalsPages.notificationView.summaryCard('Transport details');
       await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Name')).toContainText('García Livestock Transport SL');
 
-      const rolesAndAddresses = animalsPages.notificationView.summaryCard('Roles and addresses');
-      await expect(animalsPages.notificationView.summaryValue(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText(
-        '123456789',
-      );
+      const addresses = animalsPages.notificationView.summaryCard('Addresses');
+      await expect(animalsPages.notificationView.summaryValue(addresses, 'County parish holding (CPH) number')).toHaveText('123456789');
 
       await animalsJourney.submitFromReview();
       await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
@@ -83,7 +81,7 @@ test.describe('Save and continue through a new notification', () => {
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
-    await expect(animalsPages.notificationView.errorSummary).toContainText('Complete reason for import');
+    await expect(animalsPages.notificationView.errorSummary).toContainText('Complete main import reason');
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete roles and addresses');
 
     await animalsPages.notificationView.continueButton.click();
@@ -173,8 +171,8 @@ test.describe('Save and continue to the next page', () => {
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText([
-      'Complete reason for import',
-      'Complete additional animal details',
+      'Complete main import reason',
+      'Complete additional details',
       'Complete arrival details',
       'Complete transport details',
       'Complete roles and addresses',

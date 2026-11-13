@@ -69,7 +69,7 @@ test.describe('Cancel amendment through the UI', () => {
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(journeyContext.referenceNumber));
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
       await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
-      await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
+      await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
     });
 
     test('Cancel amend on a question page opens the confirmation page and Go back keeps the amendment', async ({
@@ -89,7 +89,7 @@ test.describe('Cancel amendment through the UI', () => {
 
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(reference));
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
-      await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
+      await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
     });
   });
 

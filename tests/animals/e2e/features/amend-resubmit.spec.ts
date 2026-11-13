@@ -26,7 +26,7 @@ test.describe('Amend resubmission', () => {
 
     // Change the country of origin through the amending check your answers page.
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
+    await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
     await expect(animalsPages.notificationView.changeLink('Change commodity 1')).toBeVisible();
     expect(await pages.page.getByRole('link', { name: /^Change/ }).count()).toBeGreaterThanOrEqual(4);
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });

@@ -26,7 +26,7 @@ test.describe('Submitted addresses keep their copy', () => {
     });
 
     const referenceNumber = await animalsSeededJourney.createSubmittedWithPlaceOfOriginChosenInUi(animalsPages, originalName);
-    const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
+    const originRow = animalsPages.notificationView.partyRow('Addresses', 'Place of origin');
 
     await addressBookApi.updateAddress(address.id, {
       ...heldAsPlaceOfOrigin,
@@ -85,7 +85,7 @@ test.describe('Submitted addresses keep their copy', () => {
     });
 
     const referenceNumber = await animalsSeededJourney.createSubmittedWithPlaceOfOriginChosenInUi(animalsPages, originalName);
-    const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
+    const originRow = animalsPages.notificationView.partyRow('Addresses', 'Place of origin');
 
     await addressBookApi.deleteAddress(address.id);
 

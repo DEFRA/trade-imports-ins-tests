@@ -40,7 +40,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(animalsPages.addresses.partySection('Consignor')).toContainText(editedName);
 
     await animalsPages.notificationView.open(referenceNumber);
-    const consignorRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+    const consignorRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
     await expect(consignorRow).toContainText(editedName);
     await expect(consignorRow).toContainText('Penrith');
     await expect(consignorRow).toContainText('CA11 9ZZ');
@@ -109,7 +109,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(form.country).toHaveAccessibleDescription(/Enter a country/);
 
     await animalsPages.notificationView.open(referenceNumber);
-    const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
+    const originRow = animalsPages.notificationView.partyRow('Addresses', 'Place of origin');
     await expect(originRow).toContainText('Origin Farm');
     await expect(originRow).toContainText('V95 X7P2');
     await expect(originRow).not.toContainText('CA11 9ZZ 1234');
@@ -124,14 +124,14 @@ test.describe('Copied addresses are edited on the notification', () => {
 
     // From the review page, back to the review page.
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
-    await animalsPages.notificationView.editPartyDetails('Roles and addresses', 'Consignor').click();
+    await animalsPages.notificationView.editPartyDetails('Addresses', 'Consignor').click();
     await expect(animalsPages.consignorEdit.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/\/consignors\/edit\?return=notification-view/);
     await animalsPages.consignorEdit.fill({ name: 'Never Saved Ltd' });
     await animalsPages.consignorEdit.cancel.click();
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    const consignorRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Consignor');
+    const consignorRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
     await expect(consignorRow).toContainText('Astra Rosales');
     await expect(consignorRow).not.toContainText('Never Saved Ltd');
 
@@ -162,10 +162,10 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(animalsPages.contactAddress.editCurrentContact).toBeVisible();
 
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
-    await expect(animalsPages.notificationView.changeLink('Change roles and addresses')).toBeVisible();
-    await expect(animalsPages.notificationView.editPartyDetails('Roles and addresses', 'Consignor')).toBeVisible();
+    await expect(animalsPages.notificationView.changeLink('Change addresses')).toBeVisible();
+    await expect(animalsPages.notificationView.editPartyDetails('Addresses', 'Consignor')).toBeVisible();
     await expect(animalsPages.notificationView.changeLink(/^Change contact address/)).toBeVisible();
-    await expect(animalsPages.notificationView.editPartyDetails('Contact address for this consignment', 'Contact address')).toBeVisible();
+    await expect(animalsPages.notificationView.editPartyDetails('Contact address', 'Contact address')).toBeVisible();
 
     const unansweredReferenceNumber = await animalsSeededJourney.createDraftNotification('unlocked');
     await animalsSeededJourney.resumeInUi(unansweredReferenceNumber, animalsPages.addresses);
@@ -197,7 +197,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(animalsPages.contactAddress.chosenAddress).toHaveCount(0);
 
     await animalsPages.notificationView.open(referenceNumber);
-    const contactRow = animalsPages.notificationView.partyRow('Contact address for this consignment', 'Contact address');
+    const contactRow = animalsPages.notificationView.partyRow('Contact address', 'Contact address');
     await expect(contactRow).toContainText(editedName);
     await expect(contactRow).toContainText('Weybridge');
     await expect(contactRow).not.toContainText('Addlestone');
