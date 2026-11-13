@@ -85,4 +85,8 @@ export const ALL_COMMODITY_LINES = {
       county: 'North Yorkshire',
     },
   },
+  ostrich: {
+    ...MANDATORY_COMMODITY_LINES.ostrich,
+    description: 'Dark plumage',
+  },
 } satisfies Record<string, CommodityLineAnswer>;

@@ -59,9 +59,10 @@ const PARTY_PICKER_KEYS: Record<PartyRole, PartyPickerKey> = {
   Importer: 'importerSelection',
 };
 
-type AnimalWithPassport = Required<Pick<CommodityLineAnswer, 'passportNumber'>>;
-
-type AnimalWithFallbackDetails = Partial<Pick<CommodityLineAnswer, 'identificationDetails' | 'description'>>;
+type AnimalIdentifiers = Pick<
+  CommodityLineAnswer,
+  'earTag' | 'passportNumber' | 'microchip' | 'tattoo' | 'identificationDetails' | 'description'
+>;
 
 export type SpeciesAnimalCount = {
   species: CommodityLine;
@@ -326,19 +327,7 @@ export class AnimalsJourney {
     await this.animalsPages.overview.task('Identification details').click();
     const { animalIdentification: identification } = this.animalsPages;
     for (const line of lines) {
-      const card = identification.speciesCard(line.species);
-      if (line.earTag) {
-        await identification.cardEarTag(card).fill(line.earTag);
-      }
-      if (line.passportNumber) {
-        await identification.cardPassport(card).fill(line.passportNumber);
-      }
-      if (line.microchip) {
-        await identification.cardMicrochip(card).fill(line.microchip);
-      }
-      if (line.tattoo) {
-        await identification.cardTattoo(card).fill(line.tattoo);
-      }
+      await this.fillAnimalIdentifiers(identification.speciesCard(line.species), line);
     }
     await identification.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
@@ -588,21 +577,46 @@ export class AnimalsJourney {
     await this.openReviewFromOverview();
   }
 
-  async saveAnimalWithPassport(card: Locator, { passportNumber }: AnimalWithPassport): Promise<void> {
-    const identification = this.animalsPages.animalIdentification;
-    await identification.cardPassport(card).fill(passportNumber);
-    await identification.cardSaveControl(card).click();
+  private async fillAnimalIdentifiers(card: Locator, identifiers: AnimalIdentifiers): Promise<void> {
+    const { animalIdentification: identification } = this.animalsPages;
+    if (identifiers.earTag) {
+      await identification.cardEarTag(card).fill(identifiers.earTag);
+    }
+    if (identifiers.passportNumber) {
+      await identification.cardPassport(card).fill(identifiers.passportNumber);
+    }
+    if (identifiers.microchip) {
+      await identification.cardMicrochip(card).fill(identifiers.microchip);
+    }
+    if (identifiers.tattoo) {
+      await identification.cardTattoo(card).fill(identifiers.tattoo);
+    }
+    if (identifiers.identificationDetails) {
+      await identification.cardIdentificationDetails(card).fill(identifiers.identificationDetails);
+    }
+    if (identifiers.description) {
+      await identification.cardDescription(card).fill(identifiers.description);
+    }
   }
 
-  async saveAnimalWithFallbackDetails(card: Locator, answer: AnimalWithFallbackDetails): Promise<void> {
-    const identification = this.animalsPages.animalIdentification;
-    if (answer.identificationDetails !== undefined) {
-      await identification.cardIdentificationDetails(card).fill(answer.identificationDetails);
-    }
-    if (answer.description !== undefined) {
-      await identification.cardDescription(card).fill(answer.description);
-    }
-    await identification.saveAndContinue.click();
+  private async saveAnimalOn(card: Locator): Promise<void> {
+    const { animalIdentification: identification } = this.animalsPages;
+    await identification.cardSaveControl(card).or(identification.saveAndContinue).first().click();
+  }
+
+  async saveAnimalIdentifiers(card: Locator, identifiers: AnimalIdentifiers): Promise<void> {
+    await this.fillAnimalIdentifiers(card, identifiers);
+    await this.saveAnimalOn(card);
+  }
+
+  async openPermanentAddress(): Promise<void> {
+    await this.animalsPages.addresses.addPermanentAddress.click();
+    await this.animalsPages.permanentAddress.heading.waitFor(pageLoadWait);
+  }
+
+  async toPermanentAddress(answers: NotificationAnswers): Promise<void> {
+    await this.toRolesAndAddresses(answers, () => this.answerAnimalIdentification(answers));
+    await this.openPermanentAddress();
   }
 
   /** Answers the permanent address page for every animal that needs one, applying each animal's
@@ -616,9 +630,8 @@ export class AnimalsJourney {
     if (linesNeedingAddress.length === 0) {
       return;
     }
-    await this.animalsPages.addresses.addPermanentAddress.click();
+    await this.openPermanentAddress();
     const { permanentAddress: addressPage } = this.animalsPages;
-    await addressPage.heading.waitFor(pageLoadWait);
     let cardsAnswered = 0;
     for (const line of linesNeedingAddress) {
       const cardCount = await addressPage.cardsFor(line.species).count();

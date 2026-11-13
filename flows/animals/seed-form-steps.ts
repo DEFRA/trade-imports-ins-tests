@@ -53,6 +53,12 @@ const identificationForm = (lines: CommodityLineAnswer[]): FormFields => {
     if (line.tattoo) {
       form[`animalIdentifierTattoo-${index}`] = line.tattoo;
     }
+    if (line.identificationDetails) {
+      form[`identificationDetails-${index}`] = line.identificationDetails;
+    }
+    if (line.description) {
+      form[`description-${index}`] = line.description;
+    }
   });
   return form;
 };
@@ -108,7 +114,6 @@ const commoditySteps = (answers: NotificationAnswers): SeedStep[] => {
     { slug: 'commodities', form: { species: lines.map(({ species }) => speciesCheckboxValue(species)) } },
     { slug: 'consignment-details', form: consignmentDetailsForm(lines) },
     { slug: 'commodities/identification', form: identificationForm(lines) },
-    { slug: 'permanent-address', form: permanentAddressForm(lines) },
   ];
 };
 
@@ -123,18 +128,22 @@ const consignmentSteps = (answers: NotificationAnswers): SeedStep[] => [
   },
 ];
 
-const addressSteps = (parties: PartyIds, answers: NotificationAnswers): SeedStep[] => [
-  { slug: 'consignors/select', form: { party: parties.consignor } },
-  { slug: 'destinations/select', form: { party: parties.placeOfDestination } },
-  { slug: 'place-of-origin/select', form: { party: parties.placeOfOrigin } },
-  { slug: 'consignees/select', form: { party: parties.consignee } },
-  { slug: 'importers/select', form: { party: parties.importer } },
-  { slug: 'addresses', form: {} },
-  {
-    slug: 'cph-number',
-    form: { cphCounty: answers.cph.county, cphParish: answers.cph.parish, cphHolding: answers.cph.holding },
-  },
-];
+const addressSteps = (parties: PartyIds, answers: NotificationAnswers): SeedStep[] => {
+  const permanentAddressFields = permanentAddressForm(answers.commodityLines);
+  return [
+    { slug: 'consignors/select', form: { party: parties.consignor } },
+    { slug: 'destinations/select', form: { party: parties.placeOfDestination } },
+    { slug: 'place-of-origin/select', form: { party: parties.placeOfOrigin } },
+    { slug: 'consignees/select', form: { party: parties.consignee } },
+    { slug: 'importers/select', form: { party: parties.importer } },
+    ...(Object.keys(permanentAddressFields).length > 0 ? [{ slug: 'permanent-address', form: permanentAddressFields }] : []),
+    { slug: 'addresses', form: {} },
+    {
+      slug: 'cph-number',
+      form: { cphCounty: answers.cph.county, cphParish: answers.cph.parish, cphHolding: answers.cph.holding },
+    },
+  ];
+};
 
 const arrivalStep = (answers: NotificationAnswers): SeedStep => ({
   slug: 'port-of-entry',

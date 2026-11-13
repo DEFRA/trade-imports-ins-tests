@@ -2,6 +2,7 @@ import { type Locator, type Page } from '@playwright/test';
 import { type SpeciesNamePair } from '@domain/animals/constants/commodity-lines';
 import { type NewPermanentAddressFields } from '@domain/animals/constants/journey-commodity-line-answers';
 import { NotificationPage } from '@page-objects/shared/base-page';
+import { escapeRegex } from '@page-objects/shared/escape-regex';
 
 const PLACE_OF_DESTINATION_OPTION = 'Same as the place of destination (POD)';
 const NEW_ADDRESS_OPTION = 'Enter a new address';
@@ -20,7 +21,7 @@ export class AnimalsPermanentAddressPage extends NotificationPage {
   }
 
   cardsFor(species: SpeciesNamePair): Locator {
-    return this.page.getByRole('region', { name: new RegExp(`^${species.latinName} \\d+$`) });
+    return this.page.getByRole('region', { name: new RegExp(`^${escapeRegex(species.latinName)} \\d+$`) });
   }
 
   selectPlaceOfDestination(card: Locator): Promise<void> {

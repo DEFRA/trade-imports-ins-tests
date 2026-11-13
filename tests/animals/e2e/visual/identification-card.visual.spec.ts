@@ -9,7 +9,7 @@ test.describe('Identification card (visual regression)', { tag: '@visual' }, () 
   test.beforeEach(async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toAnimalIdentificationWithCounts([{ species: commodityLines.domesticCat, animalCount: 2 }]);
     const card = animalsPages.animalIdentification.speciesCard(commodityLines.domesticCat);
-    await animalsJourney.saveAnimalWithPassport(card, MANDATORY_COMMODITY_LINES.domesticCat);
+    await animalsJourney.saveAnimalIdentifiers(card, MANDATORY_COMMODITY_LINES.domesticCat);
     await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.domesticCat, 2, 2)).toBeVisible();
   });
 

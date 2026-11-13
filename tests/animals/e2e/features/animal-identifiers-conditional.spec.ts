@@ -1,4 +1,4 @@
-import { MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
+import { ALL_COMMODITY_LINES, MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
 
 import { test, expect } from '@fixtures';
@@ -21,7 +21,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await expect(animalsPages.animalIdentification.cardEntryLabels(catCard)).toHaveText(['Microchip', 'Passport', 'Tattoo']);
 
     const catLine = MANDATORY_COMMODITY_LINES.domesticCat;
-    await animalsJourney.saveAnimalWithPassport(catCard, catLine);
+    await animalsJourney.saveAnimalIdentifiers(catCard, catLine);
 
     await expect(animalsPages.animalIdentification.heading).toBeVisible();
     await expect(animalsPages.animalIdentification.cardColumnHeadings(catCard)).toHaveText([
@@ -39,7 +39,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     animalsJourney,
     animalsPages,
   }) => {
-    const ostrichLine = MANDATORY_COMMODITY_LINES.ostrich;
+    const ostrichLine = ALL_COMMODITY_LINES.ostrich;
     await animalsJourney.toAnimalIdentificationWithCounts([
       { species: commodityLines.cattle, animalCount: 1 },
       { species: ostrichLine.species, animalCount: 1 },
@@ -60,14 +60,13 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await identification.saveAndContinue.click();
     const lengthError = 'Identification details must be 58 characters or less';
     await expect(identification.errorSummaryLink(lengthError)).toBeVisible();
-    await identification.cardIdentificationDetails(ostrichCard).fill(ostrichLine.identificationDetails);
-    await animalsJourney.saveAnimalWithFallbackDetails(ostrichCard, { description: 'Dark plumage' });
+    await animalsJourney.saveAnimalIdentifiers(ostrichCard, ostrichLine);
     await identification.open(referenceNumber);
 
     await expect(identification.cardColumnHeadings(ostrichCard)).toHaveText(['Animal', 'Identification details', 'Description', 'Actions']);
     const ostrichRow = identification.savedAnimalRow(ostrichLine.species, 1);
     await expect(ostrichRow.getByRole('cell', { name: ostrichLine.identificationDetails, exact: true })).toBeVisible();
-    await expect(ostrichRow.getByRole('cell', { name: 'Dark plumage', exact: true })).toBeVisible();
+    await expect(ostrichRow.getByRole('cell', { name: ostrichLine.description, exact: true })).toBeVisible();
     await expect(identification.removeButton(ostrichLine.species, 1)).toBeVisible();
   });
 
@@ -92,8 +91,8 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
     await expect(identification.cardHorseName(donkeyCard)).toHaveCount(0);
 
     const donkeyLine = MANDATORY_COMMODITY_LINES.donkey;
-    await animalsJourney.saveAnimalWithPassport(donkeyCard, donkeyLine);
-    await animalsJourney.saveAnimalWithPassport(horseCard, MANDATORY_COMMODITY_LINES.horse);
+    await animalsJourney.saveAnimalIdentifiers(donkeyCard, donkeyLine);
+    await animalsJourney.saveAnimalIdentifiers(horseCard, MANDATORY_COMMODITY_LINES.horse);
 
     await expect(identification.cardColumnHeadings(donkeyCard)).toHaveText(['Animal', 'Microchip', 'Passport', 'Actions']);
     await expect(identification.cardColumnHeadings(horseCard)).toHaveText(['Animal', 'Microchip', 'Passport', 'Horse name', 'Actions']);

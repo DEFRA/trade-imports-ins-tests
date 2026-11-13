@@ -20,8 +20,7 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
     await expect(animalsPages.addresses.permanentAddressSection).toBeVisible();
     await expect(animalsPages.addresses.addPermanentAddress).toBeVisible();
 
-    await animalsPages.addresses.addPermanentAddress.click();
-    await expect(animalsPages.permanentAddress.heading).toBeVisible();
+    await animalsJourney.openPermanentAddress();
 
     const { permanentAddress: address } = MANDATORY_COMMODITY_LINES.domesticCat;
     const card = animalsPages.permanentAddress.card(commodityLines.domesticCat, 1);
@@ -76,11 +75,8 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
     journeyContext,
     pages,
   }) => {
-    await animalsJourney.toRolesAndAddresses(CAT_ANSWERS, () => animalsJourney.answerAnimalIdentification(CAT_ANSWERS));
+    await animalsJourney.toPermanentAddress(CAT_ANSWERS);
     const referenceNumber = journeyContext.referenceNumber;
-
-    await animalsPages.addresses.addPermanentAddress.click();
-    await expect(animalsPages.permanentAddress.heading).toBeVisible();
 
     const card = animalsPages.permanentAddress.card(commodityLines.domesticCat, 1);
     await animalsPages.permanentAddress.selectNewAddress(card);
@@ -110,34 +106,28 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
 
     await animalsJourney.toRolesAndAddresses(answers, async () => {
       await animalsPages.overview.task('Identification details').click();
-      await animalsJourney.saveAnimalWithPassport(catCard, catLine);
+      await animalsJourney.saveAnimalIdentifiers(catCard, catLine);
       await animalsPages.animalIdentification.saveAndReturnToOverview.click();
       await expect(animalsPages.overview.heading).toBeVisible();
     });
 
-    await animalsPages.addresses.addPermanentAddress.click();
-    await expect(animalsPages.permanentAddress.heading).toBeVisible();
-
-    const { permanentAddress: address } = catLine;
-    const firstCatAddressCard = animalsPages.permanentAddress.card(commodityLines.domesticCat, 1);
-    await animalsPages.permanentAddress.selectNewAddress(firstCatAddressCard);
-    await animalsPages.permanentAddress.fillNewAddress(address, firstCatAddressCard);
-    await animalsPages.permanentAddress.saveAndContinue.click();
+    await animalsJourney.answerPermanentAddresses([catLine]);
     await expect(animalsPages.addresses.heading).toBeVisible();
 
     await animalsJourney.openCurrentOverview();
     await animalsPages.overview.task('Identification details').click();
-    await animalsJourney.saveAnimalWithPassport(catCard, catLine);
+    await animalsJourney.saveAnimalIdentifiers(catCard, catLine);
     await animalsPages.animalIdentification.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.overview.task('Roles and addresses').click();
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await animalsPages.addresses.addPermanentAddress.click();
-    await expect(animalsPages.permanentAddress.heading).toBeVisible();
+    await animalsJourney.openPermanentAddress();
 
     const reopenedFirstCatCard = animalsPages.permanentAddress.card(commodityLines.domesticCat, 1);
     await expect(reopenedFirstCatCard.getByRole('radio', { name: 'Enter a new address' })).toBeChecked();
-    await expect(reopenedFirstCatCard.getByLabel('Name or organisation name', { exact: true })).toHaveValue(address.nameOrOrganisationName);
+    await expect(reopenedFirstCatCard.getByLabel('Name or organisation name', { exact: true })).toHaveValue(
+      catLine.permanentAddress.nameOrOrganisationName,
+    );
   });
 });
