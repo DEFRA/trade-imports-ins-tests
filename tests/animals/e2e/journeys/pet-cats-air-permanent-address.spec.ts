@@ -1,5 +1,6 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
+import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { internalMarketPurposes } from '@domain/animals/constants/internal-market-purposes';
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { AIR_OR_SEA_OVERVIEW_TASKS, certificateDocument } from '@flows/animals/journey';
@@ -36,6 +37,9 @@ test.describe('Pet cats by air with permanent addresses', () => {
 
     const commonName = await referenceDataApi.findCommonName(commodityLines.domesticCat);
     const addresses = animalsPages.notificationView.summaryCard('Addresses');
+    await expect(animalsPages.notificationView.summaryValue(addresses, `${commonName} 1`)).toContainText(
+      MANDATORY_ANSWERS.parties.placeOfDestination,
+    );
     await expect(animalsPages.notificationView.summaryValue(addresses, `${commonName} 2`)).toContainText(
       MANDATORY_COMMODITY_LINES.domesticCat.permanentAddress.addressLine1,
     );

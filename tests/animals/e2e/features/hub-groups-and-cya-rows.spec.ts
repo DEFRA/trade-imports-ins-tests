@@ -127,9 +127,13 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(speciesCard.getByRole('columnheader', { name: 'Ear tag' })).toBeVisible();
     await expect(speciesCard.getByRole('columnheader', { name: 'Tattoo' })).toBeVisible();
     await expect(speciesCard.getByRole('cell', { name: 'Animal 1' })).toBeVisible();
-    await expect(speciesCard.getByRole('cell', { name: cowLine.earTag })).toBeVisible();
-    await expect(speciesCard.getByRole('cell', { name: cowLine.passportNumber })).toBeVisible();
-    await expect(speciesCard.getByRole('cell', { name: cowLine.tattoo })).toBeVisible();
+    const { earTag, passportNumber, tattoo } = cowLine;
+    expect(earTag).toBeDefined();
+    expect(passportNumber).toBeDefined();
+    expect(tattoo).toBeDefined();
+    await expect(speciesCard.getByRole('cell', { name: earTag, exact: true })).toBeVisible();
+    await expect(speciesCard.getByRole('cell', { name: passportNumber, exact: true })).toBeVisible();
+    await expect(speciesCard.getByRole('cell', { name: tattoo, exact: true })).toBeVisible();
 
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Port of entry')).toHaveText(answers.pointOfEntry.display);
