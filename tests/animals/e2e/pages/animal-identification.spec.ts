@@ -95,7 +95,9 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await expect(earTag).toHaveValue('');
   });
 
-  test('leaves a species of more than one animal unsaved when Save and continue is pressed', async ({ animalsPages }) => {
+  test('returns to the overview and leaves a species of more than one animal unsaved when Save and return to overview is pressed', async ({
+    animalsPages,
+  }) => {
     const { domesticCat } = commodityLines;
     await animalsPages.animalIdentification.speciesCard(domesticCat).getByLabel('Passport', { exact: true }).fill('UK123456789');
     await animalsPages.animalIdentification.saveAndReturnToOverview.click();
@@ -112,9 +114,9 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await animalsPages.animalIdentification.selectedCommodities.changeLinkFor(cattle).click();
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText('3 selected');
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(cattle));
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(bison));
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(domesticCat));
+    await expect(animalsPages.commoditySelection.speciesEntry(cattle)).toBeVisible();
+    await expect(animalsPages.commoditySelection.speciesEntry(bison)).toBeVisible();
+    await expect(animalsPages.commoditySelection.speciesEntry(domesticCat)).toBeVisible();
 
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.raccoonDog]);
     await animalsPages.commoditySelection.saveAndContinue.click();

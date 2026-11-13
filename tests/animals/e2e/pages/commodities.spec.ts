@@ -40,7 +40,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
   });
 
-  test("lists reference-data's groups by commodity heading and each group's species by label, in that order", async ({
+  test("lists reference-data's groups by commodity code and each group's species by label, in that order", async ({
     pages,
     animalsPages,
     referenceDataApi,
@@ -60,7 +60,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
       const commodityGroups = animalsPages.commoditySelection.commodityGroups;
       await expect(commodityGroups).toHaveCount(orderedGroups.length);
       for (const [index, { code }] of orderedGroups.entries()) {
-        await expect(commodityGroups.nth(index)).toHaveAccessibleName(code);
+        await expect(commodityGroups.nth(index)).toHaveAccessibleName(animalsPages.commoditySelection.commodityGroupName(code));
       }
       for (const { code, species } of orderedGroups) {
         const checkboxes = animalsPages.commoditySelection.commodityGroup(code).getByRole('checkbox');
@@ -91,7 +91,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
 
   test('says so when nothing matches', async ({ pages, animalsPages }) => {
     await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
-    await expect(pages.page.getByText('No results found')).toBeVisible();
+    await expect(animalsPages.commoditySelection.noResults).toBeVisible();
     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
   });
 
@@ -106,8 +106,8 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.overview.task('What are you importing?').click();
 
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText('2 selected');
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(commodityLines.cattle));
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(commodityLines.domesticCat));
+    await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.cattle)).toBeVisible();
+    await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.domesticCat)).toBeVisible();
 
     await animalsPages.commoditySelection.search(commodityLines.cattle.searchTerm);
     await expect(animalsPages.commoditySelection.species(commodityLines.cattle)).toBeChecked();
@@ -119,7 +119,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.commoditySelection.searchAndCheckSpecies([commodityLines.cattle]);
     await animalsPages.commoditySelection.search(NO_MATCH_QUERY);
     await expect(animalsPages.commoditySelection.selectedSummary).toContainText('1 selected');
-    await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(commodityLines.cattle));
+    await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.cattle)).toBeVisible();
 
     await animalsPages.commoditySelection.clearAll.click();
     await expect(animalsPages.commoditySelection.selectedSummary).toHaveCount(0);
@@ -154,6 +154,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
       await animalsPages.overview.task('What are you importing?').click();
       await animalsPages.commoditySelection.clearAll.click();
       await animalsPages.commoditySelection.saveAndReturnToOverview.click();
+      await expect(animalsPages.commoditySelection.errorSummaryLinks).toBeVisible();
     });
 
     test('refuses the save with "Select a commodity" and stays on the page', async ({ animalsPages }) => {
@@ -165,7 +166,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
     test('keeps the saved selection when the page is reopened', async ({ animalsPages }) => {
       const referenceNumber = animalsPages.commoditySelection.referenceNumberFromUrl();
       await animalsPages.overview.openTaskAfterReopening(referenceNumber, 'What are you importing?');
-      await expect(animalsPages.commoditySelection.selectedSummary).toContainText(speciesLabel(commodityLines.cattle));
+      await expect(animalsPages.commoditySelection.speciesEntry(commodityLines.cattle)).toBeVisible();
     });
   });
 

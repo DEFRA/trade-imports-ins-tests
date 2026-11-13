@@ -1,11 +1,10 @@
-import path from 'node:path';
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { uniquelyNamedCommercialTransporter } from '@domain/animals/constants/transporters';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
 import { getRelativeDatePickerValue } from '@utils/date-utils';
-import { writeEicarPdfFile } from '@utils/eicar-file-writer';
+import { eicarPdfUpload } from '@utils/eicar-upload';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { writePaddedPdf } from '@resources/file-upload/padded-pdf';
 import { DOCUMENT_ISSUE_DATE, MAX_FILE_SIZE_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-upload/constants';
@@ -112,9 +111,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Upload documents with an infected file', async () => {
-      const eicar = await writeEicarPdfFile(path.join(testInfo.outputDir, 'file-upload'));
       const reference = `PWVIRUS${Date.now()}`;
-      await animalsPages.accompanyingDocuments.fillDocument(reference, DOCUMENT_ISSUE_DATE, eicar.filePath);
+      await animalsPages.accompanyingDocuments.fillDocument(reference, DOCUMENT_ISSUE_DATE, eicarPdfUpload());
       await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
       await expect(animalsPages.accompanyingDocuments.documentRow(reference)).toContainText('Virus found', {
         timeout: fileUploadTimeouts.virusScanComplete,
