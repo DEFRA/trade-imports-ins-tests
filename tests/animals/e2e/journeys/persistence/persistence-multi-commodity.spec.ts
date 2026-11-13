@@ -37,7 +37,9 @@ test.describe('Notification persistence — multiple commodities', { tag: '@mong
             species: expect.arrayContaining([
               expect.objectContaining({
                 text: cowLine.species.latinName,
-                animalIdentifiers: [expect.objectContaining({ earTag: cowLine.earTag, passport: cowLine.passportNumber })],
+                animalIdentifiers: [
+                  expect.objectContaining({ earTag: cowLine.earTag, passport: cowLine.passportNumber, tattoo: cowLine.tattoo }),
+                ],
               }),
             ]),
           }),

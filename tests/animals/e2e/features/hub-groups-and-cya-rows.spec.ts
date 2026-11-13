@@ -1,7 +1,13 @@
 import { test, expect } from '@fixtures';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { speciesCardTitle } from '@domain/animals/constants/commodity-lines';
-import { ALL_ANSWERS_WITHOUT_DOCUMENT, CPH_NUMBER } from '@domain/animals/constants/journey-options';
+import {
+  ALL_ANSWERS_WITHOUT_DOCUMENT,
+  CPH_NUMBER,
+  MANDATORY_ANSWERS,
+  type NotificationAnswers,
+} from '@domain/animals/constants/journey-options';
+import { MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
 
 const ABOUT_GOODS_AND_TRANSPORT = ['1. About the consignment', '2. Description of the goods', '3. Transport and arrival'];
 const CONTACT_ADDRESS_SECTION = '6. Contact address';
@@ -119,9 +125,11 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of packages')).toHaveText(String(cowLine.noOfPackages));
     await expect(speciesCard.getByRole('heading', { name: 'Animal details' })).toBeVisible();
     await expect(speciesCard.getByRole('columnheader', { name: 'Ear tag' })).toBeVisible();
+    await expect(speciesCard.getByRole('columnheader', { name: 'Tattoo' })).toBeVisible();
     await expect(speciesCard.getByRole('cell', { name: 'Animal 1' })).toBeVisible();
     await expect(speciesCard.getByRole('cell', { name: cowLine.earTag })).toBeVisible();
     await expect(speciesCard.getByRole('cell', { name: cowLine.passportNumber })).toBeVisible();
+    await expect(speciesCard.getByRole('cell', { name: cowLine.tattoo })).toBeVisible();
 
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Port of entry')).toHaveText(answers.pointOfEntry.display);
@@ -159,5 +167,29 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
 
     const contactAddress = animalsPages.notificationView.summaryCard('Contact address');
     await expect(animalsPages.notificationView.summaryValue(contactAddress, 'Contact address')).toContainText(answers.contactAddress);
+  });
+
+  test('the Addresses card shows a cat’s saved permanent address, keyed by its common name and number', async ({
+    animalsJourney,
+    animalsPages,
+    referenceDataApi,
+  }) => {
+    const answers: NotificationAnswers = {
+      ...MANDATORY_ANSWERS,
+      commodityLines: [MANDATORY_COMMODITY_LINES.domesticCat],
+    };
+    await animalsJourney.toReview(answers);
+    const commonName = await referenceDataApi.findCommonName(MANDATORY_COMMODITY_LINES.domesticCat.species);
+
+    const addresses = animalsPages.notificationView.summaryCard('Addresses');
+    const { permanentAddress: address } = MANDATORY_COMMODITY_LINES.domesticCat;
+    const permanentAddressRow = animalsPages.notificationView.summaryValue(addresses, `${commonName} 1`);
+    await expect(permanentAddressRow).toContainText(address.nameOrOrganisationName);
+    await expect(permanentAddressRow).toContainText(address.addressLine1);
+    await expect(permanentAddressRow).toContainText(address.townOrCity);
+    await expect(permanentAddressRow).toContainText(address.postcode);
+    await expect(permanentAddressRow).toContainText('United Kingdom');
+    await expect(permanentAddressRow).toContainText(address.phone);
+    await expect(permanentAddressRow).toContainText(address.email);
   });
 });

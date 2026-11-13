@@ -53,20 +53,40 @@ const identificationForm = (lines: CommodityLineAnswer[]): FormFields => {
     if (line.tattoo) {
       form[`animalIdentifierTattoo-${index}`] = line.tattoo;
     }
-    if (line.permanentAddress) {
-      const { permanentAddress: address } = line;
-      form[`nameOrOrganisationName-${index}`] = address.nameOrOrganisationName;
-      form[`addressLine1-${index}`] = address.addressLine1;
-      if (address.addressLine2) {
-        form[`addressLine2-${index}`] = address.addressLine2;
+    if (line.identificationDetails) {
+      form[`identificationDetails-${index}`] = line.identificationDetails;
+    }
+    if (line.description) {
+      form[`description-${index}`] = line.description;
+    }
+  });
+  return form;
+};
+
+const permanentAddressForm = (lines: CommodityLineAnswer[]): FormFields => {
+  const form: FormFields = {};
+  lines.forEach((line, lineIndex) => {
+    if (!line.permanentAddress) {
+      return;
+    }
+    const { permanentAddress: address } = line;
+    for (let unitIndex = 0; unitIndex < line.noOfAnimals; unitIndex += 1) {
+      const key = `${lineIndex}-${unitIndex}`;
+      form[`option-${key}`] = address.origin;
+      if (address.origin === 'newAddress') {
+        form[`nameOrOrganisationName-${key}`] = address.nameOrOrganisationName;
+        form[`addressLine1-${key}`] = address.addressLine1;
+        if (address.addressLine2) {
+          form[`addressLine2-${key}`] = address.addressLine2;
+        }
+        form[`townOrCity-${key}`] = address.townOrCity;
+        if (address.county) {
+          form[`county-${key}`] = address.county;
+        }
+        form[`postcode-${key}`] = address.postcode;
+        form[`email-${key}`] = address.email;
+        form[`phone-${key}`] = address.phone;
       }
-      form[`townOrCity-${index}`] = address.townOrCity;
-      if (address.county) {
-        form[`county-${index}`] = address.county;
-      }
-      form[`postcode-${index}`] = address.postcode;
-      form[`phone-${index}`] = address.phone;
-      form[`email-${index}`] = address.email;
     }
   });
   return form;
@@ -108,18 +128,22 @@ const consignmentSteps = (answers: NotificationAnswers): SeedStep[] => [
   },
 ];
 
-const addressSteps = (parties: PartyIds, answers: NotificationAnswers): SeedStep[] => [
-  { slug: 'consignors/select', form: { party: parties.consignor } },
-  { slug: 'destinations/select', form: { party: parties.placeOfDestination } },
-  { slug: 'place-of-origin/select', form: { party: parties.placeOfOrigin } },
-  { slug: 'consignees/select', form: { party: parties.consignee } },
-  { slug: 'importers/select', form: { party: parties.importer } },
-  { slug: 'addresses', form: {} },
-  {
-    slug: 'cph-number',
-    form: { cphCounty: answers.cph.county, cphParish: answers.cph.parish, cphHolding: answers.cph.holding },
-  },
-];
+const addressSteps = (parties: PartyIds, answers: NotificationAnswers): SeedStep[] => {
+  const permanentAddressFields = permanentAddressForm(answers.commodityLines);
+  return [
+    { slug: 'consignors/select', form: { party: parties.consignor } },
+    { slug: 'destinations/select', form: { party: parties.placeOfDestination } },
+    { slug: 'place-of-origin/select', form: { party: parties.placeOfOrigin } },
+    { slug: 'consignees/select', form: { party: parties.consignee } },
+    { slug: 'importers/select', form: { party: parties.importer } },
+    ...(Object.keys(permanentAddressFields).length > 0 ? [{ slug: 'permanent-address', form: permanentAddressFields }] : []),
+    { slug: 'addresses', form: {} },
+    {
+      slug: 'cph-number',
+      form: { cphCounty: answers.cph.county, cphParish: answers.cph.parish, cphHolding: answers.cph.holding },
+    },
+  ];
+};
 
 const arrivalStep = (answers: NotificationAnswers): SeedStep => ({
   slug: 'port-of-entry',

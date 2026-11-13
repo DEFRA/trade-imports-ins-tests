@@ -79,7 +79,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
               noOfPackages: cowLine.noOfPackages,
               earTag: cowLine.earTag,
               passport: cowLine.passportNumber,
-              animalIdentifiers: [{ earTag: cowLine.earTag, passport: cowLine.passportNumber }],
+              animalIdentifiers: [{ earTag: cowLine.earTag, passport: cowLine.passportNumber, tattoo: cowLine.tattoo }],
             },
           ],
         },

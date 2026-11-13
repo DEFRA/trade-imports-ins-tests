@@ -2,12 +2,12 @@ import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { transporters } from '@domain/animals/constants/transporters';
-import { OVERLAND_WITHOUT_IDENTIFICATION_OVERVIEW_TASKS, certificateDocument } from '@flows/animals/journey';
+import { OVERLAND_OVERVIEW_TASKS, certificateDocument } from '@flows/animals/journey';
 
 import { test, expect } from '@fixtures';
 
 test.describe('Poultry by rail in transit', () => {
-  test('walks a poultry-by-rail notification in transit from create to the review, with no identification task and every overview task complete', async ({
+  test('walks a poultry-by-rail notification in transit from create to the review, passing through Identification details with every overview task complete', async ({
     animalsJourney,
     animalsPages,
     pages,
@@ -17,12 +17,7 @@ test.describe('Poultry by rail in transit', () => {
     const referenceNumber = await animalsJourney.walkPoultryByRail(certificateDocument('RAILDOC'));
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
 
-    await openReviewFromCompleteOverview(
-      animalsPages.overview,
-      animalsJourney,
-      referenceNumber,
-      OVERLAND_WITHOUT_IDENTIFICATION_OVERVIEW_TASKS,
-    );
+    await openReviewFromCompleteOverview(animalsPages.overview, animalsJourney, referenceNumber, OVERLAND_OVERVIEW_TASKS);
 
     const originOfImport = animalsPages.notificationView.summaryCard('Origin of import');
     await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Country of origin')).toHaveText('Germany');
