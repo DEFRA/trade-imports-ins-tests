@@ -130,7 +130,7 @@ export class AnimalsAnimalIdentificationPage extends NotificationPage {
   }
 
   cardEntryLabels(card: Locator): Locator {
-    return card.locator('label[for$="-0"]');
+    return card.locator('label');
   }
 
   cardSaveControl(card: Locator): Locator {
