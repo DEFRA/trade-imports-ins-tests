@@ -93,7 +93,7 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
   }
 
   selectedCommodityHeading(code: string): Locator {
-    return this.selectedSummary.getByText(`${code}:`, { exact: true });
+    return this.selectedSummary.getByText(new RegExp(`^(.+ \\()?${code}\\)?:$`));
   }
 
   speciesEntry(species: CommodityLine): Locator {
