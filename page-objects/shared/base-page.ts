@@ -258,6 +258,10 @@ export class NotificationPage extends BasePage {
     return SET_BASES.liveAnimals;
   }
 
+  region(name: string): Locator {
+    return this.page.getByRole('region', { name, exact: true });
+  }
+
   fieldHint(fieldId: string): Locator {
     return this.page.locator(`#${fieldId}-hint`);
   }

@@ -18,6 +18,18 @@ export class PlantsOverviewPage extends PlantsNotificationPage {
     return this.page.locator('.govuk-task-list');
   }
 
+  get taskListRegion(): Locator {
+    return this.region('Notification tasklist');
+  }
+
+  groupRegion(caption: string): Locator {
+    return this.taskListRegion.getByRole('region', { name: caption, exact: true });
+  }
+
+  get mainSecondLevelHeadings(): Locator {
+    return this.page.getByRole('main').getByRole('heading', { level: 2 });
+  }
+
   get groupHeadings(): Locator {
     return this.page.getByRole('heading', { level: 2, name: /^[1-4]\. / });
   }

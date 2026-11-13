@@ -1,6 +1,8 @@
 import type { Locator } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 
+const TASK_LIST_NAME = 'Notification tasklist';
+
 export class AnimalsOverviewPage extends NotificationPage {
   constructor(page: ConstructorParameters<typeof NotificationPage>[0]) {
     super(page, '');
@@ -8,6 +10,22 @@ export class AnimalsOverviewPage extends NotificationPage {
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Overview' });
+  }
+
+  get taskListHeading(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: TASK_LIST_NAME });
+  }
+
+  get taskListRegion(): Locator {
+    return this.region(TASK_LIST_NAME);
+  }
+
+  get commodityTotalsRegion(): Locator {
+    return this.region('Your commodities');
+  }
+
+  get sectionRegions(): Locator {
+    return this.taskListRegion.getByRole('region');
   }
 
   get numberedSectionHeadings(): Locator {
@@ -18,15 +36,16 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Review and submit' });
   }
 
+  get buttons(): Locator {
+    return this.page.getByRole('main').getByRole('button');
+  }
+
   task(name: string): Locator {
     return this.page.getByRole('link', { name, exact: true });
   }
 
   taskTitlesInSectionHeaded(heading: string): Locator {
-    return this.page
-      .getByRole('heading', { level: 3, name: heading, exact: true })
-      .locator('xpath=following-sibling::ul[contains(@class, "app-task-list")][1]')
-      .getByRole('link');
+    return this.region(heading).getByRole('link');
   }
 
   get taskNames(): Locator {

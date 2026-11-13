@@ -4,6 +4,8 @@ import { TRAIL_START } from '@page-objects/shared/base-page';
 import { POTATOES } from '@flows/plants/journey';
 import { test, expect } from '@fixtures';
 
+const GROUP_CAPTIONS = ['1. About the consignment', '2. Arrival and destination', '3. Consignment parties', '4. Check and submit'];
+
 test.describe('High-risk plants start section', () => {
   test('the dashboard renders after signing in', { tag: '@smoke' }, async ({ pages, plantsPages }) => {
     await plantsPages.dashboard.open();
@@ -75,12 +77,7 @@ test.describe('High-risk plants start section', () => {
     await expect(plantsPages.overview.cancelAmend).toHaveCount(0);
 
     await expect(plantsPages.overview.taskLists).toHaveCount(4);
-    await expect(plantsPages.overview.groupHeadings).toHaveText([
-      '1. About the consignment',
-      '2. Arrival and destination',
-      '3. Consignment parties',
-      '4. Check and submit',
-    ]);
+    await expect(plantsPages.overview.groupHeadings).toHaveText(GROUP_CAPTIONS);
     await expect(plantsPages.overview.taskRowLink('What are you importing?')).toHaveAttribute(
       'href',
       plantsPages.commodityType.expectedUrlOnTrail(reference, [TRAIL_START.overview]),
@@ -99,6 +96,22 @@ test.describe('High-risk plants start section', () => {
 
     await expect(plantsPages.overview.btnReturnToDashboard).toHaveAttribute('href', plantsPages.dashboard.expectedUrl);
     await expect(plantsPages.overview.linkBack).toHaveAttribute('href', plantsPages.dashboard.expectedUrl);
+  });
+
+  test('the Overview groups its four numbered groups as named regions inside one Notification tasklist region', async ({
+    plantsPages,
+    plantsJourney,
+  }) => {
+    await plantsJourney.startNotification();
+    await plantsJourney.toOverviewWithCommodityTypeSaved(POTATOES);
+
+    await expect(plantsPages.overview.taskListRegion.getByRole('region')).toHaveCount(GROUP_CAPTIONS.length);
+    for (const caption of GROUP_CAPTIONS) {
+      const group = plantsPages.overview.groupRegion(caption);
+      await expect(group.getByRole('heading', { level: 2 })).toHaveText(caption);
+      await expect(group.getByRole('list')).toHaveCount(1);
+    }
+    await expect(plantsPages.overview.mainSecondLevelHeadings).toHaveText(GROUP_CAPTIONS);
   });
 
   test('the new draft is listed on the dashboard and Resume reopens it', async ({ pages, plantsPages, plantsJourney }) => {

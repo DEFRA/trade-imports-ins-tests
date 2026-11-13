@@ -3,46 +3,59 @@ import { test, expect } from '@fixtures';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { ALL_ANSWERS_WITHOUT_DOCUMENT, CPH_NUMBER } from '@domain/animals/constants/journey-options';
 
+const SECTION_CAPTIONS = [
+  '1. About the consignment',
+  '2. Description of the goods',
+  '3. Transport and arrival',
+  '4. Documents',
+  '5. Consignment parties',
+  '6. Contact address',
+];
+
 test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-frontend' }, () => {
   test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({
     animalsJourney,
-    pages,
     animalsPages,
   }) => {
     await animalsJourney.startNotification();
 
-    await expect(pages.page.getByRole('heading', { level: 2, name: 'Notification tasklist' })).toBeVisible();
+    await expect(animalsPages.overview.taskListHeading).toBeVisible();
 
-    await expect(animalsPages.overview.numberedSectionHeadings).toHaveText([
-      '1. About the consignment',
-      '2. Description of the goods',
-      '3. Transport and arrival',
-      '4. Documents',
-      '5. Consignment parties',
-      '6. Contact address',
-    ]);
+    await expect(animalsPages.overview.numberedSectionHeadings).toHaveText(SECTION_CAPTIONS);
 
-    await expect(pages.page.locator('.govuk-button-group .govuk-button')).toHaveText(['Review and submit', 'Return to dashboard']);
+    await expect(animalsPages.overview.buttons).toHaveText(['Review and submit', 'Return to dashboard']);
 
-    await expect(pages.page.locator('ul.app-task-list')).toHaveCount(6);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded('1. About the consignment')).toHaveText([
+    await expect(animalsPages.overview.sectionRegions).toHaveCount(SECTION_CAPTIONS.length);
+    for (const [index, caption] of SECTION_CAPTIONS.entries()) {
+      await expect(animalsPages.overview.sectionRegions.nth(index)).toHaveAccessibleName(caption);
+    }
+    const [aboutTheConsignment, descriptionOfTheGoods, transportAndArrival, documents, consignmentParties, contactAddress] =
+      SECTION_CAPTIONS;
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded(aboutTheConsignment)).toHaveText([
       'Where is this consignment coming from?',
       'What are you importing?',
       IMPORT_REASON_TASK,
     ]);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded('2. Description of the goods')).toHaveText([
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded(descriptionOfTheGoods)).toHaveText([
       'Commodity details',
       'Additional details',
     ]);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded('3. Transport and arrival')).toHaveText([
-      'Arrival details',
-      'Transport details',
-    ]);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded('4. Documents')).toHaveText(['Upload documents']);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded('5. Consignment parties')).toHaveText(['Roles and addresses']);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded('6. Contact address')).toHaveText([
-      'Contact address for this consignment',
-    ]);
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded(transportAndArrival)).toHaveText(['Arrival details', 'Transport details']);
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded(documents)).toHaveText(['Upload documents']);
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded(consignmentParties)).toHaveText(['Roles and addresses']);
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded(contactAddress)).toHaveText(['Contact address for this consignment']);
+  });
+
+  test('the hub marks its commodity totals as two named regions inside the Your commodities region', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.startNotification();
+
+    const totals = animalsPages.overview.commodityTotalsRegion.getByRole('region');
+    await expect(totals).toHaveCount(2);
+    await expect(totals.nth(0)).toHaveAccessibleName('Animals summary');
+    await expect(totals.nth(1)).toHaveAccessibleName('Packages summary');
   });
 
   test('after completing every section the check-your-answers page renders the answered rows', async ({
@@ -61,12 +74,9 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       card.locator('.govuk-summary-list__row', { has: pages.page.getByText(key, { exact: true }) }).locator('.govuk-summary-list__value');
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 2, name: '1. About the consignment' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 2, name: '2. Description of the goods' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 2, name: '3. Transport and arrival' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 2, name: '4. Documents' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 2, name: '5. Consignment parties' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 2, name: '6. Contact address' })).toBeVisible();
+    for (const caption of SECTION_CAPTIONS) {
+      await expect(pages.page.getByRole('heading', { level: 2, name: caption })).toBeVisible();
+    }
     await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
     await expect(animalsPages.notificationView.changeLink('Change uploaded documents')).toBeVisible();
 
