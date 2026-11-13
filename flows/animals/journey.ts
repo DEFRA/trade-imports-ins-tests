@@ -602,7 +602,7 @@ export class AnimalsJourney {
     if (answer.description !== undefined) {
       await identification.cardDescription(card).fill(answer.description);
     }
-    await identification.cardSaveControl(card).click();
+    await identification.saveAndContinue.click();
   }
 
   /** Answers the permanent address page for every animal that needs one, applying each animal's

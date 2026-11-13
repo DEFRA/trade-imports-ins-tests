@@ -45,6 +45,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
       { species: ostrichLine.species, animalCount: 1 },
     ]);
     const identification = animalsPages.animalIdentification;
+    const referenceNumber = identification.referenceNumberFromUrl();
 
     await expect(identification.enterDetailsCounterHeading(commodityLines.cattle, 1, 1)).toBeVisible();
     await expect(identification.earTag).toBeVisible();
@@ -56,23 +57,18 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: '@
 
     const overLongValue = 'D'.repeat(59);
     await identification.cardIdentificationDetails(ostrichCard).fill(overLongValue);
-    await identification.cardSaveControl(ostrichCard).click();
+    await identification.saveAndContinue.click();
     const lengthError = 'Identification details must be 58 characters or less';
     await expect(identification.errorSummaryLink(lengthError)).toBeVisible();
     await identification.cardIdentificationDetails(ostrichCard).fill(ostrichLine.identificationDetails);
     await animalsJourney.saveAnimalWithFallbackDetails(ostrichCard, { description: 'Dark plumage' });
+    await identification.open(referenceNumber);
 
     await expect(identification.cardColumnHeadings(ostrichCard)).toHaveText(['Animal', 'Identification details', 'Description', 'Actions']);
     const ostrichRow = identification.savedAnimalRow(ostrichLine.species, 1);
     await expect(ostrichRow.getByRole('cell', { name: ostrichLine.identificationDetails, exact: true })).toBeVisible();
     await expect(ostrichRow.getByRole('cell', { name: 'Dark plumage', exact: true })).toBeVisible();
     await expect(identification.removeButton(ostrichLine.species, 1)).toBeVisible();
-
-    const referenceNumber = identification.referenceNumberFromUrl();
-    await identification.open(referenceNumber);
-    const reopenedRow = identification.savedAnimalRow(ostrichLine.species, 1);
-    await expect(reopenedRow.getByRole('cell', { name: ostrichLine.identificationDetails, exact: true })).toBeVisible();
-    await expect(reopenedRow.getByRole('cell', { name: 'Dark plumage', exact: true })).toBeVisible();
   });
 
   test('a horse card is asked for a horse name and a donkey card on the same commodity code is not, while both are asked for a microchip and a passport', async ({
