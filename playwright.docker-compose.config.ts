@@ -27,10 +27,14 @@ applyServiceBaseUrls({
     'http://localhost:4566/000000000000/trade_imports_animals_eu_notifications_gateway-deadletter.fifo',
 });
 
-const dockerComposeConfig = sharedConfig;
+const dockerComposeConfig = {
+  ...sharedConfig,
+  globalSetup: ['./utils/playwright/stack-owner-guard.ts', sharedConfig.globalSetup].flat(),
+};
 
 /**
  * e2e against the workspace docker-compose stack (local dev, CI, and containerised runs).
+ * Stops before any test when another workspace clone owns the stack (stack-owner-guard); ALLOW_FOREIGN_STACK=1 skips that check.
  * In-container runs (PLAYWRIGHT_IN_CONTAINER=1) add a Chromium host-resolver rule for OIDC localhost redirects.
  * PROFILE=security or security:active routes traffic through ZAP's proxy.
  * See https://playwright.dev/docs/test-configuration.
