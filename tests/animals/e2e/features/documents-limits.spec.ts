@@ -34,7 +34,7 @@ test.describe('Documents limits', { tag: '@duplicated-in-frontend' }, () => {
     await expect(addControl).toHaveAttribute('aria-disabled', 'true');
     await expect(addControl).toHaveAttribute('aria-describedby', 'add-document-error');
     await expect(addControl).not.toHaveAttribute('formaction', /./);
-    await expect(animalsPages.accompanyingDocuments.addDocumentError).toHaveText(`Error: ${maximumDocumentsMessage}`);
+    await expect(animalsPages.accompanyingDocuments.addDocumentRefusedReason).toHaveText(`Error: ${maximumDocumentsMessage}`);
   });
 
   test('accepts a PDF at the maximum file size and rejects one a byte over it', async ({
