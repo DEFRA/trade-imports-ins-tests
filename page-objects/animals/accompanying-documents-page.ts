@@ -70,7 +70,7 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
   }
 
   get fileFieldError(): Locator {
-    return this.page.locator('.govuk-error-message');
+    return this.page.locator('.govuk-form-group', { has: this.fileUpload }).locator('.govuk-error-message');
   }
 
   get addDocumentRefusedReason(): Locator {
