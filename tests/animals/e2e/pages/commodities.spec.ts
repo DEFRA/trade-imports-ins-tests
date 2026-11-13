@@ -60,7 +60,7 @@ test.describe('Commodity selection page', { tag: '@duplicated-in-frontend' }, ()
       const commodityGroups = animalsPages.commoditySelection.commodityGroups;
       await expect(commodityGroups).toHaveCount(orderedGroups.length);
       for (const [index, { code }] of orderedGroups.entries()) {
-        await expect(commodityGroups.nth(index)).toHaveAccessibleName(animalsPages.commoditySelection.commodityHeading(code));
+        await expect(commodityGroups.nth(index)).toHaveAccessibleName(animalsPages.commoditySelection.commodityGroupName(code));
       }
       for (const { code, species } of orderedGroups) {
         const checkboxes = animalsPages.commoditySelection.commodityGroup(code).getByRole('checkbox');

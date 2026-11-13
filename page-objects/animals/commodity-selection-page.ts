@@ -58,16 +58,18 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     await this.searchButton.click();
   }
 
-  commodityHeading(code: string): RegExp {
-    return new RegExp(`^(.+ \\()?${code}\\)?$`);
+  commodityGroupName(code: string): string {
+    const commodityNamesByCode: Readonly<Record<string, string>> = { '0101': 'Horse', '0102': 'Cattle', '0301': 'Fish' };
+    const name = commodityNamesByCode[code];
+    return name ? `${name} (${code})` : code;
   }
 
   commodityGroup(code: string): Locator {
-    return this.page.getByRole('group', { name: this.commodityHeading(code) });
+    return this.page.getByRole('group', { name: this.commodityGroupName(code), exact: true });
   }
 
   get commodityGroups(): Locator {
-    return this.page.getByRole('group', { name: this.commodityHeading('\\d+') });
+    return this.page.getByRole('group', { name: /^(?:.+ \(\d+\)|\d+)$/ });
   }
 
   species(species: CommodityLine): Locator {
@@ -93,7 +95,7 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
   }
 
   selectedCommodityHeading(code: string): Locator {
-    return this.selectedSummary.getByText(new RegExp(`^(.+ \\()?${code}\\)?:$`));
+    return this.selectedSummary.getByText(`${this.commodityGroupName(code)}:`, { exact: true });
   }
 
   speciesEntry(species: CommodityLine): Locator {
