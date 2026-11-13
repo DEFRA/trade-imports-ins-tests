@@ -1,8 +1,7 @@
 export type InMemoryFile = { name: string; mimeType: string; buffer: Buffer };
 
 /**
- * Returns the standard EICAR anti-virus test file as an in-memory PDF upload named `eicar-virus-file.pdf`,
- * for `locator.setInputFiles`. The bytes are never written to disk.
+ * Returns the standard EICAR anti-virus test file as an in-memory PDF upload named `eicar-virus-file.pdf`.
  *
  * @see https://www.eicar.org/download-anti-malware-testfile/
  */
