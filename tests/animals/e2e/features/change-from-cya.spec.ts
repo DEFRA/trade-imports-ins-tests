@@ -3,6 +3,7 @@ import { fileUploadPaths } from '@resources/file-upload/paths';
 import { expectOpenFromReview, expectSaveAndContinueWalk } from '@page-objects/shared/journey-checks';
 import { DOCUMENT_ISSUE_DATE } from '@resources/file-upload/constants';
 import { CONSIGNEE_NAME, CONTACT_ADDRESS_NAME } from '@domain/shared/constants/journey-party-names';
+import { HEALTH_CERTIFICATE_DOCUMENT_REFERENCE } from '@domain/animals/constants/journey-options';
 
 test.describe('Change from check your answers', { tag: '@duplicated-in-frontend' }, () => {
   test('a Change link opens the answering page with the review on the trail, and the review shows the new value after the save', async ({
@@ -162,7 +163,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expectOpenFromReview(pages.page, animalsPages.accompanyingDocuments, referenceNumber, animalsPages.notificationView.slug);
     await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);
 
-    await animalsPages.accompanyingDocuments.documentReference.fill('GBHC1234567890');
+    await animalsPages.accompanyingDocuments.documentReference.fill(HEALTH_CERTIFICATE_DOCUMENT_REFERENCE);
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     await expect(animalsPages.accompanyingDocuments.errorSummary).toContainText('Upload a document');
