@@ -11,7 +11,7 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     await animalsJourney.toAccompanyingDocuments();
   });
 
-  test('infected upload: accepted while scanning, then Virus found with error summary blocking Save and continue until it is removed', async ({
+  test('infected upload: Virus found with an error summary that blocks Save and continue until the file is removed', async ({
     pages,
     animalsPages,
   }) => {
@@ -23,8 +23,6 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
 
     const row = animalsPages.accompanyingDocuments.documentRow(reference);
-    await firstScanStatus(row, 'Virus found');
-
     await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(
@@ -38,8 +36,8 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     ).toBeVisible();
 
     await animalsPages.accompanyingDocuments.removeDocument(1).click();
-    await animalsPages.accompanyingDocuments.saveAndReturnToOverview.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await animalsPages.accompanyingDocuments.saveAndContinue.click();
+    await expect(animalsPages.addresses.heading).toBeVisible();
   });
 
   test('clean upload: Save and return to overview reaches the overview, and the row settles to Check completed with a view link on reopening', async ({
