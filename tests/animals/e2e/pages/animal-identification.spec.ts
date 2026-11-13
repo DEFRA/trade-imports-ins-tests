@@ -126,6 +126,31 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await expect(earTag).toHaveValue('');
   });
 
+  test('appends a second cattle animal to the cattle table when Enter is pressed after one is already saved, leaving the bison table unchanged', async ({
+    animalsPages,
+  }) => {
+    const { cattle, bison } = commodityLines;
+    const { animalIdentification } = animalsPages;
+    const bosTaurus = animalIdentification.speciesCard(cattle);
+    const bisonBison = animalIdentification.speciesCard(bison);
+    await animalIdentification.cardEarTag(bosTaurus).fill('UK000000000001');
+    await animalIdentification.cardSaveControl(bosTaurus).click();
+    await expect(animalIdentification.savedAnimalRow(cattle, 1)).toContainText('UK000000000001');
+    await animalIdentification.cardEarTag(bisonBison).fill('UK000000000002');
+    await animalIdentification.cardSaveControl(bisonBison).click();
+    await expect(animalIdentification.savedAnimalRow(bison, 1)).toContainText('UK000000000002');
+
+    const cattleEarTag = animalIdentification.cardEarTag(bosTaurus);
+    await cattleEarTag.fill('UK000000000003');
+    await cattleEarTag.press('Enter');
+
+    await expect(animalIdentification.savedAnimalsRows(cattle)).toHaveCount(2);
+    await expect(animalIdentification.savedAnimalsRows(bison)).toHaveCount(1);
+    await expect(animalIdentification.savedAnimalRow(cattle, 1)).toContainText('UK000000000001');
+    await expect(animalIdentification.savedAnimalRow(cattle, 2)).toContainText('UK000000000003');
+    await expect(animalIdentification.savedAnimalRow(bison, 1)).toContainText('UK000000000002');
+  });
+
   test('leaves a species of more than one animal unsaved when Save and continue is pressed', async ({ animalsPages }) => {
     const { domesticCat } = commodityLines;
     await animalsPages.animalIdentification.speciesCard(domesticCat).getByLabel('Passport', { exact: true }).fill('UK123456789');
