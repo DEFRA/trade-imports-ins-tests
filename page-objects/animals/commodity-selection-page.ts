@@ -106,7 +106,10 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
   }
 
   removeButtonFor(species: CommodityLine): Locator {
-    return this.selectedSummary.getByRole('button', { name: `Remove ${species.latinName}`, exact: true });
+    return this.selectedSummary.getByRole('button', {
+      name: `Remove ${species.latinName} from ${this.commodityGroupName(species.commodityCode)}`,
+      exact: true,
+    });
   }
 
   async pressRemoveSpecies(species: CommodityLine): Promise<void> {
