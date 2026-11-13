@@ -20,7 +20,11 @@ import {
   type OriginOptions,
   type PartyAnswers,
 } from '@domain/animals/constants/journey-options';
-import { type CommodityLineAnswer } from '@domain/animals/constants/journey-commodity-line-answers';
+import {
+  MANDATORY_COMMODITY_LINES,
+  type CommodityLineAnswer,
+  type PermanentAddressAnswer,
+} from '@domain/animals/constants/journey-commodity-line-answers';
 import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
 import { internalMarketPurposes } from '@domain/animals/constants/internal-market-purposes';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
@@ -405,7 +409,7 @@ export class AnimalsJourney {
   async answerAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Roles and addresses').click();
     await this.addFiveParties(answers.parties);
-    await this.answerPermanentAddresses(answers);
+    await this.answerPermanentAddresses(answers.commodityLines);
     await this.addCphAndLeaveAddresses(answers.cph);
     await this.animalsPages.contactAddress.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
@@ -587,27 +591,33 @@ export class AnimalsJourney {
     await identification.cardSaveControl(card).click();
   }
 
-  /** Answers the permanent address page for every animal on a line that needs one, applying that
-   * line's one answer to each of its animals, then saves back to the consignment addresses page. */
-  async answerPermanentAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
-    const linesNeedingAddress = answers.commodityLines.filter((line) => line.permanentAddress);
+  /** Answers the permanent address page for every animal that needs one, applying each animal's
+   * own answer when the caller gives one and otherwise that line's single answer, then saves
+   * back to the consignment addresses page. */
+  async answerPermanentAddresses(
+    commodityLineAnswers: CommodityLineAnswer[] = MANDATORY_ANSWERS.commodityLines,
+    addressPerAnimal: PermanentAddressAnswer[] = [],
+  ): Promise<void> {
+    const linesNeedingAddress = commodityLineAnswers.filter((line) => line.permanentAddress);
     if (linesNeedingAddress.length === 0) {
       return;
     }
     await this.animalsPages.addresses.addPermanentAddress.click();
     const { permanentAddress: addressPage } = this.animalsPages;
     await addressPage.heading.waitFor(pageLoadWait);
+    let cardsAnswered = 0;
     for (const line of linesNeedingAddress) {
-      const address = line.permanentAddress;
       const cardCount = await addressPage.cardsFor(line.species).count();
       for (let animal = 1; animal <= cardCount; animal += 1) {
         const card = addressPage.card(line.species, animal);
+        const address = addressPerAnimal[cardsAnswered] ?? line.permanentAddress;
         if (address.origin === 'placeOfDestination') {
           await addressPage.selectPlaceOfDestination(card);
         } else {
           await addressPage.selectNewAddress(card);
           await addressPage.fillNewAddress(address, card);
         }
+        cardsAnswered += 1;
       }
     }
     await addressPage.saveAndContinue.click();
@@ -811,7 +821,7 @@ export class AnimalsJourney {
   private async walkFromTransporterToReview(
     transporter: string,
     document: AccompanyingDocumentAnswer,
-    { addCph }: { addCph: boolean },
+    { addCph, afterParties }: { addCph: boolean; afterParties?: () => Promise<void> },
   ): Promise<void> {
     const pages = this.animalsPages;
 
@@ -825,6 +835,9 @@ export class AnimalsJourney {
 
     await pages.addresses.heading.waitFor(pageLoadWait);
     await this.addFiveParties();
+    if (afterParties) {
+      await afterParties();
+    }
     if (addCph) {
       await this.addCphAndLeaveAddresses();
     } else {
@@ -952,6 +965,57 @@ export class AnimalsJourney {
     await pages.transitedCountries.saveAndContinue.click();
 
     await this.walkFromTransporterToReview(MANDATORY_ANSWERS.transporter.display, document, { addCph: true });
+    return referenceNumber;
+  }
+
+  async walkCatsByAir(document: AccompanyingDocumentAnswer, afterPermanentAddressesSaved: () => Promise<void>): Promise<string> {
+    const pages = this.animalsPages;
+    const referenceNumber = await this.walkToImportReason({ countryCode: countryCodes.eu.spain }, [commodityLines.domesticCat]);
+
+    await pages.importReason.reason(importReasons.internalMarket.display).check();
+    await pages.importReason.purpose(internalMarketPurposes.companionAnimalNotForResaleOrRehoming.display).check();
+    await pages.importReason.saveAndContinue.click();
+
+    await pages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await pages.consignmentDetails.numberOfAnimals.fill('2');
+    await pages.consignmentDetails.saveAndContinue.click();
+
+    await pages.animalIdentification.heading.waitFor(pageLoadWait);
+    await pages.animalIdentification.microchip.fill('900000000001234');
+    await pages.animalIdentification.passportNumber.fill('CAT-PASSPORT-0001');
+    await pages.animalIdentification.tattoo.fill('CAT0001');
+    await pages.animalIdentification.saveAndAddAnother.click();
+    await pages.animalIdentification.savedAnimalRow(commodityLines.domesticCat, 1).waitFor(pageLoadWait);
+    await pages.animalIdentification.microchip.fill('900000000005678');
+    await pages.animalIdentification.passportNumber.fill('CAT-PASSPORT-0002');
+    await pages.animalIdentification.tattoo.fill('CAT0002');
+    await pages.animalIdentification.saveAndFinish.click();
+    await pages.animalIdentification.savedAnimalRow(commodityLines.domesticCat, 2).waitFor(pageLoadWait);
+    await pages.animalIdentification.saveAndContinue.click();
+
+    await pages.additionalDetails.heading.waitFor(pageLoadWait);
+    await pages.additionalDetails.certifiedFor(certificationPurposes.furtherKeeping.display).check();
+    await pages.additionalDetails.saveAndContinue.click();
+
+    await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await this.fillArrivalDetails({
+      port: pointOfEntries.heathrowAirport.display,
+      means: meansOfTransport.airplane.display,
+      transportId: 'BA0193',
+      documentReference: 'AWB-2026-0002',
+    });
+    await pages.arrivalDetails.saveAndContinue.click();
+
+    await this.walkFromTransporterToReview(MANDATORY_ANSWERS.transporter.display, document, {
+      addCph: false,
+      afterParties: async () => {
+        await this.answerPermanentAddresses(
+          [MANDATORY_COMMODITY_LINES.domesticCat],
+          [{ origin: 'placeOfDestination' }, MANDATORY_COMMODITY_LINES.domesticCat.permanentAddress],
+        );
+        await afterPermanentAddressesSaved();
+      },
+    });
     return referenceNumber;
   }
 
