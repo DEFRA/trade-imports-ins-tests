@@ -1,6 +1,6 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
-import { type Locator } from '@playwright/test';
+import { type Locator, expect } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { SaveAndContinueStop } from '@page-objects/shared/journey-checks';
 import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
@@ -634,6 +634,7 @@ export class AnimalsJourney {
     const { permanentAddress: addressPage } = this.animalsPages;
     let cardsAnswered = 0;
     for (const line of linesNeedingAddress) {
+      await expect(addressPage.cardsFor(line.species).first()).toBeVisible();
       const cardCount = await addressPage.cardsFor(line.species).count();
       for (let animal = 1; animal <= cardCount; animal += 1) {
         const card = addressPage.card(line.species, animal);
