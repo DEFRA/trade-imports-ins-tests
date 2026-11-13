@@ -6,11 +6,6 @@ import { test, expect } from '@fixtures/visual';
 test.use({ headless: true });
 
 test.describe('Identification card (visual regression)', { tag: '@visual' }, () => {
-  test.fixme(
-    true,
-    'The committed baselines show an address block the card no longer carries. Regenerate both with npm run test:visual:update:macos and test:visual:update:linux against the workspace stack, then take this off.',
-  );
-
   test.beforeEach(async ({ animalsJourney, animalsPages }) => {
     await animalsJourney.toAnimalIdentificationWithCounts([{ species: commodityLines.domesticCat, animalCount: 2 }]);
     const card = animalsPages.animalIdentification.speciesCard(commodityLines.domesticCat);
