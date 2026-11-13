@@ -1,4 +1,4 @@
-import { type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page, type Response } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import {
   pickerNoMatchesMessage,
@@ -122,7 +122,10 @@ export class AnimalsPartyPickerPage extends NotificationPage {
 
   async search(term: string): Promise<void> {
     await this.searchBox.fill(term);
-    await Promise.all([this.page.waitForURL((url) => (url.searchParams.get('q') ?? '') === term), this.searchButton.click()]);
+    const isSearchResponse = (response: Response): boolean =>
+      response.request().method() === 'POST' && new URL(response.url()).pathname.endsWith('/select');
+    await Promise.all([this.page.waitForResponse(isSearchResponse), this.searchButton.click()]);
+    await this.page.waitForLoadState('load');
   }
 
   async select(name: string): Promise<void> {
