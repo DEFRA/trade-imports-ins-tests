@@ -15,6 +15,8 @@ export const users = {
     organisations: {
       /** SBI for Gatwick Airport — needed when Sarah picks among multiple orgs. */
       gatwickAirport: '110100101',
+      /** SBI for Farms Ltd, a different organisation from Andrew's Gatwick Airport. */
+      farmsLtd: '110100102',
     },
   },
 } as const;
