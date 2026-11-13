@@ -131,7 +131,7 @@ export const MANDATORY_ANSWERS: MandatoryAnswers = {
   contactAddress: CONTACT_ADDRESS_NAME,
 };
 
-export const LONG_DOCUMENT_REFERENCE = 'GBHC1234567890';
+export const HEALTH_CERTIFICATE_DOCUMENT_REFERENCE = 'GBHC1234567890';
 
 /** Every answer, including an accompanying document. The UI journey uses this set, as a browser can upload a file. */
 export const ALL_ANSWERS: AllAnswers = {

@@ -426,8 +426,6 @@ Visual specs import `test` from `@fixtures/visual`. On macOS it launches Playwri
 
 Visual specs run headless whatever the project setting, because headed mode uses OS font rendering, which produces pixel differences against a headless baseline.
 
-The origin of import baseline masks the whole status strip, not the notification reference alone. The strip renders from the first request and the reference inside it is minted per run, so an unmasked strip never matches the baseline twice. Masking the full-width strip keeps the masked box a fixed size, which the reference alone is not. The strip's own content is covered by `tests/animals/e2e/features/reference-strip.spec.ts`.
-
 The declaration specs set the date of declaration to a fixed string before the screenshot instead of masking it, because the server writes today's date into the page text and a mask is as wide as that text, which changes with the day and month. `freezeDatePickersAt` does not reach that text: it stops the browser clock and moves each date picker's served bounds, and changes nothing the server has already written. The date's strong emphasis is proved by the declaration e2e specs.
 
 Run against the stack with `npm run test:docker-compose:visual` (or
@@ -447,9 +445,6 @@ npm run test:visual:update:macos -- tests/animals/e2e/visual/origin-of-import.vi
 ```
 
 The Linux script points the service URLs at `host.docker.internal`, because inside the container `localhost` is the container. It also runs the container with `--add-host=localhost:host-gateway`, which maps `localhost` to the host, so any URL the script does not override and that still names `localhost` reaches the stack too.
-
-Visual specs set `headless: true`, because headed mode uses the host's font rendering and
-never matches a headless baseline.
 
 Every full-page screenshot of a notification page masks the whole status strip. It renders
 from the first request and holds the notification reference, which is minted per run. The
