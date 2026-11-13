@@ -101,7 +101,7 @@ the same suite as the all-domain script, limited to that domain's `tests/<domain
 | `animals`       | `test:docker-compose:animals`       | `test:docker-compose:animals:a11y`       | `test:docker-compose:animals:visual` | `test:docker-compose:animals:security`       | `test:docker-compose:animals:security:active`       |
 | `animals-admin` | `test:docker-compose:animals-admin` | `test:docker-compose:animals-admin:a11y` | —                                    | `test:docker-compose:animals-admin:security` | `test:docker-compose:animals-admin:security:active` |
 | `ins`           | `test:docker-compose:ins`           | —                                        | —                                    | `test:docker-compose:ins:security`           | `test:docker-compose:ins:security:active`           |
-| `plants`        | `test:docker-compose:plants`        | —                                        | —                                    | —                                            | —                                                   |
+| `plants`        | `test:docker-compose:plants`        | —                                        | `test:docker-compose:plants:visual`  | —                                            | —                                                   |
 
 A dash means the domain has no specs of that test type yet.
 
@@ -426,12 +426,10 @@ Visual specs import `test` from `@fixtures/visual`. On macOS it launches Playwri
 
 Visual specs run headless whatever the project setting, because headed mode uses OS font rendering, which produces pixel differences against a headless baseline.
 
-The origin of import baseline masks the whole status strip, not the notification reference alone. The strip renders from the first request and the reference inside it is minted per run, so an unmasked strip never matches the baseline twice. Masking the full-width strip keeps the masked box a fixed size, which the reference alone is not. The strip's own content is covered by `tests/animals/e2e/features/reference-strip.spec.ts`.
-
 The declaration specs set the date of declaration to a fixed string before the screenshot instead of masking it, because the server writes today's date into the page text and a mask is as wide as that text, which changes with the day and month. `freezeDatePickersAt` does not reach that text: it stops the browser clock and moves each date picker's served bounds, and changes nothing the server has already written. The date's strong emphasis is proved by the declaration e2e specs.
 
 Run against the stack with `npm run test:docker-compose:visual` (or
-`test:docker-compose:animals:visual` for `animals` alone). `animals` and `plants` have `@visual` specs.
+`test:docker-compose:animals:visual` for `animals` alone, `test:docker-compose:plants:visual` for `plants` alone). `animals` and `plants` have `@visual` specs.
 
 Regenerate the E2E baseline against the stack frontend with
 `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
@@ -447,9 +445,6 @@ npm run test:visual:update:macos -- tests/animals/e2e/visual/origin-of-import.vi
 ```
 
 The Linux script points the service URLs at `host.docker.internal`, because inside the container `localhost` is the container. It also runs the container with `--add-host=localhost:host-gateway`, which maps `localhost` to the host, so any URL the script does not override and that still names `localhost` reaches the stack too.
-
-Visual specs set `headless: true`, because headed mode uses the host's font rendering and
-never matches a headless baseline.
 
 Every full-page screenshot of a notification page masks the whole status strip. It renders
 from the first request and holds the notification reference, which is minted per run. The
@@ -590,7 +585,7 @@ Ensure TypeScript is properly installed and `tsconfig.json` is configured correc
 
 ### Tests timeout
 
-Increase timeout in `playwright.config.ts` or in individual tests using `test.setTimeout()`.
+Raise the run-wide timeout in `playwright.config.ts`. Raise a single test's timeout with `setTestTimeout` from `@utils/playwright/test-timeout`, which leaves a test with no timeout, as in debug mode, with none.
 
 ### Apple Silicon Docker build fails
 
