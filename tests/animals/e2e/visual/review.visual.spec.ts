@@ -15,7 +15,7 @@ test.describe('Review (visual regression)', { tag: '@visual' }, () => {
     await pinDateText(
       animalsPages.notificationView.summaryValue(
         animalsPages.notificationView.summaryCard('Arrival details'),
-        'Arrival date at port of entry',
+        'Arrival date at destination',
       ),
     );
     await expect(animalsPages.notificationView.summaryCard('Contact address')).toBeVisible();

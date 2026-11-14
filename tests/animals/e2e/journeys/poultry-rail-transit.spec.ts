@@ -28,15 +28,18 @@ test.describe('Poultry by rail in transit', () => {
 
     const mainImportReason = animalsPages.notificationView.summaryCard('Main import reason');
     await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Main import reason')).toHaveText('Transit');
+    await expect(animalsPages.notificationView.summaryKeys(mainImportReason)).toHaveText([
+      'Main import reason',
+      'Exit border control post',
+      'Destination country',
+    ]);
+    await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Exit border control post')).toContainText('Holyhead Port');
     await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Destination country')).toHaveText('Ireland');
-    await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Port of exit')).toContainText('Holyhead Port');
-
-    const transitCountries = animalsPages.notificationView.summaryCard('Transit countries');
-    await expect(
-      animalsPages.notificationView.summaryValue(transitCountries, 'Countries that the consignment will travel through'),
-    ).toHaveText('Belgium, France');
 
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
+    await expect(
+      animalsPages.notificationView.summaryValue(arrivalDetails, 'Countries that the consignment will travel through'),
+    ).toHaveText('Belgium, France');
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Means of transport to the port of entry')).toHaveText(
       meansOfTransport.railway.display,
     );

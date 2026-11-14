@@ -90,7 +90,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       speciesCardTitle(cowLine.species),
       'Additional details',
       'Arrival details',
-      'Transit countries',
       'Transport details',
       'Uploaded documents',
       'Addresses',
@@ -99,7 +98,11 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
 
     const originOfImport = animalsPages.notificationView.summaryCard('Origin of import');
     await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Country of origin')).toHaveText(answers.countryCode.display);
-    await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Region of origin code required')).toHaveText('Yes');
+    await expect(animalsPages.notificationView.summaryKeys(originOfImport)).toHaveText([
+      'Country of origin',
+      'Region of origin code',
+      'Internal reference number',
+    ]);
     await expect(animalsPages.notificationView.regionOfOriginCode).toHaveText(`${answers.countryCode.value}-${answers.regionCode}`);
     await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Internal reference number')).toHaveText(
       answers.internalReference,
@@ -108,6 +111,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     const additionalDetails = animalsPages.notificationView.summaryCard('Additional details');
     await expect(animalsPages.notificationView.summaryValue(additionalDetails, 'Certified for')).toHaveText(answers.certifiedFor.display);
     await expect(animalsPages.notificationView.summaryValue(additionalDetails, 'Includes unweaned animals')).toHaveText('No');
+    await expect(additionalDetails.getByRole('link', { name: 'Change additional details' })).toBeVisible();
 
     const mainImportReason = animalsPages.notificationView.summaryCard('Main import reason');
     await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Main import reason')).toHaveText(
@@ -137,9 +141,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
 
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Port of entry')).toHaveText(answers.pointOfEntry.display);
-    await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Arrival date at port of entry')).toHaveText(
-      answers.arrivalDate,
-    );
+    await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Arrival date at destination')).toHaveText(answers.arrivalDate);
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Means of transport to the port of entry')).toHaveText(
       answers.meansOfTransport.display,
     );
@@ -150,13 +152,26 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       answers.transportDocumentReference,
     );
 
-    const transitCountries = animalsPages.notificationView.summaryCard('Transit countries');
     await expect(
-      animalsPages.notificationView.summaryValue(transitCountries, 'Countries that the consignment will travel through'),
+      animalsPages.notificationView.summaryValue(arrivalDetails, 'Countries that the consignment will travel through'),
     ).toHaveText(answers.transitedCountries.map(({ display }) => display).join(', '));
+    await expect(arrivalDetails.getByRole('heading', { level: 4, name: 'Transit countries' })).toBeVisible();
+    await expect(arrivalDetails.getByRole('link', { name: 'Change transit countries' })).toBeVisible();
 
     const transportDetails = animalsPages.notificationView.summaryCard('Transport details');
+    await expect(animalsPages.notificationView.summaryKeys(transportDetails)).toHaveText([
+      'Name',
+      'Address',
+      'Country',
+      'Approval number',
+      'Type',
+    ]);
     await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Name')).toContainText(answers.transporter.display);
+    await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Address')).toContainText(answers.transporter.addressLine1);
+    await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Country')).toHaveText(answers.transporter.country);
+    await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Approval number')).toHaveText(
+      answers.transporter.approvalNumber,
+    );
     await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Type')).toHaveText('Commercial');
 
     const addresses = animalsPages.notificationView.summaryCard('Addresses');
@@ -171,6 +186,42 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
 
     const contactAddress = animalsPages.notificationView.summaryCard('Contact address');
     await expect(animalsPages.notificationView.summaryValue(contactAddress, 'Contact address')).toContainText(answers.contactAddress);
+  });
+
+  test('a road notification with no transit countries and no region of origin code needed reads Not applicable and continues to the declaration', async ({
+    animalsJourney,
+    pages,
+    animalsPages,
+  }) => {
+    await animalsJourney.toReview(MANDATORY_ANSWERS);
+
+    const [cattleLine] = MANDATORY_ANSWERS.commodityLines;
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(pages.page.getByRole('heading', { level: 3 })).toHaveText([
+      'Origin of import',
+      'Main import reason',
+      speciesCardTitle(cattleLine.species),
+      'Additional details',
+      'Arrival details',
+      'Transport details',
+      'Uploaded documents',
+      'Addresses',
+      'Contact address',
+    ]);
+
+    const originOfImport = animalsPages.notificationView.summaryCard('Origin of import');
+    await expect(animalsPages.notificationView.summaryKeys(originOfImport)).toHaveText([
+      'Country of origin',
+      'Region of origin code',
+      'Internal reference number',
+    ]);
+    await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Region of origin code')).toHaveText('Not applicable');
+
+    await expect(pages.page.getByText('Complete transit countries')).toHaveCount(0);
+    await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
+
+    await animalsPages.notificationView.continueButton.click();
+    await expect(animalsPages.declaration.heading).toBeVisible();
   });
 
   test('the Addresses card shows a cat’s saved permanent address, keyed by its common name and number', async ({

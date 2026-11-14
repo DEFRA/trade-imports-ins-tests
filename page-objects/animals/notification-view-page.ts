@@ -47,6 +47,10 @@ export class AnimalsNotificationViewPage extends NotificationPage {
       .locator('xpath=following-sibling::dd[1]');
   }
 
+  summaryKeys(card: Locator): Locator {
+    return card.getByRole('term');
+  }
+
   get regionOfOriginCode(): Locator {
     return this.summaryValue(this.summaryCard('Origin of import'), 'Region of origin code');
   }
