@@ -374,12 +374,12 @@ For the security (OWASP ZAP) profiles against this stack, see
 
 #### Workspace stack commands (run from the workspace root)
 
-| Command                             | Purpose                                                |
-| ----------------------------------- | ------------------------------------------------------ |
-| `./scripts/stack/run-stack.sh`      | Start the full stack from published images             |
-| `./scripts/stack/run-stack.sh -d`   | Start the stack built from local source under `repos/` |
-| `./scripts/stack/stop-stack.sh`     | Stop the stack and wipe volumes                        |
-| `./scripts/stack/bounce-backend.sh` | Recreate the backend container (picks up Java changes) |
+| Command                           | Purpose                                                |
+| --------------------------------- | ------------------------------------------------------ |
+| `./scripts/stack/run-stack.sh`    | Start the full stack from published images             |
+| `./scripts/stack/run-stack.sh -d` | Start the stack built from local source under `repos/` |
+| `./scripts/stack/stop-stack.sh`   | Stop the stack and wipe volumes                        |
+| `tim docker bounce-backend`       | Rebuild and recreate the backend container             |
 
 See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
 
