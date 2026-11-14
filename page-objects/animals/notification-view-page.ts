@@ -82,8 +82,12 @@ export class AnimalsNotificationViewPage extends NotificationPage {
       .locator('xpath=..');
   }
 
-  editPartyDetails(card: string, role: string): Locator {
-    return this.partyRow(card, role).getByRole('link', { name: 'Edit details' });
+  cardLinks(card: string): Locator {
+    return this.summaryCard(card).getByRole('link');
+  }
+
+  cardSubsection(card: string, heading: string): Locator {
+    return this.summaryCard(card).locator(`xpath=.//h4[normalize-space()="${heading}"]/following-sibling::dl[1]`);
   }
 
   partyError(card: string, role: string): Locator {

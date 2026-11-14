@@ -3,7 +3,7 @@ import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page
 import { commodityCardTitle, commodityLines, speciesBlockHeading } from '@domain/animals/constants/commodity-lines';
 import {
   ALL_ANSWERS_WITHOUT_DOCUMENT,
-  CPH_NUMBER,
+  CPH_NUMBER_WITH_SLASHES,
   MANDATORY_ANSWERS,
   type NotificationAnswers,
 } from '@domain/animals/constants/journey-options';
@@ -191,7 +191,9 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(animalsPages.notificationView.summaryValue(addresses, 'Place of destination')).toContainText(
       answers.parties.placeOfDestination,
     );
-    await expect(animalsPages.notificationView.summaryValue(addresses, 'County parish holding (CPH) number')).toHaveText(CPH_NUMBER);
+    await expect(animalsPages.notificationView.summaryValue(addresses, 'County parish holding (CPH) number')).toHaveText(
+      CPH_NUMBER_WITH_SLASHES,
+    );
 
     const contactAddress = animalsPages.notificationView.summaryCard('Contact address');
     await expect(animalsPages.notificationView.summaryValue(contactAddress, 'Contact address')).toContainText(answers.contactAddress);
@@ -235,7 +237,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(animalsPages.declaration.heading).toBeVisible();
   });
 
-  test('the Addresses card shows a cat’s saved permanent address, keyed by its common name and number', async ({
+  test('the Addresses card’s Permanent address subsection shows a cat’s saved address, keyed by its common name and number, with no telephone or email', async ({
     animalsJourney,
     animalsPages,
     referenceDataApi,
@@ -248,16 +250,13 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await animalsJourney.toReview(answers);
     const commonName = await referenceDataApi.findCommonName(MANDATORY_COMMODITY_LINES.domesticCat.species);
 
-    const addresses = animalsPages.notificationView.summaryCard('Addresses');
+    const subsection = animalsPages.notificationView.cardSubsection('Addresses', 'Permanent address');
     const { permanentAddress: address } = MANDATORY_COMMODITY_LINES.domesticCat;
-    const permanentAddressRow = animalsPages.notificationView.summaryValue(addresses, `${commonName} 1`);
-    await expect(permanentAddressRow).toContainText(address.nameOrOrganisationName);
-    await expect(permanentAddressRow).toContainText(address.addressLine1);
-    await expect(permanentAddressRow).toContainText(address.townOrCity);
-    await expect(permanentAddressRow).toContainText(address.postcode);
-    await expect(permanentAddressRow).toContainText('United Kingdom');
-    await expect(permanentAddressRow).toContainText(address.phone);
-    await expect(permanentAddressRow).toContainText(address.email);
+    await expect(animalsPages.notificationView.summaryKeys(subsection)).toHaveText([`${commonName} 1`]);
+    await expect(animalsPages.notificationView.summaryValue(subsection, `${commonName} 1`)).toHaveText(
+      [address.nameOrOrganisationName, address.addressLine1, address.townOrCity, address.postcode, 'United Kingdom'].join(' '),
+      { useInnerText: true },
+    );
   });
 
   test('the review names each of two cattle species short of an identifier and links to its species block', async ({

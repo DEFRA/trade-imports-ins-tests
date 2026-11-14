@@ -2,7 +2,7 @@ import { commodityLines, speciesBlockHeading } from '@domain/animals/constants/c
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { TRAIL_START } from '@page-objects/shared/base-page';
 import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
-import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { CPH_NUMBER_WITH_SLASHES, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { AIR_OR_SEA_OVERVIEW_TASKS, certificateDocument } from '@flows/animals/journey';
 import { expectEmptyTransitList } from '@utils/transit-countries-assertions';
@@ -41,7 +41,9 @@ test.describe('Save and continue through a new notification', () => {
       await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Name')).toContainText('García Livestock Transport SL');
 
       const addresses = animalsPages.notificationView.summaryCard('Addresses');
-      await expect(animalsPages.notificationView.summaryValue(addresses, 'County parish holding (CPH) number')).toHaveText('123456789');
+      await expect(animalsPages.notificationView.summaryValue(addresses, 'County parish holding (CPH) number')).toHaveText(
+        CPH_NUMBER_WITH_SLASHES,
+      );
 
       await animalsJourney.submitFromReview();
       await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();

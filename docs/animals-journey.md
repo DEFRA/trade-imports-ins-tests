@@ -61,8 +61,8 @@ Why the animals flows and page objects are written the way they are. The code ca
 ### Party rows (`page-objects/animals/notification-view-page.ts`)
 
 - `partyRow` selects the summary-list row whose accessible term is the role directly, rather than climbing to it, so no XPath parent-axis hop is needed.
-- `editPartyDetails` is the row's own link to edit the address copied onto the notification. The card keeps the one Change link that re-picks from the address book.
-- `partyError` reads the first definition of the row. A summary list has no error state of its own, so an outstanding role carries its message in the row's value cell, ahead of the actions cell.
+- `cardLinks` lists every link in a summary card, so a spec can assert the card's header Change link is its only link. `cardSubsection` selects the summary list under a card's titled subsection, such as "Permanent address".
+- `partyError` reads the first definition of the row. A summary list has no error state of its own, so an outstanding role carries its message in the row's value cell.
 
 ## Choosing species (`page-objects/animals/commodity-selection-page.ts`)
 
