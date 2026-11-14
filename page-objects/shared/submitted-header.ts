@@ -16,6 +16,10 @@ export class SubmittedHeader {
     return this.page.getByRole('main').locator('.govuk-button-group').first().locator('> *');
   }
 
+  get actionRequiredWarning(): Locator {
+    return this.page.getByRole('main').locator('.govuk-warning-text', { hasText: 'You need to upload a health certificate' });
+  }
+
   get btnAmend(): Locator {
     return this.page.getByRole('button', { name: 'Amend this notification', exact: true });
   }

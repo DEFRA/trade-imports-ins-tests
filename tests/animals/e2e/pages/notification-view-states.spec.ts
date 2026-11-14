@@ -113,8 +113,8 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
   });
 
   test.describe('SUBMITTED', () => {
-    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
-      await animalsSeededJourney.createSubmittedNotification();
+    test.beforeEach(async ({ animalsSeededJourney, animalsPages, animalsNotificationActions, journeyContext }) => {
+      await animalsSeededJourney.createSubmittedWithItahcUploadedInUi(animalsPages);
       await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
     });
 
@@ -182,6 +182,57 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     test('still renders the recorded answers after submission', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
       await expect(animalsPages.notificationView.speciesBlock(commodityLines.cattle)).toBeVisible();
+    });
+  });
+
+  test.describe('SUBMITTED_ACTION_REQUIRED', () => {
+    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
+      await animalsSeededJourney.createSubmittedNotification();
+      await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
+    });
+
+    test('is headed by an orange Submitted action required tag and the warning to upload a health certificate', async ({
+      animalsPages,
+    }) => {
+      const { submittedHeader, statusTag } = animalsPages.notificationView;
+      await expect(statusTag).toHaveText('Submitted action required');
+      await expect(statusTag).toHaveClass(/govuk-tag--orange/);
+      await expect(submittedHeader.actionRequiredWarning).toBeVisible();
+    });
+
+    test('dates the notification and shows the same date after a reload', async ({ pages, animalsPages }) => {
+      const { dateSubmitted } = animalsPages.notificationView.submittedHeader;
+      await expect(dateSubmitted).toHaveText(new RegExp(`^Date submitted: ${todayOrYesterdayServiceDisplayDatePattern()}$`));
+      const shown = await dateSubmitted.textContent();
+
+      await pages.page.reload();
+
+      await expect(dateSubmitted).toHaveText(shown ?? '');
+    });
+
+    test('shows the health certificate error under the uploaded documents heading in place of document cards, with no error summary', async ({
+      animalsPages,
+    }) => {
+      await expect(animalsPages.notificationView.documentsSectionError).toHaveText('Error: Upload a valid health certificate');
+      await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
+      await expect(animalsPages.notificationView.summaryCard('Document 1')).toHaveCount(0);
+    });
+
+    test('offers Amend this notification, Copy as new and Delete in its header', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.submittedHeader.actions).toHaveText(['Amend this notification', 'Copy as new', 'Delete']);
+    });
+
+    test('shows the import reference numbers', async ({ animalsPages, journeyContext }) => {
+      const { submittedHeader } = animalsPages.notificationView;
+      await expect(submittedHeader.importReferenceValue('Notification reference')).toHaveText(journeyContext.referenceNumber);
+      await expect(submittedHeader.importReferenceValue('Customs document code')).toHaveText('C640');
+    });
+
+    test('Continue starts an amendment and opens the overview', async ({ animalsPages }) => {
+      await animalsPages.notificationView.continueButton.click();
+
+      await animalsPages.overview.heading.waitFor();
+      await expect(animalsPages.overview.statusTag).toHaveText('Amend');
     });
   });
 

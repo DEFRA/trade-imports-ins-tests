@@ -6,7 +6,7 @@ import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { parseAppDateText, toShortDisplayDate } from '@utils/date-utils';
 
 test.describe('INS dashboard notification navigation', { tag: ['@animals-backend', '@animals-frontend'] }, () => {
-  test('the INS dashboard shows a submitted notification with the arrival day entered, and its View link opens it in the owning journey frontend', async ({
+  test('the INS dashboard shows a notification submitted without its health certificate with the arrival day entered, and its View link opens it in the owning journey frontend', async ({
     animalsJourney,
     journeyContext,
     pages,
@@ -37,5 +37,6 @@ test.describe('INS dashboard notification navigation', { tag: ['@animals-backend
 
     await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
     await expect(animalsPages.notificationView.submittedHeader.reference).toHaveText(referenceNumber);
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
   });
 });

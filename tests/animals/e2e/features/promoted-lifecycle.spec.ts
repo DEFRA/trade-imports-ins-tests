@@ -1,9 +1,9 @@
 import { test, expect } from '@fixtures';
-import { notificationFulfilmentsStatuses } from '@domain/animals/models/api/notification-fulfilments';
-import { notificationStatuses } from '@domain/animals/models/api/notification';
+import { notificationStatuses } from '@domain/animals/models/api/notification-status';
+import { MANDATORY_ANSWERS_WITH_ITAHC } from '@domain/animals/constants/journey-options';
 
 test.describe('Notification lifecycle', { tag: '@compose' }, () => {
-  test('creates, submits, amends, cancels, copies and soft-deletes a notification; fulfilment view reflects each transition; each copy gets its own reference number', async ({
+  test('records a notification submitted without an ITAHC as Submitted action required through amend and cancel, then copies it into distinct drafts and soft-deletes it', async ({
     notificationApi,
     journeyContext,
   }) => {
@@ -14,21 +14,21 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
 
     const initial = await notificationApi.getNotificationFulfilments(id);
     expect(initial.referenceNumber).toBe(id);
-    expect(initial.status).toBe(notificationFulfilmentsStatuses.draft);
+    expect(initial.status).toBe(notificationStatuses.draft);
     expect(initial.fulfilments).toEqual([]);
 
     const submitted = await notificationApi.submitNotification(id, notification.concurrencyToken);
-    expect(submitted.status).toBe(notificationStatuses.submitted);
+    expect(submitted.status).toBe(notificationStatuses.submittedActionRequired);
     const submittedFulfilments = await notificationApi.getNotificationFulfilments(id);
-    expect(submittedFulfilments.status).toBe(notificationFulfilmentsStatuses.submitted);
+    expect(submittedFulfilments.status).toBe(notificationStatuses.submittedActionRequired);
 
     const amended = await notificationApi.amendNotification(id);
     expect(amended.status).toBe(notificationStatuses.amend);
     const amendedFulfilments = await notificationApi.getNotificationFulfilments(id);
-    expect(amendedFulfilments.status).toBe(notificationFulfilmentsStatuses.amend);
+    expect(amendedFulfilments.status).toBe(notificationStatuses.amend);
 
     const cancelled = await notificationApi.cancelAmendNotification(id);
-    expect(cancelled.status).toBe(notificationStatuses.submitted);
+    expect(cancelled.status).toBe(notificationStatuses.submittedActionRequired);
 
     const firstCopy = await notificationApi.copyNotification(id, cancelled.concurrencyToken);
     journeyContext.recordReferenceNumber(firstCopy.referenceNumber);
@@ -53,7 +53,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     animalsNotificationActions,
   }) => {
     test.slow();
-    await animalsJourney.submitNotification();
+    await animalsJourney.submitNotification(MANDATORY_ANSWERS_WITH_ITAHC);
     await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
 
     await expect(animalsPages.notificationView.submittedHeader.reference).toHaveText(journeyContext.referenceNumber);
@@ -70,7 +70,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     animalsPages,
   }) => {
     test.slow();
-    await animalsJourney.submitNotification();
+    await animalsJourney.submitNotification(MANDATORY_ANSWERS_WITH_ITAHC);
 
     await animalsPages.dashboard.open();
     await animalsPages.dashboard.searchForReference(journeyContext.referenceNumber);
@@ -87,7 +87,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     animalsNotificationActions,
   }) => {
     test.slow();
-    await animalsJourney.submitNotification();
+    await animalsJourney.submitNotification(MANDATORY_ANSWERS_WITH_ITAHC);
 
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
     await expect(animalsPages.notificationView.heading).toBeVisible();

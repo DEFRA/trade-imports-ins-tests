@@ -8,9 +8,9 @@ test.describe('Upload documents (visual regression)', { tag: '@visual' }, () => 
     await animalsJourney.toAccompanyingDocuments();
   });
 
-  test('shows expected page appearance with one scanned document listed', async ({ page, animalsPages, animalsJourney }) => {
+  test('shows expected page appearance with one scanned document listed', async ({ page, animalsPages }) => {
     test.slow();
-    await animalsJourney.uploadDocumentAndWaitForScan({
+    await animalsPages.accompanyingDocuments.uploadDocumentAndWaitForScan({
       ...ALL_ANSWERS.accompanyingDocument,
       reference: HEALTH_CERTIFICATE_DOCUMENT_REFERENCE,
     });

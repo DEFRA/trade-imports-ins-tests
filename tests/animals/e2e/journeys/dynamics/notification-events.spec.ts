@@ -3,6 +3,7 @@ import { formattedValue } from '@adapters/http/dataverse-client';
 import { dynamicsBaseTestTimeoutMs } from '@config/dynamics';
 import { timeouts } from '@config/timeouts';
 import { countryCodes } from '@domain/animals/constants/country-codes';
+import { MANDATORY_ANSWERS_WITH_ITAHC } from '@domain/animals/constants/journey-options';
 import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
 import { test, expect } from '@fixtures';
 import { dynamicsPollOptions, waitForAnimalsDynamicsNotification } from '@utils/dynamics/animals-polls';
@@ -39,7 +40,7 @@ test.describe('PIMS Dynamics notification events', { tag: '@dynamics' }, () => {
     test.slow();
     // Built first: a missing ANIMALS_DYNAMICS_URL / DATAVERSE_* secret fails here, before the journey.
     const dynamics = new AnimalsDynamicsClient(externalRequest);
-    await animalsJourney.submitNotification();
+    await animalsJourney.submitNotification(MANDATORY_ANSWERS_WITH_ITAHC);
     const submittedAt = Date.now();
     const referenceNumber = journeyContext.referenceNumber;
 
@@ -64,7 +65,7 @@ test.describe('PIMS Dynamics notification events', { tag: '@dynamics' }, () => {
     test.slow();
     const dynamics = new AnimalsDynamicsClient(externalRequest);
     const amendedCountry = countryCodes.eu.belgium;
-    await animalsJourney.submitNotification();
+    await animalsJourney.submitNotification(MANDATORY_ANSWERS_WITH_ITAHC);
     const referenceNumber = journeyContext.referenceNumber;
 
     await waitForAnimalsDynamicsNotification(dynamics, referenceNumber, AMENDMENT_COLUMNS);

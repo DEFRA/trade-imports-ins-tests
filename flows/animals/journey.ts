@@ -1,5 +1,4 @@
 import { pageLoadWait } from '@config/timeouts';
-import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { type Locator, expect } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { SaveAndContinueStop } from '@page-objects/shared/journey-checks';
@@ -421,22 +420,9 @@ export class AnimalsJourney {
     await this.animalsPages.arrivalDetails.transportDocumentReference.fill(documentReference);
   }
 
-  async uploadDocumentAndWaitForScan(document: AccompanyingDocumentAnswer): Promise<void> {
-    await this.animalsPages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
-    await this.animalsPages.accompanyingDocuments.saveAndAddAnother.click();
-    await this.waitForDocumentScanComplete(document.reference);
-  }
-
-  async waitForDocumentScanComplete(reference: string): Promise<void> {
-    await this.animalsPages.accompanyingDocuments
-      .documentRow(reference)
-      .filter({ hasText: 'Check completed' })
-      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
-  }
-
   async uploadScannedDocument(): Promise<Locator> {
     const reference = timestampedReference('PW');
-    await this.uploadDocumentAndWaitForScan({ ...ALL_ANSWERS.accompanyingDocument, reference });
+    await this.animalsPages.accompanyingDocuments.uploadDocumentAndWaitForScan({ ...ALL_ANSWERS.accompanyingDocument, reference });
     return this.animalsPages.accompanyingDocuments.documentRow(reference);
   }
 
@@ -514,7 +500,7 @@ export class AnimalsJourney {
     if (!answers.accompanyingDocument) return;
     await this.animalsPages.overview.task('Upload documents').click();
     await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await this.uploadDocumentAndWaitForScan(answers.accompanyingDocument);
+    await this.animalsPages.accompanyingDocuments.uploadDocumentAndWaitForScan(answers.accompanyingDocument);
     await this.openCurrentOverview();
   }
 
@@ -858,7 +844,7 @@ export class AnimalsJourney {
     await pages.transporter.saveAndContinue.click();
 
     await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await this.uploadDocumentAndWaitForScan(document);
+    await this.animalsPages.accompanyingDocuments.uploadDocumentAndWaitForScan(document);
     await pages.accompanyingDocuments.continueButton.click();
 
     await pages.addresses.heading.waitFor(pageLoadWait);

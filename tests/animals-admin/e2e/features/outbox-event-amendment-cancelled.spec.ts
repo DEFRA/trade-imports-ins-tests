@@ -1,3 +1,4 @@
+import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
@@ -36,8 +37,13 @@ test.describe('Notification amendment cancelled outbox event', { tag: '@mongodb'
       expect(outboxEvent.timestamp).toBeInstanceOf(Date);
       expect(outboxEvent.metadata.correlationId).toBeDefined();
       expect(outboxEvent.data.exchangedDocument.identifier).toBe(referenceNumber);
-      expect(outboxEvent.data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED');
-      expect(outboxEvent.statusChanges?.map(({ status }) => status)).toEqual(['DRAFT', 'SUBMITTED', 'AMEND', 'SUBMITTED']);
+      expect(outboxEvent.data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.submittedActionRequired);
+      expect(outboxEvent.statusChanges?.map(({ status }) => status)).toEqual([
+        notificationStatuses.draft,
+        notificationStatuses.submittedActionRequired,
+        notificationStatuses.amend,
+        notificationStatuses.submittedActionRequired,
+      ]);
     } finally {
       await client.close();
     }

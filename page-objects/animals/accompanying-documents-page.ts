@@ -1,4 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
+import { fileUploadTimeouts } from '@config/file-upload-timeouts';
+import type { AccompanyingDocumentAnswer } from '@domain/animals/constants/journey-options';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { DatePicker } from '@page-objects/shared/date-picker';
 
@@ -83,6 +85,18 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
 
   get refreshStatus(): Locator {
     return this.page.getByRole('link', { name: /Refresh/ });
+  }
+
+  async uploadDocumentAndWaitForScan(document: AccompanyingDocumentAnswer): Promise<void> {
+    await this.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
+    await this.saveAndAddAnother.click();
+    await this.waitForScanComplete(document.reference);
+  }
+
+  async waitForScanComplete(reference: string): Promise<void> {
+    await this.documentRow(reference)
+      .filter({ hasText: 'Check completed' })
+      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
   }
 
   async fillDocument(reference: string, issueDate: string, filePath: string, documentType: string = 'ITAHC'): Promise<void> {

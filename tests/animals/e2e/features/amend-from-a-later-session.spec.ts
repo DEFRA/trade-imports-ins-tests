@@ -16,7 +16,7 @@ test.describe('Dashboard actions in a later browser session', () => {
     await expect(freshPages.overview.journeyStrip).toContainText(reference);
   });
 
-  test('copies a notification that an earlier browser session submitted into a new draft and leaves the original submitted', async ({
+  test('copies a notification that an earlier browser session submitted into a new draft and leaves the original awaiting its health certificate', async ({
     submitAnimalsNotificationThenOpenFreshSession,
     journeyContext,
   }) => {
@@ -31,7 +31,7 @@ test.describe('Dashboard actions in a later browser session', () => {
     expect(copiedReference).not.toEqual(reference);
     await freshPages.dashboard.open();
     await freshPages.dashboard.searchForReference(reference);
-    await expect(freshPages.dashboard.cardStatusTag(reference)).toHaveText('Submitted');
+    await expect(freshPages.dashboard.cardStatusTag(reference)).toHaveText('Submitted action required');
   });
 
   test('tells the user a deleted notification could not be amended', async ({

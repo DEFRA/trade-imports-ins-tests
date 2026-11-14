@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type NotificationDocument } from '@domain/animals/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
@@ -62,7 +63,7 @@ test.describe('Notification persistence — multiple commodities', { tag: '@mong
         ]),
       );
 
-      expect(doc.status).toBe('SUBMITTED');
+      expect(doc.status).toBe(notificationStatuses.submittedActionRequired);
     } finally {
       await client.close();
     }

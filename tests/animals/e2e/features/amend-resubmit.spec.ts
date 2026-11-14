@@ -1,4 +1,5 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { MANDATORY_ANSWERS_WITH_ITAHC } from '@domain/animals/constants/journey-options';
 import { test, expect } from '@fixtures';
 
 /**
@@ -20,7 +21,7 @@ test.describe('Amend resubmission', () => {
     animalsNotificationActions,
   }) => {
     test.slow();
-    await animalsJourney.submitNotification();
+    await animalsJourney.submitNotification(MANDATORY_ANSWERS_WITH_ITAHC);
 
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
     await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');

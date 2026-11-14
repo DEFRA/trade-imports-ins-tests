@@ -1,11 +1,4 @@
-export const notificationFulfilmentsStatuses = {
-  draft: 'DRAFT',
-  submitted: 'SUBMITTED',
-  amend: 'AMEND',
-  deleted: 'DELETED',
-} as const;
-
-export type NotificationFulfilmentsStatus = (typeof notificationFulfilmentsStatuses)[keyof typeof notificationFulfilmentsStatuses];
+import type { NotificationStatus } from '@domain/animals/models/api/notification-status';
 
 export type PersistedFulfilmentEntry =
   | { obligationId: string; value: unknown }
@@ -18,7 +11,7 @@ export type NotificationFulfilments = {
   referenceNumber: string;
   fulfilments: PersistedFulfilmentEntry[];
   submittedFulfilments?: PersistedFulfilmentEntry[] | null;
-  status: NotificationFulfilmentsStatus;
+  status: NotificationStatus;
   created: string;
   submittedAt?: string | null;
 };

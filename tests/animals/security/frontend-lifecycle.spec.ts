@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { MANDATORY_ANSWERS_WITH_ITAHC } from '@domain/animals/constants/journey-options';
 
 test.describe('Security scan (frontend, lifecycle)', { tag: '@active' }, () => {
   test('routes the post-submission actions through the ZAP proxy', async ({
@@ -25,7 +26,7 @@ test.describe('Security scan (frontend, lifecycle)', { tag: '@active' }, () => {
     animalsNotificationActions,
   }) => {
     test.slow();
-    await animalsJourney.submitNotification();
+    await animalsJourney.submitNotification(MANDATORY_ANSWERS_WITH_ITAHC);
     const { referenceNumber } = journeyContext;
 
     await animalsNotificationActions.amendNotification(referenceNumber);

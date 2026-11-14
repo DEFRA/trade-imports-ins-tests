@@ -134,6 +134,13 @@ export const MANDATORY_ANSWERS: MandatoryAnswers = {
 
 export const HEALTH_CERTIFICATE_DOCUMENT_REFERENCE = 'GBHC1234567890';
 
+export const ITAHC_DOCUMENT: AccompanyingDocumentAnswer = {
+  reference: HEALTH_CERTIFICATE_DOCUMENT_REFERENCE,
+  issueDate: '03/01/2026',
+  filePath: fileUploadPaths.safeFile1kbPdf,
+  type: documentTypes.itahc,
+};
+
 /** Every answer, including an accompanying document. The UI journey uses this set, as a browser can upload a file. */
 export const ALL_ANSWERS: AllAnswers = {
   ...MANDATORY_ANSWERS,
@@ -142,13 +149,10 @@ export const ALL_ANSWERS: AllAnswers = {
   regionCode: '75',
   internalReference: 'Imports456GB',
   transitedCountries: [countryCodes.eu.france, countryCodes.eu.belgium],
-  accompanyingDocument: {
-    reference: 'DOCREF0001',
-    issueDate: '03/01/2026',
-    filePath: fileUploadPaths.safeFile1kbPdf,
-    type: documentTypes.veterinaryHealthCertificate,
-  },
+  accompanyingDocument: { ...ITAHC_DOCUMENT, reference: 'DOCREF0001', type: documentTypes.veterinaryHealthCertificate },
 };
+
+export const MANDATORY_ANSWERS_WITH_ITAHC: NotificationAnswers = { ...MANDATORY_ANSWERS, accompanyingDocument: ITAHC_DOCUMENT };
 
 /** Every answer except the accompanying document. The seeded journey uses this set, as its form client cannot upload a file. */
 export const ALL_ANSWERS_WITHOUT_DOCUMENT: AllAnswersWithoutDocument = {

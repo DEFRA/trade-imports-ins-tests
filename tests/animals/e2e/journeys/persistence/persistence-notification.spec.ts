@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type NotificationDocument } from '@domain/animals/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
@@ -58,7 +59,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
       const [doc] = await collection.find({ referenceNumber }).toArray();
       const { notification } = doc;
       expect(doc.referenceNumber).toBe(referenceNumber);
-      expect(doc.status).toBe('SUBMITTED');
+      expect(doc.status).toBe(notificationStatuses.submittedActionRequired);
       expect(notification.origin.countryCode).toBe(answers.countryCode.value);
       expect(notification.origin.requiresRegionCode).toBe('yes');
       expect(notification.origin.regionOfOriginCode).toBe(`${answers.countryCode.value}-${answers.regionCode}`);
@@ -121,8 +122,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
 
     await animalsPages.notificationView.open(referenceNumber);
     await expect(animalsPages.notificationView.submittedHeader.reference).toHaveText(referenceNumber);
-    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
     await expect(animalsPages.notificationView.changeLink(/^Change/)).toHaveCount(0);
-    await expect(animalsPages.notificationView.continueButton).toHaveCount(0);
   });
 });

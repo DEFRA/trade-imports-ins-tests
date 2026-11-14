@@ -14,7 +14,7 @@ import {
   type PartyRole,
   type SeedStep,
 } from '@flows/animals/seed-form-steps';
-import { MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
+import { ITAHC_DOCUMENT, MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { OPTIONAL_RETURN_AND_TRAIL_PATTERN } from '@page-objects/shared/base-page';
@@ -67,6 +67,22 @@ export class AnimalsSeededJourney {
 
   async createSubmittedNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
     const referenceNumber = await this.createDraftNotification('ready', answers);
+    await this.declare(referenceNumber);
+    return referenceNumber;
+  }
+
+  async createSubmittedWithItahcUploadedInUi(
+    animalsPages: AnimalsPages,
+    answers: NotificationAnswers = MANDATORY_ANSWERS,
+  ): Promise<string> {
+    const referenceNumber = await this.createDraftNotification('ready', answers);
+    await this.resumeInUi(referenceNumber, animalsPages.accompanyingDocuments);
+    await animalsPages.accompanyingDocuments.uploadDocumentAndWaitForScan(ITAHC_DOCUMENT);
+    await this.declare(referenceNumber);
+    return referenceNumber;
+  }
+
+  private async declare(referenceNumber: string): Promise<void> {
     const declarationPath = `${CREATE_PATH}/${referenceNumber}/${declarationStep.slug}`;
     const review = await this.forms.getPageHtml(`${CREATE_PATH}/${referenceNumber}/${declarationStep.reviewSlug}`);
     const concurrencyToken = concurrencyTokenIn(review, declarationStep.reviewSlug);
@@ -76,7 +92,6 @@ export class AnimalsSeededJourney {
       { ...declarationStep.declare, concurrencyToken: concurrencyTokenIn(declaration, declarationStep.slug) },
       { redirectsTo: /\/confirmation$/ },
     );
-    return referenceNumber;
   }
 
   async createAmendNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
