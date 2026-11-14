@@ -1,8 +1,14 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { test, expect } from '@fixtures';
+import type { AnimalsPages } from '@page-objects';
 
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
 const EXACT_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
+
+const expectDeleteOpensConfirmation = async (animalsPages: AnimalsPages): Promise<void> => {
+  await animalsPages.notificationView.btnDelete.click();
+  await expect(animalsPages.deleteNotification.heading).toBeVisible();
+};
 
 test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, () => {
   test.describe('DRAFT', () => {
@@ -36,11 +42,15 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(animalsPages.notificationView.changeCommodityLink(commodityLines.cattle)).toBeVisible();
     });
 
-    test('offers submission and none of the post-submit actions', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.continueButton).toBeVisible();
+    test('ends with Continue and a warning Delete, with neither Copy as new nor Cancel amend', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.endControls).toHaveText(['Continue', 'Delete']);
+      await expect(animalsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
       await expect(animalsPages.notificationView.btnCopyAsNew).toHaveCount(0);
-      await expect(animalsPages.notificationView.btnDelete).toHaveCount(0);
-      await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
+      await expect(animalsPages.notificationView.btnCancelAmend).toHaveCount(0);
+    });
+
+    test('Delete on a draft review opens the delete confirmation', async ({ animalsPages }) => {
+      await expectDeleteOpensConfirmation(animalsPages);
     });
 
     test('Continue: when the notification is unfinished, stays put and names what is left', async ({ pages, animalsPages }) => {
@@ -78,6 +88,27 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
   });
 
+  test.describe('AMEND', () => {
+    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions }) => {
+      const referenceNumber = await animalsSeededJourney.createAmendNotification();
+      await animalsNotificationActions.toNotificationView(referenceNumber);
+    });
+
+    test('ends with Continue, Cancel amend and Delete', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.endControls).toHaveText(['Continue', 'Cancel amend', 'Delete']);
+    });
+
+    test('Cancel amend opens the cancel-amendment confirmation', async ({ animalsPages }) => {
+      await animalsPages.notificationView.btnCancelAmend.click();
+
+      await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
+    });
+
+    test('Delete on an amendment review opens the delete confirmation', async ({ animalsPages }) => {
+      await expectDeleteOpensConfirmation(animalsPages);
+    });
+  });
+
   test.describe('SUBMITTED', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
       await animalsSeededJourney.createSubmittedNotification();
@@ -93,7 +124,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     test('offers Copy as new and Delete on the read-only view', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.btnCopyAsNew).toBeVisible();
       await expect(animalsPages.notificationView.btnDelete).toBeVisible();
-      await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
+      await expect(animalsPages.notificationView.btnCancelAmend).toHaveCount(0);
     });
 
     test('copies the submitted notification to a new draft', async ({ animalsPages, journeyContext }) => {

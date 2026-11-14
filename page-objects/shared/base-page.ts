@@ -268,7 +268,7 @@ export class NotificationPage extends BasePage {
     return this.page.locator(`#${fieldId}-hint`);
   }
 
-  get cancelAmend(): Locator {
+  get stripCancelAmend(): Locator {
     return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
   }
 
@@ -278,6 +278,14 @@ export class NotificationPage extends BasePage {
 
   get buttonGroup(): Locator {
     return this.page.locator('.govuk-button-group');
+  }
+
+  get btnCancelAmend(): Locator {
+    return this.page.getByRole('main').getByRole('button', { name: 'Cancel amend', exact: true });
+  }
+
+  get endControls(): Locator {
+    return this.page.locator('form[novalidate] .govuk-button-group > *');
   }
 
   get formButtons(): Locator {

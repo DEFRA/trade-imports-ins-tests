@@ -74,7 +74,7 @@ test.describe('High-risk plants start section', () => {
     await expect(plantsPages.overview.journeyStrip).toBeVisible();
     await expect(plantsPages.overview.statusTag).toHaveText('Draft');
     await expect(plantsPages.overview.notificationReference).toHaveText(reference);
-    await expect(plantsPages.overview.cancelAmend).toHaveCount(0);
+    await expect(plantsPages.overview.stripCancelAmend).toHaveCount(0);
 
     await expect(plantsPages.overview.taskLists).toHaveCount(4);
     await expect(plantsPages.overview.groupHeadings).toHaveText(GROUP_CAPTIONS);

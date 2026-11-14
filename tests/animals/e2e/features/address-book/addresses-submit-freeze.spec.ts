@@ -54,7 +54,7 @@ test.describe('Submitted addresses keep their copy', () => {
     await expect(originRow).not.toContainText(renamed);
     await expect(originRow).not.toContainText('Penrith');
 
-    await animalsPages.notificationView.cancelAmend.click();
+    await animalsPages.notificationView.btnCancelAmend.click();
     await animalsPages.notificationCancelAmend.confirm.click();
     await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');

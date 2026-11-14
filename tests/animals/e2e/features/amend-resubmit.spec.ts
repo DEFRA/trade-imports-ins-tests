@@ -47,7 +47,7 @@ test.describe('Amend resubmission', () => {
     await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(countryRow).toContainText('Belgium');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
-    await expect(animalsPages.notificationView.cancelAmend).not.toBeVisible();
+    await expect(animalsPages.notificationView.btnCancelAmend).not.toBeVisible();
 
     // And the dashboard offers Amend again for the resubmitted notification.
     await animalsPages.dashboard.open();

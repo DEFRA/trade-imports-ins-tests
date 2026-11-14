@@ -28,7 +28,7 @@ async function assertReadOnly(plantsPages: PlantsPages) {
 async function expectAmending(pages: SharedPages, plantsPages: PlantsPages, reference: string) {
   await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
   await expect(plantsPages.notificationView.statusTag).toHaveText('Amend');
-  await expect(plantsPages.notificationView.cancelAmend).toBeVisible();
+  await expect(plantsPages.notificationView.btnCancelAmend).toBeVisible();
 }
 
 async function openIdentificationNumbersFromReviewChangeLink(plantsPages: PlantsPages, reference: string) {
@@ -324,11 +324,11 @@ test.describe('High-risk plants check and submit section', () => {
         await plantsPages.notificationView.open(reference);
         await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('DiscardMe99');
         await expect(plantsPages.notificationView.statusTag).toHaveText('Amend');
-        await plantsPages.notificationView.cancelAmend.click();
+        await plantsPages.notificationView.btnCancelAmend.click();
       } else {
         await plantsPages.identificationNumbers.open(reference);
         await expect(plantsPages.identificationNumbers.statusTag).toHaveText('Amend');
-        await plantsPages.identificationNumbers.cancelAmend.click();
+        await plantsPages.identificationNumbers.stripCancelAmend.click();
       }
       await expect(pages.page.getByRole('heading', { name: 'Cancel this amendment?', level: 1 })).toBeVisible();
       await pages.page.getByRole('button', { name: 'Yes, cancel amendment', exact: true }).click();
@@ -342,6 +342,39 @@ test.describe('High-risk plants check and submit section', () => {
       await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('P123');
     });
   }
+
+  test('a draft check answers ends with Continue, a warning Delete notification and Save and return, and Delete notification opens the delete page', async ({
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    await plantsJourney.completeNotification(addressBookApi);
+    await expectReview(plantsPages);
+
+    await expect(plantsPages.notificationView.endControls).toHaveText(['Continue', 'Delete notification', 'Save and return to overview']);
+    await expect(plantsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
+    await plantsPages.notificationView.btnDelete.click();
+
+    await expect(plantsPages.deleteNotification.heading).toBeVisible();
+  });
+
+  test('an amendment check answers offers a Cancel amend button beside Continue, no Delete notification, and the button opens the confirmation', async ({
+    plantsPages,
+    plantsJourney,
+    plantsNotificationActions,
+    addressBookApi,
+  }) => {
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
+    await plantsJourney.submitFromReview();
+    await plantsNotificationActions.amendNotification(reference);
+    await plantsPages.notificationView.open(reference);
+
+    await expect(plantsPages.notificationView.endControls).toHaveText(['Continue', 'Cancel amend', 'Save and return to overview']);
+    await expect(plantsPages.notificationView.btnDelete).toHaveCount(0);
+    await plantsPages.notificationView.btnCancelAmend.click();
+
+    await expect(plantsPages.notificationCancelAmend.heading).toBeVisible();
+  });
 
   test("Back from a submitted notification's view opens the notification list", async ({ plantsPages, plantsJourney, addressBookApi }) => {
     const { reference } = await plantsJourney.completeNotification(addressBookApi);
@@ -516,7 +549,7 @@ test.describe('High-risk plants check and submit section', () => {
 
       await expect(pages.page).toHaveURL(plantsPages.overview.expectedUrlPattern(reference));
       await expect(plantsPages.overview.statusTag).toHaveText('Amend');
-      await expect(plantsPages.overview.cancelAmend).toBeVisible();
+      await expect(plantsPages.overview.stripCancelAmend).toBeVisible();
     });
   });
 

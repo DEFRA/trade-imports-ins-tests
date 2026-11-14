@@ -3,10 +3,10 @@ import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { test, expect } from '@fixtures';
 import { expectOpenFromReview, expectSaveAndContinueWalk, expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { AMENDED_REFERENCE } from '@domain/animals/constants/origin-page';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
 const CHANGE_ORIGIN_OF_IMPORT = 'Change origin of import';
-const AMENDED_REFERENCE = 'AMENDED-REF';
 const AMEND = 'Amend';
 
 const openOriginFromOriginOfImportChangeLink = async (
@@ -33,7 +33,7 @@ test.describe('Amendment page endings', () => {
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(reference));
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
     await expect(animalsPages.notificationView.referenceNumberCaption).toContainText(reference);
-    await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
+    await expect(animalsPages.notificationView.btnCancelAmend).toBeVisible();
   });
 
   test.describe('a page opened from Overview while amending', () => {
@@ -56,7 +56,7 @@ test.describe('Amendment page endings', () => {
     });
 
     test('shows Cancel amend in the strip', async ({ animalsPages }) => {
-      await expect(animalsPages.arrivalDetails.cancelAmend).toBeVisible();
+      await expect(animalsPages.arrivalDetails.stripCancelAmend).toBeVisible();
     });
   });
 
@@ -66,7 +66,7 @@ test.describe('Amendment page endings', () => {
     await animalsPages.overview.open(reference);
 
     await expect(animalsPages.overview.statusTag).toHaveText(AMEND);
-    await expect(animalsPages.overview.cancelAmend).toBeVisible();
+    await expect(animalsPages.overview.stripCancelAmend).toBeVisible();
   });
 
   test('Cancel and return to overview while amending opens Overview with the Amend status and Cancel amend, and keeps the saved value', async ({
@@ -81,7 +81,7 @@ test.describe('Amendment page endings', () => {
 
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.statusTag).toHaveText(AMEND);
-    await expect(animalsPages.overview.cancelAmend).toBeVisible();
+    await expect(animalsPages.overview.stripCancelAmend).toBeVisible();
     await animalsPages.arrivalDetails.open(reference);
     await expect(animalsPages.arrivalDetails.transportIdentification).toHaveValue(MANDATORY_ANSWERS.transportIdentification);
   });
@@ -124,6 +124,7 @@ test.describe('Amendment page endings', () => {
       [animalsPages.notificationView.slug],
       animalsJourney.saveAndContinueStopsFrom(animalsPages.importReason),
       animalsPages.notificationView,
+      animalsPages.notificationView.anyReviewHeading,
     );
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
   });

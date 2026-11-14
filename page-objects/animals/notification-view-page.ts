@@ -14,6 +14,14 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Review your notification' });
   }
 
+  get resubmittingHeading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'Review before re-submitting' });
+  }
+
+  get anyReviewHeading(): Locator {
+    return this.heading.or(this.resubmittingHeading);
+  }
+
   get referenceNumberCaption(): Locator {
     return this.journeyStrip;
   }
@@ -23,7 +31,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   }
 
   get btnDelete(): Locator {
-    return this.page.getByRole('button', { name: 'Delete' });
+    return this.page.getByRole('button', { name: 'Delete', exact: true });
   }
 
   get continueButton(): Locator {
@@ -96,6 +104,6 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   async open(referenceNumber: string, { attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await super.open(referenceNumber, { attemptSignIn, ...identity });
-    if (attemptSignIn) await this.heading.waitFor(pageLoadWait);
+    if (attemptSignIn) await this.anyReviewHeading.waitFor(pageLoadWait);
   }
 }

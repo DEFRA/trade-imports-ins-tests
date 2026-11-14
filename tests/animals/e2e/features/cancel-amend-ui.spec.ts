@@ -9,7 +9,7 @@ test.describe('Cancel amendment through the UI', () => {
 
     test('shows the Cancel amend link while the notification is amending', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
-      await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
+      await expect(animalsPages.notificationView.btnCancelAmend).toBeVisible();
     });
 
     test('shows the Amend status bar with Cancel amend on Overview, a question page and the review', async ({
@@ -21,17 +21,17 @@ test.describe('Cancel amendment through the UI', () => {
       await animalsPages.overview.open(reference);
       await expect(animalsPages.overview.statusTag).toHaveText('Amend');
       await expect(animalsPages.overview.journeyStrip).toContainText(reference);
-      await expect(animalsPages.overview.cancelAmend).toBeVisible();
+      await expect(animalsPages.overview.stripCancelAmend).toBeVisible();
 
       await animalsPages.originOfImport.open(reference);
       await expect(animalsPages.originOfImport.statusTag).toHaveText('Amend');
       await expect(animalsPages.originOfImport.journeyStrip).toContainText(reference);
-      await expect(animalsPages.originOfImport.cancelAmend).toBeVisible();
+      await expect(animalsPages.originOfImport.stripCancelAmend).toBeVisible();
 
       await animalsPages.notificationView.open(reference);
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
       await expect(animalsPages.notificationView.journeyStrip).toContainText(reference);
-      await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
+      await expect(animalsPages.notificationView.btnCancelAmend).toBeVisible();
     });
 
     test(
@@ -41,7 +41,7 @@ test.describe('Cancel amendment through the UI', () => {
         const reference = journeyContext.referenceNumber;
 
         await animalsPages.overview.open(reference);
-        await animalsPages.overview.cancelAmend.click();
+        await animalsPages.overview.stripCancelAmend.click();
 
         await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(reference));
         await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
@@ -49,7 +49,7 @@ test.describe('Cancel amendment through the UI', () => {
     );
 
     test('opens the confirmation page when Cancel amend is selected', async ({ pages, animalsPages, journeyContext }) => {
-      await animalsPages.notificationView.cancelAmend.click();
+      await animalsPages.notificationView.btnCancelAmend.click();
 
       await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(journeyContext.referenceNumber));
       await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
@@ -59,16 +59,16 @@ test.describe('Cancel amendment through the UI', () => {
       await expect(animalsPages.notificationCancelAmend.confirm).toBeVisible();
       await expect(animalsPages.notificationCancelAmend.reject).toBeVisible();
       await expect(animalsPages.notificationCancelAmend.statusTag).toHaveText('Amend');
-      await expect(animalsPages.notificationCancelAmend.cancelAmend).toHaveCount(0);
+      await expect(animalsPages.notificationCancelAmend.stripCancelAmend).toHaveCount(0);
     });
 
     test('No returns to the notification view with the amendment still in progress', async ({ pages, animalsPages, journeyContext }) => {
-      await animalsPages.notificationView.cancelAmend.click();
+      await animalsPages.notificationView.btnCancelAmend.click();
       await animalsPages.notificationCancelAmend.reject.click();
 
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(journeyContext.referenceNumber));
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
-      await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
+      await expect(animalsPages.notificationView.btnCancelAmend).toBeVisible();
       await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
     });
 
@@ -80,7 +80,7 @@ test.describe('Cancel amendment through the UI', () => {
       const reference = journeyContext.referenceNumber;
       await animalsPages.originOfImport.open(reference);
 
-      await animalsPages.originOfImport.cancelAmend.click();
+      await animalsPages.originOfImport.stripCancelAmend.click();
 
       await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(reference));
       await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
@@ -106,13 +106,13 @@ test.describe('Cancel amendment through the UI', () => {
       await animalsNotificationActions.changeCountryOfOrigin('Belgium');
       await expect(countryRow).toContainText('Belgium');
 
-      await animalsPages.notificationView.cancelAmend.click();
+      await animalsPages.notificationView.btnCancelAmend.click();
       await animalsPages.notificationCancelAmend.confirm.click();
 
       await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
       await expect(pages.page.getByRole('alert')).toContainText('The amendment has been cancelled and the submitted version restored.');
       await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
-      await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
+      await expect(animalsPages.notificationView.btnCancelAmend).toHaveCount(0);
       await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
       await expect(countryRow).toContainText('France');
     },
@@ -135,16 +135,16 @@ test.describe('Cancel amend without JavaScript', { tag: '@duplicated-in-frontend
     await animalsPages.originOfImport.saveAndContinue.click();
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await animalsPages.notificationView.open(reference);
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.anyReviewHeading).toBeVisible();
     await expect(countryRow).toContainText('Belgium');
 
     await animalsPages.originOfImport.open(reference);
-    await animalsPages.originOfImport.cancelAmend.click();
+    await animalsPages.originOfImport.stripCancelAmend.click();
     await animalsPages.notificationCancelAmend.confirm.click();
 
     await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
     await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
-    await expect(animalsPages.notificationView.cancelAmend).toHaveCount(0);
+    await expect(animalsPages.notificationView.btnCancelAmend).toHaveCount(0);
     await expect(countryRow).toContainText('France');
   });
 });
