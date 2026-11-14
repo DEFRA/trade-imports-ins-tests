@@ -122,7 +122,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     const referenceNumber = await animalsSeededJourney.createDraftNotification();
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
 
-    await animalsPages.notificationView.changeLink('Change uploaded documents').click();
+    await animalsPages.notificationView.changeLink('Change document 1').click();
     await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
     await expectOpenFromReview(pages.page, animalsPages.accompanyingDocuments, referenceNumber, animalsPages.notificationView.slug);
     await expectSaveAndContinueWalk(
@@ -155,7 +155,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
     const reviewUrl = animalsPages.notificationView.expectedUrlPattern(referenceNumber);
 
-    await animalsPages.notificationView.changeLink('Change uploaded documents').click();
+    await animalsPages.notificationView.changeLink('Change document 1').click();
     await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
     await expectOpenFromReview(pages.page, animalsPages.accompanyingDocuments, referenceNumber, animalsPages.notificationView.slug);
     await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);

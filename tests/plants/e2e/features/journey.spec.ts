@@ -123,7 +123,10 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await expect(plantsPages.notificationView.card('Place of destination')).toContainText(address.name);
       await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('JOURNEY_123');
       await expect(plantsPages.notificationView.card('Contact')).toContainText(address.name);
-      await expect(plantsPages.notificationView.card('Contact')).toContainText(address.email);
+      await expect(plantsPages.notificationView.row('Contact', 'Address').getByRole('definition')).toHaveText(
+        [address.addressLine1, address.townOrCity, address.county, address.postcode, 'United Kingdom'].join('\n'),
+        { useInnerText: true },
+      );
       if (scenario.type !== POTATOES) {
         await expect(plantsPages.notificationView.card('Consignor')).toContainText(address.name);
       }

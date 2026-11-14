@@ -81,8 +81,10 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2 }).filter({ hasText: /^\d\.\s/ })).toHaveText(REVIEW_SECTION_HEADINGS);
-    await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
-    await expect(animalsPages.notificationView.changeLink('Change uploaded documents')).toBeVisible();
+    const documentCard = animalsPages.notificationView.summaryCard('Document 1');
+    await expect(animalsPages.notificationView.summaryKeys(documentCard)).toHaveText(['Document reference']);
+    await expect(animalsPages.notificationView.summaryValue(documentCard, 'Document reference')).toHaveText('Not applicable');
+    await expect(animalsPages.notificationView.changeLink('Change document 1')).toBeVisible();
 
     await expect(pages.page.getByRole('heading', { level: 3 })).toHaveText([
       'Origin of import',
@@ -92,7 +94,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       'Additional details',
       'Arrival details',
       'Transport details',
-      'Uploaded documents',
+      'Document 1',
       'Addresses',
       'Contact address',
     ]);
@@ -196,7 +198,10 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     );
 
     const contactAddress = animalsPages.notificationView.summaryCard('Contact address');
-    await expect(animalsPages.notificationView.summaryValue(contactAddress, 'Contact address')).toContainText(answers.contactAddress);
+    await expect(animalsPages.notificationView.summaryValue(contactAddress, 'Contact address')).toHaveText(
+      [answers.contactAddress, 'Woodham Lane', 'Addlestone', 'KT15 3NB', 'United Kingdom'].join('\n'),
+      { useInnerText: true },
+    );
   });
 
   test('a road notification with no transit countries and no region of origin code needed reads Not applicable and continues to the declaration', async ({
@@ -217,7 +222,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       'Additional details',
       'Arrival details',
       'Transport details',
-      'Uploaded documents',
+      'Document 1',
       'Addresses',
       'Contact address',
     ]);

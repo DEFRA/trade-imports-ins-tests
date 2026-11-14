@@ -27,7 +27,9 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
   change(name: string): Locator {
     return this.page.getByRole('link', { name, exact: true });
   }
-  /** The row whose key is exactly `key`. */
+  rowKeys(cardTitle: string): Locator {
+    return this.card(cardTitle).locator('.govuk-summary-list__key');
+  }
   row(cardTitle: string, key: string): Locator {
     return this.card(cardTitle)
       .locator('.govuk-summary-list__row')

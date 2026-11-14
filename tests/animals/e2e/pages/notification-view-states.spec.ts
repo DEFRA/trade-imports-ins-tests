@@ -19,8 +19,9 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(pages.page.getByRole('heading', { name: '4. Uploaded documents' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '5. Consignment addresses' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '6. Contact address' })).toBeVisible();
-      await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toBeVisible();
-      await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
+      const documentCard = animalsPages.notificationView.summaryCard('Document 1');
+      await expect(documentCard).toBeVisible();
+      await expect(animalsPages.notificationView.summaryValue(documentCard, 'Document reference')).toHaveText('Not applicable');
       await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
       await expect(animalsPages.notificationView.speciesBlock(commodityLines.cattle)).toContainText('Number of animals');
     });

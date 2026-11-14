@@ -78,9 +78,10 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(plantsPages.notificationView.card('Consignor')).toHaveCount(0);
     const contact = plantsPages.notificationView.card('Contact');
     await expect(contact).toContainText(address.name);
-    await expect(contact).toContainText('4 Nursery Lane, Perth, Perthshire, PH1 5EX');
-    await expect(contact).toContainText('01738 555 0143');
-    await expect(contact).toContainText('review@example.co.uk');
+    await expect(plantsPages.notificationView.row('Contact', 'Address').getByRole('definition')).toHaveText(
+      ['4 Nursery Lane', 'Perth', 'Perthshire', 'PH1 5EX', 'United Kingdom'].join('\n'),
+      { useInnerText: true },
+    );
     await plantsPages.notificationView.openOnTrail(reference, [TRAIL_START.overview]);
     await plantsPages.notificationView.change('Change country of origin (Import details)').click();
     await expectOpenFromReview(pages.page, plantsPages.origin, reference, plantsPages.notificationView.slug, [TRAIL_START.overview]);

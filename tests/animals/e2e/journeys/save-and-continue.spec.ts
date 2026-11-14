@@ -1,3 +1,4 @@
+import { basename } from 'node:path';
 import { commodityLines, speciesBlockHeading } from '@domain/animals/constants/commodity-lines';
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { TRAIL_START } from '@page-objects/shared/base-page';
@@ -15,7 +16,8 @@ test.describe('Save and continue through a new notification', () => {
     async ({ animalsJourney, animalsPages, pages }) => {
       test.slow();
 
-      const referenceNumber = await animalsJourney.walkCattleByAir(certificateDocument('AWBDOC'));
+      const document = certificateDocument('AWBDOC');
+      const referenceNumber = await animalsJourney.walkCattleByAir(document);
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
 
       await openReviewFromCompleteOverview(animalsPages.overview, animalsJourney, referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
@@ -39,6 +41,20 @@ test.describe('Save and continue through a new notification', () => {
 
       const transportDetails = animalsPages.notificationView.summaryCard('Transport details');
       await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Name')).toContainText('García Livestock Transport SL');
+
+      const documentCard = animalsPages.notificationView.summaryCard('Document 1');
+      await expect(animalsPages.notificationView.summaryKeys(documentCard)).toHaveText([
+        'Document reference',
+        'Document type',
+        'Date of issue',
+        'Attachment',
+      ]);
+      await expect(animalsPages.notificationView.summaryValue(documentCard, 'Document reference')).toHaveText(document.reference);
+      await expect(animalsPages.notificationView.summaryValue(documentCard, 'Document type')).toHaveText(
+        'Other veterinary certificate / veterinary declaration',
+      );
+      await expect(animalsPages.notificationView.summaryValue(documentCard, 'Date of issue')).toHaveText(document.issueDate);
+      await expect(animalsPages.notificationView.summaryValue(documentCard, 'Attachment')).toHaveText(basename(document.filePath));
 
       const addresses = animalsPages.notificationView.summaryCard('Addresses');
       await expect(animalsPages.notificationView.summaryValue(addresses, 'County parish holding (CPH) number')).toHaveText(

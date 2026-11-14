@@ -54,7 +54,7 @@ test.describe('Addresses are copied, not linked', () => {
     },
   );
 
-  test('picking a record for a role with no address shows every field of that record on the review page', async ({
+  test('picking a record for a role with no address reads its name, address lines and country back on the review page, one per line', async ({
     animalsJourney,
     animalsPages,
     addressBookApi,
@@ -83,15 +83,12 @@ test.describe('Addresses are copied, not linked', () => {
     const referenceNumber = animalsPages.addresses.referenceNumberFromUrl();
     await animalsPages.notificationView.open(referenceNumber);
     const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
-    await expect(consignorCyaRow).toContainText(record.name);
-    await expect(consignorCyaRow).toContainText(record.addressLine1);
-    await expect(consignorCyaRow).toContainText(record.addressLine2);
-    await expect(consignorCyaRow).toContainText(record.townOrCity);
-    await expect(consignorCyaRow).toContainText(record.county);
-    await expect(consignorCyaRow).toContainText(record.postcode);
-    await expect(consignorCyaRow).toContainText('United Kingdom');
-    await expect(consignorCyaRow).toContainText(record.phone);
-    await expect(consignorCyaRow).toContainText(record.email);
+    await expect(consignorCyaRow.getByRole('definition')).toHaveText(
+      [record.name, record.addressLine1, record.addressLine2, record.townOrCity, record.county, record.postcode, 'United Kingdom'].join(
+        '\n',
+      ),
+      { useInnerText: true },
+    );
   });
 
   test(
