@@ -350,7 +350,7 @@ should also run the spec, whatever test type or domain the spec is in (see
    start the locally built stack:
 
    ```bash
-   ./scripts/stack/run-stack.sh -d
+   tim docker dev
    ```
 
 2. Run every domain with `npm run test:docker-compose`, or one domain with
@@ -374,12 +374,12 @@ For the security (OWASP ZAP) profiles against this stack, see
 
 #### Workspace stack commands (run from the workspace root)
 
-| Command                           | Purpose                                                |
-| --------------------------------- | ------------------------------------------------------ |
-| `./scripts/stack/run-stack.sh`    | Start the full stack from published images             |
-| `./scripts/stack/run-stack.sh -d` | Start the stack built from local source under `repos/` |
-| `tim docker down`                 | Stop the stack and wipe volumes                        |
-| `tim docker bounce-backend`       | Rebuild and recreate the backend container             |
+| Command                     | Purpose                                                |
+| --------------------------- | ------------------------------------------------------ |
+| `tim docker up`             | Start the full stack from published images             |
+| `tim docker dev`            | Start the stack built from local source under `repos/` |
+| `tim docker down`           | Stop the stack and wipe volumes                        |
+| `tim docker bounce-backend` | Rebuild and recreate the backend container             |
 
 See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
 
