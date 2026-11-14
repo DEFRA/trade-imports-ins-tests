@@ -37,7 +37,7 @@ test.describe('Back on the review page', () => {
     await animalsPages.dashboard.openAndSearchFor(reference);
 
     await animalsPages.dashboard.view(reference).click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.submittedHeader.reference).toHaveText(reference);
 
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.dashboard.heading).toBeVisible();

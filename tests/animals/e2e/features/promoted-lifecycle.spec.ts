@@ -56,8 +56,8 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await animalsJourney.submitNotification();
     await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
 
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.submittedHeader.reference).toHaveText(journeyContext.referenceNumber);
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
     await expect(animalsPages.notificationView.heading).toBeVisible();
@@ -75,7 +75,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await animalsPages.dashboard.open();
     await animalsPages.dashboard.searchForReference(journeyContext.referenceNumber);
     await animalsPages.dashboard.view(journeyContext.referenceNumber).click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.submittedHeader.reference).toHaveText(journeyContext.referenceNumber);
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.dashboard.heading).toBeVisible();
   });

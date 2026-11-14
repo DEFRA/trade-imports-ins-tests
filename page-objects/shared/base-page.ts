@@ -142,7 +142,7 @@ export class BasePage {
   }
 
   get statusTag(): Locator {
-    return this.journeyStrip.locator('.govuk-tag');
+    return this.journeyStrip.locator('.govuk-tag').or(this.page.getByRole('main').locator('h1 + .govuk-tag'));
   }
 
   get notificationReference(): Locator {

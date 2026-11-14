@@ -2,6 +2,7 @@ import { type Locator, type Page } from '@playwright/test';
 import { pageLoadWait } from '@config/timeouts';
 import { commodityCardTitle, speciesBlockHeading, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { NotificationPage, type OpenOptions } from '@page-objects/shared/base-page';
+import { SubmittedHeader } from '@page-objects/shared/submitted-header';
 
 const SPECIES_BLOCK_SELECTOR = '[id^="species-block-"]';
 
@@ -9,6 +10,8 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   constructor(page: Page) {
     super(page, 'notification-view');
   }
+
+  readonly submittedHeader = new SubmittedHeader(this.page);
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Review your notification' });
@@ -104,6 +107,14 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   async open(referenceNumber: string, { attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await super.open(referenceNumber, { attemptSignIn, ...identity });
-    if (attemptSignIn) await this.anyReviewHeading.waitFor(pageLoadWait);
+    if (attemptSignIn) {
+      const submittedHeading = this.page.getByRole('heading', { level: 1, name: referenceNumber, exact: true });
+      await this.anyReviewHeading.or(submittedHeading).waitFor(pageLoadWait);
+    }
+  }
+
+  /** Opens the view's address and signs in, without waiting for any heading: for a notification that may not exist. */
+  async openWithoutWaiting(referenceNumber: string): Promise<void> {
+    await super.open(referenceNumber);
   }
 }

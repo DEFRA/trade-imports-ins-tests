@@ -107,9 +107,8 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await plantsPages.confirmation.viewNotification.click();
       await pages.page.reload();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-      await expect(plantsPages.notificationView.heading).toBeVisible();
-      await expect(plantsPages.overview.notificationReference).toHaveText(reference);
-      await expect(plantsPages.overview.statusTag).toHaveText('Submitted');
+      await expect(plantsPages.notificationView.submittedHeader.reference).toHaveText(reference);
+      await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');
       await expect(plantsPages.notificationView.changeLinks).toHaveCount(0);
       await expect(plantsPages.notificationView.btnContinue).toHaveCount(0);
       await expect(plantsPages.notificationView.lateBanner).toHaveCount(scenario.late ? 1 : 0);

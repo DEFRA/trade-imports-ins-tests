@@ -1,6 +1,7 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { test, expect } from '@fixtures';
 import type { AnimalsPages } from '@page-objects';
+import { todayOrYesterdayServiceDisplayDatePattern } from '@utils/date-utils';
 
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
 const EXACT_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
@@ -19,6 +20,8 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
 
     test('renders the recorded answers in the numbered design sections', async ({ pages, animalsPages }) => {
       await expect(animalsPages.notificationView.heading).toBeVisible();
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Draft');
+      await expect(animalsPages.notificationView.submittedHeader.btnAmend).toHaveCount(0);
       await expect(pages.page.getByRole('heading', { name: '1. About the consignment' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '2. Description of the goods' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '3. Transport and arrival' })).toBeVisible();
@@ -115,16 +118,53 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
     });
 
-    test('lands on the view page with the Submitted strip and reference', async ({ pages, animalsPages, journeyContext }) => {
+    test('is headed by its reference with a green Submitted tag, no status bar and a title naming the reference', async ({
+      pages,
+      animalsPages,
+      journeyContext,
+    }) => {
+      const { submittedHeader, statusTag } = animalsPages.notificationView;
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(journeyContext.referenceNumber));
-      await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
-      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.referenceNumber);
+      await expect(submittedHeader.reference).toHaveText(journeyContext.referenceNumber);
+      await expect(statusTag).toHaveText('Submitted');
+      await expect(statusTag).toHaveClass(/govuk-tag--green/);
+      await expect(animalsPages.notificationView.journeyStrip).toHaveCount(0);
+      await expect(pages.page).toHaveTitle(`${journeyContext.referenceNumber} - Import notification service - GOV.UK`);
     });
 
-    test('offers Copy as new and Delete on the read-only view', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.btnCopyAsNew).toBeVisible();
-      await expect(animalsPages.notificationView.btnDelete).toBeVisible();
-      await expect(animalsPages.notificationView.btnCancelAmend).toHaveCount(0);
+    test('dates the notification with the service day it was submitted', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.submittedHeader.dateSubmitted).toHaveText(
+        new RegExp(`^Date submitted: ${todayOrYesterdayServiceDisplayDatePattern()}$`),
+      );
+    });
+
+    test('offers Amend this notification, a secondary Copy as new and a warning Delete in its header', async ({ animalsPages }) => {
+      const { submittedHeader, btnCopyAsNew, btnDelete, btnCancelAmend } = animalsPages.notificationView;
+      await expect(submittedHeader.actions).toHaveText(['Amend this notification', 'Copy as new', 'Delete']);
+      await expect(submittedHeader.btnAmend).not.toHaveClass(/govuk-button--secondary/);
+      await expect(btnCopyAsNew).toHaveClass(/govuk-button--secondary/);
+      await expect(btnDelete).toHaveClass(/govuk-button--warning/);
+      await expect(btnCancelAmend).toHaveCount(0);
+    });
+
+    test('Amend this notification starts the amendment', async ({ animalsPages }) => {
+      await animalsPages.notificationView.submittedHeader.btnAmend.click();
+
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
+    });
+
+    test('Delete opens the delete confirmation', async ({ animalsPages }) => {
+      await expectDeleteOpensConfirmation(animalsPages);
+    });
+
+    test('shows the import reference numbers as text with the warning and no Copy button', async ({ animalsPages, journeyContext }) => {
+      const { submittedHeader } = animalsPages.notificationView;
+      await expect(submittedHeader.importReferencesWarning).toContainText(
+        'You must use the correct reference and code on the customs declaration or your consignment will be delayed.',
+      );
+      await expect(submittedHeader.importReferenceValue('Notification reference')).toHaveText(journeyContext.referenceNumber);
+      await expect(submittedHeader.importReferenceValue('Customs document code')).toHaveText('C640');
+      await expect(submittedHeader.importReferences.getByRole('button')).toHaveCount(0);
     });
 
     test('copies the submitted notification to a new draft', async ({ animalsPages, journeyContext }) => {
@@ -142,6 +182,14 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     test('still renders the recorded answers after submission', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
       await expect(animalsPages.notificationView.speciesBlock(commodityLines.cattle)).toBeVisible();
+    });
+  });
+
+  test.describe('a notification that does not exist', () => {
+    test('opening its view goes to the notification list', async ({ animalsPages }) => {
+      await animalsPages.notificationView.openWithoutWaiting('GBN-AG-00-AAAAAA');
+
+      await expect(animalsPages.dashboard.heading).toBeVisible();
     });
   });
 });

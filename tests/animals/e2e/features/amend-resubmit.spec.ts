@@ -44,7 +44,7 @@ test.describe('Amend resubmission', () => {
 
     // Back in Submitted: the view is read-only again and keeps the edited value.
     await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
     await expect(countryRow).toContainText('Belgium');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
     await expect(animalsPages.notificationView.btnCancelAmend).not.toBeVisible();
