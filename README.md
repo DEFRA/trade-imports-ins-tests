@@ -475,7 +475,7 @@ See [`docs/security.md`](docs/security.md) for how to run it, what is scanned an
 
 ## Running Tests on GitHub
 
-E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `run-stack.sh --branch <branch>` and runs this repo's published test image against it, with reports published to GitHub Pages.
+E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `tim docker up --branch <branch>` and runs this repo's published test image against it, with reports published to GitHub Pages.
 
 ### GitHub Actions workflow
 
