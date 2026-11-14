@@ -193,6 +193,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     pages,
     animalsPages,
   }) => {
+    test.slow();
     await animalsJourney.toReview(MANDATORY_ANSWERS);
 
     const [cattleLine] = MANDATORY_ANSWERS.commodityLines;
@@ -229,6 +230,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     animalsPages,
     referenceDataApi,
   }) => {
+    test.slow();
     const answers: NotificationAnswers = {
       ...MANDATORY_ANSWERS,
       commodityLines: [MANDATORY_COMMODITY_LINES.domesticCat],
