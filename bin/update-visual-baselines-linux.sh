@@ -4,7 +4,7 @@
 #
 # Usage: ./bin/update-visual-baselines-linux.sh [Playwright arguments]
 #
-# Prerequisites: workspace stack running (./scripts/stack/run-stack.sh).
+# Prerequisites: workspace stack running (tim docker up).
 #
 # Override PLAYWRIGHT_IMAGE, NODE_MODULES_VOLUME, CONTAINER_USER, or any of the
 # service URLs below to customise the container run.

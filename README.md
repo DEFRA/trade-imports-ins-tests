@@ -140,6 +140,13 @@ those settings:
 | `playwright.config.ts`                | CDP services         |
 | `playwright.docker-compose.config.ts` | docker-compose stack |
 
+From a workspace clone, the docker-compose config runs only when that clone
+owns the stack (`tim docker owner` in the workspace prints the owner). From
+another clone it stops before the first test with "The stack belongs to
+`<clone>`. Run E2E there, or push and let GitHub Actions run it." Set
+`ALLOW_FOREIGN_STACK=1` to run anyway. A checkout outside a workspace, such as
+the tests image, is never stopped.
+
 `@a11y` tests use the same configs; per-test timeout is longer in
 `fixtures/a11y.ts`.
 
@@ -343,7 +350,7 @@ should also run the spec, whatever test type or domain the spec is in (see
    start the locally built stack:
 
    ```bash
-   ./scripts/stack/run-stack.sh -d
+   tim docker dev
    ```
 
 2. Run every domain with `npm run test:docker-compose`, or one domain with
@@ -367,12 +374,12 @@ For the security (OWASP ZAP) profiles against this stack, see
 
 #### Workspace stack commands (run from the workspace root)
 
-| Command                             | Purpose                                                |
-| ----------------------------------- | ------------------------------------------------------ |
-| `./scripts/stack/run-stack.sh`      | Start the full stack from published images             |
-| `./scripts/stack/run-stack.sh -d`   | Start the stack built from local source under `repos/` |
-| `./scripts/stack/stop-stack.sh`     | Stop the stack and wipe volumes                        |
-| `./scripts/stack/bounce-backend.sh` | Recreate the backend container (picks up Java changes) |
+| Command                     | Purpose                                                |
+| --------------------------- | ------------------------------------------------------ |
+| `tim docker up`             | Start the full stack from published images             |
+| `tim docker dev`            | Start the stack built from local source under `repos/` |
+| `tim docker down`           | Stop the stack and wipe volumes                        |
+| `tim docker bounce-backend` | Rebuild and recreate the backend container             |
 
 See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
 
@@ -468,7 +475,7 @@ See [`docs/security.md`](docs/security.md) for how to run it, what is scanned an
 
 ## Running Tests on GitHub
 
-E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `run-stack.sh --branch <branch>` and runs this repo's published test image against it, with reports published to GitHub Pages.
+E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `tim docker up --branch <branch>` and runs this repo's published test image against it, with reports published to GitHub Pages.
 
 ### GitHub Actions workflow
 
