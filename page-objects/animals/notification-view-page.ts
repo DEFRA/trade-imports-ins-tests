@@ -1,7 +1,9 @@
 import { type Locator, type Page } from '@playwright/test';
 import { pageLoadWait } from '@config/timeouts';
-import { speciesCardTitle, type CommodityLine } from '@domain/animals/constants/commodity-lines';
+import { commodityCardTitle, speciesBlockHeading, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { NotificationPage, type OpenOptions } from '@page-objects/shared/base-page';
+
+const SPECIES_BLOCK_SELECTOR = '[id^="species-block-"]';
 
 export class AnimalsNotificationViewPage extends NotificationPage {
   constructor(page: Page) {
@@ -36,8 +38,26 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('heading', { name, exact: true }).locator('xpath=ancestor::*[.//dl][1]');
   }
 
-  speciesCard(line: CommodityLine): Locator {
-    return this.summaryCard(speciesCardTitle(line));
+  get whatAreYouImportingCard(): Locator {
+    return this.summaryCard('What are you importing?');
+  }
+
+  commodityCard(line: CommodityLine): Locator {
+    return this.summaryCard(commodityCardTitle(line));
+  }
+
+  get whatAreYouImportingSpecies(): Locator {
+    return this.summaryValue(this.whatAreYouImportingCard, 'Species');
+  }
+
+  changeCommodityLink(line: CommodityLine): Locator {
+    return this.changeLink(`Change commodity ${commodityCardTitle(line)}`);
+  }
+
+  speciesBlock(line: CommodityLine): Locator {
+    return this.commodityCard(line)
+      .locator(SPECIES_BLOCK_SELECTOR)
+      .filter({ has: this.page.getByRole('heading', { name: speciesBlockHeading(line), exact: true }) });
   }
 
   summaryValue(card: Locator, key: string): Locator {

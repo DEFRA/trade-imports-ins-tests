@@ -1,4 +1,4 @@
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, speciesBlockHeading } from '@domain/animals/constants/commodity-lines';
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { TRAIL_START } from '@page-objects/shared/base-page';
 import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
@@ -24,9 +24,9 @@ test.describe('Save and continue through a new notification', () => {
       await expect(animalsPages.notificationView.regionOfOriginCode).toHaveText('FR-75');
       await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Internal reference number')).toHaveText('CATTLE-2026-01');
 
-      const speciesCard = animalsPages.notificationView.speciesCard(commodityLines.cattle);
-      await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText(commodityLines.cattle.latinName);
-      await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('2');
+      const speciesBlock = animalsPages.notificationView.speciesBlock(commodityLines.cattle);
+      await expect(animalsPages.notificationView.whatAreYouImportingSpecies).toHaveText(speciesBlockHeading(commodityLines.cattle));
+      await expect(animalsPages.notificationView.summaryValue(speciesBlock, 'Number of animals')).toHaveText('2');
 
       const mainImportReason = animalsPages.notificationView.summaryCard('Main import reason');
       await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Main import reason')).toHaveText('Internal market');

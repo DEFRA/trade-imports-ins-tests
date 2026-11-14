@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
-import { speciesCardTitle } from '@domain/animals/constants/commodity-lines';
+import { commodityCardTitle, commodityLines, speciesBlockHeading } from '@domain/animals/constants/commodity-lines';
 import {
   ALL_ANSWERS_WITHOUT_DOCUMENT,
   CPH_NUMBER,
@@ -86,8 +86,9 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
 
     await expect(pages.page.getByRole('heading', { level: 3 })).toHaveText([
       'Origin of import',
+      'What are you importing?',
       'Main import reason',
-      speciesCardTitle(cowLine.species),
+      commodityCardTitle(cowLine.species),
       'Additional details',
       'Arrival details',
       'Transport details',
@@ -121,23 +122,31 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       answers.internalMarketPurpose.display,
     );
 
-    const speciesCard = animalsPages.notificationView.speciesCard(cowLine.species);
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Commodity code')).toHaveText(cowLine.species.commodityCode);
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Common name')).toHaveText(commonName);
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText(cowLine.species.latinName);
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText(String(cowLine.noOfAnimals));
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of packages')).toHaveText(String(cowLine.noOfPackages));
-    await expect(speciesCard.getByRole('heading', { name: 'Animal details' })).toBeVisible();
-    await expect(speciesCard.getByRole('columnheader', { name: 'Ear tag' })).toBeVisible();
-    await expect(speciesCard.getByRole('columnheader', { name: 'Tattoo' })).toBeVisible();
-    await expect(speciesCard.getByRole('cell', { name: 'Animal 1' })).toBeVisible();
+    const whatAreYouImporting = animalsPages.notificationView.whatAreYouImportingCard;
+    await expect(whatAreYouImporting.getByRole('link', { name: 'Change what are you importing' })).toBeVisible();
+    await expect(animalsPages.notificationView.summaryValue(whatAreYouImporting, 'Commodity code')).toHaveText(
+      cowLine.species.commodityCode,
+    );
+    await expect(animalsPages.notificationView.summaryValue(whatAreYouImporting, 'Common name')).toHaveText(commonName);
+    await expect(animalsPages.notificationView.whatAreYouImportingSpecies).toHaveText(speciesBlockHeading(cowLine.species));
+
+    const speciesBlock = animalsPages.notificationView.speciesBlock(cowLine.species);
+    await expect(animalsPages.notificationView.summaryValue(speciesBlock, 'Number of animals')).toHaveText(String(cowLine.noOfAnimals));
+    await expect(animalsPages.notificationView.summaryValue(speciesBlock, 'Number of packages (when required)')).toHaveText(
+      String(cowLine.noOfPackages),
+    );
+    await expect(speciesBlock.getByRole('heading', { name: 'Identification details' })).toBeVisible();
+    await expect(speciesBlock.getByRole('link', { name: 'Change identification details' })).toBeVisible();
+    await expect(speciesBlock.getByRole('columnheader', { name: 'Ear tag' })).toBeVisible();
+    await expect(speciesBlock.getByRole('columnheader', { name: 'Tattoo' })).toBeVisible();
+    await expect(speciesBlock.getByRole('cell', { name: `${cowLine.species.latinName} 1`, exact: true })).toBeVisible();
     const { earTag, passportNumber, tattoo } = cowLine;
     expect(earTag).toBeDefined();
     expect(passportNumber).toBeDefined();
     expect(tattoo).toBeDefined();
-    await expect(speciesCard.getByRole('cell', { name: earTag, exact: true })).toBeVisible();
-    await expect(speciesCard.getByRole('cell', { name: passportNumber, exact: true })).toBeVisible();
-    await expect(speciesCard.getByRole('cell', { name: tattoo, exact: true })).toBeVisible();
+    await expect(speciesBlock.getByRole('cell', { name: earTag, exact: true })).toBeVisible();
+    await expect(speciesBlock.getByRole('cell', { name: passportNumber, exact: true })).toBeVisible();
+    await expect(speciesBlock.getByRole('cell', { name: tattoo, exact: true })).toBeVisible();
 
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Port of entry')).toHaveText(answers.pointOfEntry.display);
@@ -200,8 +209,9 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 3 })).toHaveText([
       'Origin of import',
+      'What are you importing?',
       'Main import reason',
-      speciesCardTitle(cattleLine.species),
+      commodityCardTitle(cattleLine.species),
       'Additional details',
       'Arrival details',
       'Transport details',
@@ -248,5 +258,26 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(permanentAddressRow).toContainText('United Kingdom');
     await expect(permanentAddressRow).toContainText(address.phone);
     await expect(permanentAddressRow).toContainText(address.email);
+  });
+
+  test('the review names each of two cattle species short of an identifier and links to its species block', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    test.slow();
+    const { cattle, bison } = commodityLines;
+    await animalsJourney.toReviewWithAnimalCounts([
+      { species: cattle, animalCount: 1 },
+      { species: bison, animalCount: 1 },
+    ]);
+
+    for (const species of [cattle, bison]) {
+      const heading = speciesBlockHeading(species);
+      await animalsPages.notificationView.errorSummary
+        .getByRole('link', { name: `Enter at least 1 animal identifier for ${species.latinName.toLowerCase()}` })
+        .click();
+      await expect(animalsPages.notificationView.speciesBlock(species)).toBeFocused();
+      await expect(animalsPages.notificationView.speciesBlock(species).getByRole('heading', { name: heading })).toBeVisible();
+    }
   });
 });

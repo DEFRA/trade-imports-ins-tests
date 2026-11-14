@@ -1,4 +1,4 @@
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, speciesBlockHeading } from '@domain/animals/constants/commodity-lines';
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { transporters } from '@domain/animals/constants/transporters';
@@ -22,9 +22,9 @@ test.describe('Poultry by rail in transit', () => {
     const originOfImport = animalsPages.notificationView.summaryCard('Origin of import');
     await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Country of origin')).toHaveText('Germany');
 
-    const speciesCard = animalsPages.notificationView.speciesCard(commodityLines.chicken);
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText(commodityLines.chicken.latinName);
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('400');
+    const speciesBlock = animalsPages.notificationView.speciesBlock(commodityLines.chicken);
+    await expect(animalsPages.notificationView.whatAreYouImportingSpecies).toHaveText(speciesBlockHeading(commodityLines.chicken));
+    await expect(animalsPages.notificationView.summaryValue(speciesBlock, 'Number of animals')).toHaveText('400');
 
     const mainImportReason = animalsPages.notificationView.summaryCard('Main import reason');
     await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Main import reason')).toHaveText('Transit');
