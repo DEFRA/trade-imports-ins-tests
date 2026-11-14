@@ -48,8 +48,8 @@ test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.overview.heading.waitFor();
     await animalsPages.overview.reviewAndSubmitButton.click();
 
-    const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional animal details');
-    await expect(additionalAnimalDetails.getByRole('term')).toHaveText(['Certified for']);
+    const additionalDetails = animalsPages.notificationView.summaryCard('Additional details');
+    await expect(additionalDetails.getByRole('term')).toHaveText(['Certified for']);
 
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.cattle);
     await animalsJourney.toAdditionalDetailsOfCurrentNotification();

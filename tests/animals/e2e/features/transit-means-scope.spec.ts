@@ -52,6 +52,22 @@ test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () 
     },
   );
 
+  test('the overview lists the transit-countries task for road only once a commodity is saved', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    await animalsJourney.startNotification();
+
+    await animalsJourney.saveArrivalDetailsFromOverview(meansOfTransport.roadVehicle.display);
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(
+      TASKS_WITHOUT_TRANSIT_COUNTRIES,
+    );
+
+    await animalsJourney.answerCommodity();
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded(TRANSPORT_AND_ARRIVAL_HEADING)).toHaveText(TASKS_WITH_TRANSIT_COUNTRIES);
+    await expect(animalsPages.overview.taskStatus('Transit countries')).toHaveText('To do');
+  });
+
   test('opening the transit-countries page by its address shows the overview when no means, air or sea is saved', async ({
     pages,
     animalsJourney,

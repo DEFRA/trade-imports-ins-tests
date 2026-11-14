@@ -24,7 +24,7 @@ test.describe('Reference strip', { tag: '@duplicated-in-frontend' }, () => {
     await expect(strip.locator('.govuk-tag')).toHaveText('Draft');
     await expect(strip).toContainText(GBN_REFERENCE);
     await expect(strip).toContainText(referenceNumber);
-    await expect(animalsPages.originOfImport.cancelAmend).toHaveCount(0);
+    await expect(animalsPages.originOfImport.stripCancelAmend).toHaveCount(0);
 
     // The strip stays put once the first save has committed answers.
     await animalsPages.originOfImport.country.choose('France');
@@ -36,7 +36,7 @@ test.describe('Reference strip', { tag: '@duplicated-in-frontend' }, () => {
     await expect(strip).toBeVisible();
     await expect(strip.locator('.govuk-tag')).toHaveText('Draft');
     await expect(strip).toContainText(GBN_REFERENCE);
-    await expect(animalsPages.overview.cancelAmend).toHaveCount(0);
+    await expect(animalsPages.overview.stripCancelAmend).toHaveCount(0);
 
     await animalsJourney.openOriginFromOverview();
     await expect(strip).toBeVisible();

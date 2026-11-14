@@ -120,7 +120,7 @@ export class AnimalsSeededJourney {
   async createSubmittedWithPlaceOfOriginChosenInUi(animalsPages: AnimalsPages, placeOfOriginName: string): Promise<string> {
     const referenceNumber = await this.createDraftNotification();
     await this.resumeInUi(referenceNumber, animalsPages.notificationView);
-    await animalsPages.notificationView.changeLink('Change roles and addresses').click();
+    await animalsPages.notificationView.changeLink('Change addresses').click();
     await animalsPages.addresses.heading.waitFor(pageLoadWait);
     await this.choosePartyInUi(animalsPages, 'Place of origin', animalsPages.placeOfOriginSelection, placeOfOriginName);
     await animalsPages.addresses.continueButton.click();

@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { CPH_NUMBER } from '@domain/animals/constants/journey-options';
+import { CPH_NUMBER_WITH_SLASHES } from '@domain/animals/constants/journey-options';
 import type { AnimalsPages } from '@page-objects';
 
 const saveAndExpectCphOnAddresses = async (animalsPages: AnimalsPages, cph: string) => {
@@ -10,6 +10,7 @@ const saveAndExpectCphOnAddresses = async (animalsPages: AnimalsPages, cph: stri
 
 test.describe('CPH number page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
+    test.slow();
     await animalsJourney.toCphNumber();
   });
 
@@ -30,7 +31,7 @@ test.describe('CPH number page', { tag: '@duplicated-in-frontend' }, () => {
   test('saves a valid CPH number and shows it on Consignment addresses', async ({ animalsPages }) => {
     await animalsPages.cphNumber.fillCphNumber();
 
-    await saveAndExpectCphOnAddresses(animalsPages, CPH_NUMBER);
+    await saveAndExpectCphOnAddresses(animalsPages, CPH_NUMBER_WITH_SLASHES);
   });
 
   test('asks for the whole CPH number once in the error summary when submitted empty', async ({ animalsPages }) => {
@@ -47,7 +48,7 @@ test.describe('CPH number page', { tag: '@duplicated-in-frontend' }, () => {
     await expect(county).toHaveValue('123456789');
     await expect(county).toBeFocused();
 
-    await saveAndExpectCphOnAddresses(animalsPages, CPH_NUMBER);
+    await saveAndExpectCphOnAddresses(animalsPages, CPH_NUMBER_WITH_SLASHES);
   });
 });
 
@@ -55,12 +56,15 @@ test.describe('CPH number page without JavaScript', { tag: '@duplicated-in-front
   test.use({ javaScriptEnabled: false });
 
   test.beforeEach(async ({ animalsJourney }) => {
+    test.slow();
     await animalsJourney.toCphNumber();
   });
 
-  test('saves a whole number with slashes inserted into the county box as nine digits', async ({ animalsPages }) => {
+  test('accepts a whole number with slashes typed into the county box and shows it with slashes on the consignment addresses page', async ({
+    animalsPages,
+  }) => {
     await animalsPages.cphNumber.county.fill('12/345/6789');
 
-    await saveAndExpectCphOnAddresses(animalsPages, CPH_NUMBER);
+    await saveAndExpectCphOnAddresses(animalsPages, CPH_NUMBER_WITH_SLASHES);
   });
 });

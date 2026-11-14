@@ -1,10 +1,13 @@
 import type { Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
+import { SubmittedHeader } from '@page-objects/shared/submitted-header';
 
 export class PlantsNotificationViewPage extends PlantsNotificationPage {
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
     super(page, 'notification-view');
   }
+
+  readonly submittedHeader = new SubmittedHeader(this.page);
 
   get heading(): Locator {
     return this.page.getByRole('heading', { name: 'Check your answers', level: 1 });
@@ -27,7 +30,9 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
   change(name: string): Locator {
     return this.page.getByRole('link', { name, exact: true });
   }
-  /** The row whose key is exactly `key`. */
+  rowKeys(cardTitle: string): Locator {
+    return this.card(cardTitle).locator('.govuk-summary-list__key');
+  }
   row(cardTitle: string, key: string): Locator {
     return this.card(cardTitle)
       .locator('.govuk-summary-list__row')

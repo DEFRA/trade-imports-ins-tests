@@ -26,7 +26,7 @@ test.describe('Submitted addresses keep their copy', () => {
     });
 
     const referenceNumber = await animalsSeededJourney.createSubmittedWithPlaceOfOriginChosenInUi(animalsPages, originalName);
-    const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
+    const originRow = animalsPages.notificationView.partyRow('Addresses', 'Place of origin');
 
     await addressBookApi.updateAddress(address.id, {
       ...heldAsPlaceOfOrigin,
@@ -40,7 +40,7 @@ test.describe('Submitted addresses keep their copy', () => {
     });
 
     await animalsNotificationActions.toNotificationView(referenceNumber);
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');
     await expect(originRow).not.toContainText(renamed);
@@ -54,10 +54,10 @@ test.describe('Submitted addresses keep their copy', () => {
     await expect(originRow).not.toContainText(renamed);
     await expect(originRow).not.toContainText('Penrith');
 
-    await animalsPages.notificationView.cancelAmend.click();
+    await animalsPages.notificationView.btnCancelAmend.click();
     await animalsPages.notificationCancelAmend.confirm.click();
     await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');
     await expect(originRow).not.toContainText(renamed);
@@ -85,12 +85,12 @@ test.describe('Submitted addresses keep their copy', () => {
     });
 
     const referenceNumber = await animalsSeededJourney.createSubmittedWithPlaceOfOriginChosenInUi(animalsPages, originalName);
-    const originRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Place of origin');
+    const originRow = animalsPages.notificationView.partyRow('Addresses', 'Place of origin');
 
     await addressBookApi.deleteAddress(address.id);
 
     await animalsNotificationActions.toNotificationView(referenceNumber);
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');
     await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);

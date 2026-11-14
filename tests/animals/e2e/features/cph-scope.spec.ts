@@ -1,4 +1,5 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { CPH_NUMBER_WITH_SLASHES } from '@domain/animals/constants/journey-options';
 
 import { test, expect } from '@fixtures';
 
@@ -26,7 +27,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await expect(cphLinks).toHaveText(['Add a CPH number']);
   });
 
-  test('a saved CPH number shows as 123456789 on the addresses page, Change pre-fills county, parish and holding, and Back returns to the addresses page, whose Continue reaches the contact address', async ({
+  test('a saved CPH number shows as 12/345/6789 on the addresses page, Change pre-fills county, parish and holding, and Back returns to the addresses page, whose Continue reaches the contact address', async ({
     animalsJourney,
     animalsPages,
   }) => {
@@ -43,7 +44,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await animalsPages.cphNumber.fillCphNumber();
     await animalsPages.cphNumber.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await expect(cphNumberText).toHaveText('123456789');
+    await expect(cphNumberText).toHaveText(CPH_NUMBER_WITH_SLASHES);
     await expect(cphLinks).toHaveText([animalsPages.addresses.cphLinkNames.change]);
 
     await animalsPages.addresses.changeCph.click();

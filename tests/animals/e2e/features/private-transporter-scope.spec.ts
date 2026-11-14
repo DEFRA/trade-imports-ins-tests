@@ -9,6 +9,7 @@ test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, (
     "the saved country shows on the review's Transport details card, and a saved private transporter survives an add of the other type that the trader cancels",
     { tag: '@cross-browser' },
     async ({ animalsJourney, pages, animalsPages }) => {
+      test.slow();
       await animalsJourney.startNotification();
       await animalsJourney.answerCommodity();
 

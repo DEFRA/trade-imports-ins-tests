@@ -30,7 +30,7 @@ test.describe('Security scan (frontend, lifecycle)', { tag: '@active' }, () => {
 
     await animalsNotificationActions.amendNotification(referenceNumber);
     await animalsNotificationActions.cancelAmend(referenceNumber);
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
 
     await animalsNotificationActions.deleteNotification(referenceNumber);
   });

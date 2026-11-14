@@ -1,3 +1,4 @@
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { test, expect } from '@fixtures';
 
 /**
@@ -26,8 +27,8 @@ test.describe('Amend resubmission', () => {
 
     // Change the country of origin through the amending check your answers page.
     await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
-    await expect(animalsPages.notificationView.changeLink('Change commodity 1')).toBeVisible();
+    await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
+    await expect(animalsPages.notificationView.changeCommodityLink(commodityLines.cattle)).toBeVisible();
     expect(await pages.page.getByRole('link', { name: /^Change/ }).count()).toBeGreaterThanOrEqual(4);
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
     await expect(countryRow).toContainText('France');
@@ -43,10 +44,10 @@ test.describe('Amend resubmission', () => {
 
     // Back in Submitted: the view is read-only again and keeps the edited value.
     await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
     await expect(countryRow).toContainText('Belgium');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
-    await expect(animalsPages.notificationView.cancelAmend).not.toBeVisible();
+    await expect(animalsPages.notificationView.btnCancelAmend).not.toBeVisible();
 
     // And the dashboard offers Amend again for the resubmitted notification.
     await animalsPages.dashboard.open();

@@ -16,14 +16,23 @@ export class AnimalsNotificationActions {
 
   /** From the notification view, changes the country of origin, saves it and opens the notification view again. */
   async changeCountryOfOrigin(country: string): Promise<void> {
-    await this.animalsPages.notificationView.changeLink('Change import details').click();
+    await this.animalsPages.notificationView.changeLink('Change origin of import').click();
     await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
     const referenceNumber = this.animalsPages.originOfImport.referenceNumberFromUrl();
     await this.animalsPages.originOfImport.country.choose(country);
     await this.animalsPages.originOfImport.saveAndContinue.click();
     await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
     await this.animalsPages.notificationView.open(referenceNumber);
-    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.animalsPages.notificationView.anyReviewHeading.waitFor(pageLoadWait);
+  }
+
+  /** Changes the internal reference of an amending notification, saves it and opens the review. */
+  async changeInternalReferenceOnAmendment(referenceNumber: string, internalReference: string): Promise<void> {
+    await this.animalsPages.originOfImport.open(referenceNumber);
+    await this.animalsPages.originOfImport.internalReference.fill(internalReference);
+    await this.animalsPages.originOfImport.saveAndContinue.click();
+    await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
+    await this.animalsPages.notificationView.open(referenceNumber);
   }
 
   async amendNotification(referenceNumber: string): Promise<void> {
@@ -55,7 +64,7 @@ export class AnimalsNotificationActions {
 
   async cancelAmend(referenceNumber: string): Promise<void> {
     await this.toNotificationView(referenceNumber);
-    await this.animalsPages.notificationView.cancelAmend.click();
+    await this.animalsPages.notificationView.btnCancelAmend.click();
     await this.animalsPages.notificationCancelAmend.heading.waitFor(pageLoadWait);
     await this.animalsPages.notificationCancelAmend.confirm.click();
     await this.pages.page.waitForURL(/\/notification-view\?cancelled=1$/, { timeout: timeouts.medium });

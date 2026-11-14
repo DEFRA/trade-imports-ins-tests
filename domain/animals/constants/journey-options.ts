@@ -33,6 +33,7 @@ export type CphAnswer = { county: string; parish: string; holding: string };
 
 const CPH: CphAnswer = { county: '12', parish: '345', holding: '6789' };
 export const CPH_NUMBER = `${CPH.county}${CPH.parish}${CPH.holding}`;
+export const CPH_NUMBER_WITH_SLASHES = [CPH.county, CPH.parish, CPH.holding].join('/');
 
 export type AccompanyingDocumentAnswer = {
   reference: string;

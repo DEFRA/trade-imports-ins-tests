@@ -23,19 +23,10 @@ test.describe('Number of packages scope', () => {
       { species: commodityLines.cattle, animalCount: 1 },
       { species: commodityLines.ostrich, animalCount: 1 },
     ]);
-
-    await expect(animalsPages.notificationView.speciesCard(commodityLines.cattle).getByRole('term')).toHaveText([
-      'Commodity code',
-      'Common name',
-      'Species',
+    await expect(animalsPages.notificationView.speciesBlock(commodityLines.cattle).getByRole('term')).toHaveText([
       'Number of animals',
-      'Number of packages',
+      'Number of packages (when required)',
     ]);
-    await expect(animalsPages.notificationView.speciesCard(commodityLines.ostrich).getByRole('term')).toHaveText([
-      'Commodity code',
-      'Common name',
-      'Species',
-      'Number of animals',
-    ]);
+    await expect(animalsPages.notificationView.speciesBlock(commodityLines.ostrich).getByRole('term')).toHaveText(['Number of animals']);
   });
 });

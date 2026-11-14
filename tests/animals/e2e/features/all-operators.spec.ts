@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { CPH_NUMBER_WITH_SLASHES } from '@domain/animals/constants/journey-options';
 
 test.describe('All operator addresses', { tag: '@duplicated-in-frontend' }, () => {
   // The api seed unlocks only origin + commodity, so the review page is reached
@@ -7,17 +8,13 @@ test.describe('All operator addresses', { tag: '@duplicated-in-frontend' }, () =
   test(
     'check your answers lists all six operators with the picked name and country',
     { tag: '@cross-browser' },
-    async ({ animalsJourney, pages, animalsPages }) => {
+    async ({ animalsJourney, animalsPages }) => {
       test.slow();
 
       await animalsJourney.toReview();
 
-      const card = animalsPages.notificationView.summaryCard('Roles and addresses');
-      const operator = (key: string) =>
-        card
-          .locator('.govuk-summary-list__row')
-          .filter({ has: pages.page.locator('dt', { hasText: key }) })
-          .locator('.govuk-summary-list__value');
+      const addresses = animalsPages.notificationView.summaryCard('Addresses');
+      const operator = (key: string) => animalsPages.notificationView.summaryValue(addresses, key);
 
       await expect(operator('Place of origin')).toContainText('Origin Farm');
       await expect(operator('Place of origin')).toContainText('Ireland');
@@ -34,7 +31,7 @@ test.describe('All operator addresses', { tag: '@duplicated-in-frontend' }, () =
       await expect(operator('Place of destination')).toContainText('Tech Imports Ltd');
       await expect(operator('Place of destination')).toContainText('United Kingdom');
 
-      await expect(operator('County parish holding (CPH) number')).toContainText('123456789');
+      await expect(operator('County parish holding (CPH) number')).toContainText(CPH_NUMBER_WITH_SLASHES);
     },
   );
 });

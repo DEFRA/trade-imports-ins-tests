@@ -116,11 +116,11 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       }
       const referenceNumber = await animalsSeededJourney.createDraftNotification();
       await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
-      await animalsPages.notificationView.changeLink('Change roles and addresses').click();
+      await animalsPages.notificationView.changeLink('Change addresses').click();
       await animalsPages.addresses.changeParty('Consignor').click();
       const picker = animalsPages.consignorSelection;
       await picker.select(chosenName);
-      await picker.search('');
+      await picker.search(String(stamp));
       const chosenRow = picker.party(chosenName);
       await picker.followNextPageUntilShown(chosenRow);
       await expect(picker.currentPaginationPageLink).not.toHaveText('1');

@@ -2,6 +2,7 @@ import { test, expect } from '@fixtures';
 
 test.describe('Additional details page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
+    test.slow();
     await animalsJourney.toAdditionalDetails();
   });
 

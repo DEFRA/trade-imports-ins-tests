@@ -3,19 +3,19 @@ import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { test, expect } from '@fixtures';
 import { expectOpenFromReview, expectSaveAndContinueWalk, expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { AMENDED_REFERENCE } from '@domain/animals/constants/origin-page';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
-const CHANGE_IMPORT_DETAILS = 'Change import details';
-const AMENDED_REFERENCE = 'AMENDED-REF';
+const CHANGE_ORIGIN_OF_IMPORT = 'Change origin of import';
 const AMEND = 'Amend';
 
-const openOriginFromImportDetailsChangeLink = async (
+const openOriginFromOriginOfImportChangeLink = async (
   animalsPages: AnimalsPages,
   animalsSeededJourney: AnimalsSeededJourney,
 ): Promise<string> => {
   const reference = await animalsSeededJourney.createAmendNotification();
   await animalsPages.notificationView.open(reference);
-  await animalsPages.notificationView.changeLink(CHANGE_IMPORT_DETAILS).click();
+  await animalsPages.notificationView.changeLink(CHANGE_ORIGIN_OF_IMPORT).click();
   await expect(animalsPages.originOfImport.heading).toBeVisible();
   return reference;
 };
@@ -33,7 +33,7 @@ test.describe('Amendment page endings', () => {
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(reference));
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
     await expect(animalsPages.notificationView.referenceNumberCaption).toContainText(reference);
-    await expect(animalsPages.notificationView.cancelAmend).toBeVisible();
+    await expect(animalsPages.notificationView.btnCancelAmend).toBeVisible();
   });
 
   test.describe('a page opened from Overview while amending', () => {
@@ -56,7 +56,7 @@ test.describe('Amendment page endings', () => {
     });
 
     test('shows Cancel amend in the strip', async ({ animalsPages }) => {
-      await expect(animalsPages.arrivalDetails.cancelAmend).toBeVisible();
+      await expect(animalsPages.arrivalDetails.stripCancelAmend).toBeVisible();
     });
   });
 
@@ -66,7 +66,7 @@ test.describe('Amendment page endings', () => {
     await animalsPages.overview.open(reference);
 
     await expect(animalsPages.overview.statusTag).toHaveText(AMEND);
-    await expect(animalsPages.overview.cancelAmend).toBeVisible();
+    await expect(animalsPages.overview.stripCancelAmend).toBeVisible();
   });
 
   test('Cancel and return to overview while amending opens Overview with the Amend status and Cancel amend, and keeps the saved value', async ({
@@ -81,7 +81,7 @@ test.describe('Amendment page endings', () => {
 
     await expect(animalsPages.overview.heading).toBeVisible();
     await expect(animalsPages.overview.statusTag).toHaveText(AMEND);
-    await expect(animalsPages.overview.cancelAmend).toBeVisible();
+    await expect(animalsPages.overview.stripCancelAmend).toBeVisible();
     await animalsPages.arrivalDetails.open(reference);
     await expect(animalsPages.arrivalDetails.transportIdentification).toHaveValue(MANDATORY_ANSWERS.transportIdentification);
   });
@@ -91,7 +91,7 @@ test.describe('Amendment page endings', () => {
     animalsPages,
     animalsSeededJourney,
   }) => {
-    const reference = await openOriginFromImportDetailsChangeLink(animalsPages, animalsSeededJourney);
+    const reference = await openOriginFromOriginOfImportChangeLink(animalsPages, animalsSeededJourney);
 
     await expectOpenFromReview(pages.page, animalsPages.originOfImport, reference, animalsPages.notificationView.slug);
     await animalsPages.originOfImport.internalReference.fill(AMENDED_REFERENCE);
@@ -106,7 +106,7 @@ test.describe('Amendment page endings', () => {
     );
   });
 
-  test('the reason for import Change link opens the main import reason on the review trail, and Save and continue walks each later page back to the amend review', async ({
+  test('the main import reason Change link opens the main import reason on the review trail, and Save and continue walks each later page back to the amend review', async ({
     pages,
     animalsPages,
     animalsSeededJourney,
@@ -115,7 +115,7 @@ test.describe('Amendment page endings', () => {
     test.slow();
     const reference = await animalsSeededJourney.createAmendNotification();
     await animalsPages.notificationView.open(reference);
-    await animalsPages.notificationView.changeLink('Change reason for import').click();
+    await animalsPages.notificationView.changeLink('Change main import reason').click();
     await expect(animalsPages.importReason.heading).toBeVisible();
 
     await expectSaveAndContinueWalk(
@@ -124,6 +124,7 @@ test.describe('Amendment page endings', () => {
       [animalsPages.notificationView.slug],
       animalsJourney.saveAndContinueStopsFrom(animalsPages.importReason),
       animalsPages.notificationView,
+      animalsPages.notificationView.anyReviewHeading,
     );
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
   });

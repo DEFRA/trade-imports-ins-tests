@@ -142,7 +142,7 @@ export class BasePage {
   }
 
   get statusTag(): Locator {
-    return this.journeyStrip.locator('.govuk-tag');
+    return this.journeyStrip.locator('.govuk-tag').or(this.page.getByRole('main').locator('h1 + .govuk-tag'));
   }
 
   get notificationReference(): Locator {
@@ -260,11 +260,15 @@ export class NotificationPage extends BasePage {
     return SET_BASES.liveAnimals;
   }
 
+  region(name: string): Locator {
+    return this.page.getByRole('region', { name, exact: true });
+  }
+
   fieldHint(fieldId: string): Locator {
     return this.page.locator(`#${fieldId}-hint`);
   }
 
-  get cancelAmend(): Locator {
+  get stripCancelAmend(): Locator {
     return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
   }
 
@@ -274,6 +278,14 @@ export class NotificationPage extends BasePage {
 
   get buttonGroup(): Locator {
     return this.page.locator('.govuk-button-group');
+  }
+
+  get btnCancelAmend(): Locator {
+    return this.page.getByRole('main').getByRole('button', { name: 'Cancel amend', exact: true });
+  }
+
+  get endControls(): Locator {
+    return this.page.locator('form[novalidate] .govuk-button-group > *');
   }
 
   get formButtons(): Locator {

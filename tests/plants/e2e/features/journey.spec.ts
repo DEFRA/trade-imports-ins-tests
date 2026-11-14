@@ -107,9 +107,8 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await plantsPages.confirmation.viewNotification.click();
       await pages.page.reload();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-      await expect(plantsPages.notificationView.heading).toBeVisible();
-      await expect(plantsPages.overview.notificationReference).toHaveText(reference);
-      await expect(plantsPages.overview.statusTag).toHaveText('Submitted');
+      await expect(plantsPages.notificationView.submittedHeader.reference).toHaveText(reference);
+      await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');
       await expect(plantsPages.notificationView.changeLinks).toHaveCount(0);
       await expect(plantsPages.notificationView.btnContinue).toHaveCount(0);
       await expect(plantsPages.notificationView.lateBanner).toHaveCount(scenario.late ? 1 : 0);
@@ -123,7 +122,10 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await expect(plantsPages.notificationView.card('Place of destination')).toContainText(address.name);
       await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('JOURNEY_123');
       await expect(plantsPages.notificationView.card('Contact')).toContainText(address.name);
-      await expect(plantsPages.notificationView.card('Contact')).toContainText(address.email);
+      await expect(plantsPages.notificationView.row('Contact', 'Address').getByRole('definition')).toHaveText(
+        [address.addressLine1, address.townOrCity, address.county, address.postcode, 'United Kingdom'].join('\n'),
+        { useInnerText: true },
+      );
       if (scenario.type !== POTATOES) {
         await expect(plantsPages.notificationView.card('Consignor')).toContainText(address.name);
       }

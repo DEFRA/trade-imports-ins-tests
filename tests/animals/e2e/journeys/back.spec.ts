@@ -37,7 +37,7 @@ test.describe('Back on the review page', () => {
     await animalsPages.dashboard.openAndSearchFor(reference);
 
     await animalsPages.dashboard.view(reference).click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.submittedHeader.reference).toHaveText(reference);
 
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.dashboard.heading).toBeVisible();
@@ -53,7 +53,7 @@ test.describe('Back on the review page', () => {
     await animalsPages.dashboard.amend(reference).click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
 
-    await animalsPages.notificationView.changeLink('Change import details').click();
+    await animalsPages.notificationView.changeLink('Change origin of import').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await animalsPages.originOfImport.linkBack.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
@@ -70,7 +70,7 @@ test.describe('Back on the review page', () => {
     test.slow();
     const reference = await animalsSeededJourney.createDraftNotification();
     await animalsPages.notificationView.open(reference);
-    await animalsPages.notificationView.changeLink('Change import details').click();
+    await animalsPages.notificationView.changeLink('Change origin of import').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
 
     await pages.page.reload();

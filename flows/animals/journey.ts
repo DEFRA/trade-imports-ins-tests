@@ -281,7 +281,7 @@ export class AnimalsJourney {
 
   async openReviewFromOverview(): Promise<void> {
     await this.animalsPages.overview.reviewAndSubmitButton.click();
-    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.animalsPages.notificationView.anyReviewHeading.waitFor(pageLoadWait);
   }
 
   private async chooseSpeciesAndSaveAnimalCountsToOverview(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
@@ -1052,7 +1052,7 @@ export class AnimalsJourney {
 
   async toDeclarationOfCurrentNotification(): Promise<void> {
     await this.animalsPages.notificationView.open(this.currentReferenceNumber());
-    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.animalsPages.notificationView.anyReviewHeading.waitFor(pageLoadWait);
     await this.continueFromReviewToDeclaration();
   }
 

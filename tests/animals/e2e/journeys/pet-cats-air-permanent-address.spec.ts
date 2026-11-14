@@ -1,5 +1,6 @@
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { commodityLines, speciesBlockHeading } from '@domain/animals/constants/commodity-lines';
 import { MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
+import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { internalMarketPurposes } from '@domain/animals/constants/internal-market-purposes';
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { AIR_OR_SEA_OVERVIEW_TASKS, certificateDocument } from '@flows/animals/journey';
@@ -22,21 +23,24 @@ test.describe('Pet cats by air with permanent addresses', () => {
 
     await openReviewFromCompleteOverview(animalsPages.overview, animalsJourney, referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
 
-    const importDetails = animalsPages.notificationView.summaryCard('Import details');
-    await expect(animalsPages.notificationView.summaryValue(importDetails, 'Country of origin')).toHaveText('Spain');
+    const originOfImport = animalsPages.notificationView.summaryCard('Origin of import');
+    await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Country of origin')).toHaveText('Spain');
 
-    const reasonForImport = animalsPages.notificationView.summaryCard('Reason for import');
-    await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Purpose in the market')).toHaveText(
+    const mainImportReason = animalsPages.notificationView.summaryCard('Main import reason');
+    await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Purpose in the market')).toHaveText(
       internalMarketPurposes.companionAnimalNotForResaleOrRehoming.display,
     );
 
-    const speciesCard = animalsPages.notificationView.speciesCard(commodityLines.domesticCat);
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText(commodityLines.domesticCat.latinName);
-    await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('2');
+    const speciesBlock = animalsPages.notificationView.speciesBlock(commodityLines.domesticCat);
+    await expect(animalsPages.notificationView.whatAreYouImportingSpecies).toHaveText(speciesBlockHeading(commodityLines.domesticCat));
+    await expect(animalsPages.notificationView.summaryValue(speciesBlock, 'Number of animals')).toHaveText('2');
 
     const commonName = await referenceDataApi.findCommonName(commodityLines.domesticCat);
-    const rolesAndAddresses = animalsPages.notificationView.summaryCard('Roles and addresses');
-    await expect(animalsPages.notificationView.summaryValue(rolesAndAddresses, `${commonName} 2`)).toContainText(
+    const addresses = animalsPages.notificationView.summaryCard('Addresses');
+    await expect(animalsPages.notificationView.summaryValue(addresses, `${commonName} 1`)).toContainText(
+      MANDATORY_ANSWERS.parties.placeOfDestination,
+    );
+    await expect(animalsPages.notificationView.summaryValue(addresses, `${commonName} 2`)).toContainText(
       MANDATORY_COMMODITY_LINES.domesticCat.permanentAddress.addressLine1,
     );
 

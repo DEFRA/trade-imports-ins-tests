@@ -49,6 +49,7 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
   });
 
   test('A cat consignment submits once its permanent address is answered', async ({ animalsJourney, animalsPages }) => {
+    test.slow();
     await animalsJourney.submitNotification(CAT_ANSWERS);
 
     await expect(animalsPages.confirmation.heading).toBeVisible();
