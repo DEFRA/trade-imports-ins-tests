@@ -120,7 +120,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       await animalsPages.addresses.changeParty('Consignor').click();
       const picker = animalsPages.consignorSelection;
       await picker.select(chosenName);
-      await picker.search('');
+      await picker.search(String(stamp));
       const chosenRow = picker.party(chosenName);
       await picker.followNextPageUntilShown(chosenRow);
       await expect(picker.currentPaginationPageLink).not.toHaveText('1');
