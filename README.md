@@ -378,7 +378,7 @@ For the security (OWASP ZAP) profiles against this stack, see
 | --------------------------------- | ------------------------------------------------------ |
 | `./scripts/stack/run-stack.sh`    | Start the full stack from published images             |
 | `./scripts/stack/run-stack.sh -d` | Start the stack built from local source under `repos/` |
-| `./scripts/stack/stop-stack.sh`   | Stop the stack and wipe volumes                        |
+| `tim docker down`                 | Stop the stack and wipe volumes                        |
 | `tim docker bounce-backend`       | Rebuild and recreate the backend container             |
 
 See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
