@@ -82,10 +82,22 @@ export class AnimalsSeededJourney {
     return referenceNumber;
   }
 
+  async postDeclarationOfUnfinishedDraft(referenceNumber: string): Promise<void> {
+    await this.forms.postForm(
+      `${CREATE_PATH}/${referenceNumber}/${declarationStep.slug}`,
+      { ...declarationStep.declare, concurrencyToken: await this.reviewConcurrencyToken(referenceNumber) },
+      { redirectsTo: /\/notification-view\?refused=1$/ },
+    );
+  }
+
+  private async reviewConcurrencyToken(referenceNumber: string): Promise<string> {
+    const review = await this.forms.getPageHtml(`${CREATE_PATH}/${referenceNumber}/${declarationStep.reviewSlug}`);
+    return concurrencyTokenIn(review, declarationStep.reviewSlug);
+  }
+
   private async declare(referenceNumber: string): Promise<void> {
     const declarationPath = `${CREATE_PATH}/${referenceNumber}/${declarationStep.slug}`;
-    const review = await this.forms.getPageHtml(`${CREATE_PATH}/${referenceNumber}/${declarationStep.reviewSlug}`);
-    const concurrencyToken = concurrencyTokenIn(review, declarationStep.reviewSlug);
+    const concurrencyToken = await this.reviewConcurrencyToken(referenceNumber);
     const declaration = await this.forms.postFormReturningHtml(declarationPath, { ...declarationStep.review, concurrencyToken });
     await this.forms.postForm(
       declarationPath,

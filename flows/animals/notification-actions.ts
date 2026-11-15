@@ -14,6 +14,10 @@ export class AnimalsNotificationActions {
     await this.animalsPages.notificationView.open(referenceNumber);
   }
 
+  async toRefusedNotificationView(referenceNumber: string): Promise<void> {
+    await this.animalsPages.notificationView.openRefused(referenceNumber);
+  }
+
   /** From the notification view, changes the country of origin, saves it and opens the notification view again. */
   async changeCountryOfOrigin(country: string): Promise<void> {
     await this.animalsPages.notificationView.changeLink('Change origin of import').click();

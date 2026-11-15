@@ -71,10 +71,30 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.changeLink(`Change commodity ${commodityCardTitle(line)}`);
   }
 
+  get commodityCardTitles(): Locator {
+    const sectionHeading = 'normalize-space()="2. Description of the goods"';
+    return this.page.locator(
+      `xpath=//h2[${sectionHeading}]/following-sibling::div[contains(@class, "govuk-summary-card")][.//*[starts-with(@id, "species-block-")]][preceding-sibling::h2[1][${sectionHeading}]]//h3`,
+    );
+  }
+
   speciesBlock(line: CommodityLine): Locator {
     return this.commodityCard(line)
       .locator(SPECIES_BLOCK_SELECTOR)
       .filter({ has: this.page.getByRole('heading', { name: speciesBlockHeading(line), exact: true }) });
+  }
+
+  speciesBlockHeadings(line: CommodityLine): Locator {
+    return this.commodityCard(line).locator(SPECIES_BLOCK_SELECTOR).getByRole('heading', { level: 4 });
+  }
+
+  documentCard(position: number): Locator {
+    return this.summaryCard(`Document ${position}`);
+  }
+
+  async openRefused(referenceNumber: string): Promise<void> {
+    await this.navigateToService(`${this.expectedUrl(referenceNumber)}?refused=1`);
+    await this.heading.waitFor(pageLoadWait);
   }
 
   summaryValue(card: Locator, key: string): Locator {

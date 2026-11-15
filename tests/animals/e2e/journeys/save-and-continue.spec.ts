@@ -42,7 +42,7 @@ test.describe('Save and continue through a new notification', () => {
       const transportDetails = animalsPages.notificationView.summaryCard('Transport details');
       await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Name')).toContainText('García Livestock Transport SL');
 
-      const documentCard = animalsPages.notificationView.summaryCard('Document 1');
+      const documentCard = animalsPages.notificationView.documentCard(1);
       await expect(animalsPages.notificationView.summaryKeys(documentCard)).toHaveText([
         'Document reference',
         'Document type',

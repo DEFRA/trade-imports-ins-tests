@@ -28,7 +28,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(pages.page.getByRole('heading', { name: '4. Uploaded documents' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '5. Consignment addresses' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '6. Contact address' })).toBeVisible();
-      const documentCard = animalsPages.notificationView.summaryCard('Document 1');
+      const documentCard = animalsPages.notificationView.documentCard(1);
       await expect(documentCard).toBeVisible();
       await expect(animalsPages.notificationView.summaryValue(documentCard, 'Document reference')).toHaveText('Not applicable');
       await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
@@ -215,7 +215,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     }) => {
       await expect(animalsPages.notificationView.documentsSectionError).toHaveText('Error: Upload a valid health certificate');
       await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
-      await expect(animalsPages.notificationView.summaryCard('Document 1')).toHaveCount(0);
+      await expect(animalsPages.notificationView.documentCard(1)).toHaveCount(0);
     });
 
     test('offers Amend this notification, Copy as new and Delete in its header', async ({ animalsPages }) => {

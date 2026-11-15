@@ -31,6 +31,28 @@ test.describe('Declaration page', { tag: '@duplicated-in-frontend' }, () => {
     });
   });
 
+  test.describe('for an unfinished draft', () => {
+    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
+      await animalsSeededJourney.createDraftNotification('unlocked');
+      await animalsSeededJourney.postDeclarationOfUnfinishedDraft(journeyContext.referenceNumber);
+      await animalsNotificationActions.toRefusedNotificationView(journeyContext.referenceNumber);
+    });
+
+    test('a declaration posted for an unfinished draft is refused back to the review, naming each unfinished card, and the notification stays a draft', async ({
+      animalsPages,
+    }) => {
+      await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText([
+        'Complete main import reason',
+        'Complete additional details',
+        'Complete arrival details',
+        'Complete transport details',
+        'Complete roles and addresses',
+        'Complete contact address for this consignment',
+      ]);
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Draft');
+    });
+  });
+
   for (const { state, seed } of [
     { state: 'a draft', seed: (journey: AnimalsSeededJourney) => journey.createDraftNotification() },
     { state: 'an amendment', seed: (journey: AnimalsSeededJourney) => journey.createAmendNotification() },

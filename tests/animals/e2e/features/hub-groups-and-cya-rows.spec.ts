@@ -81,7 +81,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2 }).filter({ hasText: /^\d\.\s/ })).toHaveText(REVIEW_SECTION_HEADINGS);
-    const documentCard = animalsPages.notificationView.summaryCard('Document 1');
+    const documentCard = animalsPages.notificationView.documentCard(1);
     await expect(animalsPages.notificationView.summaryKeys(documentCard)).toHaveText(['Document reference']);
     await expect(animalsPages.notificationView.summaryValue(documentCard, 'Document reference')).toHaveText('Not applicable');
     await expect(animalsPages.notificationView.changeLink('Change document 1')).toBeVisible();
@@ -262,6 +262,35 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       [address.nameOrOrganisationName, address.addressLine1, address.townOrCity, address.postcode, 'United Kingdom'].join(' '),
       { useInnerText: true },
     );
+  });
+
+  test('the review reads one commodity card back per code, each holding only its own species blocks with the animal counts entered', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    test.slow();
+    const { cattle, bison, domesticCat } = commodityLines;
+    const speciesCounts = [
+      { species: bison, animalCount: 2 },
+      { species: cattle, animalCount: 3 },
+      { species: domesticCat, animalCount: 4 },
+    ];
+    await animalsJourney.toReviewWithAnimalCounts(speciesCounts);
+
+    await expect(animalsPages.notificationView.commodityCardTitles).toHaveText([
+      commodityCardTitle(cattle),
+      commodityCardTitle(domesticCat),
+    ]);
+    await expect(animalsPages.notificationView.speciesBlockHeadings(cattle)).toHaveText([
+      speciesBlockHeading(bison),
+      speciesBlockHeading(cattle),
+    ]);
+    await expect(animalsPages.notificationView.speciesBlockHeadings(domesticCat)).toHaveText([speciesBlockHeading(domesticCat)]);
+    for (const { species, animalCount } of speciesCounts) {
+      await expect(
+        animalsPages.notificationView.summaryValue(animalsPages.notificationView.speciesBlock(species), 'Number of animals'),
+      ).toHaveText(String(animalCount));
+    }
   });
 
   test('the review names each of two cattle species short of an identifier and links to its species block', async ({
