@@ -27,7 +27,7 @@ test.describe('Amend resubmission', () => {
     await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
 
     // Change the country of origin through the amending check your answers page.
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.amendReviewHeading).toBeVisible();
     await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
     await expect(animalsPages.notificationView.changeCommodityLink(commodityLines.cattle)).toBeVisible();
     expect(await pages.page.getByRole('link', { name: /^Change/ }).count()).toBeGreaterThanOrEqual(4);

@@ -20,10 +20,11 @@ test.describe('Review (visual regression)', { tag: '@visual' }, () => {
     );
     await expect(animalsPages.notificationView.summaryCard('Contact address')).toBeVisible();
     await expect(animalsPages.notificationView.continueButton).toBeVisible();
+    await animalsPages.notificationView.pinReferenceText();
 
     await expect(page).toHaveScreenshot('review-desktop.png', {
       fullPage: true,
-      mask: [animalsPages.notificationView.journeyStrip],
+      mask: animalsPages.notificationView.volatileHeaderParts,
     });
   });
 });

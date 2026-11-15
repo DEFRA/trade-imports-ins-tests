@@ -7,13 +7,15 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     animalsPages,
     runA11yScan,
   }) => {
-    await test.step('Review your notification (draft)', async () => {
+    await test.step('Draft review', async () => {
       const draftReference = await animalsSeededJourney.createDraftNotification('unlocked');
-      await animalsSeededJourney.resumeInUi(draftReference, animalsPages.notificationView);
+      await animalsSeededJourney.resumeInUi(draftReference, animalsPages.notificationView, {
+        waitFor: animalsPages.notificationView.viewHeader.reference,
+      });
       await runA11yScan();
     });
 
-    await test.step('Review your notification (draft, continue refused with unfinished sections)', async () => {
+    await test.step('Draft review, continue refused with unfinished sections', async () => {
       await animalsPages.notificationView.continueButton.click();
       await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
       await runA11yScan();

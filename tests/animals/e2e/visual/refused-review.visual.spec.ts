@@ -8,12 +8,13 @@ test.describe('Refused review (visual regression)', { tag: '@visual' }, () => {
     await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
     await animalsPages.notificationView.continueButton.click();
     await expect(page).toHaveURL(/\/notification-view\?refused=1$/);
+    await animalsPages.notificationView.pinReferenceText();
   });
 
   test('shows the unfinished card with its red left border and Complete line at desktop width', async ({ page, animalsPages }) => {
     await expect(page).toHaveScreenshot('refused-review-desktop.png', {
       fullPage: true,
-      mask: [animalsPages.notificationView.journeyStrip],
+      mask: animalsPages.notificationView.volatileHeaderParts,
     });
   });
 
@@ -22,7 +23,7 @@ test.describe('Refused review (visual regression)', { tag: '@visual' }, () => {
 
     await expect(page).toHaveScreenshot('refused-review-phone.png', {
       fullPage: true,
-      mask: [animalsPages.notificationView.journeyStrip],
+      mask: animalsPages.notificationView.volatileHeaderParts,
     });
   });
 });

@@ -11,7 +11,7 @@ test.describe('Amendment review title', () => {
     const reference = await animalsSeededJourney.createAmendNotification();
 
     await animalsPages.notificationView.open(reference);
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.amendReviewHeading).toBeVisible();
     await expect(pages.page).toHaveTitle(/^Review your notification/);
     await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
 
@@ -35,7 +35,7 @@ test.describe('Amendment review title', () => {
       await animalsJourney.uploadScannedDocument();
       await animalsPages.notificationView.open(reference);
 
-      await expect(animalsPages.notificationView.heading).toBeVisible();
+      await expect(animalsPages.notificationView.amendReviewHeading).toBeVisible();
       await expect(pages.page).toHaveTitle(/^Review your notification/);
     });
   });

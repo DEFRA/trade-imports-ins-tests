@@ -1,11 +1,19 @@
 import type { Locator, Page } from '@playwright/test';
 
-/** The header of a submitted notification's view: reference, status tag, date, actions and import reference numbers. */
-export class SubmittedHeader {
+/** The header of a notification's view, in every status that has one: reference, statusTag, dateCreated or dateSubmitted, actions and import reference numbers. */
+export class ViewHeader {
   constructor(private readonly page: Page) {}
 
   get reference(): Locator {
-    return this.page.getByRole('heading', { level: 1 });
+    return this.page.getByRole('main').getByRole('heading', { level: 1 });
+  }
+
+  get statusTag(): Locator {
+    return this.page.getByRole('main').locator('.govuk-tag').first();
+  }
+
+  get dateCreated(): Locator {
+    return this.page.getByText(/^Date created: /);
   }
 
   get dateSubmitted(): Locator {
@@ -30,6 +38,10 @@ export class SubmittedHeader {
 
   get importReferencesWarning(): Locator {
     return this.importReferences.locator('.govuk-warning-text');
+  }
+
+  get notificationReferenceValue(): Locator {
+    return this.importReferenceValue('Notification reference');
   }
 
   importReferenceValue(key: string): Locator {

@@ -54,7 +54,7 @@ test.describe('Notification dashboard search', () => {
     await animalsPages.dashboard.viewLink(referenceNumber).click();
 
     await expect(pages.page).toHaveURL(new RegExp(animalsPages.notificationView.expectedUrl(referenceNumber)));
-    await expect(animalsPages.notificationView.submittedHeader.reference).toHaveText(referenceNumber);
+    await expect(animalsPages.notificationView.viewHeader.reference).toHaveText(referenceNumber);
   });
 
   test('shows no notifications found when search has no matches', async ({ pages, animalsPages }) => {

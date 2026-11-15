@@ -159,7 +159,9 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(animalsPages.contactAddress.address('Animal and Plant Health Agency')).toBeVisible();
     await expect(animalsPages.contactAddress.editCurrentContact).toBeVisible();
 
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView, {
+      waitFor: animalsPages.notificationView.viewHeader.reference,
+    });
     await expect(animalsPages.notificationView.cardLinks('Addresses')).toHaveText(['Change addresses (Addresses)']);
     await expect(animalsPages.notificationView.cardLinks('Contact address')).toHaveText(['Change contact address (Contact address)']);
 

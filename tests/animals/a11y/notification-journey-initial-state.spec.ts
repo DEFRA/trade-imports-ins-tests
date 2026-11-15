@@ -169,15 +169,11 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.overview.heading.waitFor();
     });
 
-    await test.step('Review your notification', async () => {
-      await animalsPages.overview.reviewAndSubmitButton.click();
-      await animalsPages.notificationView.heading.waitFor();
-      await runA11yScan();
-      await animalsPages.notificationView.continueButton.click();
+    await test.step('Draft review (initial state)', async () => {
+      await animalsJourney.reviewThenContinueToDeclaration(runA11yScan);
     });
 
     await test.step('Declaration', async () => {
-      await animalsPages.declaration.heading.waitFor();
       await runA11yScan();
     });
   });

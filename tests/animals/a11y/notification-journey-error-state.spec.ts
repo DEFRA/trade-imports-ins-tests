@@ -188,7 +188,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(commercialTransporter);
       await animalsJourney.answerContact();
       await animalsPages.overview.reviewAndSubmitButton.click();
-      await animalsPages.notificationView.heading.waitFor();
+      await animalsPages.notificationView.viewHeader.reference.waitFor();
       await animalsPages.notificationView.continueButton.click();
       await animalsPages.declaration.heading.waitFor();
     });

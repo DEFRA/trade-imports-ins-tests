@@ -131,10 +131,26 @@ export class AnimalsSeededJourney {
   async resumeInUi<T extends { open(referenceNumber: string): Promise<void>; heading: Locator }>(
     referenceNumber: string,
     targetPage: T,
+  ): Promise<T>;
+  async resumeInUi<T extends { open(referenceNumber: string): Promise<void> }>(
+    referenceNumber: string,
+    targetPage: T,
+    options: { waitFor: Locator },
+  ): Promise<T>;
+  async resumeInUi<T extends { open(referenceNumber: string): Promise<void>; heading?: Locator }>(
+    referenceNumber: string,
+    targetPage: T,
+    { waitFor = targetPage.heading }: { waitFor?: Locator } = {},
   ): Promise<T> {
     await targetPage.open(referenceNumber);
-    await targetPage.heading.waitFor(pageLoadWait);
+    await waitFor?.waitFor(pageLoadWait);
     return targetPage;
+  }
+
+  async createDraftAtReviewInUi(animalsPages: AnimalsPages): Promise<string> {
+    const referenceNumber = await this.createDraftNotification();
+    await this.resumeInUi(referenceNumber, animalsPages.notificationView, { waitFor: animalsPages.notificationView.viewHeader.reference });
+    return referenceNumber;
   }
 
   async createDraftWithConsignorChosenInUi(animalsPages: AnimalsPages, consignorName: string): Promise<string> {
@@ -146,14 +162,14 @@ export class AnimalsSeededJourney {
 
   async createSubmittedWithPlaceOfOriginChosenInUi(animalsPages: AnimalsPages, placeOfOriginName: string): Promise<string> {
     const referenceNumber = await this.createDraftNotification();
-    await this.resumeInUi(referenceNumber, animalsPages.notificationView);
+    await this.resumeInUi(referenceNumber, animalsPages.notificationView, { waitFor: animalsPages.notificationView.viewHeader.reference });
     await animalsPages.notificationView.changeLink('Change addresses').click();
     await animalsPages.addresses.heading.waitFor(pageLoadWait);
     await this.choosePartyInUi(animalsPages, 'Place of origin', animalsPages.placeOfOriginSelection, placeOfOriginName);
     await animalsPages.addresses.continueButton.click();
     await animalsPages.contactAddress.heading.waitFor(pageLoadWait);
     await animalsPages.contactAddress.saveAndContinue.click();
-    await animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await animalsPages.notificationView.viewHeader.reference.waitFor(pageLoadWait);
     await animalsPages.notificationView.continueButton.click();
     await animalsPages.declaration.heading.waitFor(pageLoadWait);
     await animalsPages.declaration.confirmation.check();

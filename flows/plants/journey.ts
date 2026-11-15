@@ -299,7 +299,7 @@ export class PlantsJourney {
       await this.plantsPages.consignmentContactSelect.address(address.name).check();
     }
     await this.plantsPages.consignmentContactSelect.saveAndContinue.click();
-    await this.plantsPages.notificationView.heading.waitFor();
+    await this.plantsPages.notificationView.viewHeader.reference.waitFor();
     return { reference, address };
   }
 

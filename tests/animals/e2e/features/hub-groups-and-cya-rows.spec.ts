@@ -79,7 +79,8 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await animalsJourney.toReview(answers);
     const commonName = await referenceDataApi.findCommonName(cowLine.species);
 
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
     await expect(pages.page.getByRole('heading', { level: 2 }).filter({ hasText: /^\d\.\s/ })).toHaveText(REVIEW_SECTION_HEADINGS);
     const documentCard = animalsPages.notificationView.documentCard(1);
     await expect(animalsPages.notificationView.summaryKeys(documentCard)).toHaveText(['Document reference']);
@@ -213,7 +214,8 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await animalsJourney.toReview(MANDATORY_ANSWERS);
 
     const [cattleLine] = MANDATORY_ANSWERS.commodityLines;
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
     await expect(pages.page.getByRole('heading', { level: 3 })).toHaveText([
       'Origin of import',
       'What are you importing?',

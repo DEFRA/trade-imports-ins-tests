@@ -36,7 +36,7 @@ test.describe('INS dashboard notification navigation', { tag: ['@animals-backend
     await insPages.dashboard.viewLink(referenceNumber).click();
 
     await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
-    await expect(animalsPages.notificationView.submittedHeader.reference).toHaveText(referenceNumber);
+    await expect(animalsPages.notificationView.viewHeader.reference).toHaveText(referenceNumber);
     await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
   });
 });

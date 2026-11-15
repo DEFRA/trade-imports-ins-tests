@@ -11,6 +11,16 @@ const expectDeleteOpensConfirmation = async (animalsPages: AnimalsPages): Promis
   await expect(animalsPages.deleteNotification.heading).toBeVisible();
 };
 
+const expectImportReferencesAsText = async (animalsPages: AnimalsPages, referenceNumber: string): Promise<void> => {
+  const { viewHeader } = animalsPages.notificationView;
+  await expect(viewHeader.importReferencesWarning).toContainText(
+    'You must use the correct reference and code on the customs declaration or your consignment will be delayed.',
+  );
+  await expect(viewHeader.importReferenceValue('Notification reference')).toHaveText(referenceNumber);
+  await expect(viewHeader.importReferenceValue('Customs document code')).toHaveText('C640');
+  await expect(viewHeader.importReferences.getByRole('button')).toHaveCount(0);
+};
+
 test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, () => {
   test.describe('DRAFT', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
@@ -19,9 +29,10 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('renders the recorded answers in the numbered design sections', async ({ pages, animalsPages }) => {
-      await expect(animalsPages.notificationView.heading).toBeVisible();
+      await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+      await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
       await expect(animalsPages.notificationView.statusTag).toHaveText('Draft');
-      await expect(animalsPages.notificationView.submittedHeader.btnAmend).toHaveCount(0);
+      await expect(animalsPages.notificationView.viewHeader.btnAmend).toHaveCount(0);
       await expect(pages.page.getByRole('heading', { name: '1. About the consignment' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '2. Description of the goods' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '3. Transport and arrival' })).toBeVisible();
@@ -35,9 +46,43 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(animalsPages.notificationView.speciesBlock(commodityLines.cattle)).toContainText('Number of animals');
     });
 
-    test('shows the Draft strip with the notification reference', async ({ animalsPages, journeyContext }) => {
-      await expect(animalsPages.notificationView.statusTag).toHaveText('Draft');
-      await expect(animalsPages.notificationView.journeyStrip).toContainText(journeyContext.referenceNumber);
+    test('is headed by its reference', async ({ animalsPages, journeyContext }) => {
+      await expect(animalsPages.notificationView.viewHeader.reference).toHaveText(journeyContext.referenceNumber);
+    });
+
+    test('shows a blue Draft tag', async ({ animalsPages }) => {
+      const { statusTag } = animalsPages.notificationView.viewHeader;
+      await expect(statusTag).toHaveText('Draft');
+      await expect(statusTag).toHaveClass(/govuk-tag--blue/);
+    });
+
+    test('shows no status bar', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.journeyStrip).toHaveCount(0);
+    });
+
+    test('is titled with an Error prefix while the draft has incomplete sections', async ({ pages, journeyContext }) => {
+      await expect(pages.page).toHaveTitle(`Error: ${journeyContext.referenceNumber} - Import notification service - GOV.UK`);
+    });
+
+    test('dates the notification with the service day it was created', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.viewHeader.dateCreated).toHaveText(
+        new RegExp(`^Date created: ${todayOrYesterdayServiceDisplayDatePattern()}$`),
+      );
+    });
+
+    test('offers a primary Copy as new then a warning Delete in its header, with no Amend this notification', async ({ animalsPages }) => {
+      const { viewHeader, btnCopyAsNew, btnDelete } = animalsPages.notificationView;
+      await expect(viewHeader.actions).toHaveText(['Copy as new', 'Delete']);
+      await expect(btnCopyAsNew).not.toHaveClass(/govuk-button--secondary/);
+      await expect(btnDelete).toHaveClass(/govuk-button--warning/);
+      await expect(viewHeader.btnAmend).toHaveCount(0);
+    });
+
+    test("shows a draft's import reference numbers as text with the warning and no Copy button", async ({
+      animalsPages,
+      journeyContext,
+    }) => {
+      await expectImportReferencesAsText(animalsPages, journeyContext.referenceNumber);
     });
 
     test('shows Change links for the recorded answers', async ({ animalsPages }) => {
@@ -45,14 +90,12 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(animalsPages.notificationView.changeCommodityLink(commodityLines.cattle)).toBeVisible();
     });
 
-    test('ends with Continue and a warning Delete, with neither Copy as new nor Cancel amend', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.endControls).toHaveText(['Continue', 'Delete']);
-      await expect(animalsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
-      await expect(animalsPages.notificationView.btnCopyAsNew).toHaveCount(0);
+    test('ends with Continue alone, with no Cancel amend', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.endControls).toHaveText(['Continue']);
       await expect(animalsPages.notificationView.btnCancelAmend).toHaveCount(0);
     });
 
-    test('Delete on a draft review opens the delete confirmation', async ({ animalsPages }) => {
+    test('Delete in the header of a draft review opens the delete confirmation', async ({ animalsPages }) => {
       await expectDeleteOpensConfirmation(animalsPages);
     });
 
@@ -80,7 +123,8 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('shows no error summary once every section is answered', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.heading).toBeVisible();
+      await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+      await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
       await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
     });
 
@@ -123,9 +167,9 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       animalsPages,
       journeyContext,
     }) => {
-      const { submittedHeader, statusTag } = animalsPages.notificationView;
+      const { viewHeader, statusTag } = animalsPages.notificationView;
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(journeyContext.referenceNumber));
-      await expect(submittedHeader.reference).toHaveText(journeyContext.referenceNumber);
+      await expect(viewHeader.reference).toHaveText(journeyContext.referenceNumber);
       await expect(statusTag).toHaveText('Submitted');
       await expect(statusTag).toHaveClass(/govuk-tag--green/);
       await expect(animalsPages.notificationView.journeyStrip).toHaveCount(0);
@@ -133,22 +177,22 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('dates the notification with the service day it was submitted', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.submittedHeader.dateSubmitted).toHaveText(
+      await expect(animalsPages.notificationView.viewHeader.dateSubmitted).toHaveText(
         new RegExp(`^Date submitted: ${todayOrYesterdayServiceDisplayDatePattern()}$`),
       );
     });
 
     test('offers Amend this notification, a secondary Copy as new and a warning Delete in its header', async ({ animalsPages }) => {
-      const { submittedHeader, btnCopyAsNew, btnDelete, btnCancelAmend } = animalsPages.notificationView;
-      await expect(submittedHeader.actions).toHaveText(['Amend this notification', 'Copy as new', 'Delete']);
-      await expect(submittedHeader.btnAmend).not.toHaveClass(/govuk-button--secondary/);
+      const { viewHeader, btnCopyAsNew, btnDelete, btnCancelAmend } = animalsPages.notificationView;
+      await expect(viewHeader.actions).toHaveText(['Amend this notification', 'Copy as new', 'Delete']);
+      await expect(viewHeader.btnAmend).not.toHaveClass(/govuk-button--secondary/);
       await expect(btnCopyAsNew).toHaveClass(/govuk-button--secondary/);
       await expect(btnDelete).toHaveClass(/govuk-button--warning/);
       await expect(btnCancelAmend).toHaveCount(0);
     });
 
     test('Amend this notification starts the amendment', async ({ animalsPages }) => {
-      await animalsPages.notificationView.submittedHeader.btnAmend.click();
+      await animalsPages.notificationView.viewHeader.btnAmend.click();
 
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
     });
@@ -158,13 +202,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('shows the import reference numbers as text with the warning and no Copy button', async ({ animalsPages, journeyContext }) => {
-      const { submittedHeader } = animalsPages.notificationView;
-      await expect(submittedHeader.importReferencesWarning).toContainText(
-        'You must use the correct reference and code on the customs declaration or your consignment will be delayed.',
-      );
-      await expect(submittedHeader.importReferenceValue('Notification reference')).toHaveText(journeyContext.referenceNumber);
-      await expect(submittedHeader.importReferenceValue('Customs document code')).toHaveText('C640');
-      await expect(submittedHeader.importReferences.getByRole('button')).toHaveCount(0);
+      await expectImportReferencesAsText(animalsPages, journeyContext.referenceNumber);
     });
 
     test('copies the submitted notification to a new draft', async ({ animalsPages, journeyContext }) => {
@@ -194,14 +232,14 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     test('is headed by an orange Submitted action required tag and the warning to upload a health certificate', async ({
       animalsPages,
     }) => {
-      const { submittedHeader, statusTag } = animalsPages.notificationView;
+      const { viewHeader, statusTag } = animalsPages.notificationView;
       await expect(statusTag).toHaveText('Submitted action required');
       await expect(statusTag).toHaveClass(/govuk-tag--orange/);
-      await expect(submittedHeader.actionRequiredWarning).toBeVisible();
+      await expect(viewHeader.actionRequiredWarning).toBeVisible();
     });
 
     test('dates the notification and shows the same date after a reload', async ({ pages, animalsPages }) => {
-      const { dateSubmitted } = animalsPages.notificationView.submittedHeader;
+      const { dateSubmitted } = animalsPages.notificationView.viewHeader;
       await expect(dateSubmitted).toHaveText(new RegExp(`^Date submitted: ${todayOrYesterdayServiceDisplayDatePattern()}$`));
       const shown = await dateSubmitted.textContent();
 
@@ -219,13 +257,13 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('offers Amend this notification, Copy as new and Delete in its header', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.submittedHeader.actions).toHaveText(['Amend this notification', 'Copy as new', 'Delete']);
+      await expect(animalsPages.notificationView.viewHeader.actions).toHaveText(['Amend this notification', 'Copy as new', 'Delete']);
     });
 
     test('shows the import reference numbers', async ({ animalsPages, journeyContext }) => {
-      const { submittedHeader } = animalsPages.notificationView;
-      await expect(submittedHeader.importReferenceValue('Notification reference')).toHaveText(journeyContext.referenceNumber);
-      await expect(submittedHeader.importReferenceValue('Customs document code')).toHaveText('C640');
+      const { viewHeader } = animalsPages.notificationView;
+      await expect(viewHeader.importReferenceValue('Notification reference')).toHaveText(journeyContext.referenceNumber);
+      await expect(viewHeader.importReferenceValue('Customs document code')).toHaveText('C640');
     });
 
     test('Continue starts an amendment and opens the overview', async ({ animalsPages }) => {

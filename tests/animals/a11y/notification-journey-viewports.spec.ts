@@ -17,9 +17,11 @@ for (const [viewportName, viewport] of Object.entries(narrowViewports)) {
       animalsPages,
       runA11yScan,
     }) => {
-      await test.step('Review your notification (draft, continue refused with unfinished sections)', async () => {
+      await test.step('Draft review, continue refused with unfinished sections', async () => {
         const draftReference = await animalsSeededJourney.createDraftNotification('unlocked');
-        await animalsSeededJourney.resumeInUi(draftReference, animalsPages.notificationView);
+        await animalsSeededJourney.resumeInUi(draftReference, animalsPages.notificationView, {
+          waitFor: animalsPages.notificationView.viewHeader.reference,
+        });
         await animalsPages.notificationView.continueButton.click();
         await animalsPages.notificationView.errorSummary.waitFor();
         await scanNarrowPage(page, runA11yScan);
@@ -44,7 +46,9 @@ for (const [viewportName, viewport] of Object.entries(narrowViewports)) {
 
       await test.step('Review your notification (amending)', async () => {
         const amendReference = await animalsSeededJourney.createAmendNotification();
-        await animalsSeededJourney.resumeInUi(amendReference, animalsPages.notificationView);
+        await animalsSeededJourney.resumeInUi(amendReference, animalsPages.notificationView, {
+          waitFor: animalsPages.notificationView.amendReviewHeading,
+        });
         await scanNarrowPage(page, runA11yScan);
       });
 

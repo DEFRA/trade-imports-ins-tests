@@ -283,6 +283,13 @@ export class AnimalsJourney {
     await this.animalsPages.notificationView.anyReviewHeading.waitFor(pageLoadWait);
   }
 
+  async reviewThenContinueToDeclaration(runA11yScan: () => Promise<void>): Promise<void> {
+    await this.openReviewFromOverview();
+    await runA11yScan();
+    await this.animalsPages.notificationView.continueButton.click();
+    await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
+  }
+
   private async chooseSpeciesAndSaveAnimalCountsToOverview(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
     await this.toConsignmentDetails(speciesCounts.map(({ species }) => species));
     for (const { species, animalCount } of speciesCounts) {
@@ -861,7 +868,7 @@ export class AnimalsJourney {
     await pages.contactAddress.heading.waitFor(pageLoadWait);
     await this.chooseContactAddress();
 
-    await pages.notificationView.heading.waitFor(pageLoadWait);
+    await pages.notificationView.viewHeader.reference.waitFor(pageLoadWait);
   }
 
   async walkCattleByAir(document: AccompanyingDocumentAnswer): Promise<string> {

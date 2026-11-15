@@ -20,7 +20,8 @@ test.describe('Contact address page', { tag: '@duplicated-in-frontend' }, () => 
     await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
     await animalsPages.contactAddress.saveAndContinue.click();
 
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
   });
 
   test('a chosen contact address is shown as the current contact on return, still chosen, and saving again keeps it', async ({

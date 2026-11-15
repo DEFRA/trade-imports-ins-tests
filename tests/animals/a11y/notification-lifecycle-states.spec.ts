@@ -16,12 +16,12 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
       await animalsPages.dashboard.amend(referenceNumber).click();
-      await animalsPages.notificationView.heading.waitFor();
+      await animalsPages.notificationView.amendReviewHeading.waitFor();
       await animalsPages.overview.open(referenceNumber);
       await animalsPages.overview.heading.waitFor();
       await runA11yScan();
       await animalsPages.notificationView.open(referenceNumber);
-      await animalsPages.notificationView.heading.waitFor();
+      await animalsPages.notificationView.amendReviewHeading.waitFor();
       await runA11yScan();
       await animalsPages.notificationView.btnCancelAmend.click();
       await animalsPages.notificationCancelAmend.heading.waitFor();

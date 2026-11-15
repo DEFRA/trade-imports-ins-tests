@@ -30,12 +30,12 @@ test.describe('Back on the review page', () => {
     await expect(plantsPages.dashboard.heading).toBeVisible();
     await plantsNotificationActions.cancelAmend(reference);
     await plantsNotificationActions.amendNotification(reference);
-    await expect(plantsPages.notificationView.heading).toBeVisible();
+    await expect(plantsPages.notificationView.amendReviewHeading).toBeVisible();
 
     await plantsPages.notificationView.change('Change country of origin (Import details)').click();
     await expect(plantsPages.origin.heading).toBeVisible();
     await plantsPages.origin.linkBack.click();
-    await expect(plantsPages.notificationView.heading).toBeVisible();
+    await expect(plantsPages.notificationView.amendReviewHeading).toBeVisible();
 
     await plantsPages.notificationView.linkBack.click();
     await expect(plantsPages.dashboard.heading).toBeVisible();
@@ -54,7 +54,8 @@ test.describe('Back on the review page', () => {
     await pages.page.reload();
     await plantsPages.origin.linkBack.click();
 
-    await expect(plantsPages.notificationView.heading).toBeVisible();
+    await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
+    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
   });
 
   test('after Continue is refused it still opens the contact address', async ({ plantsPages, plantsJourney, addressBookApi }) => {

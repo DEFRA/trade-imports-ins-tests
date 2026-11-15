@@ -1,15 +1,15 @@
 import type { Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
-import { SubmittedHeader } from '@page-objects/shared/submitted-header';
+import { ViewHeader } from '@page-objects/shared/view-header';
 
 export class PlantsNotificationViewPage extends PlantsNotificationPage {
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
     super(page, 'notification-view');
   }
 
-  readonly submittedHeader = new SubmittedHeader(this.page);
+  readonly viewHeader = new ViewHeader(this.page);
 
-  get heading(): Locator {
+  get amendReviewHeading(): Locator {
     return this.page.getByRole('heading', { name: 'Check your answers', level: 1 });
   }
   get btnContinue(): Locator {

@@ -12,8 +12,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     animalsPages,
   }) => {
     test.slow();
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const referenceNumber = await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
 
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
     await expect(countryRow).toContainText('France');
@@ -24,7 +23,8 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.originOfImport.saveAndContinue.click();
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await animalsPages.notificationView.open(referenceNumber);
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(countryRow).toContainText('Belgium');
 
@@ -37,21 +37,22 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.additionalDetails.saveAndContinue.click();
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
     await animalsPages.notificationView.open(referenceNumber);
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(certifiedForRow).toContainText('Exhibition');
   });
 
   test('Back from the main import reason opened by a Change link opens the review', async ({ animalsSeededJourney, animalsPages }) => {
     test.slow();
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
 
     await animalsPages.notificationView.changeLink('Change main import reason').click();
     await expect(animalsPages.importReason.heading).toBeVisible();
 
     await animalsPages.importReason.linkBack.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
   });
 
   test('Save and continue on a page opened by a Change link goes on, and the review shows the changed answer', async ({
@@ -61,8 +62,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     animalsPages,
   }) => {
     test.slow();
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const referenceNumber = await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
 
     const purposeValue = animalsPages.notificationView.summaryValue(
       animalsPages.notificationView.summaryCard('Main import reason'),
@@ -78,6 +78,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
       [animalsPages.notificationView.slug],
       animalsJourney.saveAndContinueStopsFrom(animalsPages.importReason),
       animalsPages.notificationView,
+      animalsPages.notificationView.viewHeader.reference,
     );
     await expect(purposeValue).toContainText('Research');
   });
@@ -88,8 +89,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     animalsPages,
   }) => {
     test.slow();
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const referenceNumber = await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
     const contactAddressValue = animalsPages.notificationView.summaryValue(
       animalsPages.notificationView.summaryCard('Contact address'),
       'Contact address',
@@ -102,7 +102,8 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.contactAddress.address(CONSIGNEE_NAME).check();
     await animalsPages.contactAddress.saveAndContinue.click();
 
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
     await expect(pages.page).toHaveURL(
       animalsPages.notificationView.expectedUrlPatternOnTrail(referenceNumber, [
         animalsPages.notificationView.slug,
@@ -119,8 +120,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     animalsPages,
   }) => {
     test.slow();
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const referenceNumber = await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
 
     await animalsPages.notificationView.changeLink('Change document 1').click();
     await expect(animalsPages.accompanyingDocuments.heading).toBeVisible();
@@ -131,18 +131,19 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
       [animalsPages.notificationView.slug],
       animalsJourney.saveAndContinueStopsFrom(animalsPages.accompanyingDocuments),
       animalsPages.notificationView,
+      animalsPages.notificationView.viewHeader.reference,
     );
   });
 
   test('the addresses card Change link opens a page whose Back link opens the review', async ({ animalsSeededJourney, animalsPages }) => {
     test.slow();
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
 
     await animalsPages.notificationView.changeLink('Change addresses').click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await animalsPages.addresses.linkBack.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
   });
 
   test('the documents Change link opens the page with a Back link to the review, which stays after a refusal, after Save and add another and after Remove', async ({
@@ -151,8 +152,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     animalsPages,
   }) => {
     test.slow();
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const referenceNumber = await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
     const reviewUrl = animalsPages.notificationView.expectedUrlPattern(referenceNumber);
 
     await animalsPages.notificationView.changeLink('Change document 1').click();
@@ -176,6 +176,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);
 
     await animalsPages.accompanyingDocuments.linkBack.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
   });
 });

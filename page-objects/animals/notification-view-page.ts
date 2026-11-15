@@ -2,7 +2,7 @@ import { type Locator, type Page } from '@playwright/test';
 import { pageLoadWait } from '@config/timeouts';
 import { commodityCardTitle, speciesBlockHeading, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { NotificationPage, type OpenOptions } from '@page-objects/shared/base-page';
-import { SubmittedHeader } from '@page-objects/shared/submitted-header';
+import { ViewHeader } from '@page-objects/shared/view-header';
 
 const SPECIES_BLOCK_SELECTOR = '[id^="species-block-"]';
 
@@ -11,9 +11,9 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     super(page, 'notification-view');
   }
 
-  readonly submittedHeader = new SubmittedHeader(this.page);
+  readonly viewHeader = new ViewHeader(this.page);
 
-  get heading(): Locator {
+  get amendReviewHeading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Review your notification' });
   }
 
@@ -22,7 +22,19 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   }
 
   get anyReviewHeading(): Locator {
-    return this.heading.or(this.resubmittingHeading);
+    return this.viewHeader.reference.or(this.amendReviewHeading).or(this.resubmittingHeading);
+  }
+
+  get volatileHeaderParts(): Locator[] {
+    return [this.viewHeader.reference, this.viewHeader.dateCreated, this.viewHeader.notificationReferenceValue];
+  }
+
+  async pinReferenceText(): Promise<void> {
+    for (const reference of [this.viewHeader.reference, this.viewHeader.notificationReferenceValue]) {
+      await reference.evaluate((element) => {
+        element.textContent = 'GBN-AG-26-AAAAAA';
+      });
+    }
   }
 
   get referenceNumberCaption(): Locator {
@@ -94,7 +106,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   async openRefused(referenceNumber: string): Promise<void> {
     await this.navigateToService(`${this.expectedUrl(referenceNumber)}?refused=1`);
-    await this.heading.waitFor(pageLoadWait);
+    await this.viewHeader.reference.waitFor(pageLoadWait);
   }
 
   summaryValue(card: Locator, key: string): Locator {

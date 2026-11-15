@@ -48,7 +48,8 @@ test.describe('Import notification submitted page for a notification not yet sub
     await declarationRequest;
 
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
   });
 });
 
