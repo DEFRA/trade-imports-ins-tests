@@ -10,6 +10,10 @@ export class AnimalsConfirmationPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Import notification submitted' });
   }
 
+  get sectionHeadings(): Locator {
+    return this.page.getByRole('main').getByRole('heading', { level: 2 });
+  }
+
   get outstandingItems(): Locator {
     return this.page.getByRole('heading', { name: 'Before the consignment is imported' }).locator('~ ul').first().getByRole('listitem');
   }

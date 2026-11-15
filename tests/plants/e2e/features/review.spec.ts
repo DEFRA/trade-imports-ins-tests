@@ -205,6 +205,19 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(plantsPages.dashboard.heading).toBeVisible();
   });
 
+  test(
+    'opening the confirmation of a draft goes to its declaration',
+    { tag: '@duplicated-in-frontend' },
+    async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
+      const { reference } = await plantsJourney.completeNotification(addressBookApi);
+
+      await plantsPages.confirmation.open(reference);
+
+      await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrlPattern(reference));
+      await expect(plantsPages.declaration.heading).toBeVisible();
+    },
+  );
+
   test.describe('declaration of a draft', () => {
     let reference: string;
 

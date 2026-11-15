@@ -39,6 +39,37 @@ test.describe('Import notification submitted page', { tag: '@duplicated-in-front
   });
 });
 
+test.describe('Import notification submitted page for a notification not yet submitted', { tag: '@duplicated-in-frontend' }, () => {
+  test('sends a draft through its declaration to its review page', async ({ animalsSeededJourney, animalsPages, pages }) => {
+    const referenceNumber = await animalsSeededJourney.createDraftNotification();
+    const declarationRequest = pages.page.waitForRequest(animalsPages.declaration.expectedUrlPattern(referenceNumber));
+
+    await animalsPages.confirmation.open(referenceNumber);
+    await declarationRequest;
+
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+  });
+});
+
+test.describe('Import notification submitted page after an ITAHC was uploaded', { tag: '@duplicated-in-frontend' }, () => {
+  test('shows only the transporting, view or amend and help sections once an ITAHC is uploaded', async ({
+    animalsSeededJourney,
+    animalsPages,
+  }) => {
+    test.slow();
+    const referenceNumber = await animalsSeededJourney.createSubmittedWithItahcUploadedInUi(animalsPages);
+
+    await animalsPages.confirmation.open(referenceNumber);
+
+    await expect(animalsPages.confirmation.sectionHeadings).toHaveText([
+      'Transporting the consignment',
+      'How to view or amend this notification',
+      'Getting help',
+    ]);
+  });
+});
+
 test.describe('Import notification submitted page after a document other than the ITAHC was uploaded', () => {
   test('lists the ITAHC as still to upload when only a veterinary health certificate was uploaded', async ({
     animalsJourney,
