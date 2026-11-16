@@ -1,8 +1,5 @@
-import path from 'node:path';
 import { type Locator, type Page } from '@playwright/test';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
-import { writeEicarPdfFile, type EicarWrittenFile } from '@utils/eicar-file-writer';
-import { timestampedReference } from '@utils/timestamped-reference';
 import type { AccompanyingDocumentAnswer } from '@domain/animals/constants/journey-options';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { DatePicker } from '@page-objects/shared/date-picker';
@@ -75,14 +72,10 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
   }
 
   get fileFieldError(): Locator {
-    return this.page.locator('.govuk-error-message');
+    return this.page.locator('.govuk-form-group', { has: this.fileUpload }).locator('.govuk-error-message');
   }
 
-  // The reason the add control is shut, which the control names through
-  // aria-describedby. Distinct from fileFieldError: this one is about the
-  // notification being full or the upload service being unreachable, not
-  // about the file in the input.
-  get addDocumentError(): Locator {
+  get addDocumentRefusedReason(): Locator {
     return this.page.locator('#add-document-error');
   }
 
@@ -96,24 +89,21 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
     await this.waitForScanComplete(document.reference);
   }
 
-  async uploadInfectedDocument(outputDir: string, issueDate: string): Promise<{ row: Locator; eicar: EicarWrittenFile }> {
-    const eicar = await writeEicarPdfFile(path.join(outputDir, 'file-upload'));
-    const reference = timestampedReference('PWVIRUS');
-    await this.fillDocument(reference, issueDate, eicar.filePath);
-    await this.saveAndAddAnother.click();
-    return { row: this.documentRow(reference), eicar };
-  }
-
   async waitForScanComplete(reference: string): Promise<void> {
     await this.documentRow(reference)
       .filter({ hasText: 'Check completed' })
       .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
   }
 
-  async fillDocument(reference: string, issueDate: string, filePath: string, documentType: string = 'ITAHC'): Promise<void> {
+  async fillDocument(
+    reference: string,
+    issueDate: string,
+    file: Parameters<Locator['setInputFiles']>[0],
+    documentType: string = 'ITAHC',
+  ): Promise<void> {
     await this.documentReference.fill(reference);
     await this.documentType.selectOption(documentType);
     await this.dateOfIssue.fill(issueDate);
-    await this.fileUpload.setInputFiles(filePath);
+    await this.fileUpload.setInputFiles(file);
   }
 }

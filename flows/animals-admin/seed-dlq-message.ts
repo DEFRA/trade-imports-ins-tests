@@ -31,3 +31,8 @@ export async function seedDlqMessage(sqs: SqsClient): Promise<string> {
   await sqs.sendMessage(getDlqUrl(), JSON.stringify(event), aggregateId, eventId);
   return eventId;
 }
+
+/** Empty the DLQ, so the admin page's first page of messages has room for the ones a test seeds next. */
+export async function emptyDlq(sqs: SqsClient): Promise<void> {
+  await sqs.drainQueue(getDlqUrl());
+}

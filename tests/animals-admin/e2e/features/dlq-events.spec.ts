@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import type { AnimalsAdminPages, SharedPages } from '@page-objects';
 import { SqsClient } from '@adapters/queue/sqs-client';
-import { seedDlqMessage } from '@flows/animals-admin/seed-dlq-message';
+import { emptyDlq, seedDlqMessage } from '@flows/animals-admin/seed-dlq-message';
 import { timeouts } from '@config/timeouts';
 
 async function reloadUntilSeededRowListed(pages: SharedPages, animalsAdminPages: AnimalsAdminPages, eventId: string): Promise<void> {
@@ -18,6 +18,10 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
 
   test.beforeAll(() => {
     sqs = new SqsClient();
+  });
+
+  test.beforeEach(async () => {
+    await emptyDlq(sqs);
   });
 
   test.afterAll(() => {

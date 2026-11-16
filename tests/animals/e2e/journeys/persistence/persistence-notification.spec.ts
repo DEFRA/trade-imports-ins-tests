@@ -5,7 +5,7 @@ import { type NotificationDocument } from '@domain/animals/models/db/notificatio
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { ALL_ANSWERS as answers, CPH_NUMBER } from '@domain/animals/constants/journey-options';
-import { commodityNames } from '@domain/animals/constants/commodity-names';
+import { storedCommodityNames } from '@domain/animals/constants/commodity-names';
 import { parseAppDateText, toIsoDate } from '@utils/date-utils';
 
 test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => {
@@ -66,7 +66,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
       expect(notification.origin.internalReference).toBe(answers.internalReference);
       expect(notification.commodities).toEqual([
         {
-          name: commodityNames[cowLine.species.commodityCode],
+          name: storedCommodityNames[cowLine.species.commodityCode],
           commodityCode: cowLine.species.commodityCode,
           description: 'Live bovine animals',
           totalNoOfAnimals: cowLine.noOfAnimals,
