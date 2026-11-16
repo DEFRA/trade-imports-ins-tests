@@ -2,6 +2,7 @@ import { type Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
 import {
   pickerNoMatchesMessage,
+  pickerResultsGroup,
   pickerResultsHeading,
   pickerResultsSummary,
   pickerSearchBox,
@@ -48,12 +49,12 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
     return pickerNoMatchesMessage(this.page);
   }
 
-  selectedAddress(name: string): Locator {
-    return this.page.getByText(`Selected address: ${name}`, { exact: true });
+  get listedAddresses(): Locator {
+    return pickerResultsGroup(this.page).getByRole('radio');
   }
 
-  get selectedAddressInset(): Locator {
-    return this.page.locator('.govuk-inset-text');
+  get checkedAddress(): Locator {
+    return pickerResultsGroup(this.page).getByRole('radio', { checked: true });
   }
 
   get currentAddress(): Locator {

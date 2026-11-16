@@ -1,14 +1,51 @@
 import { test, expect } from '@fixtures';
-import { heldAsConsignor } from '@domain/shared/constants/address-types';
+import { addressRoles, heldAsConsignee, heldAsConsignor } from '@domain/shared/constants/address-types';
 import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 import { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
-import { destinationFixture } from '@flows/shared/address-book-seed';
-
-const FIVE_RESULTS_SUMMARY = /^Showing 5 out of \d+ results$/;
+import { consignorFixture } from '@flows/shared/address-book-seed';
+import { expectNothingBetweenSearchAndResults, WHOLE_LIST_COUNT } from '@page-objects/shared/address-picker-results';
 
 test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-book'] }, () => {
-  test('the picker searches and pages the address book, and the row selected on a later page is the one that saves', async ({
+  test('lists only addresses saved for the role; a record saved for two roles is listed on both', async ({
+    animalsJourney,
+    animalsPages,
+    addressBookApi,
+  }) => {
+    const stamp = Date.now();
+    const consigneeOnlyName = `Consignee Only Farm ${stamp}`;
+    await addressBookApi.createAddress({
+      ...heldAsConsignee,
+      name: consigneeOnlyName,
+      addressLine1: '1 Consignee Lane',
+      townOrCity: 'Carlisle',
+      postcode: 'CA1 1AA',
+      countryCode: 'GB',
+      phone: '01228 555 0196',
+      email: 'consignee-only@example.co.uk',
+    });
+    const consigneeAndImporterName = `Consignee And Importer Farm ${stamp}`;
+    await addressBookApi.createAddress({
+      roles: [addressRoles.consignee, addressRoles.importer],
+      name: consigneeAndImporterName,
+      addressLine1: '2 Shared Lane',
+      townOrCity: 'Carlisle',
+      postcode: 'CA1 1BB',
+      countryCode: 'GB',
+      phone: '01228 555 0195',
+      email: 'shared-role@example.co.uk',
+    });
+
+    await animalsJourney.toPartyPicker('Consignee');
+    await expect(animalsPages.consigneeSelection.party(consigneeOnlyName)).toBeVisible();
+    await expect(animalsPages.consigneeSelection.party(consigneeAndImporterName)).toBeVisible();
+
+    await animalsJourney.toPartyPicker('Importer');
+    await expect(animalsPages.importerSelection.party(consigneeAndImporterName)).toBeVisible();
+    await expect(animalsPages.importerSelection.party(consigneeOnlyName)).toHaveCount(0);
+  });
+
+  test('the picker searches within the role, lists every match on one page, and the row ticked is the one that saves, shown checked on reopening with nothing between the search box and the results heading', async ({
     animalsJourney,
     animalsPages,
     addressBookApi,
@@ -29,67 +66,46 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
       });
     }
 
-    const olderThanPageOneName = `Paged Consignor ${stamp}`;
-    const olderThanPageOneRecord = {
-      name: olderThanPageOneName,
-      addressLine1: '1 Later Page Lane',
+    const chosenName = `Chosen Consignor ${stamp}`;
+    const chosenRecord = {
+      name: chosenName,
+      addressLine1: '1 Chosen Lane',
       townOrCity: 'Carlisle',
       postcode: 'CA1 1AA',
     };
-    const olderThanPageOneAddressText = AnimalsAddressesPage.expectedAddressText({ ...olderThanPageOneRecord, country: 'United Kingdom' });
+    const chosenAddressText = AnimalsAddressesPage.expectedAddressText({ ...chosenRecord, country: 'United Kingdom' });
     await addressBookApi.createAddress({
-      ...olderThanPageOneRecord,
+      ...chosenRecord,
       ...heldAsConsignor,
       countryCode: 'GB',
       phone: '01228 555 0199',
-      email: 'paged@example.co.uk',
+      email: 'chosen@example.co.uk',
     });
-    for (let i = 0; i < 5; i += 1) {
-      await addressBookApi.createAddress({
-        ...heldAsConsignor,
-        name: `Page One Filler ${stamp} ${i}`,
-        addressLine1: `${i} Front Row`,
-        townOrCity: 'Carlisle',
-        postcode: 'CA1 1BB',
-        countryCode: 'GB',
-        phone: '01228 555 0198',
-        email: 'newer@example.co.uk',
-      });
-    }
 
     await animalsJourney.toPartyPicker('Consignor');
 
     const consignorAddressLines = animalsPages.addresses.partyAddressLines('Consignor');
 
     await expect(animalsPages.consignorSelection.resultsHeading).toBeVisible();
-    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
-    await expect(animalsPages.consignorSelection.resultsGroup.getByRole('radio')).toHaveCount(5);
+    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(WHOLE_LIST_COUNT);
 
     await animalsPages.consignorSelection.search(runOnlySearchToken);
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText('Showing 2 out of 2 results');
     await expect(animalsPages.consignorSelection.party(searchMatches[1])).toBeVisible();
-    await expect(animalsPages.consignorSelection.paginationPageLink(2)).toHaveCount(0);
 
-    await animalsPages.consignorSelection.search('');
-    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(FIVE_RESULTS_SUMMARY);
-
-    const olderThanPageOne = animalsPages.consignorSelection.party(olderThanPageOneName);
-    await expect(olderThanPageOne).toHaveCount(0);
-    await animalsPages.consignorSelection.followNextPageUntilShown(olderThanPageOne);
-    await expect(olderThanPageOne).toBeVisible();
-
-    await animalsPages.consignorSelection.party(olderThanPageOneName).check();
+    await animalsPages.consignorSelection.search(chosenName);
+    await animalsPages.consignorSelection.party(chosenName).check();
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await expect(consignorAddressLines).toHaveText(olderThanPageOneAddressText, { useInnerText: true });
+    await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
 
     await animalsPages.addresses.changeParty('Consignor').click();
     await expect(animalsPages.consignorSelection.heading).toBeVisible();
-    await expect(animalsPages.consignorSelection.selectedAddress).toHaveText(`Selected address: ${olderThanPageOneName}`);
-    await expect(animalsPages.consignorSelection.party(olderThanPageOneName)).toHaveCount(0);
+    await expect(animalsPages.consignorSelection.party(chosenName)).toBeChecked();
+    await expectNothingBetweenSearchAndResults(animalsPages.consignorSelection.resultsHeading);
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await expect(consignorAddressLines).toHaveText(olderThanPageOneAddressText, { useInnerText: true });
+    await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
   });
 
   test('a picker row shows the street line, then town and postcode on one line, and ends with only a View link', async ({
@@ -98,11 +114,11 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
   }) => {
     await animalsJourney.toPartyPicker('Consignor');
 
-    await animalsPages.consignorSelection.search(destinationFixture.name);
+    await animalsPages.consignorSelection.search(consignorFixture.name);
     await expect
-      .poll(() => animalsPages.consignorSelection.partyAddressCellText(destinationFixture.name))
-      .toBe(AnimalsPartyPickerPage.expectedAddressCellText(destinationFixture));
-    await expect(animalsPages.consignorSelection.partyActionCell(destinationFixture.name)).toHaveText(`View ${destinationFixture.name}`);
+      .poll(() => animalsPages.consignorSelection.partyAddressCellText(consignorFixture.name))
+      .toBe(AnimalsPartyPickerPage.expectedAddressCellText(consignorFixture));
+    await expect(animalsPages.consignorSelection.partyActionCell(consignorFixture.name)).toHaveText(`View ${consignorFixture.name}`);
   });
 
   test('a picker row with a second street line and a county shows each street line on its own line, then town, county and postcode on one line', async ({

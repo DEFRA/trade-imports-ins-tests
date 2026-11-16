@@ -100,10 +100,6 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     return this.resultsGroup.getByRole('radio', { checked: true });
   }
 
-  get selectedAddress(): Locator {
-    return this.page.getByText('Selected address:');
-  }
-
   get searchBox(): Locator {
     return pickerSearchBox(this.page);
   }

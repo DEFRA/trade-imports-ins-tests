@@ -1,7 +1,9 @@
-import { type Locator, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 const RESULTS_HEADING = 'Select an address';
 const NO_MATCHES = 'No addresses match your search.';
+
+export const WHOLE_LIST_COUNT = /^Showing (\d+) out of \1 results$/;
 
 export function pickerResultsHeading(page: Page): Locator {
   return page.getByRole('heading', { level: 2, name: RESULTS_HEADING });
@@ -29,4 +31,8 @@ export function pickerSearchRow(page: Page): Locator {
 
 export function pickerSearchButton(page: Page): Locator {
   return page.getByRole('button', { name: 'Search', exact: true });
+}
+
+export async function expectNothingBetweenSearchAndResults(resultsHeading: Locator): Promise<void> {
+  await expect(resultsHeading.locator('xpath=preceding-sibling::*[1]')).toHaveClass(/govuk-form-group/);
 }
