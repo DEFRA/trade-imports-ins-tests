@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { todayOrTomorrowServiceDisplayDatePattern } from '@utils/date-utils';
 
@@ -52,6 +53,53 @@ test.describe('Declaration page', { tag: '@duplicated-in-frontend' }, () => {
       await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
     });
   });
+
+  for (const { question, unanswered, errorLink, card, blankRow, answeredRows } of [
+    {
+      question: 'main import reason',
+      unanswered: 'mainImportReason',
+      errorLink: 'Complete main import reason',
+      card: 'Main import reason',
+      blankRow: 'Main import reason',
+      answeredRows: [],
+    },
+    {
+      question: 'certified-for answer',
+      unanswered: 'certifiedFor',
+      errorLink: 'Complete additional details',
+      card: 'Additional details',
+      blankRow: 'Certified for',
+      answeredRows: [{ key: 'Includes unweaned animals', value: 'No' }],
+    },
+    {
+      question: 'unweaned answer',
+      unanswered: 'unweaned',
+      errorLink: 'Complete additional details',
+      card: 'Additional details',
+      blankRow: 'Includes unweaned animals',
+      answeredRows: [{ key: 'Certified for', value: 'Slaughter' }],
+    },
+  ] as const) {
+    test.describe(`for an otherwise complete draft whose ${question} was left blank`, () => {
+      test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
+        await animalsSeededJourney.createDraftNotification('ready', MANDATORY_ANSWERS, { leaveUnanswered: [unanswered] });
+        await animalsSeededJourney.postDeclarationOfUnfinishedDraft(journeyContext.referenceNumber);
+        await animalsNotificationActions.toRefusedNotificationView(journeyContext.referenceNumber);
+      });
+
+      test(`refuses a declaration with the ${question} left blank, naming only its card and keeping the draft`, async ({
+        animalsPages,
+      }) => {
+        const { notificationView } = animalsPages;
+        await expect(notificationView.errorSummaryLinks).toHaveText([errorLink]);
+        await expect(notificationView.summaryValue(notificationView.summaryCard(card), blankRow)).toHaveText('Missing');
+        for (const { key, value } of answeredRows) {
+          await expect(notificationView.summaryValue(notificationView.summaryCard(card), key)).toHaveText(value);
+        }
+        await expect(notificationView.viewHeader.statusTag).toHaveText('Draft');
+      });
+    });
+  }
 
   for (const { state, seed } of [
     { state: 'a draft', seed: (journey: AnimalsSeededJourney) => journey.createDraftNotification() },

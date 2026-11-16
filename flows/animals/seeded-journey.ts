@@ -12,6 +12,7 @@ import {
   type PartyIds,
   type PartyNames,
   type PartyRole,
+  type SeedOptions,
   type SeedStep,
 } from '@flows/animals/seed-form-steps';
 import { ITAHC_DOCUMENT, MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
@@ -49,9 +50,13 @@ export class AnimalsSeededJourney {
     return this.remember(referenceNumber);
   }
 
-  async createDraftNotification(stage: DraftStage = 'ready', answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
+  async createDraftNotification(
+    stage: DraftStage = 'ready',
+    answers: NotificationAnswers = MANDATORY_ANSWERS,
+    seedOptions: SeedOptions = {},
+  ): Promise<string> {
     const referenceNumber = await this.createEmptyNotification();
-    for (const step of await seedSteps((names) => this.partyIds(names), stage, answers)) {
+    for (const step of await seedSteps((names) => this.partyIds(names), stage, answers, seedOptions)) {
       await this.postSeedStep(`${CREATE_PATH}/${referenceNumber}/${step.slug}`, step);
     }
     return referenceNumber;

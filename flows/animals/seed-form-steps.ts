@@ -117,14 +117,30 @@ const commoditySteps = (answers: NotificationAnswers): SeedStep[] => {
   ];
 };
 
-const consignmentSteps = (answers: NotificationAnswers): SeedStep[] => [
+/** Questions the seeded trader leaves unchosen. */
+export type UnansweredQuestion = 'mainImportReason' | 'certifiedFor' | 'unweaned';
+
+export type SeedOptions = { leaveUnanswered?: UnansweredQuestion[] };
+
+const fieldsUnlessUnanswered = (leaveUnanswered: UnansweredQuestion[], question: UnansweredQuestion, fields: FormFields): FormFields =>
+  leaveUnanswered.includes(question) ? {} : fields;
+
+const consignmentSteps = (answers: NotificationAnswers, leaveUnanswered: UnansweredQuestion[]): SeedStep[] => [
   {
     slug: 'import-reason',
-    form: { reasonForImport: answers.importReason.value, purposeInInternalMarket: answers.internalMarketPurpose.value },
+    form: fieldsUnlessUnanswered(leaveUnanswered, 'mainImportReason', {
+      reasonForImport: answers.importReason.value,
+      purposeInInternalMarket: answers.internalMarketPurpose.value,
+    }),
   },
   {
     slug: 'additional-details',
-    form: { animalsCertifiedFor: answers.certifiedFor.value, containsUnweanedAnimals: answers.unweanedAnimals.toLowerCase() },
+    form: {
+      ...fieldsUnlessUnanswered(leaveUnanswered, 'certifiedFor', { animalsCertifiedFor: answers.certifiedFor.value }),
+      ...fieldsUnlessUnanswered(leaveUnanswered, 'unweaned', {
+        containsUnweanedAnimals: answers.unweanedAnimals.toLowerCase(),
+      }),
+    },
   },
 ];
 
@@ -172,6 +188,7 @@ export const seedSteps = async (
   resolveParties: (names: PartyNames) => Promise<PartyIds>,
   stage: DraftStage,
   answers: NotificationAnswers,
+  { leaveUnanswered = [] }: SeedOptions = {},
 ): Promise<SeedStep[]> => {
   assertConsistentAnswers(answers);
   if (answers.accompanyingDocument) {
@@ -182,7 +199,12 @@ export const seedSteps = async (
     return unlocked;
   }
   const parties = await resolveParties(partyNamesFrom(answers));
-  const throughArrival = [...unlocked, ...consignmentSteps(answers), ...addressSteps(parties, answers), arrivalStep(answers)];
+  const throughArrival = [
+    ...unlocked,
+    ...consignmentSteps(answers, leaveUnanswered),
+    ...addressSteps(parties, answers),
+    arrivalStep(answers),
+  ];
   return stage === 'partial' ? throughArrival : [...throughArrival, ...transportSteps(answers), contactStep(parties)];
 };
 
