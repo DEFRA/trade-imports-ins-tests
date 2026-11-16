@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, type PlantsJourney } from '@flows/plants/journey';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
+import { addressRoles } from '@domain/shared/constants/address-types';
 import { expectNothingBetweenSearchAndResults } from '@page-objects/shared/address-picker-results';
 
 const PICKER_CASES = [
@@ -8,12 +9,14 @@ const PICKER_CASES = [
     pageName: 'place of destination',
     pickerKey: 'placeOfDestination',
     errorText: 'Select a place of destination from the list',
+    role: addressRoles.placeOfDestination,
     openPicker: (plantsJourney: PlantsJourney) => plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING),
   },
   {
     pageName: 'consignor',
     pickerKey: 'consignorSelect',
     errorText: 'Select a consignor from the list',
+    role: addressRoles.consignor,
     openPicker: async (plantsJourney: PlantsJourney, api: AddressBookApiClient) =>
       (await plantsJourney.toConsignorOfNewNotification(api, PLANTS_FOR_PLANTING)).reference,
   },
@@ -46,7 +49,7 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
     await expect(plantsPages.placeOfDestination.checkedAddress).toHaveCount(0);
   });
 
-  for (const { pageName, pickerKey, errorText, openPicker } of PICKER_CASES) {
+  for (const { pageName, pickerKey, errorText, role, openPicker } of PICKER_CASES) {
     test(`${pageName}: an address deleted after it was ticked is refused the same way on Save and return to overview and on Save and continue`, async ({
       pages,
       plantsPages,
@@ -57,7 +60,7 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
       const reference = await openPicker(plantsJourney, addressBookApi);
 
       for (const save of [picker.saveAndReturnToOverview, picker.saveAndContinue]) {
-        const { searchTerm } = await plantsJourney.createSearchTickThenDeleteAddress(addressBookApi, picker);
+        const { searchTerm } = await plantsJourney.createSearchTickThenDeleteAddress(addressBookApi, picker, role);
         await save.click();
 
         await expect(pages.page).toHaveURL(picker.expectedUrlPattern(reference));

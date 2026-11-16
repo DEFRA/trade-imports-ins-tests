@@ -239,10 +239,15 @@ export class PlantsJourney {
     await this.plantsPages.placeOfDestination.saveAndContinue.click();
   }
 
-  /** Creates an address-book record, searches the open picker for it, ticks it, then deletes the record from the book. */
-  async createSearchTickThenDeleteAddress(api: AddressBookApiClient, picker: PlantsAddressBookPickerPage): Promise<{ searchTerm: string }> {
+  /** Creates an address-book record holding the given role, searches the open picker for it,
+   * ticks it, then deletes the record from the book. */
+  async createSearchTickThenDeleteAddress(
+    api: AddressBookApiClient,
+    picker: PlantsAddressBookPickerPage,
+    role: AddressRole,
+  ): Promise<{ searchTerm: string }> {
     const addressName = `Deleted Before Save Nursery ${randomUUID()}`;
-    const record = await api.createAddress(nurseryAddress(addressName));
+    const record = await api.createAddress(nurseryAddress(addressName, 'GB', [role]));
     await picker.searchFor(addressName);
     await picker.address(addressName).check();
     await api.deleteAddress(record.id);

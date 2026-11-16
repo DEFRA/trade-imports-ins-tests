@@ -117,6 +117,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       await animalsPages.addresses.changeParty('Consignor').click();
       const picker = animalsPages.consignorSelection;
       await picker.select(chosenName);
+      await picker.search(chosenName);
       const chosenRow = picker.party(chosenName);
       const pickerUrl = new URL(pages.page.url());
 
