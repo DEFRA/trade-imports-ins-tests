@@ -122,7 +122,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
 
     await animalsPages.notificationView.open(referenceNumber);
     await expect(animalsPages.notificationView.viewHeader.reference).toHaveText(referenceNumber);
-    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted action required');
     await expect(animalsPages.notificationView.changeLink(/^Change/)).toHaveCount(0);
   });
 });

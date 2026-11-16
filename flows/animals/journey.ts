@@ -32,6 +32,7 @@ import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { getRelativeAppDateText } from '@utils/date-utils';
+import { timestampedReference } from '@utils/timestamped-reference';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
@@ -101,8 +102,6 @@ export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffse
 
 export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
 export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
-
-const timestampedReference = (referencePrefix: string): string => `${referencePrefix}${Date.now()}`;
 
 export const certificateDocument = (referencePrefix: string): AccompanyingDocumentAnswer => ({
   reference: timestampedReference(referencePrefix),

@@ -94,7 +94,7 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await plantsPages.consignmentContactSelect.address(address.name).check();
       await plantsPages.consignmentContactSelect.saveAndContinue.click();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-      await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
+      await expect(plantsPages.notificationView.viewHeader.reference).toHaveText(reference);
       await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
       await plantsPages.notificationView.btnContinue.click();
       await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrlPattern(reference));
@@ -109,7 +109,7 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await pages.page.reload();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
       await expect(plantsPages.notificationView.viewHeader.reference).toHaveText(reference);
-      await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');
+      await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted');
       await expect(plantsPages.notificationView.changeLinks).toHaveCount(0);
       await expect(plantsPages.notificationView.btnContinue).toHaveCount(0);
       await expect(plantsPages.notificationView.lateBanner).toHaveCount(scenario.late ? 1 : 0);

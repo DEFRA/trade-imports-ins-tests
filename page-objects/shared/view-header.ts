@@ -5,11 +5,11 @@ export class ViewHeader {
   constructor(private readonly page: Page) {}
 
   get reference(): Locator {
-    return this.page.getByRole('main').getByRole('heading', { level: 1 });
+    return this.page.getByRole('main').getByRole('heading', { level: 1, name: /^GBN-[A-Z]+-\d{2}-[0-9A-Z]{6}$/ });
   }
 
   get statusTag(): Locator {
-    return this.page.getByRole('main').locator('.govuk-tag').first();
+    return this.page.locator('main h1 + .govuk-tag');
   }
 
   get dateCreated(): Locator {

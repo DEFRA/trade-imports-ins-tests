@@ -1,4 +1,4 @@
-import { type Locator, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { pageLoadWait } from '@config/timeouts';
 import { commodityCardTitle, speciesBlockHeading, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { NotificationPage, type OpenOptions } from '@page-objects/shared/base-page';
@@ -25,16 +25,13 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.viewHeader.reference.or(this.amendReviewHeading).or(this.resubmittingHeading);
   }
 
-  get volatileHeaderParts(): Locator[] {
-    return [this.viewHeader.reference, this.viewHeader.dateCreated, this.viewHeader.notificationReferenceValue];
-  }
-
-  async pinReferenceText(): Promise<void> {
-    for (const reference of [this.viewHeader.reference, this.viewHeader.notificationReferenceValue]) {
-      await reference.evaluate((element) => {
-        element.textContent = 'GBN-AG-26-AAAAAA';
-      });
+  async expectDraftReview(referenceNumber?: string): Promise<void> {
+    if (referenceNumber) {
+      await expect(this.viewHeader.reference).toHaveText(referenceNumber);
+    } else {
+      await expect(this.viewHeader.reference).toBeVisible();
     }
+    await expect(this.viewHeader.statusTag).toHaveText('Draft');
   }
 
   get referenceNumberCaption(): Locator {
@@ -84,9 +81,8 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   }
 
   get commodityCardTitles(): Locator {
-    const sectionHeading = 'normalize-space()="2. Description of the goods"';
     return this.page.locator(
-      `xpath=//h2[${sectionHeading}]/following-sibling::div[contains(@class, "govuk-summary-card")][.//*[starts-with(@id, "species-block-")]][preceding-sibling::h2[1][${sectionHeading}]]//h3`,
+      'xpath=//h3[preceding::h2[1][normalize-space()="2. Description of the goods"]][../following-sibling::*[.//*[starts-with(@id, "species-block-")]]]',
     );
   }
 
@@ -126,9 +122,8 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   partyRow(card: string, role: string): Locator {
     return this.summaryCard(card)
-      .getByRole('term')
-      .and(this.page.getByText(role, { exact: true }))
-      .locator('xpath=..');
+      .locator('dl > div')
+      .filter({ has: this.page.getByRole('term').and(this.page.getByText(role, { exact: true })) });
   }
 
   cardLinks(card: string): Locator {
@@ -146,8 +141,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   async open(referenceNumber: string, { attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await super.open(referenceNumber, { attemptSignIn, ...identity });
     if (attemptSignIn) {
-      const submittedHeading = this.page.getByRole('heading', { level: 1, name: referenceNumber, exact: true });
-      await this.anyReviewHeading.or(submittedHeading).waitFor(pageLoadWait);
+      await this.anyReviewHeading.waitFor(pageLoadWait);
     }
   }
 

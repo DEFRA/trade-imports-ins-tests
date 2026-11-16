@@ -29,9 +29,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('renders the recorded answers in the numbered design sections', async ({ pages, animalsPages }) => {
-      await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
-      await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
-      await expect(animalsPages.notificationView.statusTag).toHaveText('Draft');
+      await animalsPages.notificationView.expectDraftReview();
       await expect(animalsPages.notificationView.viewHeader.btnAmend).toHaveCount(0);
       await expect(pages.page.getByRole('heading', { name: '1. About the consignment' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '2. Description of the goods' })).toBeVisible();
@@ -123,8 +121,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('shows no error summary once every section is answered', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
-      await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+      await animalsPages.notificationView.expectDraftReview();
       await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
     });
 
@@ -167,7 +164,8 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       animalsPages,
       journeyContext,
     }) => {
-      const { viewHeader, statusTag } = animalsPages.notificationView;
+      const { viewHeader } = animalsPages.notificationView;
+      const { statusTag } = viewHeader;
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(journeyContext.referenceNumber));
       await expect(viewHeader.reference).toHaveText(journeyContext.referenceNumber);
       await expect(statusTag).toHaveText('Submitted');
@@ -232,7 +230,8 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     test('is headed by an orange Submitted action required tag and the warning to upload a health certificate', async ({
       animalsPages,
     }) => {
-      const { viewHeader, statusTag } = animalsPages.notificationView;
+      const { viewHeader } = animalsPages.notificationView;
+      const { statusTag } = viewHeader;
       await expect(statusTag).toHaveText('Submitted action required');
       await expect(statusTag).toHaveClass(/govuk-tag--orange/);
       await expect(viewHeader.actionRequiredWarning).toBeVisible();

@@ -15,7 +15,12 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     animalsPages,
   }, testInfo) => {
     test.slow();
-    const { eicar } = await animalsPages.accompanyingDocuments.uploadInfectedDocumentAndWaitForVirusFound(testInfo.outputDir, issueDate);
+    const { row, eicar } = await animalsPages.accompanyingDocuments.uploadInfectedDocument(testInfo.outputDir, issueDate);
+    const { pending, text } = await firstScanStatus(row, 'Virus found');
+    if (pending) {
+      expect(text).not.toContain('View file');
+    }
+    await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(
@@ -39,7 +44,8 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     journeyContext,
   }, testInfo) => {
     test.slow();
-    await animalsPages.accompanyingDocuments.uploadInfectedDocumentAndWaitForVirusFound(testInfo.outputDir, issueDate);
+    const { row } = await animalsPages.accompanyingDocuments.uploadInfectedDocument(testInfo.outputDir, issueDate);
+    await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
 
     await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
 

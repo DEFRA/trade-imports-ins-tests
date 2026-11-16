@@ -3,7 +3,7 @@ import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { test, expect } from '@fixtures';
 import { expectOpenFromReview, expectSaveAndContinueWalk, expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
-import { AMENDED_REFERENCE } from '@domain/animals/constants/origin-page';
+import { AMENDED_INTERNAL_REFERENCE } from '@domain/animals/constants/origin-page';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
 const CHANGE_ORIGIN_OF_IMPORT = 'Change origin of import';
@@ -94,7 +94,7 @@ test.describe('Amendment page endings', () => {
     const reference = await openOriginFromOriginOfImportChangeLink(animalsPages, animalsSeededJourney);
 
     await expectOpenFromReview(pages.page, animalsPages.originOfImport, reference, animalsPages.notificationView.slug);
-    await animalsPages.originOfImport.internalReference.fill(AMENDED_REFERENCE);
+    await animalsPages.originOfImport.internalReference.fill(AMENDED_INTERNAL_REFERENCE);
     await animalsPages.originOfImport.saveAndContinue.click();
 
     await expect(animalsPages.commoditySelection.heading).toBeVisible();

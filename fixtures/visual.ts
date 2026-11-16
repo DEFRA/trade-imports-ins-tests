@@ -18,8 +18,12 @@ export const test = process.platform === 'darwin' ? legacyScrollersTest : base;
 
 export { expect };
 
+export async function pinText(locator: Locator, text: string): Promise<void> {
+  await locator.evaluate((element, pinned) => {
+    element.textContent = pinned;
+  }, text);
+}
+
 export async function pinDateText(locator: Locator): Promise<void> {
-  await locator.evaluate((element) => {
-    element.textContent = '1 November 2026';
-  });
+  await pinText(locator, '1 November 2026');
 }

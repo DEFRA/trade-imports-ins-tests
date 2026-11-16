@@ -49,7 +49,7 @@ test.describe('Declaration page', { tag: '@duplicated-in-frontend' }, () => {
         'Complete roles and addresses',
         'Complete contact address for this consignment',
       ]);
-      await expect(animalsPages.notificationView.statusTag).toHaveText('Draft');
+      await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
     });
   });
 

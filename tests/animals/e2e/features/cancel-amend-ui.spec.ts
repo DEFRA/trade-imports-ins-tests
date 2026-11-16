@@ -7,12 +7,12 @@ test.describe('Cancel amendment through the UI', () => {
       await animalsNotificationActions.toNotificationView(referenceNumber);
     });
 
-    test('shows the Cancel amend link while the notification is amending', async ({ animalsPages }) => {
+    test('shows the Cancel amend button while the notification is amending', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
       await expect(animalsPages.notificationView.btnCancelAmend).toBeVisible();
     });
 
-    test('shows the Amend status bar with Cancel amend on Overview, a question page and the review', async ({
+    test('shows the Amend status bar with its Cancel amend link on Overview and a question page, and a Cancel amend button on the review', async ({
       animalsPages,
       journeyContext,
     }) => {
@@ -111,7 +111,7 @@ test.describe('Cancel amendment through the UI', () => {
 
       await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
       await expect(pages.page.getByRole('alert')).toContainText('The amendment has been cancelled and the submitted version restored.');
-      await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
+      await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted action required');
       await expect(animalsPages.notificationView.btnCancelAmend).toHaveCount(0);
       await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
       await expect(countryRow).toContainText('France');
@@ -143,7 +143,7 @@ test.describe('Cancel amend without JavaScript', { tag: '@duplicated-in-frontend
     await animalsPages.notificationCancelAmend.confirm.click();
 
     await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
-    await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted action required');
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted action required');
     await expect(animalsPages.notificationView.btnCancelAmend).toHaveCount(0);
     await expect(countryRow).toContainText('France');
   });

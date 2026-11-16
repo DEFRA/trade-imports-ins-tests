@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { AMENDED_REFERENCE } from '@domain/animals/constants/origin-page';
+import { AMENDED_INTERNAL_REFERENCE } from '@domain/animals/constants/origin-page';
 
 test.describe('Amendment review title', () => {
   test('opens headed and titled as a review, then as re-submitting once an answer changes', async ({
@@ -15,7 +15,7 @@ test.describe('Amendment review title', () => {
     await expect(pages.page).toHaveTitle(/^Review your notification/);
     await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
 
-    await animalsNotificationActions.changeInternalReferenceOnAmendment(reference, AMENDED_REFERENCE);
+    await animalsNotificationActions.changeInternalReferenceOnAmendment(reference, AMENDED_INTERNAL_REFERENCE);
 
     await expect(animalsPages.notificationView.resubmittingHeading).toBeVisible();
     await expect(pages.page).toHaveTitle(/^Review before re-submitting/);

@@ -20,7 +20,8 @@ async function expectReview(plantsPages: PlantsPages) {
 }
 
 async function assertReadOnly(plantsPages: PlantsPages, reference: string) {
-  const { viewHeader, statusTag } = plantsPages.notificationView;
+  const { viewHeader } = plantsPages.notificationView;
+  const { statusTag } = viewHeader;
   await expect(viewHeader.reference).toHaveText(reference);
   await expect(statusTag).toHaveText('Submitted');
   await expect(plantsPages.notificationView.changeLinks).toHaveCount(0);
@@ -59,8 +60,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(contactEntry).toHaveAttribute('href', '#contact');
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-    await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await expectReview(plantsPages);
     await expect(contactEntry).toBeVisible();
     await plantsPages.overview.open(reference);
     const review = plantsPages.overview.taskRowByTitle('Check and submit');
@@ -71,8 +71,6 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.consignmentContactSelect.address(address.name).check();
     await plantsPages.consignmentContactSelect.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-    await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
     await expectReview(plantsPages);
   });
 
@@ -127,8 +125,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(plantsPages.origin.heading).toBeVisible();
 
     await plantsPages.origin.linkBack.click();
-    await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await expectReview(plantsPages);
   });
 
   test('declaration is required and submission produces a read-only notification and Submitted dashboard card', async ({
@@ -145,8 +142,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(plantsPages.declaration.errorSummary).toContainText('Confirm that the information is true and correct before submitting');
     await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrlPattern(reference));
     await plantsPages.declaration.linkBack.click();
-    await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await expectReview(plantsPages);
     await plantsJourney.submitFromReview();
     await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrlPattern(reference));
     await expect(plantsPages.confirmation.panel).toContainText(reference);
@@ -174,7 +170,8 @@ test.describe('High-risk plants check and submit section', () => {
       plantsPages,
     }) => {
       const reference = plantsPages.notificationView.referenceNumberFromUrl();
-      const { viewHeader, statusTag } = plantsPages.notificationView;
+      const { viewHeader } = plantsPages.notificationView;
+      const { statusTag } = viewHeader;
       await expect(viewHeader.reference).toHaveText(reference);
       await expect(statusTag).toHaveText('Draft');
       await expect(statusTag).toHaveClass(/govuk-tag--blue/);
@@ -354,10 +351,8 @@ test.describe('High-risk plants check and submit section', () => {
       await expect(plantsPages.notificationView.card('Import details')).toContainText('France');
       await plantsPages.notificationView.btnContinue.click();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-      await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
-      await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+      await expectReview(plantsPages);
       const correction = plantsPages.notificationView.errorSummaryLink(/Poland/);
-      await expect(plantsPages.overview.statusTag).toHaveText('Draft');
       await expect(plantsPages.notificationView.viewHeader.btnAmend).toHaveCount(0);
       await correction.click();
       await expectOpenFromReview(pages.page, plantsPages.origin, reference, plantsPages.notificationView.slug);
@@ -721,8 +716,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await form.saveChanges.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
 
-    await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await expectReview(plantsPages);
     const destination = plantsPages.notificationView.card('Place of destination');
     await expect(destination).toContainText(editedName);
     await expect(destination).toContainText('Dundee');
@@ -840,17 +834,15 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await expect(plantsPages.notificationView.row('Place of destination', 'Name')).not.toContainText('Enter');
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-    await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await expectReview(plantsPages);
     await expect(plantsPages.notificationView.errorSummary).toContainText(error);
 
     await plantsPages.declaration.open(reference);
     await plantsPages.declaration.checkbox.check();
     await plantsPages.declaration.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-    await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
-    await expect(plantsPages.overview.statusTag).not.toHaveText('Submitted');
+    await expectReview(plantsPages);
+    await expect(plantsPages.notificationView.viewHeader.statusTag).not.toHaveText('Submitted');
 
     await plantsPages.notificationView.errorSummaryLink(error).click();
     await expect(plantsPages.placeOfDestinationEdit.heading).toBeVisible();
@@ -858,8 +850,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await plantsPages.placeOfDestinationEdit.saveChanges.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
 
-    await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await expectReview(plantsPages);
     await expect(plantsPages.notificationView.errorSummary).not.toContainText(error);
     await expect(plantsPages.notificationView.errorSummary).toContainText(contactError);
 
@@ -869,8 +860,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await plantsPages.contactAddressEdit.saveChanges.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
 
-    await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await expectReview(plantsPages);
     await expect(plantsPages.notificationView.errorSummary).toHaveCount(0);
     await plantsJourney.submitFromReview();
   });

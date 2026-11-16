@@ -23,8 +23,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.originOfImport.saveAndContinue.click();
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await animalsPages.notificationView.open(referenceNumber);
-    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await animalsPages.notificationView.expectDraftReview();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(countryRow).toContainText('Belgium');
 
@@ -37,8 +36,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.additionalDetails.saveAndContinue.click();
     await expect(animalsPages.arrivalDetails.heading).toBeVisible();
     await animalsPages.notificationView.open(referenceNumber);
-    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await animalsPages.notificationView.expectDraftReview();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(certifiedForRow).toContainText('Exhibition');
   });
@@ -51,8 +49,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(animalsPages.importReason.heading).toBeVisible();
 
     await animalsPages.importReason.linkBack.click();
-    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await animalsPages.notificationView.expectDraftReview();
   });
 
   test('Save and continue on a page opened by a Change link goes on, and the review shows the changed answer', async ({
@@ -102,8 +99,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.contactAddress.address(CONSIGNEE_NAME).check();
     await animalsPages.contactAddress.saveAndContinue.click();
 
-    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await animalsPages.notificationView.expectDraftReview();
     await expect(pages.page).toHaveURL(
       animalsPages.notificationView.expectedUrlPatternOnTrail(referenceNumber, [
         animalsPages.notificationView.slug,
@@ -142,8 +138,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.notificationView.changeLink('Change addresses').click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await animalsPages.addresses.linkBack.click();
-    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await animalsPages.notificationView.expectDraftReview();
   });
 
   test('the documents Change link opens the page with a Back link to the review, which stays after a refusal, after Save and add another and after Remove', async ({
@@ -176,7 +171,6 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await expect(animalsPages.accompanyingDocuments.linkBack).toHaveAttribute('href', reviewUrl);
 
     await animalsPages.accompanyingDocuments.linkBack.click();
-    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await animalsPages.notificationView.expectDraftReview();
   });
 });

@@ -1,7 +1,5 @@
 import type { Locator } from '@playwright/test';
-import { NotificationPage } from '@page-objects/shared/base-page';
-
-const TASK_LIST_NAME = 'Notification tasklist';
+import { NotificationPage, TASK_LIST_NAME } from '@page-objects/shared/base-page';
 
 export class AnimalsOverviewPage extends NotificationPage {
   constructor(page: ConstructorParameters<typeof NotificationPage>[0]) {
@@ -14,10 +12,6 @@ export class AnimalsOverviewPage extends NotificationPage {
 
   get taskListHeading(): Locator {
     return this.page.getByRole('heading', { level: 2, name: TASK_LIST_NAME });
-  }
-
-  get taskListRegion(): Locator {
-    return this.region(TASK_LIST_NAME);
   }
 
   get commodityTotalsRegion(): Locator {
