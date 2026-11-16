@@ -5,7 +5,7 @@ import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { CREATE_PATH, CREATED_AT_ORIGIN } from '@flows/animals/seeded-journey';
 import { CPH_NUMBER, MANDATORY_ANSWERS as answers } from '@domain/animals/constants/journey-options';
-import { commodityNames } from '@domain/animals/constants/commodity-names';
+import { storedCommodityNames } from '@domain/animals/constants/commodity-names';
 
 const referenceNumberFrom = (redirectPath: string): string => {
   const referenceNumber = CREATED_AT_ORIGIN.exec(redirectPath)?.groups?.referenceNumber;
@@ -87,7 +87,7 @@ test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
 
         expect(doc.status).toBe('DRAFT');
         expect(notification.origin.countryCode).toBe(answers.countryCode.value);
-        expect(cow.name).toBe(commodityNames[cowLine.species.commodityCode]);
+        expect(cow.name).toBe(storedCommodityNames[cowLine.species.commodityCode]);
         expect(cow.commodityCode).toBe(cowLine.species.commodityCode);
         expect(species.text).toBe(cowLine.species.latinName);
         expect(species.earTag).toBe(cowLine.earTag);
