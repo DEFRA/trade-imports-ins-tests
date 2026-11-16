@@ -28,13 +28,14 @@ async function assertReadOnly(plantsPages: PlantsPages, reference: string) {
   await expect(plantsPages.notificationView.btnContinue).toHaveCount(0);
 }
 
-async function expectNotificationReferenceAsText(plantsPages: PlantsPages) {
+async function expectReferenceAndCustomsDocumentCodeAsText(plantsPages: PlantsPages) {
   const { viewHeader } = plantsPages.notificationView;
   await expect(viewHeader.importReferencesWarning).toContainText(
     'You must use the correct reference and code on the customs declaration or your consignment will be delayed.',
   );
-  await expect(viewHeader.importReferences.getByRole('term')).toHaveText(['Notification reference']);
+  await expect(viewHeader.importReferences.getByRole('term')).toHaveText(['Notification reference', 'Customs document code']);
   await expect(viewHeader.importReferenceValue('Notification reference')).toHaveText(plantsPages.notificationView.referenceNumberFromUrl());
+  await expect(viewHeader.importReferenceValue('Customs document code')).toHaveText('C085');
   await expect(viewHeader.importReferences.getByRole('button')).toHaveCount(0);
 }
 
@@ -193,10 +194,10 @@ test.describe('High-risk plants check and submit section', () => {
       await expect(btnDelete).toHaveClass(/govuk-button--warning/);
     });
 
-    test('shows the notification reference as the only import reference number, as text with the warning and no button', async ({
+    test("shows a draft's notification reference and the customs document code C085 as text with the warning and no button", async ({
       plantsPages,
     }) => {
-      await expectNotificationReferenceAsText(plantsPages);
+      await expectReferenceAndCustomsDocumentCodeAsText(plantsPages);
     });
 
     test('keeps its Change links and ends with Continue and Save and return to overview', async ({ plantsPages }) => {
@@ -240,10 +241,10 @@ test.describe('High-risk plants check and submit section', () => {
       await expectAmending(pages, plantsPages, reference);
     });
 
-    test('shows the notification reference as the only import reference number, as text with the warning and no button', async ({
+    test("shows a submitted notification's notification reference and the customs document code C085 as text with the warning and no button", async ({
       plantsPages,
     }) => {
-      await expectNotificationReferenceAsText(plantsPages);
+      await expectReferenceAndCustomsDocumentCodeAsText(plantsPages);
     });
   });
 
