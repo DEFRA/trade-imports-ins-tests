@@ -683,6 +683,11 @@ export class AnimalsJourney {
     await this.openAdditionalDetailsFromOverview();
   }
 
+  async toRolesAndAddressesWithSourcePartiesChosen(parties: PartyAnswer[]): Promise<void> {
+    await this.toRolesAndAddresses();
+    await this.addParties(parties);
+  }
+
   async toRolesAndAddressesOfCurrentNotification(): Promise<void> {
     await this.openCurrentOverview();
     await this.animalsPages.overview.task('Roles and addresses').click();
