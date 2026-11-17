@@ -3,6 +3,7 @@ import { ITAHC_DOCUMENT_TYPE_LABEL } from '@domain/animals/constants/document-ty
 import { test, expect } from '@fixtures';
 import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import type { AnimalsPages } from '@page-objects';
+import { expectImportReferencesAsText } from '@page-objects/shared/view-header';
 import { todayOrYesterdayServiceDisplayDatePattern } from '@utils/date-utils';
 
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
@@ -13,16 +14,6 @@ const expectDeleteOpensConfirmation = async (animalsPages: AnimalsPages): Promis
   await expect(animalsPages.deleteNotification.heading).toBeVisible();
 };
 
-const expectImportReferencesAsText = async (animalsPages: AnimalsPages, referenceNumber: string): Promise<void> => {
-  const { viewHeader } = animalsPages.notificationView;
-  await expect(viewHeader.importReferencesWarning).toContainText(
-    'You must use the correct reference and code on the customs declaration or your consignment will be delayed.',
-  );
-  await expect(viewHeader.importReferenceValue('Notification reference')).toHaveText(referenceNumber);
-  await expect(viewHeader.importReferenceValue('Customs document code')).toHaveText('C640');
-  await expect(viewHeader.importReferences.getByRole('button')).toHaveCount(0);
-};
-
 test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, () => {
   test.describe('DRAFT', () => {
     test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
@@ -31,7 +22,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('renders the recorded answers in the numbered design sections', async ({ pages, animalsPages }) => {
-      await animalsPages.notificationView.expectDraftReview();
+      await animalsPages.notificationView.viewHeader.expectDraftReview();
       await expect(animalsPages.notificationView.viewHeader.btnAmend).toHaveCount(0);
       await expect(pages.page.getByRole('heading', { name: '1. About the consignment' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '2. Description of the goods' })).toBeVisible();
@@ -82,7 +73,10 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       animalsPages,
       journeyContext,
     }) => {
-      await expectImportReferencesAsText(animalsPages, journeyContext.referenceNumber);
+      await expectImportReferencesAsText(animalsPages.notificationView.viewHeader, {
+        referenceNumber: journeyContext.referenceNumber,
+        customsDocumentCode: 'C640',
+      });
     });
 
     test('shows Change links for the recorded answers', async ({ animalsPages }) => {
@@ -123,7 +117,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('shows no error summary once every section is answered', async ({ animalsPages }) => {
-      await animalsPages.notificationView.expectDraftReview();
+      await animalsPages.notificationView.viewHeader.expectDraftReview();
       await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
     });
 
@@ -192,7 +186,10 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('shows the import reference numbers as text with the warning and no Copy button', async ({ animalsPages, journeyContext }) => {
-      await expectImportReferencesAsText(animalsPages, journeyContext.referenceNumber);
+      await expectImportReferencesAsText(animalsPages.notificationView.viewHeader, {
+        referenceNumber: journeyContext.referenceNumber,
+        customsDocumentCode: 'C640',
+      });
     });
 
     test('copies the submitted notification to a new draft', async ({ animalsPages, journeyContext }) => {

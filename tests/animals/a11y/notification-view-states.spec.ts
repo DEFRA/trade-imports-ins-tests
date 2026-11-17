@@ -29,7 +29,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     const submittedReference = await animalsSeededJourney.createSubmittedNotification();
 
-    await test.step('Review your notification (submitted, read-only)', async () => {
+    await test.step('Submitted view (read-only)', async () => {
       await animalsPages.notificationView.open(submittedReference);
       await animalsPages.notificationView.btnDelete.waitFor();
       await runA11yScan();

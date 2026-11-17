@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 import { pageLoadWait } from '@config/timeouts';
 import { commodityCardTitle, speciesBlockHeading, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { NotificationPage, type OpenOptions } from '@page-objects/shared/base-page';
@@ -23,15 +23,6 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   get anyReviewHeading(): Locator {
     return this.viewHeader.reference.or(this.amendReviewHeading).or(this.resubmittingHeading);
-  }
-
-  async expectDraftReview(referenceNumber?: string): Promise<void> {
-    if (referenceNumber) {
-      await expect(this.viewHeader.reference).toHaveText(referenceNumber);
-    } else {
-      await expect(this.viewHeader.reference).toBeVisible();
-    }
-    await expect(this.viewHeader.statusTag).toHaveText('Draft');
   }
 
   get referenceNumberCaption(): Locator {
@@ -86,7 +77,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
       .filter({ has: this.page.getByRole('heading', { name: speciesBlockHeading(line), exact: true }) });
   }
 
-  speciesBlockHeadings(line: CommodityLine): Locator {
+  speciesBlockHeadingsInCommodityCardOf(line: CommodityLine): Locator {
     return this.commodityCard(line).locator(SPECIES_BLOCK_SELECTOR).getByRole('heading', { level: 4 });
   }
 
@@ -139,7 +130,6 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     }
   }
 
-  /** Opens the view's address and signs in, without waiting for any heading: for a notification that may not exist. */
   async openWithoutWaiting(referenceNumber: string): Promise<void> {
     await super.open(referenceNumber);
   }

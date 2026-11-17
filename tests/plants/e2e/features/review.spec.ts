@@ -10,14 +10,10 @@ import {
 } from '@flows/plants/journey';
 import type { PlantsPages, SharedPages } from '@page-objects';
 import { TRAIL_START } from '@page-objects/shared/base-page';
+import { expectImportReferencesAsText } from '@page-objects/shared/view-header';
 import { expectOpenFromReview, expectSaveAndContinueWalk, expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 import { addressRoles } from '@domain/shared/constants/address-types';
 import { todayOrTomorrowServiceDisplayDatePattern, todayOrYesterdayServiceDisplayDatePattern } from '@utils/date-utils';
-
-async function expectReview(plantsPages: PlantsPages) {
-  await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
-  await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
-}
 
 async function assertReadOnly(plantsPages: PlantsPages, reference: string) {
   const { viewHeader } = plantsPages.notificationView;
@@ -28,21 +24,19 @@ async function assertReadOnly(plantsPages: PlantsPages, reference: string) {
   await expect(plantsPages.notificationView.btnContinue).toHaveCount(0);
 }
 
-async function expectReferenceAndCustomsDocumentCodeAsText(plantsPages: PlantsPages) {
-  const { viewHeader } = plantsPages.notificationView;
-  await expect(viewHeader.importReferencesWarning).toContainText(
-    'You must use the correct reference and code on the customs declaration or your consignment will be delayed.',
-  );
-  await expect(viewHeader.importReferences.getByRole('term')).toHaveText(['Notification reference', 'Customs document code']);
-  await expect(viewHeader.importReferenceValue('Notification reference')).toHaveText(plantsPages.notificationView.referenceNumberFromUrl());
-  await expect(viewHeader.importReferenceValue('Customs document code')).toHaveText('C085');
-  await expect(viewHeader.importReferences.getByRole('button')).toHaveCount(0);
-}
-
 async function expectAmending(pages: SharedPages, plantsPages: PlantsPages, reference: string) {
   await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
   await expect(plantsPages.notificationView.statusTag).toHaveText('Amend');
   await expect(plantsPages.notificationView.btnCancelAmend).toBeVisible();
+}
+
+async function expectPlantsImportReferencesAsText(plantsPages: PlantsPages) {
+  const { viewHeader } = plantsPages.notificationView;
+  await expectImportReferencesAsText(viewHeader, {
+    referenceNumber: plantsPages.notificationView.referenceNumberFromUrl(),
+    customsDocumentCode: 'C085',
+  });
+  await expect(viewHeader.importReferences.getByRole('term')).toHaveText(['Notification reference', 'Customs document code']);
 }
 
 async function openIdentificationNumbersFromReviewChangeLink(plantsPages: PlantsPages, reference: string) {
@@ -61,7 +55,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(contactEntry).toHaveAttribute('href', '#contact');
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
     await expect(contactEntry).toBeVisible();
     await plantsPages.overview.open(reference);
     const review = plantsPages.overview.taskRowByTitle('Check and submit');
@@ -72,7 +66,7 @@ test.describe('High-risk plants check and submit section', () => {
     await plantsPages.consignmentContactSelect.address(address.name).check();
     await plantsPages.consignmentContactSelect.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
   });
 
   test('CYA renders numbered sections, scoped cards and contact details, and Change returns to saved answers', async ({
@@ -82,7 +76,7 @@ test.describe('High-risk plants check and submit section', () => {
     addressBookApi,
   }) => {
     const { address, reference } = await plantsJourney.completeNotification(addressBookApi);
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
     await expect(pages.page.getByRole('heading', { level: 2, name: /^[1-3]\. / })).toHaveText([
       '1. About the consignment',
       '2. Arrival and destination',
@@ -120,13 +114,13 @@ test.describe('High-risk plants check and submit section', () => {
     addressBookApi,
   }) => {
     await plantsJourney.completeNotification(addressBookApi);
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
 
     await plantsPages.notificationView.change('Change country of origin (Import details)').click();
     await expect(plantsPages.origin.heading).toBeVisible();
 
     await plantsPages.origin.linkBack.click();
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
   });
 
   test('declaration is required and submission produces a read-only notification and Submitted dashboard card', async ({
@@ -136,14 +130,14 @@ test.describe('High-risk plants check and submit section', () => {
     addressBookApi,
   }) => {
     const { reference } = await plantsJourney.completeNotification(addressBookApi);
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrlPattern(reference));
     await plantsPages.declaration.btnContinue.click();
     await expect(plantsPages.declaration.errorSummary).toContainText('Confirm that the information is true and correct before submitting');
     await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrlPattern(reference));
     await plantsPages.declaration.linkBack.click();
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
     await plantsJourney.submitFromReview();
     await expect(pages.page).toHaveURL(plantsPages.confirmation.expectedUrlPattern(reference));
     await expect(plantsPages.confirmation.panel).toContainText(reference);
@@ -197,7 +191,7 @@ test.describe('High-risk plants check and submit section', () => {
     test("shows a draft's notification reference and the customs document code C085 as text with the warning and no button", async ({
       plantsPages,
     }) => {
-      await expectReferenceAndCustomsDocumentCodeAsText(plantsPages);
+      await expectPlantsImportReferencesAsText(plantsPages);
     });
 
     test('keeps its Change links and ends with Continue and Save and return to overview', async ({ plantsPages }) => {
@@ -244,7 +238,7 @@ test.describe('High-risk plants check and submit section', () => {
     test("shows a submitted notification's notification reference and the customs document code C085 as text with the warning and no button", async ({
       plantsPages,
     }) => {
-      await expectReferenceAndCustomsDocumentCodeAsText(plantsPages);
+      await expectPlantsImportReferencesAsText(plantsPages);
     });
   });
 
@@ -318,7 +312,7 @@ test.describe('High-risk plants check and submit section', () => {
   ]) {
     test(`${type}: late notifications are accepted and highlighted`, async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
       const { reference } = await plantsJourney.completeNotification(addressBookApi, { type, days });
-      await expectReview(plantsPages);
+      await plantsPages.notificationView.viewHeader.expectDraftReview();
       await expect(
         pages.page.getByText(`If you submit this notification today it will be late. ${rule} You can still submit it.`, { exact: false }),
       ).toBeVisible();
@@ -352,7 +346,7 @@ test.describe('High-risk plants check and submit section', () => {
       await expect(plantsPages.notificationView.card('Import details')).toContainText('France');
       await plantsPages.notificationView.btnContinue.click();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-      await expectReview(plantsPages);
+      await plantsPages.notificationView.viewHeader.expectDraftReview();
       const correction = plantsPages.notificationView.errorSummaryLink(/Poland/);
       await expect(plantsPages.notificationView.viewHeader.btnAmend).toHaveCount(0);
       await correction.click();
@@ -375,7 +369,7 @@ test.describe('High-risk plants check and submit section', () => {
     addressBookApi,
   }) => {
     const { reference, address } = await plantsJourney.completeNotification(addressBookApi);
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
     await addressBookApi.deleteAddress(address.id);
     await pages.page.reload();
     const destination = plantsPages.notificationView.card('Place of destination');
@@ -424,7 +418,7 @@ test.describe('High-risk plants check and submit section', () => {
       addressBookApi,
     }) => {
       const { reference } = await plantsJourney.completeNotification(addressBookApi);
-      await expectReview(plantsPages);
+      await plantsPages.notificationView.viewHeader.expectDraftReview();
       await plantsJourney.submitFromReview();
       await plantsNotificationActions.amendNotification(reference);
       await expectAmending(pages, plantsPages, reference);
@@ -468,7 +462,7 @@ test.describe('High-risk plants check and submit section', () => {
     addressBookApi,
   }) => {
     await plantsJourney.completeNotification(addressBookApi);
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
 
     await expect(plantsPages.notificationView.endControls).toHaveText(['Continue', 'Save and return to overview']);
     await expect(plantsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
@@ -526,7 +520,7 @@ test.describe('High-risk plants check and submit section', () => {
     addressBookApi,
   }) => {
     const { reference } = await plantsJourney.completeNotification(addressBookApi);
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
     await plantsJourney.submitFromReview();
     await plantsNotificationActions.deleteNotification(reference);
     await expect(plantsPages.dashboard.heading).toBeVisible();
@@ -544,7 +538,7 @@ test.describe('High-risk plants check and submit section', () => {
       addressBookApi,
     }) => {
       const { reference } = await plantsJourney.completeNotification(addressBookApi, { days: initiallyLate ? 0 : 7 });
-      await expectReview(plantsPages);
+      await plantsPages.notificationView.viewHeader.expectDraftReview();
       await plantsJourney.submitFromReview();
       await plantsPages.confirmation.viewNotification.click();
       await expect(plantsPages.notificationView.lateBanner).toHaveCount(initiallyLate ? 1 : 0);
@@ -717,7 +711,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await form.saveChanges.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
 
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
     const destination = plantsPages.notificationView.card('Place of destination');
     await expect(destination).toContainText(editedName);
     await expect(destination).toContainText('Dundee');
@@ -828,21 +822,21 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     const error = 'Correct the address details for the place of destination';
     const contactError = 'Correct the contact address details for this consignment';
 
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
     await expect(plantsPages.notificationView.errorSummary).toContainText(error);
     await expect(plantsPages.notificationView.errorSummary).toContainText(contactError);
     await expect(plantsPages.notificationView.row('Place of destination', 'Address')).toContainText('Enter a valid country');
     await expect(plantsPages.notificationView.row('Place of destination', 'Name')).not.toContainText('Enter');
     await plantsPages.notificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
     await expect(plantsPages.notificationView.errorSummary).toContainText(error);
 
     await plantsPages.declaration.open(reference);
     await plantsPages.declaration.checkbox.check();
     await plantsPages.declaration.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
     await expect(plantsPages.notificationView.viewHeader.statusTag).not.toHaveText('Submitted');
 
     await plantsPages.notificationView.errorSummaryLink(error).click();
@@ -851,7 +845,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await plantsPages.placeOfDestinationEdit.saveChanges.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
 
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
     await expect(plantsPages.notificationView.errorSummary).not.toContainText(error);
     await expect(plantsPages.notificationView.errorSummary).toContainText(contactError);
 
@@ -861,7 +855,7 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await plantsPages.contactAddressEdit.saveChanges.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
 
-    await expectReview(plantsPages);
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
     await expect(plantsPages.notificationView.errorSummary).toHaveCount(0);
     await plantsJourney.submitFromReview();
   });

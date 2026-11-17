@@ -2,9 +2,6 @@ import { test, expect } from '@fixtures';
 import { CPH_NUMBER_WITH_SLASHES } from '@domain/animals/constants/journey-options';
 
 test.describe('All operator addresses', { tag: '@duplicated-in-frontend' }, () => {
-  // The api seed unlocks only origin + commodity, so the review page is reached
-  // through the full journey walk — the addresses leg of that walk picks the
-  // canned parties whose names and countries are asserted here.
   test(
     'check your answers lists all six operators with the picked name and country',
     { tag: '@cross-browser' },

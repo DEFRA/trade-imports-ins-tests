@@ -54,8 +54,7 @@ test.describe('Back on the review page', () => {
     await pages.page.reload();
     await plantsPages.origin.linkBack.click();
 
-    await expect(plantsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
   });
 
   test('after Continue is refused it still opens the contact address', async ({ plantsPages, plantsJourney, addressBookApi }) => {

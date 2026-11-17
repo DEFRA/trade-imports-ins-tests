@@ -10,7 +10,7 @@ test.describe('Back on the review page', () => {
     test.slow();
     await animalsJourney.toContactAddress();
     await animalsPages.contactAddress.saveAndContinue.click();
-    await animalsPages.notificationView.expectDraftReview();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
 
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.contactAddress.heading).toBeVisible();
@@ -25,7 +25,7 @@ test.describe('Back on the review page', () => {
     await animalsPages.overview.open(reference);
 
     await animalsPages.overview.reviewAndSubmitButton.click();
-    await animalsPages.notificationView.expectDraftReview();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
 
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.overview.heading).toBeVisible();
@@ -76,7 +76,7 @@ test.describe('Back on the review page', () => {
     await pages.page.reload();
     await animalsPages.originOfImport.linkBack.click();
 
-    await animalsPages.notificationView.expectDraftReview();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
   });
 });
 

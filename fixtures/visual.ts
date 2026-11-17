@@ -1,5 +1,6 @@
 import type { Browser, Locator } from '@playwright/test';
 import { test as base, expect } from '@fixtures';
+import type { ViewHeader } from '@page-objects/shared/view-header';
 import { launchLegacyScrollersBrowser } from '@utils/playwright/legacy-scrollers-browser';
 
 const legacyScrollersTest = base.extend<object, { browser: Browser }>({
@@ -26,4 +27,10 @@ export async function pinText(locator: Locator, text: string): Promise<void> {
 
 export async function pinDateText(locator: Locator): Promise<void> {
   await pinText(locator, '1 November 2026');
+}
+
+export async function pinViewHeader(viewHeader: ViewHeader): Promise<void> {
+  await pinText(viewHeader.reference, 'GBN-AG-26-AAAAAA');
+  await pinText(viewHeader.notificationReferenceValue, 'GBN-AG-26-AAAAAA');
+  await pinText(viewHeader.dateCreated, 'Date created: 1 January 2026');
 }

@@ -1,8 +1,11 @@
-import { type Locator, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import type { AccompanyingDocumentAnswer } from '@domain/animals/constants/journey-options';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { DatePicker } from '@page-objects/shared/date-picker';
+import { DOCUMENT_ISSUE_DATE } from '@resources/file-upload/constants';
+import { eicarPdfUpload } from '@utils/eicar-upload';
+import { timestampedReference } from '@utils/timestamped-reference';
 
 export const EMPTY_DOCUMENT_LIST_CARD_TEXT = /Save and add another\s*$/;
 
@@ -87,6 +90,14 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
     await this.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
     await this.saveAndAddAnother.click();
     await this.waitForScanComplete(document.reference);
+  }
+
+  async uploadInfectedDocumentAndWaitForVirusFound(): Promise<string> {
+    const reference = timestampedReference('PWVIRUS');
+    await this.fillDocument(reference, DOCUMENT_ISSUE_DATE, eicarPdfUpload());
+    await this.saveAndAddAnother.click();
+    await expect(this.documentRow(reference)).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
+    return reference;
   }
 
   async waitForScanComplete(reference: string): Promise<void> {

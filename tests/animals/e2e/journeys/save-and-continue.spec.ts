@@ -97,13 +97,13 @@ test.describe('Save and continue through a new notification', () => {
     await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
     await animalsPages.contactAddress.saveAndContinue.click();
 
-    await animalsPages.notificationView.expectDraftReview();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete main import reason');
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete roles and addresses');
 
     await animalsPages.notificationView.continueButton.click();
-    await animalsPages.notificationView.expectDraftReview();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
     await expect(animalsPages.notificationView.errorSummary).toBeFocused();
   });
 
@@ -186,7 +186,7 @@ test.describe('Save and continue to the next page', () => {
 
     await animalsPages.contactAddress.saveAndContinue.click();
 
-    await animalsPages.notificationView.expectDraftReview();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText([
       'Complete main import reason',

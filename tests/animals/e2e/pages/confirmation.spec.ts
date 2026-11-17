@@ -50,7 +50,7 @@ test.describe('Import notification submitted page for a notification not yet sub
     await declarationRequest;
 
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
-    await animalsPages.notificationView.expectDraftReview(referenceNumber);
+    await animalsPages.notificationView.viewHeader.expectDraftReview(referenceNumber);
   });
 });
 

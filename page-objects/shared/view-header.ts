@@ -1,4 +1,7 @@
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
+
+const IMPORT_REFERENCES_WARNING =
+  'You must use the correct reference and code on the customs declaration or your consignment will be delayed.';
 
 /** The header of a notification's view, in every status that has one: reference, statusTag, dateCreated or dateSubmitted, actions and import reference numbers. */
 export class ViewHeader {
@@ -46,4 +49,23 @@ export class ViewHeader {
       .filter({ has: this.page.getByText(key, { exact: true }) })
       .locator('xpath=following-sibling::dd[1]');
   }
+
+  async expectDraftReview(referenceNumber?: string): Promise<void> {
+    if (referenceNumber) {
+      await expect(this.reference).toHaveText(referenceNumber);
+    } else {
+      await expect(this.reference).toBeVisible();
+    }
+    await expect(this.statusTag).toHaveText('Draft');
+  }
+}
+
+export async function expectImportReferencesAsText(
+  viewHeader: ViewHeader,
+  { referenceNumber, customsDocumentCode }: { referenceNumber: string; customsDocumentCode: string },
+): Promise<void> {
+  await expect(viewHeader.importReferencesWarning).toContainText(IMPORT_REFERENCES_WARNING);
+  await expect(viewHeader.importReferenceValue('Notification reference')).toHaveText(referenceNumber);
+  await expect(viewHeader.importReferenceValue('Customs document code')).toHaveText(customsDocumentCode);
+  await expect(viewHeader.importReferences.getByRole('button')).toHaveCount(0);
 }

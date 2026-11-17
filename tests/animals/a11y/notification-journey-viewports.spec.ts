@@ -44,7 +44,7 @@ for (const [viewportName, viewport] of Object.entries(narrowViewports)) {
         await scanNarrowPage(page, runA11yScan);
       });
 
-      await test.step('Review your notification (amending)', async () => {
+      await test.step('Amend review (amending)', async () => {
         const amendReference = await animalsSeededJourney.createAmendNotification();
         await animalsSeededJourney.resumeInUi(amendReference, animalsPages.notificationView, {
           waitFor: animalsPages.notificationView.amendReviewHeading,

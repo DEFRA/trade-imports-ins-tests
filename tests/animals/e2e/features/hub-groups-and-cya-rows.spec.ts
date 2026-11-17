@@ -7,7 +7,7 @@ import {
   MANDATORY_ANSWERS,
   type NotificationAnswers,
 } from '@domain/animals/constants/journey-options';
-import { MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
+import { ALL_COMMODITY_LINES, MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
 
 const ABOUT_GOODS_AND_TRANSPORT = ['1. About the consignment', '2. Description of the goods', '3. Transport and arrival'];
 const CONTACT_ADDRESS_SECTION = '6. Contact address';
@@ -75,11 +75,11 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
   }) => {
     test.slow();
     const answers = ALL_ANSWERS_WITHOUT_DOCUMENT;
-    const [cowLine] = answers.commodityLines;
+    const cowLine = ALL_COMMODITY_LINES.cattle;
     await animalsJourney.toReview(answers);
     const commonName = await referenceDataApi.findCommonName(cowLine.species);
 
-    await animalsPages.notificationView.expectDraftReview();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
     await expect(pages.page.getByRole('heading', { level: 2 }).filter({ hasText: /^\d\.\s/ })).toHaveText(REVIEW_SECTION_HEADINGS);
     const documentCard = animalsPages.notificationView.documentCard(1);
     await expect(animalsPages.notificationView.summaryKeys(documentCard)).toHaveText(['Document reference']);
@@ -143,9 +143,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(speciesBlock.getByRole('columnheader', { name: 'Tattoo' })).toBeVisible();
     await expect(speciesBlock.getByRole('cell', { name: `${cowLine.species.latinName} 1`, exact: true })).toBeVisible();
     const { earTag, passportNumber, tattoo } = cowLine;
-    expect(earTag).toBeDefined();
-    expect(passportNumber).toBeDefined();
-    expect(tattoo).toBeDefined();
     await expect(speciesBlock.getByRole('cell', { name: earTag, exact: true })).toBeVisible();
     await expect(speciesBlock.getByRole('cell', { name: passportNumber, exact: true })).toBeVisible();
     await expect(speciesBlock.getByRole('cell', { name: tattoo, exact: true })).toBeVisible();
@@ -213,7 +210,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await animalsJourney.toReview(MANDATORY_ANSWERS);
 
     const [cattleLine] = MANDATORY_ANSWERS.commodityLines;
-    await animalsPages.notificationView.expectDraftReview();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
     await expect(pages.page.getByRole('heading', { level: 3 })).toHaveText([
       'Origin of import',
       'What are you importing?',
@@ -281,11 +278,13 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       commodityCardTitle(cattle),
       commodityCardTitle(domesticCat),
     ]);
-    await expect(animalsPages.notificationView.speciesBlockHeadings(cattle)).toHaveText([
+    await expect(animalsPages.notificationView.speciesBlockHeadingsInCommodityCardOf(cattle)).toHaveText([
       speciesBlockHeading(bison),
       speciesBlockHeading(cattle),
     ]);
-    await expect(animalsPages.notificationView.speciesBlockHeadings(domesticCat)).toHaveText([speciesBlockHeading(domesticCat)]);
+    await expect(animalsPages.notificationView.speciesBlockHeadingsInCommodityCardOf(domesticCat)).toHaveText([
+      speciesBlockHeading(domesticCat),
+    ]);
     for (const { species, animalCount } of speciesCounts) {
       await expect(
         animalsPages.notificationView.summaryValue(animalsPages.notificationView.speciesBlock(species), 'Number of animals'),

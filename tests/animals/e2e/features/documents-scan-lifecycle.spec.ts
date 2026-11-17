@@ -15,15 +15,11 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     animalsPages,
   }) => {
     test.slow();
-    const eicar = eicarPdfUpload();
-    const infectedFileError = pages.page.getByText(`${eicar.name} cannot be used. Remove it and try again with a different file.`).first();
+    const infectedFileError = pages.page
+      .getByText(`${eicarPdfUpload().name} cannot be used. Remove it and try again with a different file.`)
+      .first();
 
-    const reference = `PWVIRUS${Date.now()}`;
-    await animalsPages.accompanyingDocuments.fillDocument(reference, DOCUMENT_ISSUE_DATE, eicar);
-    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
-
-    const row = animalsPages.accompanyingDocuments.documentRow(reference);
-    await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
+    await animalsPages.accompanyingDocuments.uploadInfectedDocumentAndWaitForVirusFound();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(infectedFileError).toBeVisible();
@@ -43,12 +39,7 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     journeyContext,
   }) => {
     test.slow();
-    const reference = `PWVIRUS${Date.now()}`;
-    await animalsPages.accompanyingDocuments.fillDocument(reference, DOCUMENT_ISSUE_DATE, eicarPdfUpload());
-    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
-
-    const row = animalsPages.accompanyingDocuments.documentRow(reference);
-    await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
+    await animalsPages.accompanyingDocuments.uploadInfectedDocumentAndWaitForVirusFound();
 
     await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
 

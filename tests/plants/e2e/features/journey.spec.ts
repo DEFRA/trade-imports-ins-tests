@@ -94,8 +94,7 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await plantsPages.consignmentContactSelect.address(address.name).check();
       await plantsPages.consignmentContactSelect.saveAndContinue.click();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
-      await expect(plantsPages.notificationView.viewHeader.reference).toHaveText(reference);
-      await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+      await plantsPages.notificationView.viewHeader.expectDraftReview(reference);
       await plantsPages.notificationView.btnContinue.click();
       await expect(pages.page).toHaveURL(plantsPages.declaration.expectedUrlPattern(reference));
       await plantsPages.declaration.checkbox.check();

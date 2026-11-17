@@ -21,7 +21,7 @@ test.describe('Amendment review title', () => {
     await expect(pages.page).toHaveTitle(/^Review before re-submitting/);
   });
 
-  test.describe('with the real uploader', { tag: '@compose' }, () => {
+  test.describe('after a document is uploaded', { tag: '@compose' }, () => {
     test('keeps the review heading when only a document is added', async ({
       pages,
       animalsPages,

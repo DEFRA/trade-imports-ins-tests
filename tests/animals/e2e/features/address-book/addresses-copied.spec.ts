@@ -170,8 +170,7 @@ test.describe('Addresses are copied, not linked', () => {
     await expect(consignorRow).toContainText('Carlisle');
 
     await animalsPages.notificationView.continueButton.click();
-    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
     await expect(animalsPages.notificationView.errorSummary).toContainText(message);
 
     await frontendForms.postForm(
@@ -187,8 +186,7 @@ test.describe('Addresses are copied, not linked', () => {
     await animalsPages.consignorEdit.country.selectOption({ label: 'United Kingdom' });
     await animalsPages.consignorEdit.saveChanges.click();
 
-    await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
-    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
     await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
     await expect(consignorRow).toContainText(name);
 
