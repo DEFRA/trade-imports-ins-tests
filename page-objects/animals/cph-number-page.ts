@@ -24,6 +24,24 @@ export class AnimalsCphNumberPage extends NotificationPage {
     return this.page.getByLabel('Holding number', { exact: true });
   }
 
+  get helpSummary(): Locator {
+    return this.page.getByText('What is a CPH number?', { exact: true });
+  }
+
+  get helpWhereToFind(): Locator {
+    return this.page.getByText('You can find your CPH number on documents from the Animal and Plant Health Agency (APHA) or by', {
+      exact: false,
+    });
+  }
+
+  get holdingDetailsLink(): Locator {
+    return this.page.getByRole('link', { name: 'checking your holding details on GOV.UK', exact: true });
+  }
+
+  get hint(): Locator {
+    return this.page.getByText('For example 12/345/6789', { exact: true });
+  }
+
   async fillCphNumber({ county = '12', parish = '345', holding = '6789' }: CphNumberParts = {}): Promise<void> {
     await this.county.fill(county);
     await this.parish.fill(parish);

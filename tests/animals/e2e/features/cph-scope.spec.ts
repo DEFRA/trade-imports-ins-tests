@@ -16,11 +16,15 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.domesticCat);
     await animalsJourney.toRolesAndAddressesOfCurrentNotification();
     await expect(cphSection).toBeHidden();
+
+    await animalsPages.cphNumber.open(animalsPages.addresses.referenceNumberFromUrl());
+    await expect(animalsPages.addresses.heading).toBeVisible();
+
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.contactAddress.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
 
-    await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.cattle);
+    await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.chicken);
     await animalsJourney.toRolesAndAddressesOfCurrentNotification();
     await expect(cphSection).toBeVisible();
     await expect(cphLinks).toHaveText(['Add a CPH number']);
