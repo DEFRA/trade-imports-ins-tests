@@ -1,6 +1,11 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import {
+  pickerAddressCell,
+  pickerAddressCellText,
+  pickerAddressRadio,
+  pickerAddressRow,
+  pickerLastCell,
   pickerNoMatchesMessage,
   pickerResultsGroup,
   pickerResultsHeading,
@@ -10,20 +15,7 @@ import {
   pickerSearchRow,
 } from '@page-objects/shared/address-picker-results';
 
-export type AddressCellParts = {
-  addressLine1: string;
-  addressLine2?: string;
-  townOrCity: string;
-  county?: string;
-  postcode: string;
-};
-
 export class AnimalsPartyPickerPage extends NotificationPage {
-  static expectedAddressCellText({ addressLine1, addressLine2, townOrCity, county, postcode }: AddressCellParts): string {
-    const placeLine = [townOrCity, county, postcode].filter(Boolean).join(', ');
-    return [addressLine1, addressLine2, placeLine].filter(Boolean).join('\n');
-  }
-
   constructor(
     page: Page,
     slug: string,
@@ -61,19 +53,19 @@ export class AnimalsPartyPickerPage extends NotificationPage {
   }
 
   party(name: string): Locator {
-    return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
+    return pickerAddressRadio(this.page, name);
   }
 
   partyRow(name: string): Locator {
-    return this.page.getByRole('row').filter({ has: this.party(name) });
+    return pickerAddressRow(this.page, name);
   }
 
   partyAddressCell(name: string): Locator {
-    return this.partyRow(name).getByRole('cell').nth(2);
+    return pickerAddressCell(this.page, name);
   }
 
   partyAddressCellText(name: string): Promise<string> {
-    return this.partyAddressCell(name).evaluate((cell) => (cell as HTMLElement).innerText);
+    return pickerAddressCellText(this.page, name);
   }
 
   partyViewLink(name: string): Locator {
@@ -81,7 +73,7 @@ export class AnimalsPartyPickerPage extends NotificationPage {
   }
 
   partyActionCell(name: string): Locator {
-    return this.partyRow(name).getByRole('cell').last();
+    return pickerLastCell(this.page, name);
   }
 
   get noMatchesMessage(): Locator {

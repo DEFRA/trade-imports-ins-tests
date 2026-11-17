@@ -1,8 +1,14 @@
+import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, type PlantsJourney } from '@flows/plants/journey';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
-import { addressRoles } from '@domain/shared/constants/address-types';
-import { expectNothingBetweenSearchAndResults } from '@page-objects/shared/address-picker-results';
+import { addressRoles, heldAsPlaceOfDestination } from '@domain/shared/constants/address-types';
+import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
+import {
+  expectedPickerAddressCellText,
+  expectNothingBetweenSearchAndResults,
+  pickerAddressCellText,
+} from '@page-objects/shared/address-picker-results';
 
 const PICKER_CASES = [
   {
@@ -47,6 +53,29 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
 
     await plantsPages.placeOfDestination.open(reference);
     await expect(plantsPages.placeOfDestination.checkedAddress).toHaveCount(0);
+  });
+
+  test('place of destination: a record with two street lines and a county shows each street line on its own line, then its town, county and postcode on one line, and its "View details" disclosure opens in place and holds exactly that record\'s telephone number and email address', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const record = await addressBookApi.createAddress({
+      ...addressWithLineTwoAndCounty(`Picker County Nursery ${randomUUID()}`),
+      ...heldAsPlaceOfDestination,
+    });
+    await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
+
+    await plantsPages.placeOfDestination.searchFor(record.name);
+
+    await expect.poll(() => pickerAddressCellText(pages.page, record.name)).toBe(expectedPickerAddressCellText(record));
+
+    const urlBeforeOpening = pages.page.url();
+    await plantsPages.placeOfDestination.addressDetailsToggle(record.name).click();
+
+    expect(pages.page.url()).toBe(urlBeforeOpening);
+    await expect(plantsPages.placeOfDestination.addressDetailsLines(record.name)).toHaveText([record.phone, record.email]);
   });
 
   for (const { pageName, pickerKey, errorText, role, openPicker } of PICKER_CASES) {

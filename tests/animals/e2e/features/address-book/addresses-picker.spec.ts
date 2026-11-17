@@ -2,9 +2,12 @@ import { test, expect } from '@fixtures';
 import { addressRoles, heldAsConsignee, heldAsConsignor } from '@domain/shared/constants/address-types';
 import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
-import { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
 import { consignorFixture } from '@flows/shared/address-book-seed';
-import { expectNothingBetweenSearchAndResults, WHOLE_LIST_COUNT } from '@page-objects/shared/address-picker-results';
+import {
+  expectedPickerAddressCellText,
+  expectNothingBetweenSearchAndResults,
+  WHOLE_LIST_COUNT,
+} from '@page-objects/shared/address-picker-results';
 
 test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-book'] }, () => {
   test('lists only addresses saved for the role; a record saved for two roles is listed on both', async ({
@@ -117,7 +120,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await animalsPages.consignorSelection.search(consignorFixture.name);
     await expect
       .poll(() => animalsPages.consignorSelection.partyAddressCellText(consignorFixture.name))
-      .toBe(AnimalsPartyPickerPage.expectedAddressCellText(consignorFixture));
+      .toBe(expectedPickerAddressCellText(consignorFixture));
     await expect(animalsPages.consignorSelection.partyActionCell(consignorFixture.name)).toHaveText(`View ${consignorFixture.name}`);
   });
 
@@ -132,9 +135,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
 
     await animalsPages.consignorSelection.search(record.name);
 
-    await expect
-      .poll(() => animalsPages.consignorSelection.partyAddressCellText(record.name))
-      .toBe(AnimalsPartyPickerPage.expectedAddressCellText(record));
+    await expect.poll(() => animalsPages.consignorSelection.partyAddressCellText(record.name)).toBe(expectedPickerAddressCellText(record));
   });
 
   test('saving with nothing ticked returns to the roles and addresses page with the consignor section offering only its add link', async ({
