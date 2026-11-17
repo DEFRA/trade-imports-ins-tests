@@ -103,7 +103,7 @@ test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
         expect(notification.transport.portOfEntry).toBe(answers.pointOfEntry.value);
         expect(notification.transport.arrivalDate).toBeDefined();
         expect(notification.transport.transporter?.approvalNumber).toBe('ES-T2-45001294');
-        expect(notification.consignment?.name).toBe(answers.contactAddress);
+        expect(notification.consignment).toBeUndefined();
       } finally {
         await client.close();
       }

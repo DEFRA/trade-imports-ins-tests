@@ -81,7 +81,6 @@ export const AIR_OR_SEA_OVERVIEW_TASKS = [
   'Transport details',
   'Upload documents',
   'Roles and addresses',
-  'Contact address for this consignment',
 ] as const;
 
 export const OVERLAND_OVERVIEW_TASKS = [
@@ -96,7 +95,6 @@ export const OVERLAND_OVERVIEW_TASKS = [
   'Transport details',
   'Upload documents',
   'Roles and addresses',
-  'Contact address for this consignment',
 ] as const;
 
 export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffset: 2 });

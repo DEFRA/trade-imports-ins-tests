@@ -106,7 +106,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.cphNumber.saveAndContinue.click();
       await animalsPages.addresses.heading.waitFor();
       await animalsPages.addresses.continueButton.click();
-      await animalsPages.contactAddress.heading.waitFor();
+      await animalsPages.notificationView.heading.waitFor();
       await animalsJourney.openCurrentOverview();
     });
 
@@ -154,16 +154,12 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.overview.heading.waitFor();
     });
 
-    await test.step('Contact address', async () => {
-      await animalsPages.overview.task('Contact address for this consignment').click();
-      await animalsPages.contactAddress.heading.waitFor();
-      await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
+    await test.step('Review your notification', async () => {
+      await animalsPages.overview.reviewAndSubmitButton.click();
+      await animalsPages.notificationView.heading.waitFor();
       await runA11yScan();
-      await animalsPages.contactAddress.saveAndReturnToHub.click();
-      await animalsPages.overview.heading.waitFor();
+      await animalsPages.notificationView.continueButton.click();
     });
-
-    await animalsJourney.toDeclarationThroughReview(runA11yScan);
 
     await test.step('Declaration', async () => {
       await animalsPages.declaration.heading.waitFor();
