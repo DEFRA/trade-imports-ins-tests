@@ -119,7 +119,7 @@ export class AnimalsJourney {
     private readonly context: JourneyContext,
   ) {}
 
-  /** The pages Save and continue goes through from the main import reason to the contact address, in order, starting at `first`. */
+  /** The pages Save and continue goes through from the main import reason to check your answers, in order, starting at `first`. */
   saveAndContinueStopsFrom(first: SaveAndContinueStop): SaveAndContinueStop[] {
     const stops: SaveAndContinueStop[] = [
       this.animalsPages.importReason,
@@ -131,7 +131,6 @@ export class AnimalsJourney {
       this.animalsPages.transporter,
       this.animalsPages.accompanyingDocuments,
       this.animalsPages.addresses,
-      this.animalsPages.contactAddress,
     ];
     return stops.slice(stops.indexOf(first));
   }
@@ -395,7 +394,7 @@ export class AnimalsJourney {
       await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     }
     await this.animalsPages.addresses.continueButton.click();
-    await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
+    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
   async answerAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
@@ -403,7 +402,7 @@ export class AnimalsJourney {
     await this.addFiveParties(answers.parties);
     await this.answerPermanentAddresses(answers.commodityLines);
     await this.addCphAndLeaveAddresses(answers.cph);
-    await this.animalsPages.contactAddress.cancelAndReturnToHub.click();
+    await this.animalsPages.notificationView.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -425,16 +424,6 @@ export class AnimalsJourney {
     const reference = timestampedReference('PW');
     await this.animalsPages.accompanyingDocuments.uploadDocumentAndWaitForScan({ ...ALL_ANSWERS.accompanyingDocument, reference });
     return this.animalsPages.accompanyingDocuments.documentRow(reference);
-  }
-
-  async chooseContactAddress(name: string = MANDATORY_ANSWERS.contactAddress): Promise<void> {
-    await this.animalsPages.contactAddress.address(name).check();
-    await this.animalsPages.contactAddress.saveAndContinue.click();
-  }
-
-  private async saveContactAddressToOverview(name: string): Promise<void> {
-    await this.animalsPages.contactAddress.address(name).check();
-    await this.animalsPages.contactAddress.saveAndReturnToHub.click();
   }
 
   async reachTransporterFromHub(): Promise<void> {
@@ -491,12 +480,6 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async answerContact(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
-    await this.animalsPages.overview.task('Contact address for this consignment').click();
-    await this.saveContactAddressToOverview(answers.contactAddress);
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-  }
-
   async answerAccompanyingDocument(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     if (!answers.accompanyingDocument) return;
     await this.animalsPages.overview.task('Upload documents').click();
@@ -513,7 +496,6 @@ export class AnimalsJourney {
     await this.answerReasonAndAdditionalDetails(answers);
     await this.answerAddresses(answers);
     await this.answerTransport(answers);
-    await this.answerContact(answers);
     await this.answerAccompanyingDocument(answers);
   }
 
@@ -748,13 +730,6 @@ export class AnimalsJourney {
     await this.saveTransporterDetailsToOverview(this.animalsPages.commercialTransporter);
   }
 
-  async toContactAddress(): Promise<void> {
-    await this.startNotification();
-    await this.answerCommodity();
-    await this.animalsPages.overview.task('Contact address for this consignment').click();
-    await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
-  }
-
   partyPicker(role: PartyRole): AnimalsPartyPickerPage {
     return this.animalsPages[PARTY_PICKER_KEYS[role]];
   }
@@ -887,9 +862,6 @@ export class AnimalsJourney {
     } else {
       await pages.addresses.continueButton.click();
     }
-
-    await pages.contactAddress.heading.waitFor(pageLoadWait);
-    await this.chooseContactAddress();
 
     await pages.notificationView.viewHeader.reference.waitFor(pageLoadWait);
   }

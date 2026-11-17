@@ -8,7 +8,6 @@ import { AnimalsCommercialTransporterPage } from '@page-objects/animals/commerci
 import { AnimalsCommoditySelectionPage } from '@page-objects/animals/commodity-selection-page';
 import { AnimalsConsignmentDetailsPage } from '@page-objects/animals/consignment-details-page';
 import { AnimalsConfirmationPage } from '@page-objects/animals/confirmation-page';
-import { AnimalsContactAddressPage } from '@page-objects/animals/contact-address-page';
 import { AnimalsCphNumberPage } from '@page-objects/animals/cph-number-page';
 import { AnimalsDashboardPage } from '@page-objects/animals/dashboard-page';
 import { AnimalsDeclarationPage } from '@page-objects/animals/declaration-page';
@@ -56,8 +55,6 @@ export function createAnimalsPages(page: Page) {
     transporterAdd: new AnimalsTransporterAddPage(page),
     commercialTransporter: new AnimalsCommercialTransporterPage(page),
     privateTransporter: new AnimalsPrivateTransporterPage(page),
-    contactAddress: new AnimalsContactAddressPage(page),
-    contactAddressEdit: new AnimalsPartyEditPage(page, 'consignment/contact/edit', 'Contact address for consignment'),
     notificationView: new AnimalsNotificationViewPage(page),
     declaration: new AnimalsDeclarationPage(page),
     confirmation: new AnimalsConfirmationPage(page),

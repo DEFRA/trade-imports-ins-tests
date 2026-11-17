@@ -92,7 +92,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
           urlId: 'https://refdata.tbc.defra.gov.uk/gbn-ag-goods-certified-as',
         },
       ]);
-      expect(data.exchangedDocument.issuer?.name).toBe(answers.contactAddress);
+      expect(data.exchangedDocument.issuer).toBeUndefined();
       expect(data.specifiedConsignment.consignorParty?.name).toBe(answers.parties.consignor);
       expect(data.specifiedConsignment.originCountry?.code?.value).toBe(answers.countryCode.value);
       expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(answers.pointOfEntry.value);
