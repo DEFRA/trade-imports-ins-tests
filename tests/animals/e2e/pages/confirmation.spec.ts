@@ -1,10 +1,12 @@
 import { test, expect } from '@fixtures';
-import { ALL_ANSWERS } from '@domain/animals/constants/journey-options';
+import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
 
 const CUSTOMS_ENQUIRIES_HREF =
   'https://www.gov.uk/government/organisations/hm-revenue-customs/contact/customs-international-trade-and-excise-enquiries';
 const CALL_CHARGES_HREF = 'https://www.gov.uk/call-charges';
 const ITAHC_STILL_TO_UPLOAD = ['upload the ITAHC and any other required documents'];
+const IDENTIFIER_STILL_TO_COMPLETE = ['complete the animal identifier information in the notification'];
 
 test.describe('Import notification submitted page', { tag: '@duplicated-in-frontend' }, () => {
   test.beforeEach(async ({ animalsSeededJourney, animalsPages }) => {
@@ -80,4 +82,26 @@ test.describe('Import notification submitted page after a document other than th
 
     await expect(animalsPages.confirmation.outstandingItems).toHaveText(ITAHC_STILL_TO_UPLOAD);
   });
+});
+
+const IDENTIFIERS_INCOMPLETE_CASES = [
+  {
+    title: 'lists the identifier item after the ITAHC when a line holds fewer identified animals than it declares',
+    commodityLines: [{ ...MANDATORY_COMMODITY_LINES.cattle, noOfAnimals: 2 }],
+  },
+  {
+    title: 'lists the identifier item after the ITAHC when a single-animal line has no identifier saved',
+    commodityLines: [{ species: MANDATORY_COMMODITY_LINES.cattle.species, noOfAnimals: 1 }],
+  },
+];
+
+test.describe('Import notification submitted page with animal identifiers incomplete', () => {
+  for (const { title, commodityLines } of IDENTIFIERS_INCOMPLETE_CASES) {
+    test(title, async ({ animalsSeededJourney, animalsPages }) => {
+      const referenceNumber = await animalsSeededJourney.createSubmittedNotification({ ...MANDATORY_ANSWERS, commodityLines });
+      await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.confirmation);
+
+      await expect(animalsPages.confirmation.outstandingItems).toHaveText([...ITAHC_STILL_TO_UPLOAD, ...IDENTIFIER_STILL_TO_COMPLETE]);
+    });
+  }
 });
