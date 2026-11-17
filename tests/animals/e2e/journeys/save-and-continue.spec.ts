@@ -169,7 +169,6 @@ test.describe('Save and continue to the next page', () => {
       'Complete reason for import',
       'Complete additional animal details',
       'Complete arrival details',
-      'Complete transport details',
       'Complete roles and addresses',
     ]);
   });
