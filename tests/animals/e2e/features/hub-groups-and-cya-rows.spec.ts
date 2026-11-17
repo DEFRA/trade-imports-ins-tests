@@ -11,14 +11,13 @@ import {
 import { ALL_COMMODITY_LINES, MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
 
 const ABOUT_GOODS_AND_TRANSPORT = ['1. About the consignment', '2. Description of the goods', '3. Transport and arrival'];
-const CONTACT_ADDRESS_SECTION = '6. Contact address';
 
-const REVIEW_SECTION_HEADINGS = [...ABOUT_GOODS_AND_TRANSPORT, '4. Uploaded documents', ADDRESSES_SECTION, CONTACT_ADDRESS_SECTION];
+const REVIEW_SECTION_HEADINGS = [...ABOUT_GOODS_AND_TRANSPORT, '4. Uploaded documents', ADDRESSES_SECTION];
 
-const HUB_SECTION_CAPTIONS = [...ABOUT_GOODS_AND_TRANSPORT, '4. Documents', ADDRESSES_SECTION, CONTACT_ADDRESS_SECTION];
+const HUB_SECTION_CAPTIONS = [...ABOUT_GOODS_AND_TRANSPORT, '4. Documents', ADDRESSES_SECTION];
 
 test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-frontend' }, () => {
-  test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({
+  test('the hub groups its tasks under the five numbered group headings, with nothing after them', async ({
     animalsJourney,
     animalsPages,
   }) => {
@@ -34,7 +33,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     for (const [index, caption] of HUB_SECTION_CAPTIONS.entries()) {
       await expect(animalsPages.overview.sectionRegions.nth(index)).toHaveAccessibleName(caption);
     }
-    const [aboutTheConsignment, descriptionOfTheGoods, transportAndArrival, documents, addresses, contactAddress] = HUB_SECTION_CAPTIONS;
+    const [aboutTheConsignment, descriptionOfTheGoods, transportAndArrival, documents, addresses] = HUB_SECTION_CAPTIONS;
     await expect(animalsPages.overview.taskTitlesInSectionHeaded(aboutTheConsignment)).toHaveText([
       'Where is this consignment coming from?',
       'What are you importing?',
@@ -47,7 +46,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(animalsPages.overview.taskTitlesInSectionHeaded(transportAndArrival)).toHaveText(['Arrival details', 'Transport details']);
     await expect(animalsPages.overview.taskTitlesInSectionHeaded(documents)).toHaveText(['Upload documents']);
     await expect(animalsPages.overview.taskTitlesInSectionHeaded(addresses)).toHaveText([CONSIGNMENT_ADDRESSES]);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded(contactAddress)).toHaveText(['Contact address for this consignment']);
   });
 
   test('the hub marks its commodity totals as two named regions inside the Your commodities region', async ({
@@ -91,7 +89,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       'Transport details',
       'Document 1',
       CONSIGNMENT_ADDRESSES,
-      'Contact address',
     ]);
 
     const originOfImport = animalsPages.notificationView.originOfImportCard;
@@ -189,12 +186,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     );
     await expect(animalsPages.notificationView.summaryValue(addresses, 'County parish holding (CPH) number')).toHaveText(
       CPH_NUMBER_DISPLAY,
-    );
-
-    const contactAddress = animalsPages.notificationView.contactAddressCard;
-    await expect(animalsPages.notificationView.summaryValue(contactAddress, 'Contact address')).toHaveText(
-      [answers.contactAddress, 'Woodham Lane', 'Addlestone', 'KT15 3NB', 'United Kingdom'].join('\n'),
-      { useInnerText: true },
     );
   });
 

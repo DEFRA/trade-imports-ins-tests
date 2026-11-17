@@ -3,7 +3,7 @@ import { type CommodityLineAnswer } from '@domain/animals/constants/journey-comm
 import { assertConsistentAnswers, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 import { speciesCheckboxValue } from '@domain/animals/constants/commodity-lines';
 
-export type PartyRole = 'placeOfOrigin' | 'consignor' | 'consignee' | 'importer' | 'placeOfDestination' | 'contact';
+export type PartyRole = 'placeOfOrigin' | 'consignor' | 'consignee' | 'importer' | 'placeOfDestination';
 
 export type PartyNames = Record<PartyRole, string>;
 
@@ -11,7 +11,6 @@ export type PartyIds = Record<PartyRole, string>;
 
 export const partyNamesFrom = (answers: NotificationAnswers): PartyNames => ({
   ...answers.parties,
-  contact: answers.contactAddress,
 });
 
 export type SeedStep = {
@@ -178,11 +177,6 @@ const transportSteps = (answers: NotificationAnswers): SeedStep[] => [
   { slug: 'transporters', form: { transporter: answers.transporter.value } },
 ];
 
-const contactStep = (parties: PartyIds): SeedStep => ({
-  slug: 'consignment/contact/select',
-  form: { contactAddress: parties.contact },
-});
-
 export const seedSteps = async (
   resolveParties: (names: PartyNames) => Promise<PartyIds>,
   stage: DraftStage,
@@ -204,7 +198,7 @@ export const seedSteps = async (
     ...addressSteps(parties, answers),
     arrivalStep(answers),
   ];
-  return stage === 'partial' ? throughArrival : [...throughArrival, ...transportSteps(answers), contactStep(parties)];
+  return stage === 'partial' ? throughArrival : [...throughArrival, ...transportSteps(answers)];
 };
 
 export const declarationStep: { reviewSlug: string; slug: string; review: FormFields; declare: FormFields } = {

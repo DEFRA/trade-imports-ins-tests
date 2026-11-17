@@ -3,7 +3,6 @@ import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { expectOpenFromReview, expectSaveAndContinueWalk } from '@page-objects/shared/journey-checks';
 import { DOCUMENT_ISSUE_DATE } from '@resources/file-upload/constants';
-import { CONTACT_ADDRESS_NAME, SECOND_BRANCH_ADDRESS_NAME } from '@domain/shared/constants/journey-party-names';
 import { HEALTH_CERTIFICATE_DOCUMENT_REFERENCE } from '@domain/animals/constants/journey-options';
 
 test.describe('Change from check your answers', { tag: '@duplicated-in-frontend' }, () => {
@@ -78,35 +77,6 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
       animalsPages.notificationView,
     );
     await expect(purposeValue).toContainText('Research');
-  });
-
-  test('the contact address Change link opens the page on the review trail, and choosing another address and Save and continue returns to the review showing it', async ({
-    animalsSeededJourney,
-    pages,
-    animalsPages,
-  }) => {
-    test.slow();
-    const referenceNumber = await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
-    const contactAddressValue = animalsPages.notificationView.summaryValue(
-      animalsPages.notificationView.contactAddressCard,
-      'Contact address',
-    );
-    await expect(contactAddressValue).toContainText(CONTACT_ADDRESS_NAME);
-
-    await animalsPages.notificationView.changeLink(/^Change contact address/).click();
-    await expect(animalsPages.contactAddress.heading).toBeVisible();
-    await expectOpenFromReview(pages.page, animalsPages.contactAddress, referenceNumber, animalsPages.notificationView.slug);
-    await animalsPages.contactAddress.address(SECOND_BRANCH_ADDRESS_NAME).check();
-    await animalsPages.contactAddress.saveAndContinue.click();
-
-    await animalsPages.notificationView.viewHeader.expectDraftReview();
-    await expect(pages.page).toHaveURL(
-      animalsPages.notificationView.expectedUrlPatternOnTrail(referenceNumber, [
-        animalsPages.notificationView.slug,
-        animalsPages.contactAddress.slug,
-      ]),
-    );
-    await expect(contactAddressValue).toContainText(SECOND_BRANCH_ADDRESS_NAME);
   });
 
   test('the documents Change link opens Upload documents on the review trail, and Save and continue walks each later page back to the review', async ({

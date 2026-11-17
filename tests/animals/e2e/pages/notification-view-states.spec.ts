@@ -31,7 +31,6 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(pages.page.getByRole('heading', { name: '3. Transport and arrival' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '4. Uploaded documents' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: ADDRESSES_SECTION })).toBeVisible();
-      await expect(pages.page.getByRole('heading', { name: '6. Contact address' })).toBeVisible();
       const documentCard = animalsPages.notificationView.documentCard(1);
       await expect(documentCard).toBeVisible();
       await expect(animalsPages.notificationView.summaryValue(documentCard, 'Document reference')).toHaveText('Not applicable');
@@ -107,7 +106,6 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
         'Complete arrival details',
         'Complete transport details',
         CONSIGNMENT_ADDRESSES_INCOMPLETE,
-        'Complete contact address for this consignment',
       ]);
     });
   });
