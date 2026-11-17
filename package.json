@@ -94,6 +94,9 @@
     "typescript-eslint": "8.71.1",
     "yaml": "2.9.1"
   },
+  "overrides": {
+    "get-uri": "8.0.2"
+  },
   "lint-staged": {
     "*.ts": [
       "eslint",
