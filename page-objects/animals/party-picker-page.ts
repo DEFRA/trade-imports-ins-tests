@@ -125,4 +125,15 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     await this.search(name);
     await this.party(name).check();
   }
+
+  /**
+   * Ticks the named party's radio, then re-searches to commit it: the picker
+   * only threads its checked party through a server round trip, so a link
+   * off the page before that round trip carries the previously-saved party,
+   * not the just-ticked one.
+   */
+  async selectAndCommit(name: string): Promise<void> {
+    await this.select(name);
+    await this.search(name);
+  }
 }

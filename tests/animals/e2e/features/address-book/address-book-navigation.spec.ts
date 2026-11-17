@@ -116,8 +116,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       await animalsPages.notificationView.changeLink('Change roles and addresses').click();
       await animalsPages.addresses.changeParty('Consignor').click();
       const picker = animalsPages.consignorSelection;
-      await picker.select(chosenName);
-      await picker.search(chosenName);
+      await picker.selectAndCommit(chosenName);
       const chosenRow = picker.party(chosenName);
       const pickerUrl = new URL(pages.page.url());
 
