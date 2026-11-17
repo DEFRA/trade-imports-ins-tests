@@ -383,7 +383,7 @@ export class AnimalsJourney {
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
   }
 
-  async addCphAndLeaveAddresses(cph: CphAnswer = MANDATORY_ANSWERS.cph): Promise<void> {
+  private async addCphOnAddressesHub(cph: CphAnswer = MANDATORY_ANSWERS.cph): Promise<void> {
     if (await this.animalsPages.addresses.addCph.isVisible()) {
       await this.animalsPages.addresses.addCph.click();
       await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
@@ -391,6 +391,10 @@ export class AnimalsJourney {
       await this.animalsPages.cphNumber.saveAndContinue.click();
       await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     }
+  }
+
+  async addCphAndLeaveAddresses(cph: CphAnswer = MANDATORY_ANSWERS.cph): Promise<void> {
+    await this.addCphOnAddressesHub(cph);
     await this.animalsPages.addresses.continueButton.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
@@ -399,8 +403,8 @@ export class AnimalsJourney {
     await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await this.addFiveParties(answers.parties);
     await this.answerPermanentAddresses(answers.commodityLines);
-    await this.addCphAndLeaveAddresses(answers.cph);
-    await this.animalsPages.notificationView.saveAndReturnToOverview.click();
+    await this.addCphOnAddressesHub(answers.cph);
+    await this.animalsPages.addresses.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 

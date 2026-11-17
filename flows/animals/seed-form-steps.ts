@@ -177,6 +177,11 @@ const transportSteps = (answers: NotificationAnswers): SeedStep[] => [
   { slug: 'transporters', form: { transporter: answers.transporter.value } },
 ];
 
+const openingRunTailSteps = (): SeedStep[] => [
+  { slug: 'accompanying-documents', form: {} },
+  { slug: 'addresses', form: {} },
+];
+
 export const seedSteps = async (
   resolveParties: (names: PartyNames) => Promise<PartyIds>,
   stage: DraftStage,
@@ -198,7 +203,7 @@ export const seedSteps = async (
     ...addressSteps(parties, answers),
     arrivalStep(answers),
   ];
-  return stage === 'partial' ? throughArrival : [...throughArrival, ...transportSteps(answers)];
+  return stage === 'partial' ? throughArrival : [...throughArrival, ...transportSteps(answers), ...openingRunTailSteps()];
 };
 
 export const declarationStep: { reviewSlug: string; slug: string; review: FormFields; declare: FormFields } = {
