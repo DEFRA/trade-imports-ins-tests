@@ -63,7 +63,7 @@ test.describe('Notification persistence — multiple commodities', { tag: '@mong
         ]),
       );
 
-      expect(doc.status).toBe(notificationStatuses.submittedActionRequired);
+      expect(doc.status).toBe(notificationStatuses.submitted);
     } finally {
       await client.close();
     }

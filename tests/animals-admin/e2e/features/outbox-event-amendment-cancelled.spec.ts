@@ -37,12 +37,12 @@ test.describe('Notification amendment cancelled outbox event', { tag: '@mongodb'
       expect(outboxEvent.timestamp).toBeInstanceOf(Date);
       expect(outboxEvent.metadata.correlationId).toBeDefined();
       expect(outboxEvent.data.exchangedDocument.identifier).toBe(referenceNumber);
-      expect(outboxEvent.data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.submittedActionRequired);
+      expect(outboxEvent.data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.submitted);
       expect(outboxEvent.statusChanges?.map(({ status }) => status)).toEqual([
         notificationStatuses.draft,
-        notificationStatuses.submittedActionRequired,
+        notificationStatuses.submitted,
         notificationStatuses.amend,
-        notificationStatuses.submittedActionRequired,
+        notificationStatuses.submitted,
       ]);
     } finally {
       await client.close();

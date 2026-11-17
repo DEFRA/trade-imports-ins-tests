@@ -70,7 +70,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
 
       await expect
-        .poll(() => collection.findOne({ _id: aggregateId, status: notificationStatuses.submittedActionRequired }), {
+        .poll(() => collection.findOne({ _id: aggregateId, status: notificationStatuses.submitted }), {
           timeout: timeouts.long,
         })
         .not.toBeNull();
@@ -80,7 +80,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       const submittedDoc = await collection.findOne({ _id: aggregateId });
       expect(submittedDoc._id).toBe(aggregateId);
       expect(submittedDoc.referenceNumber).toBe(referenceNumber);
-      expect(submittedDoc.status).toBe(notificationStatuses.submittedActionRequired);
+      expect(submittedDoc.status).toBe(notificationStatuses.submitted);
       expect(submittedDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
       expect(submittedDoc.commodity).toBe(INS_DASHBOARD_COMMODITY_LABEL);
       expect(submittedDoc.arrivalDate).toBe(arrivalIsoDate);

@@ -50,12 +50,6 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Continue' });
   }
 
-  get documentsSectionError(): Locator {
-    return this.page
-      .getByRole('heading', { level: 2, name: '4. Uploaded documents' })
-      .locator('xpath=following-sibling::p[contains(@class, "govuk-error-message")][1]');
-  }
-
   changeLink(name: string | RegExp): Locator {
     return this.page.getByRole('link', { name });
   }

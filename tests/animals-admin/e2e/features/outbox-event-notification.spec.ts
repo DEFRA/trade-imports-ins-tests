@@ -70,7 +70,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       expect(data.$model).toBe('defra/certificate-internal/1');
       expect(data.$type).toBe('gbn-ag');
       expect(data.exchangedDocument.identifier).toBe(referenceNumber);
-      expect(data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.submittedActionRequired);
+      expect(data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.submitted);
       expect(data.exchangedDocument.referenceDocument).toEqual([
         {
           typeCode: VETERINARY_CERTIFICATE_TYPE_CODE,
@@ -137,7 +137,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       expect(statusChanges).toHaveLength(2);
       expect(statusChanges[0].status).toBe(notificationStatuses.draft);
       expect(statusChanges[0].dateChanged).toEqual(expect.any(Date));
-      expect(statusChanges[1].status).toBe(notificationStatuses.submittedActionRequired);
+      expect(statusChanges[1].status).toBe(notificationStatuses.submitted);
       expect(statusChanges[1].dateChanged).toEqual(expect.any(Date));
       expect(actorWithNullableFields(statusChanges[1].actor)).toEqual(EXPECTED_ACTOR);
     } finally {

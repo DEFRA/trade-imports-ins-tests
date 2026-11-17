@@ -62,7 +62,7 @@ test.describe('Notification amendment outbox event', { tag: '@mongodb' }, () => 
       expect(statusChanges).toHaveLength(3);
       expect(statusChanges.map(({ status }) => status)).toEqual([
         notificationStatuses.draft,
-        notificationStatuses.submittedActionRequired,
+        notificationStatuses.submitted,
         notificationStatuses.amend,
       ]);
       expect(statusChanges.map(({ dateChanged }) => dateChanged)).toEqual([expect.any(Date), expect.any(Date), expect.any(Date)]);

@@ -3,7 +3,7 @@ import { notificationStatuses } from '@domain/animals/models/api/notification-st
 import { MANDATORY_ANSWERS_WITH_ITAHC } from '@domain/animals/constants/journey-options';
 
 test.describe('Notification lifecycle', { tag: '@compose' }, () => {
-  test('records a notification submitted without an ITAHC as Submitted action required through amend and cancel, then copies it into distinct drafts and soft-deletes it', async ({
+  test('records a notification submitted without an ITAHC as Submitted through amend and cancel, then copies it into distinct drafts and soft-deletes it', async ({
     notificationApi,
     journeyContext,
   }) => {
@@ -18,9 +18,9 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     expect(initial.fulfilments).toEqual([]);
 
     const submitted = await notificationApi.submitNotification(id, notification.concurrencyToken);
-    expect(submitted.status).toBe(notificationStatuses.submittedActionRequired);
+    expect(submitted.status).toBe(notificationStatuses.submitted);
     const submittedFulfilments = await notificationApi.getNotificationFulfilments(id);
-    expect(submittedFulfilments.status).toBe(notificationStatuses.submittedActionRequired);
+    expect(submittedFulfilments.status).toBe(notificationStatuses.submitted);
 
     const amended = await notificationApi.amendNotification(id);
     expect(amended.status).toBe(notificationStatuses.amend);
@@ -28,7 +28,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     expect(amendedFulfilments.status).toBe(notificationStatuses.amend);
 
     const cancelled = await notificationApi.cancelAmendNotification(id);
-    expect(cancelled.status).toBe(notificationStatuses.submittedActionRequired);
+    expect(cancelled.status).toBe(notificationStatuses.submitted);
 
     const firstCopy = await notificationApi.copyNotification(id, cancelled.concurrencyToken);
     journeyContext.recordReferenceNumber(firstCopy.referenceNumber);

@@ -85,7 +85,7 @@ test.describe('Import notification service dashboard', () => {
       await expect(animalsPages.dashboard.amend(referenceNumber)).toBeVisible();
     });
 
-    test('shows Submitted action required with view, copy, amend and delete actions for a notification submitted without its health certificate', async ({
+    test('shows Submitted with view, copy, amend and delete actions for a notification submitted without its health certificate', async ({
       animalsPages,
       animalsSeededJourney,
     }) => {
@@ -93,7 +93,7 @@ test.describe('Import notification service dashboard', () => {
 
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
-      await expect(animalsPages.dashboard.cardStatusTag(referenceNumber)).toHaveText('Submitted action required');
+      await expect(animalsPages.dashboard.cardStatusTag(referenceNumber)).toHaveText('Submitted');
       await expect(animalsPages.dashboard.view(referenceNumber)).toBeVisible();
       await expect(animalsPages.dashboard.copyAsNew(referenceNumber)).toBeVisible();
       await expect(animalsPages.dashboard.amend(referenceNumber)).toBeVisible();

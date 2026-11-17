@@ -78,7 +78,7 @@ test.describe('Notification deleted outbox events', { tag: '@mongodb' }, () => {
       expect(doc.data.exchangedDocument.versionId).toBe(1);
       expect(doc.statusChanges?.map(({ status }) => status)).toEqual([
         notificationStatuses.draft,
-        notificationStatuses.submittedActionRequired,
+        notificationStatuses.submitted,
         notificationStatuses.deleted,
       ]);
     } finally {

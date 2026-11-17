@@ -111,7 +111,7 @@ test.describe('Cancel amendment through the UI', () => {
 
       await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
       await expect(pages.page.getByRole('alert')).toContainText('The amendment has been cancelled and the submitted version restored.');
-      await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted action required');
+      await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted');
       await expect(animalsPages.notificationView.btnCancelAmend).toHaveCount(0);
       await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
       await expect(countryRow).toContainText('France');
@@ -143,7 +143,7 @@ test.describe('Cancel amend without JavaScript', { tag: '@duplicated-in-frontend
     await animalsPages.notificationCancelAmend.confirm.click();
 
     await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
-    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted action required');
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted');
     await expect(animalsPages.notificationView.btnCancelAmend).toHaveCount(0);
     await expect(countryRow).toContainText('France');
   });

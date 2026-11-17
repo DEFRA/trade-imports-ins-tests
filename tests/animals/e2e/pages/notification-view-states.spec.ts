@@ -1,5 +1,7 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { ITAHC_DOCUMENT_TYPE_LABEL } from '@domain/animals/constants/document-types';
 import { test, expect } from '@fixtures';
+import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import type { AnimalsPages } from '@page-objects';
 import { todayOrYesterdayServiceDisplayDatePattern } from '@utils/date-utils';
 
@@ -159,30 +161,20 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
     });
 
-    test('is headed by its reference with a green Submitted tag, no status bar and a title naming the reference', async ({
+    test('is headed by its reference with no status bar and a title naming the reference', async ({
       pages,
       animalsPages,
       journeyContext,
     }) => {
       const { viewHeader } = animalsPages.notificationView;
-      const { statusTag } = viewHeader;
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(journeyContext.referenceNumber));
       await expect(viewHeader.reference).toHaveText(journeyContext.referenceNumber);
-      await expect(statusTag).toHaveText('Submitted');
-      await expect(statusTag).toHaveClass(/govuk-tag--green/);
       await expect(animalsPages.notificationView.journeyStrip).toHaveCount(0);
       await expect(pages.page).toHaveTitle(`${journeyContext.referenceNumber} - Import notification service - GOV.UK`);
     });
 
-    test('dates the notification with the service day it was submitted', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.viewHeader.dateSubmitted).toHaveText(
-        new RegExp(`^Date submitted: ${todayOrYesterdayServiceDisplayDatePattern()}$`),
-      );
-    });
-
-    test('offers Amend this notification, a secondary Copy as new and a warning Delete in its header', async ({ animalsPages }) => {
+    test('styles Amend this notification as primary, Copy as new as secondary and Delete as warning', async ({ animalsPages }) => {
       const { viewHeader, btnCopyAsNew, btnDelete, btnCancelAmend } = animalsPages.notificationView;
-      await expect(viewHeader.actions).toHaveText(['Amend this notification', 'Copy as new', 'Delete']);
       await expect(viewHeader.btnAmend).not.toHaveClass(/govuk-button--secondary/);
       await expect(btnCopyAsNew).toHaveClass(/govuk-button--secondary/);
       await expect(btnDelete).toHaveClass(/govuk-button--warning/);
@@ -215,63 +207,59 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       expect(copiedReferenceNumber).not.toEqual(originalReferenceNumber);
     });
 
+    test('shows the uploaded health certificate as a card under the uploaded documents heading', async ({ animalsPages }) => {
+      await expect(animalsPages.notificationView.documentCard(1)).toContainText(ITAHC_DOCUMENT_TYPE_LABEL);
+    });
+
     test('still renders the recorded answers after submission', async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
       await expect(animalsPages.notificationView.speciesBlock(commodityLines.cattle)).toBeVisible();
     });
   });
 
-  test.describe('SUBMITTED_ACTION_REQUIRED', () => {
-    test.beforeEach(async ({ animalsSeededJourney, animalsNotificationActions, journeyContext }) => {
-      await animalsSeededJourney.createSubmittedNotification();
-      await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
+  const submittedSetUps = [
+    {
+      name: 'with its health certificate uploaded',
+      setUp: (animalsSeededJourney: AnimalsSeededJourney, animalsPages: AnimalsPages) =>
+        animalsSeededJourney.createSubmittedWithItahcUploadedInUi(animalsPages),
+    },
+    {
+      name: 'without its health certificate',
+      setUp: (animalsSeededJourney: AnimalsSeededJourney) => animalsSeededJourney.createSubmittedNotification(),
+    },
+  ];
+
+  for (const { name, setUp } of submittedSetUps) {
+    test.describe(`a notification submitted ${name}`, () => {
+      test.beforeEach(async ({ animalsSeededJourney, animalsPages, animalsNotificationActions, journeyContext }) => {
+        await setUp(animalsSeededJourney, animalsPages);
+        await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
+      });
+
+      test('is headed by a green Submitted tag', async ({ animalsPages }) => {
+        const { statusTag } = animalsPages.notificationView.viewHeader;
+        await expect(statusTag).toHaveText('Submitted');
+        await expect(statusTag).toHaveClass(/govuk-tag--green/);
+      });
+
+      test('dates the notification with the service day it was submitted and shows the same date after a reload', async ({
+        pages,
+        animalsPages,
+      }) => {
+        const { dateSubmitted } = animalsPages.notificationView.viewHeader;
+        await expect(dateSubmitted).toHaveText(new RegExp(`^Date submitted: ${todayOrYesterdayServiceDisplayDatePattern()}$`));
+        const shown = await dateSubmitted.textContent();
+
+        await pages.page.reload();
+
+        await expect(dateSubmitted).toHaveText(shown ?? '');
+      });
+
+      test('offers exactly Amend this notification, Copy as new and Delete', async ({ pages }) => {
+        await expect(pages.page.getByRole('main').getByRole('button')).toHaveText(['Amend this notification', 'Copy as new', 'Delete']);
+      });
     });
-
-    test('is headed by an orange Submitted action required tag and the warning to upload a health certificate', async ({
-      animalsPages,
-    }) => {
-      const { viewHeader } = animalsPages.notificationView;
-      const { statusTag } = viewHeader;
-      await expect(statusTag).toHaveText('Submitted action required');
-      await expect(statusTag).toHaveClass(/govuk-tag--orange/);
-      await expect(viewHeader.actionRequiredWarning).toBeVisible();
-    });
-
-    test('dates the notification and shows the same date after a reload', async ({ pages, animalsPages }) => {
-      const { dateSubmitted } = animalsPages.notificationView.viewHeader;
-      await expect(dateSubmitted).toHaveText(new RegExp(`^Date submitted: ${todayOrYesterdayServiceDisplayDatePattern()}$`));
-      const shown = await dateSubmitted.textContent();
-
-      await pages.page.reload();
-
-      await expect(dateSubmitted).toHaveText(shown ?? '');
-    });
-
-    test('shows the health certificate error under the uploaded documents heading in place of document cards, with no error summary', async ({
-      animalsPages,
-    }) => {
-      await expect(animalsPages.notificationView.documentsSectionError).toHaveText('Error: Upload a valid health certificate');
-      await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
-      await expect(animalsPages.notificationView.documentCard(1)).toHaveCount(0);
-    });
-
-    test('offers Amend this notification, Copy as new and Delete in its header', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.viewHeader.actions).toHaveText(['Amend this notification', 'Copy as new', 'Delete']);
-    });
-
-    test('shows the import reference numbers', async ({ animalsPages, journeyContext }) => {
-      const { viewHeader } = animalsPages.notificationView;
-      await expect(viewHeader.importReferenceValue('Notification reference')).toHaveText(journeyContext.referenceNumber);
-      await expect(viewHeader.importReferenceValue('Customs document code')).toHaveText('C640');
-    });
-
-    test('Continue starts an amendment and opens the overview', async ({ animalsPages }) => {
-      await animalsPages.notificationView.continueButton.click();
-
-      await animalsPages.overview.heading.waitFor();
-      await expect(animalsPages.overview.statusTag).toHaveText('Amend');
-    });
-  });
+  }
 
   test.describe('a notification that does not exist', () => {
     test('opening its view goes to the notification list', async ({ animalsPages }) => {
