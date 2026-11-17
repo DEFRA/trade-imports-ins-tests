@@ -1,11 +1,13 @@
 # cross-browser
 
 This folder holds no specs. The animals-admin cross-browser tests are existing e2e specs, selected by the
-`@cross-browser` tag and run in Playwright's Firefox, WebKit, an emulated iPhone 17 and an emulated Pixel 10.
+`@cross-browser` tag and run in Playwright's browsers and on BrowserStack.
 
 Strategy: see [`docs/cross-browser.md`](../../../docs/cross-browser.md).
 
-## Run on the local stack
+## Playwright browsers
+
+### Run on the local stack
 
 Run against the docker-compose stack, from the repo root.
 
@@ -17,6 +19,18 @@ Run against the docker-compose stack, from the repo root.
 | `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=mobile-webkit tests/animals-admin/`   | iPhone 17 only                                      |
 | `npm run _clean_and_test_docker_compose -- --grep '@cross-browser' --project=mobile-chromium tests/animals-admin/` | Pixel 10 only                                       |
 
-## Run on CDP
+### Run on CDP
 
 Run the `animals-admin:cross-browser` profile.
+
+## BrowserStack
+
+### Run on the local stack
+
+Run against the docker-compose stack, from the repo root.
+
+`npm run test:docker-compose:animals-admin:browserstack`
+
+### Run on CDP
+
+TODO: the CDP BrowserStack profile is not wired up yet.
