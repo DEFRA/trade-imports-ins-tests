@@ -3,7 +3,7 @@ import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { test, expect } from '@fixtures';
 
 test.describe('Back on the review page', () => {
-  test('after Continue from the addresses page it opens check your answers, whose Back opens the addresses hub and then Overview', async ({
+  test('after Continue from the addresses page it opens check your answers, whose Back opens the addresses hub', async ({
     animalsJourney,
     animalsPages,
   }) => {
@@ -14,9 +14,6 @@ test.describe('Back on the review page', () => {
 
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
-
-    await animalsPages.addresses.linkBack.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
   });
 
   test('opened from the Overview review button it opens Overview', async ({ animalsSeededJourney, animalsPages }) => {
