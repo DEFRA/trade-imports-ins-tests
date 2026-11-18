@@ -3,6 +3,7 @@ import { skipIfNonStubStackEnvironment, skipUnlessNonStubStackEnvironment } from
 import { branchAddressFixture } from '@flows/shared/address-book-seed';
 import { heldAsBranchAddress, heldAsConsignor } from '@domain/shared/constants/address-types';
 import { AnimalsContactAddressPage } from '@page-objects/animals/contact-address-page';
+import { expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 
 const SELECT_A_CONTACT_ADDRESS = 'Select a contact address';
 
@@ -19,6 +20,15 @@ test.describe('Contact address page', { tag: '@duplicated-in-frontend' }, () => 
       'This is the contact address of the person responsible for the consignment from when it enters Great Britain until authorities complete their checks.',
     );
     await expect(animalsPages.contactAddress.resultsHeading).toBeVisible();
+  });
+
+  test('ends with Save and continue and Save and return to hub side by side and Cancel and return to hub on its own line below them', async ({
+    animalsPages,
+  }) => {
+    await expectSaveControlsLayout(animalsPages.contactAddress, {
+      saveAndReturnLabel: 'Save and return to hub',
+      cancelAndReturnLink: animalsPages.contactAddress.cancelAndReturnToHub,
+    });
   });
 
   test('renders the page controls, hinted with the address ending at the postcode', async ({ animalsPages }) => {
@@ -51,14 +61,14 @@ test.describe('Contact address page', { tag: '@duplicated-in-frontend' }, () => 
     test.slow();
 
     await animalsPages.contactAddress.address(branchAddressFixture.name).check();
-    await animalsPages.contactAddress.saveAndReturnToOverview.click();
+    await animalsPages.contactAddress.saveAndReturnToHub.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
     await animalsPages.overview.task('Contact address for this consignment').click();
     await expect(animalsPages.contactAddress.address(branchAddressFixture.name)).toBeChecked();
     await expect(animalsPages.contactAddress.mainHeadings).toHaveText(AnimalsContactAddressPage.headings);
 
-    await animalsPages.contactAddress.saveAndReturnToOverview.click();
+    await animalsPages.contactAddress.saveAndReturnToHub.click();
     await expect(animalsPages.overview.heading).toBeVisible();
     await animalsPages.overview.task('Contact address for this consignment').click();
     await expect(animalsPages.contactAddress.address(branchAddressFixture.name)).toBeChecked();
@@ -77,8 +87,8 @@ test.describe('Contact address page', { tag: '@duplicated-in-frontend' }, () => 
     await expect(animalsPages.overview.taskStatus('Contact address for this consignment')).toHaveText('To do');
   });
 
-  test('Save and return to overview with nothing chosen does the same', async ({ animalsPages }) => {
-    await animalsPages.contactAddress.saveAndReturnToOverview.click();
+  test('Save and return to hub with nothing chosen does the same', async ({ animalsPages }) => {
+    await animalsPages.contactAddress.saveAndReturnToHub.click();
 
     await expect(animalsPages.contactAddress.heading).toBeVisible();
     await expect(animalsPages.contactAddress.errorSummaryLink(SELECT_A_CONTACT_ADDRESS)).toBeVisible();

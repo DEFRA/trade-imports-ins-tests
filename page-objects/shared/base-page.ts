@@ -300,6 +300,14 @@ export class NotificationPage extends BasePage {
     return this.page.getByRole('button', { name: 'Save and return to overview', exact: true });
   }
 
+  get cancelAndReturnToHub(): Locator {
+    return this.page.getByRole('link', { name: 'Cancel and return to hub', exact: true });
+  }
+
+  get saveAndReturnToHub(): Locator {
+    return this.page.getByRole('button', { name: 'Save and return to hub', exact: true });
+  }
+
   expectedUrl(referenceNumber: string): string {
     const suffix = this.slug ? `/${this.slug}` : '';
     return `${this.setBase}/notifications/${referenceNumber}${suffix}`;

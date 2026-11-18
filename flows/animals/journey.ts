@@ -403,7 +403,7 @@ export class AnimalsJourney {
     await this.addFiveParties(answers.parties);
     await this.answerPermanentAddresses(answers.commodityLines);
     await this.addCphAndLeaveAddresses(answers.cph);
-    await this.animalsPages.contactAddress.cancelAndReturnToOverview.click();
+    await this.animalsPages.contactAddress.cancelAndReturnToHub.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -447,7 +447,7 @@ export class AnimalsJourney {
 
   private async saveContactAddressToOverview(name: string): Promise<void> {
     await this.animalsPages.contactAddress.address(name).check();
-    await this.animalsPages.contactAddress.saveAndReturnToOverview.click();
+    await this.animalsPages.contactAddress.saveAndReturnToHub.click();
   }
 
   async reachTransporterFromHub(): Promise<void> {

@@ -3,6 +3,7 @@ import { uniquelyNamedCommercialTransporter } from '@domain/animals/constants/tr
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
+import { reviewAndContinueToDeclarationStep } from '@utils/a11y-utils';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -165,16 +166,11 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.contactAddress.heading.waitFor();
       await runA11yScan();
       await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
-      await animalsPages.contactAddress.saveAndReturnToOverview.click();
+      await animalsPages.contactAddress.saveAndReturnToHub.click();
       await animalsPages.overview.heading.waitFor();
     });
 
-    await test.step('Review your notification', async () => {
-      await animalsPages.overview.reviewAndSubmitButton.click();
-      await animalsPages.notificationView.heading.waitFor();
-      await runA11yScan();
-      await animalsPages.notificationView.continueButton.click();
-    });
+    await reviewAndContinueToDeclarationStep(animalsPages, runA11yScan);
 
     await test.step('Declaration', async () => {
       await animalsPages.declaration.heading.waitFor();

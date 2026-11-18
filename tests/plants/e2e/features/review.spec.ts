@@ -482,12 +482,17 @@ test.describe('High-risk plants check and submit section', () => {
     const reference = await plantsNotificationActions.amendCompletedPlantsForPlanting(plantsJourney, addressBookApi);
     await expectAmending(pages, plantsPages, reference);
 
-    for (const picker of [plantsPages.consignorSelect, plantsPages.placeOfDestination, plantsPages.consignmentContactSelect]) {
+    for (const picker of [plantsPages.consignorSelect, plantsPages.placeOfDestination]) {
       await picker.open(reference);
       await expect(picker.saveAndContinue).toBeVisible();
       await expect(picker.saveAndReturnToOverview).toBeVisible();
       await expect(picker.cancelAndReturnToOverview).toBeVisible();
     }
+
+    await plantsPages.consignmentContactSelect.open(reference);
+    await expect(plantsPages.consignmentContactSelect.saveAndContinue).toBeVisible();
+    await expect(plantsPages.consignmentContactSelect.saveAndReturnToHub).toBeVisible();
+    await expect(plantsPages.consignmentContactSelect.cancelAndReturnToHub).toBeVisible();
   });
 
   test.describe('Cancel and return to overview on an amended completed notification', () => {

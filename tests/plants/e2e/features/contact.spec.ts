@@ -4,6 +4,7 @@ import { test, expect } from '@fixtures';
 import { portByCode } from '@resources/reference-data/reference-data';
 import type { PlantsPages } from '@page-objects';
 import { nurseryAddress, type PlantsJourney } from '@flows/plants/journey';
+import { expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 
 const CONTACT = 'Contact address for consignment';
 
@@ -92,11 +93,23 @@ test.describe('High-risk plants contact', () => {
     await expect(pages.page.getByText('Your notification reference', { exact: false })).toContainText(reference);
   });
 
+  test('ends with Save and continue and Save and return to hub side by side and Cancel and return to hub on its own line below them', async ({
+    plantsPages,
+    plantsJourney,
+  }) => {
+    await openContact(plantsPages, plantsJourney);
+
+    await expectSaveControlsLayout(plantsPages.consignmentContactSelect, {
+      saveAndReturnLabel: 'Save and return to hub',
+      cancelAndReturnLink: plantsPages.consignmentContactSelect.cancelAndReturnToHub,
+    });
+  });
+
   for (const action of ['continue', 'return'] as const) {
     test(`blank contact permits save and ${action} and leaves the row incomplete`, async ({ pages, plantsPages, plantsJourney }) => {
       const reference = await openContact(plantsPages, plantsJourney);
       const contact = plantsPages.consignmentContactSelect;
-      const button = action === 'continue' ? contact.saveAndContinue : contact.saveAndReturnToOverview;
+      const button = action === 'continue' ? contact.saveAndContinue : contact.saveAndReturnToHub;
       await button.click();
       const landing = action === 'continue' ? plantsPages.notificationView : plantsPages.overview;
       await expect(pages.page).toHaveURL(landing.expectedUrlPattern(reference));

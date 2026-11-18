@@ -1,7 +1,8 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import type { Result } from 'axe-core';
-import { errors, type Page } from '@playwright/test';
+import { errors, test, type Page } from '@playwright/test';
 import { timeouts } from '@config/timeouts';
+import type { AnimalsPages } from '@page-objects';
 
 export type A11yScanOptions = {
   tags?: string[];
@@ -103,4 +104,20 @@ export function formatSummaries(results: ViolationSummary[]): string {
   const details = failed.map(({ path, violations }) => `${path}:\n${formatViolations(violations)}`).join('\n\n');
 
   return header + details;
+}
+
+/**
+ * Opens the review from Overview, scans it, then continues to the
+ * declaration, as a Playwright `test.step` named "Review your notification".
+ */
+export async function reviewAndContinueToDeclarationStep(
+  animalsPages: AnimalsPages,
+  runA11yScan: (options?: A11yScanOptions) => Promise<void>,
+): Promise<void> {
+  await test.step('Review your notification', async () => {
+    await animalsPages.overview.reviewAndSubmitButton.click();
+    await animalsPages.notificationView.heading.waitFor();
+    await runA11yScan();
+    await animalsPages.notificationView.continueButton.click();
+  });
 }
