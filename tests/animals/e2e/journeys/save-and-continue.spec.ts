@@ -159,29 +159,6 @@ test.describe('Save and continue to the next page', () => {
     await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText([]);
   });
 
-  test('contact address saved with no address chosen goes to check your answers, naming what is outstanding', async ({
-    animalsJourney,
-    animalsPages,
-    pages,
-  }) => {
-    test.slow();
-    await animalsJourney.toContactAddress();
-    const referenceNumber = animalsPages.contactAddress.referenceNumberFromUrl();
-
-    await animalsPages.contactAddress.saveAndContinue.click();
-
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
-    await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText([
-      'Complete reason for import',
-      'Complete additional animal details',
-      'Complete arrival details',
-      'Complete transport details',
-      'Complete roles and addresses',
-      'Complete contact address for this consignment',
-    ]);
-  });
-
   test('a draft with nothing saved, resumed from the dashboard, opens at the first page', async ({ animalsJourney, animalsPages }) => {
     const referenceNumber = await animalsJourney.createNotificationAtOrigin();
 

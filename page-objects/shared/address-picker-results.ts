@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 
-const RESULTS_HEADING = 'Select an address';
+export const PICKER_RESULTS_HEADING = 'Select an address';
 const NO_MATCHES = 'No addresses match your search.';
 
 export const WHOLE_LIST_COUNT = /^Showing (\d+) out of \1 results$/;
@@ -39,15 +39,19 @@ export function pickerLastCell(page: Page, name: string): Locator {
 }
 
 export function pickerResultsHeading(page: Page): Locator {
-  return page.getByRole('heading', { level: 2, name: RESULTS_HEADING });
+  return page.getByRole('heading', { level: 2, name: PICKER_RESULTS_HEADING });
+}
+
+export function paragraphFollowing(heading: Locator): Locator {
+  return heading.locator('xpath=following-sibling::*[1][self::p]');
 }
 
 export function pickerResultsSummary(page: Page): Locator {
-  return pickerResultsHeading(page).locator('xpath=following-sibling::*[1][self::p]');
+  return paragraphFollowing(pickerResultsHeading(page));
 }
 
 export function pickerResultsGroup(page: Page): Locator {
-  return page.getByRole('group', { name: RESULTS_HEADING });
+  return page.getByRole('group', { name: PICKER_RESULTS_HEADING });
 }
 
 export function pickerNoMatchesMessage(page: Page): Locator {

@@ -272,6 +272,10 @@ export class NotificationPage extends BasePage {
     return this.page.getByRole('button', { name: 'Save and continue', exact: true });
   }
 
+  get mainHeadings(): Locator {
+    return this.page.getByRole('main').getByRole('heading');
+  }
+
   get buttonGroup(): Locator {
     return this.page.locator('.govuk-button-group');
   }

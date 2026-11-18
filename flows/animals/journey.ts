@@ -403,7 +403,7 @@ export class AnimalsJourney {
     await this.addFiveParties(answers.parties);
     await this.answerPermanentAddresses(answers.commodityLines);
     await this.addCphAndLeaveAddresses(answers.cph);
-    await this.animalsPages.contactAddress.saveAndReturnToOverview.click();
+    await this.animalsPages.contactAddress.cancelAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 

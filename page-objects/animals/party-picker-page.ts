@@ -1,6 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import {
+  paragraphFollowing,
   pickerAddressCell,
   pickerAddressCellText,
   pickerAddressRadio,
@@ -37,7 +38,7 @@ export class AnimalsPartyPickerPage extends NotificationPage {
   }
 
   get descriptionUnderHeading(): Locator {
-    return this.headingRow.locator('xpath=following-sibling::*[1][self::p]');
+    return paragraphFollowing(this.headingRow);
   }
 
   get resultsHeading(): Locator {

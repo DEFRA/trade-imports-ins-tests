@@ -21,10 +21,6 @@ export class AnimalsImportReasonPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Main import reason', exact: true });
   }
 
-  get mainHeadings(): Locator {
-    return this.page.getByRole('main').getByRole('heading');
-  }
-
   get questionGroup(): Locator {
     return this.page.getByRole('group', { name: 'What is the main reason for importing the animals?' });
   }
