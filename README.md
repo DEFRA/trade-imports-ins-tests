@@ -81,11 +81,12 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 | `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                     | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:dynamics`                       | Dynamics integration (`@dynamics`) test suite          | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:cross-browser`                  | Cross-browser (`@cross-browser`) suite                 | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:browserstack`                   | Cross-browser (`@cross-browser`) suite on BrowserStack | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites         | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                     | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:cross-browser`   | Cross-browser (`@cross-browser`) suite                 | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:browserstack`    | Cross-browser (`@cross-browser`) suite on BrowserStack | docker-compose stack | `playwright.browserstack.config.ts`   | ✓                |
+| `npm run test:docker-compose:browserstack`    | Cross-browser (`@cross-browser`) suite on BrowserStack | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                 | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite  | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
