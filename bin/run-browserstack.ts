@@ -8,6 +8,7 @@ dotenv.config({ quiet: true });
 const REQUIRED_CREDENTIALS = ['BROWSERSTACK_USERNAME', 'BROWSERSTACK_ACCESS_KEY'];
 const CDP_CONFIG = 'playwright.config.ts';
 const DOCKER_COMPOSE_CONFIG = 'playwright.docker-compose.config.ts';
+const GLOBAL_REQUIRE_URL = new URL('browserstack-global-require.mjs', import.meta.url).href;
 // The BrowserStack plan allows 13 parallel sessions, shared by the whole team.
 const MAX_DEFAULT_PARALLELS_PER_PLATFORM = 13;
 
@@ -68,6 +69,7 @@ function runSdk(playwrightArgs: string[]): Promise<number> {
     stdio: 'inherit',
     env: {
       ...process.env,
+      NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ''} --import ${GLOBAL_REQUIRE_URL}`.trim(),
       BROWSERSTACK_BUILD_NAME: run.name,
       BROWSERSTACK_BUILD_IDENTIFIER: run.identifier,
       BROWSERSTACK_LOCAL: String(run.usesLocalTunnel),
