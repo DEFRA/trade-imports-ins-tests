@@ -4,6 +4,7 @@ import { pageLoadWait } from '@config/timeouts';
 import { commodityCardTitle, speciesBlockHeading, type CommodityLine } from '@domain/animals/constants/commodity-lines';
 import { NotificationPage, type OpenOptions } from '@page-objects/shared/base-page';
 import { ViewHeader } from '@page-objects/shared/view-header';
+import { valueOfTerm } from '@page-objects/shared/summary-list';
 
 const SPECIES_BLOCK_SELECTOR = '[id^="species-block-"]';
 
@@ -96,10 +97,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   }
 
   summaryValue(card: Locator, key: string): Locator {
-    return card
-      .getByRole('term')
-      .filter({ has: this.page.getByText(key, { exact: true }) })
-      .locator('xpath=following-sibling::dd[1]');
+    return valueOfTerm(card, key);
   }
 
   summaryKeys(card: Locator): Locator {

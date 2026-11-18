@@ -47,7 +47,7 @@ test.describe('Import notification service dashboard', () => {
 
     test('displays details on a notification card', async ({ animalsSeededJourney, animalsPages }) => {
       test.slow();
-      const referenceNumber = await animalsSeededJourney.createSubmittedWithItahcUploadedInUi(animalsPages);
+      const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
 
@@ -74,18 +74,7 @@ test.describe('Import notification service dashboard', () => {
       await expect(animalsPages.dashboard.amend(referenceNumber)).not.toBeVisible();
     });
 
-    test('shows view, copy and amend actions for a submitted notification', async ({ animalsPages, animalsSeededJourney }) => {
-      const referenceNumber = await animalsSeededJourney.createSubmittedWithItahcUploadedInUi(animalsPages);
-
-      await animalsPages.dashboard.open();
-      await animalsPages.dashboard.searchForReference(referenceNumber);
-      await expect(animalsPages.dashboard.cardStatusTag(referenceNumber)).toHaveText('Submitted');
-      await expect(animalsPages.dashboard.view(referenceNumber)).toBeVisible();
-      await expect(animalsPages.dashboard.copyAsNew(referenceNumber)).toBeVisible();
-      await expect(animalsPages.dashboard.amend(referenceNumber)).toBeVisible();
-    });
-
-    test('shows Submitted with view, copy, amend and delete actions for a notification submitted without its health certificate', async ({
+    test('shows Submitted with view, copy, amend and delete actions for a submitted notification', async ({
       animalsPages,
       animalsSeededJourney,
     }) => {

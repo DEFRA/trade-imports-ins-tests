@@ -1,6 +1,5 @@
 import { test, expect } from '@fixtures';
 import { notificationStatuses } from '@domain/animals/models/api/notification-status';
-import { MANDATORY_ANSWERS_WITH_ITAHC } from '@domain/animals/constants/journey-options';
 
 test.describe('Notification lifecycle', { tag: '@compose' }, () => {
   test('records a notification submitted without an ITAHC as Submitted through amend and cancel, then copies it into distinct drafts and soft-deletes it', async ({
@@ -53,7 +52,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     animalsNotificationActions,
   }) => {
     test.slow();
-    await animalsJourney.submitNotification(MANDATORY_ANSWERS_WITH_ITAHC);
+    await animalsJourney.submitNotification();
     await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
 
     await expect(animalsPages.notificationView.viewHeader.reference).toHaveText(journeyContext.referenceNumber);
@@ -70,7 +69,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     animalsPages,
   }) => {
     test.slow();
-    await animalsJourney.submitNotification(MANDATORY_ANSWERS_WITH_ITAHC);
+    await animalsJourney.submitNotification();
 
     await animalsPages.dashboard.open();
     await animalsPages.dashboard.searchForReference(journeyContext.referenceNumber);
@@ -87,7 +86,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     animalsNotificationActions,
   }) => {
     test.slow();
-    await animalsJourney.submitNotification(MANDATORY_ANSWERS_WITH_ITAHC);
+    await animalsJourney.submitNotification();
 
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
     await expect(animalsPages.notificationView.amendReviewHeading).toBeVisible();

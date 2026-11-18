@@ -20,8 +20,7 @@ Why the animals flows and page objects are written the way they are. The code ca
 
 ## Documents
 
-- `uploadDocumentAndWaitForScan` waits for the virus scan to finish so the submission carries the document.
-- `answerAccompanyingDocument` adds the answers' accompanying document using that wait, and does nothing when the answers carry none.
+- `answerAccompanyingDocument` adds the answers' accompanying document, waiting for the virus scan to finish, and does nothing when the answers carry none.
 
 ## Answer sets
 
@@ -54,15 +53,15 @@ Why the animals flows and page objects are written the way they are. The code ca
 
 ## Notification view
 
-### Cancelling an amendment (`flows/animals/notification-actions.ts`)
-
-- `cancelAmend` waits on `?cancelled=1` rather than the view's heading, because the error page has the same heading.
-
 ### Party rows (`page-objects/animals/notification-view-page.ts`)
 
 - `partyRow` selects the summary-list row whose accessible term is the role directly, rather than climbing to it, so no XPath parent-axis hop is needed.
 - `cardLinks` lists every link in a summary card, so a spec can assert the card's header Change link is its only link. `cardSubsection` selects the summary list under a card's titled subsection, such as "Permanent address".
 - `partyError` reads the first definition of the row. A summary list has no error state of its own, so an outstanding role carries its message in the row's value cell.
+
+## Documents (`page-objects/animals/accompanying-documents-page.ts`)
+
+- `uploadDocumentAndWaitForScan` waits for the virus scan to finish so the submission carries the document.
 
 ## Choosing species (`page-objects/animals/commodity-selection-page.ts`)
 

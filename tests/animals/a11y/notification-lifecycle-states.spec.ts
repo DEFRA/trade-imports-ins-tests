@@ -26,7 +26,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.notificationView.btnCancelAmend.click();
       await animalsPages.notificationCancelAmend.heading.waitFor();
       await runA11yScan();
-      // ?cancelled=1 rather than the view's heading, which the error page also has.
       await animalsPages.notificationCancelAmend.confirm.click();
       await pages.page.waitForURL(/\/notification-view\?cancelled=1$/);
     });

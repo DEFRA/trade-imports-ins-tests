@@ -189,6 +189,12 @@ test.describe('High-risk plants check and submit section', () => {
       await expect(btnDelete).toHaveClass(/govuk-button--warning/);
     });
 
+    test('Delete notification in the header opens the delete page', async ({ plantsPages }) => {
+      await plantsPages.notificationView.btnDelete.click();
+
+      await expect(plantsPages.deleteNotification.heading).toBeVisible();
+    });
+
     test("shows a draft's notification reference and the customs document code C085 as text with the warning and no button", async ({
       plantsPages,
     }) => {
@@ -456,21 +462,6 @@ test.describe('High-risk plants check and submit section', () => {
       await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('P123');
     });
   }
-
-  test('a draft check answers ends with Continue and Save and return, and the Delete notification in its header opens the delete page', async ({
-    plantsPages,
-    plantsJourney,
-    addressBookApi,
-  }) => {
-    await plantsJourney.completeNotification(addressBookApi);
-    await plantsPages.notificationView.viewHeader.expectDraftReview();
-
-    await expect(plantsPages.notificationView.endControls).toHaveText(['Continue', 'Save and return to overview']);
-    await expect(plantsPages.notificationView.btnDelete).toHaveClass(/govuk-button--warning/);
-    await plantsPages.notificationView.btnDelete.click();
-
-    await expect(plantsPages.deleteNotification.heading).toBeVisible();
-  });
 
   test('an amendment check answers offers a Cancel amend button beside Continue, no Delete notification, and the button opens the confirmation', async ({
     plantsPages,

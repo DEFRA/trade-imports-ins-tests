@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
+import { valueOfTerm } from '@page-objects/shared/summary-list';
 
 const IMPORT_REFERENCES_WARNING =
   'You must use the correct reference and code on the customs declaration or your consignment will be delayed.';
@@ -44,10 +45,7 @@ export class ViewHeader {
   }
 
   importReferenceValue(key: string): Locator {
-    return this.importReferences
-      .getByRole('term')
-      .filter({ has: this.page.getByText(key, { exact: true }) })
-      .locator('xpath=following-sibling::dd[1]');
+    return valueOfTerm(this.importReferences, key);
   }
 
   async expectDraftReview(referenceNumber?: string): Promise<void> {
@@ -65,7 +63,7 @@ export async function expectImportReferencesAsText(
   { referenceNumber, customsDocumentCode }: { referenceNumber: string; customsDocumentCode: string },
 ): Promise<void> {
   await expect(viewHeader.importReferencesWarning).toContainText(IMPORT_REFERENCES_WARNING);
-  await expect(viewHeader.importReferenceValue('Notification reference')).toHaveText(referenceNumber);
+  await expect(viewHeader.notificationReferenceValue).toHaveText(referenceNumber);
   await expect(viewHeader.importReferenceValue('Customs document code')).toHaveText(customsDocumentCode);
   await expect(viewHeader.importReferences.getByRole('button')).toHaveCount(0);
 }

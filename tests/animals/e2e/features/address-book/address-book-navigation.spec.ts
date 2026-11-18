@@ -115,10 +115,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       for (let i = 0; i < 5; i += 1) {
         await addressBookApi.createAddress({ ...traderAddress(`Newer Consignor ${stamp} ${i}`), ...heldAsConsignor });
       }
-      const referenceNumber = await animalsSeededJourney.createDraftNotification();
-      await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView, {
-        waitFor: animalsPages.notificationView.viewHeader.reference,
-      });
+      const referenceNumber = await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
       await animalsPages.notificationView.changeLink(CONSIGNMENT_ADDRESSES_CHANGE_LINK).click();
       await animalsPages.addresses.changeParty('Consignor').click();
       const picker = animalsPages.consignorSelection;
