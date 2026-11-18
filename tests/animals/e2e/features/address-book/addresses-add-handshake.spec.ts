@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { addressFormCountryNames } from '@resources/reference-data/reference-data';
@@ -84,7 +85,7 @@ test.describe('Add an address from the journey via INS', () => {
 
   for (const role of PARTY_ROLES) {
     test(
-      `Save and select on the INS add page reached from the ${role} picker saves the address holding that role, selects it for the role and lands on Roles and addresses with the added banner, whose Back opens the Overview`,
+      `Save and select on the INS add page reached from the ${role} picker saves the address holding that role, selects it for the role and lands on Consignment addresses with the added banner, whose Back opens the Overview`,
       { tag: ['@address-book', '@ins-frontend'] },
       async ({ animalsJourney, pages, animalsPages, insPages, addressBookApi }) => {
         const addPage = insPages.addressBookAdd;
@@ -159,7 +160,7 @@ test.describe('Add an address from the journey via INS', () => {
 
         await expect(animalsPages.overview.heading).toBeVisible();
 
-        await animalsPages.overview.task('Roles and addresses').click();
+        await animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
         await expect(animalsPages.addresses.heading).toBeVisible();
         await expect(animalsPages.addresses.partyLinks(role)).toHaveText([AnimalsAddressesPage.addLinkName(role)]);
 

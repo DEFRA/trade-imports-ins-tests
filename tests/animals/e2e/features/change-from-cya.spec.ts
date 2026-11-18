@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES_CHANGE_LINK } from '@domain/animals/constants/consignment-addresses-page';
 import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { expectOpenFromReview, expectSaveAndContinueWalk } from '@page-objects/shared/journey-checks';
@@ -131,11 +132,14 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     );
   });
 
-  test('the addresses card Change link opens a page whose Back link opens the review', async ({ animalsSeededJourney, animalsPages }) => {
+  test('the consignment addresses card Change link opens a page whose Back link opens the review', async ({
+    animalsSeededJourney,
+    animalsPages,
+  }) => {
     test.slow();
     await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
 
-    await animalsPages.notificationView.changeLink('Change addresses').click();
+    await animalsPages.notificationView.changeLink(CONSIGNMENT_ADDRESSES_CHANGE_LINK).click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await animalsPages.addresses.linkBack.click();
     await animalsPages.notificationView.viewHeader.expectDraftReview();

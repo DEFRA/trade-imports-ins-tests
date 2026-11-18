@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { test, expect } from '@fixtures';
 import { heldAsConsignor } from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
@@ -44,7 +45,7 @@ test.describe('Addresses are copied, not linked', () => {
 
       const referenceNumber = animalsPages.addresses.referenceNumberFromUrl();
       await animalsPages.notificationView.open(referenceNumber);
-      const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
+      const consignorCyaRow = animalsPages.notificationView.partyRow(CONSIGNMENT_ADDRESSES, 'Consignor');
       await expect(consignorCyaRow).toContainText(originalName);
       await expect(consignorCyaRow).toContainText('Carlisle');
       await expect(consignorCyaRow).toContainText('CA1 1AA');
@@ -82,7 +83,7 @@ test.describe('Addresses are copied, not linked', () => {
 
     const referenceNumber = animalsPages.addresses.referenceNumberFromUrl();
     await animalsPages.notificationView.open(referenceNumber);
-    const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
+    const consignorCyaRow = animalsPages.notificationView.partyRow(CONSIGNMENT_ADDRESSES, 'Consignor');
     await expect(consignorCyaRow.getByRole('definition')).toHaveText(
       [record.name, record.addressLine1, record.addressLine2, record.townOrCity, record.county, record.postcode, 'United Kingdom'].join(
         '\n',
@@ -121,7 +122,7 @@ test.describe('Addresses are copied, not linked', () => {
       await expect(animalsPages.addresses.partyLinks('Consignor')).toHaveText([change, editDetails]);
 
       await animalsPages.notificationView.open(referenceNumber);
-      const consignorCyaRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
+      const consignorCyaRow = animalsPages.notificationView.partyRow(CONSIGNMENT_ADDRESSES, 'Consignor');
       await expect(consignorCyaRow).toContainText(name);
       await expect(consignorCyaRow).toContainText('Carlisle');
       await expect(animalsPages.notificationView.errorSummary).toHaveCount(0);
@@ -163,9 +164,9 @@ test.describe('Addresses are copied, not linked', () => {
 
     await animalsPages.notificationView.open(referenceNumber);
     const message = 'Correct the address details for the consignor';
-    const consignorRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
+    const consignorRow = animalsPages.notificationView.partyRow(CONSIGNMENT_ADDRESSES, 'Consignor');
     await expect(animalsPages.notificationView.errorSummary).toContainText(message);
-    await expect(animalsPages.notificationView.partyError('Addresses', 'Consignor')).toContainText(message);
+    await expect(animalsPages.notificationView.partyError(CONSIGNMENT_ADDRESSES, 'Consignor')).toContainText(message);
     await expect(consignorRow).toContainText(name);
     await expect(consignorRow).toContainText('Carlisle');
 

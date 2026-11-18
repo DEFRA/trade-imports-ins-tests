@@ -5,7 +5,7 @@ import { PLANTS_FOR_PLANTING, POTATOES, WOOD_AND_CUT_TREES, nurseryAddress } fro
 const CONSIGNOR = 'Consignor';
 const NUMBERS = 'Identification numbers';
 
-test.describe('High-risk plants consignment parties section', () => {
+test.describe('High-risk plants addresses section', () => {
   for (const type of [PLANTS_FOR_PLANTING, WOOD_AND_CUT_TREES]) {
     test(`${type}: a blank consignor save moves on to identification numbers, leaving the consignor not yet started`, async ({
       pages,

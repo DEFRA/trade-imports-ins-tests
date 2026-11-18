@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES_INCOMPLETE } from '@domain/animals/constants/consignment-addresses-page';
 import { test, expect } from '@fixtures';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
@@ -47,7 +48,7 @@ test.describe('Declaration page', { tag: '@duplicated-in-frontend' }, () => {
         'Complete additional details',
         'Complete arrival details',
         'Complete transport details',
-        'Complete roles and addresses',
+        CONSIGNMENT_ADDRESSES_INCOMPLETE,
         'Complete contact address for this consignment',
       ]);
       await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');

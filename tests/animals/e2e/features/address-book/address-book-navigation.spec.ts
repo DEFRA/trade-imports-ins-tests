@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES_CHANGE_LINK } from '@domain/animals/constants/consignment-addresses-page';
 import { test, expect } from '@fixtures';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { originOf } from '@page-objects/shared/base-page';
@@ -102,7 +103,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
   );
 
   test(
-    "a later picker page's View link, opened while changing an answer, Backs to that page with the chosen address still selected and the trail kept, and saving returns to the roles and addresses page carrying the trail from the review",
+    "a later picker page's View link, opened while changing an answer, Backs to that page with the chosen address still selected and the trail kept, and saving returns to the consignment addresses page carrying the trail from the review",
     { tag: '@address-book' },
     async ({ pages, animalsSeededJourney, animalsPages, insPages, addressBookApi }) => {
       test.slow();
@@ -118,7 +119,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView, {
         waitFor: animalsPages.notificationView.viewHeader.reference,
       });
-      await animalsPages.notificationView.changeLink('Change addresses').click();
+      await animalsPages.notificationView.changeLink(CONSIGNMENT_ADDRESSES_CHANGE_LINK).click();
       await animalsPages.addresses.changeParty('Consignor').click();
       const picker = animalsPages.consignorSelection;
       await picker.select(chosenName);

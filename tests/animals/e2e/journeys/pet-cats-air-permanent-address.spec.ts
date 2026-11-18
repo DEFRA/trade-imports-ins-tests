@@ -36,7 +36,7 @@ test.describe('Pet cats by air with permanent addresses', () => {
     await expect(animalsPages.notificationView.summaryValue(speciesBlock, 'Number of animals')).toHaveText('2');
 
     const commonName = await referenceDataApi.findCommonName(commodityLines.domesticCat);
-    const addresses = animalsPages.notificationView.summaryCard('Addresses');
+    const addresses = animalsPages.notificationView.addressesCard;
     await expect(animalsPages.notificationView.summaryValue(addresses, `${commonName} 1`)).toContainText(
       MANDATORY_ANSWERS.parties.placeOfDestination,
     );

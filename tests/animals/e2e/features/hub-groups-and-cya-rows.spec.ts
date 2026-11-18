@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES, ADDRESSES_SECTION } from '@domain/animals/constants/consignment-addresses-page';
 import { test, expect } from '@fixtures';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { commodityCardTitle, commodityLines, speciesBlockHeading } from '@domain/animals/constants/commodity-lines';
@@ -12,14 +13,9 @@ import { ALL_COMMODITY_LINES, MANDATORY_COMMODITY_LINES } from '@domain/animals/
 const ABOUT_GOODS_AND_TRANSPORT = ['1. About the consignment', '2. Description of the goods', '3. Transport and arrival'];
 const CONTACT_ADDRESS_SECTION = '6. Contact address';
 
-const REVIEW_SECTION_HEADINGS = [
-  ...ABOUT_GOODS_AND_TRANSPORT,
-  '4. Uploaded documents',
-  '5. Consignment addresses',
-  CONTACT_ADDRESS_SECTION,
-];
+const REVIEW_SECTION_HEADINGS = [...ABOUT_GOODS_AND_TRANSPORT, '4. Uploaded documents', ADDRESSES_SECTION, CONTACT_ADDRESS_SECTION];
 
-const HUB_SECTION_CAPTIONS = [...ABOUT_GOODS_AND_TRANSPORT, '4. Documents', '5. Consignment parties', CONTACT_ADDRESS_SECTION];
+const HUB_SECTION_CAPTIONS = [...ABOUT_GOODS_AND_TRANSPORT, '4. Documents', ADDRESSES_SECTION, CONTACT_ADDRESS_SECTION];
 
 test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-frontend' }, () => {
   test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({
@@ -38,8 +34,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     for (const [index, caption] of HUB_SECTION_CAPTIONS.entries()) {
       await expect(animalsPages.overview.sectionRegions.nth(index)).toHaveAccessibleName(caption);
     }
-    const [aboutTheConsignment, descriptionOfTheGoods, transportAndArrival, documents, consignmentParties, contactAddress] =
-      HUB_SECTION_CAPTIONS;
+    const [aboutTheConsignment, descriptionOfTheGoods, transportAndArrival, documents, addresses, contactAddress] = HUB_SECTION_CAPTIONS;
     await expect(animalsPages.overview.taskTitlesInSectionHeaded(aboutTheConsignment)).toHaveText([
       'Where is this consignment coming from?',
       'What are you importing?',
@@ -51,7 +46,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     ]);
     await expect(animalsPages.overview.taskTitlesInSectionHeaded(transportAndArrival)).toHaveText(['Arrival details', 'Transport details']);
     await expect(animalsPages.overview.taskTitlesInSectionHeaded(documents)).toHaveText(['Upload documents']);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded(consignmentParties)).toHaveText(['Roles and addresses']);
+    await expect(animalsPages.overview.taskTitlesInSectionHeaded(addresses)).toHaveText([CONSIGNMENT_ADDRESSES]);
     await expect(animalsPages.overview.taskTitlesInSectionHeaded(contactAddress)).toHaveText(['Contact address for this consignment']);
   });
 
@@ -95,7 +90,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       'Arrival details',
       'Transport details',
       'Document 1',
-      'Addresses',
+      CONSIGNMENT_ADDRESSES,
       'Contact address',
     ]);
 
@@ -149,7 +144,9 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
 
     const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Port of entry')).toHaveText(answers.pointOfEntry.display);
-    await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Arrival date at destination')).toHaveText(answers.arrivalDate);
+    await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Arrival date at port of entry')).toHaveText(
+      answers.arrivalDate,
+    );
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Means of transport to the port of entry')).toHaveText(
       answers.meansOfTransport.display,
     );
@@ -182,7 +179,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     );
     await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Type')).toHaveText('Commercial');
 
-    const addresses = animalsPages.notificationView.summaryCard('Addresses');
+    const addresses = animalsPages.notificationView.addressesCard;
     await expect(animalsPages.notificationView.summaryValue(addresses, 'Place of origin')).toContainText(answers.parties.placeOfOrigin);
     await expect(animalsPages.notificationView.summaryValue(addresses, 'Consignor')).toContainText(answers.parties.consignor);
     await expect(animalsPages.notificationView.summaryValue(addresses, 'Consignee')).toContainText(answers.parties.consignee);
@@ -220,7 +217,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       'Arrival details',
       'Transport details',
       'Document 1',
-      'Addresses',
+      CONSIGNMENT_ADDRESSES,
       'Contact address',
     ]);
 
@@ -239,7 +236,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(animalsPages.declaration.heading).toBeVisible();
   });
 
-  test('the Addresses card’s Permanent address subsection shows a cat’s saved address, keyed by its common name and number, with no telephone or email', async ({
+  test('the Consignment addresses card’s Permanent address subsection shows a cat’s saved address, keyed by its common name and number, with no telephone or email', async ({
     animalsJourney,
     animalsPages,
     referenceDataApi,
@@ -252,7 +249,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await animalsJourney.toReview(answers);
     const commonName = await referenceDataApi.findCommonName(MANDATORY_COMMODITY_LINES.domesticCat.species);
 
-    const subsection = animalsPages.notificationView.cardSubsection('Addresses', 'Permanent address');
+    const subsection = animalsPages.notificationView.cardSubsection(CONSIGNMENT_ADDRESSES, 'Permanent address');
     const { permanentAddress: address } = MANDATORY_COMMODITY_LINES.domesticCat;
     await expect(animalsPages.notificationView.summaryKeys(subsection)).toHaveText([`${commonName} 1`]);
     await expect(animalsPages.notificationView.summaryValue(subsection, `${commonName} 1`)).toHaveText(

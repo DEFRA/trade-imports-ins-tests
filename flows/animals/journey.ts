@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { pageLoadWait } from '@config/timeouts';
 import { type Locator, expect } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
@@ -79,7 +80,7 @@ export const AIR_OR_SEA_OVERVIEW_TASKS = [
   'Arrival details',
   'Transport details',
   'Upload documents',
-  'Roles and addresses',
+  CONSIGNMENT_ADDRESSES,
   'Contact address for this consignment',
 ] as const;
 
@@ -94,7 +95,7 @@ export const OVERLAND_OVERVIEW_TASKS = [
   'Transit countries',
   'Transport details',
   'Upload documents',
-  'Roles and addresses',
+  CONSIGNMENT_ADDRESSES,
   'Contact address for this consignment',
 ] as const;
 
@@ -385,7 +386,7 @@ export class AnimalsJourney {
   }
 
   async fillAddressesAndOpenCph(): Promise<void> {
-    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await this.addFiveParties();
     await this.animalsPages.addresses.addCph.click();
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
@@ -404,7 +405,7 @@ export class AnimalsJourney {
   }
 
   async answerAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
-    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await this.addFiveParties(answers.parties);
     await this.answerPermanentAddresses(answers.commodityLines);
     await this.addCphAndLeaveAddresses(answers.cph);
@@ -607,7 +608,7 @@ export class AnimalsJourney {
   }
 
   async toPermanentAddress(answers: NotificationAnswers): Promise<void> {
-    await this.toRolesAndAddresses(answers, () => this.answerAnimalIdentification(answers));
+    await this.toConsignmentAddresses(answers, () => this.answerAnimalIdentification(answers));
     await this.openPermanentAddress();
   }
 
@@ -644,13 +645,13 @@ export class AnimalsJourney {
     await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
   }
 
-  async toRolesAndAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS, afterCommodity?: () => Promise<void>): Promise<void> {
+  async toConsignmentAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS, afterCommodity?: () => Promise<void>): Promise<void> {
     await this.startNotification();
     await this.answerCommodity(answers);
     if (afterCommodity) {
       await afterCommodity();
     }
-    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
   }
 
@@ -675,9 +676,9 @@ export class AnimalsJourney {
     await this.openAdditionalDetailsFromOverview();
   }
 
-  async toRolesAndAddressesOfCurrentNotification(): Promise<void> {
+  async toConsignmentAddressesOfCurrentNotification(): Promise<void> {
     await this.openCurrentOverview();
-    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
   }
 
@@ -762,7 +763,7 @@ export class AnimalsJourney {
   async toPartyPicker(role: PartyRole): Promise<void> {
     await this.startNotification();
     await this.answerCommodity();
-    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await this.animalsPages.addresses.addParty(role).click();
     await this.partyPicker(role).heading.waitFor(pageLoadWait);
   }
@@ -807,7 +808,7 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
-  async walkToRolesAndAddressesWithoutCph(): Promise<string> {
+  async walkToConsignmentAddressesWithoutCph(): Promise<string> {
     const pages = this.animalsPages;
     const referenceNumber = await this.walkToImportReason();
 

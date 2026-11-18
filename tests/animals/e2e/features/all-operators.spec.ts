@@ -10,7 +10,7 @@ test.describe('All operator addresses', { tag: '@duplicated-in-frontend' }, () =
 
       await animalsJourney.toReview();
 
-      const addresses = animalsPages.notificationView.summaryCard('Addresses');
+      const addresses = animalsPages.notificationView.addressesCard;
       const operator = (key: string) => animalsPages.notificationView.summaryValue(addresses, key);
 
       await expect(operator('Place of origin')).toContainText('Origin Farm');

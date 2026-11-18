@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { uniquelyNamedCommercialTransporter } from '@domain/animals/constants/transporters';
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
@@ -81,7 +82,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Consignor selection', async () => {
-      await animalsPages.overview.task('Roles and addresses').click();
+      await animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
       await animalsPages.addresses.heading.waitFor();
       await animalsPages.addresses.addParty('Consignor').click();
       await animalsPages.consignorSelection.select('Astra Rosales');

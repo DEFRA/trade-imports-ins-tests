@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES, CONSIGNMENT_ADDRESSES_CHANGE_LINK } from '@domain/animals/constants/consignment-addresses-page';
 import { test, expect } from '@fixtures';
 import { heldAsConsignor } from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
@@ -40,7 +41,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(animalsPages.addresses.partySection('Consignor')).toContainText(editedName);
 
     await animalsPages.notificationView.open(referenceNumber);
-    const consignorRow = animalsPages.notificationView.partyRow('Addresses', 'Consignor');
+    const consignorRow = animalsPages.notificationView.partyRow(CONSIGNMENT_ADDRESSES, 'Consignor');
     await expect(consignorRow).toContainText(editedName);
     await expect(consignorRow).toContainText('Penrith');
     await expect(consignorRow).toContainText('CA11 9ZZ');
@@ -109,7 +110,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(form.country).toHaveAccessibleDescription(/Enter a country/);
 
     await animalsPages.notificationView.open(referenceNumber);
-    const originRow = animalsPages.notificationView.partyRow('Addresses', 'Place of origin');
+    const originRow = animalsPages.notificationView.partyRow(CONSIGNMENT_ADDRESSES, 'Place of origin');
     await expect(originRow).toContainText('Origin Farm');
     await expect(originRow).toContainText('V95 X7P2');
     await expect(originRow).not.toContainText('CA11 9ZZ 1234');
@@ -162,7 +163,9 @@ test.describe('Copied addresses are edited on the notification', () => {
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView, {
       waitFor: animalsPages.notificationView.viewHeader.reference,
     });
-    await expect(animalsPages.notificationView.cardLinks('Addresses')).toHaveText(['Change addresses (Addresses)']);
+    await expect(animalsPages.notificationView.cardLinks(CONSIGNMENT_ADDRESSES)).toHaveText([
+      `${CONSIGNMENT_ADDRESSES_CHANGE_LINK} (${CONSIGNMENT_ADDRESSES})`,
+    ]);
     await expect(animalsPages.notificationView.cardLinks('Contact address')).toHaveText(['Change contact address (Contact address)']);
 
     const unansweredReferenceNumber = await animalsSeededJourney.createDraftNotification('unlocked');

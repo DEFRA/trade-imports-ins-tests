@@ -15,14 +15,14 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     const { cphSection, cphLinks } = animalsPages.addresses;
 
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.domesticCat);
-    await animalsJourney.toRolesAndAddressesOfCurrentNotification();
+    await animalsJourney.toConsignmentAddressesOfCurrentNotification();
     await expect(cphSection).toBeHidden();
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.contactAddress.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
 
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.cattle);
-    await animalsJourney.toRolesAndAddressesOfCurrentNotification();
+    await animalsJourney.toConsignmentAddressesOfCurrentNotification();
     await expect(cphSection).toBeVisible();
     await expect(cphLinks).toHaveText(['Add a CPH number']);
   });
@@ -38,7 +38,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     const { cphLinks, cphNumberText } = animalsPages.addresses;
 
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.cattle);
-    await animalsJourney.toRolesAndAddressesOfCurrentNotification();
+    await animalsJourney.toConsignmentAddressesOfCurrentNotification();
     await animalsPages.addresses.addCph.click();
     await expect(animalsPages.cphNumber.heading).toBeVisible();
     await animalsPages.cphNumber.fillCphNumber();

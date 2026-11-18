@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES_INCOMPLETE } from '@domain/animals/constants/consignment-addresses-page';
 import { basename } from 'node:path';
 import { commodityLines, speciesBlockHeading } from '@domain/animals/constants/commodity-lines';
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
@@ -56,7 +57,7 @@ test.describe('Save and continue through a new notification', () => {
       await expect(animalsPages.notificationView.summaryValue(documentCard, 'Date of issue')).toHaveText(document.issueDate);
       await expect(animalsPages.notificationView.summaryValue(documentCard, 'Attachment')).toHaveText(basename(document.filePath));
 
-      const addresses = animalsPages.notificationView.summaryCard('Addresses');
+      const addresses = animalsPages.notificationView.addressesCard;
       await expect(animalsPages.notificationView.summaryValue(addresses, 'County parish holding (CPH) number')).toHaveText(
         CPH_NUMBER_WITH_SLASHES,
       );
@@ -87,7 +88,7 @@ test.describe('Save and continue through a new notification', () => {
   }) => {
     test.slow();
 
-    const referenceNumber = await animalsJourney.walkToRolesAndAddressesWithoutCph();
+    const referenceNumber = await animalsJourney.walkToConsignmentAddressesWithoutCph();
 
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.contactAddress.heading).toBeVisible();
@@ -100,7 +101,7 @@ test.describe('Save and continue through a new notification', () => {
     await animalsPages.notificationView.viewHeader.expectDraftReview();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete main import reason');
-    await expect(animalsPages.notificationView.errorSummary).toContainText('Complete roles and addresses');
+    await expect(animalsPages.notificationView.errorSummary).toContainText(CONSIGNMENT_ADDRESSES_INCOMPLETE);
 
     await animalsPages.notificationView.continueButton.click();
     await animalsPages.notificationView.viewHeader.expectDraftReview();
@@ -193,7 +194,7 @@ test.describe('Save and continue to the next page', () => {
       'Complete additional details',
       'Complete arrival details',
       'Complete transport details',
-      'Complete roles and addresses',
+      CONSIGNMENT_ADDRESSES_INCOMPLETE,
       'Complete contact address for this consignment',
     ]);
   });

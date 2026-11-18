@@ -1,10 +1,11 @@
 import type { PlantsPages } from '@page-objects';
+import { ADDRESSES_SECTION } from '@domain/plants/constants/hub-groups';
 import { WHOLE_REFERENCE_NUMBER_PATTERN } from '@domain/plants/constants/reference-number-patterns';
 import { TRAIL_START } from '@page-objects/shared/base-page';
 import { POTATOES } from '@flows/plants/journey';
 import { test, expect } from '@fixtures';
 
-const GROUP_CAPTIONS = ['1. About the consignment', '2. Arrival and destination', '3. Consignment parties', '4. Check and submit'];
+const GROUP_CAPTIONS = ['1. About the consignment', '2. Arrival and destination', ADDRESSES_SECTION, '4. Check and submit'];
 
 test.describe('High-risk plants start section', () => {
   test('the dashboard renders after signing in', { tag: '@smoke' }, async ({ pages, plantsPages }) => {

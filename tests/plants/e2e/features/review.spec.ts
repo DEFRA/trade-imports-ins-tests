@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { ADDRESSES_SECTION } from '@domain/plants/constants/hub-groups';
 import { test, expect } from '@fixtures';
 import {
   POTATOES,
@@ -80,7 +81,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(pages.page.getByRole('heading', { level: 2, name: /^[1-3]\. / })).toHaveText([
       '1. About the consignment',
       '2. Arrival and destination',
-      '3. Consignment parties',
+      ADDRESSES_SECTION,
     ]);
     await expect(plantsPages.notificationView.card('Consignor')).toHaveCount(0);
     const contact = plantsPages.notificationView.card('Contact');

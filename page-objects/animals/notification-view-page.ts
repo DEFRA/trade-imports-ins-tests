@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { type Locator, type Page } from '@playwright/test';
 import { pageLoadWait } from '@config/timeouts';
 import { commodityCardTitle, speciesBlockHeading, type CommodityLine } from '@domain/animals/constants/commodity-lines';
@@ -51,6 +52,10 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   get whatAreYouImportingCard(): Locator {
     return this.summaryCard('What are you importing?');
+  }
+
+  get addressesCard(): Locator {
+    return this.summaryCard(CONSIGNMENT_ADDRESSES);
   }
 
   commodityCard(line: CommodityLine): Locator {

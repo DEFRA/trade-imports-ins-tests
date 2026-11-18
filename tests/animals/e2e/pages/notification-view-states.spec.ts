@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES_INCOMPLETE, ADDRESSES_SECTION } from '@domain/animals/constants/consignment-addresses-page';
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { ITAHC_DOCUMENT_TYPE_LABEL } from '@domain/animals/constants/document-types';
 import { test, expect } from '@fixtures';
@@ -28,7 +29,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(pages.page.getByRole('heading', { name: '2. Description of the goods' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '3. Transport and arrival' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '4. Uploaded documents' })).toBeVisible();
-      await expect(pages.page.getByRole('heading', { name: '5. Consignment addresses' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: ADDRESSES_SECTION })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '6. Contact address' })).toBeVisible();
       const documentCard = animalsPages.notificationView.documentCard(1);
       await expect(documentCard).toBeVisible();
@@ -104,7 +105,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
         'Complete additional details',
         'Complete arrival details',
         'Complete transport details',
-        'Complete roles and addresses',
+        CONSIGNMENT_ADDRESSES_INCOMPLETE,
         'Complete contact address for this consignment',
       ]);
     });

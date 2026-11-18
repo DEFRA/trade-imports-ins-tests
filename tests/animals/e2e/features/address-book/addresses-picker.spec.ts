@@ -121,7 +121,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
       .toBe(AnimalsPartyPickerPage.expectedAddressCellText(record));
   });
 
-  test('saving with nothing ticked returns to the roles and addresses page with the consignor section offering only its add link', async ({
+  test('saving with nothing ticked returns to the consignment addresses page with the consignor section offering only its add link', async ({
     animalsJourney,
     animalsPages,
   }) => {

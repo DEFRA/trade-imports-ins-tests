@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { test, expect } from '@fixtures';
 import { heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
 
@@ -26,7 +27,7 @@ test.describe('Submitted addresses keep their copy', () => {
     });
 
     const referenceNumber = await animalsSeededJourney.createSubmittedWithPlaceOfOriginChosenInUi(animalsPages, originalName);
-    const originRow = animalsPages.notificationView.partyRow('Addresses', 'Place of origin');
+    const originRow = animalsPages.notificationView.partyRow(CONSIGNMENT_ADDRESSES, 'Place of origin');
 
     await addressBookApi.updateAddress(address.id, {
       ...heldAsPlaceOfOrigin,
@@ -85,7 +86,7 @@ test.describe('Submitted addresses keep their copy', () => {
     });
 
     const referenceNumber = await animalsSeededJourney.createSubmittedWithPlaceOfOriginChosenInUi(animalsPages, originalName);
-    const originRow = animalsPages.notificationView.partyRow('Addresses', 'Place of origin');
+    const originRow = animalsPages.notificationView.partyRow(CONSIGNMENT_ADDRESSES, 'Place of origin');
 
     await addressBookApi.deleteAddress(address.id);
 
