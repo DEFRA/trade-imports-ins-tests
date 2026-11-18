@@ -1,10 +1,15 @@
 import { spawn } from 'node:child_process';
+import { cpus } from 'node:os';
 import dotenv from 'dotenv';
 import { getEnvironment } from '@utils/playwright/environment';
 
 dotenv.config({ quiet: true });
 
 const REQUIRED_CREDENTIALS = ['BROWSERSTACK_USERNAME', 'BROWSERSTACK_ACCESS_KEY'];
+const CDP_CONFIG = 'playwright.config.ts';
+const DOCKER_COMPOSE_CONFIG = 'playwright.docker-compose.config.ts';
+// The BrowserStack plan allows 13 parallel sessions, shared by the whole team.
+const MAX_DEFAULT_PARALLELS_PER_PLATFORM = 13;
 
 function assertCredentialsSet(): void {
   const missing = REQUIRED_CREDENTIALS.filter((name) => !process.env[name]);
@@ -18,37 +23,57 @@ function utcTimestamp(): string {
   return new Date().toISOString().replace(/[-:]|\.\d+/g, '');
 }
 
-interface BuildSettings {
+interface RunSettings {
   name: string;
   identifier: string;
   usesLocalTunnel: boolean;
+  playwrightConfig: string;
 }
 
-function resolveBuildSettings(): BuildSettings {
+function resolveRunSettings(): RunSettings {
   if (process.env.RUN_ID) {
-    return { name: `cdp-${getEnvironment() ?? 'unknown'}`, identifier: process.env.RUN_ID, usesLocalTunnel: false };
+    return {
+      name: `cdp-${getEnvironment() ?? 'unknown'}`,
+      identifier: process.env.RUN_ID,
+      usesLocalTunnel: false,
+      playwrightConfig: CDP_CONFIG,
+    };
   }
-  if (process.env.GITHUB_RUN_ID) {
-    return { name: 'github', identifier: process.env.GITHUB_RUN_ID, usesLocalTunnel: true };
+  const identifier = process.env.GITHUB_RUN_ID;
+  return identifier
+    ? { name: 'github', identifier, usesLocalTunnel: true, playwrightConfig: DOCKER_COMPOSE_CONFIG }
+    : { name: 'local', identifier: utcTimestamp(), usesLocalTunnel: true, playwrightConfig: DOCKER_COMPOSE_CONFIG };
+}
+
+// Half the CPUs, as Playwright's 50% workers, from 1 up to the plan limit.
+function defaultParallelsPerPlatform(): number {
+  return Math.min(MAX_DEFAULT_PARALLELS_PER_PLATFORM, Math.max(1, Math.floor(cpus().length / 2)));
+}
+
+function resolveParallelsPerPlatform(): string {
+  const override = process.env.BROWSERSTACK_PARALLELS_PER_PLATFORM;
+  if (!override) return String(defaultParallelsPerPlatform());
+  if (!/^[1-9]\d*$/.test(override)) {
+    console.error(`BROWSERSTACK_PARALLELS_PER_PLATFORM must be a positive whole number, not "${override}".`);
+    process.exit(1);
   }
-  return { name: 'local', identifier: utcTimestamp(), usesLocalTunnel: true };
+  return override;
 }
 
 function runSdk(playwrightArgs: string[]): Promise<number> {
-  const build = resolveBuildSettings();
-  const sdk = spawn(
-    'npx',
-    ['browserstack-node-sdk', 'playwright', 'test', '--config=playwright.browserstack.config.ts', ...playwrightArgs],
-    {
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        BROWSERSTACK_BUILD_NAME: build.name,
-        BROWSERSTACK_BUILD_IDENTIFIER: build.identifier,
-        BROWSERSTACK_LOCAL: String(build.usesLocalTunnel),
-      },
+  const run = resolveRunSettings();
+  const parallelsPerPlatform = resolveParallelsPerPlatform();
+  console.log(`BrowserStack: ${parallelsPerPlatform} parallel sessions per platform`);
+  const sdk = spawn('npx', ['browserstack-node-sdk', 'playwright', 'test', `--config=${run.playwrightConfig}`, ...playwrightArgs], {
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      BROWSERSTACK_BUILD_NAME: run.name,
+      BROWSERSTACK_BUILD_IDENTIFIER: run.identifier,
+      BROWSERSTACK_LOCAL: String(run.usesLocalTunnel),
+      BROWSERSTACK_PARALLELS_PER_PLATFORM: parallelsPerPlatform,
     },
-  );
+  });
   return new Promise((resolve) => sdk.on('close', (code) => resolve(code ?? 1)));
 }
 
