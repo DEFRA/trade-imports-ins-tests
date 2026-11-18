@@ -43,11 +43,13 @@ The `mobile-webkit` project emulates an iPhone 17 on WebKit, to catch layout pro
 ## BrowserStack
 
 > [!WARNING]
-> TODO: finish this section. Only Windows 11 Firefox is configured; CDP and GitHub runs are not wired up.
+> TODO: finish this section. Only Windows 11 Firefox is configured; GitHub runs are not wired up.
 
 BrowserStack runs the `@cross-browser` tests on its own browsers, one run per `platforms` entry in `browserstack.yml`. Playwright can drive only its own builds, Chrome, Edge and iOS Safari, so real desktop Safari is not available.
 
 - Put `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY` in `.env`.
 - Start the docker-compose stack, then run `npm run test:docker-compose:browserstack` (or `test:docker-compose:<domain>:browserstack`).
+- On CDP, run the `browserstack` or `<domain>:browserstack` profile. BrowserStack reaches CDP directly, so BrowserStack Local is off.
 - BrowserStack Local carries the stack's `localhost` URLs to the remote browser. Safari, WebKit and Android browsers cannot open `localhost` through it.
+- When a proxy is set (`HTTP_PROXY`, as on CDP), the SDK writes `require("global-agent")` into its generated Playwright config, which fails in an ES module project. `bin/browserstack-global-require.mjs` defines a global `require` for it, and `bin/run-browserstack.ts` preloads that file into the SDK and its workers.
 - Builds are named `local`, `github` or `cdp-<ENVIRONMENT>`, with a UTC time or the run id as the identifier, under the project `trade-imports-ins-tests`.

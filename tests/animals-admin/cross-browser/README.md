@@ -33,4 +33,4 @@ Run against the docker-compose stack, from the repo root.
 
 ### Run on CDP
 
-TODO: the CDP BrowserStack profile is not wired up yet.
+Run the `animals-admin:browserstack` profile.

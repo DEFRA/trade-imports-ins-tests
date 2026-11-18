@@ -56,6 +56,7 @@ export default tseslint.config(
       'zap-report',
       '.playwright-cli',
       '*.mjs',
+      'bin/*.mjs',
       'eslint-rules',
     ],
   },

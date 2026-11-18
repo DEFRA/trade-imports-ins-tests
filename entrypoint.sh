@@ -2,20 +2,21 @@
 #
 # PROFILE selects the test suite to run (case-sensitive, defaults to 'default').
 # Allowed values, each running every domain:
-#   default (or unset)  — standard run via npm test
+#   default (or unset)  — the same as e2e
+#   e2e                 — standard run via npm test
 #   a11y                — accessibility suite via npm run test:a11y
 #   dynamics            — checks against each domain's Dynamics instance via npm run test:dynamics;
 #                         needs that domain's secrets (see README)
 #   cross-browser       — the @cross-browser tests in Firefox, WebKit and an iPhone 17 via npm run test:cross-browser
-#   browserstack        — not implemented (exits 1)
+#   browserstack        — the @cross-browser tests on BrowserStack via npm run test:browserstack
 #   security            — ZAP passive scan (broad e2e suite) via npm run test:security, safe to run routinely
 #   security:active     — refused; the @active suite is destructive, so it only
 #                         runs against the disposable docker-compose stack
 #
 # Or scoped to one domain's test directory (tests/<domain>/), as <domain>:<suite>:
 #   domain — animals, animals-admin, ins, plants
-#   suite  — e2e, a11y, cross-browser, security, security:active, dynamics (same behaviour as above)
-# e.g. animals:a11y, ins:security, plants:e2e, animals:dynamics, animals:cross-browser
+#   suite  — e2e, a11y, cross-browser, browserstack, security, security:active, dynamics (same behaviour as above)
+# e.g. animals:a11y, ins:security, plants:e2e, animals:dynamics, animals:cross-browser, ins:browserstack
 
 DOMAINS="animals animals-admin ins plants"
 
@@ -37,8 +38,7 @@ case " $DOMAINS " in
     # config/zap.ts keys off the bare suite (security / security:active), so
     # the domain prefix must not reach the Node side.
     case "${PROFILE#*:}" in
-      e2e) export PROFILE=default ;;
-      a11y | cross-browser | security | security:active | dynamics) export PROFILE="${PROFILE#*:}" ;;
+      e2e | a11y | cross-browser | browserstack | security | security:active | dynamics) export PROFILE="${PROFILE#*:}" ;;
       *) export PROFILE=invalid ;;
     esac
     ;;
@@ -226,7 +226,7 @@ run_security_profile() {
 }
 
 case "$PROFILE" in
-  default)
+  default | e2e)
     # Record a non-zero npm test exit in the FAILED marker: a run that dies
     # before Playwright starts must not report a pass.
     npm test ${SUITE_PATH:+-- "$SUITE_PATH"} || echo "npm test exited $? before completing" >> FAILED
@@ -241,14 +241,13 @@ case "$PROFILE" in
     npm run test:cross-browser ${SUITE_PATH:+-- "$SUITE_PATH"} || echo "npm run test:cross-browser exited $? before completing" >> FAILED
     ;;
   browserstack)
-    echo "browserstack profile runs are not implemented yet."
-    exit 1
+    npm run test:browserstack ${SUITE_PATH:+-- "$SUITE_PATH"} || echo "npm run test:browserstack exited $? before completing" >> FAILED
     ;;
   security | security:active)
     run_security_profile
     ;;
   *)
-    echo "unknown PROFILE: '${requested_profile}'. Allowed values: default, a11y, dynamics, cross-browser, browserstack, security, security:active (unset defaults to default), or <domain>:e2e|a11y|cross-browser|security|security:active|dynamics for domain in: ${DOMAINS}."
+    echo "unknown PROFILE: '${requested_profile}'. Allowed values: default, e2e, a11y, dynamics, cross-browser, browserstack, security, security:active (unset defaults to default), or <domain>:e2e|a11y|cross-browser|browserstack|security|security:active|dynamics for domain in: ${DOMAINS}."
     exit 1
     ;;
 esac
