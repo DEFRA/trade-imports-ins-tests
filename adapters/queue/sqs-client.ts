@@ -1,4 +1,4 @@
-import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
+import { DeleteMessageBatchCommand, ReceiveMessageCommand, SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 import { getSqsEndpoint } from '@config/service-base-urls';
 
 /**
@@ -28,6 +28,24 @@ export class SqsClient {
         MessageDeduplicationId: messageDeduplicationId,
       }),
     );
+  }
+
+  /** Receive and delete every message on the queue until a receive comes back empty. */
+  async drainQueue(queueUrl: string): Promise<void> {
+    for (;;) {
+      const { Messages: messages = [] } = await this.client.send(
+        new ReceiveMessageCommand({ QueueUrl: queueUrl, MaxNumberOfMessages: 10, WaitTimeSeconds: 0 }),
+      );
+      if (messages.length === 0) {
+        return;
+      }
+      await this.client.send(
+        new DeleteMessageBatchCommand({
+          QueueUrl: queueUrl,
+          Entries: messages.map((message, index) => ({ Id: String(index), ReceiptHandle: message.ReceiptHandle })),
+        }),
+      );
+    }
   }
 
   destroy(): void {
