@@ -128,6 +128,11 @@ export const MANDATORY_ANSWERS: MandatoryAnswers = {
   contactAddress: CONTACT_ADDRESS_NAME,
 };
 
+export const CAT_ANSWERS: NotificationAnswers = {
+  ...MANDATORY_ANSWERS,
+  commodityLines: [MANDATORY_COMMODITY_LINES.domesticCat],
+};
+
 export const HEALTH_CERTIFICATE_DOCUMENT_REFERENCE = 'GBHC1234567890';
 
 /** Every answer, including an accompanying document. The UI journey uses this set, as a browser can upload a file. */

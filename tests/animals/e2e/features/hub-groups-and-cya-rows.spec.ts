@@ -1,11 +1,6 @@
 import { test, expect } from '@fixtures';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
-import {
-  ALL_ANSWERS_WITHOUT_DOCUMENT,
-  CPH_NUMBER_DISPLAY,
-  MANDATORY_ANSWERS,
-  type NotificationAnswers,
-} from '@domain/animals/constants/journey-options';
+import { ALL_ANSWERS_WITHOUT_DOCUMENT, CAT_ANSWERS, CPH_NUMBER_DISPLAY } from '@domain/animals/constants/journey-options';
 import { MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
 
 test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-frontend' }, () => {
@@ -166,11 +161,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     animalsPages,
     referenceDataApi,
   }) => {
-    const answers: NotificationAnswers = {
-      ...MANDATORY_ANSWERS,
-      commodityLines: [MANDATORY_COMMODITY_LINES.domesticCat],
-    };
-    await animalsJourney.toReview(answers);
+    await animalsJourney.toReview(CAT_ANSWERS);
     const commonName = await referenceDataApi.findCommonName(MANDATORY_COMMODITY_LINES.domesticCat.species);
 
     const rolesAndAddresses = animalsPages.notificationView.summaryCard('Roles and addresses');
