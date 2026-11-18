@@ -8,10 +8,6 @@ platforms:
     browserName: playwright-firefox
     browserVersion: latest
 
-# Parallel sessions per platform. The total is this value times the number of platforms,
-# and must fit within the BrowserStack plan's parallel session limit.
-parallelsPerPlatform: 1
-
 framework: playwright
 source: playwright:ins-tests:sdk-v1
 testObservability: true
