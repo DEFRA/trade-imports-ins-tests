@@ -494,14 +494,16 @@ Test Suite URL: https://portal.cdp-int.defra.cloud/test-suites/trade-imports-ins
 In the CDP Portal, provide a `PROFILE` value to choose which test suite the container runs via `entrypoint.sh`.
 If `PROFILE` is not set, the `default` profile is used.
 
-| PROFILE           | Test suite                                                                                     | NPM script                   |
-| ----------------- | ---------------------------------------------------------------------------------------------- | ---------------------------- |
-| `default`         | e2e test suite                                                                                 | `npm test`                   |
-| `a11y`            | accessibility test suite                                                                       | `npm run test:a11y`          |
-| `dynamics`        | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics`      |
-| `cross-browser`   | `@cross-browser` tests in Firefox, WebKit, iPhone 17 and Pixel 10                              | `npm run test:cross-browser` |
-| `security`        | security test suite (ZAP passive scan)                                                         | `npm run test:security`      |
-| `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                            |
+| PROFILE              | Test suite                                                                                     | NPM script                   |
+| -------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------- |
+| `default` (or unset) | the same as `e2e`                                                                              | `npm test`                   |
+| `e2e`                | e2e test suite                                                                                 | `npm test`                   |
+| `a11y`               | accessibility test suite                                                                       | `npm run test:a11y`          |
+| `dynamics`           | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics`      |
+| `cross-browser`      | `@cross-browser` tests in Firefox, WebKit, iPhone 17 and Pixel 10                              | `npm run test:cross-browser` |
+| `browserstack`       | `@cross-browser` tests on BrowserStack                                                         | `npm run test:browserstack`  |
+| `security`           | security test suite (ZAP passive scan)                                                         | `npm run test:security`      |
+| `security:active`    | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                            |
 
 The profiles above run every domain. To run one domain's suite only, prefix the
 suite with its domain name as `<domain>:<suite>`:
@@ -512,6 +514,7 @@ suite with its domain name as `<domain>:<suite>`:
 | `<domain>:a11y`            | that domain's accessibility suite                       |
 | `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)             |
 | `<domain>:cross-browser`   | that domain's `@cross-browser` tests                    |
+| `<domain>:browserstack`    | that domain's `@cross-browser` tests on BrowserStack    |
 | `<domain>:security`        | that domain's security suite (ZAP passive scan)         |
 | `<domain>:security:active` | **not supported on CDP**, as `security:active`          |
 
