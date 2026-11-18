@@ -68,3 +68,10 @@ zap-report/
 
 # Headroom
 .tokensave/
+
+# BrowserStack SDK
+/browserstackSetupConfig.json
+/playwright-browserstack-sdk.config.temp.json
+/playwright-browserstack-sdk.config.ts
+/log/
+/local.log

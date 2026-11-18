@@ -1,0 +1,20 @@
+# BrowserStack Playwright SDK settings. Credentials are never written here: the SDK reads
+# BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY from the environment (set them in .env).
+projectName: trade-imports-ins-tests
+
+platforms:
+  - os: Windows
+    osVersion: 11
+    browserName: playwright-firefox
+    browserVersion: latest
+
+# Parallel sessions per platform. The total is this value times the number of platforms,
+# and must fit within the BrowserStack plan's parallel session limit.
+parallelsPerPlatform: 1
+
+framework: playwright
+source: playwright:ins-tests:sdk-v1
+testObservability: true
+networkLogs: false
+consoleLogs: errors
+debug: false
