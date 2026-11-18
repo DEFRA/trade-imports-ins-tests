@@ -124,11 +124,12 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
       expect(line.physicalReferencedLogisticsPackage?.[0].itemQuantity).toBe(cowLine.noOfPackages);
       const animals = line.individualTradeProductInstance ?? [];
       expect(animals).toHaveLength(1);
-      expect(animals[0].identifier).toHaveLength(2);
+      expect(animals[0].identifier).toHaveLength(3);
       expect(animals[0].identifier).toEqual(
         expect.arrayContaining([
           { typeCode: 'EAR_TAG', content: cowLine.earTag, urlId: ANIMAL_IDENTIFIER_TYPES },
           { typeCode: 'PASSPORT', content: cowLine.passportNumber, urlId: ANIMAL_IDENTIFIER_TYPES },
+          { typeCode: 'TATTOO', content: cowLine.tattoo, urlId: ANIMAL_IDENTIFIER_TYPES },
         ]),
       );
       expect(actorWithNullableFields(doc.actor)).toEqual(EXPECTED_ACTOR);

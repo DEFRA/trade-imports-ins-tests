@@ -20,6 +20,7 @@ import { AnimalsOriginOfImportPage } from '@page-objects/animals/origin-of-impor
 import { AnimalsOverviewPage } from '@page-objects/animals/overview-page';
 import { AnimalsPartyEditPage } from '@page-objects/animals/party-edit-page';
 import { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
+import { AnimalsPermanentAddressPage } from '@page-objects/animals/permanent-address-page';
 import { AnimalsPrivateTransporterPage } from '@page-objects/animals/private-transporter-page';
 import { AnimalsTransitedCountriesPage } from '@page-objects/animals/transited-countries-page';
 import { AnimalsTransporterAddPage } from '@page-objects/animals/transporter-add-page';
@@ -48,6 +49,7 @@ export function createAnimalsPages(page: Page) {
     consigneeEdit: new AnimalsPartyEditPage(page, 'consignees/edit', 'Consignee'),
     importerEdit: new AnimalsPartyEditPage(page, 'importers/edit', 'Importer'),
     cphNumber: new AnimalsCphNumberPage(page),
+    permanentAddress: new AnimalsPermanentAddressPage(page),
     arrivalDetails: new AnimalsArrivalDetailsPage(page),
     transitedCountries: new AnimalsTransitedCountriesPage(page),
     transporter: new AnimalsTransporterPage(page),

@@ -75,19 +75,20 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command                                       | Test scope                                            | Target               | Config                                | Generates Report |
-| --------------------------------------------- | ----------------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
-| `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`           | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                    | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:dynamics`                       | Dynamics integration (`@dynamics`) test suite         | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:cross-browser`                  | Cross-browser (`@cross-browser`) suite                | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites        | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:cross-browser`   | Cross-browser (`@cross-browser`) suite                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| Command                                       | Test scope                                             | Target               | Config                                | Generates Report |
+| --------------------------------------------- | ------------------------------------------------------ | -------------------- | ------------------------------------- | ---------------- |
+| `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`            | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                     | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:dynamics`                       | Dynamics integration (`@dynamics`) test suite          | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:cross-browser`                  | Cross-browser (`@cross-browser`) suite                 | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites         | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                     | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:cross-browser`   | Cross-browser (`@cross-browser`) suite                 | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:browserstack`    | Cross-browser (`@cross-browser`) suite on BrowserStack | docker-compose stack | `playwright.browserstack.config.ts`   | ✓                |
+| `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                 | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite  | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
 ### Running one domain
 
@@ -414,14 +415,12 @@ If it is not set, Playwright's default applies (50% of cores on CI).
 
 ## Cross-browser tests
 
-Tests tagged `@cross-browser` also run in Playwright's Firefox, WebKit, an
-emulated iPhone 17 and an emulated Pixel 10, to render every page in each. Each domain has its own commands:
+Tests tagged `@cross-browser` run in Playwright's browsers (Firefox, WebKit, an emulated iPhone 17 and an emulated Pixel 10) and on BrowserStack. Commands for each domain:
 [animals](tests/animals/cross-browser/README.md),
 [animals-admin](tests/animals-admin/cross-browser/README.md) and
-[ins](tests/ins/cross-browser/README.md). `npm run test:docker-compose:cross-browser`
-runs them all.
+[ins](tests/ins/cross-browser/README.md).
 
-See [`docs/cross-browser.md`](docs/cross-browser.md) for the strategy, what is covered and how it works.
+See [`docs/cross-browser.md`](docs/cross-browser.md) for the strategy and how it works.
 
 ## Visual Regression Tests
 

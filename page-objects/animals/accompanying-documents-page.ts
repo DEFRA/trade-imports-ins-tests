@@ -70,14 +70,10 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
   }
 
   get fileFieldError(): Locator {
-    return this.page.locator('.govuk-error-message');
+    return this.page.locator('.govuk-form-group', { has: this.fileUpload }).locator('.govuk-error-message');
   }
 
-  // The reason the add control is shut, which the control names through
-  // aria-describedby. Distinct from fileFieldError: this one is about the
-  // notification being full or the upload service being unreachable, not
-  // about the file in the input.
-  get addDocumentError(): Locator {
+  get addDocumentRefusedReason(): Locator {
     return this.page.locator('#add-document-error');
   }
 
@@ -85,10 +81,15 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
     return this.page.getByRole('link', { name: /Refresh/ });
   }
 
-  async fillDocument(reference: string, issueDate: string, filePath: string, documentType: string = 'ITAHC'): Promise<void> {
+  async fillDocument(
+    reference: string,
+    issueDate: string,
+    file: Parameters<Locator['setInputFiles']>[0],
+    documentType: string = 'ITAHC',
+  ): Promise<void> {
     await this.documentReference.fill(reference);
     await this.documentType.selectOption(documentType);
     await this.dateOfIssue.fill(issueDate);
-    await this.fileUpload.setInputFiles(filePath);
+    await this.fileUpload.setInputFiles(file);
   }
 }

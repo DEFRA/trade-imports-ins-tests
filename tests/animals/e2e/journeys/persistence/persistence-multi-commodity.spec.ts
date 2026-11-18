@@ -4,7 +4,7 @@ import { type NotificationDocument } from '@domain/animals/models/db/notificatio
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { ALL_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
-import { commodityNames } from '@domain/animals/constants/commodity-names';
+import { storedCommodityNames } from '@domain/animals/constants/commodity-names';
 import { ALL_ANSWERS, type AllAnswers } from '@domain/animals/constants/journey-options';
 
 test.describe('Notification persistence — multiple commodities', { tag: '@mongodb' }, () => {
@@ -32,17 +32,19 @@ test.describe('Notification persistence — multiple commodities', { tag: '@mong
       expect(storedCommodities).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            name: commodityNames[cowLine.species.commodityCode],
+            name: storedCommodityNames[cowLine.species.commodityCode],
             commodityCode: cowLine.species.commodityCode,
             species: expect.arrayContaining([
               expect.objectContaining({
                 text: cowLine.species.latinName,
-                animalIdentifiers: [expect.objectContaining({ earTag: cowLine.earTag, passport: cowLine.passportNumber })],
+                animalIdentifiers: [
+                  expect.objectContaining({ earTag: cowLine.earTag, passport: cowLine.passportNumber, tattoo: cowLine.tattoo }),
+                ],
               }),
             ]),
           }),
           expect.objectContaining({
-            name: commodityNames[catLine.species.commodityCode],
+            name: storedCommodityNames[catLine.species.commodityCode],
             commodityCode: catLine.species.commodityCode,
             species: expect.arrayContaining([
               expect.objectContaining({

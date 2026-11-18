@@ -1,6 +1,6 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
-import { type Locator } from '@playwright/test';
+import { type Locator, expect } from '@playwright/test';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { SaveAndContinueStop } from '@page-objects/shared/journey-checks';
 import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
@@ -20,7 +20,11 @@ import {
   type OriginOptions,
   type PartyAnswers,
 } from '@domain/animals/constants/journey-options';
-import { type CommodityLineAnswer } from '@domain/animals/constants/journey-commodity-line-answers';
+import {
+  MANDATORY_COMMODITY_LINES,
+  type CommodityLineAnswer,
+  type PermanentAddressAnswer,
+} from '@domain/animals/constants/journey-commodity-line-answers';
 import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
 import { internalMarketPurposes } from '@domain/animals/constants/internal-market-purposes';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
@@ -55,7 +59,10 @@ const PARTY_PICKER_KEYS: Record<PartyRole, PartyPickerKey> = {
   Importer: 'importerSelection',
 };
 
-type AnimalWithPermanentAddress = Required<Pick<CommodityLineAnswer, 'passportNumber' | 'permanentAddress'>>;
+type AnimalIdentifiers = Pick<
+  CommodityLineAnswer,
+  'earTag' | 'passportNumber' | 'microchip' | 'tattoo' | 'identificationDetails' | 'description'
+>;
 
 export type SpeciesAnimalCount = {
   species: CommodityLine;
@@ -76,11 +83,12 @@ export const AIR_OR_SEA_OVERVIEW_TASKS = [
   'Contact address for this consignment',
 ] as const;
 
-export const OVERLAND_WITHOUT_IDENTIFICATION_OVERVIEW_TASKS = [
+export const OVERLAND_OVERVIEW_TASKS = [
   'Where is this consignment coming from?',
   'What are you importing?',
   IMPORT_REASON_TASK,
   'Commodity details',
+  'Identification details',
   'Additional details',
   'Arrival details',
   'Transit countries',
@@ -319,22 +327,7 @@ export class AnimalsJourney {
     await this.animalsPages.overview.task('Identification details').click();
     const { animalIdentification: identification } = this.animalsPages;
     for (const line of lines) {
-      const card = identification.speciesCard(line.species);
-      if (line.earTag) {
-        await card.getByLabel('Ear tag', { exact: true }).fill(line.earTag);
-      }
-      if (line.passportNumber) {
-        await card.getByLabel('Passport', { exact: true }).fill(line.passportNumber);
-      }
-      if (line.microchip) {
-        await card.getByLabel('Microchip', { exact: true }).fill(line.microchip);
-      }
-      if (line.tattoo) {
-        await card.getByLabel('Tattoo', { exact: true }).fill(line.tattoo);
-      }
-      if (line.permanentAddress) {
-        await identification.fillPermanentAddress(line.permanentAddress, card);
-      }
+      await this.fillAnimalIdentifiers(identification.speciesCard(line.species), line);
     }
     await identification.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
@@ -348,7 +341,9 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     await this.openAdditionalDetailsFromOverview();
     await this.animalsPages.additionalDetails.certifiedFor(answers.certifiedFor.display).check();
-    await this.animalsPages.additionalDetails.containsUnweanedAnimals(answers.unweanedAnimals).check();
+    if (await this.animalsPages.additionalDetails.unweanedAnimalsQuestion.isVisible()) {
+      await this.animalsPages.additionalDetails.containsUnweanedAnimals(answers.unweanedAnimals).check();
+    }
     await this.animalsPages.additionalDetails.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
@@ -392,11 +387,13 @@ export class AnimalsJourney {
   }
 
   async addCphAndLeaveAddresses(cph: CphAnswer = MANDATORY_ANSWERS.cph): Promise<void> {
-    await this.animalsPages.addresses.addCph.click();
-    await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
-    await this.animalsPages.cphNumber.fillCphNumber(cph);
-    await this.animalsPages.cphNumber.saveAndContinue.click();
-    await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
+    if (await this.animalsPages.addresses.addCph.isVisible()) {
+      await this.animalsPages.addresses.addCph.click();
+      await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
+      await this.animalsPages.cphNumber.fillCphNumber(cph);
+      await this.animalsPages.cphNumber.saveAndContinue.click();
+      await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
+    }
     await this.animalsPages.addresses.continueButton.click();
     await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
   }
@@ -404,6 +401,7 @@ export class AnimalsJourney {
   async answerAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task('Roles and addresses').click();
     await this.addFiveParties(answers.parties);
+    await this.answerPermanentAddresses(answers.commodityLines);
     await this.addCphAndLeaveAddresses(answers.cph);
     await this.animalsPages.contactAddress.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
@@ -579,11 +577,89 @@ export class AnimalsJourney {
     await this.openReviewFromOverview();
   }
 
-  async saveAnimalWithPermanentAddress({ passportNumber, permanentAddress }: AnimalWithPermanentAddress): Promise<void> {
-    const identification = this.animalsPages.animalIdentification;
-    await identification.passportNumber.fill(passportNumber);
-    await identification.fillPermanentAddress(permanentAddress);
-    await identification.saveAndAddAnother.click();
+  private async fillAnimalIdentifiers(card: Locator, identifiers: AnimalIdentifiers): Promise<void> {
+    const { animalIdentification: identification } = this.animalsPages;
+    if (identifiers.earTag) {
+      await identification.cardEarTag(card).fill(identifiers.earTag);
+    }
+    if (identifiers.passportNumber) {
+      await identification.cardPassport(card).fill(identifiers.passportNumber);
+    }
+    if (identifiers.microchip) {
+      await identification.cardMicrochip(card).fill(identifiers.microchip);
+    }
+    if (identifiers.tattoo) {
+      await identification.cardTattoo(card).fill(identifiers.tattoo);
+    }
+    if (identifiers.identificationDetails) {
+      await identification.cardIdentificationDetails(card).fill(identifiers.identificationDetails);
+    }
+    if (identifiers.description) {
+      await identification.cardDescription(card).fill(identifiers.description);
+    }
+  }
+
+  private async saveAnimalOn(card: Locator): Promise<void> {
+    const { animalIdentification: identification } = this.animalsPages;
+    await identification.cardSaveControl(card).or(identification.saveAndContinue).first().click();
+  }
+
+  async saveAnimalIdentifiers(card: Locator, identifiers: AnimalIdentifiers): Promise<void> {
+    await this.fillAnimalIdentifiers(card, identifiers);
+    await this.saveAnimalOn(card);
+  }
+
+  async openPermanentAddress(): Promise<void> {
+    await this.animalsPages.addresses.addPermanentAddress.click();
+    await this.animalsPages.permanentAddress.heading.waitFor(pageLoadWait);
+  }
+
+  async toPermanentAddress(answers: NotificationAnswers): Promise<void> {
+    await this.toRolesAndAddresses(answers, () => this.answerAnimalIdentification(answers));
+    await this.openPermanentAddress();
+  }
+
+  /** Answers the permanent address page for every animal that needs one, applying each animal's
+   * own answer when the caller gives one and otherwise that line's single answer, then saves
+   * back to the consignment addresses page. */
+  async answerPermanentAddresses(
+    commodityLineAnswers: CommodityLineAnswer[] = MANDATORY_ANSWERS.commodityLines,
+    addressPerAnimal: PermanentAddressAnswer[] = [],
+  ): Promise<void> {
+    const linesNeedingAddress = commodityLineAnswers.filter((line) => line.permanentAddress);
+    if (linesNeedingAddress.length === 0) {
+      return;
+    }
+    await this.openPermanentAddress();
+    const { permanentAddress: addressPage } = this.animalsPages;
+    let cardsAnswered = 0;
+    for (const line of linesNeedingAddress) {
+      await expect(addressPage.cardsFor(line.species).first()).toBeVisible();
+      const cardCount = await addressPage.cardsFor(line.species).count();
+      for (let animal = 1; animal <= cardCount; animal += 1) {
+        const card = addressPage.card(line.species, animal);
+        const address = addressPerAnimal[cardsAnswered] ?? line.permanentAddress;
+        if (address.origin === 'placeOfDestination') {
+          await addressPage.selectPlaceOfDestination(card);
+        } else {
+          await addressPage.selectNewAddress(card);
+          await addressPage.fillNewAddress(address, card);
+        }
+        cardsAnswered += 1;
+      }
+    }
+    await addressPage.saveAndContinue.click();
+    await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
+  }
+
+  async toRolesAndAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS, afterCommodity?: () => Promise<void>): Promise<void> {
+    await this.startNotification();
+    await this.answerCommodity(answers);
+    if (afterCommodity) {
+      await afterCommodity();
+    }
+    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
   }
 
   async toImportReason(): Promise<void> {
@@ -773,7 +849,7 @@ export class AnimalsJourney {
   private async walkFromTransporterToReview(
     transporter: string,
     document: AccompanyingDocumentAnswer,
-    { addCph }: { addCph: boolean },
+    { addCph, afterParties }: { addCph: boolean; afterParties?: () => Promise<void> },
   ): Promise<void> {
     const pages = this.animalsPages;
 
@@ -787,6 +863,9 @@ export class AnimalsJourney {
 
     await pages.addresses.heading.waitFor(pageLoadWait);
     await this.addFiveParties();
+    if (afterParties) {
+      await afterParties();
+    }
     if (addCph) {
       await this.addCphAndLeaveAddresses();
     } else {
@@ -895,6 +974,9 @@ export class AnimalsJourney {
     await pages.consignmentDetails.numberOfAnimals.fill('400');
     await pages.consignmentDetails.saveAndContinue.click();
 
+    await pages.animalIdentification.heading.waitFor(pageLoadWait);
+    await pages.animalIdentification.saveAndContinue.click();
+
     await pages.additionalDetails.heading.waitFor(pageLoadWait);
     await pages.additionalDetails.certifiedFor(certificationPurposes.slaughter.display).check();
     await pages.additionalDetails.saveAndContinue.click();
@@ -914,6 +996,57 @@ export class AnimalsJourney {
     await pages.transitedCountries.saveAndContinue.click();
 
     await this.walkFromTransporterToReview(MANDATORY_ANSWERS.transporter.display, document, { addCph: true });
+    return referenceNumber;
+  }
+
+  async walkCatsByAir(document: AccompanyingDocumentAnswer, afterPermanentAddressesSaved: () => Promise<void>): Promise<string> {
+    const pages = this.animalsPages;
+    const referenceNumber = await this.walkToImportReason({ countryCode: countryCodes.eu.spain }, [commodityLines.domesticCat]);
+
+    await pages.importReason.reason(importReasons.internalMarket.display).check();
+    await pages.importReason.purpose(internalMarketPurposes.companionAnimalNotForResaleOrRehoming.display).check();
+    await pages.importReason.saveAndContinue.click();
+
+    await pages.consignmentDetails.heading.waitFor(pageLoadWait);
+    await pages.consignmentDetails.numberOfAnimals.fill('2');
+    await pages.consignmentDetails.saveAndContinue.click();
+
+    await pages.animalIdentification.heading.waitFor(pageLoadWait);
+    await pages.animalIdentification.microchip.fill('900000000001234');
+    await pages.animalIdentification.passportNumber.fill('CAT-PASSPORT-0001');
+    await pages.animalIdentification.tattoo.fill('CAT0001');
+    await pages.animalIdentification.saveAndAddAnother.click();
+    await pages.animalIdentification.savedAnimalRow(commodityLines.domesticCat, 1).waitFor(pageLoadWait);
+    await pages.animalIdentification.microchip.fill('900000000005678');
+    await pages.animalIdentification.passportNumber.fill('CAT-PASSPORT-0002');
+    await pages.animalIdentification.tattoo.fill('CAT0002');
+    await pages.animalIdentification.saveAndFinish.click();
+    await pages.animalIdentification.savedAnimalRow(commodityLines.domesticCat, 2).waitFor(pageLoadWait);
+    await pages.animalIdentification.saveAndContinue.click();
+
+    await pages.additionalDetails.heading.waitFor(pageLoadWait);
+    await pages.additionalDetails.certifiedFor(certificationPurposes.furtherKeeping.display).check();
+    await pages.additionalDetails.saveAndContinue.click();
+
+    await pages.arrivalDetails.heading.waitFor(pageLoadWait);
+    await this.fillArrivalDetails({
+      port: pointOfEntries.heathrowAirport.display,
+      means: meansOfTransport.airplane.display,
+      transportId: 'BA0193',
+      documentReference: 'AWB-2026-0002',
+    });
+    await pages.arrivalDetails.saveAndContinue.click();
+
+    await this.walkFromTransporterToReview(MANDATORY_ANSWERS.transporter.display, document, {
+      addCph: false,
+      afterParties: async () => {
+        await this.answerPermanentAddresses(
+          [MANDATORY_COMMODITY_LINES.domesticCat],
+          [{ origin: 'placeOfDestination' }, MANDATORY_COMMODITY_LINES.domesticCat.permanentAddress],
+        );
+        await afterPermanentAddressesSaved();
+      },
+    });
     return referenceNumber;
   }
 

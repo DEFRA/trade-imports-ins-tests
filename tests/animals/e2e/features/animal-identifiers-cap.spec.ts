@@ -52,7 +52,7 @@ test.describe('Animal identifiers cap', { tag: '@duplicated-in-frontend' }, () =
     await expect(card.getByRole('heading', { name: speciesLabel(commodityLines.cattle), exact: true })).toBeVisible();
     await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 2)).toBeVisible();
 
-    await animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 2).getByRole('button', { name: 'Remove' }).click();
+    await animalsPages.animalIdentification.removeButton(commodityLines.cattle, 2).click();
     await expect(animalsPages.animalIdentification.enterDetailsCounterHeading(commodityLines.cattle, 2, 2)).toBeVisible();
 
     await animalsPages.animalIdentification.saveAndReturnToOverview.click();

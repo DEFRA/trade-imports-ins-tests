@@ -19,9 +19,11 @@ export class AnimalsAdditionalDetailsPage extends NotificationPage {
     return this.page.getByRole('radio', { name, exact: true });
   }
 
+  get unweanedAnimalsQuestion(): Locator {
+    return this.page.getByRole('group', { name: 'Does the consignment contain any unweaned animals?' });
+  }
+
   containsUnweanedAnimals(value: YesNoValue): Locator {
-    return this.page
-      .getByRole('group', { name: 'Does the consignment contain any unweaned animals?' })
-      .getByRole('radio', { name: value, exact: true });
+    return this.unweanedAnimalsQuestion.getByRole('radio', { name: value, exact: true });
   }
 }

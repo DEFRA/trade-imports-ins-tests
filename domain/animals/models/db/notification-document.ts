@@ -30,6 +30,8 @@ type StoredAnimalIdentifier = {
   tattoo?: string;
   earTag?: string;
   horseName?: string;
+  identificationDetails?: string;
+  description?: string;
   permanentAddress?: StoredParty;
 };
 

@@ -1,6 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import { speciesLabel, type CommodityLine } from '@domain/animals/constants/commodity-lines';
+import { resultsGroupCommodityNames } from '@domain/animals/constants/commodity-names';
 import { SEARCH_HINT } from '@domain/animals/constants/commodity-selection-page';
 
 export class AnimalsCommoditySelectionPage extends NotificationPage {
@@ -37,6 +38,10 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     return this.page.locator('#commodity-selection');
   }
 
+  get noResults(): Locator {
+    return this.page.locator('#commodity-search-results').getByText('No results found', { exact: true });
+  }
+
   get clearAll(): Locator {
     return this.page.getByRole('button', { name: 'Clear all' });
   }
@@ -54,12 +59,17 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
     await this.searchButton.click();
   }
 
+  commodityGroupName(code: string): string {
+    const name = resultsGroupCommodityNames[code];
+    return name ? `${name} (${code})` : code;
+  }
+
   commodityGroup(code: string): Locator {
-    return this.page.getByRole('group', { name: code, exact: true });
+    return this.page.getByRole('group', { name: this.commodityGroupName(code), exact: true });
   }
 
   get commodityGroups(): Locator {
-    return this.page.getByRole('group', { name: /^\d+$/ });
+    return this.page.getByRole('group', { name: /^(?:.+ \(\d+\)|\d+)$/ });
   }
 
   species(species: CommodityLine): Locator {
@@ -85,15 +95,21 @@ export class AnimalsCommoditySelectionPage extends NotificationPage {
   }
 
   selectedCommodityHeading(code: string): Locator {
-    return this.selectedSummary.getByText(`${code}:`, { exact: true });
+    return this.selectedSummary.getByText(`${this.commodityGroupName(code)}:`, { exact: true });
   }
 
   speciesEntry(species: CommodityLine): Locator {
-    return this.selectedSummary.getByRole('listitem').filter({ hasText: speciesLabel(species) });
+    return this.selectedSummary.getByRole('listitem').filter({
+      has: this.page.getByText(species.latinName, { exact: true }),
+      hasNot: this.page.getByRole('listitem'),
+    });
   }
 
   removeButtonFor(species: CommodityLine): Locator {
-    return this.selectedSummary.getByRole('button', { name: `Remove ${speciesLabel(species)}`, exact: true });
+    return this.selectedSummary.getByRole('button', {
+      name: `Remove ${species.latinName} from ${this.commodityGroupName(species.commodityCode)}`,
+      exact: true,
+    });
   }
 
   async pressRemoveSpecies(species: CommodityLine): Promise<void> {

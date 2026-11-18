@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { SqsClient } from '@adapters/queue/sqs-client';
-import { seedDlqMessage } from '@flows/animals-admin/seed-dlq-message';
+import { emptyDlq, seedDlqMessage } from '@flows/animals-admin/seed-dlq-message';
 import { timeouts } from '@config/timeouts';
 
 test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () => {
@@ -36,6 +36,7 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
     await animalsAdminPages.notifications.btnConfirm.click();
     await expect(animalsAdminPages.notifications.successBanner).toBeVisible();
 
+    await emptyDlq(sqs);
     const eventId = await seedDlqMessage(sqs);
     await animalsAdminNavigation.toDlqEvents();
     const seededDlqRow = animalsAdminPages.dlqEvents.rowContainingMessageId(eventId);

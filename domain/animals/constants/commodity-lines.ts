@@ -12,6 +12,7 @@ export const commodityLines = {
   cattle: { searchTerm: 'Bos taurus', commodityCode: '0102', latinName: 'Bos taurus', commonName: 'Domestic Cattle' },
   bison: { searchTerm: 'Bison bison', commodityCode: '0102', latinName: 'Bison bison', commonName: 'American Bison' },
   horse: { searchTerm: 'horse', commodityCode: '0101', latinName: 'Equus cabalus', commonName: 'Horse' },
+  donkey: { searchTerm: 'donkey', commodityCode: '0101', latinName: 'Equus asinus', commonName: 'Donkey' },
   domesticCat: { searchTerm: 'domestic cat', commodityCode: '01061900', latinName: 'Felis catus', commonName: 'Domestic Cat' },
   raccoonDog: { searchTerm: 'dog', commodityCode: '01061900', latinName: 'Nyctereutes procyonoides', commonName: 'Raccoon Dog' },
   ostrich: { searchTerm: 'ostrich', commodityCode: '01063300', latinName: 'Struthio spp.', commonName: 'Ostriches' },
