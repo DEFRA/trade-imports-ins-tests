@@ -7,53 +7,24 @@ test.describe(
     tag: ['@animals-backend', '@animals-frontend'],
   },
   () => {
-    test('the owning organisation sees its submitted notification on the INS dashboard', async ({
+    test('the INS notification list returns none of this notification to another organisation searching by its reference', async ({
       animalsJourney,
       journeyContext,
-      insPages,
-      pages,
-      animalsPages,
+      insNotificationApi,
+      otherOrganisationInsNotificationApi,
     }) => {
       test.slow();
 
-      await animalsJourney.toDeclaration();
+      await animalsJourney.submitNotification();
       const referenceNumber = journeyContext.referenceNumber;
-      await animalsPages.declaration.confirmation.check();
-      await animalsPages.declaration.continueButton.click();
-      await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
-
-      await insPages.dashboard.open();
-      await expect
-        .poll(
-          async () => {
-            await insPages.dashboard.searchForReference(referenceNumber);
-            return insPages.dashboard.viewLink(referenceNumber).count();
-          },
-          { timeout: timeouts.long },
-        )
-        .toBe(1);
-    });
-
-    test('another organisation gets no rows when searching by reference', async ({
-      animalsJourney,
-      journeyContext,
-      animalsPages,
-      pages,
-      otherOrganisationInsNotificationsApi,
-    }) => {
-      test.slow();
-
-      await animalsJourney.toDeclaration();
-      const referenceNumber = journeyContext.referenceNumber;
-      await animalsPages.declaration.confirmation.check();
-      await animalsPages.declaration.continueButton.click();
-      await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
 
       await expect
-        .poll(() => otherOrganisationInsNotificationsApi.countByReference(referenceNumber), {
+        .poll(() => insNotificationApi.countByReference(referenceNumber), {
           timeout: timeouts.long,
         })
-        .toBe(0);
+        .toBe(1);
+
+      expect(await otherOrganisationInsNotificationApi.countByReference(referenceNumber)).toBe(0);
     });
   },
 );

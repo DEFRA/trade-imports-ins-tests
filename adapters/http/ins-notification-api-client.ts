@@ -7,8 +7,8 @@ interface AggregatedNotificationPage {
   totalElements: number;
 }
 
-/** Direct HTTP access to the INS aggregated notification list (read model). */
-export class InsAggregatedNotificationsApiClient {
+/** Direct HTTP access to one organisation's INS dashboard notification list. */
+export class InsNotificationApiClient {
   private readonly rest: RestClient;
   private readonly organisationId: string;
 

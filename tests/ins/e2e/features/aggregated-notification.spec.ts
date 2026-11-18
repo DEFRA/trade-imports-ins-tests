@@ -20,8 +20,6 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
   test('creates and updates aggregated notification document through the submission lifecycle', async ({
     animalsJourney,
     journeyContext,
-    pages,
-    animalsPages,
   }) => {
     test.slow();
 
@@ -66,9 +64,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
 
       const draftVersion = draftDoc.aggregateVersion;
 
-      await animalsPages.declaration.confirmation.check();
-      await animalsPages.declaration.continueButton.click();
-      await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
+      await animalsJourney.submitFromDeclaration();
 
       await expect.poll(() => collection.findOne({ _id: aggregateId, status: 'SUBMITTED' }), { timeout: timeouts.long }).not.toBeNull();
 
@@ -83,6 +79,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(submittedDoc.arrivalDate).toBe(arrivalIsoDate);
       expect(submittedDoc.lastUpdated).toBeInstanceOf(Date);
       expect(submittedDoc.aggregateVersion).toBeGreaterThan(draftVersion);
+      expect(submittedDoc.organisationId).toBe(E2E_ORGANISATION_ID);
     } finally {
       await client.close();
     }
