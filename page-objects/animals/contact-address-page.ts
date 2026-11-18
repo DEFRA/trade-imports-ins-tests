@@ -5,6 +5,7 @@ import {
   paragraphFollowing,
   pickerResultsGroup,
   pickerResultsHeading,
+  pickerResultsSummary,
 } from '@page-objects/shared/address-picker-results';
 
 const PAGE_HEADING = 'Contact address for consignment';
@@ -39,5 +40,22 @@ export class AnimalsContactAddressPage extends NotificationPage {
   /** Any option in the list shown as chosen. */
   get chosenAddress(): Locator {
     return this.page.getByRole('radio', { checked: true });
+  }
+
+  /** Every listed option, in the order the page offers them. */
+  get listedAddresses(): Locator {
+    return this.resultsGroup.getByRole('radio');
+  }
+
+  async listedAddressIds(): Promise<string[]> {
+    return Promise.all((await this.listedAddresses.all()).map((address) => address.inputValue()));
+  }
+
+  get addNewBranchAddressSentence(): Locator {
+    return pickerResultsSummary(this.page);
+  }
+
+  get addNewBranchAddressLink(): Locator {
+    return this.page.getByRole('link', { name: 'add a new branch address' });
   }
 }

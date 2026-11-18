@@ -791,6 +791,17 @@ export class AnimalsJourney {
     await this.openInsAddAddressFromPicker(addressBookAdd, role);
   }
 
+  async openInsAddAddressFromContact(addressBookAdd: InsAddressBookAddPage): Promise<void> {
+    await this.animalsPages.contactAddress.addNewBranchAddressLink.click();
+    await addressBookAdd.completeSignInIfRequested();
+    await addressBookAdd.heading.waitFor(pageLoadWait);
+  }
+
+  async toInsAddAddressFromContact(addressBookAdd: InsAddressBookAddPage): Promise<void> {
+    await this.toContactAddress();
+    await this.openInsAddAddressFromContact(addressBookAdd);
+  }
+
   async toReview(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     if (!this.context.referenceNumber) await this.startNotification();
     await this.completeAnswerSections(answers);

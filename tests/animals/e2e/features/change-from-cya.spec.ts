@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { expectOpenFromReview, expectSaveAndContinueWalk } from '@page-objects/shared/journey-checks';
 import { DOCUMENT_ISSUE_DATE } from '@resources/file-upload/constants';
-import { CONSIGNEE_NAME, CONTACT_ADDRESS_NAME } from '@domain/shared/constants/journey-party-names';
+import { CONTACT_ADDRESS_NAME, SECOND_BRANCH_ADDRESS_NAME } from '@domain/shared/constants/journey-party-names';
 import { HEALTH_CERTIFICATE_DOCUMENT_REFERENCE } from '@domain/animals/constants/journey-options';
 
 test.describe('Change from check your answers', { tag: '@duplicated-in-frontend' }, () => {
@@ -99,7 +99,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     await animalsPages.notificationView.changeLink(/^Change contact address/).click();
     await expect(animalsPages.contactAddress.heading).toBeVisible();
     await expectOpenFromReview(pages.page, animalsPages.contactAddress, referenceNumber, animalsPages.notificationView.slug);
-    await animalsPages.contactAddress.address(CONSIGNEE_NAME).check();
+    await animalsPages.contactAddress.address(SECOND_BRANCH_ADDRESS_NAME).check();
     await animalsPages.contactAddress.saveAndContinue.click();
 
     await expect(animalsPages.notificationView.heading).toBeVisible();
@@ -109,7 +109,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
         animalsPages.contactAddress.slug,
       ]),
     );
-    await expect(contactAddressValue).toContainText(CONSIGNEE_NAME);
+    await expect(contactAddressValue).toContainText(SECOND_BRANCH_ADDRESS_NAME);
   });
 
   test('the documents Change link opens Upload documents on the review trail, and Save and continue walks each later page back to the review', async ({

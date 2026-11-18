@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { skipIfNonStubStackEnvironment, skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
 import { branchAddressFixture } from '@flows/shared/address-book-seed';
+import { heldAsBranchAddress, heldAsConsignor } from '@domain/shared/constants/address-types';
 import { AnimalsContactAddressPage } from '@page-objects/animals/contact-address-page';
 
 const SELECT_A_CONTACT_ADDRESS = 'Select a contact address';
@@ -88,11 +89,71 @@ test.describe('Contact address page', { tag: '@duplicated-in-frontend' }, () => 
     await expect(pages.page.getByRole('link', { name: /add.*address/i })).toHaveCount(0);
   });
 
-  test('links to INS to add an address when the full stack is running', async ({ pages }) => {
+  test('links to INS to add a branch address when the full stack is running, under a sentence naming it as the only way to add one', async ({
+    pages,
+    animalsPages,
+  }) => {
     skipUnlessNonStubStackEnvironment('the handshake link is only rendered outside stub mode (compose or CDP)');
-    await expect(pages.page.getByRole('link', { name: /add.*address/i })).toHaveAttribute(
-      'href',
-      /\/address-book\/add\?journey-type=gbn-ag/,
+
+    await expect(animalsPages.contactAddress.addNewBranchAddressSentence).toHaveText(
+      'If the correct address is not shown, add a new branch address, then return to this page.',
     );
+    await expect(animalsPages.contactAddress.addNewBranchAddressLink).toHaveAttribute('href', /\/address-book\/add\?journey-type=gbn-ag/);
+    await expect(pages.page.getByRole('link', { name: /add.*address/i })).toHaveCount(1);
+  });
+});
+
+test.describe('Contact address page — branch addresses', { tag: '@address-book' }, () => {
+  test("offers the organisation's branch addresses newest added first, and does not offer one held for a consignment role", async ({
+    animalsJourney,
+    animalsPages,
+    addressBookApi,
+  }) => {
+    skipUnlessNonStubStackEnvironment('branch filtering and ordering need the real address book');
+    const stamp = Date.now();
+    const earlierBranchName = `Earlier Branch Office ${stamp}`;
+    const laterBranchName = `Later Branch Office ${stamp}`;
+    const consignorOnlyName = `Consignor Only Farm ${stamp}`;
+
+    const earlierBranch = await addressBookApi.createAddress({
+      ...heldAsBranchAddress,
+      name: earlierBranchName,
+      addressLine1: '1 Earlier Way',
+      townOrCity: 'Leeds',
+      postcode: 'LS1 1AA',
+      countryCode: 'GB',
+      phone: '0113 555 0100',
+      email: 'earlier-branch@example.co.uk',
+    });
+    const laterBranch = await addressBookApi.createAddress({
+      ...heldAsBranchAddress,
+      name: laterBranchName,
+      addressLine1: '2 Later Way',
+      townOrCity: 'Leeds',
+      postcode: 'LS1 1BB',
+      countryCode: 'GB',
+      phone: '0113 555 0101',
+      email: 'later-branch@example.co.uk',
+    });
+    await addressBookApi.createAddress({
+      ...heldAsConsignor,
+      name: consignorOnlyName,
+      addressLine1: '3 Consignor Way',
+      townOrCity: 'Leeds',
+      postcode: 'LS1 1CC',
+      countryCode: 'GB',
+      phone: '0113 555 0102',
+      email: 'consignor-only@example.co.uk',
+    });
+
+    await animalsJourney.toContactAddress();
+    const listedIds = await animalsPages.contactAddress.listedAddressIds();
+    expect(listedIds).toContain(laterBranch.id);
+    expect(listedIds).toContain(earlierBranch.id);
+    expect(listedIds.indexOf(laterBranch.id)).toBeLessThan(listedIds.indexOf(earlierBranch.id));
+    await expect(animalsPages.contactAddress.address(consignorOnlyName)).toHaveCount(0);
+
+    await animalsJourney.toPartyPicker('Consignor');
+    await expect(animalsPages.consignorSelection.party(consignorOnlyName)).toBeVisible();
   });
 });
