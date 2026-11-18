@@ -1,9 +1,7 @@
 import { test, expect } from '@fixtures';
+import { CPH_NUMBER_DISPLAY } from '@domain/animals/constants/journey-options';
 
 test.describe('All operator addresses', { tag: '@duplicated-in-frontend' }, () => {
-  // The api seed unlocks only origin + commodity, so the review page is reached
-  // through the full journey walk — the addresses leg of that walk picks the
-  // canned parties whose names and countries are asserted here.
   test(
     'check your answers lists all six operators with the picked name and country',
     { tag: '@cross-browser' },
@@ -34,7 +32,7 @@ test.describe('All operator addresses', { tag: '@duplicated-in-frontend' }, () =
       await expect(operator('Place of destination')).toContainText('Tech Imports Ltd');
       await expect(operator('Place of destination')).toContainText('United Kingdom');
 
-      await expect(operator('County parish holding (CPH) number')).toContainText('123456789');
+      await expect(operator('County parish holding (CPH) number')).toContainText(CPH_NUMBER_DISPLAY);
     },
   );
 });

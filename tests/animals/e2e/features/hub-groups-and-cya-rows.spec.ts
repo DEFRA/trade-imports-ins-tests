@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import {
   ALL_ANSWERS_WITHOUT_DOCUMENT,
-  CPH_NUMBER,
+  CPH_NUMBER_DISPLAY,
   MANDATORY_ANSWERS,
   type NotificationAnswers,
 } from '@domain/animals/constants/journey-options';
@@ -154,7 +154,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       answers.parties.placeOfDestination,
     );
     await expect(animalsPages.notificationView.summaryValue(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText(
-      CPH_NUMBER,
+      CPH_NUMBER_DISPLAY,
     );
 
     const contactAddress = animalsPages.notificationView.summaryCard('Contact address for this consignment');

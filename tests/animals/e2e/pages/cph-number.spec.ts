@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { CPH_NUMBER } from '@domain/animals/constants/journey-options';
+import { CPH_NUMBER_DISPLAY } from '@domain/animals/constants/journey-options';
 import type { AnimalsPages } from '@page-objects';
 
 const saveAndExpectCphOnAddresses = async (animalsPages: AnimalsPages, cph: string) => {
@@ -30,7 +30,7 @@ test.describe('CPH number page', { tag: '@duplicated-in-frontend' }, () => {
   test('saves a valid CPH number and shows it on Consignment addresses', async ({ animalsPages }) => {
     await animalsPages.cphNumber.fillCphNumber();
 
-    await saveAndExpectCphOnAddresses(animalsPages, CPH_NUMBER);
+    await saveAndExpectCphOnAddresses(animalsPages, CPH_NUMBER_DISPLAY);
   });
 
   test('saves the page blank and returns to Consignment addresses with the number not yet added', async ({ animalsPages }) => {
@@ -61,7 +61,7 @@ test.describe('CPH number page', { tag: '@duplicated-in-frontend' }, () => {
     await expect(county).toHaveValue('123456789');
     await expect(county).toBeFocused();
 
-    await saveAndExpectCphOnAddresses(animalsPages, CPH_NUMBER);
+    await saveAndExpectCphOnAddresses(animalsPages, CPH_NUMBER_DISPLAY);
   });
 });
 
@@ -72,9 +72,9 @@ test.describe('CPH number page without JavaScript', { tag: '@duplicated-in-front
     await animalsJourney.toCphNumber();
   });
 
-  test('saves a whole number with slashes inserted into the county box as nine digits', async ({ animalsPages }) => {
+  test('saves a whole number with slashes inserted into the county box and shows it in its slashed form', async ({ animalsPages }) => {
     await animalsPages.cphNumber.county.fill('12/345/6789');
 
-    await saveAndExpectCphOnAddresses(animalsPages, CPH_NUMBER);
+    await saveAndExpectCphOnAddresses(animalsPages, CPH_NUMBER_DISPLAY);
   });
 });

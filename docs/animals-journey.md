@@ -51,6 +51,7 @@ Why the animals flows and page objects are written the way they are. The code ca
 ## Addresses
 
 - `addCphAndLeaveAddresses` runs from the addresses page: it answers the CPH number and then leaves the page.
+- The API seed unlocks only origin and commodity, so a spec that needs the review walks the whole journey rather than seeding it. The walk's addresses leg picks the canned parties whose names and countries a review assertion reads.
 
 ## Notification view
 

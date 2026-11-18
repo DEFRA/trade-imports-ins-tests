@@ -23,16 +23,13 @@ import {
   PLACE_OF_ORIGIN_NAME,
 } from '@domain/shared/constants/journey-party-names';
 
-// Inside the arrival-date window (1 week back to 6 months ahead) wherever the
-// wall clock happens to be, in the unpadded d/m/yyyy the app itself renders —
-// so a CYA assertion compares against the app's shape, not the typed string it
-// happens to echo back.
 export const ARRIVAL_DATE = getRelativeAppDateText({ monthOffset: 1 });
 
 export type CphAnswer = { county: string; parish: string; holding: string };
 
 const CPH: CphAnswer = { county: '12', parish: '345', holding: '6789' };
 export const CPH_NUMBER = `${CPH.county}${CPH.parish}${CPH.holding}`;
+export const CPH_NUMBER_DISPLAY = `${CPH.county}/${CPH.parish}/${CPH.holding}`;
 
 export type AccompanyingDocumentAnswer = {
   reference: string;
