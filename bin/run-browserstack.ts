@@ -36,7 +36,7 @@ function resolveRunSettings(): RunSettings {
     return {
       name: `cdp-${getEnvironment() ?? 'unknown'}`,
       identifier: process.env.RUN_ID,
-      usesLocalTunnel: false,
+      usesLocalTunnel: true,
       playwrightConfig: CDP_CONFIG,
     };
   }
