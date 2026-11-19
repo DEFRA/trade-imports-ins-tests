@@ -5,7 +5,7 @@ import { speciesCheckboxValue } from '@domain/animals/constants/commodity-lines'
 
 export type PartyRole = 'placeOfOrigin' | 'consignor' | 'consignee' | 'importer' | 'placeOfDestination' | 'contact';
 
-/** The address-book records the answers name; each name must match a record seeded by `address-book-seed.ts`. */
+/** The address-book records the answers name. */
 export type PartyNames = Record<PartyRole, string>;
 
 export type PartyIds = Record<PartyRole, string>;

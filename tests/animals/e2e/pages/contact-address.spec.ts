@@ -2,6 +2,7 @@ import { test, expect } from '@fixtures';
 import { skipIfNonStubStackEnvironment, skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
 import { branchAddressFixture } from '@flows/shared/address-book-seed';
 import { heldAsBranchAddress, heldAsConsignor } from '@domain/shared/constants/address-types';
+import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { AnimalsContactAddressPage } from '@page-objects/animals/contact-address-page';
 import { expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 
@@ -165,5 +166,50 @@ test.describe('Contact address page — branch addresses', { tag: '@address-book
 
     await animalsJourney.toPartyPicker('Consignor');
     await expect(animalsPages.consignorSelection.party(consignorOnlyName)).toBeVisible();
+  });
+
+  test('a branch address deleted after being chosen is no longer offered, each save control refuses a blank save, and the notification keeps the address', async ({
+    animalsSeededJourney,
+    animalsPages,
+    addressBookApi,
+  }) => {
+    skipUnlessNonStubStackEnvironment('deleting a branch address needs the real address book');
+    const stamp = Date.now();
+    const branchName = `Deleted Branch Office ${stamp}`;
+    const branch = await addressBookApi.createAddress({
+      ...heldAsBranchAddress,
+      name: branchName,
+      addressLine1: '4 Deleted Way',
+      townOrCity: 'Leeds',
+      postcode: 'LS1 1DD',
+      countryCode: 'GB',
+      phone: '0113 555 0103',
+      email: 'deleted-branch@example.co.uk',
+    });
+
+    const referenceNumber = await animalsSeededJourney.createAmendNotification({ ...MANDATORY_ANSWERS, contactAddress: branchName });
+    await addressBookApi.deleteAddress(branch.id);
+
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
+    await expect(animalsPages.contactAddress.chosenAddress).toHaveCount(0);
+    await expect(animalsPages.contactAddress.address(branchName)).toHaveCount(0);
+
+    await animalsPages.contactAddress.saveAndContinue.click();
+    await expect(animalsPages.contactAddress.heading).toBeVisible();
+    await expect(animalsPages.contactAddress.errorSummaryLink(SELECT_A_CONTACT_ADDRESS)).toBeVisible();
+    await expect(animalsPages.contactAddress.radiosError('Select an address')).toContainText(SELECT_A_CONTACT_ADDRESS);
+
+    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
+    await animalsPages.contactAddress.saveAndReturnToHub.click();
+    await expect(animalsPages.contactAddress.heading).toBeVisible();
+    await expect(animalsPages.contactAddress.errorSummaryLink(SELECT_A_CONTACT_ADDRESS)).toBeVisible();
+    await expect(animalsPages.contactAddress.radiosError('Select an address')).toContainText(SELECT_A_CONTACT_ADDRESS);
+
+    await animalsPages.overview.open(referenceNumber);
+    await expect(animalsPages.overview.taskStatus('Contact address for this consignment')).toHaveText('Complete');
+    await animalsPages.notificationView.open(referenceNumber);
+    await expect(animalsPages.notificationView.partyRow('Contact address for this consignment', 'Contact address')).toContainText(
+      branchName,
+    );
   });
 });
