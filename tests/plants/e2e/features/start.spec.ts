@@ -1,7 +1,7 @@
 import type { PlantsPages } from '@page-objects';
 import { ADDRESSES_SECTION } from '@domain/plants/constants/hub-groups';
 import { WHOLE_REFERENCE_NUMBER_PATTERN } from '@domain/plants/constants/reference-number-patterns';
-import { TRAIL_START } from '@page-objects/shared/base-page';
+import { TASK_LIST_NAME, TRAIL_START } from '@page-objects/shared/base-page';
 import { POTATOES } from '@flows/plants/journey';
 import { test, expect } from '@fixtures';
 
@@ -99,20 +99,21 @@ test.describe('High-risk plants start section', () => {
     await expect(plantsPages.overview.linkBack).toHaveAttribute('href', plantsPages.dashboard.expectedUrl);
   });
 
-  test('the Overview groups its four numbered groups as named regions inside one Notification tasklist region', async ({
+  test('the Overview heads its task list region Notification task list and groups its four numbered groups as regions under third-level headings', async ({
     plantsPages,
     plantsJourney,
   }) => {
     await plantsJourney.startNotification();
     await plantsJourney.toOverviewWithCommodityTypeSaved(POTATOES);
 
+    await expect(plantsPages.overview.taskListHeading).toBeVisible();
     await expect(plantsPages.overview.taskListRegion.getByRole('region')).toHaveCount(GROUP_CAPTIONS.length);
     for (const caption of GROUP_CAPTIONS) {
       const group = plantsPages.overview.groupRegion(caption);
-      await expect(group.getByRole('heading', { level: 2 })).toHaveText(caption);
+      await expect(group.getByRole('heading', { level: 3 })).toHaveText(caption);
       await expect(group.getByRole('list')).toHaveCount(1);
     }
-    await expect(plantsPages.overview.mainSecondLevelHeadings).toHaveText(GROUP_CAPTIONS);
+    await expect(plantsPages.overview.mainSecondLevelHeadings).toHaveText([TASK_LIST_NAME]);
   });
 
   test('the new draft is listed on the dashboard and Resume reopens it', async ({ pages, plantsPages, plantsJourney }) => {

@@ -135,7 +135,7 @@ test.describe('Cancel amend without JavaScript', { tag: '@duplicated-in-frontend
     await animalsPages.originOfImport.saveAndContinue.click();
     await expect(animalsPages.commoditySelection.heading).toBeVisible();
     await animalsPages.notificationView.open(reference);
-    await expect(animalsPages.notificationView.anyReviewHeading).toBeVisible();
+    await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(countryRow).toContainText('Belgium');
 
     await animalsPages.originOfImport.open(reference);

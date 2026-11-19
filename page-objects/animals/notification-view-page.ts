@@ -8,6 +8,9 @@ import { valueOfTerm } from '@page-objects/shared/summary-list';
 
 const SPECIES_BLOCK_SELECTOR = '[id^="species-block-"]';
 
+export const reviewHeadingText = 'Review your notification';
+export const resubmitHeadingText = 'Review before re-submitting';
+
 export class AnimalsNotificationViewPage extends NotificationPage {
   constructor(page: Page) {
     super(page, 'notification-view');
@@ -15,16 +18,8 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   readonly viewHeader = new ViewHeader(this.page);
 
-  get amendReviewHeading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Review your notification' });
-  }
-
-  get resubmittingHeading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Review before re-submitting' });
-  }
-
-  get anyReviewHeading(): Locator {
-    return this.viewHeader.reference.or(this.amendReviewHeading).or(this.resubmittingHeading);
+  get heading(): Locator {
+    return this.page.getByRole('main').getByRole('heading', { level: 1 });
   }
 
   get referenceNumberCaption(): Locator {
@@ -48,7 +43,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   }
 
   summaryCard(name: string): Locator {
-    return this.page.getByRole('heading', { name, exact: true }).locator('xpath=ancestor::*[.//dl][1]');
+    return this.page.locator('.govuk-summary-card').filter({ has: this.page.getByRole('heading', { name, exact: true }) });
   }
 
   get whatAreYouImportingCard(): Locator {
@@ -72,9 +67,10 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   }
 
   get commodityCardTitles(): Locator {
-    return this.page.locator(
-      'xpath=//h3[preceding::h2[1][normalize-space()="2. Description of the goods"]][../following-sibling::*[.//*[starts-with(@id, "species-block-")]]]',
-    );
+    return this.page
+      .locator('.govuk-summary-card')
+      .filter({ has: this.page.locator(SPECIES_BLOCK_SELECTOR) })
+      .locator('.govuk-summary-card__title');
   }
 
   speciesBlock(line: CommodityLine): Locator {
@@ -93,7 +89,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   async openRefused(referenceNumber: string): Promise<void> {
     await this.navigateToService(`${this.expectedUrl(referenceNumber)}?refused=1`);
-    await this.viewHeader.reference.waitFor(pageLoadWait);
+    await this.heading.waitFor(pageLoadWait);
   }
 
   summaryValue(card: Locator, key: string): Locator {
@@ -110,8 +106,12 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   partyRow(card: string, role: string): Locator {
     return this.summaryCard(card)
-      .locator('dl > div')
+      .locator('.govuk-summary-list__row')
       .filter({ has: this.page.getByRole('term').and(this.page.getByText(role, { exact: true })) });
+  }
+
+  editPartyDetails(card: string, role: string): Locator {
+    return this.partyRow(card, role).getByRole('link', { name: 'Edit details' });
   }
 
   cardLinks(card: string): Locator {
@@ -119,7 +119,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   }
 
   cardSubsection(card: string, heading: string): Locator {
-    return this.summaryCard(card).locator(`xpath=.//h4[normalize-space()="${heading}"]/following-sibling::dl[1]`);
+    return this.summaryCard(card).locator(`h4:text-is("${heading}") + dl`);
   }
 
   partyError(card: string, role: string): Locator {
@@ -129,7 +129,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   async open(referenceNumber: string, { attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
     await super.open(referenceNumber, { attemptSignIn, ...identity });
     if (attemptSignIn) {
-      await this.anyReviewHeading.waitFor(pageLoadWait);
+      await this.heading.waitFor(pageLoadWait);
     }
   }
 

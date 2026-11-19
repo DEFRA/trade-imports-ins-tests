@@ -76,7 +76,6 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
       [animalsPages.notificationView.slug],
       animalsJourney.saveAndContinueStopsFrom(animalsPages.importReason),
       animalsPages.notificationView,
-      animalsPages.notificationView.viewHeader.reference,
     );
     await expect(purposeValue).toContainText('Research');
   });
@@ -128,7 +127,6 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
       [animalsPages.notificationView.slug],
       animalsJourney.saveAndContinueStopsFrom(animalsPages.accompanyingDocuments),
       animalsPages.notificationView,
-      animalsPages.notificationView.viewHeader.reference,
     );
   });
 

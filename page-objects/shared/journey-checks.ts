@@ -35,30 +35,14 @@ export async function expectSaveAndContinueWalk(
   trailBeforeFirstStop: string[],
   stops: readonly SaveAndContinueStop[],
   destination: JourneyPage,
-): Promise<void>;
-export async function expectSaveAndContinueWalk(
-  page: Page,
-  referenceNumber: string,
-  trailBeforeFirstStop: string[],
-  stops: readonly SaveAndContinueStop[],
-  destination: NotificationPage,
-  destinationHeading: Locator,
-): Promise<void>;
-export async function expectSaveAndContinueWalk(
-  page: Page,
-  referenceNumber: string,
-  trailBeforeFirstStop: string[],
-  stops: readonly SaveAndContinueStop[],
-  destination: NotificationPage & { heading?: Locator },
-  destinationHeading: Locator = destination.heading,
 ): Promise<void> {
   const trail = [...trailBeforeFirstStop];
   for (const stop of stops) {
-    await expectOpenOnTrail(page, referenceNumber, stop, trail, stop.heading);
+    await expectOpenOnTrail(page, referenceNumber, stop, trail);
     await continuePressedOn(stop).click();
     trail.push(stop.slug);
   }
-  await expectOpenOnTrail(page, referenceNumber, destination, trail, destinationHeading);
+  await expectOpenOnTrail(page, referenceNumber, destination, trail);
 }
 
 /**
@@ -75,15 +59,9 @@ export async function expectOpenFromReview(
   await expect(page).toHaveURL(journeyPage.expectedUrlPatternOnTrail(referenceNumber, [...placesBeforeReview, reviewSlug]));
 }
 
-async function expectOpenOnTrail(
-  page: Page,
-  referenceNumber: string,
-  journeyPage: NotificationPage,
-  trail: string[],
-  heading: Locator,
-): Promise<void> {
+async function expectOpenOnTrail(page: Page, referenceNumber: string, journeyPage: JourneyPage, trail: string[]): Promise<void> {
   await expect(page).toHaveURL(journeyPage.expectedUrlPatternOnTrail(referenceNumber, trail));
-  await expect(heading).toBeVisible();
+  await expect(journeyPage.heading).toBeVisible();
 }
 
 /**

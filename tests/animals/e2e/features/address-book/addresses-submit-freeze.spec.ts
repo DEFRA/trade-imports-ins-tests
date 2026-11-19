@@ -1,5 +1,6 @@
 import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { test, expect } from '@fixtures';
+import { reviewHeadingText } from '@page-objects/animals/notification-view-page';
 import { heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
 
 test.describe('Submitted addresses keep their copy', () => {
@@ -48,7 +49,7 @@ test.describe('Submitted addresses keep their copy', () => {
     await expect(originRow).not.toContainText('Penrith');
 
     await animalsNotificationActions.amendNotification(referenceNumber);
-    await expect(animalsPages.notificationView.amendReviewHeading).toBeVisible();
+    await expect(animalsPages.notificationView.heading).toHaveText(reviewHeadingText);
     await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');

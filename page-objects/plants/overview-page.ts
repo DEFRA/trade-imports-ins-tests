@@ -27,7 +27,7 @@ export class PlantsOverviewPage extends PlantsNotificationPage {
   }
 
   get groupHeadings(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: /^[1-4]\. / });
+    return this.page.getByRole('heading', { level: 3, name: /^[1-4]\. / });
   }
 
   taskRowLink(title: string): Locator {

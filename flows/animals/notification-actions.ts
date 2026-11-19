@@ -27,7 +27,7 @@ export class AnimalsNotificationActions {
     await this.animalsPages.originOfImport.saveAndContinue.click();
     await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
     await this.animalsPages.notificationView.open(referenceNumber);
-    await this.animalsPages.notificationView.anyReviewHeading.waitFor(pageLoadWait);
+    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
   /** Changes the internal reference of an amending notification, saves it and opens the review. */
@@ -43,7 +43,7 @@ export class AnimalsNotificationActions {
     await this.animalsPages.dashboard.open();
     await this.animalsPages.dashboard.searchForReference(referenceNumber);
     await this.animalsPages.dashboard.amend(referenceNumber).click();
-    await this.animalsPages.notificationView.amendReviewHeading.waitFor(pageLoadWait);
+    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
   /** Amends a submitted notification's country of origin and resubmits it, landing on the submitted confirmation. */

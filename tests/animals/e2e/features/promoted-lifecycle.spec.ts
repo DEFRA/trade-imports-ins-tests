@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { reviewHeadingText } from '@page-objects/animals/notification-view-page';
 import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 
 test.describe('Notification lifecycle', { tag: '@compose' }, () => {
@@ -59,7 +60,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
-    await expect(animalsPages.notificationView.amendReviewHeading).toBeVisible();
+    await expect(animalsPages.notificationView.heading).toHaveText(reviewHeadingText);
     await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
   });
 
@@ -89,7 +90,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await animalsJourney.submitNotification();
 
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
-    await expect(animalsPages.notificationView.amendReviewHeading).toBeVisible();
+    await expect(animalsPages.notificationView.heading).toHaveText(reviewHeadingText);
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.dashboard.heading).toBeVisible();
   });

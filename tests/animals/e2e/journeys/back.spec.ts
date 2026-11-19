@@ -1,6 +1,7 @@
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 
 import { test, expect } from '@fixtures';
+import { reviewHeadingText } from '@page-objects/animals/notification-view-page';
 
 test.describe('Back on the review page', () => {
   test('after Save and continue from the contact address it opens the contact address, whose Back opens Overview', async ({
@@ -52,12 +53,12 @@ test.describe('Back on the review page', () => {
     const reference = await animalsSeededJourney.createSubmittedNotification();
     await animalsPages.dashboard.openAndSearchFor(reference);
     await animalsPages.dashboard.amend(reference).click();
-    await expect(animalsPages.notificationView.amendReviewHeading).toBeVisible();
+    await expect(animalsPages.notificationView.heading).toHaveText(reviewHeadingText);
 
     await animalsPages.notificationView.changeLink('Change origin of import').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await animalsPages.originOfImport.linkBack.click();
-    await expect(animalsPages.notificationView.amendReviewHeading).toBeVisible();
+    await expect(animalsPages.notificationView.heading).toHaveText(reviewHeadingText);
 
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.dashboard.heading).toBeVisible();

@@ -4,6 +4,7 @@ import { ITAHC_DOCUMENT_TYPE_LABEL } from '@domain/animals/constants/document-ty
 import { test, expect } from '@fixtures';
 import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import type { AnimalsPages } from '@page-objects';
+import { expectPageNotFound } from '@page-objects/shared/page-not-found';
 import { expectImportReferencesAsText } from '@page-objects/shared/view-header';
 import { todayOrYesterdayServiceDisplayDatePattern } from '@utils/date-utils';
 
@@ -260,10 +261,10 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
   }
 
   test.describe('a notification that does not exist', () => {
-    test('opening its view goes to the notification list', async ({ animalsPages }) => {
+    test('opening its view shows the standard page not found', async ({ pages, animalsPages }) => {
       await animalsPages.notificationView.openWithoutWaiting('GBN-AG-00-AAAAAA');
 
-      await expect(animalsPages.dashboard.heading).toBeVisible();
+      await expectPageNotFound(pages.page);
     });
   });
 });

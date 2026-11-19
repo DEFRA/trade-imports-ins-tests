@@ -9,9 +9,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   }) => {
     await test.step('Draft review', async () => {
       const draftReference = await animalsSeededJourney.createDraftNotification('unlocked');
-      await animalsSeededJourney.resumeInUi(draftReference, animalsPages.notificationView, {
-        waitFor: animalsPages.notificationView.viewHeader.reference,
-      });
+      await animalsSeededJourney.resumeInUi(draftReference, animalsPages.notificationView);
       await runA11yScan();
     });
 

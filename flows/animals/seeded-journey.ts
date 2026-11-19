@@ -137,25 +137,15 @@ export class AnimalsSeededJourney {
   async resumeInUi<T extends { open(referenceNumber: string): Promise<void>; heading: Locator }>(
     referenceNumber: string,
     targetPage: T,
-  ): Promise<T>;
-  async resumeInUi<T extends { open(referenceNumber: string): Promise<void> }>(
-    referenceNumber: string,
-    targetPage: T,
-    options: { waitFor: Locator },
-  ): Promise<T>;
-  async resumeInUi<T extends { open(referenceNumber: string): Promise<void>; heading?: Locator }>(
-    referenceNumber: string,
-    targetPage: T,
-    { waitFor = targetPage.heading }: { waitFor?: Locator } = {},
   ): Promise<T> {
     await targetPage.open(referenceNumber);
-    await waitFor?.waitFor(pageLoadWait);
+    await targetPage.heading.waitFor(pageLoadWait);
     return targetPage;
   }
 
   async createDraftAtReviewInUi(animalsPages: AnimalsPages): Promise<string> {
     const referenceNumber = await this.createDraftNotification();
-    await this.resumeInUi(referenceNumber, animalsPages.notificationView, { waitFor: animalsPages.notificationView.viewHeader.reference });
+    await this.resumeInUi(referenceNumber, animalsPages.notificationView);
     return referenceNumber;
   }
 

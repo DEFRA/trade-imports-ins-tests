@@ -27,7 +27,7 @@ const RETURN_PARAMETER = 'return';
 /** An optional `return=` marker followed by an optional trail. */
 export const OPTIONAL_RETURN_AND_TRAIL_PATTERN = `(?:[?&]${RETURN_PARAMETER}=[^&#]*)?(?:[?&]${TRAIL_PARAMETER}=[^#]*)?`;
 export const TRAIL_START = { overview: 'overview', dashboard: 'dashboard', ins: 'ins' } as const;
-export const TASK_LIST_NAME = 'Notification tasklist';
+export const TASK_LIST_NAME = 'Notification task list';
 
 /** `?from=` followed by `places`, newest last, URI-encoded and joined by commas. */
 export function trailQuery(places: string[]): string {
@@ -259,6 +259,10 @@ export class NotificationPage extends BasePage {
   /** The set this notification's pages belong to. */
   protected get setBase(): SetBase {
     return SET_BASES.liveAnimals;
+  }
+
+  get taskListHeading(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: TASK_LIST_NAME });
   }
 
   get taskListRegion(): Locator {

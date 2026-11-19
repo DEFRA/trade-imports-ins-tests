@@ -2,6 +2,8 @@ import type { Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
 import { ViewHeader } from '@page-objects/shared/view-header';
 
+export const checkYourAnswersHeadingText = 'Check your answers';
+
 export class PlantsNotificationViewPage extends PlantsNotificationPage {
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
     super(page, 'notification-view');
@@ -9,8 +11,8 @@ export class PlantsNotificationViewPage extends PlantsNotificationPage {
 
   readonly viewHeader = new ViewHeader(this.page);
 
-  get amendReviewHeading(): Locator {
-    return this.page.getByRole('heading', { name: 'Check your answers', level: 1 });
+  get heading(): Locator {
+    return this.page.getByRole('main').getByRole('heading', { level: 1 });
   }
   get btnContinue(): Locator {
     return this.page.getByRole('button', { name: 'Continue', exact: true });

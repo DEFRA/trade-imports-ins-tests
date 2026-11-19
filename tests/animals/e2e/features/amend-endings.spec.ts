@@ -124,7 +124,6 @@ test.describe('Amendment page endings', () => {
       [animalsPages.notificationView.slug],
       animalsJourney.saveAndContinueStopsFrom(animalsPages.importReason),
       animalsPages.notificationView,
-      animalsPages.notificationView.anyReviewHeading,
     );
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
   });

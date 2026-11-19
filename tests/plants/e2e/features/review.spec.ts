@@ -10,7 +10,9 @@ import {
   renamedAndMovedNurseryAddress,
 } from '@flows/plants/journey';
 import type { PlantsPages, SharedPages } from '@page-objects';
+import { checkYourAnswersHeadingText } from '@page-objects/plants/notification-view-page';
 import { TRAIL_START } from '@page-objects/shared/base-page';
+import { expectPageNotFound } from '@page-objects/shared/page-not-found';
 import { expectImportReferencesAsText } from '@page-objects/shared/view-header';
 import { expectOpenFromReview, expectSaveAndContinueWalk, expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 import { todayOrTomorrowServiceDisplayDatePattern, todayOrYesterdayServiceDisplayDatePattern } from '@utils/date-utils';
@@ -248,10 +250,10 @@ test.describe('High-risk plants check and submit section', () => {
     });
   });
 
-  test('opening the view of a notification that does not exist goes to the notification list', async ({ plantsPages }) => {
+  test('opening the view of a notification that does not exist shows the standard page not found', async ({ pages, plantsPages }) => {
     await plantsPages.notificationView.open('GBN-HRP-00-AAAAAA');
 
-    await expect(plantsPages.dashboard.heading).toBeVisible();
+    await expectPageNotFound(pages.page);
   });
 
   test(
@@ -588,7 +590,6 @@ test.describe('High-risk plants check and submit section', () => {
         [plantsPages.notificationView.slug],
         [plantsPages.identificationNumbers, plantsPages.consignmentContactSelect],
         plantsPages.notificationView,
-        plantsPages.notificationView.amendReviewHeading,
       );
       await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('CHANGED2');
     });
@@ -680,7 +681,7 @@ test.describe('High-risk plants check and submit section', () => {
 
     await plantsPages.notificationView.btnContinue.click();
 
-    await expect(plantsPages.notificationView.amendReviewHeading).toBeVisible();
+    await expect(plantsPages.notificationView.heading).toHaveText(checkYourAnswersHeadingText);
     await expect(plantsPages.notificationView.errorSummary).toContainText('There is a problem');
     await expect(plantsPages.notificationView.errorSummaryLink('Complete arrival details')).toHaveAttribute('href', '#arrival-details');
     await expect(plantsPages.overview.statusTag).toHaveText('Amend');

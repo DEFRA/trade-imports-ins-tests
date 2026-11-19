@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { COLD_START } from '@fixtures/auth-state';
 import { createPlantsPages } from '@page-objects';
+import { expectPageNotFound } from '@page-objects/shared/page-not-found';
 import { users } from '@config/users';
 
 test.describe('Another organisation opens a notification by its URL', () => {
@@ -16,8 +17,7 @@ test.describe('Another organisation opens a notification by its URL', () => {
       });
 
       const page = sarahsPages.commodityType.heading.page();
-      await expect(page.getByRole('heading', { level: 1, name: '404' })).toBeVisible();
-      await expect(page.getByText('Page not found', { exact: true })).toBeVisible();
+      await expectPageNotFound(page);
       await expect(sarahsPages.commodityType.heading).toBeHidden();
       await expect(page.getByText(reference)).toBeHidden();
     } finally {
