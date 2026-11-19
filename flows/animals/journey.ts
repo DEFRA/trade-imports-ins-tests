@@ -829,7 +829,7 @@ export class AnimalsJourney {
 
   async submitNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.toDeclaration(answers);
-    await this.confirmDeclaration();
+    await this.submitFromDeclaration();
   }
 
   async walkToImportReason(
@@ -1087,7 +1087,7 @@ export class AnimalsJourney {
 
   async submitFromReview(): Promise<void> {
     await this.continueFromReviewToDeclaration();
-    await this.confirmDeclaration();
+    await this.submitFromDeclaration();
   }
 
   private async fromOverviewToDeclaration(): Promise<void> {
@@ -1100,7 +1100,7 @@ export class AnimalsJourney {
     await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
   }
 
-  private async confirmDeclaration(): Promise<void> {
+  async submitFromDeclaration(): Promise<void> {
     await this.animalsPages.declaration.confirmation.check();
     await this.animalsPages.declaration.continueButton.click();
     await this.animalsPages.confirmation.heading.waitFor(pageLoadWait);
