@@ -4,7 +4,7 @@ import { commodityLines, speciesBlockHeading } from '@domain/animals/constants/c
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { TRAIL_START } from '@page-objects/shared/base-page';
 import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
-import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { CPH_NUMBER_DISPLAY, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { AIR_OR_SEA_OVERVIEW_TASKS, certificateDocument } from '@flows/animals/journey';
 import { expectEmptyTransitList } from '@utils/transit-countries-assertions';

@@ -1,4 +1,5 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { CPH_NUMBER_DISPLAY } from '@domain/animals/constants/journey-options';
 
 import { test, expect } from '@fixtures';
 
@@ -43,7 +44,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await animalsPages.cphNumber.fillCphNumber();
     await animalsPages.cphNumber.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await expect(cphNumberText).toHaveText('123456789');
+    await expect(cphNumberText).toHaveText(CPH_NUMBER_DISPLAY);
     await expect(cphLinks).toHaveText([animalsPages.addresses.cphLinkNames.change]);
 
     await animalsPages.addresses.changeCph.click();
