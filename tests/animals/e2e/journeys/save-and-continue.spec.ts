@@ -2,7 +2,7 @@ import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { TRAIL_START } from '@page-objects/shared/base-page';
 import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
-import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { CPH_NUMBER_DISPLAY, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { AIR_OR_SEA_OVERVIEW_TASKS, certificateDocument } from '@flows/animals/journey';
 import { expectEmptyTransitList } from '@utils/transit-countries-assertions';
@@ -42,7 +42,7 @@ test.describe('Save and continue through a new notification', () => {
 
       const rolesAndAddresses = animalsPages.notificationView.summaryCard('Roles and addresses');
       await expect(animalsPages.notificationView.summaryValue(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText(
-        '123456789',
+        CPH_NUMBER_DISPLAY,
       );
 
       await animalsJourney.submitFromReview();
