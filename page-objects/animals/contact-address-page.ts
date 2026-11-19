@@ -3,9 +3,9 @@ import { NotificationPage } from '@page-objects/shared/base-page';
 import {
   PICKER_RESULTS_HEADING,
   paragraphFollowing,
+  paragraphUnderResultsHeading,
   pickerResultsGroup,
   pickerResultsHeading,
-  pickerResultsSummary,
 } from '@page-objects/shared/address-picker-results';
 
 const PAGE_HEADING = 'Contact address for consignment';
@@ -52,7 +52,7 @@ export class AnimalsContactAddressPage extends NotificationPage {
   }
 
   get addNewBranchAddressSentence(): Locator {
-    return pickerResultsSummary(this.page);
+    return paragraphUnderResultsHeading(this.page);
   }
 
   get addNewBranchAddressLink(): Locator {

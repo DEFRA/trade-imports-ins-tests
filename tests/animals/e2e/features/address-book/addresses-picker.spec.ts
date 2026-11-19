@@ -68,6 +68,17 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
         email: 'searchable@example.co.uk',
       });
     }
+    const consigneeRoleSearchMatch = `Consignee Match ${runOnlySearchToken}`;
+    await addressBookApi.createAddress({
+      ...heldAsConsignee,
+      name: consigneeRoleSearchMatch,
+      addressLine1: '10 Market Street',
+      townOrCity: 'Leeds',
+      postcode: 'LS1 6HB',
+      countryCode: 'GB',
+      phone: '01228 555 0198',
+      email: 'searchable-consignee@example.co.uk',
+    });
 
     const chosenName = `Chosen Consignor ${stamp}`;
     const chosenRecord = {
@@ -94,7 +105,9 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
 
     await animalsPages.consignorSelection.search(runOnlySearchToken);
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText('Showing 2 out of 2 results');
+    await expect(animalsPages.consignorSelection.party(searchMatches[0])).toBeVisible();
     await expect(animalsPages.consignorSelection.party(searchMatches[1])).toBeVisible();
+    await expect(animalsPages.consignorSelection.party(consigneeRoleSearchMatch)).toHaveCount(0);
 
     await animalsPages.consignorSelection.search(chosenName);
     await animalsPages.consignorSelection.party(chosenName).check();

@@ -44,17 +44,13 @@ const HANDSHAKE_ADDRESS = {
   phone: '01228 555 0199',
 };
 
-function newHandshakeAddress(label: string, token: string): AddressDetails {
+function newHandshakeAddress(label: string, token: string = uniqueToken()): AddressDetails {
   return {
     ...HANDSHAKE_ADDRESS,
     name: `Handshake ${label} ${token}`,
     country: 'United Kingdom',
     email: `handshake-${token}@example.co.uk`,
   };
-}
-
-function newAddressFor(role: PartyRole, token: string = uniqueToken()): AddressDetails {
-  return newHandshakeAddress(role, token);
 }
 
 function addressAlreadyInTheBookFor(role: PartyRole, token: string) {
@@ -98,7 +94,7 @@ test.describe('Add an address from the journey via INS', () => {
       { tag: ['@address-book', '@ins-frontend'] },
       async ({ animalsJourney, pages, animalsPages, insPages, addressBookApi }) => {
         const addPage = insPages.addressBookAdd;
-        const details = newAddressFor(role);
+        const details = newHandshakeAddress(role);
         const insOrigin = originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL');
 
         await arriveOnInsAddPageAndFill(animalsJourney, addPage, role, details);
@@ -136,7 +132,7 @@ test.describe('Add an address from the journey via INS', () => {
         const addPage = insPages.addressBookAdd;
         const picker = animalsJourney.partyPicker(role);
         const token = uniqueToken();
-        const details = newAddressFor(role, token);
+        const details = newHandshakeAddress(role, token);
         const alreadyInTheBook = await addressBookApi.createAddress(addressAlreadyInTheBookFor(role, token));
 
         await animalsJourney.toPartyPicker(role);
@@ -162,7 +158,7 @@ test.describe('Add an address from the journey via INS', () => {
       async ({ animalsJourney, animalsPages, insPages }) => {
         const addPage = insPages.addressBookAdd;
         const picker = animalsJourney.partyPicker(role);
-        const details = newAddressFor(role);
+        const details = newHandshakeAddress(role);
 
         await arriveOnInsAddPageAndFill(animalsJourney, addPage, role, details);
         await addPage.linkCancelAndReturnToHub.click();
@@ -243,7 +239,7 @@ test.describe('Add an address from the journey via INS', () => {
     async ({ animalsJourney, pages, animalsPages, insPages }) => {
       const addPage = insPages.addressBookAdd;
 
-      const details = newAddressFor('Consignor');
+      const details = newHandshakeAddress('Consignor');
 
       await arriveOnInsAddPageAndFill(animalsJourney, addPage, 'Consignor', details);
       await pages.page.clock.install();
@@ -333,7 +329,7 @@ test.describe('Add an address from the journey via INS', () => {
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, animalsPages, insPages, addressBookApi }) => {
       const addPage = insPages.addressBookAdd;
-      const details = newAddressFor('Consignee');
+      const details = newHandshakeAddress('Consignee');
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
       await expect(addPage.rolesGroup(journeyRolesQuestion.legend)).toHaveAccessibleDescription(journeyRolesQuestion.consigneeHint);
@@ -358,7 +354,7 @@ test.describe('Add an address from the journey via INS', () => {
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, insPages, addressBookApi }) => {
       const addPage = insPages.addressBookAdd;
-      const details = newAddressFor('Consignee');
+      const details = newHandshakeAddress('Consignee');
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
       await addPage.fill({ ...details, addressLine1: '', townOrCity: '', postcode: '', email: '', phone: '' });

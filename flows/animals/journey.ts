@@ -1,6 +1,7 @@
 import { pageLoadWait } from '@config/timeouts';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
-import { type Locator, expect } from '@playwright/test';
+import { type Locator, expect, test } from '@playwright/test';
+import type { A11yScanOptions } from '@utils/a11y-utils';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { SaveAndContinueStop } from '@page-objects/shared/journey-checks';
 import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
@@ -806,6 +807,18 @@ export class AnimalsJourney {
     if (!this.context.referenceNumber) await this.startNotification();
     await this.completeAnswerSections(answers);
     await this.openReviewFromOverview();
+  }
+
+  /**
+   * Opens the review from Overview, scans it, then continues to the
+   * declaration, as a Playwright `test.step` named "Review your notification".
+   */
+  async toDeclarationThroughReview(runA11yScan: (options?: A11yScanOptions) => Promise<void>): Promise<void> {
+    await test.step('Review your notification', async () => {
+      await this.openReviewFromOverview();
+      await runA11yScan();
+      await this.animalsPages.notificationView.continueButton.click();
+    });
   }
 
   async toDeclaration(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {

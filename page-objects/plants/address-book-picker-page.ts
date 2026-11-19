@@ -4,9 +4,9 @@ import {
   pickerAddressRadio,
   pickerLastCell,
   pickerNoMatchesMessage,
+  paragraphUnderResultsHeading,
   pickerResultsGroup,
   pickerResultsHeading,
-  pickerResultsSummary,
   pickerSearchBox,
   pickerSearchButton,
   pickerSearchRow,
@@ -56,7 +56,7 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
   }
 
   get resultsSummary(): Locator {
-    return pickerResultsSummary(this.page);
+    return paragraphUnderResultsHeading(this.page);
   }
 
   get noMatchesMessage(): Locator {

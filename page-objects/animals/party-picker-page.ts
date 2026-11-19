@@ -2,6 +2,7 @@ import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import {
   paragraphFollowing,
+  paragraphUnderResultsHeading,
   pickerAddressCell,
   pickerAddressCellText,
   pickerAddressRadio,
@@ -10,7 +11,6 @@ import {
   pickerNoMatchesMessage,
   pickerResultsGroup,
   pickerResultsHeading,
-  pickerResultsSummary,
   pickerSearchBox,
   pickerSearchButton,
   pickerSearchRow,
@@ -46,7 +46,7 @@ export class AnimalsPartyPickerPage extends NotificationPage {
   }
 
   get resultsSummary(): Locator {
-    return pickerResultsSummary(this.page);
+    return paragraphUnderResultsHeading(this.page);
   }
 
   get resultsGroup(): Locator {
@@ -119,12 +119,7 @@ export class AnimalsPartyPickerPage extends NotificationPage {
     await this.party(name).check();
   }
 
-  /**
-   * Ticks the named party's radio, then re-searches to commit it: the picker
-   * only threads its checked party through a server round trip, so a link
-   * off the page before that round trip carries the previously-saved party,
-   * not the just-ticked one.
-   */
+  /** Ticks the named party's radio, then re-searches to commit it. */
   async selectAndCommit(name: string): Promise<void> {
     await this.select(name);
     await this.search(name);

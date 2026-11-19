@@ -11,12 +11,7 @@ type JourneyType = (typeof journeyTypes)[keyof typeof journeyTypes];
 const unregisteredJourneyType = 'not-a-journey';
 
 export const journeyParties = {
-  placeOfOrigin: 'placeOfOrigin',
   consignor: 'consignor',
-  consignee: 'consignee',
-  importer: 'importer',
-  placeOfDestination: 'placeOfDestination',
-  consignmentContact: 'consignmentContact',
 } as const;
 
 export type JourneyParty = (typeof journeyParties)[keyof typeof journeyParties];
@@ -29,21 +24,11 @@ export interface JourneyHandshake extends Record<string, string> {
 }
 
 const fulfilmentIdByParty: Record<JourneyParty, string> = {
-  placeOfOrigin: '89c0d1e2-f3a4-4b5f-8c0b-8d9e0f1a2b3c',
   consignor: '9ad1e2f3-a4b5-4c60-8d1c-9e0f1a2b3c4d',
-  consignee: 'abe2f3a4-b5c6-4d71-8e2d-af0a1b2c3d4e',
-  importer: 'bcf3a4b5-c6d7-4e82-8f3e-ba1b2c3d4e5f',
-  placeOfDestination: 'cd04b5c6-d7e8-4f93-8a4f-cb2c3d4e5f60',
-  consignmentContact: 'f037e8f9-a0b1-4c26-8d72-fe5f60718293',
 };
 
 export const ownRoleByParty: Record<JourneyParty, AddressRole> = {
-  placeOfOrigin: addressRoles.placeOfOrigin,
   consignor: addressRoles.consignor,
-  consignee: addressRoles.consignee,
-  importer: addressRoles.importer,
-  placeOfDestination: addressRoles.placeOfDestination,
-  consignmentContact: addressRoles.branchAddress,
 };
 
 const setBaseByJourneyType: Record<JourneyType, string> = {

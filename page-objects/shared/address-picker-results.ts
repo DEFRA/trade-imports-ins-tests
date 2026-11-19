@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
+import { expectEntirelyAbove } from '@page-objects/shared/layout-checks';
 
 export const PICKER_RESULTS_HEADING = 'Select an address';
 const NO_MATCHES = 'No addresses match your search.';
@@ -46,7 +47,7 @@ export function paragraphFollowing(heading: Locator): Locator {
   return heading.locator('xpath=following-sibling::*[1][self::p]');
 }
 
-export function pickerResultsSummary(page: Page): Locator {
+export function paragraphUnderResultsHeading(page: Page): Locator {
   return paragraphFollowing(pickerResultsHeading(page));
 }
 
@@ -71,5 +72,9 @@ export function pickerSearchButton(page: Page): Locator {
 }
 
 export async function expectNothingBetweenSearchAndResults(resultsHeading: Locator): Promise<void> {
-  await expect(resultsHeading.locator('xpath=preceding-sibling::*[1]')).toHaveClass(/govuk-form-group/);
+  const page = resultsHeading.page();
+  await expectEntirelyAbove(pickerSearchButton(page), resultsHeading);
+  const main = await page.getByRole('main').innerText();
+  const between = main.slice(main.lastIndexOf('Search') + 'Search'.length, main.indexOf(PICKER_RESULTS_HEADING));
+  expect(between.trim()).toBe('');
 }

@@ -7,6 +7,7 @@ import { nurseryAddress, type PlantsJourney } from '@flows/plants/journey';
 import { expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 
 const CONTACT = 'Contact address for consignment';
+const MATCHING_RECORDS = 6;
 
 async function openContact(plantsPages: PlantsPages, journey: PlantsJourney): Promise<string> {
   const reference = await journey.toArrivalDetailsOfNewPotatoNotification();
@@ -22,7 +23,7 @@ test.describe('High-risk plants contact', () => {
     async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
       const token = randomUUID();
       const records: AddressBookRecord[] = [];
-      for (let index = 0; index <= 5; index++) {
+      for (let index = 0; index < MATCHING_RECORDS; index += 1) {
         records.push(await addressBookApi.createAddress(nurseryAddress(`Contact ${token} ${index}`)));
       }
       const target = records[0];
@@ -33,7 +34,7 @@ test.describe('High-risk plants contact', () => {
       await expect(contact.heading).toBeVisible();
 
       await contact.searchFor(token);
-      await expect(contact.resultsSummary).toHaveText('Showing 6 out of 6 results');
+      await expect(contact.resultsSummary).toHaveText(`Showing ${MATCHING_RECORDS} out of ${MATCHING_RECORDS} results`);
 
       await contact.address(target.name).check();
       await contact.saveAndContinue.click();

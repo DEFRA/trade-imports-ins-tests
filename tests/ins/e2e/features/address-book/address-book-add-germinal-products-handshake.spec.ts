@@ -15,7 +15,7 @@ test.describe('INS address book add reached from a germinal products notificatio
     skipUnlessComposeEnvironment('INS handshake routes are only exercised against the compose stack');
   });
 
-  test('shows the add page, offers Back and Cancel to the germinal products return, and Save and select hands back the saved address holding the same record a live animals add would', async ({
+  test('shows the add page, offers Back and Cancel to the germinal products return, and Save and select stores the consignor address the form was given and hands back its id with the select landing', async ({
     pages,
     insPages,
     insJourney,

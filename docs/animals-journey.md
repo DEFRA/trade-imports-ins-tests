@@ -52,6 +52,8 @@ Why the animals flows and page objects are written the way they are. The code ca
 
 - `addCphAndLeaveAddresses` runs from the addresses page: it answers the CPH number and then leaves the page.
 - The API seed unlocks only origin and commodity, so a spec that needs the review walks the whole journey rather than seeding it. The walk's addresses leg picks the canned parties whose names and countries a review assertion reads.
+- `PartyNames` (`flows/animals/seed-form-steps.ts`) names the address-book record each role's answer picks. Every name must match a record `flows/shared/address-book-seed.ts` seeds holding that role, since a picker now refuses a record that does not carry its own role.
+- `selectAndCommit` (`page-objects/animals/party-picker-page.ts`) ticks a party's radio, then re-searches to commit it: the picker only threads its checked party through a server round trip, so a link off the page before that round trip carries the previously-saved party, not the just-ticked one.
 
 ## Notification view
 
