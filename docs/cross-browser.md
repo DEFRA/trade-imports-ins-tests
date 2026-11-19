@@ -29,7 +29,7 @@ Playwright runs branded Chrome and Edge, its own Firefox and WebKit builds, an e
 
 - The `chrome`, `msedge`, `firefox`, `webkit`, `mobile-webkit` and `mobile-chromium` projects in `utils/playwright/shared-config.ts` have `default: false`, so they run only when `--project` names them. Every other script stays on Chromium.
 - The commands add `--grep '@cross-browser'`. Without it a named engine runs every test.
-- `chrome` and `msedge` launch the installed Google Chrome and Microsoft Edge. The test image installs both; locally, install them from Google and Microsoft. Do not run `npx playwright install chrome` or `msedge` on your own machine: it replaces the browser you already have.
+- `chrome` and `msedge` launch the installed Google Chrome and Microsoft Edge. The amd64 test image installs both (neither has a Linux Arm64 build); locally, install them from Google and Microsoft. Do not run `npx playwright install chrome` or `msedge` on your own machine: it replaces the browser you already have.
 - Write `--project=firefox`, not `--project firefox`: `--project` takes several values, so a trailing path would be read as a project name.
 - Do not run these engines with `PLAYWRIGHT_IN_CONTAINER=1`. Its host-resolver rule is Chromium-only.
 - `npm run test:docker-compose:cross-browser` runs every domain. The CDP `cross-browser` and `<domain>:cross-browser` profiles do the same on CDP, excluding `@compose` tests.
