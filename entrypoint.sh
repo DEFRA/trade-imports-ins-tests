@@ -7,7 +7,7 @@
 #   a11y                — accessibility suite via npm run test:a11y
 #   dynamics            — checks against each domain's Dynamics instance via npm run test:dynamics;
 #                         needs that domain's secrets (see README)
-#   cross-browser       — the @cross-browser tests in Firefox, WebKit and an iPhone 17 via npm run test:cross-browser
+#   cross-browser       — the @cross-browser tests in Chrome, Edge, Firefox, WebKit, an iPhone 17 and a Pixel 10 via npm run test:cross-browser
 #   browserstack        — the @cross-browser tests on BrowserStack via npm run test:browserstack
 #   security            — ZAP passive scan (broad e2e suite) via npm run test:security, safe to run routinely
 #   security:active     — refused; the @active suite is destructive, so it only

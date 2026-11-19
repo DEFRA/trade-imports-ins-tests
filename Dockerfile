@@ -40,6 +40,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --ignore-scripts
 
+# Branded Chrome and Edge for the chrome and msedge projects; the base image ships only Playwright builds
+RUN npx playwright install --with-deps chrome msedge
+
 # Copy the rest of the project
 COPY . .
 
