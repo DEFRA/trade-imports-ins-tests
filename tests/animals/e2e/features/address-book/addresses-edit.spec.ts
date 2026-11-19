@@ -2,6 +2,7 @@ import { CONSIGNMENT_ADDRESSES, CONSIGNMENT_ADDRESSES_CHANGE_LINK } from '@domai
 import { test, expect } from '@fixtures';
 import { heldAsConsignor } from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
+import { AnimalsContactAddressPage } from '@page-objects/animals/contact-address-page';
 
 const OWN_RECORD = {
   ...heldAsConsignor,
@@ -116,7 +117,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(originRow).not.toContainText('CA11 9ZZ 1234');
   });
 
-  test('cancelling an edit returns to the consignment addresses page or the contact page it was started from and leaves the copy as it was', async ({
+  test('cancelling an edit from the consignment addresses page returns there and leaves the copy as it was', async ({
     animalsSeededJourney,
     pages,
     animalsPages,
@@ -133,20 +134,9 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(animalsPages.addresses.partySection('Consignor')).toContainText('Astra Rosales');
     await expect(animalsPages.addresses.partySection('Consignor')).not.toContainText('Never Saved Ltd');
-
-    // From the contact page, back to the contact page.
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
-    await animalsPages.contactAddress.editCurrentContact.click();
-    await expect(animalsPages.contactAddressEdit.heading).toBeVisible();
-    await animalsPages.contactAddressEdit.fill({ townOrCity: 'Never Saved Town' });
-    await animalsPages.contactAddressEdit.cancel.click();
-
-    await expect(animalsPages.contactAddress.heading).toBeVisible();
-    await expect(animalsPages.contactAddress.currentContact).toContainText('Addlestone');
-    await expect(animalsPages.contactAddress.currentContact).not.toContainText('Never Saved Town');
   });
 
-  test('a copied address offers both Change and Edit details on the hub and the contact page, the review cards offer only their Change links, and an unanswered role offers only its named add link', async ({
+  test('a copied address offers both Change and Edit details on the hub, the contact page offers its options and save controls, chosen or not, the review cards offer only their Change links, and an unanswered role offers only its named add link', async ({
     animalsSeededJourney,
     animalsPages,
   }) => {
@@ -157,8 +147,9 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(animalsPages.addresses.partyLinks('Consignor')).toHaveText([change, editDetails]);
 
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
-    await expect(animalsPages.contactAddress.address('Animal and Plant Health Agency')).toBeVisible();
-    await expect(animalsPages.contactAddress.editCurrentContact).toBeVisible();
+    await expect(animalsPages.contactAddress.address('Animal and Plant Health Agency')).toBeChecked();
+    await expect(animalsPages.contactAddress.saveAndContinue).toBeVisible();
+    await expect(animalsPages.contactAddress.mainHeadings).toHaveText(AnimalsContactAddressPage.headings);
 
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView, {
       waitFor: animalsPages.notificationView.viewHeader.reference,
@@ -173,38 +164,6 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(animalsPages.addresses.partyLinks('Consignor')).toHaveText([AnimalsAddressesPage.addLinkName('Consignor')]);
 
     await animalsSeededJourney.resumeInUi(unansweredReferenceNumber, animalsPages.contactAddress);
-    await expect(animalsPages.contactAddress.currentContact).toHaveCount(0);
-  });
-
-  test('editing the contact address from the contact page changes only this notification', async ({
-    animalsSeededJourney,
-    animalsPages,
-    addressBookApi,
-  }) => {
-    const contact = 'Animal and Plant Health Agency';
-    const editedName = `APHA Weybridge ${Date.now()}`;
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
-    await animalsPages.contactAddress.editCurrentContact.click();
-    const form = animalsPages.contactAddressEdit;
-    await expect(form.roleCaption).toBeVisible();
-    await expect(form.name).toHaveValue(contact);
-    await form.fill({ name: editedName, addressLine1: 'New Haw', townOrCity: 'Weybridge' });
-    await form.saveChanges.click();
-
-    await expect(animalsPages.contactAddress.heading).toBeVisible();
-    await expect(animalsPages.contactAddress.currentContact).toContainText(editedName);
     await expect(animalsPages.contactAddress.chosenAddress).toHaveCount(0);
-
-    await animalsPages.notificationView.open(referenceNumber);
-    const contactRow = animalsPages.notificationView.partyRow('Contact address', 'Contact address');
-    await expect(contactRow).toContainText(editedName);
-    await expect(contactRow).toContainText('Weybridge');
-    await expect(contactRow).not.toContainText('Addlestone');
-
-    const record = await addressBookApi.findByName(contact);
-    expect(record).toMatchObject({ addressLine1: 'Woodham Lane', townOrCity: 'Addlestone' });
-    expect(await addressBookApi.listAddresses(editedName)).toHaveLength(0);
   });
 });

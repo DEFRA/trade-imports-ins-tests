@@ -267,3 +267,33 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
   });
 });
+
+test.describe('Review refused with no contact address', () => {
+  test('an unanswered contact address keeps the trader on the review after Continue, naming it among what is outstanding', async ({
+    animalsJourney,
+    animalsPages,
+    pages,
+  }) => {
+    test.slow();
+    await animalsJourney.toContactAddress();
+    const referenceNumber = animalsPages.contactAddress.referenceNumberFromUrl();
+
+    await animalsPages.overview.open(referenceNumber);
+    await animalsPages.overview.reviewAndSubmitButton.click();
+
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
+    await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText([
+      'Complete main import reason',
+      'Complete additional details',
+      'Complete arrival details',
+      'Complete transport details',
+      CONSIGNMENT_ADDRESSES_INCOMPLETE,
+      'Complete contact address for this consignment',
+    ]);
+
+    await animalsPages.notificationView.continueButton.click();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
+    await expect(animalsPages.notificationView.errorSummary).toBeFocused();
+  });
+});

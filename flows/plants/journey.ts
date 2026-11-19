@@ -203,16 +203,33 @@ export class PlantsJourney {
     return reference;
   }
 
-  /** Mints a record for the place of destination, answers everything before it and lands on the consignor page. */
+  /** Mints a consignor-role record, answers everything up to and including the place of
+   * destination with a record of its own, and lands on the consignor page. */
   async toConsignorOfNewNotification(
     api: AddressBookApiClient,
     commodityType: string,
-  ): Promise<{ reference: string; addressName: string }> {
+  ): Promise<{ reference: string; addressName: string; destinationName: string }> {
     const addressName = `Consignor Route Nursery ${randomUUID()}`;
-    await api.createAddress(nurseryAddress(addressName));
+    await api.createAddress(nurseryAddress(addressName, 'GB', [addressRoles.consignor]));
+    const destinationName = `Consignor Route Destination ${randomUUID()}`;
+    await api.createAddress(nurseryAddress(destinationName));
     const reference = await this.toDestinationOfNewNotification(commodityType);
-    await this.chooseDestination(addressName);
+    await this.chooseDestination(destinationName);
     await this.plantsPages.consignorSelect.heading.waitFor();
+    return { reference, addressName, destinationName };
+  }
+
+  /** Mints a consignor-role record, picks it on the consignor page, saves, and lands on
+   * identification numbers. */
+  async toIdentificationNumbersViaConsignor(
+    api: AddressBookApiClient,
+    commodityType: string,
+  ): Promise<{ reference: string; addressName: string }> {
+    const { reference, addressName } = await this.toConsignorOfNewNotification(api, commodityType);
+    await this.plantsPages.consignorSelect.searchFor(addressName);
+    await this.plantsPages.consignorSelect.address(addressName).check();
+    await this.plantsPages.consignorSelect.saveAndContinue.click();
+    await this.plantsPages.identificationNumbers.heading.waitFor();
     return { reference, addressName };
   }
 
@@ -222,10 +239,15 @@ export class PlantsJourney {
     await this.plantsPages.placeOfDestination.saveAndContinue.click();
   }
 
-  /** Creates an address-book record, searches the open picker for it, ticks it, then deletes the record from the book. */
-  async createSearchTickThenDeleteAddress(api: AddressBookApiClient, picker: PlantsAddressBookPickerPage): Promise<{ searchTerm: string }> {
+  /** Creates an address-book record holding the given role, searches the open picker for it,
+   * ticks it, then deletes the record from the book. */
+  async createSearchTickThenDeleteAddress(
+    api: AddressBookApiClient,
+    picker: PlantsAddressBookPickerPage,
+    role: AddressRole,
+  ): Promise<{ searchTerm: string }> {
     const addressName = `Deleted Before Save Nursery ${randomUUID()}`;
-    const record = await api.createAddress(nurseryAddress(addressName));
+    const record = await api.createAddress(nurseryAddress(addressName, 'GB', [role]));
     await picker.searchFor(addressName);
     await picker.address(addressName).check();
     await api.deleteAddress(record.id);
@@ -266,8 +288,11 @@ export class PlantsJourney {
 
   /**
    * Answers a notification through to Check your answers, picking one address-book
-   * record for the place of destination and the contact (and the consignor, for
-   * plants for planting). Mints the record unless `existing` names one.
+   * record for the contact (the same record for the place of destination, or, for
+   * plants for planting, for the consignor instead). Mints the record unless
+   * `existing` names one; plants for planting also mints a throwaway record for the
+   * place of destination and returns it as `destinationAddress` (the same record as
+   * `address` otherwise).
    */
   async completeNotification(
     api: AddressBookApiClient,
@@ -280,16 +305,21 @@ export class PlantsJourney {
       name = `Review Nursery ${randomUUID()}`,
       existing,
     }: NotificationOptions = {},
-  ): Promise<{ reference: string; address: AddressBookRecord }> {
-    const address = existing ?? (await api.createAddress(nurseryAddress(name, countryCode, roles)));
+  ): Promise<{ reference: string; address: AddressBookRecord; destinationAddress: AddressBookRecord }> {
+    const isConsignorRoute = type === PLANTS_FOR_PLANTING;
+    const address =
+      existing ??
+      (await api.createAddress(nurseryAddress(name, countryCode, roles ?? (isConsignorRoute ? [addressRoles.consignor] : undefined))));
     const reference = await this.toDestinationOfNewNotification(type, { arrivalStatus: ALREADY_ARRIVED, days });
-    await this.chooseDestination(address.name);
-    if (type === PLANTS_FOR_PLANTING) {
+    const destinationAddress = isConsignorRoute ? await api.createAddress(nurseryAddress(`${name} Destination`)) : address;
+    if (isConsignorRoute) {
+      await this.chooseDestination(destinationAddress.name);
       await this.plantsPages.consignorSelect.searchFor(address.name);
       await this.plantsPages.consignorSelect.address(address.name).check();
       await this.plantsPages.consignorSelect.saveAndContinue.click();
       await this.plantsPages.identificationNumbers.supplier.fill('S123');
     } else {
+      await this.chooseDestination(address.name);
       await this.plantsPages.identificationNumbers.producer.fill('P123');
       await this.plantsPages.identificationNumbers.crop.fill('C123');
     }
@@ -300,7 +330,7 @@ export class PlantsJourney {
     }
     await this.plantsPages.consignmentContactSelect.saveAndContinue.click();
     await this.plantsPages.notificationView.viewHeader.reference.waitFor();
-    return { reference, address };
+    return { reference, address, destinationAddress };
   }
 
   async toDeclarationFromReview(): Promise<void> {

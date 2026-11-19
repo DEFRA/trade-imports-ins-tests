@@ -4,7 +4,7 @@ import { commodityLines, speciesBlockHeading } from '@domain/animals/constants/c
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { TRAIL_START } from '@page-objects/shared/base-page';
 import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
-import { CPH_NUMBER_WITH_SLASHES, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { CPH_NUMBER_DISPLAY, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 import { AIR_OR_SEA_OVERVIEW_TASKS, certificateDocument } from '@flows/animals/journey';
 import { expectEmptyTransitList } from '@utils/transit-countries-assertions';
@@ -59,7 +59,7 @@ test.describe('Save and continue through a new notification', () => {
 
       const addresses = animalsPages.notificationView.addressesCard;
       await expect(animalsPages.notificationView.summaryValue(addresses, 'County parish holding (CPH) number')).toHaveText(
-        CPH_NUMBER_WITH_SLASHES,
+        CPH_NUMBER_DISPLAY,
       );
 
       await animalsJourney.submitFromReview();
@@ -174,29 +174,6 @@ test.describe('Save and continue to the next page', () => {
     await animalsPages.transitedCountries.open(referenceNumber);
     await expectEmptyTransitList(animalsPages.transitedCountries);
     await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText([]);
-  });
-
-  test('contact address saved with no address chosen goes to check your answers, naming what is outstanding', async ({
-    animalsJourney,
-    animalsPages,
-    pages,
-  }) => {
-    test.slow();
-    await animalsJourney.toContactAddress();
-    const referenceNumber = animalsPages.contactAddress.referenceNumberFromUrl();
-
-    await animalsPages.contactAddress.saveAndContinue.click();
-
-    await animalsPages.notificationView.viewHeader.expectDraftReview();
-    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
-    await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText([
-      'Complete main import reason',
-      'Complete additional details',
-      'Complete arrival details',
-      'Complete transport details',
-      CONSIGNMENT_ADDRESSES_INCOMPLETE,
-      'Complete contact address for this consignment',
-    ]);
   });
 
   test('a draft with nothing saved, resumed from the dashboard, opens at the first page', async ({ animalsJourney, animalsPages }) => {

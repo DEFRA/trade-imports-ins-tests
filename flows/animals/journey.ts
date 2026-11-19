@@ -1,6 +1,7 @@
 import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { pageLoadWait } from '@config/timeouts';
-import { type Locator, expect } from '@playwright/test';
+import { type Locator, expect, test } from '@playwright/test';
+import type { A11yScanOptions } from '@utils/a11y-utils';
 import type { AnimalsPages, SharedPages } from '@page-objects';
 import type { SaveAndContinueStop } from '@page-objects/shared/journey-checks';
 import type { InsAddressBookAddPage } from '@page-objects/ins/address-book/add-page';
@@ -283,13 +284,6 @@ export class AnimalsJourney {
     await this.animalsPages.notificationView.anyReviewHeading.waitFor(pageLoadWait);
   }
 
-  async reviewThenContinueToDeclaration(runA11yScan: () => Promise<void>): Promise<void> {
-    await this.openReviewFromOverview();
-    await runA11yScan();
-    await this.animalsPages.notificationView.continueButton.click();
-    await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
-  }
-
   private async chooseSpeciesAndSaveAnimalCountsToOverview(speciesCounts: SpeciesAnimalCount[]): Promise<void> {
     await this.toConsignmentDetails(speciesCounts.map(({ species }) => species));
     for (const { species, animalCount } of speciesCounts) {
@@ -409,7 +403,7 @@ export class AnimalsJourney {
     await this.addFiveParties(answers.parties);
     await this.answerPermanentAddresses(answers.commodityLines);
     await this.addCphAndLeaveAddresses(answers.cph);
-    await this.animalsPages.contactAddress.saveAndReturnToOverview.click();
+    await this.animalsPages.contactAddress.cancelAndReturnToHub.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -440,7 +434,7 @@ export class AnimalsJourney {
 
   private async saveContactAddressToOverview(name: string): Promise<void> {
     await this.animalsPages.contactAddress.address(name).check();
-    await this.animalsPages.contactAddress.saveAndReturnToOverview.click();
+    await this.animalsPages.contactAddress.saveAndReturnToHub.click();
   }
 
   async reachTransporterFromHub(): Promise<void> {
@@ -676,6 +670,11 @@ export class AnimalsJourney {
     await this.openAdditionalDetailsFromOverview();
   }
 
+  async toConsignmentAddressesWithSourcePartiesChosen(parties: PartyAnswer[]): Promise<void> {
+    await this.toConsignmentAddresses();
+    await this.addParties(parties);
+  }
+
   async toConsignmentAddressesOfCurrentNotification(): Promise<void> {
     await this.openCurrentOverview();
     await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
@@ -779,10 +778,34 @@ export class AnimalsJourney {
     await this.openInsAddAddressFromPicker(addressBookAdd, role);
   }
 
+  async openInsAddAddressFromContact(addressBookAdd: InsAddressBookAddPage): Promise<void> {
+    await this.animalsPages.contactAddress.addNewBranchAddressLink.click();
+    await addressBookAdd.completeSignInIfRequested();
+    await addressBookAdd.heading.waitFor(pageLoadWait);
+  }
+
+  async toInsAddAddressFromContact(addressBookAdd: InsAddressBookAddPage): Promise<void> {
+    await this.toContactAddress();
+    await this.openInsAddAddressFromContact(addressBookAdd);
+  }
+
   async toReview(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     if (!this.context.referenceNumber) await this.startNotification();
     await this.completeAnswerSections(answers);
     await this.openReviewFromOverview();
+  }
+
+  /**
+   * Opens the review from Overview, scans it, then continues to the
+   * declaration, as a Playwright `test.step` named "Review your notification".
+   */
+  async toDeclarationThroughReview(runA11yScan: (options?: A11yScanOptions) => Promise<void>): Promise<void> {
+    await test.step('Review your notification', async () => {
+      await this.openReviewFromOverview();
+      await runA11yScan();
+      await this.animalsPages.notificationView.continueButton.click();
+      await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
+    });
   }
 
   async toDeclaration(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
@@ -793,7 +816,7 @@ export class AnimalsJourney {
 
   async submitNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.toDeclaration(answers);
-    await this.confirmDeclaration();
+    await this.submitFromDeclaration();
   }
 
   async walkToImportReason(
@@ -1051,7 +1074,7 @@ export class AnimalsJourney {
 
   async submitFromReview(): Promise<void> {
     await this.continueFromReviewToDeclaration();
-    await this.confirmDeclaration();
+    await this.submitFromDeclaration();
   }
 
   private async fromOverviewToDeclaration(): Promise<void> {
@@ -1064,7 +1087,7 @@ export class AnimalsJourney {
     await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
   }
 
-  private async confirmDeclaration(): Promise<void> {
+  async submitFromDeclaration(): Promise<void> {
     await this.animalsPages.declaration.confirmation.check();
     await this.animalsPages.declaration.continueButton.click();
     await this.animalsPages.confirmation.heading.waitFor(pageLoadWait);

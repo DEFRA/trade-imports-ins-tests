@@ -4,6 +4,7 @@ import { WHOLE_REFERENCE_NUMBER_PATTERN } from '@domain/plants/constants/referen
 import { portByCode } from '@resources/reference-data/reference-data';
 import { NOT_YET_ARRIVED } from '@domain/plants/constants/arrival-status-page';
 import { COLD_START } from '@fixtures/auth-state';
+import { addressRoles } from '@domain/shared/constants/address-types';
 import { PLANTS_FOR_PLANTING, POTATOES, WOOD_AND_CUT_TREES, arrivalDate, nurseryAddress, type CommodityLine } from '@flows/plants/journey';
 
 const scenarios: { name: string; type: string; category: string; country: string; late: boolean; line: CommodityLine }[] = [
@@ -60,6 +61,10 @@ test.describe('High-risk plants full happy-path journeys', () => {
       addressBookApi,
     }) => {
       const address = await addressBookApi.createAddress(nurseryAddress(`Journey Nursery ${randomUUID()}`));
+      const consignorAddress =
+        scenario.type === POTATOES
+          ? undefined
+          : await addressBookApi.createAddress(nurseryAddress(`Journey Consignor Nursery ${randomUUID()}`, 'GB', [addressRoles.consignor]));
       const expectedArrival = arrivalDate(scenario.late ? -1 : 7);
       const reference = await plantsJourney.startNotification();
       expect(reference).toMatch(WHOLE_REFERENCE_NUMBER_PATTERN);
@@ -77,9 +82,9 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await plantsPages.arrivalDetails.arrivalDate.fill(expectedArrival);
       await plantsPages.arrivalDetails.saveAndContinue.click();
       await plantsJourney.chooseDestination(address.name);
-      if (scenario.type !== POTATOES) {
-        await plantsPages.consignorSelect.searchFor(address.name);
-        await plantsPages.consignorSelect.address(address.name).check();
+      if (consignorAddress) {
+        await plantsPages.consignorSelect.searchFor(consignorAddress.name);
+        await plantsPages.consignorSelect.address(consignorAddress.name).check();
         await plantsPages.consignorSelect.saveAndContinue.click();
       }
       if (scenario.type === POTATOES) {
@@ -126,8 +131,8 @@ test.describe('High-risk plants full happy-path journeys', () => {
         [address.addressLine1, address.townOrCity, address.county, address.postcode, 'United Kingdom'].join('\n'),
         { useInnerText: true },
       );
-      if (scenario.type !== POTATOES) {
-        await expect(plantsPages.notificationView.card('Consignor')).toContainText(address.name);
+      if (consignorAddress) {
+        await expect(plantsPages.notificationView.card('Consignor')).toContainText(consignorAddress.name);
       }
       await plantsPages.dashboard.open();
       await plantsPages.dashboard.searchForReference(reference);

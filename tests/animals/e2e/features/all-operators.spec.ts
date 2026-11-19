@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { CPH_NUMBER_WITH_SLASHES } from '@domain/animals/constants/journey-options';
+import { CPH_NUMBER_DISPLAY } from '@domain/animals/constants/journey-options';
 
 test.describe('All operator addresses', { tag: '@duplicated-in-frontend' }, () => {
   test(
@@ -28,7 +28,7 @@ test.describe('All operator addresses', { tag: '@duplicated-in-frontend' }, () =
       await expect(operator('Place of destination')).toContainText('Tech Imports Ltd');
       await expect(operator('Place of destination')).toContainText('United Kingdom');
 
-      await expect(operator('County parish holding (CPH) number')).toContainText(CPH_NUMBER_WITH_SLASHES);
+      await expect(operator('County parish holding (CPH) number')).toContainText(CPH_NUMBER_DISPLAY);
     },
   );
 });

@@ -4,9 +4,9 @@ import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page
 import { commodityCardTitle, commodityLines, speciesBlockHeading } from '@domain/animals/constants/commodity-lines';
 import {
   ALL_ANSWERS_WITHOUT_DOCUMENT,
-  CPH_NUMBER_WITH_SLASHES,
+  CAT_ANSWERS,
+  CPH_NUMBER_DISPLAY,
   MANDATORY_ANSWERS,
-  type NotificationAnswers,
 } from '@domain/animals/constants/journey-options';
 import { ALL_COMMODITY_LINES, MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
 
@@ -188,7 +188,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       answers.parties.placeOfDestination,
     );
     await expect(animalsPages.notificationView.summaryValue(addresses, 'County parish holding (CPH) number')).toHaveText(
-      CPH_NUMBER_WITH_SLASHES,
+      CPH_NUMBER_DISPLAY,
     );
 
     const contactAddress = animalsPages.notificationView.summaryCard('Contact address');
@@ -242,11 +242,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     referenceDataApi,
   }) => {
     test.slow();
-    const answers: NotificationAnswers = {
-      ...MANDATORY_ANSWERS,
-      commodityLines: [MANDATORY_COMMODITY_LINES.domesticCat],
-    };
-    await animalsJourney.toReview(answers);
+    await animalsJourney.toReview(CAT_ANSWERS);
     const commonName = await referenceDataApi.findCommonName(MANDATORY_COMMODITY_LINES.domesticCat.species);
 
     const subsection = animalsPages.notificationView.cardSubsection(CONSIGNMENT_ADDRESSES, 'Permanent address');

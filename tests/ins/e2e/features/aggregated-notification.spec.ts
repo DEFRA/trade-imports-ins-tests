@@ -4,6 +4,7 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { type AggregatedNotificationDocument } from '@domain/ins/models/db/aggregated-notification-document';
 import { timeouts } from '@config/timeouts';
+import { E2E_ORGANISATION_ID } from '@adapters/http/organisation';
 import { getMongoDbUri } from '@config/service-base-urls';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { parseAppDateText, toIsoDate } from '@utils/date-utils';
@@ -20,8 +21,6 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
   test('creates and updates aggregated notification document through the submission lifecycle', async ({
     animalsJourney,
     journeyContext,
-    pages,
-    animalsPages,
   }) => {
     test.slow();
 
@@ -62,12 +61,11 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(draftDoc.arrivalDate).toBe(arrivalIsoDate);
       expect(draftDoc.lastUpdated).toBeInstanceOf(Date);
       expect(draftDoc.aggregateVersion).toBeGreaterThan(0);
+      expect(draftDoc.organisationId).toBe(E2E_ORGANISATION_ID);
 
       const draftVersion = draftDoc.aggregateVersion;
 
-      await animalsPages.declaration.confirmation.check();
-      await animalsPages.declaration.continueButton.click();
-      await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
+      await animalsJourney.submitFromDeclaration();
 
       await expect
         .poll(() => collection.findOne({ _id: aggregateId, status: notificationStatuses.submitted }), {
@@ -86,6 +84,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
       expect(submittedDoc.arrivalDate).toBe(arrivalIsoDate);
       expect(submittedDoc.lastUpdated).toBeInstanceOf(Date);
       expect(submittedDoc.aggregateVersion).toBeGreaterThan(draftVersion);
+      expect(submittedDoc.organisationId).toBe(E2E_ORGANISATION_ID);
     } finally {
       await client.close();
     }

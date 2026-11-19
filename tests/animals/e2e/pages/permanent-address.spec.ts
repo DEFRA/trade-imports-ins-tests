@@ -1,15 +1,10 @@
 import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
-import { MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
+import { CAT_ANSWERS, MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 import { MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 
 import { test, expect } from '@fixtures';
-
-const CAT_ANSWERS: NotificationAnswers = {
-  ...MANDATORY_ANSWERS,
-  commodityLines: [MANDATORY_COMMODITY_LINES.domesticCat],
-};
 
 test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () => {
   test('A cat consignment walked from the consignment addresses page through a hand-entered save, back to the consignment addresses page', async ({

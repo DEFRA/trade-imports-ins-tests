@@ -1,29 +1,22 @@
 import { type Locator, type Page, type Response } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 import {
+  paragraphFollowing,
+  paragraphUnderResultsHeading,
+  pickerAddressCell,
+  pickerAddressCellText,
+  pickerAddressRadio,
+  pickerAddressRow,
+  pickerLastCell,
   pickerNoMatchesMessage,
   pickerResultsGroup,
   pickerResultsHeading,
-  pickerResultsSummary,
   pickerSearchBox,
   pickerSearchButton,
   pickerSearchRow,
 } from '@page-objects/shared/address-picker-results';
 
-export type AddressCellParts = {
-  addressLine1: string;
-  addressLine2?: string;
-  townOrCity: string;
-  county?: string;
-  postcode: string;
-};
-
 export class AnimalsPartyPickerPage extends NotificationPage {
-  static expectedAddressCellText({ addressLine1, addressLine2, townOrCity, county, postcode }: AddressCellParts): string {
-    const placeLine = [townOrCity, county, postcode].filter(Boolean).join(', ');
-    return [addressLine1, addressLine2, placeLine].filter(Boolean).join('\n');
-  }
-
   constructor(
     page: Page,
     slug: string,
@@ -45,7 +38,7 @@ export class AnimalsPartyPickerPage extends NotificationPage {
   }
 
   get descriptionUnderHeading(): Locator {
-    return this.headingRow.locator('xpath=following-sibling::*[1][self::p]');
+    return paragraphFollowing(this.headingRow);
   }
 
   get resultsHeading(): Locator {
@@ -53,7 +46,7 @@ export class AnimalsPartyPickerPage extends NotificationPage {
   }
 
   get resultsSummary(): Locator {
-    return pickerResultsSummary(this.page);
+    return paragraphUnderResultsHeading(this.page);
   }
 
   get resultsGroup(): Locator {
@@ -61,19 +54,19 @@ export class AnimalsPartyPickerPage extends NotificationPage {
   }
 
   party(name: string): Locator {
-    return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
+    return pickerAddressRadio(this.page, name);
   }
 
   partyRow(name: string): Locator {
-    return this.page.getByRole('row').filter({ has: this.party(name) });
+    return pickerAddressRow(this.page, name);
   }
 
   partyAddressCell(name: string): Locator {
-    return this.partyRow(name).getByRole('cell').nth(2);
+    return pickerAddressCell(this.page, name);
   }
 
   partyAddressCellText(name: string): Promise<string> {
-    return this.partyAddressCell(name).evaluate((cell) => (cell as HTMLElement).innerText);
+    return pickerAddressCellText(this.page, name);
   }
 
   partyViewLink(name: string): Locator {
@@ -81,7 +74,7 @@ export class AnimalsPartyPickerPage extends NotificationPage {
   }
 
   partyActionCell(name: string): Locator {
-    return this.partyRow(name).getByRole('cell').last();
+    return pickerLastCell(this.page, name);
   }
 
   get noMatchesMessage(): Locator {
@@ -98,10 +91,6 @@ export class AnimalsPartyPickerPage extends NotificationPage {
 
   get checkedParties(): Locator {
     return this.resultsGroup.getByRole('radio', { checked: true });
-  }
-
-  get selectedAddress(): Locator {
-    return this.page.getByText('Selected address:');
   }
 
   get searchBox(): Locator {
@@ -131,5 +120,11 @@ export class AnimalsPartyPickerPage extends NotificationPage {
   async select(name: string): Promise<void> {
     await this.search(name);
     await this.party(name).check();
+  }
+
+  /** Ticks the named party's radio, then re-searches to commit it. */
+  async selectAndCommit(name: string): Promise<void> {
+    await this.select(name);
+    await this.search(name);
   }
 }

@@ -131,7 +131,7 @@ test.describe('Addresses are copied, not linked', () => {
 
       await animalsPages.addresses.open(referenceNumber);
       await animalsPages.addresses.changeParty('Consignor').click();
-      await expect(animalsPages.consignorSelection.selectedAddress).toHaveCount(0);
+      await expect(animalsPages.consignorSelection.checkedParties).toHaveCount(0);
       await animalsPages.consignorSelection.searchBox.fill(name);
       await animalsPages.consignorSelection.searchButton.click();
       await expect(animalsPages.consignorSelection.party(name)).toHaveCount(0);

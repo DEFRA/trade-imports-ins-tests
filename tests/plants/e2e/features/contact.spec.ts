@@ -4,10 +4,10 @@ import { test, expect } from '@fixtures';
 import { portByCode } from '@resources/reference-data/reference-data';
 import type { PlantsPages } from '@page-objects';
 import { nurseryAddress, type PlantsJourney } from '@flows/plants/journey';
+import { expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 
 const CONTACT = 'Contact address for consignment';
-
-const PICKER_PAGE_SIZE = 5;
+const MATCHING_RECORDS = 6;
 
 async function openContact(plantsPages: PlantsPages, journey: PlantsJourney): Promise<string> {
   const reference = await journey.toArrivalDetailsOfNewPotatoNotification();
@@ -18,12 +18,12 @@ async function openContact(plantsPages: PlantsPages, journey: PlantsJourney): Pr
 
 test.describe('High-risk plants contact', () => {
   test(
-    'searches the address book, pages the matches five at a time and persists a row ticked on a later page',
+    'searches the address book, lists every match on one page, and persists a row ticked, shown checked on reopening',
     { tag: '@address-book' },
     async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
       const token = randomUUID();
       const records: AddressBookRecord[] = [];
-      for (let index = 0; index <= PICKER_PAGE_SIZE; index++) {
+      for (let index = 0; index < MATCHING_RECORDS; index += 1) {
         records.push(await addressBookApi.createAddress(nurseryAddress(`Contact ${token} ${index}`)));
       }
       const target = records[0];
@@ -34,11 +34,7 @@ test.describe('High-risk plants contact', () => {
       await expect(contact.heading).toBeVisible();
 
       await contact.searchFor(token);
-      await expect(contact.resultsSummary).toHaveText('Showing 5 out of 6 results');
-      await expect(contact.address(target.name)).toHaveCount(0);
-
-      await contact.paginationPageLink(2).click();
-      await expect(contact.resultsSummary).toHaveText('Showing 1 out of 6 results');
+      await expect(contact.resultsSummary).toHaveText(`Showing ${MATCHING_RECORDS} out of ${MATCHING_RECORDS} results`);
 
       await contact.address(target.name).check();
       await contact.saveAndContinue.click();
@@ -50,8 +46,7 @@ test.describe('High-risk plants contact', () => {
       await expect(review.getByRole('link')).toHaveCount(0);
 
       await contact.open(reference);
-      await expect(contact.selectedAddress(target.name)).toBeVisible();
-      await expect(contact.address(target.name)).toHaveCount(0);
+      await expect(contact.address(target.name)).toBeChecked();
     },
   );
 
@@ -99,11 +94,23 @@ test.describe('High-risk plants contact', () => {
     await expect(pages.page.getByText('Your notification reference', { exact: false })).toContainText(reference);
   });
 
+  test('ends with Save and continue and Save and return to hub side by side and Cancel and return to hub on its own line below them', async ({
+    plantsPages,
+    plantsJourney,
+  }) => {
+    await openContact(plantsPages, plantsJourney);
+
+    await expectSaveControlsLayout(plantsPages.consignmentContactSelect, {
+      saveAndReturnLabel: 'Save and return to hub',
+      cancelAndReturnLink: plantsPages.consignmentContactSelect.cancelAndReturnToHub,
+    });
+  });
+
   for (const action of ['continue', 'return'] as const) {
     test(`blank contact permits save and ${action} and leaves the row incomplete`, async ({ pages, plantsPages, plantsJourney }) => {
       const reference = await openContact(plantsPages, plantsJourney);
       const contact = plantsPages.consignmentContactSelect;
-      const button = action === 'continue' ? contact.saveAndContinue : contact.saveAndReturnToOverview;
+      const button = action === 'continue' ? contact.saveAndContinue : contact.saveAndReturnToHub;
       await button.click();
       const landing = action === 'continue' ? plantsPages.notificationView : plantsPages.overview;
       await expect(pages.page).toHaveURL(landing.expectedUrlPattern(reference));
@@ -111,7 +118,6 @@ test.describe('High-risk plants contact', () => {
       await expect(plantsPages.overview.taskRow(CONTACT)).toContainText('Not yet started');
       await contact.open(reference);
       await expect(contact.heading).toBeVisible();
-      await expect(contact.selectedAddressInset).toHaveCount(0);
       await expect(pages.page.getByRole('radio', { checked: true })).toHaveCount(0);
     });
   }

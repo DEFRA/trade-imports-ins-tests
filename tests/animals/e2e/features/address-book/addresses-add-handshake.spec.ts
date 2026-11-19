@@ -11,6 +11,7 @@ import { ADDRESS_FORM_FIELD_LABELS_IN_ORDER, ADDRESS_FORM_VALIDATION_MESSAGES } 
 import { journeyRolesQuestion, rolesQuestionLabels } from '@domain/ins/constants/address-book-types';
 import {
   addressRoles,
+  heldAsBranchAddress,
   heldAsConsignee,
   heldAsConsignor,
   heldAsImporter,
@@ -19,6 +20,7 @@ import {
   rolesFieldOf,
   type HeldRoles,
 } from '@domain/shared/constants/address-types';
+import { CONTACT_ADDRESS_NAME, SECOND_BRANCH_ADDRESS_NAME } from '@domain/shared/constants/journey-party-names';
 import { AnimalsAddressesPage, type PartyRole } from '@page-objects/animals/addresses-page';
 import { originOf } from '@page-objects/shared/base-page';
 
@@ -43,10 +45,10 @@ const HANDSHAKE_ADDRESS = {
   phone: '01228 555 0199',
 };
 
-function newAddressFor(role: PartyRole, token: string = uniqueToken()): AddressDetails {
+function newHandshakeAddress(label: string, token: string = uniqueToken()): AddressDetails {
   return {
     ...HANDSHAKE_ADDRESS,
-    name: `Handshake ${role} ${token}`,
+    name: `Handshake ${label} ${token}`,
     country: 'United Kingdom',
     email: `handshake-${token}@example.co.uk`,
   };
@@ -64,6 +66,10 @@ function addressAlreadyInTheBookFor(role: PartyRole, token: string) {
 
 function addedBannerText(details: AddressDetails): string {
   return `${details.name} address added to your address book`;
+}
+
+function newContactBranchAddress(token: string = uniqueToken()): AddressDetails {
+  return newHandshakeAddress('Branch Office', token);
 }
 
 async function arriveOnInsAddPageAndFill(
@@ -89,7 +95,7 @@ test.describe('Add an address from the journey via INS', () => {
       { tag: ['@address-book', '@ins-frontend'] },
       async ({ animalsJourney, pages, animalsPages, insPages, addressBookApi }) => {
         const addPage = insPages.addressBookAdd;
-        const details = newAddressFor(role);
+        const details = newHandshakeAddress(role);
         const insOrigin = originOf('TRADE_IMPORTS_INS_FRONTEND_BASE_URL');
 
         await arriveOnInsAddPageAndFill(animalsJourney, addPage, role, details);
@@ -127,7 +133,7 @@ test.describe('Add an address from the journey via INS', () => {
         const addPage = insPages.addressBookAdd;
         const picker = animalsJourney.partyPicker(role);
         const token = uniqueToken();
-        const details = newAddressFor(role, token);
+        const details = newHandshakeAddress(role, token);
         const alreadyInTheBook = await addressBookApi.createAddress(addressAlreadyInTheBookFor(role, token));
 
         await animalsJourney.toPartyPicker(role);
@@ -153,7 +159,7 @@ test.describe('Add an address from the journey via INS', () => {
       async ({ animalsJourney, animalsPages, insPages }) => {
         const addPage = insPages.addressBookAdd;
         const picker = animalsJourney.partyPicker(role);
-        const details = newAddressFor(role);
+        const details = newHandshakeAddress(role);
 
         await arriveOnInsAddPageAndFill(animalsJourney, addPage, role, details);
         await addPage.linkCancelAndReturnToHub.click();
@@ -174,12 +180,67 @@ test.describe('Add an address from the journey via INS', () => {
   }
 
   test(
+    'the INS add page reached from the contact address page asks no roles question, and Save and continue saves the address as a branch address, selects it and lists it above both branch addresses already in the book, with the added banner',
+    { tag: ['@address-book', '@ins-frontend'] },
+    async ({ animalsJourney, animalsPages, insPages, addressBookApi }) => {
+      const addPage = insPages.addressBookAdd;
+      const details = newContactBranchAddress();
+
+      await animalsJourney.toInsAddAddressFromContact(addPage);
+      await expect(addPage.formLabels).toHaveText(ADDRESS_FORM_FIELD_LABELS_IN_ORDER);
+
+      await addPage.fill(details);
+      await addPage.btnSaveAndContinue.click();
+
+      await expect(animalsPages.contactAddress.heading).toBeVisible();
+      await expect(animalsPages.contactAddress.successBanner.getByText(addedBannerText(details), { exact: true })).toBeVisible();
+
+      const saved = await addressBookApi.findByName(details.name);
+      expect(rolesFieldOf(saved)).toEqual(heldAsBranchAddress);
+
+      const seededContactBranch = await addressBookApi.findByName(CONTACT_ADDRESS_NAME);
+      const seededSecondBranch = await addressBookApi.findByName(SECOND_BRANCH_ADDRESS_NAME);
+      const listedIds = await animalsPages.contactAddress.listedAddressIds();
+      expect(listedIds).toContain(saved.id);
+      expect(listedIds).toContain(seededContactBranch.id);
+      expect(listedIds).toContain(seededSecondBranch.id);
+      expect(listedIds.indexOf(saved.id)).toBeLessThan(listedIds.indexOf(seededContactBranch.id));
+      expect(listedIds.indexOf(saved.id)).toBeLessThan(listedIds.indexOf(seededSecondBranch.id));
+      await expect(animalsPages.contactAddress.chosenAddress).toHaveAttribute('value', saved.id);
+    },
+  );
+
+  test(
+    'Save and continue on the INS add page reached from the contact address page shows the added banner, which is still shown ten seconds later and is gone after a reload',
+    { tag: ['@address-book', '@ins-frontend'] },
+    async ({ animalsJourney, pages, animalsPages, insPages }) => {
+      const addPage = insPages.addressBookAdd;
+      const details = newContactBranchAddress();
+
+      await animalsJourney.toInsAddAddressFromContact(addPage);
+      await addPage.fill(details);
+      await pages.page.clock.install();
+      await addPage.btnSaveAndContinue.click();
+      await expect(animalsPages.contactAddress.heading).toBeVisible();
+      const addedBanner = animalsPages.contactAddress.successBanner.getByText(addedBannerText(details), { exact: true });
+      await expect(addedBanner).toBeVisible();
+
+      await pages.page.clock.runFor(10_000);
+      await expect(addedBanner).toBeVisible();
+
+      await pages.page.reload();
+      await expect(animalsPages.contactAddress.heading).toBeVisible();
+      await expect(animalsPages.contactAddress.successBanner).toHaveCount(0);
+    },
+  );
+
+  test(
     'Save and select on the INS add page reached from the Consignor picker shows the added banner, which is still shown ten seconds later and is gone after a reload',
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, pages, animalsPages, insPages }) => {
       const addPage = insPages.addressBookAdd;
 
-      const details = newAddressFor('Consignor');
+      const details = newHandshakeAddress('Consignor');
 
       await arriveOnInsAddPageAndFill(animalsJourney, addPage, 'Consignor', details);
       await pages.page.clock.install();
@@ -269,7 +330,7 @@ test.describe('Add an address from the journey via INS', () => {
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, animalsPages, insPages, addressBookApi }) => {
       const addPage = insPages.addressBookAdd;
-      const details = newAddressFor('Consignee');
+      const details = newHandshakeAddress('Consignee');
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
       await expect(addPage.rolesGroup(journeyRolesQuestion.legend)).toHaveAccessibleDescription(journeyRolesQuestion.consigneeHint);
@@ -294,7 +355,7 @@ test.describe('Add an address from the journey via INS', () => {
     { tag: ['@address-book', '@ins-frontend'] },
     async ({ animalsJourney, insPages, addressBookApi }) => {
       const addPage = insPages.addressBookAdd;
-      const details = newAddressFor('Consignee');
+      const details = newHandshakeAddress('Consignee');
 
       await animalsJourney.toInsAddAddressFromPicker(addPage, 'Consignee');
       await addPage.fill({ ...details, addressLine1: '', townOrCity: '', postcode: '', email: '', phone: '' });

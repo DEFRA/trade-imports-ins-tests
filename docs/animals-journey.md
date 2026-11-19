@@ -45,11 +45,14 @@ Why the animals flows and page objects are written the way they are. The code ca
 
 - `walkToImportReason` carries a fresh notification from creation to the main import reason page, leaving the caller on that page with a chosen species and no reason answered. `walkToConsignmentAddressesWithoutCph`, `walkCattleByAir`, `walkHorseBySea`, `walkPoultryByRail` and `walkCatsByAir` each call it before they diverge on its own reason and species, and a spec that only needs to start at the main import reason page — rather than the fuller walk one of the named consignments gives it — calls this one directly instead of taking on a whole consignment's worth of unrelated answers.
 - `walkPoultryByRail` walks a rail consignment in transit from creation to the review. It passes through the identification page straight after saving commodity details, leaving both of the chosen commodity's free-text fallback answers blank there, because the chosen commodity declares no identifier of its own and the two answers are optional. It ends on the review rather than submitting, because the MDM stub serves no species page for this commodity and Continue from the review is refused.
-- `walkCatsByAir` walks a two-cat air consignment from creation to the review. It answers the permanent address page from the consignment addresses page, which the walk reaches only inside `walkFromTransporterToReview`, so the caller's permanent-address step is supplied to that method rather than run before or after it. It answers neither a CPH number nor the unweaned-animals question, because the commodity code cats share is exempt from CPH (`CPH_EXEMPT_CODES`) and is not an unweaned code (`UNWEANED_CODES`).
+- `walkCatsByAir` walks a two-cat air consignment from creation to the review. It answers the permanent address page from the consignment addresses page, which the walk reaches only inside `walkFromTransporterToReview`, so the caller's permanent-address step is supplied to that method rather than run before or after it. It answers neither a CPH number nor the unweaned-animals question, because the commodity code cats share is not on the CPH-required list (`CPH_REQUIRED_CODES`) and is not an unweaned code (`UNWEANED_CODES`).
 
 ## Addresses
 
 - `addCphAndLeaveAddresses` runs from the addresses page: it answers the CPH number and then leaves the page.
+- The API seed unlocks only origin and commodity, so a spec that needs the review walks the whole journey rather than seeding it. The walk's addresses leg picks the canned parties whose names and countries a review assertion reads.
+- `PartyNames` (`flows/animals/seed-form-steps.ts`) names the address-book record each role's answer picks. Every name must match a record `flows/shared/address-book-seed.ts` seeds holding that role, since a picker now refuses a record that does not carry its own role.
+- `selectAndCommit` (`page-objects/animals/party-picker-page.ts`) ticks a party's radio, then re-searches to commit it: the picker only threads its checked party through a server round trip, so a link off the page before that round trip carries the previously-saved party, not the just-ticked one.
 
 ## Notification view
 

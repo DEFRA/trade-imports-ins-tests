@@ -1,5 +1,5 @@
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
-import { CPH_NUMBER_WITH_SLASHES } from '@domain/animals/constants/journey-options';
+import { CPH_NUMBER_DISPLAY } from '@domain/animals/constants/journey-options';
 
 import { test, expect } from '@fixtures';
 
@@ -17,11 +17,15 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.domesticCat);
     await animalsJourney.toConsignmentAddressesOfCurrentNotification();
     await expect(cphSection).toBeHidden();
+
+    await animalsPages.cphNumber.open(animalsPages.addresses.referenceNumberFromUrl());
+    await expect(animalsPages.addresses.heading).toBeVisible();
+
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.contactAddress.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
 
-    await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.cattle);
+    await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.chicken);
     await animalsJourney.toConsignmentAddressesOfCurrentNotification();
     await expect(cphSection).toBeVisible();
     await expect(cphLinks).toHaveText(['Add a CPH number']);
@@ -44,7 +48,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await animalsPages.cphNumber.fillCphNumber();
     await animalsPages.cphNumber.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
-    await expect(cphNumberText).toHaveText(CPH_NUMBER_WITH_SLASHES);
+    await expect(cphNumberText).toHaveText(CPH_NUMBER_DISPLAY);
     await expect(cphLinks).toHaveText([animalsPages.addresses.cphLinkNames.change]);
 
     await animalsPages.addresses.changeCph.click();

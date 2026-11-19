@@ -27,7 +27,7 @@ test.describe('Commercial transporter journeys', () => {
 
       await animalsPages.overview.task('Contact address for this consignment').click();
       await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
-      await animalsPages.contactAddress.saveAndReturnToOverview.click();
+      await animalsPages.contactAddress.saveAndReturnToHub.click();
       await animalsPages.overview.heading.waitFor();
 
       await animalsJourney.openReviewFromOverview();

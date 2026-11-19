@@ -8,7 +8,7 @@ test.describe('Copied addresses are edited on the notification', () => {
     addressBookApi,
   }) => {
     // Plants for planting, so the consignor is asked as well as the destination and contact.
-    const { reference, address } = await plantsJourney.completeNotification(addressBookApi, {
+    const { reference, address, destinationAddress } = await plantsJourney.completeNotification(addressBookApi, {
       type: PLANTS_FOR_PLANTING,
       days: -1,
     });
@@ -19,8 +19,8 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(plantsPages.consignorSelect.editCurrentAddress).toBeVisible();
 
     await plantsPages.placeOfDestination.open(reference);
-    await plantsPages.placeOfDestination.searchFor(address.name);
-    await expect(plantsPages.placeOfDestination.address(address.name)).toBeVisible();
+    await plantsPages.placeOfDestination.searchFor(destinationAddress.name);
+    await expect(plantsPages.placeOfDestination.address(destinationAddress.name)).toBeVisible();
     await expect(plantsPages.placeOfDestination.editCurrentAddress).toBeVisible();
 
     await plantsPages.consignmentContactSelect.open(reference);
