@@ -9,6 +9,7 @@ test.describe('Back on the review page', () => {
   }) => {
     test.slow();
     await animalsJourney.toContactAddress();
+    await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
     await animalsPages.contactAddress.saveAndContinue.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
 

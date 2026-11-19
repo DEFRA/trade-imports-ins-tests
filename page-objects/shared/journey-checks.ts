@@ -65,12 +65,18 @@ async function expectOpenOnTrail(page: Page, referenceNumber: string, journeyPag
 }
 
 /**
- * Checks the button group holding Save and continue holds exactly Save and continue then Save and return to overview, and sits
- * entirely above the Cancel and return to overview link.
+ * Checks the button group holding Save and continue holds exactly Save and continue then the page's own save-and-return control,
+ * and sits entirely above the page's own cancel link. Both default to the overview-worded pair.
  */
-export async function expectSaveControlsLayout(journeyPage: NotificationPage): Promise<void> {
+export async function expectSaveControlsLayout(
+  journeyPage: NotificationPage,
+  {
+    saveAndReturnLabel = 'Save and return to overview',
+    cancelAndReturnLink = journeyPage.cancelAndReturnToOverview,
+  }: { saveAndReturnLabel?: string; cancelAndReturnLink?: Locator } = {},
+): Promise<void> {
   const saveButtons = journeyPage.buttonGroup.filter({ has: journeyPage.saveAndContinue });
 
-  await expect(saveButtons.getByRole('button')).toHaveText(['Save and continue', 'Save and return to overview']);
-  await expectEntirelyAbove(saveButtons, journeyPage.cancelAndReturnToOverview);
+  await expect(saveButtons.getByRole('button')).toHaveText(['Save and continue', saveAndReturnLabel]);
+  await expectEntirelyAbove(saveButtons, cancelAndReturnLink);
 }

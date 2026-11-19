@@ -2,6 +2,7 @@ import { test, expect } from '@fixtures';
 import { addFormAddressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { addressRoles } from '@domain/shared/constants/address-types';
 import { originOrConsignorTab, roleOptionLabels } from '@domain/ins/constants/address-book-types';
+import { unregisteredJourneyHandshake } from '@domain/ins/constants/address-book-journey';
 
 test.describe('Security scan (ins)', { tag: '@active' }, () => {
   test('routes the address book through the ZAP proxy', async ({ pages, insPages, insJourney, addressBookApi }) => {
@@ -36,9 +37,7 @@ test.describe('Security scan (ins)', { tag: '@active' }, () => {
 
     await insPages.dashboard.open();
 
-    await pages.page.goto(
-      '/address-book/add?journey-type=not-a-journey&notification-id=GBN-AG-26-4F7K2P&fulfilment-id=9ad1e2f3-a4b5-4c60-8d1c-9e0f1a2b3c4d&handshake-token=handshake-token-value',
-    );
+    await insPages.addressBookAdd.open({ query: unregisteredJourneyHandshake });
     await expect(pages.page.getByText('Page not found')).toBeVisible();
   });
 });

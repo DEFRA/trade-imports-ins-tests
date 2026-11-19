@@ -159,16 +159,11 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.contactAddress.heading.waitFor();
       await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
       await runA11yScan();
-      await animalsPages.contactAddress.saveAndReturnToOverview.click();
+      await animalsPages.contactAddress.saveAndReturnToHub.click();
       await animalsPages.overview.heading.waitFor();
     });
 
-    await test.step('Review your notification', async () => {
-      await animalsPages.overview.reviewAndSubmitButton.click();
-      await animalsPages.notificationView.heading.waitFor();
-      await runA11yScan();
-      await animalsPages.notificationView.continueButton.click();
-    });
+    await animalsJourney.toDeclarationThroughReview(runA11yScan);
 
     await test.step('Declaration', async () => {
       await animalsPages.declaration.heading.waitFor();

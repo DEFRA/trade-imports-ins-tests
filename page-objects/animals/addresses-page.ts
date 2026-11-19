@@ -14,6 +14,12 @@ const ADD_LINK_BY_ROLE: Record<PartyRole, string> = {
   Importer: 'Add an importer',
 };
 
+const SAME_AS_LABEL_BY_ROLE: Partial<Record<PartyRole, string>> = {
+  Consignor: 'Same as place of origin',
+  Importer: 'Same as consignee',
+  'Place of destination': 'Same as consignee',
+};
+
 export type AddressTextParts = {
   name: string;
   addressLine1: string;
@@ -33,6 +39,14 @@ export class AnimalsAddressesPage extends NotificationPage {
 
   static addLinkName(role: PartyRole): string {
     return ADD_LINK_BY_ROLE[role];
+  }
+
+  static sameAsLabel(role: PartyRole): string {
+    const label = SAME_AS_LABEL_BY_ROLE[role];
+    if (!label) {
+      throw new Error(`${role} offers no same-as shortcut`);
+    }
+    return label;
   }
 
   static partyLinkNames(role: PartyRole): { change: string; editDetails: string } {
@@ -66,6 +80,10 @@ export class AnimalsAddressesPage extends NotificationPage {
 
   changeParty(role: PartyRole): Locator {
     return this.partySection(role).getByRole('link', { name: 'Change' });
+  }
+
+  sameAsParty(role: PartyRole): Locator {
+    return this.partySection(role).getByRole('button', { name: AnimalsAddressesPage.sameAsLabel(role) });
   }
 
   editPartyDetails(role: PartyRole): Locator {

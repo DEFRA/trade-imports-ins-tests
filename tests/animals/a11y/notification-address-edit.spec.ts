@@ -1,7 +1,7 @@
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test('the copied-address edit page and the contact page with a current contact have no accessibility violations', async ({
+  test('the copied-address edit page and the contact address page have no accessibility violations', async ({
     animalsSeededJourney,
     animalsPages,
     runA11yScan,
@@ -26,9 +26,8 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
     });
 
-    await test.step('Contact address with the current contact shown', async () => {
+    await test.step('Contact address', async () => {
       await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
-      await animalsPages.contactAddress.currentContact.waitFor();
       await runA11yScan();
     });
   });

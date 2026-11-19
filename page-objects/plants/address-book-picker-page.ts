@@ -1,9 +1,12 @@
 import { type Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/notification-page';
 import {
+  pickerAddressRadio,
+  pickerLastCell,
   pickerNoMatchesMessage,
+  paragraphUnderResultsHeading,
+  pickerResultsGroup,
   pickerResultsHeading,
-  pickerResultsSummary,
   pickerSearchBox,
   pickerSearchButton,
   pickerSearchRow,
@@ -21,7 +24,19 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
   abstract get heading(): Locator;
 
   address(name: string): Locator {
-    return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
+    return pickerAddressRadio(this.page, name);
+  }
+
+  addressDetails(name: string): Locator {
+    return pickerLastCell(this.page, name).getByRole('group');
+  }
+
+  addressDetailsToggle(name: string): Locator {
+    return this.addressDetails(name).getByText('View details');
+  }
+
+  addressDetailsLines(name: string): Locator {
+    return this.addressDetails(name).getByRole('listitem');
   }
 
   get searchBox(): Locator {
@@ -41,19 +56,19 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
   }
 
   get resultsSummary(): Locator {
-    return pickerResultsSummary(this.page);
+    return paragraphUnderResultsHeading(this.page);
   }
 
   get noMatchesMessage(): Locator {
     return pickerNoMatchesMessage(this.page);
   }
 
-  selectedAddress(name: string): Locator {
-    return this.page.getByText(`Selected address: ${name}`, { exact: true });
+  get listedAddresses(): Locator {
+    return pickerResultsGroup(this.page).getByRole('radio');
   }
 
-  get selectedAddressInset(): Locator {
-    return this.page.locator('.govuk-inset-text');
+  get checkedAddress(): Locator {
+    return pickerResultsGroup(this.page).getByRole('radio', { checked: true });
   }
 
   get currentAddress(): Locator {
