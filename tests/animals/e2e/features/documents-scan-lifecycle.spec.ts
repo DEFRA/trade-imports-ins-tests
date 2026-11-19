@@ -19,7 +19,12 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
       .getByText(`${eicarPdfUpload().name} cannot be used. Remove it and try again with a different file.`)
       .first();
 
-    await animalsPages.accompanyingDocuments.uploadInfectedDocumentAndWaitForVirusFound();
+    await animalsPages.accompanyingDocuments.uploadInfectedDocumentAndWaitForVirusFound(async (row) => {
+      const { pending, text } = await firstScanStatus(row, 'Virus found');
+      if (pending) {
+        expect(text).not.toContain('View file');
+      }
+    });
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(infectedFileError).toBeVisible();

@@ -92,11 +92,13 @@ export class AnimalsAccompanyingDocumentsPage extends NotificationPage {
     await this.waitForScanComplete(document.reference);
   }
 
-  async uploadInfectedDocumentAndWaitForVirusFound(): Promise<string> {
+  async uploadInfectedDocumentAndWaitForVirusFound(checkWhileScanning: (row: Locator) => Promise<void> = async () => {}): Promise<string> {
     const reference = timestampedReference('PWVIRUS');
     await this.fillDocument(reference, DOCUMENT_ISSUE_DATE, eicarPdfUpload());
     await this.saveAndAddAnother.click();
-    await expect(this.documentRow(reference)).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
+    const row = this.documentRow(reference);
+    await checkWhileScanning(row);
+    await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
     return reference;
   }
 
