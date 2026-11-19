@@ -1,6 +1,8 @@
 import { spawn } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { cpus } from 'node:os';
 import dotenv from 'dotenv';
+import { parse } from 'yaml';
 import { getEnvironment } from '@utils/playwright/environment';
 
 dotenv.config({ quiet: true });
@@ -61,6 +63,12 @@ function resolveParallelsPerPlatform(): string {
   return override;
 }
 
+function resolveProjectUrl(): string {
+  const configUrl = new URL('../browserstack.yml', import.meta.url);
+  const { projectName } = parse(readFileSync(configUrl, 'utf8')) as { projectName: string };
+  return `https://automate.browserstack.com/projects/${projectName}`;
+}
+
 function runSdk(playwrightArgs: string[]): Promise<number> {
   const run = resolveRunSettings();
   const parallelsPerPlatform = resolveParallelsPerPlatform();
@@ -82,6 +90,7 @@ function runSdk(playwrightArgs: string[]): Promise<number> {
 async function main(): Promise<void> {
   assertCredentialsSet();
   process.exitCode = await runSdk(process.argv.slice(2));
+  console.log(`BrowserStack project: ${resolveProjectUrl()}`);
 }
 
 void main();
