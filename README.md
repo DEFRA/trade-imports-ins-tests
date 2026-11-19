@@ -81,11 +81,12 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 | `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                     | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:dynamics`                       | Dynamics integration (`@dynamics`) test suite          | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:cross-browser`                  | Cross-browser (`@cross-browser`) suite                 | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:browserstack`                   | Cross-browser (`@cross-browser`) suite on BrowserStack | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites         | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                     | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:cross-browser`   | Cross-browser (`@cross-browser`) suite                 | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:browserstack`    | Cross-browser (`@cross-browser`) suite on BrowserStack | docker-compose stack | `playwright.browserstack.config.ts`   | ✓                |
+| `npm run test:docker-compose:browserstack`    | Cross-browser (`@cross-browser`) suite on BrowserStack | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                 | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite  | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
@@ -140,6 +141,13 @@ those settings:
 | ------------------------------------- | -------------------- |
 | `playwright.config.ts`                | CDP services         |
 | `playwright.docker-compose.config.ts` | docker-compose stack |
+
+From a workspace clone, the docker-compose config runs only when that clone
+owns the stack (`tim docker owner` in the workspace prints the owner). From
+another clone it stops before the first test with "The stack belongs to
+`<clone>`. Run E2E there, or push and let GitHub Actions run it." Set
+`ALLOW_FOREIGN_STACK=1` to run anyway. A checkout outside a workspace, such as
+the tests image, is never stopped.
 
 `@a11y` tests use the same configs; per-test timeout is longer in
 `fixtures/a11y.ts`.
@@ -344,7 +352,7 @@ should also run the spec, whatever test type or domain the spec is in (see
    start the locally built stack:
 
    ```bash
-   ./scripts/stack/run-stack.sh -d
+   tim docker dev
    ```
 
 2. Run every domain with `npm run test:docker-compose`, or one domain with
@@ -368,12 +376,12 @@ For the security (OWASP ZAP) profiles against this stack, see
 
 #### Workspace stack commands (run from the workspace root)
 
-| Command                             | Purpose                                                |
-| ----------------------------------- | ------------------------------------------------------ |
-| `./scripts/stack/run-stack.sh`      | Start the full stack from published images             |
-| `./scripts/stack/run-stack.sh -d`   | Start the stack built from local source under `repos/` |
-| `./scripts/stack/stop-stack.sh`     | Stop the stack and wipe volumes                        |
-| `./scripts/stack/bounce-backend.sh` | Recreate the backend container (picks up Java changes) |
+| Command                     | Purpose                                                |
+| --------------------------- | ------------------------------------------------------ |
+| `tim docker up`             | Start the full stack from published images             |
+| `tim docker dev`            | Start the stack built from local source under `repos/` |
+| `tim docker down`           | Stop the stack and wipe volumes                        |
+| `tim docker bounce-backend` | Rebuild and recreate the backend container             |
 
 See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
 
@@ -467,7 +475,7 @@ See [`docs/security.md`](docs/security.md) for how to run it, what is scanned an
 
 ## Running Tests on GitHub
 
-E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `run-stack.sh --branch <branch>` and runs this repo's published test image against it, with reports published to GitHub Pages.
+E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `tim docker up --branch <branch>` and runs this repo's published test image against it, with reports published to GitHub Pages.
 
 ### GitHub Actions workflow
 
@@ -486,14 +494,16 @@ Test Suite URL: https://portal.cdp-int.defra.cloud/test-suites/trade-imports-ins
 In the CDP Portal, provide a `PROFILE` value to choose which test suite the container runs via `entrypoint.sh`.
 If `PROFILE` is not set, the `default` profile is used.
 
-| PROFILE           | Test suite                                                                                     | NPM script                   |
-| ----------------- | ---------------------------------------------------------------------------------------------- | ---------------------------- |
-| `default`         | e2e test suite                                                                                 | `npm test`                   |
-| `a11y`            | accessibility test suite                                                                       | `npm run test:a11y`          |
-| `dynamics`        | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics`      |
-| `cross-browser`   | `@cross-browser` tests in Firefox, WebKit, iPhone 17 and Pixel 10                              | `npm run test:cross-browser` |
-| `security`        | security test suite (ZAP passive scan)                                                         | `npm run test:security`      |
-| `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                            |
+| PROFILE              | Test suite                                                                                     | NPM script                   |
+| -------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------- |
+| `default` (or unset) | the same as `e2e`                                                                              | `npm test`                   |
+| `e2e`                | e2e test suite                                                                                 | `npm test`                   |
+| `a11y`               | accessibility test suite                                                                       | `npm run test:a11y`          |
+| `dynamics`           | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics`      |
+| `cross-browser`      | `@cross-browser` tests in Firefox, WebKit, iPhone 17 and Pixel 10                              | `npm run test:cross-browser` |
+| `browserstack`       | `@cross-browser` tests on BrowserStack                                                         | `npm run test:browserstack`  |
+| `security`           | security test suite (ZAP passive scan)                                                         | `npm run test:security`      |
+| `security:active`    | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                            |
 
 The profiles above run every domain. To run one domain's suite only, prefix the
 suite with its domain name as `<domain>:<suite>`:
@@ -504,6 +514,7 @@ suite with its domain name as `<domain>:<suite>`:
 | `<domain>:a11y`            | that domain's accessibility suite                       |
 | `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)             |
 | `<domain>:cross-browser`   | that domain's `@cross-browser` tests                    |
+| `<domain>:browserstack`    | that domain's `@cross-browser` tests on BrowserStack    |
 | `<domain>:security`        | that domain's security suite (ZAP passive scan)         |
 | `<domain>:security:active` | **not supported on CDP**, as `security:active`          |
 

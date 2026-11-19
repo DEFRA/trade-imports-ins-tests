@@ -6,7 +6,7 @@ set -eu
 fail() {
   echo "error: $1 is not responding at $2" >&2
   echo "  the docker-compose lane needs the workspace stack running:" >&2
-  echo "    ./scripts/stack/run-stack.sh -d  # from the workspace root" >&2
+  echo "    tim docker dev" >&2
   exit 1
 }
 
