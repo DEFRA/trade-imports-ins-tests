@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { timeouts } from '@config/timeouts';
+import { ensureE2eAddressBook } from '@flows/shared/address-book-seed';
 
 test.describe(
   'Organisation-scoped INS dashboard',
@@ -12,8 +13,16 @@ test.describe(
       journeyContext,
       insNotificationApi,
       otherOrganisationInsNotificationApi,
+      addressBookApi,
     }) => {
       test.slow();
+
+      // The journey picks its five parties from the address book, and each
+      // picker lists only its own role's addresses, so a book short of one
+      // leaves that page with nothing to choose. Only the compose config runs
+      // the global seed, so against a deployed environment this spec seeds
+      // itself.
+      await ensureE2eAddressBook(addressBookApi);
 
       await animalsJourney.submitNotification();
       const referenceNumber = journeyContext.referenceNumber;
