@@ -45,6 +45,7 @@ export function originOf(envVar: Parameters<typeof requireBaseUrl>[0]): string {
 
 export type SignInIdentity = { userId?: string; organisationSbi?: string };
 export type OpenOptions = SignInIdentity & { attemptSignIn?: boolean };
+export type OpenViewOptions = OpenOptions & { waitForReview?: boolean };
 
 export class BasePage {
   constructor(protected readonly page: Page) {}

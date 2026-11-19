@@ -1,5 +1,5 @@
-import { CONSIGNMENT_ADDRESSES_INCOMPLETE } from '@domain/animals/constants/consignment-addresses-page';
 import { basename } from 'node:path';
+import { CONSIGNMENT_ADDRESSES_INCOMPLETE } from '@domain/animals/constants/consignment-addresses-page';
 import { commodityLines, speciesBlockHeading } from '@domain/animals/constants/commodity-lines';
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { TRAIL_START } from '@page-objects/shared/base-page';
@@ -23,7 +23,7 @@ test.describe('Save and continue through a new notification', () => {
 
       await openReviewFromCompleteOverview(animalsPages.overview, animalsJourney, referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
 
-      const originOfImport = animalsPages.notificationView.summaryCard('Origin of import');
+      const originOfImport = animalsPages.notificationView.originOfImportCard;
       await expect(animalsPages.notificationView.regionOfOriginCode).toHaveText('FR-75');
       await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Internal reference number')).toHaveText('CATTLE-2026-01');
 
@@ -31,11 +31,11 @@ test.describe('Save and continue through a new notification', () => {
       await expect(animalsPages.notificationView.whatAreYouImportingSpecies).toHaveText(speciesBlockHeading(commodityLines.cattle));
       await expect(animalsPages.notificationView.summaryValue(speciesBlock, 'Number of animals')).toHaveText('2');
 
-      const mainImportReason = animalsPages.notificationView.summaryCard('Main import reason');
+      const mainImportReason = animalsPages.notificationView.mainImportReasonCard;
       await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Main import reason')).toHaveText('Internal market');
       await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Purpose in the market')).toHaveText('Breeding');
 
-      const additionalDetails = animalsPages.notificationView.summaryCard('Additional details');
+      const additionalDetails = animalsPages.notificationView.additionalDetailsCard;
       await expect(animalsPages.notificationView.summaryValue(additionalDetails, 'Certified for')).toHaveText(
         certificationPurposes.furtherKeeping.display,
       );

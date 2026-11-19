@@ -23,10 +23,10 @@ test.describe('Pet cats by air with permanent addresses', () => {
 
     await openReviewFromCompleteOverview(animalsPages.overview, animalsJourney, referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
 
-    const originOfImport = animalsPages.notificationView.summaryCard('Origin of import');
+    const originOfImport = animalsPages.notificationView.originOfImportCard;
     await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Country of origin')).toHaveText('Spain');
 
-    const mainImportReason = animalsPages.notificationView.summaryCard('Main import reason');
+    const mainImportReason = animalsPages.notificationView.mainImportReasonCard;
     await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Purpose in the market')).toHaveText(
       internalMarketPurposes.companionAnimalNotForResaleOrRehoming.display,
     );

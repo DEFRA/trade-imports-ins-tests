@@ -70,7 +70,7 @@ test.describe('Declaration page', { tag: '@duplicated-in-frontend' }, () => {
       errorLink: 'Complete additional details',
       card: 'Additional details',
       blankRow: 'Certified for',
-      answeredRows: [{ key: 'Includes unweaned animals', value: 'No' }],
+      answeredRows: [{ key: 'Includes unweaned animals', value: MANDATORY_ANSWERS.unweanedAnimals }],
     },
     {
       question: 'unweaned answer',
@@ -78,7 +78,7 @@ test.describe('Declaration page', { tag: '@duplicated-in-frontend' }, () => {
       errorLink: 'Complete additional details',
       card: 'Additional details',
       blankRow: 'Includes unweaned animals',
-      answeredRows: [{ key: 'Certified for', value: 'Slaughter' }],
+      answeredRows: [{ key: 'Certified for', value: MANDATORY_ANSWERS.certifiedFor.display }],
     },
   ] as const) {
     test.describe(`for an otherwise complete draft whose ${question} was left blank`, () => {

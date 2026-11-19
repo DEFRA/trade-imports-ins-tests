@@ -251,7 +251,7 @@ test.describe('High-risk plants check and submit section', () => {
   });
 
   test('opening the view of a notification that does not exist shows the standard page not found', async ({ pages, plantsPages }) => {
-    await plantsPages.notificationView.open('GBN-HRP-00-AAAAAA');
+    await plantsPages.notificationView.open('GBN-HRP-00-AAAAAA', { waitForReview: false });
 
     await expectPageNotFound(pages.page);
   });
@@ -833,7 +833,6 @@ test.describe('High-risk plants copied addresses are edited on the notification'
     await plantsPages.declaration.btnContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
     await plantsPages.notificationView.viewHeader.expectDraftReview();
-    await expect(plantsPages.notificationView.viewHeader.statusTag).not.toHaveText('Submitted');
 
     await plantsPages.notificationView.errorSummaryLink(error).click();
     await expect(plantsPages.placeOfDestinationEdit.heading).toBeVisible();

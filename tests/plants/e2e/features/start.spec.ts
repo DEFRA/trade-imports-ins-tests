@@ -47,7 +47,7 @@ test.describe('High-risk plants start section', () => {
 
   for (const [name, open] of [
     ['Overview', (pagesOf: PlantsPages, reference: string) => pagesOf.overview.open(reference)],
-    ['the review page', (pagesOf: PlantsPages, reference: string) => pagesOf.notificationView.open(reference)],
+    ['the review page', (pagesOf: PlantsPages, reference: string) => pagesOf.notificationView.open(reference, { waitForReview: false })],
     ['the declaration', (pagesOf: PlantsPages, reference: string) => pagesOf.declaration.open(reference)],
     ['the confirmation page', (pagesOf: PlantsPages, reference: string) => pagesOf.confirmation.open(reference)],
   ] as const) {

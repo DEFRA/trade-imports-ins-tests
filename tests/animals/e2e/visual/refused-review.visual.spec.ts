@@ -1,4 +1,4 @@
-import { test, expect, pinViewHeader } from '@fixtures/visual';
+import { test, expect, pinDraftViewHeader } from '@fixtures/visual';
 
 test.use({ headless: true });
 
@@ -9,7 +9,7 @@ test.describe('Refused review (visual regression)', { tag: '@visual' }, () => {
     await animalsPages.notificationView.continueButton.click();
     await expect(page).toHaveURL(/\/notification-view\?refused=1$/);
     const { viewHeader } = animalsPages.notificationView;
-    await pinViewHeader(viewHeader);
+    await pinDraftViewHeader(viewHeader);
   });
 
   test('shows the unfinished card with its red left border and Complete line at desktop width', async ({ page }) => {

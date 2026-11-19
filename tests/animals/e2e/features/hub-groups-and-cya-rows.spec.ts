@@ -94,7 +94,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       'Contact address',
     ]);
 
-    const originOfImport = animalsPages.notificationView.summaryCard('Origin of import');
+    const originOfImport = animalsPages.notificationView.originOfImportCard;
     await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Country of origin')).toHaveText(answers.countryCode.display);
     await expect(animalsPages.notificationView.summaryKeys(originOfImport)).toHaveText([
       'Country of origin',
@@ -106,12 +106,12 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       answers.internalReference,
     );
 
-    const additionalDetails = animalsPages.notificationView.summaryCard('Additional details');
+    const additionalDetails = animalsPages.notificationView.additionalDetailsCard;
     await expect(animalsPages.notificationView.summaryValue(additionalDetails, 'Certified for')).toHaveText(answers.certifiedFor.display);
     await expect(animalsPages.notificationView.summaryValue(additionalDetails, 'Includes unweaned animals')).toHaveText('No');
     await expect(additionalDetails.getByRole('link', { name: 'Change additional details' })).toBeVisible();
 
-    const mainImportReason = animalsPages.notificationView.summaryCard('Main import reason');
+    const mainImportReason = animalsPages.notificationView.mainImportReasonCard;
     await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Main import reason')).toHaveText(
       answers.importReason.display,
     );
@@ -142,7 +142,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(speciesBlock.getByRole('cell', { name: passportNumber, exact: true })).toBeVisible();
     await expect(speciesBlock.getByRole('cell', { name: tattoo, exact: true })).toBeVisible();
 
-    const arrivalDetails = animalsPages.notificationView.summaryCard('Arrival details');
+    const arrivalDetails = animalsPages.notificationView.arrivalDetailsCard;
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Port of entry')).toHaveText(answers.pointOfEntry.display);
     await expect(animalsPages.notificationView.summaryValue(arrivalDetails, 'Arrival date at port of entry')).toHaveText(
       answers.arrivalDate,
@@ -191,7 +191,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       CPH_NUMBER_DISPLAY,
     );
 
-    const contactAddress = animalsPages.notificationView.summaryCard('Contact address');
+    const contactAddress = animalsPages.notificationView.contactAddressCard;
     await expect(animalsPages.notificationView.summaryValue(contactAddress, 'Contact address')).toHaveText(
       [answers.contactAddress, 'Woodham Lane', 'Addlestone', 'KT15 3NB', 'United Kingdom'].join('\n'),
       { useInnerText: true },
@@ -221,7 +221,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       'Contact address',
     ]);
 
-    const originOfImport = animalsPages.notificationView.summaryCard('Origin of import');
+    const originOfImport = animalsPages.notificationView.originOfImportCard;
     await expect(animalsPages.notificationView.summaryKeys(originOfImport)).toHaveText([
       'Country of origin',
       'Region of origin code',

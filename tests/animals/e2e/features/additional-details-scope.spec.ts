@@ -48,7 +48,7 @@ test.describe('Additional details scope', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.overview.heading.waitFor();
     await animalsPages.overview.reviewAndSubmitButton.click();
 
-    const additionalDetails = animalsPages.notificationView.summaryCard('Additional details');
+    const additionalDetails = animalsPages.notificationView.additionalDetailsCard;
     await expect(additionalDetails.getByRole('term')).toHaveText(['Certified for']);
 
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.cattle);

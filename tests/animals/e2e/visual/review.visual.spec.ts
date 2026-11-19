@@ -1,4 +1,4 @@
-import { test, expect, pinDateText, pinViewHeader } from '@fixtures/visual';
+import { test, expect, pinDateText, pinDraftViewHeader } from '@fixtures/visual';
 
 test.use({ headless: true });
 
@@ -13,15 +13,12 @@ test.describe('Review (visual regression)', { tag: '@visual' }, () => {
     animalsPages,
   }) => {
     await pinDateText(
-      animalsPages.notificationView.summaryValue(
-        animalsPages.notificationView.summaryCard('Arrival details'),
-        'Arrival date at port of entry',
-      ),
+      animalsPages.notificationView.summaryValue(animalsPages.notificationView.arrivalDetailsCard, 'Arrival date at port of entry'),
     );
-    await expect(animalsPages.notificationView.summaryCard('Contact address')).toBeVisible();
+    await expect(animalsPages.notificationView.contactAddressCard).toBeVisible();
     await expect(animalsPages.notificationView.continueButton).toBeVisible();
     const { viewHeader } = animalsPages.notificationView;
-    await pinViewHeader(viewHeader);
+    await pinDraftViewHeader(viewHeader);
 
     await expect(page).toHaveScreenshot('review-desktop.png', { fullPage: true });
   });

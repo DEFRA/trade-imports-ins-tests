@@ -27,7 +27,6 @@ export class AnimalsNotificationActions {
     await this.animalsPages.originOfImport.saveAndContinue.click();
     await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
     await this.animalsPages.notificationView.open(referenceNumber);
-    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
   /** Changes the internal reference of an amending notification, saves it and opens the review. */

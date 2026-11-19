@@ -102,7 +102,7 @@ test.describe('Import notification service dashboard', () => {
         await animalsPages.dashboard.copyAsNew(originalReferenceNumber).click();
 
         await animalsPages.overview.heading.waitFor();
-        const copiedReferenceNumber = (await animalsPages.notificationView.referenceNumberCaption.textContent())?.match(
+        const copiedReferenceNumber = (await animalsPages.notificationView.journeyStrip.textContent())?.match(
           REFERENCE_NUMBER_PATTERN,
         )?.[0];
         expect(copiedReferenceNumber).toMatch(WHOLE_REFERENCE_NUMBER_PATTERN);

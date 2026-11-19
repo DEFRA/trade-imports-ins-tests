@@ -47,7 +47,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     await test.step('Draft review with validation errors', async () => {
       await animalsPages.overview.reviewAndSubmitButton.click();
-      await animalsPages.notificationView.viewHeader.reference.waitFor();
+      await animalsPages.notificationView.heading.waitFor();
       await animalsPages.notificationView.continueButton.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
@@ -212,7 +212,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(commercialTransporter);
       await animalsJourney.answerContact();
       await animalsPages.overview.reviewAndSubmitButton.click();
-      await animalsPages.notificationView.viewHeader.reference.waitFor();
+      await animalsPages.notificationView.heading.waitFor();
       await animalsPages.notificationView.continueButton.click();
       await animalsPages.declaration.heading.waitFor();
     });

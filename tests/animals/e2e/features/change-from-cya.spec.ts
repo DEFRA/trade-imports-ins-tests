@@ -63,7 +63,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     const referenceNumber = await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
 
     const purposeValue = animalsPages.notificationView.summaryValue(
-      animalsPages.notificationView.summaryCard('Main import reason'),
+      animalsPages.notificationView.mainImportReasonCard,
       'Purpose in the market',
     );
     await expect(purposeValue).toContainText('Breeding');
@@ -88,7 +88,7 @@ test.describe('Change from check your answers', { tag: '@duplicated-in-frontend'
     test.slow();
     const referenceNumber = await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
     const contactAddressValue = animalsPages.notificationView.summaryValue(
-      animalsPages.notificationView.summaryCard('Contact address'),
+      animalsPages.notificationView.contactAddressCard,
       'Contact address',
     );
     await expect(contactAddressValue).toContainText(CONTACT_ADDRESS_NAME);

@@ -35,7 +35,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       const documentCard = animalsPages.notificationView.documentCard(1);
       await expect(documentCard).toBeVisible();
       await expect(animalsPages.notificationView.summaryValue(documentCard, 'Document reference')).toHaveText('Not applicable');
-      await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
+      await expect(animalsPages.notificationView.originOfImportCard).toContainText('France');
       await expect(animalsPages.notificationView.speciesBlock(commodityLines.cattle)).toContainText('Number of animals');
     });
 
@@ -199,19 +199,17 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await animalsPages.notificationView.btnCopyAsNew.click();
 
       await animalsPages.overview.heading.waitFor();
-      const copiedReferenceNumber = (await animalsPages.notificationView.referenceNumberCaption.textContent())?.match(
-        REFERENCE_NUMBER_PATTERN,
-      )?.[0];
+      const copiedReferenceNumber = (await animalsPages.notificationView.journeyStrip.textContent())?.match(REFERENCE_NUMBER_PATTERN)?.[0];
       expect(copiedReferenceNumber).toMatch(EXACT_REFERENCE_NUMBER_PATTERN);
       expect(copiedReferenceNumber).not.toEqual(originalReferenceNumber);
     });
 
-    test('shows the uploaded health certificate as a card under the uploaded documents heading', async ({ animalsPages }) => {
+    test("shows the uploaded health certificate's type on the Document 1 card", async ({ animalsPages }) => {
       await expect(animalsPages.notificationView.documentCard(1)).toContainText(ITAHC_DOCUMENT_TYPE_LABEL);
     });
 
     test('still renders the recorded answers after submission', async ({ animalsPages }) => {
-      await expect(animalsPages.notificationView.summaryCard('Origin of import')).toContainText('France');
+      await expect(animalsPages.notificationView.originOfImportCard).toContainText('France');
       await expect(animalsPages.notificationView.speciesBlock(commodityLines.cattle)).toBeVisible();
     });
   });
@@ -262,7 +260,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
 
   test.describe('a notification that does not exist', () => {
     test('opening its view shows the standard page not found', async ({ pages, animalsPages }) => {
-      await animalsPages.notificationView.openWithoutWaiting('GBN-AG-00-AAAAAA');
+      await animalsPages.notificationView.open('GBN-AG-00-AAAAAA', { waitForReview: false });
 
       await expectPageNotFound(pages.page);
     });

@@ -153,8 +153,6 @@ export const ALL_ANSWERS: AllAnswers = {
   accompanyingDocument: { ...ITAHC_DOCUMENT, reference: 'DOCREF0001', type: documentTypes.veterinaryHealthCertificate },
 };
 
-export const MANDATORY_ANSWERS_WITH_ITAHC: NotificationAnswers = { ...MANDATORY_ANSWERS, accompanyingDocument: ITAHC_DOCUMENT };
-
 /** Every answer except the accompanying document. The seeded journey uses this set, as its form client cannot upload a file. */
 export const ALL_ANSWERS_WITHOUT_DOCUMENT: AllAnswersWithoutDocument = {
   ...ALL_ANSWERS,

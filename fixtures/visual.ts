@@ -29,7 +29,7 @@ export async function pinDateText(locator: Locator): Promise<void> {
   await pinText(locator, '1 November 2026');
 }
 
-export async function pinViewHeader(viewHeader: ViewHeader): Promise<void> {
+export async function pinDraftViewHeader(viewHeader: ViewHeader): Promise<void> {
   await pinText(viewHeader.reference, 'GBN-AG-26-AAAAAA');
   await pinText(viewHeader.notificationReferenceValue, 'GBN-AG-26-AAAAAA');
   await pinText(viewHeader.dateCreated, 'Date created: 1 January 2026');

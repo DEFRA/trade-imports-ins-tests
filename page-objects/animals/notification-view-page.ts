@@ -1,9 +1,16 @@
-import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
+import {
+  ADDITIONAL_DETAILS_CARD,
+  ARRIVAL_DETAILS_CARD,
+  CONSIGNMENT_ADDRESSES,
+  CONTACT_ADDRESS_CARD,
+  MAIN_IMPORT_REASON_CARD,
+  ORIGIN_OF_IMPORT_CARD,
+} from '@domain/animals/constants/consignment-addresses-page';
 import { type Locator, type Page } from '@playwright/test';
 import { pageLoadWait } from '@config/timeouts';
 import { commodityCardTitle, speciesBlockHeading, type CommodityLine } from '@domain/animals/constants/commodity-lines';
-import { NotificationPage, type OpenOptions } from '@page-objects/shared/base-page';
-import { ViewHeader } from '@page-objects/shared/view-header';
+import { NotificationPage, type OpenViewOptions } from '@page-objects/shared/base-page';
+import { NOTIFICATION_REFERENCE_PATTERN, ViewHeader } from '@page-objects/shared/view-header';
 import { valueOfTerm } from '@page-objects/shared/summary-list';
 
 const SPECIES_BLOCK_SELECTOR = '[id^="species-block-"]';
@@ -19,11 +26,8 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   readonly viewHeader = new ViewHeader(this.page);
 
   get heading(): Locator {
-    return this.page.getByRole('main').getByRole('heading', { level: 1 });
-  }
-
-  get referenceNumberCaption(): Locator {
-    return this.journeyStrip;
+    const reviewHeadings = [NOTIFICATION_REFERENCE_PATTERN, reviewHeadingText, resubmitHeadingText].join('|');
+    return this.page.getByRole('main').getByRole('heading', { level: 1, name: new RegExp(`^(${reviewHeadings})$`) });
   }
 
   get btnCopyAsNew(): Locator {
@@ -52,6 +56,26 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   get addressesCard(): Locator {
     return this.summaryCard(CONSIGNMENT_ADDRESSES);
+  }
+
+  get originOfImportCard(): Locator {
+    return this.summaryCard(ORIGIN_OF_IMPORT_CARD);
+  }
+
+  get mainImportReasonCard(): Locator {
+    return this.summaryCard(MAIN_IMPORT_REASON_CARD);
+  }
+
+  get additionalDetailsCard(): Locator {
+    return this.summaryCard(ADDITIONAL_DETAILS_CARD);
+  }
+
+  get arrivalDetailsCard(): Locator {
+    return this.summaryCard(ARRIVAL_DETAILS_CARD);
+  }
+
+  get contactAddressCard(): Locator {
+    return this.summaryCard(CONTACT_ADDRESS_CARD);
   }
 
   commodityCard(line: CommodityLine): Locator {
@@ -101,7 +125,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
   }
 
   get regionOfOriginCode(): Locator {
-    return this.summaryValue(this.summaryCard('Origin of import'), 'Region of origin code');
+    return this.summaryValue(this.originOfImportCard, 'Region of origin code');
   }
 
   partyRow(card: string, role: string): Locator {
@@ -126,14 +150,10 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.partyRow(card, role).getByRole('definition').first();
   }
 
-  async open(referenceNumber: string, { attemptSignIn = true, ...identity }: OpenOptions = {}): Promise<void> {
+  async open(referenceNumber: string, { attemptSignIn = true, waitForReview = true, ...identity }: OpenViewOptions = {}): Promise<void> {
     await super.open(referenceNumber, { attemptSignIn, ...identity });
-    if (attemptSignIn) {
+    if (attemptSignIn && waitForReview) {
       await this.heading.waitFor(pageLoadWait);
     }
-  }
-
-  async openWithoutWaiting(referenceNumber: string): Promise<void> {
-    await super.open(referenceNumber);
   }
 }

@@ -1,15 +1,14 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 import { valueOfTerm } from '@page-objects/shared/summary-list';
 
-const IMPORT_REFERENCES_WARNING =
-  'You must use the correct reference and code on the customs declaration or your consignment will be delayed.';
+export const NOTIFICATION_REFERENCE_PATTERN = 'GBN-[A-Z]+-\\d{2}-[0-9A-Z]{6}';
 
 /** The header of a notification's view, in every status that has one: reference, statusTag, dateCreated or dateSubmitted, actions and import reference numbers. */
 export class ViewHeader {
   constructor(private readonly page: Page) {}
 
   get reference(): Locator {
-    return this.page.getByRole('main').getByRole('heading', { level: 1, name: /^GBN-[A-Z]+-\d{2}-[0-9A-Z]{6}$/ });
+    return this.page.getByRole('main').getByRole('heading', { level: 1, name: new RegExp(`^${NOTIFICATION_REFERENCE_PATTERN}$`) });
   }
 
   get statusTag(): Locator {
@@ -62,7 +61,9 @@ export async function expectImportReferencesAsText(
   viewHeader: ViewHeader,
   { referenceNumber, customsDocumentCode }: { referenceNumber: string; customsDocumentCode: string },
 ): Promise<void> {
-  await expect(viewHeader.importReferencesWarning).toContainText(IMPORT_REFERENCES_WARNING);
+  const importReferencesWarning =
+    'You must use the correct reference and code on the customs declaration or your consignment will be delayed.';
+  await expect(viewHeader.importReferencesWarning).toContainText(importReferencesWarning);
   await expect(viewHeader.notificationReferenceValue).toHaveText(referenceNumber);
   await expect(viewHeader.importReferenceValue('Customs document code')).toHaveText(customsDocumentCode);
   await expect(viewHeader.importReferences.getByRole('button')).toHaveCount(0);

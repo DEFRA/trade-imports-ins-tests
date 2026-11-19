@@ -32,7 +32,7 @@ test.describe('Amendment page endings', () => {
 
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(reference));
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
-    await expect(animalsPages.notificationView.referenceNumberCaption).toContainText(reference);
+    await expect(animalsPages.notificationView.journeyStrip).toContainText(reference);
     await expect(animalsPages.notificationView.btnCancelAmend).toBeVisible();
   });
 

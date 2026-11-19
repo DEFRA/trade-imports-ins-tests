@@ -154,7 +154,10 @@ test.describe('Copied addresses are edited on the notification', () => {
     await expect(contactRow).not.toContainText('Never Saved Town');
   });
 
-  test('a copied address offers Change and Edit details on the hub and the review', async ({ animalsSeededJourney, animalsPages }) => {
+  test('a copied party offers Change and Edit details on the hub; on the review its Consignment addresses card offers only Change and its Contact address card offers Change and Edit details; the contact page keeps its headings; an unanswered role offers only its add link', async ({
+    animalsSeededJourney,
+    animalsPages,
+  }) => {
     const referenceNumber = await animalsSeededJourney.createDraftNotification();
 
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.addresses);
