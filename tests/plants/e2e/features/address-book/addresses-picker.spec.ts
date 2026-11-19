@@ -1,25 +1,35 @@
+import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, type PlantsJourney } from '@flows/plants/journey';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
+import { addressRoles, heldAsPlaceOfDestination } from '@domain/shared/constants/address-types';
+import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
+import {
+  expectedPickerAddressCellText,
+  expectNothingBetweenSearchAndResults,
+  pickerAddressCellText,
+} from '@page-objects/shared/address-picker-results';
 
 const PICKER_CASES = [
   {
     pageName: 'place of destination',
     pickerKey: 'placeOfDestination',
     errorText: 'Select a place of destination from the list',
+    role: addressRoles.placeOfDestination,
     openPicker: (plantsJourney: PlantsJourney) => plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING),
   },
   {
     pageName: 'consignor',
     pickerKey: 'consignorSelect',
     errorText: 'Select a consignor from the list',
+    role: addressRoles.consignor,
     openPicker: async (plantsJourney: PlantsJourney, api: AddressBookApiClient) =>
       (await plantsJourney.toConsignorOfNewNotification(api, PLANTS_FOR_PLANTING)).reference,
   },
 ] as const;
 
 test.describe('Addresses picker', { tag: '@address-book' }, () => {
-  test('reopening the picker names the record the address was chosen from, and names nothing once the address is edited on the notification', async ({
+  test('reopening the picker shows the chosen address checked, with nothing between the search box and the results heading, and shows nothing checked once the address is edited on the notification', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -29,7 +39,8 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
     const editedName = `Edited Destination ${address.name}`;
 
     await plantsPages.placeOfDestination.open(reference);
-    await expect(plantsPages.placeOfDestination.selectedAddress(address.name)).toBeVisible();
+    await expect(plantsPages.placeOfDestination.address(address.name)).toBeChecked();
+    await expectNothingBetweenSearchAndResults(plantsPages.placeOfDestination.resultsHeading);
     await expect(plantsPages.placeOfDestination.currentAddress).toContainText(address.name);
 
     await plantsPages.placeOfDestination.editCurrentAddress.click();
@@ -38,13 +49,36 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
 
     await expect(pages.page).toHaveURL(plantsPages.placeOfDestination.expectedUrlPattern(reference));
     await expect(plantsPages.placeOfDestination.currentAddress).toContainText(editedName);
-    await expect(plantsPages.placeOfDestination.selectedAddressInset).toHaveCount(0);
+    await expect(plantsPages.placeOfDestination.checkedAddress).toHaveCount(0);
 
     await plantsPages.placeOfDestination.open(reference);
-    await expect(plantsPages.placeOfDestination.selectedAddressInset).toHaveCount(0);
+    await expect(plantsPages.placeOfDestination.checkedAddress).toHaveCount(0);
   });
 
-  for (const { pageName, pickerKey, errorText, openPicker } of PICKER_CASES) {
+  test('place of destination: a record with two street lines and a county shows each street line on its own line, then its town, county and postcode on one line, and its "View details" disclosure opens in place and holds exactly that record\'s telephone number and email address', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const record = await addressBookApi.createAddress({
+      ...addressWithLineTwoAndCounty(`Picker County Nursery ${randomUUID()}`),
+      ...heldAsPlaceOfDestination,
+    });
+    await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
+
+    await plantsPages.placeOfDestination.searchFor(record.name);
+
+    await expect.poll(() => pickerAddressCellText(pages.page, record.name)).toBe(expectedPickerAddressCellText(record));
+
+    const urlBeforeOpening = pages.page.url();
+    await plantsPages.placeOfDestination.addressDetailsToggle(record.name).click();
+
+    expect(pages.page.url()).toBe(urlBeforeOpening);
+    await expect(plantsPages.placeOfDestination.addressDetailsLines(record.name)).toHaveText([record.phone, record.email]);
+  });
+
+  for (const { pageName, pickerKey, errorText, role, openPicker } of PICKER_CASES) {
     test(`${pageName}: an address deleted after it was ticked is refused the same way on Save and return to overview and on Save and continue`, async ({
       pages,
       plantsPages,
@@ -55,7 +89,7 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
       const reference = await openPicker(plantsJourney, addressBookApi);
 
       for (const save of [picker.saveAndReturnToOverview, picker.saveAndContinue]) {
-        const { searchTerm } = await plantsJourney.createSearchTickThenDeleteAddress(addressBookApi, picker);
+        const { searchTerm } = await plantsJourney.createSearchTickThenDeleteAddress(addressBookApi, picker, role);
         await save.click();
 
         await expect(pages.page).toHaveURL(picker.expectedUrlPattern(reference));

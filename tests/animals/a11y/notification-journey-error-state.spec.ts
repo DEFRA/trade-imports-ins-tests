@@ -140,6 +140,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('CPH number with validation errors', async () => {
+      await animalsPages.cphNumber.county.fill('1');
       await animalsPages.cphNumber.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();

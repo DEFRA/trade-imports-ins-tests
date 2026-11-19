@@ -49,7 +49,8 @@ BrowserStack runs the `@cross-browser` tests on its own browsers, one run per `p
 
 - Put `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY` in `.env`.
 - Start the docker-compose stack, then run `npm run test:docker-compose:browserstack` (or `test:docker-compose:<domain>:browserstack`).
-- On CDP, run the `browserstack` or `<domain>:browserstack` profile. BrowserStack reaches CDP directly, so BrowserStack Local is off.
-- BrowserStack Local carries the stack's `localhost` URLs to the remote browser. Safari, WebKit and Android browsers cannot open `localhost` through it.
+- On CDP, run the `browserstack` or `<domain>:browserstack` profile.
+- BrowserStack Local is always on. It carries the docker-compose stack's `localhost` URLs, and CDP's hostnames, which resolve only inside the platform, to the remote browser.
+- Safari, WebKit and Android browsers cannot open `localhost` through BrowserStack Local, so they cannot run against the docker-compose stack.
 - When a proxy is set (`HTTP_PROXY`, as on CDP), the SDK writes `require("global-agent")` into its generated Playwright config, which fails in an ES module project. `bin/browserstack-global-require.mjs` defines a global `require` for it, and `bin/run-browserstack.ts` preloads that file into the SDK and its workers.
 - Builds are named `local`, `github` or `cdp-<ENVIRONMENT>`, with a UTC time or the run id as the identifier, under the project `trade-imports-ins-tests`.

@@ -6,6 +6,7 @@ import type { CommercialTransporterDetails } from '@page-objects/ins/address-boo
 import { addressTypes, type AddressType, type AddressRole, type AddressTypeAskingRoles } from '@domain/shared/constants/address-types';
 import { rolesQuestionOptions, type AddressBookTab } from '@domain/ins/constants/address-book-types';
 import { transporterTypes, type TransporterType } from '@domain/ins/constants/transporter-types';
+import type { JourneyHandshake } from '@domain/ins/constants/address-book-journey';
 
 type AddressFormOptions = OpenOptions & { addressType?: AddressTypeAskingRoles };
 
@@ -19,6 +20,12 @@ export class InsJourney {
   async toAddressType(options: OpenOptions = {}): Promise<void> {
     await this.insPages.addressBookAddressType.open(options);
     await this.insPages.addressBookAddressType.heading.waitFor();
+  }
+
+  /** Opens the add page from a journey handshake and waits for it. */
+  async toAddressFormFromJourneyHandshake(handshake: JourneyHandshake, options: OpenOptions = {}): Promise<void> {
+    await this.insPages.addressBookAdd.open({ ...options, query: handshake });
+    await this.insPages.addressBookAdd.heading.waitFor();
   }
 
   /** Opens the address type page through the address book list's 'Add a new address' button. */

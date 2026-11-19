@@ -102,7 +102,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
   );
 
   test(
-    "a later picker page's View link, opened while changing an answer, Backs to that page with the chosen address still selected and the trail kept, and saving returns to the roles and addresses page carrying the trail from the review",
+    "the picker's View link, opened while changing an answer, Backs to the same list with the chosen address still checked and the trail kept, and saving returns to the roles and addresses page carrying the trail from the review",
     { tag: '@address-book' },
     async ({ pages, animalsSeededJourney, animalsPages, insPages, addressBookApi }) => {
       test.slow();
@@ -111,20 +111,14 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       const chosenName = `Changed Consignor ${stamp}`;
       const chosenRecord = traderAddress(chosenName);
       await addressBookApi.createAddress({ ...chosenRecord, ...heldAsConsignor });
-      for (let i = 0; i < 5; i += 1) {
-        await addressBookApi.createAddress({ ...traderAddress(`Newer Consignor ${stamp} ${i}`), ...heldAsConsignor });
-      }
       const referenceNumber = await animalsSeededJourney.createDraftNotification();
       await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
       await animalsPages.notificationView.changeLink('Change roles and addresses').click();
       await animalsPages.addresses.changeParty('Consignor').click();
       const picker = animalsPages.consignorSelection;
-      await picker.select(chosenName);
-      await picker.search('');
+      await picker.selectAndCommit(chosenName);
       const chosenRow = picker.party(chosenName);
-      await picker.followNextPageUntilShown(chosenRow);
-      await expect(picker.currentPaginationPageLink).not.toHaveText('1');
-      const laterPageUrl = new URL(pages.page.url());
+      const pickerUrl = new URL(pages.page.url());
 
       await picker.partyViewLink(chosenName).click();
       await insPages.addressBookView.completeSignInIfRequested();
@@ -133,14 +127,12 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
 
       await expect(pages.page).toHaveURL(
         (url) =>
-          url.origin === laterPageUrl.origin &&
-          url.pathname === laterPageUrl.pathname &&
-          url.searchParams.get('page') === laterPageUrl.searchParams.get('page') &&
-          url.searchParams.get('from') === laterPageUrl.searchParams.get('from'),
+          url.origin === pickerUrl.origin &&
+          url.pathname === pickerUrl.pathname &&
+          url.searchParams.get('q') === chosenName &&
+          url.searchParams.get('from') === pickerUrl.searchParams.get('from'),
       );
-      await expect(picker.currentPaginationPageLink).toHaveText(laterPageUrl.searchParams.get('page') ?? '');
       await expect(chosenRow).toBeChecked();
-      await expect(picker.selectedAddress).toHaveText(`Selected address: ${chosenName}`);
 
       await picker.saveAndContinue.click();
 

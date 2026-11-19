@@ -30,10 +30,11 @@ test.describe('High-risk plants consignment parties section', () => {
       plantsJourney,
       addressBookApi,
     }) => {
-      const { reference, addressName: name } = await plantsJourney.toConsignorOfNewNotification(addressBookApi, type);
+      const { reference, addressName: name, destinationName } = await plantsJourney.toConsignorOfNewNotification(addressBookApi, type);
       const consignor = plantsPages.consignorSelect;
       const numbers = plantsPages.identificationNumbers;
 
+      await expect(consignor.address(destinationName)).toHaveCount(0);
       await consignor.searchFor(name);
       await consignor.address(name).check();
       await consignor.saveAndContinue.click();
@@ -56,7 +57,7 @@ test.describe('High-risk plants consignment parties section', () => {
       await expect(plantsPages.overview.taskRow(CONSIGNOR)).toContainText('Completed');
       await expect(plantsPages.overview.taskRow(NUMBERS)).toContainText(type === WOOD_AND_CUT_TREES ? 'Optional' : 'Completed');
       await consignor.open(reference);
-      await expect(consignor.selectedAddress(name)).toBeVisible();
+      await expect(consignor.address(name)).toBeChecked();
       await numbers.open(reference);
       if (type === PLANTS_FOR_PLANTING) await expect(numbers.supplier).toHaveValue('GB-12345');
       await numbers.consignment.fill('SHIP_2027_001');
@@ -82,10 +83,7 @@ test.describe('High-risk plants consignment parties section', () => {
     plantsJourney,
     addressBookApi,
   }) => {
-    const name = `Overview Nursery ${randomUUID()}`;
-    await addressBookApi.createAddress(nurseryAddress(name));
-    const reference = await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
-    await plantsJourney.chooseDestination(name);
+    const { reference, addressName: name } = await plantsJourney.toConsignorOfNewNotification(addressBookApi, PLANTS_FOR_PLANTING);
     const consignor = plantsPages.consignorSelect;
 
     await consignor.searchFor(name);
@@ -145,15 +143,8 @@ test.describe('High-risk plants consignment parties section', () => {
     plantsJourney,
     addressBookApi,
   }) => {
-    const name = `Numbers Nursery ${randomUUID()}`;
-    await addressBookApi.createAddress(nurseryAddress(name));
-    const reference = await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
-    await plantsJourney.chooseDestination(name);
-    const consignor = plantsPages.consignorSelect;
+    const { reference } = await plantsJourney.toIdentificationNumbersViaConsignor(addressBookApi, PLANTS_FOR_PLANTING);
     const numbers = plantsPages.identificationNumbers;
-    await consignor.searchFor(name);
-    await consignor.address(name).check();
-    await consignor.saveAndContinue.click();
     await expect(pages.page).toHaveURL(numbers.expectedUrlPattern(reference));
     await numbers.saveAndContinue.click();
     await expect(numbers.errorSummary).toContainText('Enter the identification number of the supplier');
@@ -184,15 +175,9 @@ test.describe('High-risk plants consignment parties section', () => {
     plantsJourney,
     addressBookApi,
   }) => {
-    const name = `Scope Nursery ${randomUUID()}`;
-    await addressBookApi.createAddress(nurseryAddress(name));
-    const reference = await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
-    await plantsJourney.chooseDestination(name);
+    const { reference, addressName: name } = await plantsJourney.toIdentificationNumbersViaConsignor(addressBookApi, PLANTS_FOR_PLANTING);
     const consignor = plantsPages.consignorSelect;
     const numbers = plantsPages.identificationNumbers;
-    await consignor.searchFor(name);
-    await consignor.address(name).check();
-    await consignor.saveAndContinue.click();
     await numbers.supplier.fill('GB-12345');
     await numbers.consignment.fill('SHIP_2027');
     await numbers.saveAndContinue.click();
@@ -220,7 +205,6 @@ test.describe('High-risk plants consignment parties section', () => {
     await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRow(CONSIGNOR)).toContainText('Not yet started');
     await consignor.open(reference);
-    await expect(consignor.selectedAddress(name)).toHaveCount(0);
     await consignor.searchFor(name);
     await expect(consignor.address(name)).not.toBeChecked();
 

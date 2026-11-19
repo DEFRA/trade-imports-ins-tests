@@ -2,7 +2,7 @@ import type { AnimalsPages } from '@page-objects';
 import type { AnimalsSeededJourney } from '@flows/animals/seeded-journey';
 import { test, expect } from '@fixtures';
 import { expectOpenFromReview, expectSaveAndContinueWalk, expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
-import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { CAT_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 
 const ARRIVAL_DETAILS_TASK = 'Arrival details';
 const CHANGE_IMPORT_DETAILS = 'Change import details';
@@ -143,8 +143,49 @@ test.describe('Amendment page endings', () => {
     await expect(animalsPages.cphNumber.saveAndReturnToOverview).toHaveCount(0);
 
     await animalsPages.contactAddress.open(reference);
-    await expect(animalsPages.contactAddress.formButtons).toHaveText(['Save and continue', 'Save and return to overview']);
-    await expect(animalsPages.contactAddress.cancelAndReturnToOverview).toBeVisible();
+    await expect(animalsPages.contactAddress.formButtons).toHaveText(['Save and continue', 'Save and return to hub']);
+    await expect(animalsPages.contactAddress.cancelAndReturnToHub).toBeVisible();
+  });
+
+  test('while amending, the permanent address page ends with Save and continue alone', async ({ animalsPages, animalsSeededJourney }) => {
+    const reference = await animalsSeededJourney.createAmendNotification(CAT_ANSWERS);
+
+    await animalsPages.permanentAddress.open(reference);
+
+    await expect(animalsPages.permanentAddress.formButtons).toHaveText(['Save and continue']);
+    await expect(animalsPages.permanentAddress.saveAndReturnToOverview).toHaveCount(0);
+  });
+
+  test('while amending, the Amend bar’s Cancel amend opens the cancel amendment confirmation page from the CPH number page and the contact address page', async ({
+    pages,
+    animalsPages,
+    animalsSeededJourney,
+  }) => {
+    const reference = await animalsSeededJourney.createAmendNotification();
+
+    await animalsPages.cphNumber.open(reference);
+    await animalsPages.cphNumber.cancelAmend.click();
+    await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(reference));
+    await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
+
+    await animalsPages.contactAddress.open(reference);
+    await animalsPages.contactAddress.cancelAmend.click();
+    await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(reference));
+    await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
+  });
+
+  test('while amending, the Amend bar’s Cancel amend opens the cancel amendment confirmation page from the permanent address page', async ({
+    pages,
+    animalsPages,
+    animalsSeededJourney,
+  }) => {
+    const reference = await animalsSeededJourney.createAmendNotification(CAT_ANSWERS);
+
+    await animalsPages.permanentAddress.open(reference);
+    await animalsPages.permanentAddress.cancelAmend.click();
+
+    await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(reference));
+    await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
   });
 
   test('Continue on an amend review with an answer missing stays on the review and shows There is a problem, naming what is missing', async ({

@@ -272,6 +272,10 @@ export class NotificationPage extends BasePage {
     return this.page.getByRole('button', { name: 'Save and continue', exact: true });
   }
 
+  get mainHeadings(): Locator {
+    return this.page.getByRole('main').getByRole('heading');
+  }
+
   get buttonGroup(): Locator {
     return this.page.locator('.govuk-button-group');
   }
@@ -294,6 +298,14 @@ export class NotificationPage extends BasePage {
 
   get saveAndReturnToOverview(): Locator {
     return this.page.getByRole('button', { name: 'Save and return to overview', exact: true });
+  }
+
+  get cancelAndReturnToHub(): Locator {
+    return this.page.getByRole('link', { name: 'Cancel and return to hub', exact: true });
+  }
+
+  get saveAndReturnToHub(): Locator {
+    return this.page.getByRole('button', { name: 'Save and return to hub', exact: true });
   }
 
   expectedUrl(referenceNumber: string): string {
