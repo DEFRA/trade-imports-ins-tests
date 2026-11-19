@@ -82,7 +82,7 @@
     "allure-commandline": "2.46.1",
     "allure-playwright": "3.13.0",
     "audit-ci": "7.1.0",
-    "browserstack-node-sdk": "1.80.0",
+    "browserstack-node-sdk": "1.80.1",
     "dotenv": "18.0.5",
     "eslint": "10.12.0",
     "husky": "9.1.7",
