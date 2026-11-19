@@ -523,7 +523,7 @@ suite with its domain name as `<domain>:<suite>`:
 `plants:a11y` today) fails with Playwright's "No tests found".
 
 Calls that leave CDP for the internet go through the CDP proxy
-(`localhost:3128`), which the `externalRequest` fixture uses. Journey and
+(`HTTP_PROXY`), which the `externalRequest` fixture uses. Journey and
 service calls stay direct.
 
 ### Dynamics checks
