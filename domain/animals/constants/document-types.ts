@@ -7,8 +7,10 @@ export type DocumentType = (typeof documentTypes)[keyof typeof documentTypes];
 
 export const DOCUMENT_TYPE_SELECT_TEXT = 'Select one';
 
+export const ITAHC_DOCUMENT_TYPE_LABEL = 'ITAHC (Intra Trade Animal Health Certificate)';
+
 export const OFFERED_DOCUMENT_TYPE_LABELS = [
-  'ITAHC (Intra Trade Animal Health Certificate)',
+  ITAHC_DOCUMENT_TYPE_LABEL,
   'Other veterinary certificate / veterinary declaration',
   'Self-declaration',
   'Journey log',

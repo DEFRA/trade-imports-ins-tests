@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { CAT_ANSWERS, MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 import { MANDATORY_COMMODITY_LINES } from '@domain/animals/constants/journey-commodity-line-answers';
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
@@ -10,7 +11,7 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
     animalsJourney,
     animalsPages,
   }) => {
-    await animalsJourney.toRolesAndAddresses(CAT_ANSWERS, () => animalsJourney.answerAnimalIdentification(CAT_ANSWERS));
+    await animalsJourney.toConsignmentAddresses(CAT_ANSWERS, () => animalsJourney.answerAnimalIdentification(CAT_ANSWERS));
 
     await expect(animalsPages.addresses.permanentAddressSection).toBeVisible();
     await expect(animalsPages.addresses.addPermanentAddress).toBeVisible();
@@ -44,6 +45,7 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
   });
 
   test('A cat consignment submits once its permanent address is answered', async ({ animalsJourney, animalsPages }) => {
+    test.slow();
     await animalsJourney.submitNotification(CAT_ANSWERS);
 
     await expect(animalsPages.confirmation.heading).toBeVisible();
@@ -53,7 +55,7 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
     animalsJourney,
     animalsPages,
   }) => {
-    await animalsJourney.toRolesAndAddresses();
+    await animalsJourney.toConsignmentAddresses();
 
     await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(animalsPages.addresses.permanentAddressSection).toHaveCount(0);
@@ -99,7 +101,7 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
     const answers: NotificationAnswers = { ...MANDATORY_ANSWERS, commodityLines: [catLine] };
     const catCard = animalsPages.animalIdentification.speciesCard(commodityLines.domesticCat);
 
-    await animalsJourney.toRolesAndAddresses(answers, async () => {
+    await animalsJourney.toConsignmentAddresses(answers, async () => {
       await animalsPages.overview.task('Identification details').click();
       await animalsJourney.saveAnimalIdentifiers(catCard, catLine);
       await animalsPages.animalIdentification.saveAndReturnToOverview.click();
@@ -115,7 +117,7 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
     await animalsPages.animalIdentification.saveAndReturnToOverview.click();
     await expect(animalsPages.overview.heading).toBeVisible();
 
-    await animalsPages.overview.task('Roles and addresses').click();
+    await animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await animalsJourney.openPermanentAddress();
 

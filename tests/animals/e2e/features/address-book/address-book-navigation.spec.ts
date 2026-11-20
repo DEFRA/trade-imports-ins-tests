@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES_CHANGE_LINK } from '@domain/animals/constants/consignment-addresses-page';
 import { test, expect } from '@fixtures';
 import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { originOf } from '@page-objects/shared/base-page';
@@ -102,7 +103,7 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
   );
 
   test(
-    "the picker's View link, opened while changing an answer, Backs to the same list with the chosen address still checked and the trail kept, and saving returns to the roles and addresses page carrying the trail from the review",
+    "the picker's View link, opened while changing an answer, Backs to the same list with the chosen address still checked and the trail kept, and saving returns to the consignment addresses page carrying the trail from the review",
     { tag: '@address-book' },
     async ({ pages, animalsSeededJourney, animalsPages, insPages, addressBookApi }) => {
       test.slow();
@@ -111,9 +112,8 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
       const chosenName = `Changed Consignor ${stamp}`;
       const chosenRecord = traderAddress(chosenName);
       await addressBookApi.createAddress({ ...chosenRecord, ...heldAsConsignor });
-      const referenceNumber = await animalsSeededJourney.createDraftNotification();
-      await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
-      await animalsPages.notificationView.changeLink('Change roles and addresses').click();
+      const referenceNumber = await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
+      await animalsPages.notificationView.changeLink(CONSIGNMENT_ADDRESSES_CHANGE_LINK).click();
       await animalsPages.addresses.changeParty('Consignor').click();
       const picker = animalsPages.consignorSelection;
       await picker.selectAndCommit(chosenName);

@@ -53,7 +53,7 @@ test.describe('Contact address page', { tag: '@duplicated-in-frontend' }, () => 
     await animalsPages.contactAddress.address(branchAddressFixture.name).check();
     await animalsPages.contactAddress.saveAndContinue.click();
 
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
   });
 
   test('a contact address saved by the secondary control is still chosen on return, with the page headings still exactly the two', async ({
@@ -208,8 +208,6 @@ test.describe('Contact address page — branch addresses', { tag: '@address-book
     await animalsPages.overview.open(referenceNumber);
     await expect(animalsPages.overview.taskStatus('Contact address for this consignment')).toHaveText('Complete');
     await animalsPages.notificationView.open(referenceNumber);
-    await expect(animalsPages.notificationView.partyRow('Contact address for this consignment', 'Contact address')).toContainText(
-      branchName,
-    );
+    await expect(animalsPages.notificationView.partyRow('Contact address', 'Contact address')).toContainText(branchName);
   });
 });

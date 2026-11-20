@@ -1,13 +1,5 @@
 import type { PersistedFulfilmentEntry } from '@domain/animals/models/api/notification-fulfilments';
-
-export const notificationStatuses = {
-  draft: 'DRAFT',
-  submitted: 'SUBMITTED',
-  amend: 'AMEND',
-  deleted: 'DELETED',
-} as const;
-
-export type NotificationStatus = (typeof notificationStatuses)[keyof typeof notificationStatuses];
+import type { NotificationStatus } from '@domain/animals/models/api/notification-status';
 
 /** A Standard Address Block on the wire. */
 export type PartyAddress = {

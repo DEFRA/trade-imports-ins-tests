@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES_CHANGE_LINK } from '@domain/animals/constants/consignment-addresses-page';
 import type { Locator } from '@playwright/test';
 import type { AnimalsPages } from '@page-objects';
 import type { PartyRole as AddressesPartyRole } from '@page-objects/animals/addresses-page';
@@ -12,9 +13,10 @@ import {
   type PartyIds,
   type PartyNames,
   type PartyRole,
+  type SeedOptions,
   type SeedStep,
 } from '@flows/animals/seed-form-steps';
-import { MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
+import { ITAHC_DOCUMENT, MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { OPTIONAL_RETURN_AND_TRAIL_PATTERN } from '@page-objects/shared/base-page';
@@ -49,9 +51,13 @@ export class AnimalsSeededJourney {
     return this.remember(referenceNumber);
   }
 
-  async createDraftNotification(stage: DraftStage = 'ready', answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
+  async createDraftNotification(
+    stage: DraftStage = 'ready',
+    answers: NotificationAnswers = MANDATORY_ANSWERS,
+    seedOptions: SeedOptions = {},
+  ): Promise<string> {
     const referenceNumber = await this.createEmptyNotification();
-    for (const step of await seedSteps((names) => this.partyIds(names), stage, answers)) {
+    for (const step of await seedSteps((names) => this.partyIds(names), stage, answers, seedOptions)) {
       await this.postSeedStep(`${CREATE_PATH}/${referenceNumber}/${step.slug}`, step);
     }
     return referenceNumber;
@@ -67,16 +73,43 @@ export class AnimalsSeededJourney {
 
   async createSubmittedNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
     const referenceNumber = await this.createDraftNotification('ready', answers);
-    const declarationPath = `${CREATE_PATH}/${referenceNumber}/${declarationStep.slug}`;
+    await this.declare(referenceNumber);
+    return referenceNumber;
+  }
+
+  async createSubmittedWithItahcUploadedInUi(
+    animalsPages: AnimalsPages,
+    answers: NotificationAnswers = MANDATORY_ANSWERS,
+  ): Promise<string> {
+    const referenceNumber = await this.createDraftNotification('ready', answers);
+    await this.resumeInUi(referenceNumber, animalsPages.accompanyingDocuments);
+    await animalsPages.accompanyingDocuments.uploadDocumentAndWaitForScan(ITAHC_DOCUMENT);
+    await this.declare(referenceNumber);
+    return referenceNumber;
+  }
+
+  async postDeclarationOfUnfinishedDraft(referenceNumber: string): Promise<void> {
+    await this.forms.postForm(
+      `${CREATE_PATH}/${referenceNumber}/${declarationStep.slug}`,
+      { ...declarationStep.declare, concurrencyToken: await this.reviewConcurrencyToken(referenceNumber) },
+      { redirectsTo: /\/notification-view\?refused=1$/ },
+    );
+  }
+
+  private async reviewConcurrencyToken(referenceNumber: string): Promise<string> {
     const review = await this.forms.getPageHtml(`${CREATE_PATH}/${referenceNumber}/${declarationStep.reviewSlug}`);
-    const concurrencyToken = concurrencyTokenIn(review, declarationStep.reviewSlug);
+    return concurrencyTokenIn(review, declarationStep.reviewSlug);
+  }
+
+  private async declare(referenceNumber: string): Promise<void> {
+    const declarationPath = `${CREATE_PATH}/${referenceNumber}/${declarationStep.slug}`;
+    const concurrencyToken = await this.reviewConcurrencyToken(referenceNumber);
     const declaration = await this.forms.postFormReturningHtml(declarationPath, { ...declarationStep.review, concurrencyToken });
     await this.forms.postForm(
       declarationPath,
       { ...declarationStep.declare, concurrencyToken: concurrencyTokenIn(declaration, declarationStep.slug) },
       { redirectsTo: /\/confirmation$/ },
     );
-    return referenceNumber;
   }
 
   async createAmendNotification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<string> {
@@ -110,6 +143,12 @@ export class AnimalsSeededJourney {
     return targetPage;
   }
 
+  async createDraftAtReviewInUi(animalsPages: AnimalsPages): Promise<string> {
+    const referenceNumber = await this.createDraftNotification();
+    await this.resumeInUi(referenceNumber, animalsPages.notificationView);
+    return referenceNumber;
+  }
+
   async createDraftWithConsignorChosenInUi(animalsPages: AnimalsPages, consignorName: string): Promise<string> {
     const referenceNumber = await this.createDraftNotification();
     await this.resumeInUi(referenceNumber, animalsPages.addresses);
@@ -118,15 +157,14 @@ export class AnimalsSeededJourney {
   }
 
   async createSubmittedWithPlaceOfOriginChosenInUi(animalsPages: AnimalsPages, placeOfOriginName: string): Promise<string> {
-    const referenceNumber = await this.createDraftNotification();
-    await this.resumeInUi(referenceNumber, animalsPages.notificationView);
-    await animalsPages.notificationView.changeLink('Change roles and addresses').click();
+    const referenceNumber = await this.createDraftAtReviewInUi(animalsPages);
+    await animalsPages.notificationView.changeLink(CONSIGNMENT_ADDRESSES_CHANGE_LINK).click();
     await animalsPages.addresses.heading.waitFor(pageLoadWait);
     await this.choosePartyInUi(animalsPages, 'Place of origin', animalsPages.placeOfOriginSelection, placeOfOriginName);
     await animalsPages.addresses.continueButton.click();
     await animalsPages.contactAddress.heading.waitFor(pageLoadWait);
     await animalsPages.contactAddress.saveAndContinue.click();
-    await animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await animalsPages.notificationView.viewHeader.reference.waitFor(pageLoadWait);
     await animalsPages.notificationView.continueButton.click();
     await animalsPages.declaration.heading.waitFor(pageLoadWait);
     await animalsPages.declaration.confirmation.check();

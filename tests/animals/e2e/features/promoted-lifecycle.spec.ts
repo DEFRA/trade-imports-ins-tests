@@ -1,9 +1,9 @@
 import { test, expect } from '@fixtures';
-import { notificationFulfilmentsStatuses } from '@domain/animals/models/api/notification-fulfilments';
-import { notificationStatuses } from '@domain/animals/models/api/notification';
+import { reviewHeadingText } from '@page-objects/animals/notification-view-page';
+import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 
 test.describe('Notification lifecycle', { tag: '@compose' }, () => {
-  test('creates, submits, amends, cancels, copies and soft-deletes a notification; fulfilment view reflects each transition; each copy gets its own reference number', async ({
+  test('records a notification submitted without an ITAHC as Submitted through amend and cancel, then copies it into distinct drafts and soft-deletes it', async ({
     notificationApi,
     journeyContext,
   }) => {
@@ -14,18 +14,18 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
 
     const initial = await notificationApi.getNotificationFulfilments(id);
     expect(initial.referenceNumber).toBe(id);
-    expect(initial.status).toBe(notificationFulfilmentsStatuses.draft);
+    expect(initial.status).toBe(notificationStatuses.draft);
     expect(initial.fulfilments).toEqual([]);
 
     const submitted = await notificationApi.submitNotification(id, notification.concurrencyToken);
     expect(submitted.status).toBe(notificationStatuses.submitted);
     const submittedFulfilments = await notificationApi.getNotificationFulfilments(id);
-    expect(submittedFulfilments.status).toBe(notificationFulfilmentsStatuses.submitted);
+    expect(submittedFulfilments.status).toBe(notificationStatuses.submitted);
 
     const amended = await notificationApi.amendNotification(id);
     expect(amended.status).toBe(notificationStatuses.amend);
     const amendedFulfilments = await notificationApi.getNotificationFulfilments(id);
-    expect(amendedFulfilments.status).toBe(notificationFulfilmentsStatuses.amend);
+    expect(amendedFulfilments.status).toBe(notificationStatuses.amend);
 
     const cancelled = await notificationApi.cancelAmendNotification(id);
     expect(cancelled.status).toBe(notificationStatuses.submitted);
@@ -56,11 +56,11 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await animalsJourney.submitNotification();
     await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
 
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.viewHeader.reference).toHaveText(journeyContext.referenceNumber);
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.heading).toHaveText(reviewHeadingText);
     await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
   });
 
@@ -75,7 +75,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await animalsPages.dashboard.open();
     await animalsPages.dashboard.searchForReference(journeyContext.referenceNumber);
     await animalsPages.dashboard.view(journeyContext.referenceNumber).click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.reference).toHaveText(journeyContext.referenceNumber);
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.dashboard.heading).toBeVisible();
   });
@@ -90,7 +90,7 @@ test.describe('Notification lifecycle', { tag: '@compose' }, () => {
     await animalsJourney.submitNotification();
 
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.heading).toHaveText(reviewHeadingText);
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.dashboard.heading).toBeVisible();
   });

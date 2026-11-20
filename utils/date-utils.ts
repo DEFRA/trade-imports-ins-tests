@@ -182,3 +182,8 @@ export function toShortDisplayDate(input: DateInput): string {
 export function todayOrTomorrowServiceDisplayDatePattern(): string {
   return `(${getRelativeServiceDisplayDate()}|${getRelativeServiceDisplayDate(1)})`;
 }
+
+/** A regular-expression group matching today's or yesterday's service display date. */
+export function todayOrYesterdayServiceDisplayDatePattern(): string {
+  return `(${getRelativeServiceDisplayDate()}|${getRelativeServiceDisplayDate(-1)})`;
+}

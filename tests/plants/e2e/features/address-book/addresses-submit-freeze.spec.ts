@@ -23,7 +23,7 @@ test.describe('Submitted addresses keep their copy', () => {
     await addressBookApi.updateAddress(address.id, movedAddress);
 
     await plantsNotificationActions.toNotificationView(reference);
-    await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');
+    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted');
     await expect(destination).toContainText(address.name);
     await expect(destination).toContainText(address.townOrCity);
     await expect(destination).not.toContainText(renamed);
@@ -39,7 +39,7 @@ test.describe('Submitted addresses keep their copy', () => {
 
     await plantsNotificationActions.cancelAmend(reference);
     await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
-    await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');
+    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted');
     await expect(destination).toContainText(address.name);
     await expect(destination).toContainText(address.townOrCity);
     await expect(destination).not.toContainText(renamed);
@@ -62,7 +62,7 @@ test.describe('Submitted addresses keep their copy', () => {
     await addressBookApi.deleteAddress(address.id);
 
     await plantsNotificationActions.toNotificationView(reference);
-    await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');
+    await expect(plantsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted');
     await expect(destination).toContainText(address.name);
     await expect(destination).toContainText(address.townOrCity);
     await expect(plantsPages.notificationView.errorSummary).toHaveCount(0);

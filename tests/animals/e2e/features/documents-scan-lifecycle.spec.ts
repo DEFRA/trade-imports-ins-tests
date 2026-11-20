@@ -15,15 +15,17 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     animalsPages,
   }) => {
     test.slow();
-    const eicar = eicarPdfUpload();
-    const infectedFileError = pages.page.getByText(`${eicar.name} cannot be used. Remove it and try again with a different file.`).first();
+    const infectedFileError = pages.page
+      .getByText(`${eicarPdfUpload().name} cannot be used. Remove it and try again with a different file.`)
+      .first();
 
-    const reference = `PWVIRUS${Date.now()}`;
-    await animalsPages.accompanyingDocuments.fillDocument(reference, DOCUMENT_ISSUE_DATE, eicar);
-    await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
+    await animalsPages.accompanyingDocuments.uploadInfectedDocumentAndWaitForVirusFound(async (row) => {
+      const { pending, text } = await firstScanStatus(row, 'Virus found');
+      if (pending) {
+        expect(text).not.toContain('View file');
+      }
+    });
 
-    const row = animalsPages.accompanyingDocuments.documentRow(reference);
-    await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(infectedFileError).toBeVisible();
     await expect(animalsPages.accompanyingDocuments.viewFile(1)).toHaveCount(0);
@@ -34,6 +36,25 @@ test.describe('Documents scan lifecycle', { tag: '@duplicated-in-frontend' }, ()
     await animalsPages.accompanyingDocuments.removeDocument(1).click();
     await animalsPages.accompanyingDocuments.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
+  });
+
+  test('infected upload: the review marks the Document 1 card as rejected and links the error summary to it', async ({
+    animalsPages,
+    animalsNotificationActions,
+    journeyContext,
+  }) => {
+    test.slow();
+    await animalsPages.accompanyingDocuments.uploadInfectedDocumentAndWaitForVirusFound();
+
+    await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
+
+    const rejectedMessage = 'One or more of your documents were rejected. Return to Documents to remove and re-upload.';
+    const documentCard = animalsPages.notificationView.documentCard(1);
+    await expect(documentCard).toContainText(rejectedMessage);
+    await expect(animalsPages.notificationView.errorSummaryLink(rejectedMessage)).toHaveAttribute(
+      'href',
+      `#${await documentCard.getAttribute('id')}`,
+    );
   });
 
   test('clean upload: Save and return to overview reaches the overview, and the row settles to Check completed with a view link on reopening', async ({

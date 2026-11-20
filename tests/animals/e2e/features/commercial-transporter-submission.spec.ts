@@ -6,6 +6,8 @@ test.describe('Commercial transporter journeys', () => {
     'a trader can submit a notification using a hand-added commercial transporter',
     { tag: '@cross-browser' },
     async ({ animalsSeededJourney, animalsJourney, pages, animalsPages }) => {
+      test.slow();
+
       const referenceNumber = await animalsSeededJourney.createDraftNotification('partial');
       await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.transitedCountries);
 

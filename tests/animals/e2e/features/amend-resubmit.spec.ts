@@ -1,15 +1,7 @@
+import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { test, expect } from '@fixtures';
+import { reviewHeadingText } from '@page-objects/animals/notification-view-page';
 
-/**
- * Amend resubmission through the UI. A submitted notification is amended from
- * the dashboard, one answer is changed through the UI, and
- * the amendment is resubmitted through check your answers + declaration —
- * returning the notification to Submitted with the edited value kept.
- *
- * The notification is submitted through the full UI journey (not API-seeded):
- * the declaration resubmit is gated on every task row being fulfilled, and
- * the API seed answers only the origin and commodity sections.
- */
 test.describe('Amend resubmission', () => {
   test('resubmits an amended notification: Submitted → Amend → Submitted with the edited answer kept', async ({
     animalsJourney,
@@ -24,31 +16,27 @@ test.describe('Amend resubmission', () => {
     await animalsNotificationActions.amendNotification(journeyContext.referenceNumber);
     await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
 
-    // Change the country of origin through the amending check your answers page.
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(animalsPages.notificationView.changeLink('Change import details')).toBeVisible();
-    await expect(animalsPages.notificationView.changeLink('Change commodity 1')).toBeVisible();
+    await expect(animalsPages.notificationView.heading).toHaveText(reviewHeadingText);
+    await expect(animalsPages.notificationView.changeLink('Change origin of import')).toBeVisible();
+    await expect(animalsPages.notificationView.changeCommodityLink(commodityLines.cattle)).toBeVisible();
     expect(await pages.page.getByRole('link', { name: /^Change/ }).count()).toBeGreaterThanOrEqual(4);
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
     await expect(countryRow).toContainText('France');
     await animalsNotificationActions.changeCountryOfOrigin('Belgium');
     await expect(countryRow).toContainText('Belgium');
 
-    // Resubmit through the declaration (AMEND → SUBMITTED).
     await animalsPages.notificationView.continueButton.click();
     await expect(animalsPages.declaration.heading).toBeVisible();
     await animalsPages.declaration.confirmation.check();
     await animalsPages.declaration.continueButton.click();
     await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
 
-    // Back in Submitted: the view is read-only again and keeps the edited value.
     await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
-    await expect(animalsPages.notificationView.journeyStrip).toContainText('Submitted');
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted');
     await expect(countryRow).toContainText('Belgium');
     await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
-    await expect(animalsPages.notificationView.cancelAmend).not.toBeVisible();
+    await expect(animalsPages.notificationView.btnCancelAmend).not.toBeVisible();
 
-    // And the dashboard offers Amend again for the resubmitted notification.
     await animalsPages.dashboard.open();
     await animalsPages.dashboard.searchForReference(journeyContext.referenceNumber);
     await expect(animalsPages.dashboard.amend(journeyContext.referenceNumber)).toBeVisible();

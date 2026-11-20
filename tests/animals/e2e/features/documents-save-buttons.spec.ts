@@ -93,7 +93,7 @@ for (const [mode, javaScriptEnabled] of [
       await expect(animalsPages.accompanyingDocuments.addedDocumentsTable).toHaveCount(0);
     });
 
-    test('Save and continue: an untouched form shows Roles and addresses', async ({ animalsJourney, animalsPages }) => {
+    test('Save and continue: an untouched form shows Consignment addresses', async ({ animalsJourney, animalsPages }) => {
       await animalsJourney.toAccompanyingDocuments();
 
       await animalsPages.accompanyingDocuments.saveAndContinue.click();

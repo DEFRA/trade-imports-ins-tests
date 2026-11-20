@@ -56,7 +56,7 @@ test.describe('Import notification service dashboard', () => {
       await expect(details.commodity).toBeVisible();
       await expect(details.origin).toBeVisible();
       await expect(details.arrivalAtDestination).toContainText(DISPLAYED_DATE_PATTERN);
-      await expect(details.status).toContainText('Submitted');
+      await expect(animalsPages.dashboard.cardStatusTag(referenceNumber)).toHaveText('Submitted');
       await expect(details.dateCreated).toHaveText(DISPLAYED_DATE_PATTERN);
     });
   });
@@ -67,22 +67,26 @@ test.describe('Import notification service dashboard', () => {
 
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
-      await expect(animalsPages.dashboard.notificationCardDetails(0).status).toContainText('Draft');
+      await expect(animalsPages.dashboard.cardStatusTag(referenceNumber)).toHaveText('Draft');
       await expect(animalsPages.dashboard.resume(referenceNumber)).toBeVisible();
       await expect(animalsPages.dashboard.copyAsNew(referenceNumber)).toBeVisible();
       await expect(animalsPages.dashboard.delete(referenceNumber)).toBeVisible();
       await expect(animalsPages.dashboard.amend(referenceNumber)).not.toBeVisible();
     });
 
-    test('shows view, copy and amend actions for a submitted notification', async ({ animalsPages, animalsSeededJourney }) => {
+    test('shows Submitted with view, copy, amend and delete actions for a submitted notification', async ({
+      animalsPages,
+      animalsSeededJourney,
+    }) => {
       const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
 
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
-      await expect(animalsPages.dashboard.notificationCardDetails(0).status).toContainText('Submitted');
+      await expect(animalsPages.dashboard.cardStatusTag(referenceNumber)).toHaveText('Submitted');
       await expect(animalsPages.dashboard.view(referenceNumber)).toBeVisible();
       await expect(animalsPages.dashboard.copyAsNew(referenceNumber)).toBeVisible();
       await expect(animalsPages.dashboard.amend(referenceNumber)).toBeVisible();
+      await expect(animalsPages.dashboard.delete(referenceNumber)).toBeVisible();
     });
 
     test(
@@ -98,7 +102,7 @@ test.describe('Import notification service dashboard', () => {
         await animalsPages.dashboard.copyAsNew(originalReferenceNumber).click();
 
         await animalsPages.overview.heading.waitFor();
-        const copiedReferenceNumber = (await animalsPages.notificationView.referenceNumberCaption.textContent())?.match(
+        const copiedReferenceNumber = (await animalsPages.notificationView.journeyStrip.textContent())?.match(
           REFERENCE_NUMBER_PATTERN,
         )?.[0];
         expect(copiedReferenceNumber).toMatch(WHOLE_REFERENCE_NUMBER_PATTERN);

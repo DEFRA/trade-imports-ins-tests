@@ -1,6 +1,7 @@
 import { meansOfTransport } from '@domain/animals/constants/means-of-transport';
 
 import { test, expect } from '@fixtures';
+import { reviewHeadingText } from '@page-objects/animals/notification-view-page';
 
 test.describe('Back on the review page', () => {
   test('after Save and continue from the contact address it opens the contact address, whose Back opens Overview', async ({
@@ -11,7 +12,7 @@ test.describe('Back on the review page', () => {
     await animalsJourney.toContactAddress();
     await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
     await animalsPages.contactAddress.saveAndContinue.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
 
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.contactAddress.heading).toBeVisible();
@@ -26,7 +27,7 @@ test.describe('Back on the review page', () => {
     await animalsPages.overview.open(reference);
 
     await animalsPages.overview.reviewAndSubmitButton.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
 
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.overview.heading).toBeVisible();
@@ -38,7 +39,7 @@ test.describe('Back on the review page', () => {
     await animalsPages.dashboard.openAndSearchFor(reference);
 
     await animalsPages.dashboard.view(reference).click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.viewHeader.reference).toHaveText(reference);
 
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.dashboard.heading).toBeVisible();
@@ -52,12 +53,12 @@ test.describe('Back on the review page', () => {
     const reference = await animalsSeededJourney.createSubmittedNotification();
     await animalsPages.dashboard.openAndSearchFor(reference);
     await animalsPages.dashboard.amend(reference).click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.heading).toHaveText(reviewHeadingText);
 
-    await animalsPages.notificationView.changeLink('Change import details').click();
+    await animalsPages.notificationView.changeLink('Change origin of import').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
     await animalsPages.originOfImport.linkBack.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(animalsPages.notificationView.heading).toHaveText(reviewHeadingText);
 
     await animalsPages.notificationView.linkBack.click();
     await expect(animalsPages.dashboard.heading).toBeVisible();
@@ -71,13 +72,13 @@ test.describe('Back on the review page', () => {
     test.slow();
     const reference = await animalsSeededJourney.createDraftNotification();
     await animalsPages.notificationView.open(reference);
-    await animalsPages.notificationView.changeLink('Change import details').click();
+    await animalsPages.notificationView.changeLink('Change origin of import').click();
     await expect(animalsPages.originOfImport.heading).toBeVisible();
 
     await pages.page.reload();
     await animalsPages.originOfImport.linkBack.click();
 
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
   });
 });
 

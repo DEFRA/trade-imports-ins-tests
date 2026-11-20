@@ -1,5 +1,5 @@
+import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { pageLoadWait } from '@config/timeouts';
-import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { type Locator, expect, test } from '@playwright/test';
 import type { A11yScanOptions } from '@utils/a11y-utils';
 import type { AnimalsPages, SharedPages } from '@page-objects';
@@ -34,6 +34,7 @@ import { DEFAULT_REGION_CODE } from '@domain/animals/constants/origin-page';
 import { pointOfEntries } from '@domain/animals/constants/point-of-entries';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { getRelativeAppDateText } from '@utils/date-utils';
+import { timestampedReference } from '@utils/timestamped-reference';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import { commodityLines, type CommodityLine } from '@domain/animals/constants/commodity-lines';
@@ -80,7 +81,7 @@ export const AIR_OR_SEA_OVERVIEW_TASKS = [
   'Arrival details',
   'Transport details',
   'Upload documents',
-  'Roles and addresses',
+  CONSIGNMENT_ADDRESSES,
   'Contact address for this consignment',
 ] as const;
 
@@ -95,7 +96,7 @@ export const OVERLAND_OVERVIEW_TASKS = [
   'Transit countries',
   'Transport details',
   'Upload documents',
-  'Roles and addresses',
+  CONSIGNMENT_ADDRESSES,
   'Contact address for this consignment',
 ] as const;
 
@@ -103,8 +104,6 @@ export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffse
 
 export const HORSE_TRANSPORT_ID = 'STENA ADVENTURER';
 export const HORSE_TRANSPORTER = 'J & G Campbell LTD';
-
-const timestampedReference = (referencePrefix: string): string => `${referencePrefix}${Date.now()}`;
 
 export const certificateDocument = (referencePrefix: string): AccompanyingDocumentAnswer => ({
   reference: timestampedReference(referencePrefix),
@@ -381,7 +380,7 @@ export class AnimalsJourney {
   }
 
   async fillAddressesAndOpenCph(): Promise<void> {
-    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await this.addFiveParties();
     await this.animalsPages.addresses.addCph.click();
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
@@ -400,7 +399,7 @@ export class AnimalsJourney {
   }
 
   async answerAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
-    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await this.addFiveParties(answers.parties);
     await this.answerPermanentAddresses(answers.commodityLines);
     await this.addCphAndLeaveAddresses(answers.cph);
@@ -422,22 +421,9 @@ export class AnimalsJourney {
     await this.animalsPages.arrivalDetails.transportDocumentReference.fill(documentReference);
   }
 
-  async uploadDocumentAndWaitForScan(document: AccompanyingDocumentAnswer): Promise<void> {
-    await this.animalsPages.accompanyingDocuments.fillDocument(document.reference, document.issueDate, document.filePath, document.type);
-    await this.animalsPages.accompanyingDocuments.saveAndAddAnother.click();
-    await this.waitForDocumentScanComplete(document.reference);
-  }
-
-  async waitForDocumentScanComplete(reference: string): Promise<void> {
-    await this.animalsPages.accompanyingDocuments
-      .documentRow(reference)
-      .filter({ hasText: 'Check completed' })
-      .waitFor({ state: 'visible', timeout: fileUploadTimeouts.virusScanComplete });
-  }
-
   async uploadScannedDocument(): Promise<Locator> {
     const reference = timestampedReference('PW');
-    await this.uploadDocumentAndWaitForScan({ ...ALL_ANSWERS.accompanyingDocument, reference });
+    await this.animalsPages.accompanyingDocuments.uploadDocumentAndWaitForScan({ ...ALL_ANSWERS.accompanyingDocument, reference });
     return this.animalsPages.accompanyingDocuments.documentRow(reference);
   }
 
@@ -515,7 +501,7 @@ export class AnimalsJourney {
     if (!answers.accompanyingDocument) return;
     await this.animalsPages.overview.task('Upload documents').click();
     await this.animalsPages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await this.uploadDocumentAndWaitForScan(answers.accompanyingDocument);
+    await this.animalsPages.accompanyingDocuments.uploadDocumentAndWaitForScan(answers.accompanyingDocument);
     await this.openCurrentOverview();
   }
 
@@ -616,7 +602,7 @@ export class AnimalsJourney {
   }
 
   async toPermanentAddress(answers: NotificationAnswers): Promise<void> {
-    await this.toRolesAndAddresses(answers, () => this.answerAnimalIdentification(answers));
+    await this.toConsignmentAddresses(answers, () => this.answerAnimalIdentification(answers));
     await this.openPermanentAddress();
   }
 
@@ -653,13 +639,13 @@ export class AnimalsJourney {
     await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
   }
 
-  async toRolesAndAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS, afterCommodity?: () => Promise<void>): Promise<void> {
+  async toConsignmentAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS, afterCommodity?: () => Promise<void>): Promise<void> {
     await this.startNotification();
     await this.answerCommodity(answers);
     if (afterCommodity) {
       await afterCommodity();
     }
-    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
   }
 
@@ -684,14 +670,14 @@ export class AnimalsJourney {
     await this.openAdditionalDetailsFromOverview();
   }
 
-  async toRolesAndAddressesWithSourcePartiesChosen(parties: PartyAnswer[]): Promise<void> {
-    await this.toRolesAndAddresses();
+  async toConsignmentAddressesWithSourcePartiesChosen(parties: PartyAnswer[]): Promise<void> {
+    await this.toConsignmentAddresses();
     await this.addParties(parties);
   }
 
-  async toRolesAndAddressesOfCurrentNotification(): Promise<void> {
+  async toConsignmentAddressesOfCurrentNotification(): Promise<void> {
     await this.openCurrentOverview();
-    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
   }
 
@@ -776,7 +762,7 @@ export class AnimalsJourney {
   async toPartyPicker(role: PartyRole): Promise<void> {
     await this.startNotification();
     await this.answerCommodity();
-    await this.animalsPages.overview.task('Roles and addresses').click();
+    await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await this.animalsPages.addresses.addParty(role).click();
     await this.partyPicker(role).heading.waitFor(pageLoadWait);
   }
@@ -818,6 +804,7 @@ export class AnimalsJourney {
       await this.openReviewFromOverview();
       await runA11yScan();
       await this.animalsPages.notificationView.continueButton.click();
+      await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
     });
   }
 
@@ -844,7 +831,7 @@ export class AnimalsJourney {
     return referenceNumber;
   }
 
-  async walkToRolesAndAddressesWithoutCph(): Promise<string> {
+  async walkToConsignmentAddressesWithoutCph(): Promise<string> {
     const pages = this.animalsPages;
     const referenceNumber = await this.walkToImportReason();
 
@@ -887,7 +874,7 @@ export class AnimalsJourney {
     await pages.transporter.saveAndContinue.click();
 
     await pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
-    await this.uploadDocumentAndWaitForScan(document);
+    await this.animalsPages.accompanyingDocuments.uploadDocumentAndWaitForScan(document);
     await pages.accompanyingDocuments.continueButton.click();
 
     await pages.addresses.heading.waitFor(pageLoadWait);
@@ -904,7 +891,7 @@ export class AnimalsJourney {
     await pages.contactAddress.heading.waitFor(pageLoadWait);
     await this.chooseContactAddress();
 
-    await pages.notificationView.heading.waitFor(pageLoadWait);
+    await pages.notificationView.viewHeader.reference.waitFor(pageLoadWait);
   }
 
   async walkCattleByAir(document: AccompanyingDocumentAnswer): Promise<string> {

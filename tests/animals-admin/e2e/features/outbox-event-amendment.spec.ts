@@ -1,3 +1,4 @@
+import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
@@ -56,10 +57,14 @@ test.describe('Notification amendment outbox event', { tag: '@mongodb' }, () => 
 
       expect(amended.aggregateVersion).toBeGreaterThan(1);
       expect(amended.eventType).toBe(NOTIFICATION_AMENDMENT_REQUESTED);
-      expect(amended.data.exchangedDocument.notificationStatusCode).toBe('AMEND');
+      expect(amended.data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.amend);
       expect(actorWithNullableFields(amended.actor)).toEqual(EXPECTED_ACTOR);
       expect(statusChanges).toHaveLength(3);
-      expect(statusChanges.map(({ status }) => status)).toEqual(['DRAFT', 'SUBMITTED', 'AMEND']);
+      expect(statusChanges.map(({ status }) => status)).toEqual([
+        notificationStatuses.draft,
+        notificationStatuses.submitted,
+        notificationStatuses.amend,
+      ]);
       expect(statusChanges.map(({ dateChanged }) => dateChanged)).toEqual([expect.any(Date), expect.any(Date), expect.any(Date)]);
       expect(actorWithNullableFields(statusChanges[1].actor)).toEqual(EXPECTED_ACTOR);
       expect(actorWithNullableFields(statusChanges[2].actor)).toEqual(EXPECTED_ACTOR);
