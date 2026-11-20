@@ -183,7 +183,7 @@ const differsFrom = (live: AddressBookRecord, wanted: AddressBookRequest): boole
  */
 export async function ensureE2eAddressBook(api: AddressBookApiClient): Promise<void> {
   for (const record of E2E_ADDRESS_BOOK_FIXTURES) {
-    const matches = (await api.listAddresses(record.name)).filter((item) => item.name === record.name);
+    const matches = (await api.listAddressesOnEveryPage(record.name)).filter((item) => item.name === record.name);
     if (matches.length === 0) {
       await api.createAddress(record);
       continue;

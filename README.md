@@ -184,16 +184,23 @@ you in." page before deciding whether to try again.
 
 ### Address-book records made by a test
 
-Specs do not clean up the addresses they create. In CDP dev, test, perf-test
-and ext-test the address book removes every address about 7 days after it was
-created, so test records age out on their own there. That needs both
-`ADDRESS_TTL_DAYS` and `ADDRESS_TTL_EXPIRY_ENABLED` set; the local
-docker-compose stack sets neither, so addresses a local run creates never age
-out. Make each name unique (a timestamp or UUID
-suffix) so a search finds only this run's record. A spec deletes an address
-only when the deletion is what it tests. Where expiry is on, the shared journey
-addresses seeded in `globalSetup` expire too; the next run's
-`ensureE2eAddressBook` creates them again.
+The `addressBookApi` and `isolatedOrganisationAddressBookApi` fixtures delete
+every address and transporter created through them once the test ends, pass or
+fail, retries included. A record a test saves through the UI is not created
+through them: call `addressBookApi.trackTransporterNamed(name)` after saving a
+transporter so it is deleted too. A delete that fails is logged with the
+record's id and never fails the test. Records saved through the UI in any other
+way, such as an address added on the add-address page or through the
+handshake, are not deleted.
+
+In CDP dev, test, perf-test and ext-test the address book also removes every
+address about 7 days after it was created. That needs both `ADDRESS_TTL_DAYS`
+and `ADDRESS_TTL_EXPIRY_ENABLED` set; the local docker-compose stack sets
+neither. Make each name unique (a timestamp or UUID suffix) so a search finds
+only this run's record. Where expiry is on, the shared journey addresses
+seeded in `globalSetup` expire too; the next run's `ensureE2eAddressBook`
+creates them again. `globalSetup` seeds them through its own client, so no
+test's clean-up deletes them.
 
 A spec that edits or deletes an address makes its own record rather than
 using one of the shared journey addresses, because every spec running
@@ -211,6 +218,32 @@ first, so a spec that needs a record off page one creates it, then enough
 newer records to fill page one. Other workers add records while a spec pages
 through the list, so the spec follows Next until the record shows or Next
 runs out, rather than to a last page worked out before it started.
+
+### Resetting the shared e2e address book
+
+`npm run reset:e2e-address-book` brings the shared e2e organisation's address
+book on a CDP environment back to a small known state. It soft-deletes only
+records whose name matches a name a test creates, listed in
+`domain/shared/constants/test-record-names.ts`. It keeps the seeded journey
+addresses, the performance tests' records and every other record. A spec that
+creates a record with a new name adds that name to the list.
+
+Run it from your own machine with your developer API key, set up as in
+[Target CDP environments](#target-cdp-environments-from-local-machine). Never
+run it from CI.
+
+```bash
+npm run reset:e2e-address-book                          # dry run: reports, deletes nothing
+npm run reset:e2e-address-book -- --apply               # deletes the addresses
+npm run reset:e2e-address-book -- --apply --transporters  # deletes transporters too
+```
+
+It prints the environment and organisation first and refuses prod. A dry run
+reports how many records it would delete and keep, the deletes by name, and
+the 30 commonest kept names, so a leak the list misses shows up. `--apply`
+deletes one record at a time, then seeds the journey addresses again.
+Transporters are left alone unless you pass `--transporters`, because
+deleting one changes the drafts that use it.
 
 ### Commodity lines in the animals specs
 
