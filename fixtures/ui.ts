@@ -179,12 +179,12 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   addressBookApi: async ({ request }, use) => {
     const api = new RecordTrackingAddressBookApiClient(request);
     await use(api);
-    await api.deleteTrackedRecords();
+    await api.deleteTrackedRecordsOneByOne();
   },
   isolatedOrganisationAddressBookApi: async ({ request }, use) => {
     const api = new RecordTrackingAddressBookApiClient(request, { organisationId: `e2e-isolated-organisation-${randomUUID()}` });
     await use(api);
-    await api.deleteTrackedRecords();
+    await api.deleteTrackedRecordsOneByOne();
   },
   referenceDataApi: async ({ request }, use) => {
     await use(new ReferenceDataApiClient(request));

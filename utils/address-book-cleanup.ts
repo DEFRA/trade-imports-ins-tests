@@ -30,17 +30,18 @@ export class RecordTrackingAddressBookApiClient extends AddressBookApiClient {
     return stored;
   }
 
-  /** Soft-deletes every tracked record at once, logging each delete that fails. Never throws. */
-  async deleteTrackedRecords(): Promise<void> {
+  /** Soft-deletes every tracked record one at a time, logging each delete that fails. Never throws. */
+  async deleteTrackedRecordsOneByOne(): Promise<void> {
     const deletes = [
-      ...this.trackedAddressIds.splice(0).map((id) => ({ record: `address ${id}`, deleted: this.deleteAddress(id) })),
-      ...this.trackedTransporterIds.splice(0).map((id) => ({ record: `transporter ${id}`, deleted: this.deleteTransporter(id) })),
+      ...this.trackedAddressIds.splice(0).map((id) => ({ record: `address ${id}`, remove: () => this.deleteAddress(id) })),
+      ...this.trackedTransporterIds.splice(0).map((id) => ({ record: `transporter ${id}`, remove: () => this.deleteTransporter(id) })),
     ];
-    const outcomes = await Promise.allSettled(deletes.map(({ deleted }) => deleted));
-    outcomes.forEach((outcome, index) => {
-      if (outcome.status === 'rejected') {
-        console.warn(`Could not delete ${deletes[index].record} after the test`, outcome.reason);
+    for (const { record, remove } of deletes) {
+      try {
+        await remove();
+      } catch (error) {
+        console.warn(`Could not delete ${record} after the test`, error);
       }
-    });
+    }
   }
 }
