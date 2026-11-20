@@ -219,6 +219,32 @@ newer records to fill page one. Other workers add records while a spec pages
 through the list, so the spec follows Next until the record shows or Next
 runs out, rather than to a last page worked out before it started.
 
+### Resetting the shared e2e address book
+
+`npm run reset:e2e-address-book` brings the shared e2e organisation's address
+book on a CDP environment back to a small known state. It soft-deletes only
+records whose name matches a name a test creates, listed in
+`domain/shared/constants/test-record-names.ts`. It keeps the seeded journey
+addresses, the performance tests' records and every other record. A spec that
+creates a record with a new name adds that name to the list.
+
+Run it from your own machine with your developer API key, set up as in
+[Target CDP environments](#target-cdp-environments-from-local-machine). Never
+run it from CI.
+
+```bash
+npm run reset:e2e-address-book                          # dry run: reports, deletes nothing
+npm run reset:e2e-address-book -- --apply               # deletes the addresses
+npm run reset:e2e-address-book -- --apply --transporters  # deletes transporters too
+```
+
+It prints the environment and organisation first and refuses prod. A dry run
+reports how many records it would delete and keep, the deletes by name, and
+the 30 commonest kept names, so a leak the list misses shows up. `--apply`
+deletes one record at a time, then seeds the journey addresses again.
+Transporters are left alone unless you pass `--transporters`, because
+deleting one changes the drafts that use it.
+
 ### Commodity lines in the animals specs
 
 `domain/animals/constants/commodity-lines.ts` names each line a spec chooses
