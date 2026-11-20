@@ -37,6 +37,7 @@ export type TransporterRequest = Omit<TransporterRecord, 'id' | 'deleted' | 'mod
 interface ApiPage<T> {
   items: T[];
   totalItems: number;
+  totalPages: number;
 }
 
 /** Direct HTTP access to one organisation's address book. */
@@ -84,6 +85,22 @@ export class AddressBookApiClient {
     return page.items;
   }
 
+  /** Every live address of the organisation matching the search, from every page, newest first. */
+  async listAddressesOnEveryPage(query: string): Promise<AddressBookRecord[]> {
+    const pageSize = 100;
+    const records: AddressBookRecord[] = [];
+    let page = 1;
+    let totalPages = 1;
+    while (page <= totalPages) {
+      const params = new URLSearchParams({ q: query, page: String(page), pageSize: String(pageSize) });
+      const result = await this.rest.get<ApiPage<AddressBookRecord>>(`${this.path()}?${params}`, organisationHeaders(this.organisationId));
+      records.push(...result.items);
+      totalPages = result.totalPages;
+      page += 1;
+    }
+    return records;
+  }
+
   /** Saves a new address to the organisation's book. */
   async createAddress(request: AddressBookRequest): Promise<AddressBookRecord> {
     return this.rest.post<AddressBookRecord>(this.path(), request, organisationHeaders(this.organisationId));
@@ -91,7 +108,7 @@ export class AddressBookApiClient {
 
   /** The live address with this name. Throws unless exactly one live address has it. */
   async findByName(name: string): Promise<AddressBookRecord> {
-    const matches = (await this.listAddresses(name)).filter((record) => record.name === name);
+    const matches = (await this.listAddressesOnEveryPage(name)).filter((record) => record.name === name);
     if (matches.length !== 1) {
       throw new Error(`Expected exactly one address named "${name}", found ${matches.length}`);
     }
