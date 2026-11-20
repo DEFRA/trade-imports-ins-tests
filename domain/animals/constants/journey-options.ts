@@ -17,7 +17,6 @@ import { getRelativeAppDateText } from '@utils/date-utils';
 import {
   CONSIGNEE_NAME,
   CONSIGNOR_NAME,
-  CONTACT_ADDRESS_NAME,
   DESTINATION_NAME,
   IMPORTER_NAME,
   PLACE_OF_ORIGIN_NAME,
@@ -69,7 +68,6 @@ export type MandatoryAnswers = {
   transportIdentification: string;
   transportDocumentReference: string;
   transporter: Transporter;
-  contactAddress: string;
 };
 
 /** The answers the frontend leaves optional for cattle. */
@@ -125,7 +123,6 @@ export const MANDATORY_ANSWERS: MandatoryAnswers = {
   transportIdentification: 'FR-892-LK',
   transportDocumentReference: 'CMR-2026-884721',
   transporter: transporters.garciaLivestockTransport,
-  contactAddress: CONTACT_ADDRESS_NAME,
 };
 
 export const CAT_ANSWERS: NotificationAnswers = {

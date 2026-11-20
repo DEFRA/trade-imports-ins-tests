@@ -18,7 +18,6 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(pages.page.getByRole('heading', { name: '3. Transport and arrival' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '4. Documents' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '5. Consignment parties' })).toBeVisible();
-      await expect(pages.page.getByRole('heading', { name: '6. Contact address' })).toBeVisible();
       await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toBeVisible();
       await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
       await expect(animalsPages.notificationView.summaryCard('Import details')).toContainText('France');
@@ -54,7 +53,6 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
         'Complete arrival details',
         'Complete transport details',
         'Complete roles and addresses',
-        'Complete contact address for this consignment',
       ]);
     });
   });
@@ -111,35 +109,5 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(animalsPages.notificationView.summaryCard('Import details')).toContainText('France');
       await expect(animalsPages.notificationView.speciesCard(commodityLines.cattle)).toBeVisible();
     });
-  });
-});
-
-test.describe('Review refused with no contact address', () => {
-  test('an unanswered contact address keeps the trader on the review after Continue, naming it among what is outstanding', async ({
-    animalsJourney,
-    animalsPages,
-    pages,
-  }) => {
-    test.slow();
-    await animalsJourney.toContactAddress();
-    const referenceNumber = animalsPages.contactAddress.referenceNumberFromUrl();
-
-    await animalsPages.overview.open(referenceNumber);
-    await animalsPages.overview.reviewAndSubmitButton.click();
-
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
-    await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText([
-      'Complete reason for import',
-      'Complete additional animal details',
-      'Complete arrival details',
-      'Complete transport details',
-      'Complete roles and addresses',
-      'Complete contact address for this consignment',
-    ]);
-
-    await animalsPages.notificationView.continueButton.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(animalsPages.notificationView.errorSummary).toBeFocused();
   });
 });

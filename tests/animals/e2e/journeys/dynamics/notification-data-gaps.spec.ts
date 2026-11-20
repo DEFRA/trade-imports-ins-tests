@@ -16,7 +16,7 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     skipIfComposeEnvironment('the compose stack has no PIMS Dynamics');
   });
 
-  test('the contact address, species names, party postcodes, phones and emails, CPH number, transport document and identification, reason for import, internal market purpose, certified for, number of animals and ear tag are stored in PIMS Dynamics', async ({
+  test('the species names, party postcodes, phones and emails, CPH number, transport document and identification, reason for import, internal market purpose, certified for, number of animals and ear tag are stored in PIMS Dynamics', async ({
     animalsJourney,
     journeyContext,
     externalRequest,
@@ -33,15 +33,8 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     const placeOfOrigin = await addressBookApi.findByName(answers.parties.placeOfOrigin);
     const consignee = await addressBookApi.findByName(answers.parties.consignee);
     const importer = await addressBookApi.findByName(answers.parties.importer);
-    const contact = await addressBookApi.findByName(answers.contactAddress);
     await animalsJourney.submitNotification(answers);
     const row = await waitForAnimalsDynamicsNotification(dynamics, journeyContext.referenceNumber);
-
-    // [FROM v0.3.0]
-    // exchangedDocument.issuer.postalAddress
-    for (const part of [contact.addressLine1, contact.townOrCity, contact.postcode]) {
-      expect.soft(row.defraimp_personresponsibleaddress, `contact address ${part}`).toContain(part);
-    }
 
     // [FROM v0.2.0]
     // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].scientificName and commonName

@@ -19,12 +19,11 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       '3. Transport and arrival',
       '4. Documents',
       '5. Consignment parties',
-      '6. Contact address',
     ]);
 
     await expect(pages.page.locator('.govuk-button-group .govuk-button')).toHaveText(['Review and submit', 'Return to dashboard']);
 
-    await expect(pages.page.locator('ul.app-task-list')).toHaveCount(6);
+    await expect(pages.page.locator('ul.app-task-list')).toHaveCount(5);
     await expect(animalsPages.overview.taskTitlesInSectionHeaded('1. About the consignment')).toHaveText([
       'Where is this consignment coming from?',
       'What are you importing?',
@@ -40,9 +39,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     ]);
     await expect(animalsPages.overview.taskTitlesInSectionHeaded('4. Documents')).toHaveText(['Upload documents']);
     await expect(animalsPages.overview.taskTitlesInSectionHeaded('5. Consignment parties')).toHaveText(['Roles and addresses']);
-    await expect(animalsPages.overview.taskTitlesInSectionHeaded('6. Contact address')).toHaveText([
-      'Contact address for this consignment',
-    ]);
   });
 
   test('after completing every section the check-your-answers page renders the answered rows', async ({
@@ -63,7 +59,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(pages.page.getByRole('heading', { level: 2, name: '3. Transport and arrival' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '4. Documents' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '5. Consignment parties' })).toBeVisible();
-    await expect(pages.page.getByRole('heading', { level: 2, name: '6. Contact address' })).toBeVisible();
     await expect(animalsPages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
     await expect(animalsPages.notificationView.changeLink('Change uploaded documents')).toBeVisible();
 
@@ -77,7 +72,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       'Transport details',
       'Upload documents',
       'Roles and addresses',
-      'Contact address for this consignment',
     ]);
 
     const importDetails = animalsPages.notificationView.summaryCard('Import details');
@@ -151,9 +145,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
     await expect(animalsPages.notificationView.summaryValue(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText(
       CPH_NUMBER_DISPLAY,
     );
-
-    const contactAddress = animalsPages.notificationView.summaryCard('Contact address for this consignment');
-    await expect(animalsPages.notificationView.summaryValue(contactAddress, 'Contact address')).toContainText(answers.contactAddress);
   });
 
   test('the roles-and-addresses card shows a cat’s saved permanent address, keyed by its common name and number', async ({

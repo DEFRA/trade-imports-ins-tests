@@ -74,13 +74,8 @@ test.describe('Save and continue through a new notification', () => {
     const referenceNumber = await animalsJourney.walkToRolesAndAddressesWithoutCph();
 
     await animalsPages.addresses.continueButton.click();
-    await expect(animalsPages.contactAddress.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
-    await expect(pages.page).toHaveURL(animalsPages.contactAddress.expectedUrlPattern(referenceNumber));
-
-    await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
-    await animalsPages.contactAddress.saveAndContinue.click();
-
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete reason for import');
@@ -157,6 +152,25 @@ test.describe('Save and continue to the next page', () => {
     await animalsPages.transitedCountries.open(referenceNumber);
     await expectEmptyTransitList(animalsPages.transitedCountries);
     await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText([]);
+  });
+
+  test('roles and addresses saved with parties missing goes to check your answers, naming what is outstanding', async ({
+    animalsJourney,
+    animalsPages,
+    pages,
+  }) => {
+    test.slow();
+    const referenceNumber = await animalsJourney.walkToRolesAndAddressesWithoutCph();
+    await animalsPages.addresses.continueButton.click();
+
+    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
+    await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText([
+      'Complete reason for import',
+      'Complete additional animal details',
+      'Complete arrival details',
+      'Complete roles and addresses',
+    ]);
   });
 
   test('a draft with nothing saved, resumed from the dashboard, opens at the first page', async ({ animalsJourney, animalsPages }) => {

@@ -43,7 +43,6 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
     const placeOfOrigin = await addressBookApi.findByName(answers.parties.placeOfOrigin);
     const consignee = await addressBookApi.findByName(answers.parties.consignee);
     const importer = await addressBookApi.findByName(answers.parties.importer);
-    const contact = await addressBookApi.findByName(answers.contactAddress);
     const [cowLine] = answers.commodityLines;
 
     await animalsJourney.submitNotification(answers);
@@ -104,7 +103,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
       expect(notification.consignee).toMatchObject({ name: consignee.name, address: { postcode: consignee.postcode } });
       expect(notification.importer).toMatchObject({ name: importer.name, address: { postcode: importer.postcode } });
       expect(notification.placeOfOrigin).toMatchObject({ name: placeOfOrigin.name, address: { postcode: placeOfOrigin.postcode } });
-      expect(notification.consignment).toMatchObject({ name: contact.name, address: { postcode: contact.postcode } });
+      expect(notification.consignment).toBeUndefined();
       expect(doc.preAmendNotification).toBeUndefined();
       expect(notification.cphNumber).toBe(CPH_NUMBER);
       expect(notification.transport.portOfEntry).toBe(answers.pointOfEntry.value);
