@@ -3,9 +3,6 @@ import { test, expect } from '@fixtures';
 import { transporterTab, typeFilterPlaceholder, transporterTypeFilterLabels } from '@domain/ins/constants/address-book-types';
 import { commercialTransporterDetails, privateTransporterDetails, transporterRequestOf } from '@domain/ins/constants/trader-transporter';
 import { transporterTypes } from '@domain/ins/constants/transporter-types';
-import { transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
-
-const createdTransporterIds = transporterIdsDeletedAfterEachTest();
 
 const transporterTypeFilterTermOf = (scenario: string): string => `Typefilter ${scenario} ${randomUUID()}`;
 
@@ -27,16 +24,14 @@ test.describe('Transporter tab Type filter', () => {
   }) => {
     const term = transporterTypeFilterTermOf('beyond first page');
     for (const suffix of ['First Commercial', 'Second Commercial']) {
-      const transporter = await addressBookApi.createTransporter(
+      await addressBookApi.createTransporter(
         transporterRequestOf(commercialTransporterDetails(`${term} ${suffix}`, `NI/TA/${randomUUID()}`), transporterTypes.commercial),
       );
-      createdTransporterIds.push(transporter.id);
     }
     for (let index = 1; index <= 9; index++) {
-      const transporter = await addressBookApi.createTransporter(
+      await addressBookApi.createTransporter(
         transporterRequestOf(privateTransporterDetails(`${term} Private ${index}`), transporterTypes.private),
       );
-      createdTransporterIds.push(transporter.id);
     }
 
     await insJourney.toAddressBookTab(transporterTab, { search: term });

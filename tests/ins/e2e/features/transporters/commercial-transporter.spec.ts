@@ -7,9 +7,6 @@ import {
 import { commercialTransporterDetails } from '@domain/ins/constants/trader-transporter';
 import { transporterTab, transporterTypeFilterLabels } from '@domain/ins/constants/address-book-types';
 import { expectCancelAddsNoTransporter, expectOpensTypeQuestionWithNoTypeChosen } from './run-transporters';
-import { trackTransporterForDeletion, transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
-
-const createdTransporterIds = transporterIdsDeletedAfterEachTest();
 
 test.describe('The commercial transporter form', () => {
   test('opens with its caption, heading, the fixed Northern Ireland country, the Standard Address Block and contact fields, and Back to the transporter type question', async ({
@@ -60,7 +57,7 @@ test.describe('The commercial transporter form', () => {
 
     await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(transporterTab));
     await expect(insPages.addressBookList.successBanner).toContainText(`${name} added to your address book`);
-    const stored = await trackTransporterForDeletion(addressBookApi, name, createdTransporterIds);
+    const stored = await addressBookApi.trackTransporterNamed(name);
     expect(stored.type).toBe(transporterTypes.commercial);
     expect(stored.approvalNumber).toBe(approvalNumber);
     expect(stored.countryCode).toBe(COMMERCIAL_TRANSPORTER_COUNTRY_CODE);
@@ -81,7 +78,7 @@ test.describe('The commercial transporter form', () => {
     const name = `Searched Commercial Transporter ${Date.now()}`;
     const approvalNumber = `NI/TA/${Date.now()}`;
     await insJourney.addCommercialTransporterFromList(commercialTransporterDetails(name, approvalNumber));
-    await trackTransporterForDeletion(addressBookApi, name, createdTransporterIds);
+    await addressBookApi.trackTransporterNamed(name);
 
     for (const term of [name, 'Commercial', 'Shore Road', approvalNumber, COMMERCIAL_TRANSPORTER_COUNTRY_NAME]) {
       await insPages.addressBookList.open({ addressType: transporterTab.addressType });

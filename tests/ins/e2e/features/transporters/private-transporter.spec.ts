@@ -4,9 +4,6 @@ import { transporterTypeFilterLabels } from '@domain/ins/constants/address-book-
 import { privateTransporterDetails } from '@domain/ins/constants/trader-transporter';
 import { transporterTab } from '@domain/ins/constants/address-book-types';
 import { expectCancelAddsNoTransporter, expectOpensTypeQuestionWithNoTypeChosen } from './run-transporters';
-import { trackTransporterForDeletion, transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
-
-const createdTransporterIds = transporterIdsDeletedAfterEachTest();
 
 test.describe('The private transporter form', () => {
   test('opens with its caption, heading, the Standard Address Block and contact fields, and Back to the transporter type question', async ({
@@ -57,7 +54,7 @@ test.describe('The private transporter form', () => {
 
     await expect(pages.page).toHaveURL(insPages.addressBookList.tabUrlPattern(transporterTab));
     await expect(insPages.addressBookList.successBanner).toContainText(`${name} added to your address book`);
-    const stored = await trackTransporterForDeletion(addressBookApi, name, createdTransporterIds);
+    const stored = await addressBookApi.trackTransporterNamed(name);
     expect(stored.type).toBe(transporterTypes.private);
     expect(stored.approvalNumber).toBeFalsy();
     expect(stored.countryCode).toBe('GB');
@@ -77,7 +74,7 @@ test.describe('The private transporter form', () => {
   }) => {
     const name = `Searched Private Transporter ${Date.now()}`;
     await insJourney.addPrivateTransporterFromList(privateTransporterDetails(name));
-    await trackTransporterForDeletion(addressBookApi, name, createdTransporterIds);
+    await addressBookApi.trackTransporterNamed(name);
 
     for (const term of [name, 'Private', 'Carrier Close', 'United Kingdom']) {
       await insPages.addressBookList.open({ addressType: transporterTab.addressType });

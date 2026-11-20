@@ -23,7 +23,6 @@ import { PlantsNotificationActions } from '@flows/plants/notification-actions';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
 import { OTHER_ORGANISATION_ID } from '@adapters/http/organisation';
 import { getPlantsBackendBaseUrl } from '@config/service-base-urls';
-import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { InsNotificationApiClient } from '@adapters/http/ins-notification-api-client';
 import { ReferenceDataApiClient } from '@adapters/http/reference-data-api-client';
 import { FrontendFormClient } from '@adapters/http/frontend-form-client';
@@ -32,6 +31,7 @@ import { createFrontendSeedContext } from '@fixtures/seed-context';
 import { getCdpProxy } from '@config/cdp-proxy';
 import { baseUrlForDomain, domainFromSpecPath } from '@utils/playwright/domain-base-urls';
 import { sessionReuseEnabled } from '@utils/playwright/session-reuse';
+import { RecordTrackingAddressBookApiClient } from '@utils/address-book-cleanup';
 
 const SESSION_MINT_TIMEOUT_MS = 120_000;
 
@@ -73,8 +73,8 @@ export interface PageFixtures {
   otherOrganisationInsNotificationApi: InsNotificationApiClient;
   plantsNotificationApi: NotificationApiClient;
   otherOrganisationPlantsNotificationApi: NotificationApiClient;
-  addressBookApi: AddressBookApiClient;
-  isolatedOrganisationAddressBookApi: AddressBookApiClient;
+  addressBookApi: RecordTrackingAddressBookApiClient;
+  isolatedOrganisationAddressBookApi: RecordTrackingAddressBookApiClient;
   referenceDataApi: ReferenceDataApiClient;
   frontendForms: FrontendFormClient;
   externalRequest: APIRequestContext;
@@ -177,10 +177,14 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
     );
   },
   addressBookApi: async ({ request }, use) => {
-    await use(new AddressBookApiClient(request));
+    const api = new RecordTrackingAddressBookApiClient(request);
+    await use(api);
+    await api.deleteTrackedRecords();
   },
   isolatedOrganisationAddressBookApi: async ({ request }, use) => {
-    await use(new AddressBookApiClient(request, { organisationId: `e2e-isolated-organisation-${randomUUID()}` }));
+    const api = new RecordTrackingAddressBookApiClient(request, { organisationId: `e2e-isolated-organisation-${randomUUID()}` });
+    await use(api);
+    await api.deleteTrackedRecords();
   },
   referenceDataApi: async ({ request }, use) => {
     await use(new ReferenceDataApiClient(request));

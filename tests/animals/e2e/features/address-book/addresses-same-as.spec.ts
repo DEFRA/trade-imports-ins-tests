@@ -1,14 +1,6 @@
 import { test, expect } from '@fixtures';
-import type { AddressBookApiClient, AddressBookRequest } from '@adapters/http/address-book-api-client';
 import { heldAsConsignee, heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
-import { addressIdsDeletedAfterEachTest } from '@utils/address-book-cleanup';
-
-const createdAddressIds = addressIdsDeletedAfterEachTest('addressBookApi');
-
-const createAddressDeletedAfterTest = async (api: AddressBookApiClient, request: AddressBookRequest): Promise<void> => {
-  createdAddressIds.push((await api.createAddress(request)).id);
-};
 
 test.describe('Same-as shortcuts fill a party from a paired party', () => {
   test(
@@ -28,14 +20,14 @@ test.describe('Same-as shortcuts fill a party from a paired party', () => {
         townOrCity: 'Carlisle',
         postcode: 'CA1 5EE',
       };
-      await createAddressDeletedAfterTest(addressBookApi, {
+      await addressBookApi.createAddress({
         ...originRecord,
         ...heldAsPlaceOfOrigin,
         countryCode: 'GB',
         phone: '01228 555 0110',
         email: 'origin@example.co.uk',
       });
-      await createAddressDeletedAfterTest(addressBookApi, {
+      await addressBookApi.createAddress({
         ...consigneeRecord,
         ...heldAsConsignee,
         countryCode: 'GB',
@@ -84,14 +76,14 @@ test.describe('Same-as shortcuts fill a party from a paired party', () => {
       const stamp = Date.now();
       const firstOrigin = { name: `First Origin ${stamp}`, addressLine1: '1 First Lane', townOrCity: 'Carlisle', postcode: 'CA1 6FF' };
       const secondOrigin = { name: `Second Origin ${stamp}`, addressLine1: '2 Second Lane', townOrCity: 'Carlisle', postcode: 'CA1 7GG' };
-      await createAddressDeletedAfterTest(addressBookApi, {
+      await addressBookApi.createAddress({
         ...firstOrigin,
         ...heldAsPlaceOfOrigin,
         countryCode: 'GB',
         phone: '01228 555 0112',
         email: 'first-origin@example.co.uk',
       });
-      await createAddressDeletedAfterTest(addressBookApi, {
+      await addressBookApi.createAddress({
         ...secondOrigin,
         ...heldAsPlaceOfOrigin,
         countryCode: 'GB',
@@ -126,7 +118,7 @@ test.describe('Same-as shortcuts fill a party from a paired party', () => {
         county: 'Westmorland',
         postcode: 'LA9 5RR',
       };
-      await createAddressDeletedAfterTest(addressBookApi, {
+      await addressBookApi.createAddress({
         ...consigneeRecord,
         ...heldAsConsignee,
         countryCode: 'GB',

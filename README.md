@@ -184,16 +184,23 @@ you in." page before deciding whether to try again.
 
 ### Address-book records made by a test
 
-Specs do not clean up the addresses they create. In CDP dev, test, perf-test
-and ext-test the address book removes every address about 7 days after it was
-created, so test records age out on their own there. That needs both
-`ADDRESS_TTL_DAYS` and `ADDRESS_TTL_EXPIRY_ENABLED` set; the local
-docker-compose stack sets neither, so addresses a local run creates never age
-out. Make each name unique (a timestamp or UUID
-suffix) so a search finds only this run's record. A spec deletes an address
-only when the deletion is what it tests. Where expiry is on, the shared journey
-addresses seeded in `globalSetup` expire too; the next run's
-`ensureE2eAddressBook` creates them again.
+The `addressBookApi` and `isolatedOrganisationAddressBookApi` fixtures delete
+every address and transporter created through them once the test ends, pass or
+fail, retries included. A record a test saves through the UI is not created
+through them: call `addressBookApi.trackTransporterNamed(name)` after saving a
+transporter so it is deleted too. A delete that fails is logged with the
+record's id and never fails the test. Records saved through the UI in any other
+way, such as an address added on the add-address page or through the
+handshake, are not deleted.
+
+In CDP dev, test, perf-test and ext-test the address book also removes every
+address about 7 days after it was created. That needs both `ADDRESS_TTL_DAYS`
+and `ADDRESS_TTL_EXPIRY_ENABLED` set; the local docker-compose stack sets
+neither. Make each name unique (a timestamp or UUID suffix) so a search finds
+only this run's record. Where expiry is on, the shared journey addresses
+seeded in `globalSetup` expire too; the next run's `ensureE2eAddressBook`
+creates them again. `globalSetup` seeds them through its own client, so no
+test's clean-up deletes them.
 
 A spec that edits or deletes an address makes its own record rather than
 using one of the shared journey addresses, because every spec running

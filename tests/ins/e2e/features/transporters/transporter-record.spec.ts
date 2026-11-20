@@ -2,7 +2,6 @@ import { test, expect } from '@fixtures';
 import type { TransporterRequest } from '@adapters/http/address-book-api-client';
 import { COMMERCIAL_TRANSPORTER_COUNTRY_CODE, transporterTypes } from '@domain/ins/constants/transporter-types';
 import { transporterTab } from '@domain/ins/constants/address-book-types';
-import { transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
 
 const privateTransporter = (name: string): TransporterRequest => ({
   name,
@@ -28,8 +27,6 @@ const commercialTransporter = (name: string): TransporterRequest => ({
 });
 
 test.describe("A transporter's own page", () => {
-  const createdTransporterIds = transporterIdsDeletedAfterEachTest();
-
   test('opens at its own transporter URL, headed with the name, showing the address block and contact details', async ({
     pages,
     insPages,
@@ -37,7 +34,6 @@ test.describe("A transporter's own page", () => {
   }) => {
     const name = `Record Haulage Ltd ${Date.now()}`;
     const created = await addressBookApi.createTransporter(privateTransporter(name));
-    createdTransporterIds.push(created.id);
 
     await insPages.addressBookTransporterView.open(created.id);
 
@@ -53,7 +49,6 @@ test.describe("A transporter's own page", () => {
   }) => {
     const commercialName = `Record Commercial Ltd ${Date.now()}`;
     const commercial = await addressBookApi.createTransporter(commercialTransporter(commercialName));
-    createdTransporterIds.push(commercial.id);
 
     await insPages.addressBookTransporterView.open(commercial.id);
 
@@ -64,7 +59,6 @@ test.describe("A transporter's own page", () => {
 
     const privateName = `Record Private Ltd ${Date.now()}`;
     const stored = await addressBookApi.createTransporter(privateTransporter(privateName));
-    createdTransporterIds.push(stored.id);
 
     await insPages.addressBookTransporterView.open(stored.id);
 
@@ -74,7 +68,6 @@ test.describe("A transporter's own page", () => {
   test('offers Edit and Delete for that same transporter', async ({ insPages, addressBookApi }) => {
     const name = `Record Actions Ltd ${Date.now()}`;
     const created = await addressBookApi.createTransporter(privateTransporter(name));
-    createdTransporterIds.push(created.id);
 
     await insPages.addressBookTransporterView.open(created.id);
 
@@ -91,7 +84,6 @@ test.describe("A transporter's own page", () => {
   test('Back goes to the address book filtered to transporters', async ({ pages, insPages, addressBookApi }) => {
     const name = `Record Back Ltd ${Date.now()}`;
     const created = await addressBookApi.createTransporter(privateTransporter(name));
-    createdTransporterIds.push(created.id);
 
     await insPages.addressBookTransporterView.open(created.id);
 
