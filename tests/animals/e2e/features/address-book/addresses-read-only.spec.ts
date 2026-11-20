@@ -81,4 +81,13 @@ test.describe('Addresses are read-only in the journey', () => {
 
     expect(response?.status()).toBe(404);
   });
+
+  test('the consignment contact select page is no longer served', async ({ animalsJourney, journeyContext, pages }) => {
+    await animalsJourney.startNotification();
+    const referenceNumber = journeyContext.referenceNumber;
+
+    const response = await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/consignment/contact/select`);
+
+    expect(response?.status()).toBe(404);
+  });
 });

@@ -2,7 +2,6 @@ import { test, expect } from '@fixtures';
 import { type AddressType } from '@domain/shared/constants/address-types';
 import {
   addressBookTabLabels,
-  branchTab,
   originOrConsignorTab,
   roleBackedAddressBookTabs,
   rolesLabelOf,
@@ -11,7 +10,7 @@ import {
   transporterTypeFilterLabels,
   unsupportedAddressType,
 } from '@domain/ins/constants/address-book-types';
-import { branchAddressFixture, E2E_ADDRESS_BOOK_FIXTURES } from '@flows/shared/address-book-seed';
+import { E2E_ADDRESS_BOOK_FIXTURES } from '@flows/shared/address-book-seed';
 import { commercialTransporterDetails, transporterRequestOf } from '@domain/ins/constants/trader-transporter';
 import { transporterTypes } from '@domain/ins/constants/transporter-types';
 import { createRunAddresses, runAddressesOnTab } from './run-addresses';
@@ -45,7 +44,7 @@ test.describe('Address book tabs API', () => {
 });
 
 test.describe('Address book tabs', () => {
-  test('the four tabs read in order, Origin and Consignor is current on a plain open and on an unknown tab, and Transporter is offered', async ({
+  test('the three tabs read in order, Origin and Consignor is current on a plain open and on an unknown tab, and Transporter is offered', async ({
     insPages,
   }) => {
     await insPages.addressBookList.open();
@@ -101,38 +100,11 @@ test.describe('Address book tabs', () => {
     await expect(insPages.addressBookList.transporterTypeCell(name)).toHaveText(transporterTypeFilterLabels.COMMERCIAL);
   });
 
-  test('every shared fixture shows on the tab holding its roles, with its roles label, and a branch fixture is absent from the Origin and Consignor tab', async ({
-    insPages,
-    insJourney,
-  }) => {
+  test('every shared fixture shows on the tab holding its roles, with its roles label', async ({ insPages, insJourney }) => {
     for (const { name, roles } of E2E_ADDRESS_BOOK_FIXTURES) {
       await insJourney.toAddressBookTab(tabHolding(roles[0]), { search: name });
 
       await expect(insPages.addressBookList.rolesCell(name)).toHaveText(rolesLabelOf(roles));
     }
-
-    await insJourney.toAddressBookTab(originOrConsignorTab, { search: branchAddressFixture.name });
-
-    await expect(insPages.addressBookList.row(branchAddressFixture.name)).toHaveCount(0);
-  });
-});
-
-test.describe('Address book tabs without JavaScript', () => {
-  test.use({ javaScriptEnabled: false });
-
-  test('following the Branch tab loads it, marks it current and lists the branch address the test added', async ({
-    insPages,
-    addressBookApi,
-  }) => {
-    const { searchTerm, runAddresses } = await createRunAddresses(addressBookApi);
-    await insPages.addressBookList.open();
-
-    await insPages.addressBookList.tabLink(branchTab.label).click();
-    await insPages.addressBookList.search(searchTerm, { submitWith: 'button' });
-
-    await expect(insPages.addressBookList.selectedTab).toHaveText(branchTab.label);
-    await expect(insPages.addressBookList.panelHeading).toHaveText(branchTab.panelHeading);
-    await expect(insPages.addressBookList.bodyRows).toHaveCount(1);
-    await expect(insPages.addressBookList.row(runAddresses.branchAddress.name)).toBeVisible();
   });
 });

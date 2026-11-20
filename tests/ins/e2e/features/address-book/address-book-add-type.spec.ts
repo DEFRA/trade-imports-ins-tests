@@ -22,7 +22,7 @@ const expectTextboxesEmpty = async (form: InsAddressBookFormPage): Promise<void>
 };
 
 test.describe('Choosing an address type before adding an address', () => {
-  test('Add a new address opens Choose an address type with its caption, the four types and their hints in order, Continue and Back to the address book', async ({
+  test('Add a new address opens Choose an address type with its caption, the three types and their hints in order, Continue and Back to the address book', async ({
     pages,
     insPages,
     insJourney,
@@ -85,7 +85,6 @@ test.describe('Choosing an address type before adding an address', () => {
   const roleTickedByAddressType = {
     [addressTypes.originOrConsignor]: addressRoles.placeOfOrigin,
     [addressTypes.destinationConsigneeOrImporter]: addressRoles.consignee,
-    [addressTypes.branch]: addressRoles.branchAddress,
   } as const;
 
   for (const { addressType, label } of addFormOptions) {
@@ -126,17 +125,17 @@ test.describe('Choosing an address type before adding an address', () => {
     insJourney,
   }) => {
     const addPage = insPages.addressBookAdd;
-    await insJourney.toAddressFormFromList({ addressType: addressTypes.branch });
+    await insJourney.toAddressFormFromList({ addressType: addressTypes.destinationConsigneeOrImporter });
     await addPage.fill(addFormAddressWithLineTwoAndCounty(`Abandoned Entry ${Date.now()}`, 'United Kingdom'));
-    await addPage.tickRoles([addressRoles.branchAddress]);
+    await addPage.tickRoles([addressRoles.consignee]);
     await insPages.addressBookList.open();
 
     await insPages.addressBookList.btnAddNewAddress.click();
 
     await expectNoTypeChosen(insPages.addressBookAddressType);
-    await insJourney.chooseAddressType(addressTypes.branch);
+    await insJourney.chooseAddressType(addressTypes.destinationConsigneeOrImporter);
     await expectTextboxesEmpty(addPage);
-    await expect(addPage.rolesOption(addressRoles.branchAddress)).not.toBeChecked();
+    await expect(addPage.rolesOption(addressRoles.consignee)).not.toBeChecked();
   });
 
   test('after a save the next add starts with no type chosen, empty text fields and no role ticked', async ({ insPages, insJourney }) => {

@@ -99,7 +99,7 @@ test.describe('Address book API roles', () => {
     expect(await isolatedOrganisationAddressBookApi.listAddresses(address.name)).toEqual([]);
   });
 
-  test('an update carrying a role outside the six is refused naming the roles and the address keeps its original roles', async ({
+  test('an update carrying a role outside the five is refused naming the roles and the address keeps its original roles', async ({
     isolatedOrganisationAddressBookApi,
   }) => {
     const address = traderAddress(`Kept Known Roles Farm ${Date.now()}`);
@@ -122,25 +122,9 @@ test.describe('Address book API roles', () => {
     expect(await isolatedOrganisationAddressBookApi.listAddresses(address.name)).toEqual([]);
   });
 
-  test('an update adding a branch address role to a receiving address is refused naming the roles and the address keeps its original roles', async ({
-    isolatedOrganisationAddressBookApi,
-  }) => {
-    const address = traderAddress(`Kept Receiving Roles Farm ${Date.now()}`);
-    const created = await isolatedOrganisationAddressBookApi.createAddress({ ...address, roles: [addressRoles.importer] });
-
-    await expectValidationRefusalNamingRoles(
-      isolatedOrganisationAddressBookApi.updateAddress(created.id, {
-        ...address,
-        roles: [addressRoles.importer, addressRoles.branchAddress],
-      }),
-    );
-    expect((await isolatedOrganisationAddressBookApi.getAddress(created.id)).roles).toEqual([addressRoles.importer]);
-  });
-
   for (const [group, roles] of [
     ['sending', [addressRoles.placeOfOrigin, addressRoles.consignor]],
     ['receiving', [addressRoles.consignee, addressRoles.importer, addressRoles.placeOfDestination]],
-    ['branch', [addressRoles.branchAddress]],
   ] as const) {
     test(`an address holding ${group} roles outside the United Kingdom is saved`, async ({ isolatedOrganisationAddressBookApi }) => {
       const created = await isolatedOrganisationAddressBookApi.createAddress({

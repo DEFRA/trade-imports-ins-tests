@@ -37,6 +37,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
 
     const { cphLinks, cphNumberText } = animalsPages.addresses;
 
+    // Cattle is a CPH-triggering commodity line; domestic cat is not (chicken is not on the mandatory journey seed).
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.cattle);
     await animalsJourney.toConsignmentAddressesOfCurrentNotification();
     await animalsPages.addresses.addCph.click();

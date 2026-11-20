@@ -1,14 +1,17 @@
 import { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
+import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { formattedValue } from '@adapters/http/dataverse-client';
+import { timeouts } from '@config/timeouts';
 import { dynamicsBaseTestTimeoutMs } from '@config/dynamics';
 import { defaultUser } from '@config/users';
 import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
 import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { test, expect } from '@fixtures';
 import { parseAppDateText, toIsoDate } from '@utils/date-utils';
 import { waitForAnimalsDynamicsNotification } from '@utils/dynamics/animals-polls';
-import { skipIfComposeEnvironment } from '@utils/playwright/environment';
+import { skipIfComposeEnvironment, skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { setTestTimeout } from '@utils/playwright/test-timeout';
 
 // Traces record APIRequestContext calls with their headers and form bodies: the bearer token and client secret.
@@ -110,6 +113,25 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     expect.soft(row.defraimp_traderreference, 'internal reference').toBeNull();
     expect.soft(row.defraimp_commoditiesnumberofpackages, 'number of packages').toBeNull();
     expect.soft(row.defraimp_routetransitingstates, 'transited countries').toBeNull();
+  });
+
+  test('the submitted notification outbox GBN-AG payload has no issuer', async ({ animalsJourney, journeyContext }) => {
+    skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
+    setTestTimeout(dynamicsBaseTestTimeoutMs);
+    test.slow();
+    await animalsJourney.submitNotification(MANDATORY_ANSWERS);
+    const aggregateId = `Imports.Notification.GBN-AG.${journeyContext.referenceNumber}`;
+    const client = new MongoDbClient();
+
+    try {
+      await client.connect();
+      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
+      await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.long }).toBeGreaterThan(0);
+      const doc = await collection.findOne({ aggregateId });
+      expect(doc?.data.exchangedDocument.issuer).toBeUndefined();
+    } finally {
+      await client.close();
+    }
   });
 
   test('answering yes to unweaned animals is stored in PIMS Dynamics', async ({ animalsJourney, journeyContext, externalRequest }) => {
