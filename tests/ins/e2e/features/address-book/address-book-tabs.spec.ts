@@ -14,16 +14,11 @@ import {
 import { branchAddressFixture, E2E_ADDRESS_BOOK_FIXTURES } from '@flows/shared/address-book-seed';
 import { commercialTransporterDetails, transporterRequestOf } from '@domain/ins/constants/trader-transporter';
 import { transporterTypes } from '@domain/ins/constants/transporter-types';
-import { addressIdsDeletedAfterEachTest } from '@utils/address-book-cleanup';
 import { createRunAddresses, runAddressesOnTab } from './run-addresses';
 
-const createdAddressIds = addressIdsDeletedAfterEachTest('addressBookApi');
-
 test.describe('Address book tabs API', () => {
-  const isolatedOrganisationAddressIds = addressIdsDeletedAfterEachTest('isolatedOrganisationAddressBookApi');
-
   test("listing by a tab's roles returns exactly the addresses holding any of them", async ({ isolatedOrganisationAddressBookApi }) => {
-    const { searchTerm, runAddresses } = await createRunAddresses(isolatedOrganisationAddressBookApi, isolatedOrganisationAddressIds);
+    const { searchTerm, runAddresses } = await createRunAddresses(isolatedOrganisationAddressBookApi);
 
     for (const tab of roleBackedAddressBookTabs) {
       const listed = await isolatedOrganisationAddressBookApi.listAddresses(searchTerm, { roles: tab.roleFilterOptions });
@@ -37,7 +32,7 @@ test.describe('Address book tabs API', () => {
   });
 
   test('listing with no role returns every live address', async ({ isolatedOrganisationAddressBookApi }) => {
-    const { searchTerm, runAddresses } = await createRunAddresses(isolatedOrganisationAddressBookApi, isolatedOrganisationAddressIds);
+    const { searchTerm, runAddresses } = await createRunAddresses(isolatedOrganisationAddressBookApi);
 
     const listed = await isolatedOrganisationAddressBookApi.listAddresses(searchTerm);
 
@@ -69,7 +64,7 @@ test.describe('Address book tabs', () => {
     insJourney,
     addressBookApi,
   }) => {
-    const { searchTerm, runAddresses } = await createRunAddresses(addressBookApi, createdAddressIds);
+    const { searchTerm, runAddresses } = await createRunAddresses(addressBookApi);
 
     for (const tab of roleBackedAddressBookTabs) {
       await insJourney.toAddressBookTab(tab, { search: searchTerm });
@@ -129,7 +124,7 @@ test.describe('Address book tabs without JavaScript', () => {
     insPages,
     addressBookApi,
   }) => {
-    const { searchTerm, runAddresses } = await createRunAddresses(addressBookApi, createdAddressIds);
+    const { searchTerm, runAddresses } = await createRunAddresses(addressBookApi);
     await insPages.addressBookList.open();
 
     await insPages.addressBookList.tabLink(branchTab.label).click();

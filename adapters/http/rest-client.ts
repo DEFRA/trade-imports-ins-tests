@@ -29,6 +29,20 @@ const withoutCallLog = (error: unknown): string => {
   return typeof error === 'string' ? error : 'unknown error';
 };
 
+const retryAfterMs = (retryAfter: string): number => {
+  const seconds = Number(retryAfter);
+  if (retryAfter.trim() !== '' && !Number.isNaN(seconds)) return seconds * 1_000;
+  return Date.parse(retryAfter) - Date.now();
+};
+
+const rateLimitWaitMs = (response: APIResponse, retry: number): number => {
+  const longestWaitMs = 5_000;
+  const retryAfter = response.headers()['retry-after'];
+  const askedWaitMs = retryAfter === undefined ? Number.NaN : retryAfterMs(retryAfter);
+  const waitMs = Number.isNaN(askedWaitMs) ? 1_000 * 2 ** (retry - 1) : askedWaitMs;
+  return Math.min(Math.max(waitMs, 0), longestWaitMs);
+};
+
 export class RestClient {
   constructor(
     private readonly baseUrl: string,
@@ -54,13 +68,30 @@ export class RestClient {
 
   private async send<T>(method: string, path: string, body?: unknown, headers?: Record<string, string>): Promise<T> {
     const url = `${this.baseUrl}${path}`;
-    const { response, responseBody } = await this.exchange(method, url, body, headers);
+    const { response, responseBody } = await this.exchangeWithinRateLimit(method, url, body, headers);
 
     if (!response.ok()) {
       throw new RestClientError(response.status(), method, url, responseBody);
     }
 
     return (responseBody ? JSON.parse(responseBody) : undefined) as T;
+  }
+
+  private async exchangeWithinRateLimit(
+    method: string,
+    url: string,
+    body: unknown,
+    headers: Record<string, string> | undefined,
+  ): Promise<{ response: APIResponse; responseBody: string }> {
+    const tooManyRequests = 429;
+    const maxRetries = 3;
+    for (let retry = 1; ; retry += 1) {
+      const exchanged = await this.exchange(method, url, body, headers);
+      if (exchanged.response.status() !== tooManyRequests || retry > maxRetries) return exchanged;
+      const waitMs = rateLimitWaitMs(exchanged.response, retry);
+      console.warn(`${method} ${url} responded ${tooManyRequests}, retry ${retry} of ${maxRetries} in ${waitMs}ms`);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    }
   }
 
   private async exchange(

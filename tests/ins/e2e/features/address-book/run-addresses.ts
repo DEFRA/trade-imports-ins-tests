@@ -40,17 +40,16 @@ const runAddressesOf = (searchTerm: string) => {
 
 export const createAddressHolding = async (
   api: AddressBookApiClient,
-  createdAddressIds: string[],
   { name, roles }: Pick<RunAddress, 'name' | 'roles'>,
 ): Promise<void> => {
-  createdAddressIds.push((await api.createAddress({ ...traderAddress(name), roles })).id);
+  await api.createAddress({ ...traderAddress(name), roles });
 };
 
-export const createRunAddresses = async (api: AddressBookApiClient, createdAddressIds: string[]) => {
+export const createRunAddresses = async (api: AddressBookApiClient) => {
   const searchTerm = newRunSearchTerm();
   const runAddresses = runAddressesOf(searchTerm);
   for (const runAddress of Object.values<RunAddress>(runAddresses)) {
-    await createAddressHolding(api, createdAddressIds, runAddress);
+    await createAddressHolding(api, runAddress);
   }
   return { searchTerm, runAddresses };
 };
@@ -59,10 +58,10 @@ export const runAddressesOnTab = (runAddresses: Record<string, RunAddress>, tab:
   Object.values(runAddresses).filter(({ roles }) => tabHolding(roles[0]) === tab);
 
 export const createRunAddressesAndFilterListByRole = async (
-  { insPages, api, createdAddressIds }: { insPages: InsPages; api: AddressBookApiClient; createdAddressIds: string[] },
+  { insPages, api }: { insPages: InsPages; api: AddressBookApiClient },
   role: AddressRole,
 ) => {
-  const { searchTerm, runAddresses } = await createRunAddresses(api, createdAddressIds);
+  const { searchTerm, runAddresses } = await createRunAddresses(api);
   await insPages.addressBookList.open();
   await insPages.addressBookList.filter({ term: searchTerm, submitWith: 'button', label: roleOptionLabels[role] });
   return { searchTerm, runAddresses };

@@ -1,7 +1,6 @@
 import { test, expect } from '@fixtures';
 import type { TransporterRequest } from '@adapters/http/address-book-api-client';
 import { COMMERCIAL_TRANSPORTER_COUNTRY_CODE, transporterTypes } from '@domain/ins/constants/transporter-types';
-import { transporterIdsDeletedAfterEachTest } from '@utils/transporter-cleanup';
 
 const commercialTransporter: Omit<TransporterRequest, 'name'> = {
   addressLine1: '7 Dockside Way',
@@ -15,8 +14,6 @@ const commercialTransporter: Omit<TransporterRequest, 'name'> = {
 };
 
 test.describe('A transporter added through the INS address book', { tag: ['@address-book', '@ins-frontend'] }, () => {
-  const createdTransporterIds = transporterIdsDeletedAfterEachTest();
-
   test("is on the transporter list of the organisation's next notification, tagged New, with its approval number, and can be picked and saved", async ({
     animalsJourney,
     animalsPages,
@@ -24,7 +21,6 @@ test.describe('A transporter added through the INS address book', { tag: ['@addr
   }) => {
     const name = `Cross Service Haulage Ltd ${Date.now()}`;
     const created = await addressBookApi.createTransporter({ ...commercialTransporter, name });
-    createdTransporterIds.push(created.id);
 
     await animalsJourney.startNotification();
     await animalsJourney.answerCommodity();
@@ -51,8 +47,7 @@ test.describe('A transporter added through the INS address book', { tag: ['@addr
     addressBookApi,
   }) => {
     const name = `Returning Haulage Ltd ${Date.now()}`;
-    const created = await addressBookApi.createTransporter({ ...commercialTransporter, name });
-    createdTransporterIds.push(created.id);
+    await addressBookApi.createTransporter({ ...commercialTransporter, name });
 
     await animalsJourney.startNotification();
     await animalsJourney.answerCommodity();
