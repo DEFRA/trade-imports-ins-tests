@@ -85,22 +85,24 @@ export class AddressBookApiClient {
     return page.items;
   }
 
-  private async listOnEveryPage<T>(path: string, query: string): Promise<T[]> {
+  private async listOnEveryPage<T extends { id: string }>(path: string, query: string): Promise<T[]> {
     const pageSize = 100;
-    const records: T[] = [];
+    const recordsById = new Map<string, T>();
     let page = 1;
     let totalPages = 1;
     while (page <= totalPages) {
       const params = new URLSearchParams({ q: query, page: String(page), pageSize: String(pageSize) });
       const result = await this.rest.get<ApiPage<T>>(`${path}?${params}`, organisationHeaders(this.organisationId));
-      records.push(...result.items);
+      for (const record of result.items) {
+        if (!recordsById.has(record.id)) recordsById.set(record.id, record);
+      }
       totalPages = result.totalPages;
       page += 1;
     }
-    return records;
+    return [...recordsById.values()];
   }
 
-  /** Every live address of the organisation matching the search, from every page, newest first. */
+  /** Every live address of the organisation matching the search, from every page, once each, newest first. */
   async listAddressesOnEveryPage(query: string): Promise<AddressBookRecord[]> {
     return this.listOnEveryPage<AddressBookRecord>(this.path(), query);
   }
@@ -144,7 +146,7 @@ export class AddressBookApiClient {
     return page.items;
   }
 
-  /** Every live transporter of the organisation matching the search, from every page, newest first. */
+  /** Every live transporter of the organisation matching the search, from every page, once each, newest first. */
   async listTransportersOnEveryPage(query: string): Promise<TransporterRecord[]> {
     return this.listOnEveryPage<TransporterRecord>(this.transporterPath(), query);
   }

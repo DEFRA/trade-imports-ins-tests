@@ -1,7 +1,8 @@
 const GENERATED_PARTS: Record<string, string> = {
   '<stamp>': String.raw`\d{13}`,
   '<uuid>': '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
-  '<hex>': '[0-9a-f]+',
+  '<hex8>': '[0-9a-f]{8}',
+  '<hex32>': '[0-9a-f]{32}',
   '<index>': String.raw`\d+`,
   '<words>': '[A-Za-z][A-Za-z ,-]*',
 };
@@ -9,8 +10,8 @@ const GENERATED_PARTS: Record<string, string> = {
 /**
  * The names tests give the address book records they create in the shared e2e organisation.
  * Each placeholder stands for the part a test generates or fills in:
- * `<stamp>` a `Date.now()`, `<uuid>` a `randomUUID()`, `<hex>` part of one, `<index>` a loop index
- * and `<words>` a label from a list. A new spec that creates a record adds its name here.
+ * `<stamp>` a `Date.now()`, `<uuid>` a `randomUUID()`, `<hex8>` its first 8 characters,
+ * `<hex32>` its 32 hex digits without the hyphens, `<index>` a loop index and `<words>` a label from a list. A new spec that creates a record adds its name here.
  */
 export const TEST_RECORD_NAME_TEMPLATES: readonly string[] = [
   'A11y Added Farm <stamp>',
@@ -105,10 +106,10 @@ export const TEST_RECORD_NAME_TEMPLATES: readonly string[] = [
   'Delete Title Farm <stamp>',
   'Edit Title Farm <stamp>',
   'View Title Farm <stamp>',
-  'Run <hex> Branch',
-  'Run <hex> Consignee And Destination',
-  'Run <hex> Consignor',
-  'Run <hex> Importer',
+  'Run <hex32> Branch',
+  'Run <hex32> Consignee And Destination',
+  'Run <hex32> Consignor',
+  'Run <hex32> Importer',
   'Tabs Transporter <stamp>',
   'Typefilter <words> <uuid> First Commercial',
   'Typefilter <words> <uuid> Private <index>',
@@ -128,8 +129,8 @@ export const TEST_RECORD_NAME_TEMPLATES: readonly string[] = [
   'Germinal Return Farm <stamp>',
   'Picker View Farm <stamp>',
   'Return Farm <stamp>',
-  'Already in the book <words> <stamp>-<hex>',
-  'Handshake <words> <stamp>-<hex>',
+  'Already in the book <words> <stamp>-<hex8>',
+  'Handshake <words> <stamp>-<hex8>',
   'Copied Farm <stamp>',
   'Doomed Farm <stamp>',
   'Full Detail Farm <stamp>',
@@ -157,7 +158,7 @@ export const TEST_RECORD_NAME_TEMPLATES: readonly string[] = [
   'Cross Service Haulage Ltd <stamp>',
   'Returning Haulage Ltd <stamp>',
   'Commercial scope private transporter <stamp>',
-  'Lough Neagh Livestock Haulage Ltd <hex>',
+  'Lough Neagh Livestock Haulage Ltd <hex8>',
   'Abandoned Commercial Transporter <stamp>',
   'Saved private transporter <stamp>',
   'Consignor Only Farm <stamp>',
@@ -194,7 +195,7 @@ const escapedForPattern = (literal: string): string => literal.replaceAll(/[.*+?
 
 const patternOf = (template: string): RegExp => {
   const source = template
-    .split(/(<[a-z]+>)/)
+    .split(/(<[a-z]+\d*>)/)
     .map((part) => (Object.hasOwn(GENERATED_PARTS, part) ? GENERATED_PARTS[part] : escapedForPattern(part)))
     .join('');
   return new RegExp(`^${source}$`);

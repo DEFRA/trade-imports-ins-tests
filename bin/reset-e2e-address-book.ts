@@ -58,15 +58,15 @@ const targetEnvironment = (): string => {
   return environment;
 };
 
-const isOwnedByAnotherSuite = (name: string): boolean => {
+const isSeededOrPerformanceTestRecord = (name: string): boolean => {
   const seededNames = new Set(E2E_ADDRESS_BOOK_FIXTURES.map((fixture) => fixture.name));
-  return seededNames.has(name) || name === 'Perf Test Holding' || /^Address Book Load \d+$/.test(name);
+  return seededNames.has(name) || name === 'Perf Test Holding' || name.startsWith('Address Book Load ');
 };
 
 const sortRecords = (records: readonly NamedRecord[]): Sorted => {
   const sorted: Sorted = { deletes: [], kept: [] };
   for (const record of records) {
-    const template = isOwnedByAnotherSuite(record.name) ? undefined : testRecordNameTemplateOf(record.name);
+    const template = isSeededOrPerformanceTestRecord(record.name) ? undefined : testRecordNameTemplateOf(record.name);
     if (template) {
       sorted.deletes.push({ record, template });
     } else {

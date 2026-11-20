@@ -88,8 +88,9 @@ export class RestClient {
     for (let retry = 1; ; retry += 1) {
       const exchanged = await this.exchange(method, url, body, headers);
       if (exchanged.response.status() !== tooManyRequests || retry > maxRetries) return exchanged;
-      console.warn(`${method} ${url} responded ${tooManyRequests}, retry ${retry} of ${maxRetries}`);
-      await new Promise((resolve) => setTimeout(resolve, rateLimitWaitMs(exchanged.response, retry)));
+      const waitMs = rateLimitWaitMs(exchanged.response, retry);
+      console.warn(`${method} ${url} responded ${tooManyRequests}, retry ${retry} of ${maxRetries} in ${waitMs}ms`);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
     }
   }
 
