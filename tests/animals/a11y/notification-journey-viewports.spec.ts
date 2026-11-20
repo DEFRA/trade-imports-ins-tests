@@ -17,7 +17,7 @@ for (const [viewportName, viewport] of Object.entries(narrowViewports)) {
       animalsPages,
       runA11yScan,
     }) => {
-      await test.step('Review your notification (draft, continue refused with unfinished sections)', async () => {
+      await test.step('Draft review, continue refused with unfinished sections', async () => {
         const draftReference = await animalsSeededJourney.createDraftNotification('unlocked');
         await animalsSeededJourney.resumeInUi(draftReference, animalsPages.notificationView);
         await animalsPages.notificationView.continueButton.click();
@@ -42,7 +42,7 @@ for (const [viewportName, viewport] of Object.entries(narrowViewports)) {
         await scanNarrowPage(page, runA11yScan);
       });
 
-      await test.step('Review your notification (amending)', async () => {
+      await test.step('Amend review (amending)', async () => {
         const amendReference = await animalsSeededJourney.createAmendNotification();
         await animalsSeededJourney.resumeInUi(amendReference, animalsPages.notificationView);
         await scanNarrowPage(page, runA11yScan);

@@ -15,7 +15,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     const { cphSection, cphLinks } = animalsPages.addresses;
 
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.domesticCat);
-    await animalsJourney.toRolesAndAddressesOfCurrentNotification();
+    await animalsJourney.toConsignmentAddressesOfCurrentNotification();
     await expect(cphSection).toBeHidden();
 
     await animalsPages.cphNumber.open(animalsPages.addresses.referenceNumberFromUrl());
@@ -26,12 +26,12 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await expect(animalsPages.cphNumber.heading).toBeHidden();
 
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.chicken);
-    await animalsJourney.toRolesAndAddressesOfCurrentNotification();
+    await animalsJourney.toConsignmentAddressesOfCurrentNotification();
     await expect(cphSection).toBeVisible();
     await expect(cphLinks).toHaveText(['Add a CPH number']);
   });
 
-  test('a saved CPH number shows in its slashed county/parish/holding form on the addresses page, Change pre-fills county, parish and holding, and Back returns to the addresses page, whose Continue reaches the contact address', async ({
+  test('a saved CPH number shows as 12/345/6789 on the addresses page, Change pre-fills county, parish and holding, and Back returns to the addresses page, whose Continue reaches the contact address', async ({
     animalsJourney,
     animalsPages,
   }) => {
@@ -42,7 +42,7 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     const { cphLinks, cphNumberText } = animalsPages.addresses;
 
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.cattle);
-    await animalsJourney.toRolesAndAddressesOfCurrentNotification();
+    await animalsJourney.toConsignmentAddressesOfCurrentNotification();
     await animalsPages.addresses.addCph.click();
     await expect(animalsPages.cphNumber.heading).toBeVisible();
     await animalsPages.cphNumber.fillCphNumber();

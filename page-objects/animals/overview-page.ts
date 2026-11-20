@@ -10,6 +10,14 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Overview' });
   }
 
+  get commodityTotalsRegion(): Locator {
+    return this.region('Your commodities');
+  }
+
+  get sectionRegions(): Locator {
+    return this.taskListRegion.getByRole('region');
+  }
+
   get numberedSectionHeadings(): Locator {
     return this.page.getByRole('heading', { level: 3, name: /^\d+\. / });
   }
@@ -18,15 +26,16 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Review and submit' });
   }
 
+  get buttons(): Locator {
+    return this.page.getByRole('main').getByRole('button');
+  }
+
   task(name: string): Locator {
     return this.page.getByRole('link', { name, exact: true });
   }
 
   taskTitlesInSectionHeaded(heading: string): Locator {
-    return this.page
-      .getByRole('heading', { level: 3, name: heading, exact: true })
-      .locator('xpath=following-sibling::ul[contains(@class, "app-task-list")][1]')
-      .getByRole('link');
+    return this.region(heading).getByRole('link');
   }
 
   get taskNames(): Locator {

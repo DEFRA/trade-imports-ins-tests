@@ -84,9 +84,7 @@ test.describe('Notification created outbox event', { tag: '@mongodb' }, () => {
     await animalsPages.notificationView.btnCopyAsNew.click();
     await animalsPages.overview.heading.waitFor();
 
-    const copiedReferenceNumber = (await animalsPages.notificationView.referenceNumberCaption.textContent())?.match(
-      REFERENCE_NUMBER_PATTERN,
-    )?.[0];
+    const copiedReferenceNumber = (await animalsPages.notificationView.journeyStrip.textContent())?.match(REFERENCE_NUMBER_PATTERN)?.[0];
     expect(copiedReferenceNumber).toBeDefined();
     expect(copiedReferenceNumber).not.toEqual(sourceReferenceNumber);
 

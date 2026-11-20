@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { checkYourAnswersHeadingText } from '@page-objects/plants/notification-view-page';
 
 test.describe('Back on the review page', () => {
   test('after Save and continue from the contact address it opens the contact address, and Back steps back through the pages Save and continue was pressed on', async ({
@@ -30,12 +31,12 @@ test.describe('Back on the review page', () => {
     await expect(plantsPages.dashboard.heading).toBeVisible();
     await plantsNotificationActions.cancelAmend(reference);
     await plantsNotificationActions.amendNotification(reference);
-    await expect(plantsPages.notificationView.heading).toBeVisible();
+    await expect(plantsPages.notificationView.heading).toHaveText(checkYourAnswersHeadingText);
 
     await plantsPages.notificationView.change('Change country of origin (Import details)').click();
     await expect(plantsPages.origin.heading).toBeVisible();
     await plantsPages.origin.linkBack.click();
-    await expect(plantsPages.notificationView.heading).toBeVisible();
+    await expect(plantsPages.notificationView.heading).toHaveText(checkYourAnswersHeadingText);
 
     await plantsPages.notificationView.linkBack.click();
     await expect(plantsPages.dashboard.heading).toBeVisible();
@@ -54,7 +55,7 @@ test.describe('Back on the review page', () => {
     await pages.page.reload();
     await plantsPages.origin.linkBack.click();
 
-    await expect(plantsPages.notificationView.heading).toBeVisible();
+    await plantsPages.notificationView.viewHeader.expectDraftReview();
   });
 
   test('after Continue is refused it still opens the contact address', async ({ plantsPages, plantsJourney, addressBookApi }) => {

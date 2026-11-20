@@ -1,0 +1,10 @@
+export const CONSIGNMENT_ADDRESSES = 'Consignment addresses';
+export const CONSIGNMENT_ADDRESSES_CHANGE_LINK = 'Change consignment addresses';
+export const ADDRESSES_CAPTION = 'Addresses';
+export const ADDRESSES_SECTION = `5. ${ADDRESSES_CAPTION}`;
+export const CONSIGNMENT_ADDRESSES_INCOMPLETE = 'Complete consignment addresses';
+export const ORIGIN_OF_IMPORT_CARD = 'Origin of import';
+export const MAIN_IMPORT_REASON_CARD = 'Main import reason';
+export const ADDITIONAL_DETAILS_CARD = 'Additional details';
+export const ARRIVAL_DETAILS_CARD = 'Arrival details';
+export const CONTACT_ADDRESS_CARD = 'Contact address';

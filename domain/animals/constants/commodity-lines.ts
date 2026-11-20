@@ -21,7 +21,12 @@ export const commodityLines = {
 
 export const speciesCheckboxValue = (line: CommodityLine): string => `${line.commodityCode}|${line.latinName}`;
 
-export const speciesCardTitle = (line: CommodityLine): string => `${line.commodityCode} — ${line.latinName}`;
+export const commodityCardTitle = (line: CommodityLine): string => line.commodityCode;
+
+export const speciesBlockHeading = (line: CommodityLine): string => {
+  const name = line.latinName.toLowerCase();
+  return `${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+};
 
 export const speciesLabel = (species: SpeciesNamePair): string =>
   species.commonName ? `${species.latinName} (${species.commonName})` : species.latinName;

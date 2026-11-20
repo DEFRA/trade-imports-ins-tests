@@ -1,10 +1,10 @@
+import { ADDRESSES_CAPTION } from '@domain/animals/constants/consignment-addresses-page';
 import { SET_BASES } from '@page-objects/shared/sets';
 
 import { test, expect } from '@fixtures';
 import { skipIfNonStubStackEnvironment, skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
 import type { PartyRole } from '@page-objects/animals/addresses-page';
 
-const PARTIES_CAPTION = 'Consignment parties';
 const ADD_NEW_ADDRESS = 'Add a new address';
 
 const PARTY_ADD_CONTROL_CASES: Array<{ role: PartyRole; description: string }> = [
@@ -50,7 +50,7 @@ test.describe('Addresses are read-only in the journey', () => {
         test('holds only the caption and the heading in the heading row in stub mode', async ({ animalsJourney }) => {
           skipIfNonStubStackEnvironment('the INS add control is shown when animals-frontend runs outside stub mode (compose or CDP)');
           const picker = animalsJourney.partyPicker(role);
-          await expect(picker.headingRowParts).toHaveText([PARTIES_CAPTION, picker.expectedHeading]);
+          await expect(picker.headingRowParts).toHaveText([ADDRESSES_CAPTION, picker.expectedHeading]);
         });
 
         test('offers one Add a new address button to INS beside the heading when the full stack is running', async ({
@@ -60,7 +60,7 @@ test.describe('Addresses are read-only in the journey', () => {
           skipUnlessNonStubStackEnvironment('the handshake button is only rendered outside stub mode (compose or CDP)');
           const picker = animalsJourney.partyPicker(role);
           await expect(picker.saveAndContinue).toBeVisible();
-          await expect(picker.headingRowParts).toHaveText([PARTIES_CAPTION, picker.expectedHeading, ADD_NEW_ADDRESS]);
+          await expect(picker.headingRowParts).toHaveText([ADDRESSES_CAPTION, picker.expectedHeading, ADD_NEW_ADDRESS]);
           await expect(picker.addNewAddress).toHaveAttribute('href', /\/address-book\/add\?journey-type=gbn-ag/);
           await expect(pages.page.getByRole('button', { name: ADD_NEW_ADDRESS })).toHaveCount(1);
           await expect(pages.page.getByRole('link', { name: ADD_NEW_ADDRESS })).toHaveCount(0);

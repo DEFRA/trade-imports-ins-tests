@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/shared/base-page';
 
@@ -55,7 +56,7 @@ export class AnimalsAddressesPage extends NotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Consignment addresses' });
+    return this.page.getByRole('heading', { level: 1, name: CONSIGNMENT_ADDRESSES });
   }
 
   get intro(): Locator {

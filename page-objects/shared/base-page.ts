@@ -27,6 +27,7 @@ const RETURN_PARAMETER = 'return';
 /** An optional `return=` marker followed by an optional trail. */
 export const OPTIONAL_RETURN_AND_TRAIL_PATTERN = `(?:[?&]${RETURN_PARAMETER}=[^&#]*)?(?:[?&]${TRAIL_PARAMETER}=[^#]*)?`;
 export const TRAIL_START = { overview: 'overview', dashboard: 'dashboard', ins: 'ins' } as const;
+export const TASK_LIST_NAME = 'Notification task list';
 
 /** `?from=` followed by `places`, newest last, URI-encoded and joined by commas. */
 export function trailQuery(places: string[]): string {
@@ -44,6 +45,7 @@ export function originOf(envVar: Parameters<typeof requireBaseUrl>[0]): string {
 
 export type SignInIdentity = { userId?: string; organisationSbi?: string };
 export type OpenOptions = SignInIdentity & { attemptSignIn?: boolean };
+export type OpenViewOptions = OpenOptions & { waitForReview?: boolean };
 
 export class BasePage {
   constructor(protected readonly page: Page) {}
@@ -260,11 +262,23 @@ export class NotificationPage extends BasePage {
     return SET_BASES.liveAnimals;
   }
 
+  get taskListHeading(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: TASK_LIST_NAME });
+  }
+
+  get taskListRegion(): Locator {
+    return this.region(TASK_LIST_NAME);
+  }
+
+  region(name: string): Locator {
+    return this.page.getByRole('region', { name, exact: true });
+  }
+
   fieldHint(fieldId: string): Locator {
     return this.page.locator(`#${fieldId}-hint`);
   }
 
-  get cancelAmend(): Locator {
+  get stripCancelAmend(): Locator {
     return this.journeyStrip.getByRole('link', { name: 'Cancel amend', exact: true });
   }
 
@@ -278,6 +292,14 @@ export class NotificationPage extends BasePage {
 
   get buttonGroup(): Locator {
     return this.page.locator('.govuk-button-group');
+  }
+
+  get btnCancelAmend(): Locator {
+    return this.page.getByRole('main').getByRole('button', { name: 'Cancel amend', exact: true });
+  }
+
+  get endControls(): Locator {
+    return this.page.locator('form[novalidate] .govuk-button-group > *');
   }
 
   get formButtons(): Locator {

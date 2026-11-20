@@ -4,11 +4,9 @@ import { uniquelyNamedCommercialTransporter } from '@domain/animals/constants/tr
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
 import { govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
 import { getRelativeDatePickerValue } from '@utils/date-utils';
-import { eicarPdfUpload } from '@utils/eicar-upload';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { writePaddedPdf } from '@resources/file-upload/padded-pdf';
 import { DOCUMENT_ISSUE_DATE, MAX_FILE_SIZE_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-upload/constants';
-import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 const IDENTIFIER_MAX_LENGTH = 58;
 
@@ -47,7 +45,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.overview.heading.waitFor();
     });
 
-    await test.step('Review your notification with validation errors', async () => {
+    await test.step('Draft review with validation errors', async () => {
       await animalsPages.overview.reviewAndSubmitButton.click();
       await animalsPages.notificationView.heading.waitFor();
       await animalsPages.notificationView.continueButton.click();
@@ -120,12 +118,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Upload documents with an infected file', async () => {
-      const reference = `PWVIRUS${Date.now()}`;
-      await animalsPages.accompanyingDocuments.fillDocument(reference, DOCUMENT_ISSUE_DATE, eicarPdfUpload());
-      await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
-      await expect(animalsPages.accompanyingDocuments.documentRow(reference)).toContainText('Virus found', {
-        timeout: fileUploadTimeouts.virusScanComplete,
-      });
+      const reference = await animalsPages.accompanyingDocuments.uploadInfectedDocumentAndWaitForVirusFound();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
       await animalsPages.accompanyingDocuments.removeDocument(1).click();

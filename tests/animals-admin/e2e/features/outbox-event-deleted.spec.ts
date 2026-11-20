@@ -1,3 +1,4 @@
+import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
@@ -39,7 +40,7 @@ test.describe('Notification deleted outbox events', { tag: '@mongodb' }, () => {
       expect(doc.timestamp).toBeInstanceOf(Date);
       expect(doc.metadata.correlationId).toBeDefined();
       expect(doc.data.exchangedDocument.identifier).toBe(referenceNumber);
-      expect(doc.data.exchangedDocument.notificationStatusCode).toBe('DELETED');
+      expect(doc.data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.deleted);
       expect(doc.data.exchangedDocument.versionId).toBeUndefined();
     } finally {
       await client.close();
@@ -73,9 +74,13 @@ test.describe('Notification deleted outbox events', { tag: '@mongodb' }, () => {
       expect(doc.timestamp).toBeInstanceOf(Date);
       expect(doc.metadata.correlationId).toBeDefined();
       expect(doc.data.exchangedDocument.identifier).toBe(referenceNumber);
-      expect(doc.data.exchangedDocument.notificationStatusCode).toBe('DELETED');
+      expect(doc.data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.deleted);
       expect(doc.data.exchangedDocument.versionId).toBe(1);
-      expect(doc.statusChanges?.map(({ status }) => status)).toEqual(['DRAFT', 'SUBMITTED', 'DELETED']);
+      expect(doc.statusChanges?.map(({ status }) => status)).toEqual([
+        notificationStatuses.draft,
+        notificationStatuses.submitted,
+        notificationStatuses.deleted,
+      ]);
     } finally {
       await client.close();
     }

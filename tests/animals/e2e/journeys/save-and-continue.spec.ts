@@ -1,4 +1,6 @@
-import { commodityLines } from '@domain/animals/constants/commodity-lines';
+import { basename } from 'node:path';
+import { CONSIGNMENT_ADDRESSES_INCOMPLETE } from '@domain/animals/constants/consignment-addresses-page';
+import { commodityLines, speciesBlockHeading } from '@domain/animals/constants/commodity-lines';
 import { openReviewFromCompleteOverview } from '@page-objects/shared/journey-checks';
 import { TRAIL_START } from '@page-objects/shared/base-page';
 import { certificationPurposes } from '@domain/animals/constants/certification-purposes';
@@ -15,33 +17,48 @@ test.describe('Save and continue through a new notification', () => {
     async ({ animalsJourney, animalsPages, pages }) => {
       test.slow();
 
-      const referenceNumber = await animalsJourney.walkCattleByAir(certificateDocument('AWBDOC'));
+      const document = certificateDocument('AWBDOC');
+      const referenceNumber = await animalsJourney.walkCattleByAir(document);
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
 
       await openReviewFromCompleteOverview(animalsPages.overview, animalsJourney, referenceNumber, AIR_OR_SEA_OVERVIEW_TASKS);
 
-      const importDetails = animalsPages.notificationView.summaryCard('Import details');
+      const originOfImport = animalsPages.notificationView.originOfImportCard;
       await expect(animalsPages.notificationView.regionOfOriginCode).toHaveText('FR-75');
-      await expect(animalsPages.notificationView.summaryValue(importDetails, 'Internal reference number')).toHaveText('CATTLE-2026-01');
+      await expect(animalsPages.notificationView.summaryValue(originOfImport, 'Internal reference number')).toHaveText('CATTLE-2026-01');
 
-      const speciesCard = animalsPages.notificationView.speciesCard(commodityLines.cattle);
-      await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Species')).toHaveText(commodityLines.cattle.latinName);
-      await expect(animalsPages.notificationView.summaryValue(speciesCard, 'Number of animals')).toHaveText('2');
+      const speciesBlock = animalsPages.notificationView.speciesBlock(commodityLines.cattle);
+      await expect(animalsPages.notificationView.whatAreYouImportingSpecies).toHaveText(speciesBlockHeading(commodityLines.cattle));
+      await expect(animalsPages.notificationView.summaryValue(speciesBlock, 'Number of animals')).toHaveText('2');
 
-      const reasonForImport = animalsPages.notificationView.summaryCard('Reason for import');
-      await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Reason for import')).toHaveText('Internal market');
-      await expect(animalsPages.notificationView.summaryValue(reasonForImport, 'Purpose in the market')).toHaveText('Breeding');
+      const mainImportReason = animalsPages.notificationView.mainImportReasonCard;
+      await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Main import reason')).toHaveText('Internal market');
+      await expect(animalsPages.notificationView.summaryValue(mainImportReason, 'Purpose in the market')).toHaveText('Breeding');
 
-      const additionalAnimalDetails = animalsPages.notificationView.summaryCard('Additional animal details');
-      await expect(animalsPages.notificationView.summaryValue(additionalAnimalDetails, 'Certified for')).toHaveText(
+      const additionalDetails = animalsPages.notificationView.additionalDetailsCard;
+      await expect(animalsPages.notificationView.summaryValue(additionalDetails, 'Certified for')).toHaveText(
         certificationPurposes.furtherKeeping.display,
       );
 
       const transportDetails = animalsPages.notificationView.summaryCard('Transport details');
       await expect(animalsPages.notificationView.summaryValue(transportDetails, 'Name')).toContainText('García Livestock Transport SL');
 
-      const rolesAndAddresses = animalsPages.notificationView.summaryCard('Roles and addresses');
-      await expect(animalsPages.notificationView.summaryValue(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText(
+      const documentCard = animalsPages.notificationView.documentCard(1);
+      await expect(animalsPages.notificationView.summaryKeys(documentCard)).toHaveText([
+        'Document reference',
+        'Document type',
+        'Date of issue',
+        'Attachment',
+      ]);
+      await expect(animalsPages.notificationView.summaryValue(documentCard, 'Document reference')).toHaveText(document.reference);
+      await expect(animalsPages.notificationView.summaryValue(documentCard, 'Document type')).toHaveText(
+        'Other veterinary certificate / veterinary declaration',
+      );
+      await expect(animalsPages.notificationView.summaryValue(documentCard, 'Date of issue')).toHaveText(document.issueDate);
+      await expect(animalsPages.notificationView.summaryValue(documentCard, 'Attachment')).toHaveText(basename(document.filePath));
+
+      const addresses = animalsPages.notificationView.addressesCard;
+      await expect(animalsPages.notificationView.summaryValue(addresses, 'County parish holding (CPH) number')).toHaveText(
         CPH_NUMBER_DISPLAY,
       );
 
@@ -71,7 +88,7 @@ test.describe('Save and continue through a new notification', () => {
   }) => {
     test.slow();
 
-    const referenceNumber = await animalsJourney.walkToRolesAndAddressesWithoutCph();
+    const referenceNumber = await animalsJourney.walkToConsignmentAddressesWithoutCph();
 
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.contactAddress.heading).toBeVisible();
@@ -81,13 +98,13 @@ test.describe('Save and continue through a new notification', () => {
     await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
     await animalsPages.contactAddress.saveAndContinue.click();
 
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
-    await expect(animalsPages.notificationView.errorSummary).toContainText('Complete reason for import');
-    await expect(animalsPages.notificationView.errorSummary).toContainText('Complete roles and addresses');
+    await expect(animalsPages.notificationView.errorSummary).toContainText('Complete main import reason');
+    await expect(animalsPages.notificationView.errorSummary).toContainText(CONSIGNMENT_ADDRESSES_INCOMPLETE);
 
     await animalsPages.notificationView.continueButton.click();
-    await expect(animalsPages.notificationView.heading).toBeVisible();
+    await animalsPages.notificationView.viewHeader.expectDraftReview();
     await expect(animalsPages.notificationView.errorSummary).toBeFocused();
   });
 

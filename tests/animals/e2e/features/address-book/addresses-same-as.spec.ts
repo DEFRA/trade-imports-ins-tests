@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { test, expect } from '@fixtures';
 import { heldAsConsignee, heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
@@ -35,7 +36,7 @@ test.describe('Same-as shortcuts fill a party from a paired party', () => {
         email: 'consignee@example.co.uk',
       });
 
-      await animalsJourney.toRolesAndAddressesWithSourcePartiesChosen([
+      await animalsJourney.toConsignmentAddressesWithSourcePartiesChosen([
         ['Place of origin', originRecord.name],
         ['Consignee', consigneeRecord.name],
       ]);
@@ -91,7 +92,7 @@ test.describe('Same-as shortcuts fill a party from a paired party', () => {
         email: 'second-origin@example.co.uk',
       });
 
-      await animalsJourney.toRolesAndAddressesWithSourcePartiesChosen([['Place of origin', firstOrigin.name]]);
+      await animalsJourney.toConsignmentAddressesWithSourcePartiesChosen([['Place of origin', firstOrigin.name]]);
       await animalsPages.addresses.sameAsParty('Consignor').click();
       await expect(animalsPages.addresses.heading).toBeVisible();
 
@@ -106,7 +107,7 @@ test.describe('Same-as shortcuts fill a party from a paired party', () => {
   );
 
   test(
-    "shows the importer filled from the consignee on the review with the consignee record's full details",
+    "shows the importer filled from the consignee on the review with the consignee record's name, address lines and country and no telephone or email",
     { tag: '@address-book' },
     async ({ animalsJourney, animalsPages, addressBookApi }) => {
       const stamp = Date.now();
@@ -126,22 +127,25 @@ test.describe('Same-as shortcuts fill a party from a paired party', () => {
         email: 'full.detail.consignee@example.co.uk',
       });
 
-      await animalsJourney.toRolesAndAddressesWithSourcePartiesChosen([['Consignee', consigneeRecord.name]]);
+      await animalsJourney.toConsignmentAddressesWithSourcePartiesChosen([['Consignee', consigneeRecord.name]]);
       await animalsPages.addresses.sameAsParty('Importer').click();
       await expect(animalsPages.addresses.heading).toBeVisible();
 
       const referenceNumber = animalsPages.addresses.referenceNumberFromUrl();
       await animalsPages.notificationView.open(referenceNumber);
-      const importerRow = animalsPages.notificationView.partyRow('Roles and addresses', 'Importer');
-      await expect(importerRow).toContainText(consigneeRecord.name);
-      await expect(importerRow).toContainText(consigneeRecord.addressLine1);
-      await expect(importerRow).toContainText(consigneeRecord.addressLine2);
-      await expect(importerRow).toContainText(consigneeRecord.townOrCity);
-      await expect(importerRow).toContainText(consigneeRecord.county);
-      await expect(importerRow).toContainText(consigneeRecord.postcode);
-      await expect(importerRow).toContainText('United Kingdom');
-      await expect(importerRow).toContainText('01539 555 0199');
-      await expect(importerRow).toContainText('full.detail.consignee@example.co.uk');
+      const importerValue = animalsPages.notificationView.partyRow(CONSIGNMENT_ADDRESSES, 'Importer').getByRole('definition').first();
+      await expect(importerValue).toHaveText(
+        [
+          consigneeRecord.name,
+          consigneeRecord.addressLine1,
+          consigneeRecord.addressLine2,
+          consigneeRecord.townOrCity,
+          consigneeRecord.county,
+          consigneeRecord.postcode,
+          'United Kingdom',
+        ].join(' '),
+        { useInnerText: true },
+      );
     },
   );
 });

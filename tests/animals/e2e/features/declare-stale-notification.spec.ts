@@ -3,8 +3,6 @@ import { CREATE_PATH } from '@flows/animals/seeded-journey';
 
 const EDITED_REFERENCE = 'Edited456GB';
 
-// The frontend's fit specs and the backend's integration tests already prove these refusals in isolation;
-// these run the same journeys against the real frontend, backend and database together.
 test.describe('A notification that changed after the trader last saw it', () => {
   test('check your answers: when changed since it rendered, Continue returns to it with the current content', async ({
     animalsSeededJourney,
@@ -12,8 +10,7 @@ test.describe('A notification that changed after the trader last saw it', () => 
     pages,
     animalsPages,
   }) => {
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const referenceNumber = await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
 
     // Another tab, or another user, edits the notification after check your answers rendered.
     await frontendForms.postForm(`${CREATE_PATH}/${referenceNumber}/origin`, {
@@ -35,8 +32,7 @@ test.describe('A notification that changed after the trader last saw it', () => 
     pages,
     animalsPages,
   }) => {
-    const referenceNumber = await animalsSeededJourney.createDraftNotification();
-    await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.notificationView);
+    const referenceNumber = await animalsSeededJourney.createDraftAtReviewInUi(animalsPages);
     await animalsPages.notificationView.continueButton.click();
     await expect(animalsPages.declaration.heading).toBeVisible();
 

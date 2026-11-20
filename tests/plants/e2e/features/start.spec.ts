@@ -1,8 +1,11 @@
 import type { PlantsPages } from '@page-objects';
+import { ADDRESSES_SECTION } from '@domain/plants/constants/hub-groups';
 import { WHOLE_REFERENCE_NUMBER_PATTERN } from '@domain/plants/constants/reference-number-patterns';
-import { TRAIL_START } from '@page-objects/shared/base-page';
+import { TASK_LIST_NAME, TRAIL_START } from '@page-objects/shared/base-page';
 import { POTATOES } from '@flows/plants/journey';
 import { test, expect } from '@fixtures';
+
+const GROUP_CAPTIONS = ['1. About the consignment', '2. Arrival and destination', ADDRESSES_SECTION, '4. Check and submit'];
 
 test.describe('High-risk plants start section', () => {
   test('the dashboard renders after signing in', { tag: '@smoke' }, async ({ pages, plantsPages }) => {
@@ -44,7 +47,7 @@ test.describe('High-risk plants start section', () => {
 
   for (const [name, open] of [
     ['Overview', (pagesOf: PlantsPages, reference: string) => pagesOf.overview.open(reference)],
-    ['the review page', (pagesOf: PlantsPages, reference: string) => pagesOf.notificationView.open(reference)],
+    ['the review page', (pagesOf: PlantsPages, reference: string) => pagesOf.notificationView.open(reference, { waitForReview: false })],
     ['the declaration', (pagesOf: PlantsPages, reference: string) => pagesOf.declaration.open(reference)],
     ['the confirmation page', (pagesOf: PlantsPages, reference: string) => pagesOf.confirmation.open(reference)],
   ] as const) {
@@ -72,15 +75,10 @@ test.describe('High-risk plants start section', () => {
     await expect(plantsPages.overview.journeyStrip).toBeVisible();
     await expect(plantsPages.overview.statusTag).toHaveText('Draft');
     await expect(plantsPages.overview.notificationReference).toHaveText(reference);
-    await expect(plantsPages.overview.cancelAmend).toHaveCount(0);
+    await expect(plantsPages.overview.stripCancelAmend).toHaveCount(0);
 
     await expect(plantsPages.overview.taskLists).toHaveCount(4);
-    await expect(plantsPages.overview.groupHeadings).toHaveText([
-      '1. About the consignment',
-      '2. Arrival and destination',
-      '3. Consignment parties',
-      '4. Check and submit',
-    ]);
+    await expect(plantsPages.overview.groupHeadings).toHaveText(GROUP_CAPTIONS);
     await expect(plantsPages.overview.taskRowLink('What are you importing?')).toHaveAttribute(
       'href',
       plantsPages.commodityType.expectedUrlOnTrail(reference, [TRAIL_START.overview]),
@@ -99,6 +97,23 @@ test.describe('High-risk plants start section', () => {
 
     await expect(plantsPages.overview.btnReturnToDashboard).toHaveAttribute('href', plantsPages.dashboard.expectedUrl);
     await expect(plantsPages.overview.linkBack).toHaveAttribute('href', plantsPages.dashboard.expectedUrl);
+  });
+
+  test('the Overview heads its task list region Notification task list and groups its four numbered groups as regions under third-level headings', async ({
+    plantsPages,
+    plantsJourney,
+  }) => {
+    await plantsJourney.startNotification();
+    await plantsJourney.toOverviewWithCommodityTypeSaved(POTATOES);
+
+    await expect(plantsPages.overview.taskListHeading).toBeVisible();
+    await expect(plantsPages.overview.taskListRegion.getByRole('region')).toHaveCount(GROUP_CAPTIONS.length);
+    for (const caption of GROUP_CAPTIONS) {
+      const group = plantsPages.overview.groupRegion(caption);
+      await expect(group.getByRole('heading', { level: 3 })).toHaveText(caption);
+      await expect(group.getByRole('list')).toHaveCount(1);
+    }
+    await expect(plantsPages.overview.mainSecondLevelHeadings).toHaveText([TASK_LIST_NAME]);
   });
 
   test('the new draft is listed on the dashboard and Resume reopens it', async ({ pages, plantsPages, plantsJourney }) => {

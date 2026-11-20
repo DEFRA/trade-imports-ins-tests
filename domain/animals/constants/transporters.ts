@@ -1,7 +1,13 @@
 import { randomUUID } from 'node:crypto';
 
 export const transporters = {
-  garciaLivestockTransport: { value: 'garcia-livestock-transport', display: 'García Livestock Transport SL' },
+  garciaLivestockTransport: {
+    value: 'garcia-livestock-transport',
+    display: 'García Livestock Transport SL',
+    approvalNumber: 'ES-T2-45001294',
+    addressLine1: '43 East Hague Extension',
+    country: 'Switzerland',
+  },
 } as const;
 
 export const SELECT_TRANSPORTER_ERROR = 'Select a transporter from the list';

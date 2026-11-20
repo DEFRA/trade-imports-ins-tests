@@ -1,3 +1,4 @@
+import { CONSIGNMENT_ADDRESSES } from '@domain/animals/constants/consignment-addresses-page';
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { uniquelyNamedCommercialTransporter } from '@domain/animals/constants/transporters';
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
@@ -74,14 +75,14 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.accompanyingDocuments.fillDocument('InternalReference123', '03/01/2026', fileUploadPaths.safeFile1kbPdf);
       await runA11yScan();
       await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
-      await animalsJourney.waitForDocumentScanComplete('InternalReference123');
+      await animalsPages.accompanyingDocuments.waitForScanComplete('InternalReference123');
       await runA11yScan();
       await animalsPages.overview.open(animalsPages.accompanyingDocuments.referenceNumberFromUrl());
       await animalsPages.overview.heading.waitFor();
     });
 
     await test.step('Consignor selection', async () => {
-      await animalsPages.overview.task('Roles and addresses').click();
+      await animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
       await animalsPages.addresses.heading.waitFor();
       await animalsPages.addresses.addParty('Consignor').click();
       await animalsPages.consignorSelection.select('Astra Rosales');
@@ -166,7 +167,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await animalsJourney.toDeclarationThroughReview(runA11yScan);
 
     await test.step('Declaration', async () => {
-      await animalsPages.declaration.heading.waitFor();
       await animalsPages.declaration.confirmation.check();
       await runA11yScan();
       await animalsPages.declaration.continueButton.click();
