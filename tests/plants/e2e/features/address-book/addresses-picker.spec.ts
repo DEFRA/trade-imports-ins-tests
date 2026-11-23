@@ -5,8 +5,8 @@ import type { AddressBookApiClient } from '@adapters/http/address-book-api-clien
 import { addressRoles, heldAsPlaceOfDestination } from '@domain/shared/constants/address-types';
 import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import {
+  expectChosenAddressNamedAboveResults,
   expectedPickerAddressCellText,
-  expectNothingBetweenSearchAndResults,
   pickerAddressCellText,
 } from '@page-objects/shared/address-picker-results';
 
@@ -29,7 +29,7 @@ const PICKER_CASES = [
 ] as const;
 
 test.describe('Addresses picker', { tag: '@address-book' }, () => {
-  test('reopening the picker shows the chosen address checked, with nothing between the search box and the results heading, and shows nothing checked once the address is edited on the notification', async ({
+  test('reopening the picker shows the chosen address checked and named above the results, and shows nothing checked once the address is edited on the notification', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -40,7 +40,7 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
 
     await plantsPages.placeOfDestination.open(reference);
     await expect(plantsPages.placeOfDestination.address(address.name)).toBeChecked();
-    await expectNothingBetweenSearchAndResults(plantsPages.placeOfDestination.resultsHeading);
+    await expectChosenAddressNamedAboveResults(plantsPages.placeOfDestination.resultsHeading, address.name);
     await expect(plantsPages.placeOfDestination.currentAddress).toContainText(address.name);
 
     await plantsPages.placeOfDestination.editCurrentAddress.click();

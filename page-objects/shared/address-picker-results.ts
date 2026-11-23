@@ -4,7 +4,27 @@ import { expectEntirelyAbove } from '@page-objects/shared/layout-checks';
 export const PICKER_RESULTS_HEADING = 'Select an address';
 const NO_MATCHES = 'No addresses match your search.';
 
+/** How many of a picker's addresses one page holds. */
+export const ADDRESSES_A_PAGE = 8;
+
+/** The count a picker reads for a list of any size: the rows this page shows
+ * out of however many the list holds, which the organisation's book grows as
+ * other tests add to it. */
+export const PAGED_LIST_COUNT = /^Showing \d+ out of \d+ results$/;
+
 export const WHOLE_LIST_COUNT = /^Showing (\d+) out of \1 results$/;
+
+export function pickerPagination(page: Page): Locator {
+  return page.getByRole('navigation', { name: 'Pagination' });
+}
+
+export function pickerPageLink(page: Page, number: number): Locator {
+  return page.getByRole('link', { name: `Page ${number}`, exact: true });
+}
+
+export function pickerSelectedAddress(page: Page): Locator {
+  return page.locator('.govuk-inset-text');
+}
 
 export type AddressCellParts = {
   addressLine1: string;
@@ -71,10 +91,20 @@ export function pickerSearchButton(page: Page): Locator {
   return page.getByRole('button', { name: 'Search', exact: true });
 }
 
+function textBetweenSearchAndResults(main: string): string {
+  return main.slice(main.lastIndexOf('Search') + 'Search'.length, main.indexOf(PICKER_RESULTS_HEADING)).trim();
+}
+
 export async function expectNothingBetweenSearchAndResults(resultsHeading: Locator): Promise<void> {
   const page = resultsHeading.page();
   await expectEntirelyAbove(pickerSearchButton(page), resultsHeading);
-  const main = await page.getByRole('main').innerText();
-  const between = main.slice(main.lastIndexOf('Search') + 'Search'.length, main.indexOf(PICKER_RESULTS_HEADING));
-  expect(between.trim()).toBe('');
+  expect(textBetweenSearchAndResults(await page.getByRole('main').innerText())).toBe('');
+}
+
+/** The picker names the address already chosen between its search box and its
+ * results, so the choice shows on a page that does not hold its row. */
+export async function expectChosenAddressNamedAboveResults(resultsHeading: Locator, name: string): Promise<void> {
+  const page = resultsHeading.page();
+  await expectEntirelyAbove(pickerSearchButton(page), resultsHeading);
+  expect(textBetweenSearchAndResults(await page.getByRole('main').innerText())).toBe(`Selected address: ${name}`);
 }

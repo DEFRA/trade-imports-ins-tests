@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, POTATOES, nurseryAddress } from '@flows/plants/journey';
 import { ALREADY_ARRIVED } from '@domain/plants/constants/arrival-status-page';
 import { addressRoles } from '@domain/shared/constants/address-types';
-import { expectNothingBetweenSearchAndResults, WHOLE_LIST_COUNT } from '@page-objects/shared/address-picker-results';
+import { expectChosenAddressNamedAboveResults, PAGED_LIST_COUNT } from '@page-objects/shared/address-picker-results';
 
 const DESTINATION_TASK_ROW = 'Place of destination';
 
@@ -68,7 +68,7 @@ test.describe('High-risk plants destination section', () => {
 
     await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
 
-    await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(WHOLE_LIST_COUNT);
+    await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(PAGED_LIST_COUNT);
     await expect(plantsPages.placeOfDestination.address(`Consignor Only ${token}`)).toHaveCount(0);
 
     await plantsPages.placeOfDestination.searchFor(token);
@@ -82,10 +82,10 @@ test.describe('High-risk plants destination section', () => {
     await expect(plantsPages.placeOfDestination.noMatchesMessage).toBeVisible();
 
     await plantsPages.placeOfDestination.searchFor('');
-    await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(WHOLE_LIST_COUNT);
+    await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(PAGED_LIST_COUNT);
   });
 
-  test('a row ticked saves, and reopening the picker shows it checked with nothing between the search box and the results heading', async ({
+  test('a row ticked saves, and reopening the picker shows it checked and named above the results', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -110,7 +110,7 @@ test.describe('High-risk plants destination section', () => {
 
     await plantsPages.placeOfDestination.open(reference);
     await expect(plantsPages.placeOfDestination.address(target)).toBeChecked();
-    await expectNothingBetweenSearchAndResults(plantsPages.placeOfDestination.resultsHeading);
+    await expectChosenAddressNamedAboveResults(plantsPages.placeOfDestination.resultsHeading, target);
   });
 
   test(
