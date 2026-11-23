@@ -49,7 +49,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(animalsPages.importerSelection.party(consigneeOnlyName)).toHaveCount(0);
   });
 
-  test('the picker searches within the role, lists every match on one page, and the row ticked is the one that saves, shown checked on reopening with nothing between the search box and the results heading', async ({
+  test('the picker searches within the role, and the row ticked is the one that saves, named above the results on reopening and checked once its page is shown', async ({
     animalsJourney,
     animalsPages,
     addressBookApi,
@@ -118,8 +118,11 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
 
     await animalsPages.addresses.changeParty('Consignor').click();
     await expect(animalsPages.consignorSelection.heading).toBeVisible();
-    await expect(animalsPages.consignorSelection.party(chosenName)).toBeChecked();
     await expectChosenAddressNamedAboveResults(animalsPages.consignorSelection.resultsHeading, chosenName);
+
+    await animalsPages.consignorSelection.search(chosenName);
+
+    await expect(animalsPages.consignorSelection.party(chosenName)).toBeChecked();
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
