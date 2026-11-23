@@ -9,12 +9,9 @@ import {
   pickerAddressRow,
   pickerLastCell,
   pickerNoMatchesMessage,
-  pickerPageLink,
-  pickerPagination,
   pickerResultsGroup,
   pickerResultsHeading,
   pickerSearchBox,
-  pickerSelectedAddress,
   pickerSearchButton,
   pickerSearchRow,
 } from '@page-objects/shared/address-picker-results';
@@ -82,18 +79,6 @@ export class AnimalsPartyPickerPage extends NotificationPage {
 
   get noMatchesMessage(): Locator {
     return pickerNoMatchesMessage(this.page);
-  }
-
-  get paging(): Locator {
-    return pickerPagination(this.page);
-  }
-
-  pageLink(number: number): Locator {
-    return pickerPageLink(this.page, number);
-  }
-
-  get chosenAddressAboveResults(): Locator {
-    return pickerSelectedAddress(this.page);
   }
 
   get listedParties(): Locator {

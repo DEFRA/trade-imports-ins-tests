@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, POTATOES, nurseryAddress } from '@flows/plants/journey';
 import { ALREADY_ARRIVED } from '@domain/plants/constants/arrival-status-page';
 import { addressRoles } from '@domain/shared/constants/address-types';
-import { expectChosenAddressNamedAboveResults, PAGED_LIST_COUNT } from '@page-objects/shared/address-picker-results';
+import { expectChosenAddressNamedAboveResults, RESULTS_COUNT } from '@page-objects/shared/address-picker-results';
 
 const DESTINATION_TASK_ROW = 'Place of destination';
 
@@ -68,7 +68,7 @@ test.describe('High-risk plants destination section', () => {
 
     await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
 
-    await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(PAGED_LIST_COUNT);
+    await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(RESULTS_COUNT);
     await expect(plantsPages.placeOfDestination.address(`Consignor Only ${token}`)).toHaveCount(0);
 
     await plantsPages.placeOfDestination.searchFor(token);
@@ -82,7 +82,7 @@ test.describe('High-risk plants destination section', () => {
     await expect(plantsPages.placeOfDestination.noMatchesMessage).toBeVisible();
 
     await plantsPages.placeOfDestination.searchFor('');
-    await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(PAGED_LIST_COUNT);
+    await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(RESULTS_COUNT);
   });
 
   test('a row ticked saves, and reopening the picker shows it checked and named above the results', async ({

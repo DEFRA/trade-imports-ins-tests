@@ -4,6 +4,7 @@ import { test, expect } from '@fixtures';
 import { portByCode } from '@resources/reference-data/reference-data';
 import type { PlantsPages } from '@page-objects';
 import { nurseryAddress, type PlantsJourney } from '@flows/plants/journey';
+import { expectChosenAddressNamedAboveResults } from '@page-objects/shared/address-picker-results';
 import { expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 
 const CONTACT = 'Contact address for consignment';
@@ -18,7 +19,7 @@ async function openContact(plantsPages: PlantsPages, journey: PlantsJourney): Pr
 
 test.describe('High-risk plants contact', () => {
   test(
-    'searches the address book, lists every match on one page, and persists a row ticked, shown checked on reopening',
+    'searches the address book, lists every match of a search that fits on one page, and persists a row ticked, named above the results on reopening and checked once its page is shown',
     { tag: '@address-book' },
     async ({ pages, plantsPages, plantsJourney, addressBookApi }) => {
       const token = randomUUID();
@@ -46,6 +47,9 @@ test.describe('High-risk plants contact', () => {
       await expect(review.getByRole('link')).toHaveCount(0);
 
       await contact.open(reference);
+      await expectChosenAddressNamedAboveResults(contact.resultsHeading, target.name);
+
+      await contact.searchFor(target.name);
       await expect(contact.address(target.name)).toBeChecked();
     },
   );

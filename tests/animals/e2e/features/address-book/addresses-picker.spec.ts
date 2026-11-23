@@ -7,7 +7,8 @@ import {
   ADDRESSES_A_PAGE,
   expectChosenAddressNamedAboveResults,
   expectedPickerAddressCellText,
-  PAGED_LIST_COUNT,
+  pickerResultsCount,
+  RESULTS_COUNT,
 } from '@page-objects/shared/address-picker-results';
 
 test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-book'] }, () => {
@@ -102,7 +103,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     const consignorAddressLines = animalsPages.addresses.partyAddressLines('Consignor');
 
     await expect(animalsPages.consignorSelection.resultsHeading).toBeVisible();
-    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(PAGED_LIST_COUNT);
+    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(RESULTS_COUNT);
 
     await animalsPages.consignorSelection.search(runOnlySearchToken);
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText('Showing 2 out of 2 results');
@@ -158,17 +159,17 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
 
     await picker.search(token);
 
-    await expect(picker.resultsSummary).toHaveText(`Showing ${ADDRESSES_A_PAGE} out of ${names.length} results`);
+    await expect(picker.resultsSummary).toHaveText(pickerResultsCount(ADDRESSES_A_PAGE, names.length));
     await expect(picker.listedParties).toHaveCount(ADDRESSES_A_PAGE);
-    await expect(picker.paging).toBeVisible();
-    await expect(picker.chosenAddressAboveResults).toHaveText(`Selected address: ${chosenName}`);
+    await expect(picker.pagination).toBeVisible();
+    await expectChosenAddressNamedAboveResults(picker.resultsHeading, chosenName);
 
-    await picker.pageLink(2).click();
+    await picker.paginationPageLink(2).click();
 
     await expect(picker.searchBox).toHaveValue(token);
-    await expect(picker.resultsSummary).toHaveText(`Showing 1 out of ${names.length} results`);
+    await expect(picker.resultsSummary).toHaveText(pickerResultsCount(1, names.length));
     await expect(picker.listedParties).toHaveCount(1);
-    await expect(picker.chosenAddressAboveResults).toHaveText(`Selected address: ${chosenName}`);
+    await expectChosenAddressNamedAboveResults(picker.resultsHeading, chosenName);
   });
 
   test('a picker row shows the street line, then town and postcode on one line, and ends with only a View link', async ({
