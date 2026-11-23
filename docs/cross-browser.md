@@ -116,6 +116,7 @@ The BrowserStack run uses the platforms in [Browsers](#browsers). It runs on CDP
 - BrowserStack Local is always on. It carries the docker-compose stack's `localhost` URLs, and CDP's hostnames, which resolve only inside the platform, to the remote browser.
 - Safari, WebKit and Android browsers cannot open `localhost` through BrowserStack Local, so the iOS and macOS platforms run only on CDP.
 - When a proxy is set (`HTTP_PROXY`, as on CDP), the SDK writes `require("global-agent")` into its generated Playwright config, which fails in an ES module project. `bin/browserstack-global-require.mjs` defines a global `require` for it, and `bin/run-browserstack.ts` preloads that file into the SDK and its workers.
+- Session reuse is off (`E2E_SESSION_REUSE=off`), so every test signs in for itself: real iPhones allow only one browser context.
 - Each run prints its results link, under https://automate.browserstack.com/projects/trade-imports-ins-tests.
 - Each platform runs half your CPUs in parallel, up to the team-wide limit of 13 sessions. Set `BROWSERSTACK_PARALLELS_PER_PLATFORM` to change it.
 - Builds are named `local`, `github` or `cdp-<ENVIRONMENT>`, with a UTC time or the run id as the identifier, under the project `trade-imports-ins-tests`.
