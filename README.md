@@ -60,8 +60,8 @@ End-to-end, accessibility and security tests for the trade imports services — 
    The Chromium-only install skips Firefox and WebKit, which the
    [cross-browser tests](#cross-browser-tests) need.
 
-   > **Warning:** to run them in Chrome or Edge locally, install those browsers
-   > from Google and Microsoft. Playwright's install replaces your own.
+   > **Warning:** to run them in Chrome locally, install it from Google.
+   > Playwright's install replaces your own.
 
 ## Editor Setup
 
@@ -352,7 +352,7 @@ Always end a directory with `/`. Playwright reads the path as a regex, so
 `tests/animals` would also run `tests/animals-admin/`.
 
 A Playwright project is browser config only. Both configs have `chromium`, which
-runs every domain, plus opt-in `chrome`, `msedge`, `firefox`, `webkit`, `mobile-webkit` and `mobile-chromium` projects for the
+runs every domain, plus opt-in `chrome`, `firefox`, `webkit`, `mobile-webkit` and `mobile-chromium` projects for the
 [cross-browser tests](#cross-browser-tests).
 
 Within a domain directory, specs are grouped by test type, then by feature:
@@ -452,7 +452,7 @@ If it is not set, Playwright's default applies (50% of cores on CI).
 
 ## Cross-browser tests
 
-Tests tagged `@cross-browser` run in branded Chrome and Edge, Playwright's browsers (Firefox, WebKit, an emulated iPhone 17 and an emulated Pixel 10) and on BrowserStack. Commands for each domain:
+Tests tagged `@cross-browser` run in branded Chrome, Playwright's browsers (Firefox, WebKit, an emulated iPhone 17 and an emulated Pixel 10) and on BrowserStack. Commands for each domain:
 [animals](tests/animals/cross-browser/README.md),
 [animals-admin](tests/animals-admin/cross-browser/README.md) and
 [ins](tests/ins/cross-browser/README.md).
@@ -536,7 +536,7 @@ If `PROFILE` is not set, the `default` profile is used.
 | `e2e`                | e2e test suite                                                                                 | `npm test`                   |
 | `a11y`               | accessibility test suite                                                                       | `npm run test:a11y`          |
 | `dynamics`           | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics`      |
-| `cross-browser`      | `@cross-browser` tests in Chrome, Edge, Firefox, WebKit, iPhone 17 and Pixel 10                | `npm run test:cross-browser` |
+| `cross-browser`      | `@cross-browser` tests in Chrome, Firefox, WebKit, iPhone 17 and Pixel 10                      | `npm run test:cross-browser` |
 | `browserstack`       | `@cross-browser` tests on BrowserStack                                                         | `npm run test:browserstack`  |
 | `security`           | security test suite (ZAP passive scan)                                                         | `npm run test:security`      |
 | `security:active`    | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                            |

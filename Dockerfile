@@ -40,10 +40,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --ignore-scripts
 
-# Branded Chrome and Edge for the chrome and msedge projects; the base image ships only Playwright builds.
-# Google and Microsoft publish no Linux Arm64 builds, so the arm64 image goes without them.
+# Branded Chrome for the chrome project; the base image ships only Playwright builds.
+# Google publishes no Linux Arm64 build, so the arm64 image goes without it.
 ARG TARGETARCH
-RUN if [ "$TARGETARCH" = "amd64" ]; then npx playwright install --with-deps chrome msedge; fi
+RUN if [ "$TARGETARCH" = "amd64" ]; then npx playwright install --with-deps chrome; fi
 
 # Copy the rest of the project
 COPY . .

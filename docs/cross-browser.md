@@ -2,7 +2,7 @@
 
 Tests tagged `@cross-browser` also run outside the default Chromium run, to find browser-specific problems before users do. They run in two ways:
 
-- **Playwright run** (`cross-browser` profile): Playwright launches the browsers itself, inside our test image on CDP, or natively on your machine. These are Playwright's own builds plus branded Chrome and Edge.
+- **Playwright run** (`cross-browser` profile): Playwright launches the browsers itself, inside our test image on CDP, or natively on your machine. These are Playwright's own builds plus branded Chrome.
 - **BrowserStack run** (`browserstack` profile): BrowserStack's remote browsers and real devices, reached through its tunnel, on CDP or from your machine.
 
 Commands live beside each domain's tests, in `tests/<domain>/cross-browser/README.md`.
@@ -34,7 +34,6 @@ It still runs in the Chromium e2e run. Tag it only if it runs on CDP and renders
 | ----------------- | ---------------------------------------------- | ---------------------------------- |
 | `chromium`        | Playwright's Chromium build                    | Every test, in the default e2e run |
 | `chrome`          | Branded Google Chrome, installed               | `@cross-browser` tests             |
-| `msedge`          | Branded Microsoft Edge, installed              | `@cross-browser` tests             |
 | `firefox`         | Playwright's Firefox build                     | `@cross-browser` tests             |
 | `webkit`          | Playwright's WebKit build                      | `@cross-browser` tests             |
 | `mobile-webkit`   | Playwright's WebKit build, emulated iPhone 17  | `@cross-browser` tests             |
@@ -58,7 +57,7 @@ Last reviewed: November 2026. Revisit them when GDS updates its list (yearly, ar
 **Playwright** runs every engine GDS lists, cheaply and reliably, on every Playwright run.
 
 - **Chromium.** `chromium` (Chrome for Testing) runs every test. It's usually ahead of stable, so it catches breakage early.
-- **Chrome and Edge.** `chrome` and `msedge` run the released branded browsers. Close enough to trust for desktop Chrome and Edge: what differs on Windows and macOS is font rendering and branded features.
+- **Chrome.** `chrome` runs the released branded Chrome. Close enough to trust for desktop Chrome and Edge: what differs on Windows and macOS is font rendering and branded features. Edge has no project of its own: it shares Chrome's engine and differs only in a thin branded layer, so `chromium` and `chrome` cover it.
 - **Firefox.** Playwright's Firefox build is close to real Firefox, and the only Firefox Playwright drives reliably.
 - **WebKit.** Safari's engine, not Safari. Our image runs the Linux port, without Safari's platform layer or cookie rules, which BrowserStack covers.
 - **Emulated iPhone 17 and Pixel 10.** Catch layout problems at phone size, but not touch, the on-screen keyboard or a real mobile viewport.
@@ -74,9 +73,9 @@ Last reviewed: November 2026. Revisit them when GDS updates its list (yearly, ar
 Not covered:
 
 - **Real Android** (Chrome, Samsung Internet, Firefox). BrowserStack supports it only up to Playwright 1.62. `mobile-chromium` covers Chrome and Samsung Internet's engine at phone size; `firefox` covers Android Firefox's engine. Add real Android Chrome once BrowserStack supports our Playwright version.
-- **Real Firefox.** Playwright reliably drives only its own build. Its `moz-firefox` channels, which drive stock Firefox over WebDriver BiDi, are experimental and undocumented. Optional: once documented, add a real Firefox project, as `chrome` and `msedge` are for Chrome and Edge.
+- **Real Firefox.** Playwright reliably drives only its own build. Its `moz-firefox` channels, which drive stock Firefox over WebDriver BiDi, are experimental and undocumented. Optional: once documented, add a real Firefox project, as `chrome` is for Chrome.
 - **Real macOS Safari.** Not available through Playwright.
-- **Chrome and Edge on Windows, Chrome on macOS.** The `chrome` and `msedge` projects run the branded builds on Linux; the operating system mostly changes font rendering.
+- **Chrome and Edge on Windows, Chrome on macOS.** `chrome` runs branded Chrome on Linux; the operating system mostly changes font rendering. Real Edge isn't tested.
 
 Optional: before a release, check Samsung Internet, Android Chrome and Android Firefox by hand on BrowserStack Live. Real Android is the only GDS platform no automated run covers.
 
@@ -98,7 +97,7 @@ A change updates `browserstack.yml` or `utils/playwright/shared-config.ts`, the 
 
 - Every Playwright project except `chromium` has `default: false`, so it runs only when `--project` names it. Every other script stays on Chromium.
 - The commands add `--grep '@cross-browser'`. Without it a named engine runs every test.
-- `chrome` and `msedge` launch the installed Google Chrome and Microsoft Edge. The amd64 test image installs both (neither has a Linux Arm64 build); locally, install them from Google and Microsoft. Do not run `npx playwright install chrome` or `msedge` on your own machine: it replaces the browser you already have.
+- `chrome` launches the installed Google Chrome. The amd64 test image installs it (Google publishes no Linux Arm64 build); locally, install it from Google. Do not run `npx playwright install chrome` on your own machine: it replaces the browser you already have.
 - Write `--project=firefox`, not `--project firefox`: `--project` takes several values, so a trailing path would be read as a project name.
 - `npm run test:docker-compose:cross-browser` runs every domain. The CDP `cross-browser` and `<domain>:cross-browser` profiles do the same on CDP, excluding `@compose` tests.
 
