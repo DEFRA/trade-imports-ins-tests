@@ -60,6 +60,9 @@ End-to-end, accessibility and security tests for the trade imports services — 
    The Chromium-only install skips Firefox and WebKit, which the
    [cross-browser tests](#cross-browser-tests) need.
 
+   > **Warning:** to run them in Chrome or Edge locally, install those browsers
+   > from Google and Microsoft. Playwright's install replaces your own.
+
 ## Editor Setup
 
 ### TypeScript version (VS Code and Cursor)
