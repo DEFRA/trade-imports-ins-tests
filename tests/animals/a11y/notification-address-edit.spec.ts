@@ -1,7 +1,11 @@
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test('the copied-address edit page has no accessibility violations', async ({ animalsSeededJourney, animalsPages, runA11yScan }) => {
+  test('the consignment addresses page and the copied-address edit page, with and without errors, have no accessibility violations', async ({
+    animalsSeededJourney,
+    animalsPages,
+    runA11yScan,
+  }) => {
     const referenceNumber = await animalsSeededJourney.createDraftNotification();
 
     await test.step('Consignment addresses with Change and Edit details on every role', async () => {

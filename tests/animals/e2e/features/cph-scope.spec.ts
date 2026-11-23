@@ -17,6 +17,10 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.domesticCat);
     await animalsJourney.toConsignmentAddressesOfCurrentNotification();
     await expect(cphSection).toBeHidden();
+
+    await animalsPages.cphNumber.open(animalsPages.addresses.referenceNumberFromUrl());
+    await expect(animalsPages.addresses.heading).toBeVisible();
+
     await animalsPages.addresses.continueButton.click();
     await expect(animalsPages.notificationView.heading).toBeVisible();
     await expect(animalsPages.cphNumber.heading).toBeHidden();
@@ -37,7 +41,6 @@ test.describe('CPH scope', { tag: '@duplicated-in-frontend' }, () => {
 
     const { cphLinks, cphNumberText } = animalsPages.addresses;
 
-    // Cattle is a CPH-triggering commodity line; domestic cat is not (chicken is not on the mandatory journey seed).
     await animalsJourney.addCommodityToCurrentNotificationAndFillEveryAnimalCountToOne(commodityLines.cattle);
     await animalsJourney.toConsignmentAddressesOfCurrentNotification();
     await animalsPages.addresses.addCph.click();

@@ -3,7 +3,11 @@ import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { ALL_ANSWERS as answers, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { countryCodes } from '@domain/animals/constants/country-codes';
-import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
+import {
+  GBN_AG_EXCHANGED_DOCUMENT_KEYS,
+  type OutboxEventActor,
+  type OutboxEventDocument,
+} from '@domain/animals/models/db/outbox-event-document';
 import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { users } from '@config/users';
@@ -92,7 +96,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
           urlId: 'https://refdata.tbc.defra.gov.uk/gbn-ag-goods-certified-as',
         },
       ]);
-      expect(data.exchangedDocument.issuer).toBeUndefined();
+      expect(GBN_AG_EXCHANGED_DOCUMENT_KEYS).toEqual(expect.arrayContaining(Object.keys(data.exchangedDocument)));
       expect(data.specifiedConsignment.consignorParty?.name).toBe(answers.parties.consignor);
       expect(data.specifiedConsignment.originCountry?.code?.value).toBe(answers.countryCode.value);
       expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(answers.pointOfEntry.value);

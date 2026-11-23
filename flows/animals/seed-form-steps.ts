@@ -1,17 +1,9 @@
 import type { FormFields } from '@adapters/http/frontend-form-client';
 import { type CommodityLineAnswer } from '@domain/animals/constants/journey-commodity-line-answers';
-import { assertConsistentAnswers, type NotificationAnswers } from '@domain/animals/constants/journey-options';
+import { assertConsistentAnswers, type NotificationAnswers, type PartyAnswers } from '@domain/animals/constants/journey-options';
 import { speciesCheckboxValue } from '@domain/animals/constants/commodity-lines';
 
-export type PartyRole = 'placeOfOrigin' | 'consignor' | 'consignee' | 'importer' | 'placeOfDestination';
-
-export type PartyNames = Record<PartyRole, string>;
-
-export type PartyIds = Record<PartyRole, string>;
-
-export const partyNamesFrom = (answers: NotificationAnswers): PartyNames => ({
-  ...answers.parties,
-});
+export type PartyIds = Record<keyof PartyAnswers, string>;
 
 export type SeedStep = {
   slug: string;
@@ -177,13 +169,13 @@ const transportSteps = (answers: NotificationAnswers): SeedStep[] => [
   { slug: 'transporters', form: { transporter: answers.transporter.value } },
 ];
 
-const openingRunTailSteps = (): SeedStep[] => [
+const continueToCheckYourAnswersSteps = (): SeedStep[] => [
   { slug: 'accompanying-documents', form: {} },
   { slug: 'addresses', form: {} },
 ];
 
 export const seedSteps = async (
-  resolveParties: (names: PartyNames) => Promise<PartyIds>,
+  resolveParties: (names: PartyAnswers) => Promise<PartyIds>,
   stage: DraftStage,
   answers: NotificationAnswers,
   { leaveUnanswered = [] }: SeedOptions = {},
@@ -203,7 +195,7 @@ export const seedSteps = async (
     ...addressSteps(parties, answers),
     arrivalStep(answers),
   ];
-  return stage === 'partial' ? throughArrival : [...throughArrival, ...transportSteps(answers), ...openingRunTailSteps()];
+  return stage === 'partial' ? throughArrival : [...throughArrival, ...transportSteps(answers), ...continueToCheckYourAnswersSteps()];
 };
 
 export const declarationStep: { reviewSlug: string; slug: string; review: FormFields; declare: FormFields } = {

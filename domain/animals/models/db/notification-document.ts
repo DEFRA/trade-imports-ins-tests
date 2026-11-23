@@ -90,13 +90,30 @@ type NotificationContent = {
       type: string;
     };
   };
-  consignment?: StoredParty;
   purposeInInternalMarket?: string;
   destinationCountry?: string;
   portOfExit?: string;
   /** A calendar date, stored as a `YYYY-MM-DD` string. */
   exitDate?: string;
 };
+
+export const STORED_NOTIFICATION_KEYS = [
+  'origin',
+  'commodities',
+  'reasonForImport',
+  'additionalDetails',
+  'placeOfOrigin',
+  'consignor',
+  'consignee',
+  'importer',
+  'destination',
+  'cphNumber',
+  'transport',
+  'purposeInInternalMarket',
+  'destinationCountry',
+  'portOfExit',
+  'exitDate',
+] as const satisfies readonly (keyof NotificationContent)[];
 
 export type NotificationDocument = {
   _id: ObjectId;

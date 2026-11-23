@@ -4,10 +4,7 @@ import { test, expect } from '@fixtures';
 import { reviewHeadingText } from '@page-objects/animals/notification-view-page';
 
 test.describe('Back on the review page', () => {
-  test('after Continue from the addresses page it opens check your answers, whose Back opens the addresses hub', async ({
-    animalsJourney,
-    animalsPages,
-  }) => {
+  test('reached by Continue from the addresses page it opens the addresses page', async ({ animalsJourney, animalsPages }) => {
     test.slow();
     await animalsJourney.walkToConsignmentAddressesWithoutCph();
     await animalsPages.addresses.continueButton.click();

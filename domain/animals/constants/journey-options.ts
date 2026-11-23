@@ -48,8 +48,7 @@ export type PartyAnswers = {
 };
 
 /**
- * What a user says about a cattle notification, never how a driver enters it: the UI journey and
- * the seeded journey both build from these, each translating a fact into its own page or form.
+ * What a user says about a cattle notification, never how a driver enters it.
  * Only the answers the frontend requires, so a missing one is a compile error.
  */
 export type MandatoryAnswers = {
@@ -150,7 +149,7 @@ export const ALL_ANSWERS: AllAnswers = {
   accompanyingDocument: { ...ITAHC_DOCUMENT, reference: 'DOCREF0001', type: documentTypes.veterinaryHealthCertificate },
 };
 
-/** Every answer except the accompanying document. The seeded journey uses this set, as its form client cannot upload a file. */
+/** Every answer except the accompanying document. */
 export const ALL_ANSWERS_WITHOUT_DOCUMENT: AllAnswersWithoutDocument = {
   ...ALL_ANSWERS,
   accompanyingDocument: undefined,

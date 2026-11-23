@@ -99,7 +99,6 @@ export type Notification = {
   consignee?: ConsignmentParty | null;
   importer?: ConsignmentParty | null;
   destination?: ConsignmentParty | null;
-  consignment?: ConsignmentParty | null;
   cphNumber?: string | null;
   transport?: Transport | null;
   purposeInInternalMarket?: string | null;

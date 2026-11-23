@@ -22,7 +22,10 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     externalRequest,
     addressBookApi,
   }) => {
-    test.fixme(true, 'PIMS Dynamics leaves these mandatory answers empty; the likely cause of each is in the comments');
+    test.fixme(
+      true,
+      'PIMS Dynamics leaves these mandatory answers empty; the field mapping and likely causes are in the workspace docs/analysis/pims-dynamics-field-gaps.md',
+    );
     setTestTimeout(dynamicsBaseTestTimeoutMs);
     test.slow();
     const dynamics = new AnimalsDynamicsClient(externalRequest);
@@ -36,12 +39,8 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     await animalsJourney.submitNotification(answers);
     const row = await waitForAnimalsDynamicsNotification(dynamics, journeyContext.referenceNumber);
 
-    // [FROM v0.2.0]
-    // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].scientificName and commonName
     expect.soft(row.defraimp_commodityspeciesname, 'species name').toBe(cowLine.species.latinName);
     expect.soft(row.defraimp_commodityspeciescommonname, 'species common name').toBe(cowLine.species.commonName);
-    // Each party's postalAddress.postcodeCode, and its definedContact[].telephoneUniversalCommunication and
-    // emailURIUniversalCommunication
     expect.soft(row.defraimp_consignoraddresspostalzipcode, 'consignor postcode').toBe(consignor.postcode);
     expect.soft(row.defraimp_consignoraddresstelephone, 'consignor phone').toBe(consignor.phone);
     expect.soft(row.defraimp_consignoraddressemail, 'consignor email').toBe(consignor.email);
@@ -57,28 +56,17 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     expect.soft(row.defraimp_importeraddresspostalzipcode, 'importer postcode').toBe(importer.postcode);
     expect.soft(row.defraimp_importeraddresstelephone, 'importer phone').toBe(importer.phone);
     expect.soft(row.defraimp_importeraddressemail, 'importer email').toBe(importer.email);
-    // specifiedConsignment.finalDestinationLocation.identifier
     expect.soft(row.defraimp_cphnumber, 'CPH number').toBe(CPH_NUMBER);
-    // specifiedConsignment.mainCarriageLogisticsTransportMovement[].transportContractRelatedReferencedDocument[]
     expect.soft(row.defraimp_meansoftransporttoentrypointdocument, 'transport document reference').toBe(answers.transportDocumentReference);
 
-    // [FROM v0.1.0: OPTION NOT MATCHED?]
-    // exchangedDocument.firstSignatoryAuthentication.includedClause[] where identifier is PURPOSE
     expect.soft(formattedValue(row, 'defraimp_purposeofconsignment'), 'reason for import').toBe(answers.importReason.display);
-    // exchangedDocument.firstSignatoryAuthentication.includedClause[] where identifier is INTERNAL_MARKET_PURPOSE
     expect
       .soft(formattedValue(row, 'defraimp_commoditiesinternalmarketpurpose'), 'internal market purpose')
       .toBe(answers.internalMarketPurpose.display);
-    // exchangedDocument.firstSignatoryAuthentication.includedClause[] where identifier is GOODS_CERTIFIED_AS
     expect.soft(formattedValue(row, 'defraimp_commoditiescertifiedfor'), 'certified for').toBe(answers.certifiedFor.display);
 
-    // [FROM v0.1.0: NOT MAPPED?]
-    // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].specifiedLineTradeDelivery[].productUnitQuantity.content
     expect.soft(row.defraimp_commoditiesnumberofanimals, 'number of animals').toBe(cowLine.noOfAnimals);
-    // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].individualTradeProductInstance[].identifier[]
-    // where typeCode is EAR_TAG
     expect.soft(row.defraimp_identificationofanimalstext, 'ear tag').toContain(cowLine.earTag);
-    // specifiedConsignment.mainCarriageLogisticsTransportMovement[].usedLogisticsTransportMeans.name
     expect.soft(row.defraimp_meansoftransporttoentrypointid, 'transport identification').toBe(answers.transportIdentification);
   });
 
@@ -87,7 +75,10 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     journeyContext,
     externalRequest,
   }) => {
-    test.fixme(true, 'PIMS Dynamics leaves these optional answers empty; the likely cause of each is in the comments');
+    test.fixme(
+      true,
+      'PIMS Dynamics leaves these optional answers empty; the field mapping and likely causes are in the workspace docs/analysis/pims-dynamics-field-gaps.md',
+    );
     setTestTimeout(dynamicsBaseTestTimeoutMs);
     test.slow();
     const dynamics = new AnimalsDynamicsClient(externalRequest);
@@ -96,21 +87,13 @@ test.describe('notification data is stored in PIMS Dynamics', { tag: '@dynamics'
     await animalsJourney.submitNotification(answers);
     const row = await waitForAnimalsDynamicsNotification(dynamics, journeyContext.referenceNumber);
 
-    // [FROM v0.3.0]
-    // specifiedConsignment.originCountry.regionOfOriginCode
     expect.soft(row.defraimp_commoditiesregionoforigin, 'region of origin code').toContain(answers.regionCode);
 
-    // [FROM v0.2.0]
-    // specifiedConsignment.transitTradeCountry[]
     for (const country of answers.transitedCountries) {
       expect.soft(row.defraimp_routetransitingstates, `transited country ${country.display}`).toContain(country.value);
     }
 
-    // [FROM v0.1.0: NOT MAPPED?]
-    // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].physicalReferencedLogisticsPackage[].itemQuantity
     expect.soft(row.defraimp_commoditiesnumberofpackages, 'number of packages').toBe(cowLine.noOfPackages);
-    // specifiedConsignment.includedConsignmentItem[].includedTradeLineItem[].individualTradeProductInstance[].identifier[]
-    // where typeCode is PASSPORT
     expect.soft(row.defraimp_identificationofanimalstext, 'passport number').toContain(cowLine.passportNumber);
   });
 });

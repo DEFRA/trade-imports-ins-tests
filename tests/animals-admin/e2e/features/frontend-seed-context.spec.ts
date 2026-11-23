@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { type NotificationDocument } from '@domain/animals/models/db/notification-document';
+import { STORED_NOTIFICATION_KEYS, type NotificationDocument } from '@domain/animals/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { CREATE_PATH, CREATED_AT_ORIGIN } from '@flows/animals/seeded-journey';
@@ -15,8 +15,6 @@ const referenceNumberFrom = (redirectPath: string): string => {
   return referenceNumber;
 };
 
-// Auth state is minted per Playwright project, so this proof only holds from the admin
-// project: an e2e-project session is already a frontend session.
 test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('the seed proof asserts on Mongo directly, which only the compose stack exposes');
@@ -103,7 +101,7 @@ test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
         expect(notification.transport.portOfEntry).toBe(answers.pointOfEntry.value);
         expect(notification.transport.arrivalDate).toBeDefined();
         expect(notification.transport.transporter?.approvalNumber).toBe('ES-T2-45001294');
-        expect(notification.consignment).toBeUndefined();
+        expect(STORED_NOTIFICATION_KEYS).toEqual(expect.arrayContaining(Object.keys(notification)));
       } finally {
         await client.close();
       }

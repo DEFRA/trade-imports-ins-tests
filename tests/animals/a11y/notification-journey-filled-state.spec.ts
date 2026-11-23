@@ -106,9 +106,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
       await animalsPages.cphNumber.saveAndContinue.click();
       await animalsPages.addresses.heading.waitFor();
-      await animalsPages.addresses.continueButton.click();
-      await animalsPages.notificationView.heading.waitFor();
-      await animalsJourney.openCurrentOverview();
+      await animalsJourney.continueFromAddressesToOverview();
     });
 
     await test.step('Arrival details', async () => {
@@ -155,12 +153,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.overview.heading.waitFor();
     });
 
-    await test.step('Review your notification', async () => {
-      await animalsPages.overview.reviewAndSubmitButton.click();
-      await animalsPages.notificationView.heading.waitFor();
-      await runA11yScan();
-      await animalsPages.notificationView.continueButton.click();
-    });
+    await animalsJourney.toDeclarationThroughReview(runA11yScan);
 
     await test.step('Declaration', async () => {
       await animalsPages.declaration.confirmation.check();

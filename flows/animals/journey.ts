@@ -300,6 +300,12 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
+  async continueFromAddressesToOverview(): Promise<void> {
+    await this.animalsPages.addresses.continueButton.click();
+    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.openCurrentOverview();
+  }
+
   private async openAdditionalDetailsFromOverview(): Promise<void> {
     await this.animalsPages.overview.task('Additional details').click();
     await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
@@ -391,12 +397,6 @@ export class AnimalsJourney {
       await this.animalsPages.cphNumber.saveAndContinue.click();
       await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     }
-  }
-
-  async addCphAndLeaveAddresses(cph: CphAnswer = MANDATORY_ANSWERS.cph): Promise<void> {
-    await this.addCphOnAddressesHub(cph);
-    await this.animalsPages.addresses.continueButton.click();
-    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
   async answerAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
@@ -849,10 +849,9 @@ export class AnimalsJourney {
       await afterParties();
     }
     if (addCph) {
-      await this.addCphAndLeaveAddresses();
-    } else {
-      await pages.addresses.continueButton.click();
+      await this.addCphOnAddressesHub();
     }
+    await pages.addresses.continueButton.click();
 
     await pages.notificationView.viewHeader.reference.waitFor(pageLoadWait);
   }
@@ -1040,7 +1039,7 @@ export class AnimalsJourney {
     await this.submitFromDeclaration();
   }
 
-  private async fromOverviewToDeclaration(): Promise<void> {
+  async fromOverviewToDeclaration(): Promise<void> {
     await this.openReviewFromOverview();
     await this.continueFromReviewToDeclaration();
   }

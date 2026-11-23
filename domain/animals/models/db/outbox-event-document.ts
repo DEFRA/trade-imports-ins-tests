@@ -51,10 +51,19 @@ export type GbnAgExchangedDocument = {
   notificationStatusCode?: string;
   versionId?: number;
   issueDateTime?: string;
-  issuer?: GbnAgTradeParty;
   firstSignatoryAuthentication?: { includedClause: GbnAgClause[] };
   referenceDocument?: GbnAgReferencedDocument[];
 };
+
+export const GBN_AG_EXCHANGED_DOCUMENT_KEYS = [
+  'identifier',
+  'traderAssignedId',
+  'notificationStatusCode',
+  'versionId',
+  'issueDateTime',
+  'firstSignatoryAuthentication',
+  'referenceDocument',
+] as const satisfies readonly (keyof GbnAgExchangedDocument)[];
 
 export type GbnAgClause = {
   identifier: string;

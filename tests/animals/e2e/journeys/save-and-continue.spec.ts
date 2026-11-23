@@ -170,25 +170,6 @@ test.describe('Save and continue to the next page', () => {
     await expect(animalsPages.transitedCountries.addedCountryNames).toHaveText([]);
   });
 
-  test('roles and addresses saved with parties missing goes to check your answers, naming what is outstanding', async ({
-    animalsJourney,
-    animalsPages,
-    pages,
-  }) => {
-    test.slow();
-    const referenceNumber = await animalsJourney.walkToRolesAndAddressesWithoutCph();
-    await animalsPages.addresses.continueButton.click();
-
-    await expect(animalsPages.notificationView.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
-    await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText([
-      'Complete reason for import',
-      'Complete additional animal details',
-      'Complete arrival details',
-      'Complete roles and addresses',
-    ]);
-  });
-
   test('a draft with nothing saved, resumed from the dashboard, opens at the first page', async ({ animalsJourney, animalsPages }) => {
     const referenceNumber = await animalsJourney.createNotificationAtOrigin();
 
