@@ -82,6 +82,7 @@ function runSdk(playwrightArgs: string[]): Promise<number> {
       BROWSERSTACK_BUILD_IDENTIFIER: run.identifier,
       BROWSERSTACK_LOCAL: String(run.usesLocalTunnel),
       BROWSERSTACK_PARALLELS_PER_PLATFORM: parallelsPerPlatform,
+      E2E_SESSION_REUSE: 'off',
     },
   });
   return new Promise((resolve) => sdk.on('close', (code) => resolve(code ?? 1)));
