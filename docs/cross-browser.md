@@ -41,12 +41,11 @@ It still runs in the Chromium e2e run. Tag it only if it runs on CDP and renders
 
 **BrowserStack run** (`browserstack` profile): BrowserStack runs the `@cross-browser` tests on its remote browsers and real devices, one run per platform in `browserstack.yml`.
 
-| Operating system     | Browser                    | Status       |
-| -------------------- | -------------------------- | ------------ |
-| Windows 11           | Playwright's Firefox build | TODO: remove |
-| iOS 27, real iPhone  | Safari                     | TODO: add    |
-| iOS 26, real iPhone  | Safari                     | TODO: add    |
-| macOS 27 Golden Gate | Playwright's WebKit build  | TODO: add    |
+| Operating system     | Device        | Browser                   |
+| -------------------- | ------------- | ------------------------- |
+| macOS 27 Golden Gate | Desktop       | Playwright's WebKit build |
+| iOS 27               | iPhone 18 Pro | Safari                    |
+| iOS 26               | iPhone 17     | Safari                    |
 
 Each platform runs the latest stable browser BrowserStack offers for it: Safari from the newest release of each iOS version, and the `playwright-webkit` build that matches our Playwright version.
 
@@ -68,7 +67,6 @@ Last reviewed: November 2026. Revisit them when GDS updates its list (yearly, ar
 - **iOS 27 and 26 only.** Each iOS version ships its own Safari. iOS 27 is the current release and iOS 26 still gets security updates. Older versions (iOS 18 and earlier) get updates mainly for older iPhones that can't run iOS 26, and we don't support those devices. See [endoflife.date](https://endoflife.date/ios).
 - **Playwright's WebKit on macOS.** BrowserStack's Playwright support has no real macOS Safari. Playwright's WebKit on macOS is the Mac port, closer to Safari than the Linux build in our image.
 - **One macOS version.** Apple usually gives security updates to the current macOS and the two before it: 27 Golden Gate, 26 Tahoe and 15 Sequoia. We test only the newest. Playwright's WebKit comes with our Playwright release, not with macOS, so older versions run the same browser; only the system underneath (networking, cookie storage, fonts) differs, which is unlikely to change a result. See [endoflife.date](https://endoflife.date/macos).
-- **No Windows 11 Firefox.** `playwright-firefox` is Playwright's own build, the same as the `firefox` project.
 
 Not covered:
 
@@ -109,9 +107,6 @@ The `mobile-webkit` project emulates an iPhone 17 on WebKit, to catch layout pro
 - Specs must not assume a fixed viewport.
 
 ## Running on BrowserStack
-
-> [!WARNING]
-> TODO: configure the platforms in [Browsers](#browsers).
 
 The BrowserStack run uses the platforms in [Browsers](#browsers). It runs on CDP, against a CDP environment, and from your machine against the docker-compose stack. GitHub Actions doesn't run it.
 
