@@ -4,11 +4,11 @@ import { test, expect } from '@fixtures';
 import { portByCode } from '@resources/reference-data/reference-data';
 import type { PlantsPages } from '@page-objects';
 import { nurseryAddress, type PlantsJourney } from '@flows/plants/journey';
-import { expectChosenAddressNamedAboveResults } from '@page-objects/shared/address-picker-results';
+import { ADDRESSES_A_PAGE, expectChosenAddressNamedAboveResults, pickerResultsCount } from '@page-objects/shared/address-picker-results';
 import { expectSaveControlsLayout } from '@page-objects/shared/journey-checks';
 
 const CONTACT = 'Contact address for consignment';
-const MATCHING_RECORDS = 6;
+const MATCHING_RECORDS = ADDRESSES_A_PAGE - 2;
 
 async function openContact(plantsPages: PlantsPages, journey: PlantsJourney): Promise<string> {
   const reference = await journey.toArrivalDetailsOfNewPotatoNotification();
@@ -35,7 +35,8 @@ test.describe('High-risk plants contact', () => {
       await expect(contact.heading).toBeVisible();
 
       await contact.searchFor(token);
-      await expect(contact.resultsSummary).toHaveText(`Showing ${MATCHING_RECORDS} out of ${MATCHING_RECORDS} results`);
+      await expect(contact.resultsSummary).toHaveText(pickerResultsCount(MATCHING_RECORDS, MATCHING_RECORDS));
+      await expect(contact.listedAddresses).toHaveCount(MATCHING_RECORDS);
 
       await contact.address(target.name).check();
       await contact.saveAndContinue.click();

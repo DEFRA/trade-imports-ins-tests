@@ -106,7 +106,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(RESULTS_COUNT);
 
     await animalsPages.consignorSelection.search(runOnlySearchToken);
-    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText('Showing 2 out of 2 results');
+    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(pickerResultsCount(2, 2));
     await expect(animalsPages.consignorSelection.party(searchMatches[0])).toBeVisible();
     await expect(animalsPages.consignorSelection.party(searchMatches[1])).toBeVisible();
     await expect(animalsPages.consignorSelection.party(consigneeRoleSearchMatch)).toHaveCount(0);
@@ -129,7 +129,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
   });
 
-  test('the picker shows eight matches a page and keeps the search term and the chosen address as the trader moves to the next page', async ({
+  test('the picker shows eight matches a page, keeps the search term and the chosen address on the next page, and still saves that choice from there', async ({
     animalsJourney,
     animalsPages,
     addressBookApi,
@@ -170,6 +170,20 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(picker.resultsSummary).toHaveText(pickerResultsCount(1, names.length));
     await expect(picker.listedParties).toHaveCount(1);
     await expectChosenAddressNamedAboveResults(picker.resultsHeading, chosenName);
+
+    await picker.saveAndContinue.click();
+
+    await expect(animalsPages.addresses.heading).toBeVisible();
+    await expect(animalsPages.addresses.partyAddressLines('Consignor')).toHaveText(
+      AnimalsAddressesPage.expectedAddressText({
+        name: chosenName,
+        addressLine1: '5 Paged Lane',
+        townOrCity: 'Peebles',
+        postcode: 'EH45 8AA',
+        country: 'United Kingdom',
+      }),
+      { useInnerText: true },
+    );
   });
 
   test('a picker row shows the street line, then town and postcode on one line, and ends with only a View link', async ({

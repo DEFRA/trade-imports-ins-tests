@@ -4,16 +4,16 @@ import { expectEntirelyAbove } from '@page-objects/shared/layout-checks';
 export const PICKER_RESULTS_HEADING = 'Select an address';
 const NO_MATCHES = 'No addresses match your search.';
 
-/** How many of a picker's addresses one page holds. */
 export const ADDRESSES_A_PAGE = 8;
 
-/** The count a picker reads: the rows this page shows out of however many it
- * found. Matches whatever the numbers are, for a picker over an address book
- * this test does not control. */
-export const RESULTS_COUNT = /^Showing \d+ out of \d+ results$/;
+function resultsCountSentence(shown: string, found: string): string {
+  return `Showing ${shown} out of ${found} results`;
+}
+
+export const RESULTS_COUNT = new RegExp(`^${resultsCountSentence('\\d+', '\\d+')}$`);
 
 export function pickerResultsCount(shown: number, found: number): string {
-  return `Showing ${shown} out of ${found} results`;
+  return resultsCountSentence(String(shown), String(found));
 }
 
 export type AddressCellParts = {

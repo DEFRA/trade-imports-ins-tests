@@ -53,6 +53,7 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
     await picker.searchFor(token);
 
     await expect(picker.resultsSummary).toHaveText(pickerResultsCount(ADDRESSES_A_PAGE, names.length));
+    await expect(picker.listedAddresses).toHaveCount(ADDRESSES_A_PAGE);
     await expect(picker.pagination).toBeVisible();
     await expectChosenAddressNamedAboveResults(picker.resultsHeading, chosenName);
 
@@ -61,6 +62,7 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
     await expect(picker.searchBox).toHaveValue(token);
     await expect(picker.resultsSummary).toHaveText(pickerResultsCount(1, names.length));
     await expectChosenAddressNamedAboveResults(picker.resultsHeading, chosenName);
+    await expect(picker.listedAddresses).toHaveCount(1);
   });
 
   test('reopening the picker names the chosen address above the results and checks its row once its page is shown, and shows nothing checked once the address is edited on the notification', async ({

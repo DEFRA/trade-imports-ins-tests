@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { PLANTS_FOR_PLANTING, POTATOES, nurseryAddress } from '@flows/plants/journey';
 import { ALREADY_ARRIVED } from '@domain/plants/constants/arrival-status-page';
 import { addressRoles } from '@domain/shared/constants/address-types';
-import { expectChosenAddressNamedAboveResults, RESULTS_COUNT } from '@page-objects/shared/address-picker-results';
+import { expectChosenAddressNamedAboveResults, pickerResultsCount, RESULTS_COUNT } from '@page-objects/shared/address-picker-results';
 
 const DESTINATION_TASK_ROW = 'Place of destination';
 
@@ -73,7 +73,7 @@ test.describe('High-risk plants destination section', () => {
 
     await plantsPages.placeOfDestination.searchFor(token);
 
-    await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText('Showing 2 out of 2 results');
+    await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(pickerResultsCount(2, 2));
     await expect(plantsPages.placeOfDestination.address(matches[0])).toBeVisible();
     await expect(plantsPages.placeOfDestination.address(matches[1])).toBeVisible();
 
@@ -98,7 +98,7 @@ test.describe('High-risk plants destination section', () => {
     const reference = await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
     await plantsPages.placeOfDestination.searchFor(token);
 
-    await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText('Showing 1 out of 1 results');
+    await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(pickerResultsCount(1, 1));
 
     await plantsPages.placeOfDestination.address(target).check();
     await plantsPages.placeOfDestination.saveAndContinue.click();
