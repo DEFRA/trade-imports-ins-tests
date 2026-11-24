@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
+import { aggregateIdFor, type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import { consignorFixture } from '@flows/shared/address-book-seed';
 import { timeouts } from '@config/timeouts';
 import { users } from '@config/users';
@@ -9,7 +9,6 @@ import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
 
 const NOTIFICATION_CREATED = 'uk.gov.defra.imports.notification.NotificationCreated';
-const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
 const EXPECTED_ACTOR: OutboxEventActor = {
   id: users.andrew.crn,

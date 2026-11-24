@@ -2,14 +2,13 @@ import { notificationStatuses } from '@domain/animals/models/api/notification-st
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { aggregateIdFor } from '@domain/animals/models/db/outbox-event-document';
 import { type AggregatedNotificationDocument } from '@domain/ins/models/db/aggregated-notification-document';
 import { timeouts } from '@config/timeouts';
 import { E2E_ORGANISATION_ID } from '@adapters/http/organisation';
 import { getMongoDbUri } from '@config/service-base-urls';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { parseAppDateText, toIsoDate } from '@utils/date-utils';
-
-const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
 const INS_DASHBOARD_COMMODITY_LABEL = 'Live bovine animals';
 

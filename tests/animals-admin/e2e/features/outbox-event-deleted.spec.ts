@@ -1,13 +1,12 @@
 import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
+import { aggregateIdFor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_DELETED = 'uk.gov.defra.imports.notification.NotificationDeleted';
 const NOTIFICATION_SUBMISSION_DELETED = 'uk.gov.defra.imports.notification.NotificationSubmissionDeleted';
-const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
 test.describe('Notification deleted outbox events', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {

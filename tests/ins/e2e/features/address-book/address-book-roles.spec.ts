@@ -85,7 +85,7 @@ test.describe('Address book API roles', () => {
     ]);
   });
 
-  test('a create carrying a role outside the six is refused naming the roles and saves nothing', async ({
+  test('a create carrying a role outside the five is refused naming the roles and saves nothing', async ({
     isolatedOrganisationAddressBookApi,
   }) => {
     const address = traderAddress(`Unknown Role Farm ${Date.now()}`);

@@ -4,6 +4,7 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { ALL_ANSWERS as answers, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { countryCodes } from '@domain/animals/constants/country-codes';
 import {
+  aggregateIdFor,
   GBN_AG_EXCHANGED_DOCUMENT_KEYS,
   type OutboxEventActor,
   type OutboxEventDocument,
@@ -26,8 +27,6 @@ const EXPECTED_ACTOR: OutboxEventActor = {
   organisationId: users.andrew.organisationId,
   onBehalfOfOrganisationId: null,
 };
-
-const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
 const actorWithNullableFields = (actor?: OutboxEventActor | null): OutboxEventActor => ({
   id: actor?.id ?? null,

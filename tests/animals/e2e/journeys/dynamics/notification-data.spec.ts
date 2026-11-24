@@ -5,7 +5,7 @@ import { timeouts } from '@config/timeouts';
 import { dynamicsBaseTestTimeoutMs } from '@config/dynamics';
 import { defaultUser } from '@config/users';
 import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
-import { GBN_AG_EXCHANGED_DOCUMENT_KEYS, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
+import { aggregateIdFor, GBN_AG_EXCHANGED_DOCUMENT_KEYS, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
 import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { test, expect } from '@fixtures';
@@ -115,28 +115,6 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     expect.soft(row.defraimp_routetransitingstates, 'transited countries').toBeNull();
   });
 
-  test('the submitted notification outbox GBN-AG payload carries only the exchanged document fields the event schema declares', async ({
-    animalsJourney,
-    journeyContext,
-  }) => {
-    skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
-    setTestTimeout(dynamicsBaseTestTimeoutMs);
-    test.slow();
-    await animalsJourney.submitNotification(MANDATORY_ANSWERS);
-    const aggregateId = `Imports.Notification.GBN-AG.${journeyContext.referenceNumber}`;
-    const client = new MongoDbClient();
-
-    try {
-      await client.connect();
-      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
-      await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.long }).toBeGreaterThan(0);
-      const doc = await collection.findOne({ aggregateId });
-      expect(GBN_AG_EXCHANGED_DOCUMENT_KEYS).toEqual(expect.arrayContaining(Object.keys(doc?.data.exchangedDocument ?? {})));
-    } finally {
-      await client.close();
-    }
-  });
-
   test('answering yes to unweaned animals is stored in PIMS Dynamics', async ({ animalsJourney, journeyContext, externalRequest }) => {
     test.fixme(true, 'PIMS Dynamics does not yet write isOrHasUnweanedAnimals from the 0.1.0 message to the record');
     setTestTimeout(dynamicsBaseTestTimeoutMs);
@@ -163,5 +141,32 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     await attachRow(row);
 
     expect.soft(row.defraimp_traderreference, 'internal reference').toBe(answers.internalReference);
+  });
+});
+
+test.describe('Submitted notification outbox payload', () => {
+  test.beforeEach(() => {
+    skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
+  });
+
+  test('the submitted notification outbox GBN-AG payload carries only the exchanged document fields the event schema declares', async ({
+    animalsJourney,
+    journeyContext,
+  }) => {
+    setTestTimeout(dynamicsBaseTestTimeoutMs);
+    test.slow();
+    await animalsJourney.submitNotification(MANDATORY_ANSWERS);
+    const aggregateId = aggregateIdFor(journeyContext.referenceNumber);
+    const client = new MongoDbClient();
+
+    try {
+      await client.connect();
+      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
+      await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.long }).toBeGreaterThan(0);
+      const doc = await collection.findOne({ aggregateId });
+      expect(GBN_AG_EXCHANGED_DOCUMENT_KEYS).toEqual(expect.arrayContaining(Object.keys(doc?.data.exchangedDocument ?? {})));
+    } finally {
+      await client.close();
+    }
   });
 });

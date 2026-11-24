@@ -1,11 +1,10 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
+import { aggregateIdFor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_WITHDRAWN = 'uk.gov.defra.imports.notification.NotificationWithdrawn';
-const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
 test.describe('Notification withdrawal outbox event', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {

@@ -73,21 +73,16 @@ test.describe('Addresses are read-only in the journey', () => {
     }
   });
 
-  test('the create-address page is no longer served', async ({ animalsJourney, journeyContext, pages }) => {
-    await animalsJourney.startNotification();
-    const referenceNumber = journeyContext.referenceNumber;
+  for (const { page: pageName, path } of [
+    { page: 'create-address', path: 'addresses/create?for=consignor' },
+    { page: 'consignment contact select', path: 'consignment/contact/select' },
+  ]) {
+    test(`the ${pageName} page is no longer served`, async ({ animalsJourney, journeyContext, pages }) => {
+      await animalsJourney.startNotification();
 
-    const response = await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/addresses/create?for=consignor`);
+      const response = await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${journeyContext.referenceNumber}/${path}`);
 
-    expect(response?.status()).toBe(404);
-  });
-
-  test('the consignment contact select page is no longer served', async ({ animalsJourney, journeyContext, pages }) => {
-    await animalsJourney.startNotification();
-    const referenceNumber = journeyContext.referenceNumber;
-
-    const response = await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/consignment/contact/select`);
-
-    expect(response?.status()).toBe(404);
-  });
+      expect(response?.status()).toBe(404);
+    });
+  }
 });

@@ -2,6 +2,7 @@ import { test, expect } from '@fixtures';
 import { type AddressType } from '@domain/shared/constants/address-types';
 import {
   addressBookTabLabels,
+  destinationConsigneeOrImporterTab,
   originOrConsignorTab,
   roleBackedAddressBookTabs,
   rolesLabelOf,
@@ -105,6 +106,29 @@ test.describe('Address book tabs', () => {
       await insJourney.toAddressBookTab(tabHolding(roles[0]), { search: name });
 
       await expect(insPages.addressBookList.rolesCell(name)).toHaveText(rolesLabelOf(roles));
+    }
+  });
+});
+
+test.describe('Address book tabs without JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('following the Destination, Consignee and Importer tab loads it, marks it current and lists the addresses the test added for it', async ({
+    insPages,
+    addressBookApi,
+  }) => {
+    const { searchTerm, runAddresses } = await createRunAddresses(addressBookApi);
+    const addedOnTab = runAddressesOnTab(runAddresses, destinationConsigneeOrImporterTab);
+    await insPages.addressBookList.open();
+
+    await insPages.addressBookList.tabLink(destinationConsigneeOrImporterTab.label).click();
+    await insPages.addressBookList.search(searchTerm, { submitWith: 'button' });
+
+    await expect(insPages.addressBookList.selectedTab).toHaveText(destinationConsigneeOrImporterTab.label);
+    await expect(insPages.addressBookList.panelHeading).toHaveText(destinationConsigneeOrImporterTab.panelHeading);
+    await expect(insPages.addressBookList.bodyRows).toHaveCount(addedOnTab.length);
+    for (const { name } of addedOnTab) {
+      await expect(insPages.addressBookList.row(name)).toBeVisible();
     }
   });
 });

@@ -149,3 +149,5 @@ export type GbnAgSpecifiedConsignment = {
   isOrHasUnweanedAnimals?: boolean | null;
   includedConsignmentItem?: GbnAgConsignmentItem[];
 };
+
+export const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;

@@ -138,7 +138,7 @@ export const ITAHC_DOCUMENT: AccompanyingDocumentAnswer = {
   type: documentTypes.itahc,
 };
 
-/** Every answer, including an accompanying document. The UI journey uses this set, as a browser can upload a file. */
+/** Every answer, including an accompanying document. */
 export const ALL_ANSWERS: AllAnswers = {
   ...MANDATORY_ANSWERS,
   commodityLines: [ALL_COMMODITY_LINES.cattle],
