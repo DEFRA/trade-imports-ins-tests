@@ -109,8 +109,10 @@ test.describe('High-risk plants destination section', () => {
     await expect(plantsPages.overview.taskRow(DESTINATION_TASK_ROW)).toContainText('Completed');
 
     await plantsPages.placeOfDestination.open(reference);
-    await expect(plantsPages.placeOfDestination.address(target)).toBeChecked();
     await expectChosenAddressNamedAboveResults(plantsPages.placeOfDestination.resultsHeading, target);
+
+    await plantsPages.placeOfDestination.searchFor(target);
+    await expect(plantsPages.placeOfDestination.address(target)).toBeChecked();
   });
 
   test(
