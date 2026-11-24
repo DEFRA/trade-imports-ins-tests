@@ -10,7 +10,7 @@ test.describe('Transited countries page', { tag: '@duplicated-in-frontend' }, ()
 
   test(
     'renders the country search with only the intro paragraphs, the cancel link and the three buttons',
-    { tag: ['@cross-browser', '@ios'] },
+    { tag: '@cross-browser' },
     async ({ animalsPages }) => {
       const { transitedCountries } = animalsPages;
 
