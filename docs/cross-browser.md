@@ -26,7 +26,7 @@ test('renders the page', { tag: '@cross-browser' }, async ({ insPages }) => {});
 
 It still runs in the Chromium e2e run. Tag it only if it runs on CDP and renders a page the set does not already cover.
 
-Real iPhones run it only once it is also tagged `@ios`. See [Real iPhones](#real-iphones).
+Real iPhones run only tests tagged `@ios`. See [Real iPhones](#real-iphones).
 
 ## Browsers
 
@@ -41,13 +41,13 @@ Real iPhones run it only once it is also tagged `@ios`. See [Real iPhones](#real
 | `mobile-webkit`   | Playwright's WebKit build, emulated iPhone 17  | `@cross-browser` tests             |
 | `mobile-chromium` | Playwright's Chromium build, emulated Pixel 10 | `@cross-browser` tests             |
 
-**BrowserStack run** (`browserstack` profile): BrowserStack runs the `@cross-browser` tests on its remote browsers and real devices, one run per platform in `browserstack.yml`.
+**BrowserStack run** (`browserstack` profile): BrowserStack runs the `@cross-browser` tests on macOS and the `@ios` tests on real iPhones, one run per platform in `browserstack.yml`.
 
-| Operating system     | Device        | Browser                   | Runs                                                                          |
-| -------------------- | ------------- | ------------------------- | ----------------------------------------------------------------------------- |
-| macOS 27 Golden Gate | Desktop       | Playwright's WebKit build | `@cross-browser` tests                                                        |
-| iOS 27               | iPhone 18 Pro | Safari                    | `@cross-browser` tests also tagged `@ios` (see [Real iPhones](#real-iphones)) |
-| iOS 26               | iPhone 17     | Safari                    | `@cross-browser` tests also tagged `@ios` (see [Real iPhones](#real-iphones)) |
+| Operating system     | Device        | Browser                   | Runs                                             |
+| -------------------- | ------------- | ------------------------- | ------------------------------------------------ |
+| macOS 27 Golden Gate | Desktop       | Playwright's WebKit build | `@cross-browser` tests                           |
+| iOS 27               | iPhone 18 Pro | Safari                    | `@ios` tests (see [Real iPhones](#real-iphones)) |
+| iOS 26               | iPhone 17     | Safari                    | `@ios` tests (see [Real iPhones](#real-iphones)) |
 
 Each platform runs the latest stable browser BrowserStack offers for it: Safari from the newest release of each iOS version, and the `playwright-webkit` build that matches our Playwright version.
 
@@ -130,7 +130,7 @@ Don't change idiomatic Playwright code to work around BrowserStack.
 
 On a real iPhone, BrowserStack does not run Playwright. It translates Playwright commands to Safari, and supports only the commands on its [supported iOS commands](https://www.browserstack.com/docs/automate/playwright/references/supported-ios-commands) list. The macOS platform runs Playwright's own WebKit, so it runs every `@cross-browser` test.
 
-The iPhones run only the `@cross-browser` tests also tagged `@ios`. The `skipUntaggedTestsOnIos` fixture in `fixtures/browserstack.ts` skips every other test on a BrowserStack iOS project, so they show as skipped in the report.
+The iPhones run only tests tagged `@ios`, and the macOS platform only tests tagged `@cross-browser`. The `skipTestsWithoutPlatformTag` fixture in `fixtures/browserstack.ts` skips every other test on each BrowserStack platform, so they show as skipped in the report.
 
 ```ts
 test('renders the address book after signing in', { tag: ['@cross-browser', '@ios'] }, async ({ insPages }) => {});

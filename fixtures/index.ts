@@ -4,4 +4,6 @@ import { test as browserStackTest } from './browserstack';
 
 export * from './ui';
 
-export const test = mergeTests(uiTest, browserStackTest);
+const isBrowserStackRun = Boolean(process.env.BROWSERSTACK_BUILD_IDENTIFIER);
+
+export const test = isBrowserStackRun ? mergeTests(uiTest, browserStackTest) : uiTest;
