@@ -298,22 +298,14 @@ unauthenticated opts out with `test.use({ storageState: COLD_START })`.
 The fixtures that sign in have their own timeout, longer than a test's, because
 signing in takes longer than a test's own budget.
 
-The seed session is the signed-in HTTP session `frontendForms` posts forms
-through to create a test's data. There is one per worker, shared by every test
-on that worker. With reuse on it uses the worker's saved session. With reuse
-off it signs in once per worker, in a Chromium it launches for itself
-(`fixtures/seed-context.ts`), so it never opens a context in the test's own
-browser.
-
 A spec that needs the same user in a new browser session uses the
 `openFreshSession` fixture. It opens a page in a new browser context that keeps
 only the auth cookie of the test's own page, so the service holds none of the
 first session's journey state. The fixture closes every context it opened.
 
-`E2E_SESSION_REUSE=off` is the kill switch: every test's page signs in for
-itself again. The seed session is still shared per worker. The CDP config caps
-workers at 4 when reuse is off; against the docker-compose stack re-cap them
-yourself (e.g. `-- --workers=4`).
+`E2E_SESSION_REUSE=off` is the kill switch: every test signs in for itself
+again. The CDP config caps workers at 4 when reuse is off; against the
+docker-compose stack re-cap them yourself (e.g. `-- --workers=4`).
 Reuse is on by default against both the docker-compose stack and CDP.
 `ENVIRONMENT=dev npm run probe:cdp-session-reuse` passed against dev on
 2026-09-15 for animals-frontend, admin and ins-frontend — it signs in once per
