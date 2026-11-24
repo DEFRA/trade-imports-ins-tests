@@ -95,8 +95,8 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
     { scope: 'worker' },
   ],
   frontendSeedContext: [
-    async ({ browser, authStateFor }, use, workerInfo) => {
-      const context = await createFrontendSeedContext(browser, workerInfo, authStateFor);
+    async ({ authStateFor }, use, workerInfo) => {
+      const context = await createFrontendSeedContext(workerInfo, authStateFor);
       await use(context);
       await context.dispose();
     },

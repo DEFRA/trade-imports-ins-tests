@@ -26,6 +26,8 @@ test('renders the page', { tag: '@cross-browser' }, async ({ insPages }) => {});
 
 It still runs in the Chromium e2e run. Tag it only if it runs on CDP and renders a page the set does not already cover.
 
+Real iPhones run it only once it is also tagged `@ios`. See [Real iPhones](#real-iphones).
+
 ## Browsers
 
 **Playwright run** (`cross-browser` profile): Playwright launches these projects, from `utils/playwright/shared-config.ts`, in our test image on CDP, or natively on your machine.
@@ -41,11 +43,11 @@ It still runs in the Chromium e2e run. Tag it only if it runs on CDP and renders
 
 **BrowserStack run** (`browserstack` profile): BrowserStack runs the `@cross-browser` tests on its remote browsers and real devices, one run per platform in `browserstack.yml`.
 
-| Operating system     | Device        | Browser                   |
-| -------------------- | ------------- | ------------------------- |
-| macOS 27 Golden Gate | Desktop       | Playwright's WebKit build |
-| iOS 27               | iPhone 18 Pro | Safari                    |
-| iOS 26               | iPhone 17     | Safari                    |
+| Operating system     | Device        | Browser                   | Runs                                                                          |
+| -------------------- | ------------- | ------------------------- | ----------------------------------------------------------------------------- |
+| macOS 27 Golden Gate | Desktop       | Playwright's WebKit build | `@cross-browser` tests                                                        |
+| iOS 27               | iPhone 18 Pro | Safari                    | `@cross-browser` tests also tagged `@ios` (see [Real iPhones](#real-iphones)) |
+| iOS 26               | iPhone 17     | Safari                    | `@cross-browser` tests also tagged `@ios` (see [Real iPhones](#real-iphones)) |
 
 Each platform runs the latest stable browser BrowserStack offers for it: Safari from the newest release of each iOS version, and the `playwright-webkit` build that matches our Playwright version.
 
@@ -79,13 +81,14 @@ Optional: before a release, check Samsung Internet, Android Chrome and Android F
 
 ### Reviewing the browsers
 
-| When                                 | Check                                                                                                              |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| Apple releases a new iOS (September) | Move the iOS platforms to the newest two versions                                                                  |
-| Apple releases a new macOS (autumn)  | Move the macOS platform to the newest version                                                                      |
-| GDS updates its list (February)      | Compare it with the tables above                                                                                   |
-| `@playwright/test` is upgraded       | Check BrowserStack still offers `playwright-webkit` on our macOS version, and whether it now supports real Android |
-| Playwright documents `moz-firefox`   | Add a real Firefox project                                                                                         |
+| When                                 | Check                                                                                                                                                                                               |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Apple releases a new iOS (September) | Move the iOS platforms to the newest two versions                                                                                                                                                   |
+| Apple releases a new macOS (autumn)  | Move the macOS platform to the newest version                                                                                                                                                       |
+| GDS updates its list (February)      | Compare it with the tables above                                                                                                                                                                    |
+| `@playwright/test` is upgraded       | Check BrowserStack still offers `playwright-webkit` on our macOS version, and whether it now supports real Android                                                                                  |
+| Any of the above                     | Check BrowserStack's [supported iOS commands](https://www.browserstack.com/docs/automate/playwright/references/supported-ios-commands) and try untagged `@cross-browser` tests on the iPhones again |
+| Playwright documents `moz-firefox`   | Add a real Firefox project                                                                                                                                                                          |
 
 A change updates `browserstack.yml` or `utils/playwright/shared-config.ts`, the tables and "Why these browsers" above, and each domain's `cross-browser/README.md`.
 
@@ -116,10 +119,40 @@ The BrowserStack run uses the platforms in [Browsers](#browsers). It runs on CDP
 - BrowserStack Local is always on. It carries the docker-compose stack's `localhost` URLs, and CDP's hostnames, which resolve only inside the platform, to the remote browser.
 - Safari, WebKit and Android browsers cannot open `localhost` through BrowserStack Local, so the iOS and macOS platforms run only on CDP.
 - When a proxy is set (`HTTP_PROXY`, as on CDP), the SDK writes `require("global-agent")` into its generated Playwright config, which fails in an ES module project. `bin/browserstack-global-require.mjs` defines a global `require` for it, and `bin/run-browserstack.ts` preloads that file into the SDK and its workers.
-- Session reuse is off (`E2E_SESSION_REUSE=off`), so every test signs in for itself: real iPhones allow only one browser context.
+- Session reuse is off (`E2E_SESSION_REUSE=off`), so every test signs in for itself. See [Real iPhones](#real-iphones).
 - Each run prints its results link, under https://automate.browserstack.com/projects/trade-imports-ins-tests.
 - Each platform runs half your CPUs in parallel, up to the team-wide limit of 13 sessions. Set `BROWSERSTACK_PARALLELS_PER_PLATFORM` to change it.
 - Builds are named `local`, `github` or `cdp-<ENVIRONMENT>`, with a UTC time or the run id as the identifier, under the project `trade-imports-ins-tests`.
+
+### Real iPhones
+
+Don't change idiomatic Playwright code to work around BrowserStack.
+
+On a real iPhone, BrowserStack does not run Playwright. It translates Playwright commands to Safari, and supports only the commands on its [supported iOS commands](https://www.browserstack.com/docs/automate/playwright/references/supported-ios-commands) list. The macOS platform runs Playwright's own WebKit, so it runs every `@cross-browser` test.
+
+The iPhones run only the `@cross-browser` tests also tagged `@ios`. The `skipUntaggedTestsOnIos` fixture in `fixtures/browserstack.ts` skips every other test on a BrowserStack iOS project, so they show as skipped in the report.
+
+```ts
+test('renders the address book after signing in', { tag: ['@cross-browser', '@ios'] }, async ({ insPages }) => {});
+```
+
+To make a test pass on an iPhone, do not add waits, swap assertions or branch on the platform. A test that needs something BrowserStack does not support stays off the iPhones. Playwright's WebKit, the emulated iPhone and the other projects still run it.
+
+A test can take `@ios` when it:
+
+- opens one browser context and one page: no second user, no second tab, no `javaScriptEnabled: false`. Otherwise: `Only one browser context is allowed`.
+- uses only the assertions on BrowserStack's list, which leaves out `toHaveAccessibleName`, `toHaveRole` and `toHaveValue`. Otherwise: `Assertion method … not supported`.
+- does not check a relative URL with `toHaveURL` after signing in. BrowserStack does not resolve it against `baseURL`, and documents that `toHaveURL` may fail after a cross-domain navigation.
+- does not wait for an XHR or fetch response. iOS reports network events only for the page's own navigation, so `waitForResponse` times out.
+- does not act on an element straight after a navigation. BrowserStack documents no auto-waiting on iOS, and on CDP a `check()` failed within 200 ms on an element the page had not yet rendered.
+
+Add `@ios` only after the test has passed on both iPhones in a CDP `browserstack` run. To try a test, tag it on a branch and run the profile.
+
+Settings for iOS:
+
+- Session reuse is off. BrowserStack allows one browser context per session, and does not restore cookies from `storageState` on iOS.
+- With session reuse off, the seed session that `frontendForms` posts through signs in with a Chromium it launches in the test container (`fixtures/seed-context.ts`), not the remote browser, so the iPhone keeps its one context. The BrowserStack SDK connects only Playwright's `browser`, `context` and `page` fixtures to BrowserStack, through `connectOptions`.
+- `consoleLogs` and Playwright logs are not available on iOS. `consoleLogs` still applies to the macOS platform.
 
 ## Reference
 
@@ -127,6 +160,8 @@ The BrowserStack run uses the platforms in [Browsers](#browsers). It runs on CDP
 - [BrowserStack: Playwright browsers and operating systems](https://www.browserstack.com/docs/automate/playwright/browsers-and-os), by Playwright version.
 - [BrowserStack: browsers and platforms for Automate](https://www.browserstack.com/list-of-browsers-and-platforms/automate), including real devices.
 - [BrowserStack: capabilities](https://www.browserstack.com/docs/automate/capabilities), the values `browserstack.yml` platforms take.
+- [BrowserStack: supported Playwright commands for iOS](https://www.browserstack.com/docs/automate/playwright/references/supported-ios-commands), what a real iPhone can run.
+- [BrowserStack: Playwright on real iOS devices](https://www.browserstack.com/docs/automate/playwright/playwright-ios/nodejs), including the capabilities iOS does not support.
 - Devices Playwright can emulate (names for `devices['…']` in `shared-config.ts`), from our installed version:
 
   ```bash

@@ -45,7 +45,6 @@ networkLogsOptions: false
 video: true
 interactiveDebugging: true
 consoleLogs: errors
-playwrightLogs: true
 
 # ======= Test Reporting =======
 testObservability: true

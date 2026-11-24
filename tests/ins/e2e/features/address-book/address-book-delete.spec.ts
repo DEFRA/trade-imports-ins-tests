@@ -29,7 +29,7 @@ test.describe('Address book delete', () => {
 
   test(
     'the delete page summarises the address, and No, cancel returns to its details with nothing deleted',
-    { tag: '@cross-browser' },
+    { tag: ['@cross-browser', '@ios'] },
     async ({ pages, insPages, addressBookApi }) => {
       const address = addressWithLineTwoAndCounty(`Delete Summary Farm ${Date.now()}`);
       const created = await addressBookApi.createAddress(address);

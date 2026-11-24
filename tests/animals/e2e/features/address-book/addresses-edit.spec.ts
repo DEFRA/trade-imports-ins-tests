@@ -62,7 +62,7 @@ test.describe('Copied addresses are edited on the notification', () => {
 
   test(
     'the edit form opens with the copied details, including the county',
-    { tag: '@cross-browser' },
+    { tag: ['@cross-browser', '@ios'] },
     async ({ animalsSeededJourney, animalsPages, addressBookApi }) => {
       const name = `Prefilled Farm ${Date.now()}`;
       await addressBookApi.createAddress({ name, ...OWN_RECORD });

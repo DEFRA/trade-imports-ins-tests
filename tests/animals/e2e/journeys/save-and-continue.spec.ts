@@ -13,7 +13,7 @@ import { test, expect } from '@fixtures';
 test.describe('Save and continue through a new notification', () => {
   test(
     'walks a cattle-by-air notification through every task with Save and continue, from create to submitted',
-    { tag: '@cross-browser' },
+    { tag: ['@cross-browser', '@ios'] },
     async ({ animalsJourney, animalsPages, pages }) => {
       test.slow();
 
