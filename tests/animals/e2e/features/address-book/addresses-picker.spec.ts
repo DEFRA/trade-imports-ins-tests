@@ -4,9 +4,11 @@ import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-addres
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
 import { consignorFixture } from '@flows/shared/address-book-seed';
 import {
+  ADDRESSES_A_PAGE,
+  expectChosenAddressNamedAboveResults,
   expectedPickerAddressCellText,
-  expectNothingBetweenSearchAndResults,
-  WHOLE_LIST_COUNT,
+  pickerResultsCount,
+  RESULTS_COUNT,
 } from '@page-objects/shared/address-picker-results';
 
 test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-book'] }, () => {
@@ -48,7 +50,7 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     await expect(animalsPages.importerSelection.party(consigneeOnlyName)).toHaveCount(0);
   });
 
-  test('the picker searches within the role, lists every match on one page, and the row ticked is the one that saves, shown checked on reopening with nothing between the search box and the results heading', async ({
+  test('the picker searches within the role, and the row ticked is the one that saves, named above the results on reopening and checked once its page is shown', async ({
     animalsJourney,
     animalsPages,
     addressBookApi,
@@ -101,10 +103,10 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
     const consignorAddressLines = animalsPages.addresses.partyAddressLines('Consignor');
 
     await expect(animalsPages.consignorSelection.resultsHeading).toBeVisible();
-    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(WHOLE_LIST_COUNT);
+    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(RESULTS_COUNT);
 
     await animalsPages.consignorSelection.search(runOnlySearchToken);
-    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText('Showing 2 out of 2 results');
+    await expect(animalsPages.consignorSelection.resultsSummary).toHaveText(pickerResultsCount(2, 2));
     await expect(animalsPages.consignorSelection.party(searchMatches[0])).toBeVisible();
     await expect(animalsPages.consignorSelection.party(searchMatches[1])).toBeVisible();
     await expect(animalsPages.consignorSelection.party(consigneeRoleSearchMatch)).toHaveCount(0);
@@ -117,11 +119,71 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
 
     await animalsPages.addresses.changeParty('Consignor').click();
     await expect(animalsPages.consignorSelection.heading).toBeVisible();
+    await expectChosenAddressNamedAboveResults(animalsPages.consignorSelection.resultsHeading, chosenName);
+
+    await animalsPages.consignorSelection.search(chosenName);
+
     await expect(animalsPages.consignorSelection.party(chosenName)).toBeChecked();
-    await expectNothingBetweenSearchAndResults(animalsPages.consignorSelection.resultsHeading);
     await animalsPages.consignorSelection.saveAndContinue.click();
     await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(consignorAddressLines).toHaveText(chosenAddressText, { useInnerText: true });
+  });
+
+  test('the picker shows eight matches a page, keeps the search term and the chosen address on the next page, and still saves that choice from there', async ({
+    animalsJourney,
+    animalsPages,
+    addressBookApi,
+  }) => {
+    const token = `Peebles${Date.now()}`;
+    const names = Array.from({ length: ADDRESSES_A_PAGE + 1 }, (_, index) => `Paged Consignor ${index + 1} ${token}`);
+    for (const name of names) {
+      await addressBookApi.createAddress({
+        ...heldAsConsignor,
+        name,
+        addressLine1: '5 Paged Lane',
+        townOrCity: 'Peebles',
+        postcode: 'EH45 8AA',
+        countryCode: 'GB',
+        phone: '01721 555 0100',
+        email: 'paged@example.co.uk',
+      });
+    }
+    const chosenName = names[0];
+    const picker = animalsPages.consignorSelection;
+
+    await animalsJourney.toPartyPicker('Consignor');
+    await picker.select(chosenName);
+    await picker.saveAndContinue.click();
+    await expect(animalsPages.addresses.heading).toBeVisible();
+    await animalsPages.addresses.changeParty('Consignor').click();
+
+    await picker.search(token);
+
+    await expect(picker.resultsSummary).toHaveText(pickerResultsCount(ADDRESSES_A_PAGE, names.length));
+    await expect(picker.listedParties).toHaveCount(ADDRESSES_A_PAGE);
+    await expect(picker.pagination).toBeVisible();
+    await expectChosenAddressNamedAboveResults(picker.resultsHeading, chosenName);
+
+    await picker.paginationPageLink(2).click();
+
+    await expect(picker.searchBox).toHaveValue(token);
+    await expect(picker.resultsSummary).toHaveText(pickerResultsCount(1, names.length));
+    await expect(picker.listedParties).toHaveCount(1);
+    await expectChosenAddressNamedAboveResults(picker.resultsHeading, chosenName);
+
+    await picker.saveAndContinue.click();
+
+    await expect(animalsPages.addresses.heading).toBeVisible();
+    await expect(animalsPages.addresses.partyAddressLines('Consignor')).toHaveText(
+      AnimalsAddressesPage.expectedAddressText({
+        name: chosenName,
+        addressLine1: '5 Paged Lane',
+        townOrCity: 'Peebles',
+        postcode: 'EH45 8AA',
+        country: 'United Kingdom',
+      }),
+      { useInnerText: true },
+    );
   });
 
   test('a picker row shows the street line, then town and postcode on one line, and ends with only a View link', async ({

@@ -1,13 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { PLANTS_FOR_PLANTING, type PlantsJourney } from '@flows/plants/journey';
+import { PLANTS_FOR_PLANTING, nurseryAddress, type PlantsJourney } from '@flows/plants/journey';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { addressRoles, heldAsPlaceOfDestination } from '@domain/shared/constants/address-types';
 import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import {
+  ADDRESSES_A_PAGE,
+  expectChosenAddressNamedAboveResults,
   expectedPickerAddressCellText,
-  expectNothingBetweenSearchAndResults,
   pickerAddressCellText,
+  pickerResultsCount,
 } from '@page-objects/shared/address-picker-results';
 
 const PICKER_CASES = [
@@ -29,7 +31,41 @@ const PICKER_CASES = [
 ] as const;
 
 test.describe('Addresses picker', { tag: '@address-book' }, () => {
-  test('reopening the picker shows the chosen address checked, with nothing between the search box and the results heading, and shows nothing checked once the address is edited on the notification', async ({
+  test('the picker shows eight matches a page and keeps the search term and the chosen address as the trader moves to the next page', async ({
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const token = `Dunkeld${randomUUID()}`;
+    const names = Array.from({ length: ADDRESSES_A_PAGE + 1 }, (_, index) => `Paged Nursery ${index + 1} ${token}`);
+    for (const name of names) {
+      await addressBookApi.createAddress(nurseryAddress(name));
+    }
+    const chosenName = names[0];
+    const picker = plantsPages.placeOfDestination;
+
+    const reference = await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
+    await picker.searchFor(chosenName);
+    await picker.address(chosenName).check();
+    await picker.saveAndContinue.click();
+    await picker.open(reference);
+
+    await picker.searchFor(token);
+
+    await expect(picker.resultsSummary).toHaveText(pickerResultsCount(ADDRESSES_A_PAGE, names.length));
+    await expect(picker.listedAddresses).toHaveCount(ADDRESSES_A_PAGE);
+    await expect(picker.pagination).toBeVisible();
+    await expectChosenAddressNamedAboveResults(picker.resultsHeading, chosenName);
+
+    await picker.paginationPageLink(2).click();
+
+    await expect(picker.searchBox).toHaveValue(token);
+    await expect(picker.resultsSummary).toHaveText(pickerResultsCount(1, names.length));
+    await expectChosenAddressNamedAboveResults(picker.resultsHeading, chosenName);
+    await expect(picker.listedAddresses).toHaveCount(1);
+  });
+
+  test('reopening the picker names the chosen address above the results and checks its row once its page is shown, and shows nothing checked once the address is edited on the notification', async ({
     pages,
     plantsPages,
     plantsJourney,
@@ -39,9 +75,11 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
     const editedName = `Edited Destination ${address.name}`;
 
     await plantsPages.placeOfDestination.open(reference);
-    await expect(plantsPages.placeOfDestination.address(address.name)).toBeChecked();
-    await expectNothingBetweenSearchAndResults(plantsPages.placeOfDestination.resultsHeading);
+    await expectChosenAddressNamedAboveResults(plantsPages.placeOfDestination.resultsHeading, address.name);
     await expect(plantsPages.placeOfDestination.currentAddress).toContainText(address.name);
+
+    await plantsPages.placeOfDestination.searchFor(address.name);
+    await expect(plantsPages.placeOfDestination.address(address.name)).toBeChecked();
 
     await plantsPages.placeOfDestination.editCurrentAddress.click();
     await plantsPages.placeOfDestinationEdit.fill({ name: editedName });

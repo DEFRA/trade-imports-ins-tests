@@ -4,7 +4,17 @@ import { expectEntirelyAbove } from '@page-objects/shared/layout-checks';
 export const PICKER_RESULTS_HEADING = 'Select an address';
 const NO_MATCHES = 'No addresses match your search.';
 
-export const WHOLE_LIST_COUNT = /^Showing (\d+) out of \1 results$/;
+export const ADDRESSES_A_PAGE = 8;
+
+function resultsCountSentence(shown: string, found: string): string {
+  return `Showing ${shown} out of ${found} results`;
+}
+
+export const RESULTS_COUNT = new RegExp(`^${resultsCountSentence('\\d+', '\\d+')}$`);
+
+export function pickerResultsCount(shown: number, found: number): string {
+  return resultsCountSentence(String(shown), String(found));
+}
 
 export type AddressCellParts = {
   addressLine1: string;
@@ -71,10 +81,12 @@ export function pickerSearchButton(page: Page): Locator {
   return page.getByRole('button', { name: 'Search', exact: true });
 }
 
-export async function expectNothingBetweenSearchAndResults(resultsHeading: Locator): Promise<void> {
+function textBetweenSearchAndResults(main: string): string {
+  return main.slice(main.lastIndexOf('Search') + 'Search'.length, main.indexOf(PICKER_RESULTS_HEADING)).trim();
+}
+
+export async function expectChosenAddressNamedAboveResults(resultsHeading: Locator, name: string): Promise<void> {
   const page = resultsHeading.page();
   await expectEntirelyAbove(pickerSearchButton(page), resultsHeading);
-  const main = await page.getByRole('main').innerText();
-  const between = main.slice(main.lastIndexOf('Search') + 'Search'.length, main.indexOf(PICKER_RESULTS_HEADING));
-  expect(between.trim()).toBe('');
+  expect(textBetweenSearchAndResults(await page.getByRole('main').innerText())).toBe(`Selected address: ${name}`);
 }
