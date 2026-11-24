@@ -47,12 +47,22 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
 
-  // firefox, webkit, mobile-webkit and mobile-chromium have default: false, so they run only when --project names them.
+  // chromium is the default project. The rest have default: false, so they run only when --project names them:
+  // chrome is the installed branded Chrome; firefox, webkit, mobile-webkit and mobile-chromium are Playwright builds.
   projects: [
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        viewport,
+      },
+    },
+    {
+      name: 'chrome',
+      default: false,
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
         viewport,
       },
     },
