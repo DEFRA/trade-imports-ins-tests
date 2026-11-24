@@ -84,7 +84,7 @@ test.describe('Address book edit', () => {
 
   test(
     'the edit page is headed Edit address and contact details, with Email address before Phone number and the stored country selected',
-    { tag: ['@cross-browser', '@ios'] },
+    { tag: '@cross-browser' },
     async ({ insPages, addressBookApi }) => {
       const address = addressWithLineTwoAndCounty(`Edit Layout Farm ${Date.now()}`);
       const created = await addressBookApi.createAddress(address);

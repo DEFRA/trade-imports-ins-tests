@@ -16,7 +16,7 @@ const expectOverviewShownFor = async (pages: SharedPages, animalsPages: AnimalsP
 test.describe('Transit countries scope', { tag: '@duplicated-in-frontend' }, () => {
   test(
     'the transit-countries page is routed only for rail or road; changing the means wipes saved countries',
-    { tag: ['@cross-browser', '@ios'] },
+    { tag: '@cross-browser' },
     async ({ animalsJourney, animalsPages }) => {
       await animalsJourney.startNotification();
       await animalsJourney.answerCommodity();

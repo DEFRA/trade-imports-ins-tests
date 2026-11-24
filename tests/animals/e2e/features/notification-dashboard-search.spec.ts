@@ -25,7 +25,7 @@ test.describe('Notification dashboard search', () => {
 
   test(
     'returns matching notification when searching by complete reference number',
-    { tag: ['@cross-browser', '@ios'] },
+    { tag: '@cross-browser' },
     async ({ pages, animalsPages, animalsSeededJourney, animalsJourney }) => {
       const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
       await animalsJourney.toNotificationDashboard();

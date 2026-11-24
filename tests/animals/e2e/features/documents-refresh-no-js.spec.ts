@@ -10,7 +10,7 @@ test.describe('Documents scan refresh without JavaScript', { tag: '@duplicated-i
 
   test(
     'the refresh fallback reflects scan progress without client JavaScript',
-    { tag: ['@cross-browser', '@ios'] },
+    { tag: '@cross-browser' },
     async ({ animalsJourney, pages, animalsPages }) => {
       test.slow();
       await animalsJourney.toOriginFromOverview();

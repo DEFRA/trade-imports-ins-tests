@@ -141,17 +141,15 @@ To make a test pass on an iPhone, do not add waits, swap assertions or branch on
 A test can take `@ios` when it:
 
 - opens one browser context and one page: no second user, no second tab, no `javaScriptEnabled: false`. Otherwise: `Only one browser context is allowed`.
+- does not seed through `frontendForms` or `animalsSeededJourney`. With session reuse off, the seed session signs in through a second browser context. A browser the test launches itself goes to BrowserStack too.
 - uses only the assertions on BrowserStack's list, which leaves out `toHaveAccessibleName`, `toHaveRole` and `toHaveValue`. Otherwise: `Assertion method … not supported`.
 - does not check a relative URL with `toHaveURL` after signing in. BrowserStack does not resolve it against `baseURL`, and documents that `toHaveURL` may fail after a cross-domain navigation.
 - does not wait for an XHR or fetch response. iOS reports network events only for the page's own navigation, so `waitForResponse` times out.
 - does not act on an element straight after a navigation. BrowserStack documents no auto-waiting on iOS, and on CDP a `check()` failed within 200 ms on an element the page had not yet rendered.
 
-Add `@ios` only after the test has passed on both iPhones in a CDP `browserstack` run. To try a test, tag it on a branch and run the profile.
-
 Settings for iOS:
 
 - Session reuse is off. BrowserStack allows one browser context per session, and does not restore cookies from `storageState` on iOS.
-- With session reuse off, the seed session that `frontendForms` posts through signs in with a Chromium it launches in the test container (`fixtures/seed-context.ts`), not the remote browser, so the iPhone keeps its one context. The BrowserStack SDK connects only Playwright's `browser`, `context` and `page` fixtures to BrowserStack, through `connectOptions`.
 - `consoleLogs` and Playwright logs are not available on iOS. `consoleLogs` still applies to the macOS platform.
 
 ## Reference

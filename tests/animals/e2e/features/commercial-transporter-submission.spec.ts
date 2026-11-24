@@ -4,7 +4,7 @@ import { uniquelyNamedCommercialTransporter } from '@domain/animals/constants/tr
 test.describe('Commercial transporter journeys', () => {
   test(
     'a trader can submit a notification using a hand-added commercial transporter',
-    { tag: ['@cross-browser', '@ios'] },
+    { tag: '@cross-browser' },
     async ({ animalsSeededJourney, animalsJourney, pages, animalsPages }) => {
       test.slow();
 

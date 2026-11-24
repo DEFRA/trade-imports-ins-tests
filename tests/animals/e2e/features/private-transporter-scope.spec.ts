@@ -7,7 +7,7 @@ const transporter = { name, address };
 test.describe('Private transporter scope', { tag: '@duplicated-in-frontend' }, () => {
   test(
     "the saved country shows on the review's Transport details card, and a saved private transporter survives an add of the other type that the trader cancels",
-    { tag: ['@cross-browser', '@ios'] },
+    { tag: '@cross-browser' },
     async ({ animalsJourney, pages, animalsPages }) => {
       test.slow();
       await animalsJourney.startNotification();
