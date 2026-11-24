@@ -11,12 +11,10 @@ import {
   seedSteps,
   type DraftStage,
   type PartyIds,
-  type PartyNames,
-  type PartyRole,
   type SeedOptions,
   type SeedStep,
 } from '@flows/animals/seed-form-steps';
-import { ITAHC_DOCUMENT, MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
+import { ITAHC_DOCUMENT, MANDATORY_ANSWERS, type NotificationAnswers, type PartyAnswers } from '@domain/animals/constants/journey-options';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { OPTIONAL_RETURN_AND_TRAIL_PATTERN } from '@page-objects/shared/base-page';

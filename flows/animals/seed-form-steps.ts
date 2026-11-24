@@ -188,7 +188,7 @@ export const seedSteps = async (
   if (stage === 'unlocked') {
     return unlocked;
   }
-  const parties = await resolveParties(partyNamesFrom(answers));
+  const parties = await resolveParties(answers.parties);
   const throughArrival = [
     ...unlocked,
     ...consignmentSteps(answers, leaveUnanswered),
