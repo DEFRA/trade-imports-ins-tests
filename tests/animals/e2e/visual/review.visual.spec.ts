@@ -8,14 +8,14 @@ test.describe('Review (visual regression)', { tag: '@visual' }, () => {
     await animalsNotificationActions.toNotificationView(journeyContext.referenceNumber);
   });
 
-  test('shows a ready draft from the first section to the Contact address card and the Continue button at desktop width', async ({
+  test('shows a ready draft from the first section to the Consignment addresses card and the Continue button at desktop width', async ({
     page,
     animalsPages,
   }) => {
     await pinDateText(
       animalsPages.notificationView.summaryValue(animalsPages.notificationView.arrivalDetailsCard, 'Arrival date at port of entry'),
     );
-    await expect(animalsPages.notificationView.contactAddressCard).toBeVisible();
+    await expect(animalsPages.notificationView.addressesCard).toBeVisible();
     await expect(animalsPages.notificationView.continueButton).toBeVisible();
     const { viewHeader } = animalsPages.notificationView;
     await pinDraftViewHeader(viewHeader);

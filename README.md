@@ -167,7 +167,7 @@ Playwright's 30s and 5s defaults that the docker-compose config keeps. Each CDP
 page load is a real network hop, so CDP needs a longer budget than the local
 stack. The suite once also timed out in bursts: a
 leaked address book on dev (grown to 4,882 records) made every
-`contact-address` page load fan out dozens of concurrent reads through the
+address picker page load fan out dozens of concurrent reads through the
 CDP SSL sidecar, which returned 502/504s for a few minutes at a time. Session
 reuse, a per-test address-book teardown and a one-off purge removed the leak
 and the outage; three clean CDP runs then kept every test under

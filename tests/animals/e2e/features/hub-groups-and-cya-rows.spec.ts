@@ -209,7 +209,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: '@duplicated-in-f
       'Transport details',
       'Document 1',
       CONSIGNMENT_ADDRESSES,
-      'Contact address',
     ]);
 
     const originOfImport = animalsPages.notificationView.originOfImportCard;

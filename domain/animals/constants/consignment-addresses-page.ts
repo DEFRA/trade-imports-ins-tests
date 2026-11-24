@@ -7,4 +7,3 @@ export const ORIGIN_OF_IMPORT_CARD = 'Origin of import';
 export const MAIN_IMPORT_REASON_CARD = 'Main import reason';
 export const ADDITIONAL_DETAILS_CARD = 'Additional details';
 export const ARRIVAL_DETAILS_CARD = 'Arrival details';
-export const CONTACT_ADDRESS_CARD = 'Contact address';
