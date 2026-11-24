@@ -545,22 +545,22 @@ If `PROFILE` is not set, the `default` profile is used.
 | `a11y`               | accessibility test suite                                                                       | `npm run test:a11y`          |
 | `dynamics`           | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics`      |
 | `cross-browser`      | `@cross-browser` tests in Chrome, Firefox, WebKit, iPhone 17 and Pixel 10                      | `npm run test:cross-browser` |
-| `browserstack`       | `@cross-browser` tests on BrowserStack                                                         | `npm run test:browserstack`  |
+| `browserstack`       | `@cross-browser` tests on BrowserStack; the iPhones run only those also tagged `@ios`          | `npm run test:browserstack`  |
 | `security`           | security test suite (ZAP passive scan)                                                         | `npm run test:security`      |
 | `security:active`    | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                            |
 
 The profiles above run every domain. To run one domain's suite only, prefix the
 suite with its domain name as `<domain>:<suite>`:
 
-| PROFILE                    | Test suite                                              |
-| -------------------------- | ------------------------------------------------------- |
-| `<domain>:e2e`             | that domain's e2e suite (`npm test -- tests/<domain>/`) |
-| `<domain>:a11y`            | that domain's accessibility suite                       |
-| `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)             |
-| `<domain>:cross-browser`   | that domain's `@cross-browser` tests                    |
-| `<domain>:browserstack`    | that domain's `@cross-browser` tests on BrowserStack    |
-| `<domain>:security`        | that domain's security suite (ZAP passive scan)         |
-| `<domain>:security:active` | **not supported on CDP**, as `security:active`          |
+| PROFILE                    | Test suite                                                                                          |
+| -------------------------- | --------------------------------------------------------------------------------------------------- |
+| `<domain>:e2e`             | that domain's e2e suite (`npm test -- tests/<domain>/`)                                             |
+| `<domain>:a11y`            | that domain's accessibility suite                                                                   |
+| `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)                                                         |
+| `<domain>:cross-browser`   | that domain's `@cross-browser` tests                                                                |
+| `<domain>:browserstack`    | that domain's `@cross-browser` tests on BrowserStack; the iPhones run only those also tagged `@ios` |
+| `<domain>:security`        | that domain's security suite (ZAP passive scan)                                                     |
+| `<domain>:security:active` | **not supported on CDP**, as `security:active`                                                      |
 
 `<domain>` is one of `animals`, `animals-admin`, `ins` or `plants`, e.g.
 `animals:a11y` or `plants:e2e`. A domain with no specs of a test type (for example

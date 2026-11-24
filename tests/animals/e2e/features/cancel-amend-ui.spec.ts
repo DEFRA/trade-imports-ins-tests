@@ -36,7 +36,7 @@ test.describe('Cancel amendment through the UI', () => {
 
     test(
       'Cancel amend on the Overview opens the cancel-amendment confirmation page',
-      { tag: '@cross-browser' },
+      { tag: ['@cross-browser', '@ios'] },
       async ({ pages, animalsPages, journeyContext }) => {
         const reference = journeyContext.referenceNumber;
 
