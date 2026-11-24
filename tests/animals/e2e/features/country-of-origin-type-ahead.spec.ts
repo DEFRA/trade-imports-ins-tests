@@ -12,7 +12,7 @@ import {
 test.describe('Country of origin type-ahead', { tag: '@duplicated-in-frontend' }, () => {
   test(
     'filters as you type, submits the country code and persists it',
-    { tag: ['@cross-browser', '@ios'] },
+    { tag: '@cross-browser' },
     async ({ animalsJourney, animalsPages }) => {
       await animalsJourney.toOriginFromOverview();
 

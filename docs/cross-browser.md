@@ -26,7 +26,7 @@ test('renders the page', { tag: '@cross-browser' }, async ({ insPages }) => {});
 
 It still runs in the Chromium e2e run. Tag it only if it runs on CDP and renders a page the set does not already cover.
 
-Real iPhones run it only once it is also tagged `@ios`. See [Real iPhones](#real-iphones).
+Real iPhones run only tests tagged `@ios`. See [Real iPhones](#real-iphones).
 
 ## Browsers
 
@@ -41,13 +41,13 @@ Real iPhones run it only once it is also tagged `@ios`. See [Real iPhones](#real
 | `mobile-webkit`   | Playwright's WebKit build, emulated iPhone 17  | `@cross-browser` tests             |
 | `mobile-chromium` | Playwright's Chromium build, emulated Pixel 10 | `@cross-browser` tests             |
 
-**BrowserStack run** (`browserstack` profile): BrowserStack runs the `@cross-browser` tests on its remote browsers and real devices, one run per platform in `browserstack.yml`.
+**BrowserStack run** (`browserstack` profile): BrowserStack runs the `@cross-browser` tests on macOS and the `@ios` tests on real iPhones, one run per platform in `browserstack.yml`.
 
-| Operating system     | Device        | Browser                   | Runs                                                                          |
-| -------------------- | ------------- | ------------------------- | ----------------------------------------------------------------------------- |
-| macOS 27 Golden Gate | Desktop       | Playwright's WebKit build | `@cross-browser` tests                                                        |
-| iOS 27               | iPhone 18 Pro | Safari                    | `@cross-browser` tests also tagged `@ios` (see [Real iPhones](#real-iphones)) |
-| iOS 26               | iPhone 17     | Safari                    | `@cross-browser` tests also tagged `@ios` (see [Real iPhones](#real-iphones)) |
+| Operating system     | Device        | Browser                   | Runs                                             |
+| -------------------- | ------------- | ------------------------- | ------------------------------------------------ |
+| macOS 27 Golden Gate | Desktop       | Playwright's WebKit build | `@cross-browser` tests                           |
+| iOS 27               | iPhone 18 Pro | Safari                    | `@ios` tests (see [Real iPhones](#real-iphones)) |
+| iOS 26               | iPhone 17     | Safari                    | `@ios` tests (see [Real iPhones](#real-iphones)) |
 
 Each platform runs the latest stable browser BrowserStack offers for it: Safari from the newest release of each iOS version, and the `playwright-webkit` build that matches our Playwright version.
 
@@ -130,7 +130,7 @@ Don't change idiomatic Playwright code to work around BrowserStack.
 
 On a real iPhone, BrowserStack does not run Playwright. It translates Playwright commands to Safari, and supports only the commands on its [supported iOS commands](https://www.browserstack.com/docs/automate/playwright/references/supported-ios-commands) list. The macOS platform runs Playwright's own WebKit, so it runs every `@cross-browser` test.
 
-The iPhones run only the `@cross-browser` tests also tagged `@ios`. The `skipUntaggedTestsOnIos` fixture in `fixtures/browserstack.ts` skips every other test on a BrowserStack iOS project, so they show as skipped in the report.
+The iPhones run only tests tagged `@ios`, and the macOS platform only tests tagged `@cross-browser`. The `skipTestsWithoutPlatformTag` fixture in `fixtures/browserstack.ts` skips every other test on each BrowserStack platform, so they show as skipped in the report.
 
 ```ts
 test('renders the address book after signing in', { tag: ['@cross-browser', '@ios'] }, async ({ insPages }) => {});
@@ -141,17 +141,15 @@ To make a test pass on an iPhone, do not add waits, swap assertions or branch on
 A test can take `@ios` when it:
 
 - opens one browser context and one page: no second user, no second tab, no `javaScriptEnabled: false`. Otherwise: `Only one browser context is allowed`.
+- does not seed through `frontendForms` or `animalsSeededJourney`. With session reuse off, the seed session signs in through a second browser context. A browser the test launches itself goes to BrowserStack too.
 - uses only the assertions on BrowserStack's list, which leaves out `toHaveAccessibleName`, `toHaveRole` and `toHaveValue`. Otherwise: `Assertion method … not supported`.
 - does not check a relative URL with `toHaveURL` after signing in. BrowserStack does not resolve it against `baseURL`, and documents that `toHaveURL` may fail after a cross-domain navigation.
 - does not wait for an XHR or fetch response. iOS reports network events only for the page's own navigation, so `waitForResponse` times out.
 - does not act on an element straight after a navigation. BrowserStack documents no auto-waiting on iOS, and on CDP a `check()` failed within 200 ms on an element the page had not yet rendered.
 
-Add `@ios` only after the test has passed on both iPhones in a CDP `browserstack` run. To try a test, tag it on a branch and run the profile.
-
 Settings for iOS:
 
 - Session reuse is off. BrowserStack allows one browser context per session, and does not restore cookies from `storageState` on iOS.
-- With session reuse off, the seed session that `frontendForms` posts through signs in with a Chromium it launches in the test container (`fixtures/seed-context.ts`), not the remote browser, so the iPhone keeps its one context. The BrowserStack SDK connects only Playwright's `browser`, `context` and `page` fixtures to BrowserStack, through `connectOptions`.
 - `consoleLogs` and Playwright logs are not available on iOS. `consoleLogs` still applies to the macOS platform.
 
 ## Reference

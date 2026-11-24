@@ -11,7 +11,7 @@ import { timeouts } from '@config/timeouts';
 test.describe('Outbox events (admin)', { tag: '@mongodb' }, () => {
   test(
     'shows the outbox event for a submitted notification',
-    { tag: ['@smoke', '@cross-browser', '@ios'] },
+    { tag: ['@smoke', '@cross-browser'] },
     async ({ animalsSeededJourney, animalsAdminNavigation, animalsAdminPages }) => {
       test.slow();
       const referenceNumber = await animalsSeededJourney.createSubmittedNotification();

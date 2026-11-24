@@ -4,7 +4,7 @@ import { CPH_NUMBER_DISPLAY } from '@domain/animals/constants/journey-options';
 test.describe('All operator addresses', { tag: '@duplicated-in-frontend' }, () => {
   test(
     'check your answers lists all six operators with the picked name and country',
-    { tag: ['@cross-browser', '@ios'] },
+    { tag: '@cross-browser' },
     async ({ animalsJourney, animalsPages }) => {
       test.slow();
 

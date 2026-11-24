@@ -298,22 +298,14 @@ unauthenticated opts out with `test.use({ storageState: COLD_START })`.
 The fixtures that sign in have their own timeout, longer than a test's, because
 signing in takes longer than a test's own budget.
 
-The seed session is the signed-in HTTP session `frontendForms` posts forms
-through to create a test's data. There is one per worker, shared by every test
-on that worker. With reuse on it uses the worker's saved session. With reuse
-off it signs in once per worker, in a Chromium it launches for itself
-(`fixtures/seed-context.ts`), so it never opens a context in the test's own
-browser.
-
 A spec that needs the same user in a new browser session uses the
 `openFreshSession` fixture. It opens a page in a new browser context that keeps
 only the auth cookie of the test's own page, so the service holds none of the
 first session's journey state. The fixture closes every context it opened.
 
-`E2E_SESSION_REUSE=off` is the kill switch: every test's page signs in for
-itself again. The seed session is still shared per worker. The CDP config caps
-workers at 4 when reuse is off; against the docker-compose stack re-cap them
-yourself (e.g. `-- --workers=4`).
+`E2E_SESSION_REUSE=off` is the kill switch: every test signs in for itself
+again. The CDP config caps workers at 4 when reuse is off; against the
+docker-compose stack re-cap them yourself (e.g. `-- --workers=4`).
 Reuse is on by default against both the docker-compose stack and CDP.
 `ENVIRONMENT=dev npm run probe:cdp-session-reuse` passed against dev on
 2026-09-15 for animals-frontend, admin and ins-frontend — it signs in once per
@@ -545,22 +537,22 @@ If `PROFILE` is not set, the `default` profile is used.
 | `a11y`               | accessibility test suite                                                                       | `npm run test:a11y`          |
 | `dynamics`           | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics`      |
 | `cross-browser`      | `@cross-browser` tests in Chrome, Firefox, WebKit, iPhone 17 and Pixel 10                      | `npm run test:cross-browser` |
-| `browserstack`       | `@cross-browser` tests on BrowserStack; the iPhones run only those also tagged `@ios`          | `npm run test:browserstack`  |
+| `browserstack`       | `@cross-browser` tests on BrowserStack macOS, `@ios` tests on its iPhones                      | `npm run test:browserstack`  |
 | `security`           | security test suite (ZAP passive scan)                                                         | `npm run test:security`      |
 | `security:active`    | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                            |
 
 The profiles above run every domain. To run one domain's suite only, prefix the
 suite with its domain name as `<domain>:<suite>`:
 
-| PROFILE                    | Test suite                                                                                          |
-| -------------------------- | --------------------------------------------------------------------------------------------------- |
-| `<domain>:e2e`             | that domain's e2e suite (`npm test -- tests/<domain>/`)                                             |
-| `<domain>:a11y`            | that domain's accessibility suite                                                                   |
-| `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)                                                         |
-| `<domain>:cross-browser`   | that domain's `@cross-browser` tests                                                                |
-| `<domain>:browserstack`    | that domain's `@cross-browser` tests on BrowserStack; the iPhones run only those also tagged `@ios` |
-| `<domain>:security`        | that domain's security suite (ZAP passive scan)                                                     |
-| `<domain>:security:active` | **not supported on CDP**, as `security:active`                                                      |
+| PROFILE                    | Test suite                                                                              |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| `<domain>:e2e`             | that domain's e2e suite (`npm test -- tests/<domain>/`)                                 |
+| `<domain>:a11y`            | that domain's accessibility suite                                                       |
+| `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)                                             |
+| `<domain>:cross-browser`   | that domain's `@cross-browser` tests                                                    |
+| `<domain>:browserstack`    | that domain's `@cross-browser` tests on BrowserStack macOS, `@ios` tests on its iPhones |
+| `<domain>:security`        | that domain's security suite (ZAP passive scan)                                         |
+| `<domain>:security:active` | **not supported on CDP**, as `security:active`                                          |
 
 `<domain>` is one of `animals`, `animals-admin`, `ins` or `plants`, e.g.
 `animals:a11y` or `plants:e2e`. A domain with no specs of a test type (for example

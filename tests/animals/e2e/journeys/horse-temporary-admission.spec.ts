@@ -14,7 +14,7 @@ import { test, expect } from '@fixtures';
 test.describe('Horse by sea under temporary admission', () => {
   test(
     'walks a horse-by-sea notification under temporary admission from create to submitted, with every task complete',
-    { tag: ['@cross-browser', '@ios'] },
+    { tag: '@cross-browser' },
     async ({ animalsJourney, animalsPages, pages }) => {
       test.slow();
 

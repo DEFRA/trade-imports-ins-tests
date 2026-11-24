@@ -14,13 +14,9 @@ test.describe('Import notification submitted page', { tag: '@duplicated-in-front
     await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.confirmation);
   });
 
-  test(
-    'lists the ITAHC as still to upload when no document was uploaded',
-    { tag: ['@cross-browser', '@ios'] },
-    async ({ animalsPages }) => {
-      await expect(animalsPages.confirmation.outstandingItems).toHaveText(ITAHC_STILL_TO_UPLOAD);
-    },
-  );
+  test('lists the ITAHC as still to upload when no document was uploaded', { tag: '@cross-browser' }, async ({ animalsPages }) => {
+    await expect(animalsPages.confirmation.outstandingItems).toHaveText(ITAHC_STILL_TO_UPLOAD);
+  });
 
   test('says the notification can be viewed or changed from the dashboard', async ({ animalsPages }) => {
     await expect(animalsPages.confirmation.viewOrChangeSentence).toHaveText(
