@@ -150,7 +150,7 @@ A test can take `@ios` when it:
 Settings for iOS:
 
 - Session reuse is off. BrowserStack allows one browser context per session, and does not restore cookies from `storageState` on iOS.
-- `consoleLogs` and Playwright logs are not available on iOS. `consoleLogs` still applies to the macOS platform.
+- `consoleLogs` and Playwright logs are not available on iOS. Both still apply to the macOS platform.
 
 ## Reference
 
