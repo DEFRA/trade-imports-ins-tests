@@ -53,3 +53,7 @@ playwrightLogs: true
 
 # ======= Test Reporting =======
 testObservability: true
+
+# ======= Accessibility =======
+# Off: the @a11y suite checks accessibility with axe, in Chromium.
+accessibility: false
