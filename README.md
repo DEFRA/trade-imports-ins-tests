@@ -21,7 +21,7 @@ End-to-end, accessibility and security tests for the trade imports services — 
 
 ## Prerequisites
 
-- Node.js v24
+- Node.js 26.13.1, the version in `.nvmrc`
 - npm package manager
 
 ## Installation
@@ -78,21 +78,21 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command                                       | Test scope                                            | Target                                | Config                                | Generates Report |
-| --------------------------------------------- | ----------------------------------------------------- | ------------------------------------- | ------------------------------------- | ---------------- |
-| `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`           | CDP                                   | `playwright.config.ts`                | ✓                |
-| `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                    | CDP                                   | `playwright.config.ts`                | ✓                |
-| `npm run test:dynamics`                       | Dynamics integration (`@dynamics`) test suite         | CDP                                   | `playwright.config.ts`                | ✓                |
-| `npm run test:cross-browser`                  | Cross-browser (`@cross-browser`) suite                | CDP                                   | `playwright.config.ts`                | ✓                |
-| `npm run test:browserstack`                   | `@cross-browser` and `@ios` suites on BrowserStack    | CDP (from your machine, set `RUN_ID`) | `playwright.config.ts`                | ✓                |
-| `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites        | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                    | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                   | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:cross-browser`   | Cross-browser (`@cross-browser`) suite                | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:browserstack`    | `@cross-browser` and `@ios` suites on BrowserStack    | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                   | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| Command                                       | Test scope                                                          | Target                                | Config                                | Generates Report |
+| --------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------- | ------------------------------------- | ---------------- |
+| `npm test`                                    | E2E suite, excluding `@compose`, `@a11y`, `@active` and `@dynamics` | CDP                                   | `playwright.config.ts`                | ✓                |
+| `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                                  | CDP                                   | `playwright.config.ts`                | ✓                |
+| `npm run test:dynamics`                       | Dynamics integration (`@dynamics`) test suite                       | CDP                                   | `playwright.config.ts`                | ✓                |
+| `npm run test:cross-browser`                  | Cross-browser (`@cross-browser`) suite                              | CDP                                   | `playwright.config.ts`                | ✓                |
+| `npm run test:browserstack`                   | `@cross-browser` and `@ios` suites on BrowserStack                  | CDP (from your machine, set `RUN_ID`) | `playwright.config.ts`                | ✓                |
+| `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites                      | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                                  | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                                 | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:cross-browser`   | Cross-browser (`@cross-browser`) suite                              | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:browserstack`    | `@cross-browser` and `@ios` suites on BrowserStack                  | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                              | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite               | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                                 | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
 
 ### Running one domain
 
@@ -157,7 +157,7 @@ the tests image, is never stopped.
 
 The animals journey scans leave out govuk-frontend's conditional-reveal radios
 (`govukConditionalRevealRadioOnOrigin` and
-`govukConditionalRevealRadiosOnReason` in `fixtures/a11y.ts`). govuk-frontend sets `aria-expanded` on
+`govukConditionalRevealRadiosOnReason` in `utils/a11y-exclusions.ts`). govuk-frontend sets `aria-expanded` on
 each radio that opens a conditional reveal (`radios.mjs`), and axe's
 `aria-allowed-attr` rule rejects it. That is a disagreement between
 govuk-frontend and axe, not a service defect.
@@ -520,7 +520,7 @@ A service tag (`config/service-tags.ts`, for example `@ins-backend`) marks a spe
 
 ### Scheduled security scan
 
-`.github/workflows/scheduled-security-scan.yml` calls the workspace's `security-active-scan.yml`. Manual dispatch only for now — see [`docs/security.md`](docs/security.md).
+`.github/workflows/scheduled-security-scan.yml` calls the workspace's `security-active-scan.yml` at 01:00 UTC on weekdays, and on manual dispatch. See [`docs/security.md`](docs/security.md).
 
 ## Running Tests via CDP Portal
 
