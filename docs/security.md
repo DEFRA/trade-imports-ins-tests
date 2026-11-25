@@ -25,7 +25,7 @@ Three lanes, and they do not all use the same config or target:
 
 **`security:active` is refused on CDP.** The `@active` suite deletes notifications, documents and DLQ messages, and the active scan re-fires each with fuzzed payloads — fine against a disposable stack, destructive against a shared one. `entrypoint.sh` writes to `FAILED` rather than running it. The `throwIfProdEnvironment` guard is no help here: it stops `prod` alone, so `dev`, `test` and `perf-test` would all have run.
 
-The GitHub Action is manual dispatch only; the nightly schedule stays disabled pending a verified end-to-end run. Its report publishes to GitHub Pages under `security-active/<date>/`, password-protected via the `ZAP_REPORT_PASSWORD` secret because that Pages site is otherwise public. Reports older than 7 days are pruned.
+The GitHub Action runs at 01:00 UTC on weekdays, and on manual dispatch. Its report publishes to GitHub Pages under `security-active/<date>/`, password-protected via the `ZAP_REPORT_PASSWORD` secret because that Pages site is otherwise public. Reports older than 7 days are pruned.
 
 ## Running locally
 
