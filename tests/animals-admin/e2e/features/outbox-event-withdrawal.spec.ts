@@ -3,6 +3,7 @@ import { withOutbox } from '@domain/animals/models/db/outbox-event-document';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_CREATED = 'uk.gov.defra.imports.notification.NotificationCreated';
+const NOTIFICATION_EDITED = 'uk.gov.defra.imports.notification.NotificationEdited';
 const NOTIFICATION_DELETED = 'uk.gov.defra.imports.notification.NotificationDeleted';
 
 test.describe('Notification withdrawal outbox event', { tag: '@mongodb' }, () => {
@@ -23,7 +24,7 @@ test.describe('Notification withdrawal outbox event', { tag: '@mongodb' }, () =>
       await outbox.singleEventOf(journeyContext.referenceNumber, NOTIFICATION_DELETED);
 
       const events = await outbox.eventsOf(journeyContext.referenceNumber);
-      expect(events.map(({ eventType }) => eventType)).toEqual([NOTIFICATION_CREATED, NOTIFICATION_DELETED]);
+      expect(events.map(({ eventType }) => eventType)).toEqual([NOTIFICATION_CREATED, NOTIFICATION_EDITED, NOTIFICATION_DELETED]);
     });
   });
 });
