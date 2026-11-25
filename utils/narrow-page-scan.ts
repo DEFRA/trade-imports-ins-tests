@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 import { expect } from '@fixtures/a11y';
 import type { A11yFixtures } from '@fixtures/a11y';
+import type { A11yScanOptions } from '@utils/a11y-utils';
 
 const scrollsSidewaysOutsideTables = (page: Page): Promise<boolean> =>
   page.evaluate(() => {
@@ -16,7 +17,11 @@ const scrollsSidewaysOutsideTables = (page: Page): Promise<boolean> =>
     return scrollsSideways;
   });
 
-export const scanNarrowPage = async (page: Page, runA11yScan: A11yFixtures['runA11yScan']): Promise<void> => {
+export const scanNarrowPage = async (
+  page: Page,
+  runA11yScan: A11yFixtures['runA11yScan'],
+  scanOptions?: A11yScanOptions,
+): Promise<void> => {
   await expect.soft(scrollsSidewaysOutsideTables(page), `${page.url()} scrolls sideways`).resolves.toBe(false);
-  await runA11yScan();
+  await runA11yScan(scanOptions);
 };

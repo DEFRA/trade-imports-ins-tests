@@ -1,4 +1,5 @@
 import { test, WCAG_STANDARD, scanViewports } from '@fixtures/a11y';
+import { govukFileUploadButtonOnDocuments } from '@utils/a11y-exclusions';
 import { scanNarrowPage } from '@utils/narrow-page-scan';
 
 const narrowViewports = {
@@ -51,7 +52,7 @@ for (const [viewportName, viewport] of Object.entries(narrowViewports)) {
       await test.step('Upload documents with a saved document', async () => {
         await animalsJourney.toAccompanyingDocuments();
         await animalsJourney.uploadScannedDocument();
-        await scanNarrowPage(page, runA11yScan);
+        await scanNarrowPage(page, runA11yScan, { exclude: govukFileUploadButtonOnDocuments });
       });
     });
   });
