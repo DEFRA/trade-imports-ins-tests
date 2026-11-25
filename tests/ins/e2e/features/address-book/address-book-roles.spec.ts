@@ -111,6 +111,21 @@ test.describe('Address book API roles', () => {
     expect((await isolatedOrganisationAddressBookApi.getAddress(created.id)).roles).toEqual([addressRoles.placeOfOrigin]);
   });
 
+  test('an update adding BRANCH_ADDRESS is refused as an unknown role naming the roles and the address keeps its original roles', async ({
+    isolatedOrganisationAddressBookApi,
+  }) => {
+    const address = traderAddress(`Kept Receiving Roles Farm ${Date.now()}`);
+    const created = await isolatedOrganisationAddressBookApi.createAddress({ ...address, roles: [addressRoles.consignee] });
+
+    await expectValidationRefusalNamingRoles(
+      isolatedOrganisationAddressBookApi.updateAddress(created.id, {
+        ...address,
+        roles: [addressRoles.consignee, 'BRANCH_ADDRESS' as AddressRole],
+      }),
+    );
+    expect((await isolatedOrganisationAddressBookApi.getAddress(created.id)).roles).toEqual([addressRoles.consignee]);
+  });
+
   test('a create holding a sending role and a receiving role is refused naming the roles and saves nothing', async ({
     isolatedOrganisationAddressBookApi,
   }) => {
