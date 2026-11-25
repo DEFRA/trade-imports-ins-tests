@@ -6,8 +6,6 @@ export const addressTypes = {
 
 export type AddressType = (typeof addressTypes)[keyof typeof addressTypes];
 
-/** The address types whose add form asks the roles question: every type but Transporter, which
- * opens the add-a-transporter pages instead and carries no roles. */
 export const addressTypesAskingRoles = [addressTypes.originOrConsignor, addressTypes.destinationConsigneeOrImporter] as const;
 
 export type AddressTypeAskingRoles = (typeof addressTypesAskingRoles)[number];
