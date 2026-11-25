@@ -1,7 +1,7 @@
 # cross-browser
 
 This folder holds no specs. The animals cross-browser tests are existing e2e specs, selected by the
-`@cross-browser` tag and run in Playwright's browsers, branded Chrome, and on BrowserStack.
+`@cross-browser` tag and run in Playwright's browsers, real Chrome, and on BrowserStack.
 
 Strategy: see [`docs/cross-browser.md`](../../../docs/cross-browser.md).
 
@@ -28,9 +28,15 @@ Run the `animals:cross-browser` profile.
 
 ### Run on the local stack
 
-Run against the docker-compose stack, from the repo root.
+Run against the docker-compose stack, from the repo root. Every platform runs, but only Windows Edge can open the stack's `localhost`. Run the others against CDP.
 
 `npm run test:docker-compose:animals:browserstack`
+
+### Run on CDP from your machine
+
+Set the `.env` from [Target CDP environments](../../../README.md#target-cdp-environments-from-local-machine), then run from the repo root:
+
+`RUN_ID=local-$(date -u +%Y%m%dT%H%M%SZ) npm run test:browserstack -- tests/animals/`
 
 ### Run on CDP
 

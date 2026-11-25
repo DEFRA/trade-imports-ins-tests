@@ -318,6 +318,7 @@ export class AnimalsJourney {
   async answerCommodity(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     const { commodityLines: lines } = answers;
     await this.animalsPages.overview.task('What are you importing?').click();
+    await this.animalsPages.commoditySelection.heading.waitFor(pageLoadWait);
     await this.chooseSpeciesAndOpenDetails(lines.map((line) => line.species));
     for (const line of lines) {
       await this.animalsPages.consignmentDetails.fillAnimalCountFor(line.species, line.noOfAnimals);
@@ -332,6 +333,7 @@ export class AnimalsJourney {
   async answerAnimalIdentification(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     const { commodityLines: lines } = answers;
     await this.animalsPages.overview.task('Identification details').click();
+    await this.animalsPages.animalIdentification.heading.waitFor(pageLoadWait);
     const { animalIdentification: identification } = this.animalsPages;
     for (const line of lines) {
       await this.fillAnimalIdentifiers(identification.speciesCard(line.species), line);
@@ -342,6 +344,7 @@ export class AnimalsJourney {
 
   async answerReasonAndAdditionalDetails(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task(IMPORT_REASON_TASK).click();
+    await this.animalsPages.importReason.heading.waitFor(pageLoadWait);
     await this.animalsPages.importReason.reason(answers.importReason.display).check();
     await this.animalsPages.importReason.purpose(answers.internalMarketPurpose.display).check();
     await this.animalsPages.importReason.saveAndReturnToOverview.click();

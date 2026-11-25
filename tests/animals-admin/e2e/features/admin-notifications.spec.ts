@@ -18,7 +18,7 @@ test.describe('Notifications (admin)', { tag: '@mongodb' }, () => {
 
   test(
     'finds and deletes a submitted notification by reference number',
-    { tag: ['@smoke', '@cross-browser'] },
+    { tag: '@smoke' },
     async ({ animalsSeededJourney, animalsAdminNavigation, animalsAdminPages }) => {
       test.slow();
       const referenceNumber = await animalsSeededJourney.createSubmittedNotification();

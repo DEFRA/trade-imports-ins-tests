@@ -78,21 +78,21 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command                                       | Test scope                                             | Target               | Config                                | Generates Report |
-| --------------------------------------------- | ------------------------------------------------------ | -------------------- | ------------------------------------- | ---------------- |
-| `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`            | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                     | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:dynamics`                       | Dynamics integration (`@dynamics`) test suite          | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:cross-browser`                  | Cross-browser (`@cross-browser`) suite                 | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:browserstack`                   | Cross-browser (`@cross-browser`) suite on BrowserStack | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites         | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                     | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:cross-browser`   | Cross-browser (`@cross-browser`) suite                 | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:browserstack`    | Cross-browser (`@cross-browser`) suite on BrowserStack | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                 | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite  | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| Command                                       | Test scope                                            | Target                                | Config                                | Generates Report |
+| --------------------------------------------- | ----------------------------------------------------- | ------------------------------------- | ------------------------------------- | ---------------- |
+| `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`           | CDP                                   | `playwright.config.ts`                | ✓                |
+| `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                    | CDP                                   | `playwright.config.ts`                | ✓                |
+| `npm run test:dynamics`                       | Dynamics integration (`@dynamics`) test suite         | CDP                                   | `playwright.config.ts`                | ✓                |
+| `npm run test:cross-browser`                  | Cross-browser (`@cross-browser`) suite                | CDP                                   | `playwright.config.ts`                | ✓                |
+| `npm run test:browserstack`                   | `@cross-browser` and `@ios` suites on BrowserStack    | CDP (from your machine, set `RUN_ID`) | `playwright.config.ts`                | ✓                |
+| `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites        | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                    | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:visual`          | Visual regression (`@visual`) suite                   | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:cross-browser`   | Cross-browser (`@cross-browser`) suite                | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:browserstack`    | `@cross-browser` and `@ios` suites on BrowserStack    | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                   | docker-compose stack                  | `playwright.docker-compose.config.ts` | ✓                |
 
 ### Running one domain
 
@@ -452,9 +452,8 @@ If it is not set, Playwright's default applies (50% of cores on CI).
 
 ## Cross-browser tests
 
-Tests tagged `@cross-browser` run in branded Chrome, Playwright's browsers (Firefox, WebKit, an emulated iPhone 17 and an emulated Pixel 10) and on BrowserStack. Commands for each domain:
-[animals](tests/animals/cross-browser/README.md),
-[animals-admin](tests/animals-admin/cross-browser/README.md) and
+Tests tagged `@cross-browser` run in real Chrome, Playwright's browsers (Firefox, WebKit, an emulated iPhone 17 and an emulated Pixel 10), and on BrowserStack (Edge on Windows 11, WebKit on macOS, and `@ios` tests on real iPhones). Commands for each domain:
+[animals](tests/animals/cross-browser/README.md) and
 [ins](tests/ins/cross-browser/README.md).
 
 See [`docs/cross-browser.md`](docs/cross-browser.md) for the strategy and how it works.
@@ -537,22 +536,22 @@ If `PROFILE` is not set, the `default` profile is used.
 | `a11y`               | accessibility test suite                                                                       | `npm run test:a11y`          |
 | `dynamics`           | Dynamics checks (`@dynamics`), see [Dynamics checks](#dynamics-checks)                         | `npm run test:dynamics`      |
 | `cross-browser`      | `@cross-browser` tests in Chrome, Firefox, WebKit, iPhone 17 and Pixel 10                      | `npm run test:cross-browser` |
-| `browserstack`       | `@cross-browser` tests on BrowserStack macOS, `@ios` tests on its iPhones                      | `npm run test:browserstack`  |
+| `browserstack`       | `@cross-browser` tests on BrowserStack Windows and macOS, `@ios` tests on its iPhones          | `npm run test:browserstack`  |
 | `security`           | security test suite (ZAP passive scan)                                                         | `npm run test:security`      |
 | `security:active`    | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                            |
 
 The profiles above run every domain. To run one domain's suite only, prefix the
 suite with its domain name as `<domain>:<suite>`:
 
-| PROFILE                    | Test suite                                                                              |
-| -------------------------- | --------------------------------------------------------------------------------------- |
-| `<domain>:e2e`             | that domain's e2e suite (`npm test -- tests/<domain>/`)                                 |
-| `<domain>:a11y`            | that domain's accessibility suite                                                       |
-| `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)                                             |
-| `<domain>:cross-browser`   | that domain's `@cross-browser` tests                                                    |
-| `<domain>:browserstack`    | that domain's `@cross-browser` tests on BrowserStack macOS, `@ios` tests on its iPhones |
-| `<domain>:security`        | that domain's security suite (ZAP passive scan)                                         |
-| `<domain>:security:active` | **not supported on CDP**, as `security:active`                                          |
+| PROFILE                    | Test suite                                                                                          |
+| -------------------------- | --------------------------------------------------------------------------------------------------- |
+| `<domain>:e2e`             | that domain's e2e suite (`npm test -- tests/<domain>/`)                                             |
+| `<domain>:a11y`            | that domain's accessibility suite                                                                   |
+| `<domain>:dynamics`        | that domain's Dynamics checks (`@dynamics`)                                                         |
+| `<domain>:cross-browser`   | that domain's `@cross-browser` tests                                                                |
+| `<domain>:browserstack`    | that domain's `@cross-browser` tests on BrowserStack Windows and macOS, `@ios` tests on its iPhones |
+| `<domain>:security`        | that domain's security suite (ZAP passive scan)                                                     |
+| `<domain>:security:active` | **not supported on CDP**, as `security:active`                                                      |
 
 `<domain>` is one of `animals`, `animals-admin`, `ins` or `plants`, e.g.
 `animals:a11y` or `plants:e2e`. A domain with no specs of a test type (for example
