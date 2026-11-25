@@ -44,12 +44,16 @@ test.describe('Permanent address page', { tag: '@duplicated-in-frontend' }, () =
     await expect(reopenedCard.getByLabel('Name or organisation name', { exact: true })).toHaveValue(address.nameOrOrganisationName);
   });
 
-  test('A cat consignment submits once its permanent address is answered', async ({ animalsJourney, animalsPages }) => {
-    test.slow();
-    await animalsJourney.submitNotification(CAT_ANSWERS);
+  test(
+    'A cat consignment submits once its permanent address is answered',
+    { tag: '@cross-browser' },
+    async ({ animalsJourney, animalsPages }) => {
+      test.slow();
+      await animalsJourney.submitNotification(CAT_ANSWERS);
 
-    await expect(animalsPages.confirmation.heading).toBeVisible();
-  });
+      await expect(animalsPages.confirmation.heading).toBeVisible();
+    },
+  );
 
   test('A cattle consignment offers no permanent address link, and opening the page directly lands on the consignment addresses page', async ({
     animalsJourney,

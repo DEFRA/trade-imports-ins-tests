@@ -54,27 +54,28 @@ test.describe('INS notification type question', { tag: ['@animals-frontend', '@p
     expect(plantsNavigations).toEqual([]);
   });
 
-  test('the question offers four unselected options under the caption, one Continue button and the alpha banner', async ({
-    pages,
-    insPages,
-  }) => {
-    const notificationTypePage = insPages.notificationType;
+  test(
+    'the question offers four unselected options under the caption, one Continue button and the alpha banner',
+    { tag: '@cross-browser' },
+    async ({ pages, insPages }) => {
+      const notificationTypePage = insPages.notificationType;
 
-    await notificationTypePage.open();
+      await notificationTypePage.open();
 
-    await expect(pages.page).toHaveTitle(QUESTION_TITLE);
-    await expect(notificationTypePage.caption).toHaveText('About the consignment');
-    await expectOptionsListedInOrderAndUnselected(notificationTypePage);
-    await expect(notificationTypePage.hints).toHaveCount(0);
-    await expect(notificationTypePage.buttons).toHaveCount(1);
-    await expect(notificationTypePage.links).toHaveCount(0);
-    await expect(notificationTypePage.btnContinue).toBeVisible();
-    await expect(notificationTypePage.journeyStrip).toHaveCount(0);
-    await expect(notificationTypePage.phaseBanner).toContainText(
-      'This is a new service. Help us improve it and give your feedback by email.',
-    );
-    await expect(notificationTypePage.phaseBanner.getByRole('link')).toHaveAttribute('href', /^mailto:/);
-  });
+      await expect(pages.page).toHaveTitle(QUESTION_TITLE);
+      await expect(notificationTypePage.caption).toHaveText('About the consignment');
+      await expectOptionsListedInOrderAndUnselected(notificationTypePage);
+      await expect(notificationTypePage.hints).toHaveCount(0);
+      await expect(notificationTypePage.buttons).toHaveCount(1);
+      await expect(notificationTypePage.links).toHaveCount(0);
+      await expect(notificationTypePage.btnContinue).toBeVisible();
+      await expect(notificationTypePage.journeyStrip).toHaveCount(0);
+      await expect(notificationTypePage.phaseBanner).toContainText(
+        'This is a new service. Help us improve it and give your feedback by email.',
+      );
+      await expect(notificationTypePage.phaseBanner.getByRole('link')).toHaveAttribute('href', /^mailto:/);
+    },
+  );
 
   test('continuing with nothing chosen shows the error summary, the inline error and an Error: title', async ({ pages, insPages }) => {
     const notificationTypePage = insPages.notificationType;
@@ -88,36 +89,35 @@ test.describe('INS notification type question', { tag: ['@animals-frontend', '@p
     await expect(pages.page).toHaveTitle(`Error: ${QUESTION_TITLE}`);
   });
 
-  test('choosing Live animals signs the user in to the animals service and opens a new draft at Origin of the import, whose Save and continue opens What are you importing?', async ({
-    insPages,
-    animalsPages,
-    animalsJourney,
-    pages,
-  }) => {
-    test.slow();
-    const { animalsNavigations, plantsNavigations } = recordHandOverNavigations(pages.page);
+  test(
+    'choosing Live animals signs the user in to the animals service and opens a new draft at Origin of the import, whose Save and continue opens What are you importing?',
+    { tag: '@cross-browser' },
+    async ({ insPages, animalsPages, animalsJourney, pages }) => {
+      test.slow();
+      const { animalsNavigations, plantsNavigations } = recordHandOverNavigations(pages.page);
 
-    const reference = await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType, LIVE_ANIMALS);
+      const reference = await animalsJourney.startNotificationFromInsTypeQuestion(insPages.notificationType, LIVE_ANIMALS);
 
-    await expect(animalsPages.originOfImport.heading).toBeVisible();
-    expect(reference).toMatch(ANIMALS_REFERENCE);
-    await expect(animalsPages.originOfImport.statusTag).toHaveText('Draft');
-    await expect(animalsPages.originOfImport.notificationReference).toContainText(reference);
-    expect(animalsNavigations).toEqual([
-      `${SET_BASES.liveAnimals}/start`,
-      SIGN_IN_PATH,
-      SIGN_IN_CALLBACK_PATH,
-      `${SET_BASES.liveAnimals}/start`,
-      `${SET_BASES.liveAnimals}/notifications/${reference}/origin`,
-    ]);
-    expect(plantsNavigations).toEqual([]);
+      await expect(animalsPages.originOfImport.heading).toBeVisible();
+      expect(reference).toMatch(ANIMALS_REFERENCE);
+      await expect(animalsPages.originOfImport.statusTag).toHaveText('Draft');
+      await expect(animalsPages.originOfImport.notificationReference).toContainText(reference);
+      expect(animalsNavigations).toEqual([
+        `${SET_BASES.liveAnimals}/start`,
+        SIGN_IN_PATH,
+        SIGN_IN_CALLBACK_PATH,
+        `${SET_BASES.liveAnimals}/start`,
+        `${SET_BASES.liveAnimals}/notifications/${reference}/origin`,
+      ]);
+      expect(plantsNavigations).toEqual([]);
 
-    await animalsJourney.fillOriginOfImport();
-    await animalsJourney.saveOriginOfImport();
+      await animalsJourney.fillOriginOfImport();
+      await animalsJourney.saveOriginOfImport();
 
-    await expect(animalsPages.commoditySelection.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(animalsPages.commoditySelection.expectedUrlPattern(reference));
-  });
+      await expect(animalsPages.commoditySelection.heading).toBeVisible();
+      await expect(pages.page).toHaveURL(animalsPages.commoditySelection.expectedUrlPattern(reference));
+    },
+  );
 
   for (const plantsOption of PLANTS_OPTIONS) {
     test(`choosing ${plantsOption.label} signs the user in to the plants service and opens a new plants draft at its first page`, async ({

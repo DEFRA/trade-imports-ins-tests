@@ -6,24 +6,25 @@ import { transporterTab } from '@domain/ins/constants/address-book-types';
 import { expectCancelAddsNoTransporter, expectOpensTypeQuestionWithNoTypeChosen } from './run-transporters';
 
 test.describe('The private transporter form', () => {
-  test('opens with its caption, heading, the Standard Address Block and contact fields, and Back to the transporter type question', async ({
-    insPages,
-    insJourney,
-  }) => {
-    await insJourney.toPrivateTransporterFormFromList();
+  test(
+    'opens with its caption, heading, the Standard Address Block and contact fields, and Back to the transporter type question',
+    { tag: ['@cross-browser', '@ios'] },
+    async ({ insPages, insJourney }) => {
+      await insJourney.toPrivateTransporterFormFromList();
 
-    const formPage = insPages.privateTransporter;
-    await expect(formPage.caption).toBeVisible();
-    await expect(formPage.heading).toBeVisible();
-    await expect(formPage.sectionHeading('Address')).toBeVisible();
-    await expect(formPage.sectionHeading('Contact details')).toBeVisible();
-    await expect(formPage.selectCountry).toBeVisible();
+      const formPage = insPages.privateTransporter;
+      await expect(formPage.caption).toBeVisible();
+      await expect(formPage.heading).toBeVisible();
+      await expect(formPage.sectionHeading('Address')).toBeVisible();
+      await expect(formPage.sectionHeading('Contact details')).toBeVisible();
+      await expect(formPage.selectCountry).toBeVisible();
 
-    await formPage.linkBack.click();
+      await formPage.linkBack.click();
 
-    await expect(insPages.transporterType.heading).toBeVisible();
-    await expect(insPages.transporterType.radio(transporterTypes.private)).toBeChecked();
-  });
+      await expect(insPages.transporterType.heading).toBeVisible();
+      await expect(insPages.transporterType.radio(transporterTypes.private)).toBeChecked();
+    },
+  );
 
   test('opening it with no transporter type chosen returns to the transporter type question', async ({ pages, insPages, insJourney }) => {
     await expectOpensTypeQuestionWithNoTypeChosen({ pages, insPages, insJourney }, insPages.privateTransporter);
