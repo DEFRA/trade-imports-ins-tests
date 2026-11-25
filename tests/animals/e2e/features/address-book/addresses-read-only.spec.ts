@@ -77,7 +77,7 @@ test.describe('Addresses are read-only in the journey', () => {
     { page: 'create-address', path: 'addresses/create?for=consignor' },
     { page: 'consignment contact select', path: 'consignment/contact/select' },
   ]) {
-    test(`the ${pageName} page is no longer served`, async ({ animalsJourney, journeyContext, pages }) => {
+    test(`the ${pageName} URL answers 404`, async ({ animalsJourney, journeyContext, pages }) => {
       await animalsJourney.startNotification();
 
       const response = await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${journeyContext.referenceNumber}/${path}`);
