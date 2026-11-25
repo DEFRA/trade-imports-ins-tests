@@ -1,4 +1,5 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { NOTIFICATION_DASHBOARD_PAGE_SIZE } from '@domain/animals/constants/notification-dashboard';
 import { sortByValues } from '@domain/animals/constants/sort-by-values';
 import { SET_BASES } from '@page-objects/shared/sets';
 
@@ -52,19 +53,18 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
   });
 
-  test.describe('pagination', () => {
-    test.beforeEach(async ({ animalsPages }) => {
-      const hasPagination = await animalsPages.dashboard.pagination.isVisible();
-      test.skip(
-        !hasPagination,
-        'Requires more than one page of notifications (seeded in compose; CDP environments normally have sufficient data).',
-      );
-    });
-
-    test('the notification dashboard has no accessibility violations when paginated', async ({ animalsPages, runA11yScan }) => {
-      await animalsPages.dashboard.nextPageLink.click();
-      await animalsPages.dashboard.heading.waitFor();
-      await runA11yScan();
-    });
+  test('the notification dashboard has no accessibility violations when paginated', async ({
+    animalsPages,
+    animalsSeededJourney,
+    animalsJourney,
+    runA11yScan,
+  }) => {
+    for (let created = 0; created <= NOTIFICATION_DASHBOARD_PAGE_SIZE; created++) {
+      await animalsSeededJourney.createEmptyNotification();
+    }
+    await animalsJourney.toNotificationDashboard();
+    await animalsPages.dashboard.nextPageLink.click();
+    await animalsPages.dashboard.heading.waitFor();
+    await runA11yScan();
   });
 });
