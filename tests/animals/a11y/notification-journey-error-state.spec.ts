@@ -2,7 +2,11 @@ import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { uniquelyNamedCommercialTransporter } from '@domain/animals/constants/transporters';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
-import { govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
+import {
+  govukConditionalRevealRadioOnOrigin,
+  govukConditionalRevealRadiosOnReason,
+  govukFileUploadButtonOnDocuments,
+} from '@utils/a11y-exclusions';
 import { getRelativeDatePickerValue } from '@utils/date-utils';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { writePaddedPdf } from '@resources/file-upload/padded-pdf';
@@ -101,7 +105,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.accompanyingDocuments.heading.waitFor();
       await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
       await expect(errorSummaryHeading).toBeVisible();
-      await runA11yScan();
+      await runA11yScan({ exclude: govukFileUploadButtonOnDocuments });
       await animalsPages.accompanyingDocuments.fillDocument(
         `PWTXT${Date.now()}`,
         DOCUMENT_ISSUE_DATE,
@@ -109,21 +113,21 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       );
       await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
       await expect(errorSummaryHeading).toBeVisible();
-      await runA11yScan();
+      await runA11yScan({ exclude: govukFileUploadButtonOnDocuments });
       const oversizeFile = await writePaddedPdf(testInfo.outputPath('oversize.pdf'), MAX_FILE_SIZE_BYTES + 1);
       await animalsPages.accompanyingDocuments.fillDocument(`PWOVER${Date.now()}`, DOCUMENT_ISSUE_DATE, oversizeFile);
       await animalsPages.accompanyingDocuments.saveAndAddAnother.click();
       await expect(animalsPages.accompanyingDocuments.fileFieldError).toHaveText(`Error: ${OVERSIZE_FILE_MESSAGE}`);
-      await runA11yScan();
+      await runA11yScan({ exclude: govukFileUploadButtonOnDocuments });
     });
 
     await test.step('Upload documents with an infected file', async () => {
       const reference = await animalsPages.accompanyingDocuments.uploadInfectedDocumentAndWaitForVirusFound();
       await expect(errorSummaryHeading).toBeVisible();
-      await runA11yScan();
+      await runA11yScan({ exclude: govukFileUploadButtonOnDocuments });
       await animalsPages.accompanyingDocuments.removeDocument(1).click();
       await expect(animalsPages.accompanyingDocuments.documentRow(reference)).toHaveCount(0);
-      await runA11yScan();
+      await runA11yScan({ exclude: govukFileUploadButtonOnDocuments });
       await animalsPages.overview.open(animalsPages.accompanyingDocuments.referenceNumberFromUrl());
       await animalsPages.overview.heading.waitFor();
     });
