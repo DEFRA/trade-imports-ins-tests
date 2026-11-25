@@ -94,8 +94,12 @@ test.describe('Save and continue through a new notification', () => {
     await animalsPages.notificationView.viewHeader.expectDraftReview();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
     await expect(animalsPages.cphNumber.heading).toBeHidden();
-    await expect(animalsPages.notificationView.errorSummary).toContainText('Complete main import reason');
-    await expect(animalsPages.notificationView.errorSummary).toContainText(CONSIGNMENT_ADDRESSES_INCOMPLETE);
+    await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText([
+      'Complete main import reason',
+      'Complete additional animal details',
+      'Complete arrival details',
+      CONSIGNMENT_ADDRESSES_INCOMPLETE,
+    ]);
 
     await animalsPages.notificationView.continueButton.click();
     await animalsPages.notificationView.viewHeader.expectDraftReview();
