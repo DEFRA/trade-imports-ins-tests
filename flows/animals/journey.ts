@@ -144,6 +144,10 @@ export class AnimalsJourney {
 
   async createNotificationAtOrigin(): Promise<string> {
     await this.toNotificationDashboard();
+    return this.createNotificationFromDashboard();
+  }
+
+  async createNotificationFromDashboard(): Promise<string> {
     await this.animalsPages.dashboard.btnCreateNewNotification.click();
     await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
     return this.recordReferenceNumberFromUrl();

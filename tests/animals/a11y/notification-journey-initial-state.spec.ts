@@ -20,8 +20,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Origin of import', async () => {
-      await animalsPages.dashboard.btnCreateNewNotification.click();
-      await animalsPages.originOfImport.heading.waitFor();
+      await animalsJourney.createNotificationFromDashboard();
       await runA11yScan({ exclude: govukConditionalRevealRadioOnOrigin });
     });
 
