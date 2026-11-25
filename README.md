@@ -453,8 +453,7 @@ If it is not set, Playwright's default applies (50% of cores on CI).
 ## Cross-browser tests
 
 Tests tagged `@cross-browser` run in real Chrome, Playwright's browsers (Firefox, WebKit, an emulated iPhone 17 and an emulated Pixel 10), and on BrowserStack (Edge on Windows 11, WebKit on macOS, and `@ios` tests on real iPhones). Commands for each domain:
-[animals](tests/animals/cross-browser/README.md),
-[animals-admin](tests/animals-admin/cross-browser/README.md) and
+[animals](tests/animals/cross-browser/README.md) and
 [ins](tests/ins/cross-browser/README.md).
 
 See [`docs/cross-browser.md`](docs/cross-browser.md) for the strategy and how it works.
