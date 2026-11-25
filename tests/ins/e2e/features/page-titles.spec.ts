@@ -2,11 +2,15 @@ import { test, expect } from '@fixtures';
 import { traderAddress } from '@domain/ins/constants/trader-address';
 
 test.describe('INS page titles', { tag: '@duplicated-in-frontend' }, () => {
-  test('the home is titled Dashboard - Import notification service - GOV.UK', { tag: '@cross-browser' }, async ({ pages, insPages }) => {
-    await insPages.dashboard.open();
+  test(
+    'the home is titled Dashboard - Import notification service - GOV.UK',
+    { tag: ['@cross-browser', '@ios'] },
+    async ({ pages, insPages }) => {
+      await insPages.dashboard.open();
 
-    await expect(pages.page).toHaveTitle('Dashboard - Import notification service - GOV.UK');
-  });
+      await expect(pages.page).toHaveTitle('Dashboard - Import notification service - GOV.UK');
+    },
+  );
 
   test('the address book is titled Address book - Import notification service - GOV.UK', async ({ pages, insPages }) => {
     await insPages.addressBookList.open();
@@ -71,7 +75,7 @@ test.describe('INS page titles', { tag: '@duplicated-in-frontend' }, () => {
 
   test(
     'a missing page is titled Page not found - Import notification service - GOV.UK',
-    { tag: '@cross-browser' },
+    { tag: ['@cross-browser', '@ios'] },
     async ({ pages, insPages }) => {
       await insPages.dashboard.open();
 

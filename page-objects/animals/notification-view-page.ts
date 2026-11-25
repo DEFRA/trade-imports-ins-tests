@@ -108,6 +108,7 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   async openRefused(referenceNumber: string): Promise<void> {
     await this.navigateToService(`${this.expectedUrl(referenceNumber)}?refused=1`);
+    await this.completeSignInIfRequested();
     await this.heading.waitFor(pageLoadWait);
   }
 

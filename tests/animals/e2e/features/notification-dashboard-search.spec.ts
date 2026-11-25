@@ -16,7 +16,7 @@ test.describe('Notification dashboard search', () => {
     await animalsJourney.toNotificationDashboard();
   });
 
-  test('displays the filter notifications search form', { tag: '@cross-browser' }, async ({ animalsPages }) => {
+  test('displays the filter notifications search form', { tag: ['@cross-browser', '@ios'] }, async ({ animalsPages }) => {
     await expect(animalsPages.dashboard.filterHeading).toBeVisible();
     await expect(animalsPages.dashboard.searchForm).toBeVisible();
     await expect(animalsPages.dashboard.inputReferenceSearch).toBeVisible();

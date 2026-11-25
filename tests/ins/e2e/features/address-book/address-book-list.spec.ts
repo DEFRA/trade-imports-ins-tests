@@ -36,7 +36,7 @@ const addAddressAndExpectSearchToListIt = async (
 test.describe('Address book list', () => {
   test(
     'shows the intro and Add a new address, with the Search field hidden until Filter addresses is opened',
-    { tag: '@cross-browser' },
+    { tag: ['@cross-browser', '@ios'] },
     async ({ insPages }) => {
       await insPages.addressBookList.open();
 

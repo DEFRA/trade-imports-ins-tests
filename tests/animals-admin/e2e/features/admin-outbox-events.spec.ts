@@ -42,7 +42,7 @@ test.describe('Outbox events (admin)', { tag: '@mongodb' }, () => {
 
   test(
     'shows the empty state for an unknown reference number',
-    { tag: '@cross-browser' },
+    { tag: ['@cross-browser', '@ios'] },
     async ({ animalsAdminNavigation, animalsAdminPages }) => {
       const unknownRef = 'GBN-AG-00-000000';
       await animalsAdminNavigation.toOutboxEvents(unknownRef);

@@ -8,7 +8,7 @@ import { addressWithLineTwoAndCounty, traderAddress } from '@domain/ins/constant
 test.describe('Address book view', () => {
   test(
     'shows Address line 2 (optional) and County (optional) when the address has them',
-    { tag: '@cross-browser' },
+    { tag: ['@cross-browser', '@ios'] },
     async ({ insPages, addressBookApi }) => {
       const addressWithOptionalFields = await addressBookApi.createAddress(addressWithLineTwoAndCounty(`View Full Farm ${Date.now()}`));
 
