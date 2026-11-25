@@ -55,15 +55,17 @@ export type GbnAgExchangedDocument = {
   referenceDocument?: GbnAgReferencedDocument[];
 };
 
-export const GBN_AG_EXCHANGED_DOCUMENT_KEYS = [
-  'identifier',
-  'traderAssignedId',
-  'notificationStatusCode',
-  'versionId',
-  'issueDateTime',
-  'firstSignatoryAuthentication',
-  'referenceDocument',
-] as const satisfies readonly (keyof GbnAgExchangedDocument)[];
+const gbnAgExchangedDocumentKeyFlags = {
+  identifier: true,
+  traderAssignedId: true,
+  notificationStatusCode: true,
+  versionId: true,
+  issueDateTime: true,
+  firstSignatoryAuthentication: true,
+  referenceDocument: true,
+} satisfies Record<keyof GbnAgExchangedDocument, true>;
+
+export const GBN_AG_EXCHANGED_DOCUMENT_KEYS = Object.keys(gbnAgExchangedDocumentKeyFlags);
 
 export type GbnAgClause = {
   identifier: string;
