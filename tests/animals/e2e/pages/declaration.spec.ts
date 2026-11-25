@@ -49,7 +49,6 @@ test.describe('Declaration page', { tag: '@duplicated-in-frontend' }, () => {
         'Complete arrival details',
         'Complete transport details',
         CONSIGNMENT_ADDRESSES_INCOMPLETE,
-        'Complete contact address for this consignment',
       ]);
       await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Draft');
     });

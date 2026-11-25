@@ -3,12 +3,14 @@ import { formattedValue } from '@adapters/http/dataverse-client';
 import { dynamicsBaseTestTimeoutMs } from '@config/dynamics';
 import { defaultUser } from '@config/users';
 import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { NOTIFICATION_SUBMITTED } from '@domain/animals/models/db/outbox-event-document';
+import { withOutbox } from '@flows/animals/outbox';
 import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
 import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { test, expect } from '@fixtures';
 import { parseAppDateText, toIsoDate } from '@utils/date-utils';
 import { waitForAnimalsDynamicsNotification } from '@utils/dynamics/animals-polls';
-import { skipIfComposeEnvironment } from '@utils/playwright/environment';
+import { skipIfComposeEnvironment, skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { setTestTimeout } from '@utils/playwright/test-timeout';
 
 // Traces record APIRequestContext calls with their headers and form bodies: the bearer token and client secret.
@@ -138,5 +140,29 @@ test.describe('PIMS Dynamics notification data', { tag: '@dynamics' }, () => {
     await attachRow(row);
 
     expect.soft(row.defraimp_traderreference, 'internal reference').toBe(answers.internalReference);
+  });
+});
+
+test.describe('Submitted notification outbox payload', () => {
+  test.beforeEach(() => {
+    skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
+  });
+
+  test('the NotificationSubmitted outbox GBN-AG payload for the mandatory answers carries exactly the declared exchanged document fields', async ({
+    animalsJourney,
+    journeyContext,
+  }) => {
+    setTestTimeout(dynamicsBaseTestTimeoutMs);
+    test.slow();
+    await animalsJourney.submitNotification(MANDATORY_ANSWERS);
+    const submitted = await withOutbox((outbox) => outbox.singleEventOf(journeyContext.referenceNumber, NOTIFICATION_SUBMITTED));
+    expect(Object.keys(submitted.data.exchangedDocument).sort()).toEqual([
+      'firstSignatoryAuthentication',
+      'identifier',
+      'issueDateTime',
+      'notificationStatusCode',
+      'traderAssignedId',
+      'versionId',
+    ]);
   });
 });

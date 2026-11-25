@@ -128,7 +128,7 @@ test.describe('Amendment page endings', () => {
     await expect(animalsPages.notificationView.statusTag).toHaveText(AMEND);
   });
 
-  test('while amending, the origin page and the CPH number page end with Save and continue alone, and the contact address page ends as it does on a draft', async ({
+  test('while amending, the origin page and the CPH number page end with Save and continue alone', async ({
     animalsPages,
     animalsSeededJourney,
   }) => {
@@ -141,10 +141,6 @@ test.describe('Amendment page endings', () => {
     await animalsPages.cphNumber.open(reference);
     await expect(animalsPages.cphNumber.formButtons).toHaveText(['Save and continue']);
     await expect(animalsPages.cphNumber.saveAndReturnToOverview).toHaveCount(0);
-
-    await animalsPages.contactAddress.open(reference);
-    await expect(animalsPages.contactAddress.formButtons).toHaveText(['Save and continue', 'Save and return to hub']);
-    await expect(animalsPages.contactAddress.cancelAndReturnToHub).toBeVisible();
   });
 
   test('while amending, the permanent address page ends with Save and continue alone', async ({ animalsPages, animalsSeededJourney }) => {
@@ -156,7 +152,7 @@ test.describe('Amendment page endings', () => {
     await expect(animalsPages.permanentAddress.saveAndReturnToOverview).toHaveCount(0);
   });
 
-  test('while amending, the Amend bar’s Cancel amend opens the cancel amendment confirmation page from the CPH number page and the contact address page', async ({
+  test('while amending, the Amend bar’s Cancel amend opens the cancel amendment confirmation page from the CPH number page', async ({
     pages,
     animalsPages,
     animalsSeededJourney,
@@ -165,11 +161,6 @@ test.describe('Amendment page endings', () => {
 
     await animalsPages.cphNumber.open(reference);
     await animalsPages.cphNumber.stripCancelAmend.click();
-    await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(reference));
-    await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
-
-    await animalsPages.contactAddress.open(reference);
-    await animalsPages.contactAddress.stripCancelAmend.click();
     await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(reference));
     await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
   });

@@ -31,10 +31,6 @@ const runAddressesOf = (searchTerm: string) => {
       name: named('Importer'),
       roles: [addressRoles.importer],
     }),
-    branchAddress: runAddress({
-      name: named('Branch'),
-      roles: [addressRoles.branchAddress],
-    }),
   };
 };
 

@@ -1,13 +1,10 @@
 import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 import { test, expect } from '@fixtures';
-import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
-import { timeouts } from '@config/timeouts';
+import { withOutbox } from '@flows/animals/outbox';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_DELETED = 'uk.gov.defra.imports.notification.NotificationDeleted';
 const NOTIFICATION_SUBMISSION_DELETED = 'uk.gov.defra.imports.notification.NotificationSubmissionDeleted';
-const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
 test.describe('Notification deleted outbox events', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
@@ -19,70 +16,35 @@ test.describe('Notification deleted outbox events', { tag: '@mongodb' }, () => {
     const referenceNumber = await animalsSeededJourney.createEmptyNotification();
     await animalsSeededJourney.softDelete(referenceNumber);
 
-    const aggregateId = aggregateIdFor(referenceNumber);
-    const client = new MongoDbClient();
+    const doc = await withOutbox((outbox) => outbox.singleEventOf(referenceNumber, NOTIFICATION_DELETED));
 
-    try {
-      await client.connect();
-      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
-
-      await expect
-        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_DELETED }), {
-          timeout: timeouts.long,
-        })
-        .toBe(1);
-
-      const [doc] = await collection.find({ aggregateId, eventType: NOTIFICATION_DELETED }).toArray();
-
-      expect(doc.eventType).toBe(NOTIFICATION_DELETED);
-      expect(doc.aggregateType).toBe('Notification');
-      expect(doc.subType).toBe('GBN-AG');
-      expect(doc.timestamp).toBeInstanceOf(Date);
-      expect(doc.metadata.correlationId).toBeDefined();
-      expect(doc.data.exchangedDocument.identifier).toBe(referenceNumber);
-      expect(doc.data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.deleted);
-      expect(doc.data.exchangedDocument.versionId).toBeUndefined();
-    } finally {
-      await client.close();
-    }
+    expect(doc.aggregateType).toBe('Notification');
+    expect(doc.subType).toBe('GBN-AG');
+    expect(doc.timestamp).toBeInstanceOf(Date);
+    expect(doc.metadata.correlationId).toBeDefined();
+    expect(doc.data.exchangedDocument.identifier).toBe(referenceNumber);
+    expect(doc.data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.deleted);
+    expect(doc.data.exchangedDocument.versionId).toBeUndefined();
   });
 
   test('writes a NotificationSubmissionDeleted event when a submitted notification is soft-deleted', async ({ animalsSeededJourney }) => {
     test.slow();
     const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
-    // Not notificationApi.softDeleteNotification: it sends no actor, and a submitted notification's address-book parties need an organisation id.
     await animalsSeededJourney.softDelete(referenceNumber);
 
-    const aggregateId = aggregateIdFor(referenceNumber);
-    const client = new MongoDbClient();
+    const doc = await withOutbox((outbox) => outbox.singleEventOf(referenceNumber, NOTIFICATION_SUBMISSION_DELETED));
 
-    try {
-      await client.connect();
-      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
-
-      await expect
-        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_SUBMISSION_DELETED }), {
-          timeout: timeouts.long,
-        })
-        .toBe(1);
-
-      const [doc] = await collection.find({ aggregateId, eventType: NOTIFICATION_SUBMISSION_DELETED }).toArray();
-
-      expect(doc.eventType).toBe(NOTIFICATION_SUBMISSION_DELETED);
-      expect(doc.aggregateType).toBe('Notification');
-      expect(doc.subType).toBe('GBN-AG');
-      expect(doc.timestamp).toBeInstanceOf(Date);
-      expect(doc.metadata.correlationId).toBeDefined();
-      expect(doc.data.exchangedDocument.identifier).toBe(referenceNumber);
-      expect(doc.data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.deleted);
-      expect(doc.data.exchangedDocument.versionId).toBe(1);
-      expect(doc.statusChanges?.map(({ status }) => status)).toEqual([
-        notificationStatuses.draft,
-        notificationStatuses.submitted,
-        notificationStatuses.deleted,
-      ]);
-    } finally {
-      await client.close();
-    }
+    expect(doc.aggregateType).toBe('Notification');
+    expect(doc.subType).toBe('GBN-AG');
+    expect(doc.timestamp).toBeInstanceOf(Date);
+    expect(doc.metadata.correlationId).toBeDefined();
+    expect(doc.data.exchangedDocument.identifier).toBe(referenceNumber);
+    expect(doc.data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.deleted);
+    expect(doc.data.exchangedDocument.versionId).toBe(1);
+    expect(doc.statusChanges?.map(({ status }) => status)).toEqual([
+      notificationStatuses.draft,
+      notificationStatuses.submitted,
+      notificationStatuses.deleted,
+    ]);
   });
 });

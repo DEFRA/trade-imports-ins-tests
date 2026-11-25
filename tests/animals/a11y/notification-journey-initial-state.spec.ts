@@ -24,8 +24,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Origin of import', async () => {
-      await animalsPages.dashboard.btnCreateNewNotification.click();
-      await animalsPages.originOfImport.heading.waitFor();
+      await animalsJourney.createNotificationFromDashboard();
       await runA11yScan({ exclude: govukConditionalRevealRadioOnOrigin });
     });
 
@@ -121,10 +120,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.cphNumber.fillCphNumber();
       await animalsPages.cphNumber.saveAndContinue.click();
       await animalsPages.addresses.heading.waitFor();
-      await animalsPages.addresses.continueButton.click();
-      await animalsPages.contactAddress.heading.waitFor();
-      await animalsPages.overview.open(animalsPages.contactAddress.referenceNumberFromUrl());
-      await animalsPages.overview.heading.waitFor();
+      await animalsJourney.continueFromAddressesToOverview();
     });
 
     await test.step('Arrival details', async () => {
@@ -163,15 +159,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.commercialTransporter.heading.waitFor();
       await runA11yScan();
       await animalsJourney.fillAndSaveCommercialTransporterAddFormToOverview(uniquelyNamedCommercialTransporter());
-    });
-
-    await test.step('Contact address', async () => {
-      await animalsPages.overview.task('Contact address for this consignment').click();
-      await animalsPages.contactAddress.heading.waitFor();
-      await runA11yScan();
-      await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
-      await animalsPages.contactAddress.saveAndReturnToHub.click();
-      await animalsPages.overview.heading.waitFor();
     });
 
     await animalsJourney.toDeclarationThroughReview(runA11yScan);

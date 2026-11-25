@@ -4,21 +4,14 @@ import { test, expect } from '@fixtures';
 import { reviewHeadingText } from '@page-objects/animals/notification-view-page';
 
 test.describe('Back on the review page', () => {
-  test('after Save and continue from the contact address it opens the contact address, whose Back opens Overview', async ({
-    animalsJourney,
-    animalsPages,
-  }) => {
+  test('reached by Continue from the addresses page it opens the addresses page', async ({ animalsJourney, animalsPages }) => {
     test.slow();
-    await animalsJourney.toContactAddress();
-    await animalsPages.contactAddress.address('Animal and Plant Health Agency').check();
-    await animalsPages.contactAddress.saveAndContinue.click();
+    await animalsJourney.walkToConsignmentAddressesWithoutCph();
+    await animalsPages.addresses.continueButton.click();
     await animalsPages.notificationView.viewHeader.expectDraftReview();
 
     await animalsPages.notificationView.linkBack.click();
-    await expect(animalsPages.contactAddress.heading).toBeVisible();
-
-    await animalsPages.contactAddress.linkBack.click();
-    await expect(animalsPages.overview.heading).toBeVisible();
+    await expect(animalsPages.addresses.heading).toBeVisible();
   });
 
   test('opened from the Overview review button it opens Overview', async ({ animalsSeededJourney, animalsPages }) => {

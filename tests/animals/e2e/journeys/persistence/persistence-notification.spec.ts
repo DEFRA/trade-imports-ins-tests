@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { type NotificationDocument } from '@domain/animals/models/db/notification-document';
+import { STORED_NOTIFICATION_KEYS, type NotificationDocument } from '@domain/animals/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { ALL_ANSWERS as answers, CPH_NUMBER } from '@domain/animals/constants/journey-options';
@@ -26,7 +26,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
 
       const [doc] = await collection.find({ referenceNumber }).toArray();
       expect(doc.referenceNumber).toBe(referenceNumber);
-      expect(doc.status).toBe('DRAFT');
+      expect(doc.status).toBe(notificationStatuses.draft);
     } finally {
       await client.close();
     }
@@ -44,7 +44,6 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
     const placeOfOrigin = await addressBookApi.findByName(answers.parties.placeOfOrigin);
     const consignee = await addressBookApi.findByName(answers.parties.consignee);
     const importer = await addressBookApi.findByName(answers.parties.importer);
-    const contact = await addressBookApi.findByName(answers.contactAddress);
     const [cowLine] = answers.commodityLines;
 
     await animalsJourney.submitNotification(answers);
@@ -105,7 +104,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
       expect(notification.consignee).toMatchObject({ name: consignee.name, address: { postcode: consignee.postcode } });
       expect(notification.importer).toMatchObject({ name: importer.name, address: { postcode: importer.postcode } });
       expect(notification.placeOfOrigin).toMatchObject({ name: placeOfOrigin.name, address: { postcode: placeOfOrigin.postcode } });
-      expect(notification.consignment).toMatchObject({ name: contact.name, address: { postcode: contact.postcode } });
+      expect(STORED_NOTIFICATION_KEYS).toEqual(expect.arrayContaining(Object.keys(notification)));
       expect(doc.preAmendNotification).toBeUndefined();
       expect(notification.cphNumber).toBe(CPH_NUMBER);
       expect(notification.transport.portOfEntry).toBe(answers.pointOfEntry.value);

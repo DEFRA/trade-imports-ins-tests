@@ -82,7 +82,6 @@ export const AIR_OR_SEA_OVERVIEW_TASKS = [
   'Transport details',
   'Upload documents',
   CONSIGNMENT_ADDRESSES,
-  'Contact address for this consignment',
 ] as const;
 
 export const OVERLAND_OVERVIEW_TASKS = [
@@ -97,7 +96,6 @@ export const OVERLAND_OVERVIEW_TASKS = [
   'Transport details',
   'Upload documents',
   CONSIGNMENT_ADDRESSES,
-  'Contact address for this consignment',
 ] as const;
 
 export const TEMPORARY_ADMISSION_EXIT_DATE = getRelativeAppDateText({ monthOffset: 2 });
@@ -119,7 +117,7 @@ export class AnimalsJourney {
     private readonly context: JourneyContext,
   ) {}
 
-  /** The pages Save and continue goes through from the main import reason to the contact address, in order, starting at `first`. */
+  /** The pages Save and continue goes through from the main import reason to check your answers, in order, starting at `first`. */
   saveAndContinueStopsFrom(first: SaveAndContinueStop): SaveAndContinueStop[] {
     const stops: SaveAndContinueStop[] = [
       this.animalsPages.importReason,
@@ -131,7 +129,6 @@ export class AnimalsJourney {
       this.animalsPages.transporter,
       this.animalsPages.accompanyingDocuments,
       this.animalsPages.addresses,
-      this.animalsPages.contactAddress,
     ];
     return stops.slice(stops.indexOf(first));
   }
@@ -147,6 +144,10 @@ export class AnimalsJourney {
 
   async createNotificationAtOrigin(): Promise<string> {
     await this.toNotificationDashboard();
+    return this.createNotificationFromDashboard();
+  }
+
+  async createNotificationFromDashboard(): Promise<string> {
     await this.animalsPages.dashboard.btnCreateNewNotification.click();
     await this.animalsPages.originOfImport.heading.waitFor(pageLoadWait);
     return this.recordReferenceNumberFromUrl();
@@ -303,6 +304,12 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
+  async continueFromAddressesToOverview(): Promise<void> {
+    await this.animalsPages.addresses.continueButton.click();
+    await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
+    await this.openCurrentOverview();
+  }
+
   private async openAdditionalDetailsFromOverview(): Promise<void> {
     await this.animalsPages.overview.task('Additional details').click();
     await this.animalsPages.additionalDetails.heading.waitFor(pageLoadWait);
@@ -389,7 +396,7 @@ export class AnimalsJourney {
     await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
   }
 
-  async addCphAndLeaveAddresses(cph: CphAnswer = MANDATORY_ANSWERS.cph): Promise<void> {
+  private async addCphOnAddressesHub(cph: CphAnswer = MANDATORY_ANSWERS.cph): Promise<void> {
     if (await this.animalsPages.addresses.addCph.isVisible()) {
       await this.animalsPages.addresses.addCph.click();
       await this.animalsPages.cphNumber.heading.waitFor(pageLoadWait);
@@ -397,16 +404,14 @@ export class AnimalsJourney {
       await this.animalsPages.cphNumber.saveAndContinue.click();
       await this.animalsPages.addresses.heading.waitFor(pageLoadWait);
     }
-    await this.animalsPages.addresses.continueButton.click();
-    await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
   }
 
   async answerAddresses(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     await this.animalsPages.overview.task(CONSIGNMENT_ADDRESSES).click();
     await this.addFiveParties(answers.parties);
     await this.answerPermanentAddresses(answers.commodityLines);
-    await this.addCphAndLeaveAddresses(answers.cph);
-    await this.animalsPages.contactAddress.cancelAndReturnToHub.click();
+    await this.addCphOnAddressesHub(answers.cph);
+    await this.animalsPages.addresses.saveAndReturnToOverview.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
@@ -428,16 +433,6 @@ export class AnimalsJourney {
     const reference = timestampedReference('PW');
     await this.animalsPages.accompanyingDocuments.uploadDocumentAndWaitForScan({ ...ALL_ANSWERS.accompanyingDocument, reference });
     return this.animalsPages.accompanyingDocuments.documentRow(reference);
-  }
-
-  async chooseContactAddress(name: string = MANDATORY_ANSWERS.contactAddress): Promise<void> {
-    await this.animalsPages.contactAddress.address(name).check();
-    await this.animalsPages.contactAddress.saveAndContinue.click();
-  }
-
-  private async saveContactAddressToOverview(name: string): Promise<void> {
-    await this.animalsPages.contactAddress.address(name).check();
-    await this.animalsPages.contactAddress.saveAndReturnToHub.click();
   }
 
   async reachTransporterFromHub(): Promise<void> {
@@ -494,12 +489,6 @@ export class AnimalsJourney {
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
   }
 
-  async answerContact(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
-    await this.animalsPages.overview.task('Contact address for this consignment').click();
-    await this.saveContactAddressToOverview(answers.contactAddress);
-    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
-  }
-
   async answerAccompanyingDocument(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     if (!answers.accompanyingDocument) return;
     await this.animalsPages.overview.task('Upload documents').click();
@@ -516,7 +505,6 @@ export class AnimalsJourney {
     await this.answerReasonAndAdditionalDetails(answers);
     await this.answerAddresses(answers);
     await this.answerTransport(answers);
-    await this.answerContact(answers);
     await this.answerAccompanyingDocument(answers);
   }
 
@@ -751,13 +739,6 @@ export class AnimalsJourney {
     await this.saveTransporterDetailsToOverview(this.animalsPages.commercialTransporter);
   }
 
-  async toContactAddress(): Promise<void> {
-    await this.startNotification();
-    await this.answerCommodity();
-    await this.animalsPages.overview.task('Contact address for this consignment').click();
-    await this.animalsPages.contactAddress.heading.waitFor(pageLoadWait);
-  }
-
   partyPicker(role: PartyRole): AnimalsPartyPickerPage {
     return this.animalsPages[PARTY_PICKER_KEYS[role]];
   }
@@ -781,17 +762,6 @@ export class AnimalsJourney {
     await this.openInsAddAddressFromPicker(addressBookAdd, role);
   }
 
-  async openInsAddAddressFromContact(addressBookAdd: InsAddressBookAddPage): Promise<void> {
-    await this.animalsPages.contactAddress.addNewBranchAddressLink.click();
-    await addressBookAdd.completeSignInIfRequested();
-    await addressBookAdd.heading.waitFor(pageLoadWait);
-  }
-
-  async toInsAddAddressFromContact(addressBookAdd: InsAddressBookAddPage): Promise<void> {
-    await this.toContactAddress();
-    await this.openInsAddAddressFromContact(addressBookAdd);
-  }
-
   async toReview(answers: NotificationAnswers = MANDATORY_ANSWERS): Promise<void> {
     if (!this.context.referenceNumber) await this.startNotification();
     await this.completeAnswerSections(answers);
@@ -806,8 +776,7 @@ export class AnimalsJourney {
     await test.step('Review your notification', async () => {
       await this.openReviewFromOverview();
       await runA11yScan();
-      await this.animalsPages.notificationView.continueButton.click();
-      await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
+      await this.continueFromReviewToDeclaration();
     });
   }
 
@@ -886,13 +855,9 @@ export class AnimalsJourney {
       await afterParties();
     }
     if (addCph) {
-      await this.addCphAndLeaveAddresses();
-    } else {
-      await pages.addresses.continueButton.click();
+      await this.addCphOnAddressesHub();
     }
-
-    await pages.contactAddress.heading.waitFor(pageLoadWait);
-    await this.chooseContactAddress();
+    await pages.addresses.continueButton.click();
 
     await pages.notificationView.viewHeader.reference.waitFor(pageLoadWait);
   }
@@ -1080,7 +1045,7 @@ export class AnimalsJourney {
     await this.submitFromDeclaration();
   }
 
-  private async fromOverviewToDeclaration(): Promise<void> {
+  async fromOverviewToDeclaration(): Promise<void> {
     await this.openReviewFromOverview();
     await this.continueFromReviewToDeclaration();
   }

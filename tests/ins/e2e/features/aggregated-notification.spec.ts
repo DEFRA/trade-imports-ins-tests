@@ -2,14 +2,13 @@ import { notificationStatuses } from '@domain/animals/models/api/notification-st
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
+import { aggregateIdFor } from '@domain/animals/models/db/outbox-event-document';
 import { type AggregatedNotificationDocument } from '@domain/ins/models/db/aggregated-notification-document';
 import { timeouts } from '@config/timeouts';
 import { E2E_ORGANISATION_ID } from '@adapters/http/organisation';
 import { getMongoDbUri } from '@config/service-base-urls';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { parseAppDateText, toIsoDate } from '@utils/date-utils';
-
-const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
 const INS_DASHBOARD_COMMODITY_LABEL = 'Live bovine animals';
 
@@ -40,7 +39,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
           async () => {
             draftDoc = await collection.findOne({
               _id: aggregateId,
-              status: 'DRAFT',
+              status: notificationStatuses.draft,
               referenceNumber: referenceNumber,
               originCountry: MANDATORY_ANSWERS.countryCode.value,
               arrivalDate: { $exists: true },
@@ -55,7 +54,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
 
       expect(draftDoc._id).toBe(aggregateId);
       expect(draftDoc.referenceNumber).toBe(referenceNumber);
-      expect(draftDoc.status).toBe('DRAFT');
+      expect(draftDoc.status).toBe(notificationStatuses.draft);
       expect(draftDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
       expect(draftDoc.commodity).toBe(INS_DASHBOARD_COMMODITY_LABEL);
       expect(draftDoc.arrivalDate).toBe(arrivalIsoDate);

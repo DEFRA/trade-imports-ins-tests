@@ -51,10 +51,21 @@ export type GbnAgExchangedDocument = {
   notificationStatusCode?: string;
   versionId?: number;
   issueDateTime?: string;
-  issuer?: GbnAgTradeParty;
   firstSignatoryAuthentication?: { includedClause: GbnAgClause[] };
   referenceDocument?: GbnAgReferencedDocument[];
 };
+
+const gbnAgExchangedDocumentKeyFlags = {
+  identifier: true,
+  traderAssignedId: true,
+  notificationStatusCode: true,
+  versionId: true,
+  issueDateTime: true,
+  firstSignatoryAuthentication: true,
+  referenceDocument: true,
+} satisfies Record<keyof GbnAgExchangedDocument, true>;
+
+export const GBN_AG_EXCHANGED_DOCUMENT_KEYS = Object.keys(gbnAgExchangedDocumentKeyFlags);
 
 export type GbnAgClause = {
   identifier: string;
@@ -140,3 +151,7 @@ export type GbnAgSpecifiedConsignment = {
   isOrHasUnweanedAnimals?: boolean | null;
   includedConsignmentItem?: GbnAgConsignmentItem[];
 };
+
+export const NOTIFICATION_SUBMITTED = 'uk.gov.defra.imports.notification.NotificationSubmitted';
+
+export const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;

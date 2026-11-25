@@ -1,7 +1,7 @@
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test('the copied-address edit page and the contact address page have no accessibility violations', async ({
+  test('the consignment addresses page and the copied-address edit page, with and without errors, have no accessibility violations', async ({
     animalsSeededJourney,
     animalsPages,
     runA11yScan,
@@ -23,11 +23,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await animalsPages.consignorEdit.fill({ name: '', email: 'not-an-email' });
       await animalsPages.consignorEdit.saveChanges.click();
       await expect(animalsPages.consignorEdit.errorSummary).toBeVisible();
-      await runA11yScan();
-    });
-
-    await test.step('Contact address', async () => {
-      await animalsSeededJourney.resumeInUi(referenceNumber, animalsPages.contactAddress);
       await runA11yScan();
     });
   });

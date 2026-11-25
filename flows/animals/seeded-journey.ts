@@ -1,7 +1,7 @@
 import { CONSIGNMENT_ADDRESSES_CHANGE_LINK } from '@domain/animals/constants/consignment-addresses-page';
 import type { Locator } from '@playwright/test';
 import type { AnimalsPages } from '@page-objects';
-import type { PartyRole as AddressesPartyRole } from '@page-objects/animals/addresses-page';
+import type { PartyRole } from '@page-objects/animals/addresses-page';
 import type { AnimalsPartyPickerPage } from '@page-objects/animals/party-picker-page';
 import { pageLoadWait } from '@config/timeouts';
 import type { FrontendFormClient } from '@adapters/http/frontend-form-client';
@@ -11,12 +11,10 @@ import {
   seedSteps,
   type DraftStage,
   type PartyIds,
-  type PartyNames,
-  type PartyRole,
   type SeedOptions,
   type SeedStep,
 } from '@flows/animals/seed-form-steps';
-import { ITAHC_DOCUMENT, MANDATORY_ANSWERS, type NotificationAnswers } from '@domain/animals/constants/journey-options';
+import { ITAHC_DOCUMENT, MANDATORY_ANSWERS, type NotificationAnswers, type PartyAnswers } from '@domain/animals/constants/journey-options';
 import type { JourneyContext } from '@flows/shared/journey-context';
 import { SET_BASES } from '@page-objects/shared/sets';
 import { OPTIONAL_RETURN_AND_TRAIL_PATTERN } from '@page-objects/shared/base-page';
@@ -162,8 +160,6 @@ export class AnimalsSeededJourney {
     await animalsPages.addresses.heading.waitFor(pageLoadWait);
     await this.choosePartyInUi(animalsPages, 'Place of origin', animalsPages.placeOfOriginSelection, placeOfOriginName);
     await animalsPages.addresses.continueButton.click();
-    await animalsPages.contactAddress.heading.waitFor(pageLoadWait);
-    await animalsPages.contactAddress.saveAndContinue.click();
     await animalsPages.notificationView.viewHeader.reference.waitFor(pageLoadWait);
     await animalsPages.notificationView.continueButton.click();
     await animalsPages.declaration.heading.waitFor(pageLoadWait);
@@ -173,20 +169,15 @@ export class AnimalsSeededJourney {
     return referenceNumber;
   }
 
-  private async choosePartyInUi(
-    animalsPages: AnimalsPages,
-    role: AddressesPartyRole,
-    picker: AnimalsPartyPickerPage,
-    name: string,
-  ): Promise<void> {
+  private async choosePartyInUi(animalsPages: AnimalsPages, role: PartyRole, picker: AnimalsPartyPickerPage, name: string): Promise<void> {
     await animalsPages.addresses.changeParty(role).click();
     await picker.select(name);
     await picker.saveAndContinue.click();
     await animalsPages.addresses.heading.waitFor(pageLoadWait);
   }
 
-  private async partyIds(names: PartyNames): Promise<PartyIds> {
-    const roles = Object.keys(names) as PartyRole[];
+  private async partyIds(names: PartyAnswers): Promise<PartyIds> {
+    const roles = Object.keys(names) as (keyof PartyAnswers)[];
     const ids = await Promise.all(roles.map((role) => this.partyIdFor(names[role])));
     return Object.fromEntries(roles.map((role, index) => [role, ids[index]])) as PartyIds;
   }

@@ -2,7 +2,6 @@ import {
   ADDITIONAL_DETAILS_CARD,
   ARRIVAL_DETAILS_CARD,
   CONSIGNMENT_ADDRESSES,
-  CONTACT_ADDRESS_CARD,
   MAIN_IMPORT_REASON_CARD,
   ORIGIN_OF_IMPORT_CARD,
 } from '@domain/animals/constants/consignment-addresses-page';
@@ -72,10 +71,6 @@ export class AnimalsNotificationViewPage extends NotificationPage {
 
   get arrivalDetailsCard(): Locator {
     return this.summaryCard(ARRIVAL_DETAILS_CARD);
-  }
-
-  get contactAddressCard(): Locator {
-    return this.summaryCard(CONTACT_ADDRESS_CARD);
   }
 
   commodityCard(line: CommodityLine): Locator {

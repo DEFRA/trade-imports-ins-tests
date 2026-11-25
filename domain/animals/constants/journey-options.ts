@@ -17,7 +17,6 @@ import { getRelativeAppDateText } from '@utils/date-utils';
 import {
   CONSIGNEE_NAME,
   CONSIGNOR_NAME,
-  CONTACT_ADDRESS_NAME,
   DESTINATION_NAME,
   IMPORTER_NAME,
   PLACE_OF_ORIGIN_NAME,
@@ -49,8 +48,7 @@ export type PartyAnswers = {
 };
 
 /**
- * What a user says about a cattle notification, never how a driver enters it: the UI journey and
- * the seeded journey both build from these, each translating a fact into its own page or form.
+ * What a user says about a cattle notification, never how a driver enters it.
  * Only the answers the frontend requires, so a missing one is a compile error.
  */
 export type MandatoryAnswers = {
@@ -69,7 +67,6 @@ export type MandatoryAnswers = {
   transportIdentification: string;
   transportDocumentReference: string;
   transporter: Transporter;
-  contactAddress: string;
 };
 
 /** The answers the frontend leaves optional for cattle. */
@@ -125,7 +122,6 @@ export const MANDATORY_ANSWERS: MandatoryAnswers = {
   transportIdentification: 'FR-892-LK',
   transportDocumentReference: 'CMR-2026-884721',
   transporter: transporters.garciaLivestockTransport,
-  contactAddress: CONTACT_ADDRESS_NAME,
 };
 
 export const CAT_ANSWERS: NotificationAnswers = {
@@ -142,7 +138,7 @@ export const ITAHC_DOCUMENT: AccompanyingDocumentAnswer = {
   type: documentTypes.itahc,
 };
 
-/** Every answer, including an accompanying document. The UI journey uses this set, as a browser can upload a file. */
+/** Every answer, including an accompanying document. */
 export const ALL_ANSWERS: AllAnswers = {
   ...MANDATORY_ANSWERS,
   commodityLines: [ALL_COMMODITY_LINES.cattle],
@@ -153,7 +149,7 @@ export const ALL_ANSWERS: AllAnswers = {
   accompanyingDocument: { ...ITAHC_DOCUMENT, reference: 'DOCREF0001', type: documentTypes.veterinaryHealthCertificate },
 };
 
-/** Every answer except the accompanying document. The seeded journey uses this set, as its form client cannot upload a file. */
+/** Every answer except the accompanying document. */
 export const ALL_ANSWERS_WITHOUT_DOCUMENT: AllAnswersWithoutDocument = {
   ...ALL_ANSWERS,
   accompanyingDocument: undefined,

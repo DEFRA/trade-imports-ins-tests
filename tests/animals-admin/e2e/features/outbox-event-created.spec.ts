@@ -1,74 +1,39 @@
+import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 import { test, expect } from '@fixtures';
-import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { type OutboxEventActor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
+import { actorWithNullableFields, EXPECTED_ACTOR, withOutbox } from '@flows/animals/outbox';
 import { consignorFixture } from '@flows/shared/address-book-seed';
-import { timeouts } from '@config/timeouts';
-import { users } from '@config/users';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
 
 const NOTIFICATION_CREATED = 'uk.gov.defra.imports.notification.NotificationCreated';
-const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
-
-const EXPECTED_ACTOR: OutboxEventActor = {
-  id: users.andrew.crn,
-  source: 'dynamics-contact',
-  userType: 'B2C',
-  displayName: users.andrew.displayName,
-  organisationId: users.andrew.organisationId,
-  onBehalfOfOrganisationId: null,
-};
-
-const actorWithNullableFields = (actor?: OutboxEventActor | null): OutboxEventActor => ({
-  id: actor?.id ?? null,
-  source: actor?.source ?? null,
-  userType: actor?.userType ?? null,
-  displayName: actor?.displayName ?? null,
-  organisationId: actor?.organisationId ?? null,
-  onBehalfOfOrganisationId: actor?.onBehalfOfOrganisationId ?? null,
-});
 
 test.describe('Notification created outbox event', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });
 
-  test('writes a NotificationCreated event immediately on draft creation', async ({ animalsJourney, journeyContext }) => {
+  test('writes a NotificationCreated event on draft creation', async ({ animalsJourney, journeyContext }) => {
     test.slow();
     await animalsJourney.startNotification();
     const referenceNumber = journeyContext.referenceNumber;
-    const aggregateId = aggregateIdFor(referenceNumber);
-    const client = new MongoDbClient();
 
-    try {
-      await client.connect();
-      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
+    const doc = await withOutbox((outbox) => outbox.singleEventOf(referenceNumber, NOTIFICATION_CREATED));
 
-      await expect
-        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_CREATED }), { timeout: timeouts.long })
-        .toBe(1);
-
-      const [doc] = await collection.find({ aggregateId, eventType: NOTIFICATION_CREATED }).toArray();
-
-      expect(doc._id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
-      expect(doc.aggregateVersion).toBe(1);
-      expect(doc.eventType).toBe(NOTIFICATION_CREATED);
-      expect(doc.aggregateType).toBe('Notification');
-      expect(doc.subType).toBe('GBN-AG');
-      expect(doc.timestamp).toBeInstanceOf(Date);
-      expect(doc.metadata.schemaVersion).toBe('1');
-      expect(doc.metadata.correlationId).toBeDefined();
-      expect(doc.data.exchangedDocument.identifier).toBe(referenceNumber);
-      expect(doc.data.exchangedDocument.notificationStatusCode).toBe('DRAFT');
-      expect(doc.data.exchangedDocument.versionId).toBeUndefined();
-      expect(actorWithNullableFields(doc.actor)).toEqual(EXPECTED_ACTOR);
-      expect(doc.statusChanges).toHaveLength(1);
-      expect(doc.statusChanges?.[0].status).toBe('DRAFT');
-      expect(doc.statusChanges?.[0].dateChanged).toEqual(expect.any(Date));
-    } finally {
-      await client.close();
-    }
+    expect(doc._id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+    expect(doc.aggregateVersion).toBe(1);
+    expect(doc.aggregateType).toBe('Notification');
+    expect(doc.subType).toBe('GBN-AG');
+    expect(doc.timestamp).toBeInstanceOf(Date);
+    expect(doc.metadata.schemaVersion).toBe('1');
+    expect(doc.metadata.correlationId).toBeDefined();
+    expect(doc.data.exchangedDocument.identifier).toBe(referenceNumber);
+    expect(doc.data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.draft);
+    expect(doc.data.exchangedDocument.versionId).toBeUndefined();
+    expect(actorWithNullableFields(doc.actor)).toEqual(EXPECTED_ACTOR);
+    expect(doc.statusChanges).toHaveLength(1);
+    expect(doc.statusChanges?.[0].status).toBe(notificationStatuses.draft);
+    expect(doc.statusChanges?.[0].dateChanged).toEqual(expect.any(Date));
   });
 
   test('writes a NotificationCreated event with consignor name when a submitted notification is copied', async ({
@@ -88,29 +53,15 @@ test.describe('Notification created outbox event', { tag: '@mongodb' }, () => {
     expect(copiedReferenceNumber).toBeDefined();
     expect(copiedReferenceNumber).not.toEqual(sourceReferenceNumber);
 
-    const aggregateId = aggregateIdFor(copiedReferenceNumber);
-    const client = new MongoDbClient();
+    const doc = await withOutbox((outbox) => outbox.singleEventOf(copiedReferenceNumber, NOTIFICATION_CREATED));
 
-    try {
-      await client.connect();
-      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
-
-      await expect
-        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_CREATED }), { timeout: timeouts.long })
-        .toBe(1);
-
-      const [doc] = await collection.find({ aggregateId, eventType: NOTIFICATION_CREATED }).toArray();
-
-      expect(doc.data.specifiedConsignment.consignorParty).toMatchObject({
-        name: consignorFixture.name,
-        postalAddress: {
-          lineOne: consignorFixture.addressLine1,
-          cityName: consignorFixture.townOrCity,
-          postcodeCode: consignorFixture.postcode,
-        },
-      });
-    } finally {
-      await client.close();
-    }
+    expect(doc.data.specifiedConsignment.consignorParty).toMatchObject({
+      name: consignorFixture.name,
+      postalAddress: {
+        lineOne: consignorFixture.addressLine1,
+        cityName: consignorFixture.townOrCity,
+        postcodeCode: consignorFixture.postcode,
+      },
+    });
   });
 });

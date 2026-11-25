@@ -19,7 +19,6 @@ const roleTexts: Record<AddressRole, RoleTexts> = {
   PLACE_OF_DESTINATION: { columnLabel: 'Place of destination', optionLabel: 'Place of Destination', formLabel: 'Place of destination' },
   CONSIGNEE: { columnLabel: 'Consignee', optionLabel: 'Consignee', formLabel: 'Consignee' },
   IMPORTER: { columnLabel: 'Importer', optionLabel: 'Importer', formLabel: 'Importer' },
-  BRANCH_ADDRESS: { columnLabel: 'Branch', optionLabel: 'Branch Address', formLabel: 'Branch address' },
 };
 
 const textsOfEachRole = (textOf: (texts: RoleTexts) => string): Record<AddressRole, string> =>
@@ -85,26 +84,10 @@ export const transporterTab: TypeBackedAddressBookTab = {
   typeFilterOptions: [transporterTypes.commercial, transporterTypes.private],
 };
 
-export const branchTab: RoleBackedAddressBookTab = {
-  addressType: addressTypes.branch,
-  label: 'Branch',
-  panelHeading: 'Branch addresses',
-  roleFilterOptions: [addressRoles.branchAddress],
-};
+export const addressBookTabs: readonly AddressBookTab[] = [originOrConsignorTab, destinationConsigneeOrImporterTab, transporterTab];
 
-export const addressBookTabs: readonly AddressBookTab[] = [
-  originOrConsignorTab,
-  destinationConsigneeOrImporterTab,
-  transporterTab,
-  branchTab,
-];
-
-/** The tabs that list by role, for a loop that only makes sense against one. */
-export const roleBackedAddressBookTabs: readonly RoleBackedAddressBookTab[] = [
-  originOrConsignorTab,
-  destinationConsigneeOrImporterTab,
-  branchTab,
-];
+/** The tabs that list by role. */
+export const roleBackedAddressBookTabs: readonly RoleBackedAddressBookTab[] = [originOrConsignorTab, destinationConsigneeOrImporterTab];
 
 export const tabHolding = (role: AddressRole): RoleBackedAddressBookTab => {
   const tab = roleBackedAddressBookTabs.find(({ roleFilterOptions }) => roleFilterOptions.includes(role));
@@ -116,18 +99,15 @@ export const tabHolding = (role: AddressRole): RoleBackedAddressBookTab => {
 
 export const addressBookTabLabels = addressBookTabs.map(({ label }) => label);
 
-/** A value that is neither a member of the address type values nor a tab any of them opens, for a
- * test proving an unknown tab falls back to the default. */
+/** A value that is not one of the address type values. */
 export const unsupportedAddressType = 'UNSUPPORTED_ADDRESS_TYPE';
 
-/** A value that is neither a member of the role values nor a role any address type groups, for a
- * test proving a role outside the six is refused. */
+/** A value that is not one of the role values. */
 export const unsupportedRole = 'UNSUPPORTED_ROLE';
 
 export const rolesQuestionOptions: Record<AddressTypeAskingRoles, readonly AddressRole[]> = {
   [addressTypes.originOrConsignor]: [addressRoles.placeOfOrigin, addressRoles.consignor],
   [addressTypes.destinationConsigneeOrImporter]: [addressRoles.placeOfDestination, addressRoles.consignee, addressRoles.importer],
-  [addressTypes.branch]: [addressRoles.branchAddress],
 };
 
 const hintOf = (addressType: AddressTypeAskingRoles): string =>
@@ -141,7 +121,6 @@ export const addressTypeOptions: readonly { addressType: AddressType; label: str
     hint: hintOf(addressTypes.destinationConsigneeOrImporter),
   },
   { addressType: addressTypes.transporter, label: 'Transporter', hint: 'Private, Commercial' },
-  { addressType: addressTypes.branch, label: 'Branch', hint: hintOf(addressTypes.branch) },
 ];
 
 export const addressTypeLabels = Object.fromEntries(addressTypeOptions.map(({ addressType, label }) => [addressType, label])) as Record<
@@ -163,7 +142,6 @@ export const rolesQuestion = {
 export const rolesQuestionLegends: Record<AddressTypeAskingRoles, string> = {
   ORIGIN_OR_CONSIGNOR: 'What can this address be used for?',
   DESTINATION_CONSIGNEE_OR_IMPORTER: 'Address type',
-  BRANCH: 'Address type',
 };
 
 export const journeyRolesQuestion = {
