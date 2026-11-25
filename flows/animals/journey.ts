@@ -769,8 +769,7 @@ export class AnimalsJourney {
     await test.step('Review your notification', async () => {
       await this.openReviewFromOverview();
       await runA11yScan();
-      await this.animalsPages.notificationView.continueButton.click();
-      await this.animalsPages.declaration.heading.waitFor(pageLoadWait);
+      await this.continueFromReviewToDeclaration();
     });
   }
 
