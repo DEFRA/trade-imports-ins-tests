@@ -86,7 +86,7 @@ export const transporterTab: TypeBackedAddressBookTab = {
 
 export const addressBookTabs: readonly AddressBookTab[] = [originOrConsignorTab, destinationConsigneeOrImporterTab, transporterTab];
 
-/** The tabs that list by role, for a loop that only makes sense against one. */
+/** The tabs that list by role. */
 export const roleBackedAddressBookTabs: readonly RoleBackedAddressBookTab[] = [originOrConsignorTab, destinationConsigneeOrImporterTab];
 
 export const tabHolding = (role: AddressRole): RoleBackedAddressBookTab => {
@@ -99,12 +99,10 @@ export const tabHolding = (role: AddressRole): RoleBackedAddressBookTab => {
 
 export const addressBookTabLabels = addressBookTabs.map(({ label }) => label);
 
-/** A value that is neither a member of the address type values nor a tab any of them opens, for a
- * test proving an unknown tab falls back to the default. */
+/** A value that is not one of the address type values. */
 export const unsupportedAddressType = 'UNSUPPORTED_ADDRESS_TYPE';
 
-/** A value that is neither a member of the role values nor a role any address type groups, for a
- * test proving a role outside the five is refused. */
+/** A value that is not one of the role values. */
 export const unsupportedRole = 'UNSUPPORTED_ROLE';
 
 export const rolesQuestionOptions: Record<AddressTypeAskingRoles, readonly AddressRole[]> = {
