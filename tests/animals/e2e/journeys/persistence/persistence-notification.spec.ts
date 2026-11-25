@@ -26,7 +26,7 @@ test.describe('Notification persistence round-trip', { tag: '@mongodb' }, () => 
 
       const [doc] = await collection.find({ referenceNumber }).toArray();
       expect(doc.referenceNumber).toBe(referenceNumber);
-      expect(doc.status).toBe('DRAFT');
+      expect(doc.status).toBe(notificationStatuses.draft);
     } finally {
       await client.close();
     }

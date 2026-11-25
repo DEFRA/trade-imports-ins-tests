@@ -1,3 +1,4 @@
+import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { STORED_NOTIFICATION_KEYS, type NotificationDocument } from '@domain/animals/models/db/notification-document';
@@ -83,7 +84,7 @@ test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
         const cow = commodities[0];
         const [species] = cow.species;
 
-        expect(doc.status).toBe('DRAFT');
+        expect(doc.status).toBe(notificationStatuses.draft);
         expect(notification.origin.countryCode).toBe(answers.countryCode.value);
         expect(cow.name).toBe(storedCommodityNames[cowLine.species.commodityCode]);
         expect(cow.commodityCode).toBe(cowLine.species.commodityCode);

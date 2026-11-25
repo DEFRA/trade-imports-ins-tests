@@ -39,7 +39,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
           async () => {
             draftDoc = await collection.findOne({
               _id: aggregateId,
-              status: 'DRAFT',
+              status: notificationStatuses.draft,
               referenceNumber: referenceNumber,
               originCountry: MANDATORY_ANSWERS.countryCode.value,
               arrivalDate: { $exists: true },
@@ -54,7 +54,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@mongodb', '
 
       expect(draftDoc._id).toBe(aggregateId);
       expect(draftDoc.referenceNumber).toBe(referenceNumber);
-      expect(draftDoc.status).toBe('DRAFT');
+      expect(draftDoc.status).toBe(notificationStatuses.draft);
       expect(draftDoc.originCountry).toBe(MANDATORY_ANSWERS.countryCode.value);
       expect(draftDoc.commodity).toBe(INS_DASHBOARD_COMMODITY_LABEL);
       expect(draftDoc.arrivalDate).toBe(arrivalIsoDate);
