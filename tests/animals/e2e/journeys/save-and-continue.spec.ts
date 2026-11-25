@@ -96,7 +96,7 @@ test.describe('Save and continue through a new notification', () => {
     await expect(animalsPages.cphNumber.heading).toBeHidden();
     await expect(animalsPages.notificationView.errorSummaryLinks).toHaveText([
       'Complete main import reason',
-      'Complete additional animal details',
+      'Complete additional details',
       'Complete arrival details',
       CONSIGNMENT_ADDRESSES_INCOMPLETE,
     ]);

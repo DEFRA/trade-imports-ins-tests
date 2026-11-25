@@ -161,6 +161,7 @@ test.describe('Submitted notification outbox payload', () => {
       'identifier',
       'issueDateTime',
       'notificationStatusCode',
+      'traderAssignedId',
       'versionId',
     ]);
   });
