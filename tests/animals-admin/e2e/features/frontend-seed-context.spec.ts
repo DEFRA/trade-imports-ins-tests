@@ -1,7 +1,7 @@
 import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { STORED_NOTIFICATION_KEYS, type NotificationDocument } from '@domain/animals/models/db/notification-document';
+import type { NotificationDocument } from '@domain/animals/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { CREATE_PATH, CREATED_AT_ORIGIN } from '@flows/animals/seeded-journey';
@@ -102,7 +102,22 @@ test.describe('Frontend seed context', { tag: '@mongodb' }, () => {
         expect(notification.transport.portOfEntry).toBe(answers.pointOfEntry.value);
         expect(notification.transport.arrivalDate).toBeDefined();
         expect(notification.transport.transporter?.approvalNumber).toBe('ES-T2-45001294');
-        expect(STORED_NOTIFICATION_KEYS).toEqual(expect.arrayContaining(Object.keys(notification)));
+        expect(Object.keys(notification).sort()).toEqual(
+          [
+            'additionalDetails',
+            'commodities',
+            'consignee',
+            'consignor',
+            'cphNumber',
+            'destination',
+            'importer',
+            'origin',
+            'placeOfOrigin',
+            'purposeInInternalMarket',
+            'reasonForImport',
+            'transport',
+          ].sort(),
+        );
       } finally {
         await client.close();
       }
