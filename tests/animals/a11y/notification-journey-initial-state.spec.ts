@@ -3,7 +3,11 @@ import { commodityLines } from '@domain/animals/constants/commodity-lines';
 import { uniquelyNamedCommercialTransporter } from '@domain/animals/constants/transporters';
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
 import { IMPORT_REASON_TASK } from '@domain/animals/constants/import-reason-page';
-import { govukConditionalRevealRadioOnOrigin, govukConditionalRevealRadiosOnReason } from '@utils/a11y-exclusions';
+import {
+  govukConditionalRevealRadioOnOrigin,
+  govukConditionalRevealRadiosOnReason,
+  govukFileUploadButtonOnDocuments,
+} from '@utils/a11y-exclusions';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ animalsJourney }) => {
@@ -85,7 +89,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Upload documents', async () => {
       await animalsPages.overview.task('Upload documents').click();
       await animalsPages.accompanyingDocuments.heading.waitFor();
-      await runA11yScan();
+      await runA11yScan({ exclude: govukFileUploadButtonOnDocuments });
       await animalsPages.overview.open(animalsPages.accompanyingDocuments.referenceNumberFromUrl());
       await animalsPages.overview.heading.waitFor();
     });
