@@ -81,7 +81,7 @@ test.describe('Save and continue through a new notification', () => {
     await expect(animalsPages.importReason.heading).toBeVisible();
   });
 
-  test('ends on the review page after Save and continue, naming what is outstanding, when the notification is incomplete', async ({
+  test('Continue from the addresses page on an incomplete notification ends on the review, naming what is outstanding', async ({
     animalsJourney,
     animalsPages,
     pages,
@@ -91,9 +91,9 @@ test.describe('Save and continue through a new notification', () => {
     const referenceNumber = await animalsJourney.walkToConsignmentAddressesWithoutCph();
 
     await animalsPages.addresses.continueButton.click();
-    await expect(animalsPages.cphNumber.heading).toBeHidden();
     await animalsPages.notificationView.viewHeader.expectDraftReview();
     await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(referenceNumber));
+    await expect(animalsPages.cphNumber.heading).toBeHidden();
     await expect(animalsPages.notificationView.errorSummary).toContainText('Complete main import reason');
     await expect(animalsPages.notificationView.errorSummary).toContainText(CONSIGNMENT_ADDRESSES_INCOMPLETE);
 
