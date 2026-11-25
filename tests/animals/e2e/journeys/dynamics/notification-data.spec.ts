@@ -1,11 +1,10 @@
 import { AnimalsDynamicsClient } from '@adapters/http/animals-dynamics-client';
-import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { formattedValue } from '@adapters/http/dataverse-client';
-import { timeouts } from '@config/timeouts';
 import { dynamicsBaseTestTimeoutMs } from '@config/dynamics';
 import { defaultUser } from '@config/users';
 import { ALL_ANSWERS, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
-import { aggregateIdFor, GBN_AG_EXCHANGED_DOCUMENT_KEYS, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
+import { NOTIFICATION_SUBMITTED } from '@domain/animals/models/db/outbox-event-document';
+import { withOutbox } from '@flows/animals/outbox';
 import type { AnimalsDynamicsImporterNotification } from '@domain/animals/models/dynamics/importer-notification';
 import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { test, expect } from '@fixtures';
@@ -149,24 +148,20 @@ test.describe('Submitted notification outbox payload', () => {
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });
 
-  test('the submitted notification outbox GBN-AG payload carries only the exchanged document fields the event schema declares', async ({
+  test('the NotificationSubmitted outbox GBN-AG payload for the mandatory answers carries exactly the declared exchanged document fields', async ({
     animalsJourney,
     journeyContext,
   }) => {
     setTestTimeout(dynamicsBaseTestTimeoutMs);
     test.slow();
     await animalsJourney.submitNotification(MANDATORY_ANSWERS);
-    const aggregateId = aggregateIdFor(journeyContext.referenceNumber);
-    const client = new MongoDbClient();
-
-    try {
-      await client.connect();
-      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
-      await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.long }).toBeGreaterThan(0);
-      const doc = await collection.findOne({ aggregateId });
-      expect(GBN_AG_EXCHANGED_DOCUMENT_KEYS).toEqual(expect.arrayContaining(Object.keys(doc?.data.exchangedDocument ?? {})));
-    } finally {
-      await client.close();
-    }
+    const submitted = await withOutbox((outbox) => outbox.singleEventOf(journeyContext.referenceNumber, NOTIFICATION_SUBMITTED));
+    expect(Object.keys(submitted.data.exchangedDocument).sort()).toEqual([
+      'firstSignatoryAuthentication',
+      'identifier',
+      'issueDateTime',
+      'notificationStatusCode',
+      'versionId',
+    ]);
   });
 });

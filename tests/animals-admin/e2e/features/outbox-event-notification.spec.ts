@@ -2,17 +2,11 @@ import { notificationStatuses } from '@domain/animals/models/api/notification-st
 import { test, expect } from '@fixtures';
 import { ALL_ANSWERS as answers, CPH_NUMBER, MANDATORY_ANSWERS } from '@domain/animals/constants/journey-options';
 import { countryCodes } from '@domain/animals/constants/country-codes';
-import {
-  actorWithNullableFields,
-  aggregateIdFor,
-  EXPECTED_ACTOR,
-  GBN_AG_EXCHANGED_DOCUMENT_KEYS,
-  withOutbox,
-} from '@domain/animals/models/db/outbox-event-document';
+import { aggregateIdFor, GBN_AG_EXCHANGED_DOCUMENT_KEYS, NOTIFICATION_SUBMITTED } from '@domain/animals/models/db/outbox-event-document';
+import { actorWithNullableFields, EXPECTED_ACTOR, withOutbox } from '@flows/animals/outbox';
 import { yesNoValues } from '@domain/shared/constants/yes-no-values';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
-const NOTIFICATION_SUBMITTED = 'uk.gov.defra.imports.notification.NotificationSubmitted';
 const LIVE_BOVINE_LINE_DESCRIPTION = 'Live bovine animals';
 const SUBDIVISION_FUNCTION_TYPE_CODE = '106';
 const VETERINARY_CERTIFICATE_TYPE_CODE = '853';
@@ -66,7 +60,7 @@ test.describe('Notification outbox event', { tag: '@mongodb' }, () => {
         urlId: 'https://refdata.tbc.defra.gov.uk/gbn-ag-goods-certified-as',
       },
     ]);
-    expect(GBN_AG_EXCHANGED_DOCUMENT_KEYS).toEqual(expect.arrayContaining(Object.keys(data.exchangedDocument)));
+    expect(Object.keys(data.exchangedDocument).sort()).toEqual([...GBN_AG_EXCHANGED_DOCUMENT_KEYS].sort());
     expect(data.specifiedConsignment.consignorParty?.name).toBe(answers.parties.consignor);
     expect(data.specifiedConsignment.originCountry?.code?.value).toBe(answers.countryCode.value);
     expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(answers.pointOfEntry.value);

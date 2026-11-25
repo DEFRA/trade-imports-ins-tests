@@ -1,12 +1,9 @@
 import { test, expect } from '@fixtures';
-import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { aggregateIdFor, type OutboxEventDocument } from '@domain/animals/models/db/outbox-event-document';
+import { withOutbox } from '@flows/animals/outbox';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_SUBMISSION_DELETED = 'uk.gov.defra.imports.notification.NotificationSubmissionDeleted';
-const BACKEND_DATABASE = 'trade-imports-animals-backend';
-const OUTBOX_COLLECTION = 'outbox';
 const shortType = (eventType: string): string => eventType.split('.').pop() ?? eventType;
 
 test.describe('Seeded notification transitions', { tag: '@mongodb' }, () => {
@@ -23,21 +20,18 @@ test.describe('Seeded notification transitions', { tag: '@mongodb' }, () => {
       await animalsSeededJourney.amend(referenceNumber);
       await animalsSeededJourney.cancelAmend(referenceNumber);
 
-      const aggregateId = aggregateIdFor(referenceNumber);
-      const client = new MongoDbClient();
-
-      try {
-        await client.connect();
-        const collection = client.collection<OutboxEventDocument>(BACKEND_DATABASE, OUTBOX_COLLECTION);
-        const events = (): Promise<OutboxEventDocument[]> => collection.find({ aggregateId }).sort({ aggregateVersion: 1 }).toArray();
-
+      await withOutbox(async (outbox) => {
         await expect
-          .poll(async () => (await events()).map((event) => shortType(event.eventType)).filter((type) => type !== 'NotificationEdited'), {
-            timeout: timeouts.long,
-          })
+          .poll(
+            async () =>
+              (await outbox.eventsOf(referenceNumber))
+                .map((event) => shortType(event.eventType))
+                .filter((type) => type !== 'NotificationEdited'),
+            { timeout: timeouts.long },
+          )
           .toEqual(['NotificationCreated', 'NotificationSubmitted', 'NotificationAmendmentRequested', 'NotificationAmendmentCancelled']);
 
-        const writtenEvents = await events();
+        const writtenEvents = await outbox.eventsOf(referenceNumber);
         for (const event of writtenEvents) {
           expect(event.actor?.organisationId, `${shortType(event.eventType)} carries no actor`).toBeTruthy();
         }
@@ -49,9 +43,7 @@ test.describe('Seeded notification transitions', { tag: '@mongodb' }, () => {
         expect(consignment?.originCountry).toBeTruthy();
         expect(consignment?.unloadingBaseportLocation).toBeTruthy();
         expect(consignment?.includedConsignmentItem?.length).toBeGreaterThan(0);
-      } finally {
-        await client.close();
-      }
+      });
     },
   );
 
@@ -60,21 +52,7 @@ test.describe('Seeded notification transitions', { tag: '@mongodb' }, () => {
     const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
     await animalsSeededJourney.softDelete(referenceNumber);
 
-    const aggregateId = aggregateIdFor(referenceNumber);
-    const client = new MongoDbClient();
-
-    try {
-      await client.connect();
-      const collection = client.collection<OutboxEventDocument>(BACKEND_DATABASE, OUTBOX_COLLECTION);
-
-      await expect
-        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_SUBMISSION_DELETED }), { timeout: timeouts.long })
-        .toBe(1);
-
-      const [deletion] = await collection.find({ aggregateId, eventType: NOTIFICATION_SUBMISSION_DELETED }).toArray();
-      expect(deletion.actor?.organisationId).toBeTruthy();
-    } finally {
-      await client.close();
-    }
+    const deletion = await withOutbox((outbox) => outbox.singleEventOf(referenceNumber, NOTIFICATION_SUBMISSION_DELETED));
+    expect(deletion.actor?.organisationId).toBeTruthy();
   });
 });

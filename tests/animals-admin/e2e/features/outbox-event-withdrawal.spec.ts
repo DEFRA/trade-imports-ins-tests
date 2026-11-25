@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { withOutbox } from '@domain/animals/models/db/outbox-event-document';
+import { withOutbox } from '@flows/animals/outbox';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_CREATED = 'uk.gov.defra.imports.notification.NotificationCreated';

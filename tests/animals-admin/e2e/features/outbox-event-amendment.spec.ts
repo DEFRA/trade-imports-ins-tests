@@ -1,6 +1,6 @@
 import { notificationStatuses } from '@domain/animals/models/api/notification-status';
 import { test, expect } from '@fixtures';
-import { actorWithNullableFields, EXPECTED_ACTOR, withOutbox } from '@domain/animals/models/db/outbox-event-document';
+import { actorWithNullableFields, EXPECTED_ACTOR, withOutbox } from '@flows/animals/outbox';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_AMENDMENT_REQUESTED = 'uk.gov.defra.imports.notification.NotificationAmendmentRequested';
