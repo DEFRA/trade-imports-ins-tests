@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { cpus } from 'node:os';
+import { availableParallelism } from 'node:os';
 import dotenv from 'dotenv';
 import { parse } from 'yaml';
 import { getEnvironment } from '@utils/playwright/environment';
@@ -11,8 +11,12 @@ const REQUIRED_CREDENTIALS = ['BROWSERSTACK_USERNAME', 'BROWSERSTACK_ACCESS_KEY'
 const CDP_CONFIG = 'playwright.config.ts';
 const DOCKER_COMPOSE_CONFIG = 'playwright.docker-compose.config.ts';
 const GLOBAL_REQUIRE_URL = new URL('browserstack-global-require.mjs', import.meta.url).href;
-// The BrowserStack plan allows 13 parallel sessions, shared by the whole team.
-const MAX_DEFAULT_PARALLELS_PER_PLATFORM = 13;
+const TEAM_SESSION_LIMIT = 13;
+
+interface BrowserStackConfig {
+  projectName: string;
+  platforms: unknown[];
+}
 
 function assertCredentialsSet(): void {
   const missing = REQUIRED_CREDENTIALS.filter((name) => !process.env[name]);
@@ -48,14 +52,14 @@ function resolveRunSettings(): RunSettings {
     : { name: 'local', identifier: utcTimestamp(), usesLocalTunnel: true, playwrightConfig: DOCKER_COMPOSE_CONFIG };
 }
 
-// Half the CPUs, as Playwright's 50% workers, from 1 up to the plan limit.
-function defaultParallelsPerPlatform(): number {
-  return Math.min(MAX_DEFAULT_PARALLELS_PER_PLATFORM, Math.max(1, Math.floor(cpus().length / 2)));
+function defaultParallelsPerPlatform(platformCount: number): number {
+  const sessions = Math.min(availableParallelism(), TEAM_SESSION_LIMIT);
+  return Math.max(1, Math.floor(sessions / platformCount));
 }
 
-function resolveParallelsPerPlatform(): string {
+function resolveParallelsPerPlatform(platformCount: number): string {
   const override = process.env.BROWSERSTACK_PARALLELS_PER_PLATFORM;
-  if (!override) return String(defaultParallelsPerPlatform());
+  if (!override) return String(defaultParallelsPerPlatform(platformCount));
   if (!/^[1-9]\d*$/.test(override)) {
     console.error(`BROWSERSTACK_PARALLELS_PER_PLATFORM must be a positive whole number, not "${override}".`);
     process.exit(1);
@@ -63,15 +67,18 @@ function resolveParallelsPerPlatform(): string {
   return override;
 }
 
-function resolveProjectUrl(): string {
+function readBrowserStackConfig(): BrowserStackConfig {
   const configUrl = new URL('../browserstack.yml', import.meta.url);
-  const { projectName } = parse(readFileSync(configUrl, 'utf8')) as { projectName: string };
-  return `https://automate.browserstack.com/projects/${projectName}`;
+  const config = parse(readFileSync(configUrl, 'utf8')) as BrowserStackConfig;
+  if (!Array.isArray(config.platforms) || config.platforms.length === 0) {
+    console.error('browserstack.yml must list at least one platform under platforms.');
+    process.exit(1);
+  }
+  return config;
 }
 
-function runSdk(playwrightArgs: string[]): Promise<number> {
+function runSdk(playwrightArgs: string[], parallelsPerPlatform: string): Promise<number> {
   const run = resolveRunSettings();
-  const parallelsPerPlatform = resolveParallelsPerPlatform();
   console.log(`BrowserStack: ${parallelsPerPlatform} parallel sessions per platform`);
   const sdk = spawn('npx', ['browserstack-node-sdk', 'playwright', 'test', `--config=${run.playwrightConfig}`, ...playwrightArgs], {
     stdio: 'inherit',
@@ -90,8 +97,9 @@ function runSdk(playwrightArgs: string[]): Promise<number> {
 
 async function main(): Promise<void> {
   assertCredentialsSet();
-  process.exitCode = await runSdk(process.argv.slice(2));
-  console.log(`BrowserStack project: ${resolveProjectUrl()}`);
+  const { projectName, platforms } = readBrowserStackConfig();
+  process.exitCode = await runSdk(process.argv.slice(2), resolveParallelsPerPlatform(platforms.length));
+  console.log(`BrowserStack project: https://automate.browserstack.com/projects/${projectName}`);
 }
 
 void main();
