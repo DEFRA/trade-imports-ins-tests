@@ -226,7 +226,7 @@ export class PlantsJourney {
     commodityType: string,
   ): Promise<{ reference: string; addressName: string }> {
     const { reference, addressName } = await this.toConsignorOfNewNotification(api, commodityType);
-    await this.plantsPages.consignorSelect.searchFor(addressName);
+    await this.plantsPages.consignorSelect.search(addressName);
     await this.plantsPages.consignorSelect.address(addressName).check();
     await this.plantsPages.consignorSelect.saveAndContinue.click();
     await this.plantsPages.identificationNumbers.heading.waitFor();
@@ -234,7 +234,7 @@ export class PlantsJourney {
   }
 
   async chooseDestination(addressName: string): Promise<void> {
-    await this.plantsPages.placeOfDestination.searchFor(addressName);
+    await this.plantsPages.placeOfDestination.search(addressName);
     await this.plantsPages.placeOfDestination.address(addressName).check();
     await this.plantsPages.placeOfDestination.saveAndContinue.click();
   }
@@ -248,7 +248,7 @@ export class PlantsJourney {
   ): Promise<{ searchTerm: string }> {
     const addressName = `Deleted Before Save Nursery ${randomUUID()}`;
     const record = await api.createAddress(nurseryAddress(addressName, 'GB', [role]));
-    await picker.searchFor(addressName);
+    await picker.search(addressName);
     await picker.address(addressName).check();
     await api.deleteAddress(record.id);
     return { searchTerm: addressName };
@@ -314,7 +314,7 @@ export class PlantsJourney {
     const destinationAddress = isConsignorRoute ? await api.createAddress(nurseryAddress(`${name} Destination`)) : address;
     if (isConsignorRoute) {
       await this.chooseDestination(destinationAddress.name);
-      await this.plantsPages.consignorSelect.searchFor(address.name);
+      await this.plantsPages.consignorSelect.search(address.name);
       await this.plantsPages.consignorSelect.address(address.name).check();
       await this.plantsPages.consignorSelect.saveAndContinue.click();
       await this.plantsPages.identificationNumbers.supplier.fill('S123');
@@ -325,7 +325,7 @@ export class PlantsJourney {
     }
     await this.plantsPages.identificationNumbers.saveAndContinue.click();
     if (contact) {
-      await this.plantsPages.consignmentContactSelect.searchFor(address.name);
+      await this.plantsPages.consignmentContactSelect.search(address.name);
       await this.plantsPages.consignmentContactSelect.address(address.name).check();
     }
     await this.plantsPages.consignmentContactSelect.saveAndContinue.click();

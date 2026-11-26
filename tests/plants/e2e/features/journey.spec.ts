@@ -83,7 +83,7 @@ test.describe('High-risk plants full happy-path journeys', () => {
       await plantsPages.arrivalDetails.saveAndContinue.click();
       await plantsJourney.chooseDestination(address.name);
       if (consignorAddress) {
-        await plantsPages.consignorSelect.searchFor(consignorAddress.name);
+        await plantsPages.consignorSelect.search(consignorAddress.name);
         await plantsPages.consignorSelect.address(consignorAddress.name).check();
         await plantsPages.consignorSelect.saveAndContinue.click();
       }
@@ -95,7 +95,7 @@ test.describe('High-risk plants full happy-path journeys', () => {
       }
       await plantsPages.identificationNumbers.consignment.fill('JOURNEY_123');
       await plantsPages.identificationNumbers.saveAndContinue.click();
-      await plantsPages.consignmentContactSelect.searchFor(address.name);
+      await plantsPages.consignmentContactSelect.search(address.name);
       await plantsPages.consignmentContactSelect.address(address.name).check();
       await plantsPages.consignmentContactSelect.saveAndContinue.click();
       await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));

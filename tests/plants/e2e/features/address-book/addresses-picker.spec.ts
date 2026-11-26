@@ -4,6 +4,7 @@ import { PLANTS_FOR_PLANTING, nurseryAddress, type PlantsJourney } from '@flows/
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { addressRoles, heldAsPlaceOfDestination } from '@domain/shared/constants/address-types';
 import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
+import { frenchConsignorFixture, saveAddressThenExpectCountrySearchListsIt } from '@flows/shared/address-book-seed';
 import {
   ADDRESSES_A_PAGE,
   expectChosenAddressNamedAboveResults,
@@ -45,12 +46,12 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
     const picker = plantsPages.placeOfDestination;
 
     const reference = await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
-    await picker.searchFor(chosenName);
+    await picker.search(chosenName);
     await picker.address(chosenName).check();
     await picker.saveAndContinue.click();
     await picker.open(reference);
 
-    await picker.searchFor(token);
+    await picker.search(token);
 
     await expect(picker.resultsSummary).toHaveText(pickerResultsCount(ADDRESSES_A_PAGE, names.length));
     await expect(picker.listedAddresses).toHaveCount(ADDRESSES_A_PAGE);
@@ -78,7 +79,7 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
     await expectChosenAddressNamedAboveResults(plantsPages.placeOfDestination.resultsHeading, address.name);
     await expect(plantsPages.placeOfDestination.currentAddress).toContainText(address.name);
 
-    await plantsPages.placeOfDestination.searchFor(address.name);
+    await plantsPages.placeOfDestination.search(address.name);
     await expect(plantsPages.placeOfDestination.address(address.name)).toBeChecked();
 
     await plantsPages.placeOfDestination.editCurrentAddress.click();
@@ -105,7 +106,7 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
     });
     await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
 
-    await plantsPages.placeOfDestination.searchFor(record.name);
+    await plantsPages.placeOfDestination.search(record.name);
 
     await expect.poll(() => pickerAddressCellText(pages.page, record.name)).toBe(expectedPickerAddressCellText(record));
 
@@ -136,4 +137,32 @@ test.describe('Addresses picker', { tag: '@address-book' }, () => {
       }
     });
   }
+});
+
+test.describe('Addresses picker country search', { tag: '@address-book' }, () => {
+  test('a consignor list searched for France lists the consignors in France', async ({ plantsPages, plantsJourney, addressBookApi }) => {
+    await plantsJourney.toConsignorOfNewNotification(addressBookApi, PLANTS_FOR_PLANTING);
+
+    await saveAddressThenExpectCountrySearchListsIt(
+      addressBookApi,
+      plantsPages.consignorSelect,
+      { ...frenchConsignorFixture, name: `Laiterie du Nord ${randomUUID()}` },
+      { term: 'France', countryCode: 'FR', countryLabel: 'France', role: addressRoles.consignor },
+    );
+  });
+
+  test('a place of destination list searched for United Kingdom lists the places of destination in the United Kingdom', async ({
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
+
+    await saveAddressThenExpectCountrySearchListsIt(
+      addressBookApi,
+      plantsPages.placeOfDestination,
+      nurseryAddress(`Country Search Nursery ${randomUUID()}`),
+      { term: 'United Kingdom', countryCode: 'GB', countryLabel: 'United Kingdom', role: addressRoles.placeOfDestination },
+    );
+  });
 });

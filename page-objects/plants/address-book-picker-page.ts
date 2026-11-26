@@ -5,6 +5,8 @@ import {
   pickerLastCell,
   pickerNoMatchesMessage,
   paragraphUnderResultsHeading,
+  pickerResultRows,
+  pickerResultRowsOutsideCountry,
   pickerResultsGroup,
   pickerResultsHeading,
   pickerSearchBox,
@@ -67,6 +69,14 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
     return pickerResultsGroup(this.page).getByRole('radio');
   }
 
+  get listedRows(): Locator {
+    return pickerResultRows(this.page);
+  }
+
+  listedRowsOutsideCountry(countryLabel: string): Locator {
+    return pickerResultRowsOutsideCountry(this.page, countryLabel);
+  }
+
   get checkedAddress(): Locator {
     return pickerResultsGroup(this.page).getByRole('radio', { checked: true });
   }
@@ -79,7 +89,7 @@ export abstract class PlantsAddressBookPickerPage extends PlantsNotificationPage
     return this.currentAddress.getByRole('link', { name: /^Edit details/ });
   }
 
-  async searchFor(term: string): Promise<void> {
+  async search(term: string): Promise<void> {
     await this.searchBox.fill(term);
     await this.searchButton.click();
   }

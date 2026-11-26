@@ -14,17 +14,17 @@ test.describe('Copied addresses are edited on the notification', () => {
     });
 
     await plantsPages.consignorSelect.open(reference);
-    await plantsPages.consignorSelect.searchFor(address.name);
+    await plantsPages.consignorSelect.search(address.name);
     await expect(plantsPages.consignorSelect.address(address.name)).toBeVisible();
     await expect(plantsPages.consignorSelect.editCurrentAddress).toBeVisible();
 
     await plantsPages.placeOfDestination.open(reference);
-    await plantsPages.placeOfDestination.searchFor(destinationAddress.name);
+    await plantsPages.placeOfDestination.search(destinationAddress.name);
     await expect(plantsPages.placeOfDestination.address(destinationAddress.name)).toBeVisible();
     await expect(plantsPages.placeOfDestination.editCurrentAddress).toBeVisible();
 
     await plantsPages.consignmentContactSelect.open(reference);
-    await plantsPages.consignmentContactSelect.searchFor(address.name);
+    await plantsPages.consignmentContactSelect.search(address.name);
     await expect(plantsPages.consignmentContactSelect.address(address.name)).toBeVisible();
     await expect(plantsPages.consignmentContactSelect.editCurrentAddress).toBeVisible();
 
