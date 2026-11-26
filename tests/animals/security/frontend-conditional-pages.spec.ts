@@ -15,22 +15,22 @@ test.describe('Security scan (frontend, conditional pages)', { tag: '@active' },
     await animalsPages.importReason.reason('Transit').check();
     await animalsPages.importReason.selectTransitPortOfExitByIndex(2);
     await animalsPages.importReason.selectTransitDestinationCountry('FR');
-    await animalsPages.importReason.saveAndContinue.click();
+    await animalsPages.importReason.saveAndReturnToOverview.click();
     await animalsPages.overview.heading.waitFor();
     await animalsPages.overview.task('Additional details').click();
     await animalsPages.additionalDetails.heading.waitFor();
-    await animalsPages.additionalDetails.saveAndContinue.click();
+    await animalsPages.additionalDetails.saveAndReturnToOverview.click();
     await animalsPages.overview.heading.waitFor();
 
     await animalsPages.overview.task(IMPORT_REASON_TASK).click();
     await animalsPages.importReason.reason('Temporary admission horses').check();
     await animalsPages.importReason.temporaryAdmissionExitDate.fill(getRelativeAppDateText({ monthOffset: 2 }));
     await animalsPages.importReason.selectTemporaryAdmissionPortOfExitByIndex(2);
-    await animalsPages.importReason.saveAndContinue.click();
+    await animalsPages.importReason.saveAndReturnToOverview.click();
     await animalsPages.overview.heading.waitFor();
     await animalsPages.overview.task('Additional details').click();
     await animalsPages.additionalDetails.heading.waitFor();
-    await animalsPages.additionalDetails.saveAndContinue.click();
+    await animalsPages.additionalDetails.saveAndReturnToOverview.click();
     await animalsPages.overview.heading.waitFor();
 
     await animalsJourney.reachTransporterFromHub();
