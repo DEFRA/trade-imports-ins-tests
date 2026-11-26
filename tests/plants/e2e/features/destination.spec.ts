@@ -71,17 +71,17 @@ test.describe('High-risk plants destination section', () => {
     await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(RESULTS_COUNT);
     await expect(plantsPages.placeOfDestination.address(`Consignor Only ${token}`)).toHaveCount(0);
 
-    await plantsPages.placeOfDestination.searchFor(token);
+    await plantsPages.placeOfDestination.search(token);
 
     await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(pickerResultsCount(2, 2));
     await expect(plantsPages.placeOfDestination.address(matches[0])).toBeVisible();
     await expect(plantsPages.placeOfDestination.address(matches[1])).toBeVisible();
 
-    await plantsPages.placeOfDestination.searchFor(`${token} Ardnamurchan`);
+    await plantsPages.placeOfDestination.search(`${token} Ardnamurchan`);
 
     await expect(plantsPages.placeOfDestination.noMatchesMessage).toBeVisible();
 
-    await plantsPages.placeOfDestination.searchFor('');
+    await plantsPages.placeOfDestination.search('');
     await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(RESULTS_COUNT);
   });
 
@@ -96,7 +96,7 @@ test.describe('High-risk plants destination section', () => {
     await addressBookApi.createAddress(nurseryAddress(target));
 
     const reference = await plantsJourney.toDestinationOfNewNotification(PLANTS_FOR_PLANTING);
-    await plantsPages.placeOfDestination.searchFor(token);
+    await plantsPages.placeOfDestination.search(token);
 
     await expect(plantsPages.placeOfDestination.resultsSummary).toHaveText(pickerResultsCount(1, 1));
 
@@ -111,7 +111,7 @@ test.describe('High-risk plants destination section', () => {
     await plantsPages.placeOfDestination.open(reference);
     await expectChosenAddressNamedAboveResults(plantsPages.placeOfDestination.resultsHeading, target);
 
-    await plantsPages.placeOfDestination.searchFor(target);
+    await plantsPages.placeOfDestination.search(target);
     await expect(plantsPages.placeOfDestination.address(target)).toBeChecked();
   });
 

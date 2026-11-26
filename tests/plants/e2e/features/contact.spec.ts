@@ -34,7 +34,7 @@ test.describe('High-risk plants contact', () => {
       await expect(pages.page).toHaveURL(contact.expectedUrlPattern(reference));
       await expect(contact.heading).toBeVisible();
 
-      await contact.searchFor(token);
+      await contact.search(token);
       await expect(contact.resultsSummary).toHaveText(pickerResultsCount(MATCHING_RECORDS, MATCHING_RECORDS));
       await expect(contact.listedAddresses).toHaveCount(MATCHING_RECORDS);
 
@@ -50,7 +50,7 @@ test.describe('High-risk plants contact', () => {
       await contact.open(reference);
       await expectChosenAddressNamedAboveResults(contact.resultsHeading, target.name);
 
-      await contact.searchFor(target.name);
+      await contact.search(target.name);
       await expect(contact.address(target.name)).toBeChecked();
     },
   );
@@ -63,7 +63,7 @@ test.describe('High-risk plants contact', () => {
   }) => {
     const address = await addressBookApi.createAddress(nurseryAddress(`Review ${randomUUID()}`));
     const reference = await openContact(plantsPages, plantsJourney);
-    await plantsPages.consignmentContactSelect.searchFor(address.name);
+    await plantsPages.consignmentContactSelect.search(address.name);
     await plantsPages.consignmentContactSelect.address(address.name).check();
     await plantsPages.consignmentContactSelect.saveAndContinue.click();
     await plantsPages.arrivalDetails.open(reference);
@@ -72,7 +72,7 @@ test.describe('High-risk plants contact', () => {
     await plantsPages.arrivalDetails.placeOfLanding.choose(portByCode('GB ABD').display);
     await plantsPages.arrivalDetails.saveAndContinue.click();
     await plantsPages.placeOfDestination.open(reference);
-    await plantsPages.placeOfDestination.searchFor(address.name);
+    await plantsPages.placeOfDestination.search(address.name);
     await plantsPages.placeOfDestination.address(address.name).check();
     await plantsPages.placeOfDestination.saveAndContinue.click();
     await plantsPages.identificationNumbers.open(reference);

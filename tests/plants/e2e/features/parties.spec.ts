@@ -35,7 +35,7 @@ test.describe('High-risk plants addresses section', () => {
       const numbers = plantsPages.identificationNumbers;
 
       await expect(consignor.address(destinationName)).toHaveCount(0);
-      await consignor.searchFor(name);
+      await consignor.search(name);
       await consignor.address(name).check();
       await consignor.saveAndContinue.click();
       await expect(pages.page).toHaveURL(numbers.expectedUrlPattern(reference));
@@ -86,7 +86,7 @@ test.describe('High-risk plants addresses section', () => {
     const { reference, addressName: name } = await plantsJourney.toConsignorOfNewNotification(addressBookApi, PLANTS_FOR_PLANTING);
     const consignor = plantsPages.consignorSelect;
 
-    await consignor.searchFor(name);
+    await consignor.search(name);
     await consignor.address(name).check();
     await consignor.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrlPattern(reference));
@@ -95,7 +95,7 @@ test.describe('High-risk plants addresses section', () => {
     await plantsPages.overview.taskRowLink(CONSIGNOR).click();
     await expect(pages.page).toHaveURL(consignor.expectedUrlPattern(reference));
 
-    await consignor.searchFor(name);
+    await consignor.search(name);
     await consignor.address(name).check();
     await consignor.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.identificationNumbers.expectedUrlPattern(reference));
@@ -205,7 +205,7 @@ test.describe('High-risk plants addresses section', () => {
     await plantsPages.overview.open(reference);
     await expect(plantsPages.overview.taskRow(CONSIGNOR)).toContainText('Not yet started');
     await consignor.open(reference);
-    await consignor.searchFor(name);
+    await consignor.search(name);
     await expect(consignor.address(name)).not.toBeChecked();
 
     await plantsJourney.changeCommodityType(reference, POTATOES);

@@ -64,7 +64,7 @@ test.describe('High-risk plants check and submit section', () => {
     await expect(review).toContainText('Cannot start yet');
     await expect(review.getByRole('link')).toHaveCount(0);
     await plantsPages.consignmentContactSelect.open(reference);
-    await plantsPages.consignmentContactSelect.searchFor(address.name);
+    await plantsPages.consignmentContactSelect.search(address.name);
     await plantsPages.consignmentContactSelect.address(address.name).check();
     await plantsPages.consignmentContactSelect.saveAndContinue.click();
     await expect(pages.page).toHaveURL(plantsPages.notificationView.expectedUrlPattern(reference));
