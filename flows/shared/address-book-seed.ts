@@ -1,4 +1,8 @@
+import { expect, type Locator } from '@playwright/test';
 import type { AddressBookApiClient, AddressBookRequest, AddressBookRecord } from '@adapters/http/address-book-api-client';
+import { timeouts } from '@config/timeouts';
+import { ADDRESSES_A_PAGE, pickerResultsCount } from '@page-objects/shared/address-picker-results';
+import type { AddressRole } from '@domain/shared/constants/address-types';
 import {
   heldAsConsignee,
   heldAsConsignor,
@@ -31,6 +35,17 @@ export const consignorFixture: AddressBookRequest = {
   townOrCity: 'Bern',
   postcode: '30055',
   countryCode: 'CH',
+  phone: '+44 1234 567890',
+  email: 'contact@example.com',
+  ...heldAsConsignor,
+};
+
+export const frenchConsignorFixture: AddressBookRequest = {
+  name: 'Laiterie du Nord SARL',
+  addressLine1: '12 Rue de la Gare',
+  townOrCity: 'Lille',
+  postcode: '59000',
+  countryCode: 'FR',
   phone: '+44 1234 567890',
   email: 'contact@example.com',
   ...heldAsConsignor,
@@ -99,16 +114,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookRequest[] = [
     email: 'contact@example.com',
     ...heldAsConsignor,
   },
-  {
-    name: 'Laiterie du Nord SARL',
-    addressLine1: '12 Rue de la Gare',
-    townOrCity: 'Lille',
-    postcode: '59000',
-    countryCode: 'FR',
-    phone: '+44 1234 567890',
-    email: 'contact@example.com',
-    ...heldAsConsignor,
-  },
+  frenchConsignorFixture,
   {
     name: 'Nordvik Seafood AS',
     addressLine1: 'Havnegata 8',
@@ -169,4 +175,41 @@ export async function ensureE2eAddressBook(api: AddressBookApiClient): Promise<v
       await api.deleteAddress(extra.id);
     }
   }
+}
+
+interface CountrySearchPicker {
+  search(term: string): Promise<void>;
+  resultsSummary: Locator;
+  listedCountryCells: Locator;
+}
+
+interface CountrySearch {
+  term: string;
+  countryCode: string;
+  countryLabel: string;
+  role: AddressRole;
+}
+
+/**
+ * Saves the record, then searches the picker for the term until the picker and the address book answer from one
+ * moment: the picker's found count equals the number of the role's addresses the book matches to the term or to the
+ * country code, the saved record is among them, and every row listed reads the country label.
+ */
+export async function saveAddressThenExpectCountrySearchListsIt(
+  api: AddressBookApiClient,
+  picker: CountrySearchPicker,
+  record: AddressBookRequest,
+  { term, countryCode, countryLabel, role }: CountrySearch,
+): Promise<void> {
+  const saved = await api.createAddress(record);
+  await expect(async () => {
+    await picker.search(term);
+    const offered = (await api.listAddressesOnEveryPage(term, [countryCode])).filter(
+      (address) => address.roles.length === 0 || address.roles.includes(role),
+    );
+    const shown = Math.min(offered.length, ADDRESSES_A_PAGE);
+    expect(offered.map((address) => address.id)).toContain(saved.id);
+    await expect(picker.resultsSummary).toHaveText(pickerResultsCount(shown, offered.length), { timeout: timeouts.veryShort });
+    await expect(picker.listedCountryCells).toHaveText(Array<string>(shown).fill(countryLabel), { timeout: timeouts.veryShort });
+  }).toPass({ timeout: timeouts.long });
 }

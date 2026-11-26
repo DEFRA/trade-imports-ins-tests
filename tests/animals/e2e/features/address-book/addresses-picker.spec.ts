@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
-import { addressRoles, heldAsConsignee, heldAsConsignor } from '@domain/shared/constants/address-types';
+import { addressRoles, heldAsConsignee, heldAsConsignor, heldAsPlaceOfOrigin } from '@domain/shared/constants/address-types';
 import { addressWithLineTwoAndCounty } from '@domain/ins/constants/trader-address';
 import { AnimalsAddressesPage } from '@page-objects/animals/addresses-page';
-import { consignorFixture } from '@flows/shared/address-book-seed';
+import { consignorFixture, frenchConsignorFixture, saveAddressThenExpectCountrySearchListsIt } from '@flows/shared/address-book-seed';
 import {
   ADDRESSES_A_PAGE,
   expectChosenAddressNamedAboveResults,
@@ -223,5 +223,75 @@ test.describe('Addresses picker', { tag: ['@duplicated-in-frontend', '@address-b
 
     await expect(animalsPages.addresses.heading).toBeVisible();
     await expect(animalsPages.addresses.partyLinks('Consignor')).toHaveText([AnimalsAddressesPage.addLinkName('Consignor')]);
+  });
+});
+
+test.describe('Addresses picker country search', { tag: '@address-book' }, () => {
+  test('a consignor list searched for France lists the consignors in France', async ({ animalsJourney, animalsPages, addressBookApi }) => {
+    await animalsJourney.toPartyPicker('Consignor');
+
+    await saveAddressThenExpectCountrySearchListsIt(
+      addressBookApi,
+      animalsPages.consignorSelection,
+      { ...frenchConsignorFixture, name: `Laiterie du Nord ${Date.now()}` },
+      { term: 'France', countryCode: 'FR', countryLabel: 'France', role: addressRoles.consignor },
+    );
+  });
+
+  test('a consignor list searched for part of an address lists only the address holding it', async ({
+    animalsJourney,
+    animalsPages,
+    addressBookApi,
+  }) => {
+    const token = `Rouen${Date.now()}`;
+    const picker = animalsPages.consignorSelection;
+    await addressBookApi.createAddress({
+      ...frenchConsignorFixture,
+      name: `Laiterie du Nord ${Date.now()}`,
+      addressLine1: `12 Rue de la Gare ${token}`,
+    });
+    await animalsJourney.toPartyPicker('Consignor');
+
+    await picker.search(token);
+
+    await expect(picker.resultsSummary).toHaveText(pickerResultsCount(1, 1));
+  });
+
+  test('a consignor list searched for a term nothing holds shows no matches and keeps the term', async ({
+    animalsJourney,
+    animalsPages,
+  }) => {
+    const unmatchedTerm = `Nowhere${Date.now()}`;
+    const picker = animalsPages.consignorSelection;
+    await animalsJourney.toPartyPicker('Consignor');
+
+    await picker.search(unmatchedTerm);
+
+    await expect(picker.noMatchesMessage).toBeVisible();
+    await expect(picker.searchBox).toHaveValue(unmatchedTerm);
+  });
+
+  test('a place of origin list searched for United Kingdom lists the places of origin in the United Kingdom', async ({
+    animalsJourney,
+    animalsPages,
+    addressBookApi,
+  }) => {
+    await animalsJourney.toPartyPicker('Place of origin');
+
+    await saveAddressThenExpectCountrySearchListsIt(
+      addressBookApi,
+      animalsPages.placeOfOriginSelection,
+      {
+        ...heldAsPlaceOfOrigin,
+        name: `Border Farm ${Date.now()}`,
+        addressLine1: '1 Farm Lane',
+        townOrCity: 'Carlisle',
+        postcode: 'CA1 1AA',
+        countryCode: 'GB',
+        phone: '+44 1234 567890',
+        email: 'contact@example.com',
+      },
+      { term: 'United Kingdom', countryCode: 'GB', countryLabel: 'United Kingdom', role: addressRoles.placeOfOrigin },
+    );
   });
 });

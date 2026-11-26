@@ -41,6 +41,10 @@ export function pickerAddressCell(page: Page, name: string): Locator {
   return pickerAddressRow(page, name).getByRole('cell').nth(2);
 }
 
+export function pickerCountryCells(page: Page): Locator {
+  return pickerResultsGroup(page).locator('tbody tr td:nth-child(4)');
+}
+
 export function pickerAddressCellText(page: Page, name: string): Promise<string> {
   return pickerAddressCell(page, name).evaluate((cell) => (cell as HTMLElement).innerText);
 }
