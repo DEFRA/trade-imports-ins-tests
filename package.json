@@ -72,7 +72,7 @@
     "security-audit": "audit-ci --config audit-ci.jsonc"
   },
   "devDependencies": {
-    "@aws-sdk/client-sqs": "3.1171.0",
+    "@aws-sdk/client-sqs": "3.1172.0",
     "@axe-core/playwright": "4.14.0",
     "@eslint/js": "10.0.1",
     "@playwright/cli": "0.1.22",
