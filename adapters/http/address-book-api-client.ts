@@ -85,13 +85,16 @@ export class AddressBookApiClient {
     return page.items;
   }
 
-  private async listOnEveryPage<T extends { id: string }>(path: string, query: string): Promise<T[]> {
+  private async listOnEveryPage<T extends { id: string }>(path: string, query: string, countryCodes: readonly string[] = []): Promise<T[]> {
     const pageSize = 100;
     const recordsById = new Map<string, T>();
     let page = 1;
     let totalPages = 1;
     while (page <= totalPages) {
       const params = new URLSearchParams({ q: query, page: String(page), pageSize: String(pageSize) });
+      for (const countryCode of countryCodes) {
+        params.append('countryCode', countryCode);
+      }
       const result = await this.rest.get<ApiPage<T>>(`${path}?${params}`, organisationHeaders(this.organisationId));
       for (const record of result.items) {
         if (!recordsById.has(record.id)) recordsById.set(record.id, record);
@@ -102,9 +105,12 @@ export class AddressBookApiClient {
     return [...recordsById.values()];
   }
 
-  /** Every live address of the organisation matching the search, from every page, once each, newest first. */
-  async listAddressesOnEveryPage(query: string): Promise<AddressBookRecord[]> {
-    return this.listOnEveryPage<AddressBookRecord>(this.path(), query);
+  /**
+   * Every live address of the organisation matching the search, from every page, once each, newest first.
+   * An address in any of the `countryCodes` also matches.
+   */
+  async listAddressesOnEveryPage(query: string, countryCodes: readonly string[] = []): Promise<AddressBookRecord[]> {
+    return this.listOnEveryPage<AddressBookRecord>(this.path(), query, countryCodes);
   }
 
   /** Saves a new address to the organisation's book. */

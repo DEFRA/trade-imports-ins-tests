@@ -7,6 +7,8 @@ import {
   pickerAddressCellText,
   pickerAddressRadio,
   pickerAddressRow,
+  pickerResultRows,
+  pickerResultRowsOutsideCountry,
   pickerLastCell,
   pickerNoMatchesMessage,
   pickerResultsGroup,
@@ -63,6 +65,14 @@ export class AnimalsPartyPickerPage extends NotificationPage {
 
   partyAddressCell(name: string): Locator {
     return pickerAddressCell(this.page, name);
+  }
+
+  get listedRows(): Locator {
+    return pickerResultRows(this.page);
+  }
+
+  listedRowsOutsideCountry(countryLabel: string): Locator {
+    return pickerResultRowsOutsideCountry(this.page, countryLabel);
   }
 
   partyAddressCellText(name: string): Promise<string> {
