@@ -180,7 +180,8 @@ export async function ensureE2eAddressBook(api: AddressBookApiClient): Promise<v
 interface CountrySearchPicker {
   search(term: string): Promise<void>;
   resultsSummary: Locator;
-  listedCountryCells: Locator;
+  listedRows: Locator;
+  listedRowsOutsideCountry(countryLabel: string): Locator;
 }
 
 interface CountrySearch {
@@ -210,6 +211,7 @@ export async function saveAddressThenExpectCountrySearchListsIt(
     const shown = Math.min(offered.length, ADDRESSES_A_PAGE);
     expect(offered.map((address) => address.id)).toContain(saved.id);
     await expect(picker.resultsSummary).toHaveText(pickerResultsCount(shown, offered.length), { timeout: timeouts.veryShort });
-    await expect(picker.listedCountryCells).toHaveText(Array<string>(shown).fill(countryLabel), { timeout: timeouts.veryShort });
+    await expect(picker.listedRows).toHaveCount(shown, { timeout: timeouts.veryShort });
+    await expect(picker.listedRowsOutsideCountry(countryLabel)).toHaveCount(0, { timeout: timeouts.veryShort });
   }).toPass({ timeout: timeouts.long });
 }

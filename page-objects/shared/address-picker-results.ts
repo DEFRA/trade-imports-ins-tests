@@ -41,8 +41,14 @@ export function pickerAddressCell(page: Page, name: string): Locator {
   return pickerAddressRow(page, name).getByRole('cell').nth(2);
 }
 
-export function pickerCountryCells(page: Page): Locator {
-  return pickerResultsGroup(page).locator('tbody tr td:nth-child(4)');
+export function pickerResultRows(page: Page): Locator {
+  return pickerResultsGroup(page)
+    .getByRole('row')
+    .filter({ has: page.getByRole('radio') });
+}
+
+export function pickerResultRowsOutsideCountry(page: Page, countryLabel: string): Locator {
+  return pickerResultRows(page).filter({ hasNot: page.getByRole('cell', { name: countryLabel, exact: true }) });
 }
 
 export function pickerAddressCellText(page: Page, name: string): Promise<string> {
