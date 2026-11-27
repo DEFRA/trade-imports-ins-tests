@@ -1,21 +1,17 @@
-import type { Browser, Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 import { test as base, expect } from '@fixtures';
 import type { ViewHeader } from '@page-objects/shared/view-header';
-import { launchLegacyScrollersBrowser } from '@utils/playwright/legacy-scrollers-browser';
 
-const legacyScrollersTest = base.extend<object, { browser: Browser }>({
-  browser: [
+export const test = base.extend<{ skipOffLinux: void }>({
+  skipOffLinux: [
     // eslint-disable-next-line no-empty-pattern
-    async ({}, use) => {
-      const legacyScrollersBrowser = await launchLegacyScrollersBrowser();
-      await use(legacyScrollersBrowser.browser);
-      await legacyScrollersBrowser.close();
+    async ({}, use, testInfo) => {
+      testInfo.skip(process.platform !== 'linux', 'Visual baselines are Linux-only. Update them with npm run test:visual:update:linux.');
+      await use();
     },
-    { scope: 'worker' },
+    { auto: true },
   ],
 });
-
-export const test = process.platform === 'darwin' ? legacyScrollersTest : base;
 
 export { expect };
 
