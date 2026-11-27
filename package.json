@@ -72,7 +72,7 @@
     "security-audit": "audit-ci --config audit-ci.jsonc"
   },
   "devDependencies": {
-    "@aws-sdk/client-sqs": "3.1172.0",
+    "@aws-sdk/client-sqs": "3.1173.0",
     "@axe-core/playwright": "4.14.0",
     "@eslint/js": "10.0.1",
     "@playwright/cli": "0.1.22",
@@ -86,7 +86,7 @@
     "eslint": "10.15.0",
     "husky": "9.1.7",
     "lint-staged": "17.6.1",
-    "mongodb": "7.9.0",
+    "mongodb": "7.9.1",
     "prettier": "3.10.1",
     "tsx": "4.23.15",
     "typescript": "6.0.3",
