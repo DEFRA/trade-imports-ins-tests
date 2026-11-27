@@ -44,8 +44,8 @@ interface ZapReport {
   site?: Array<{ '@name'?: string; alerts?: ZapAlert[] }>;
 }
 
-// zap/rules.tsv — OWASP's own convention (from zap-baseline.py/
-// zap-full-scan.py): <ruleId>\t<IGNORE|WARN|FAIL>\t(comment).
+const ruleKey = (ruleId: string, siteName?: string): string => (siteName ? `${ruleId}@${siteName}` : ruleId);
+
 async function loadRules(): Promise<Map<string, RuleAction>> {
   const rules = new Map<string, RuleAction>();
   let content: string;
@@ -58,16 +58,16 @@ async function loadRules(): Promise<Map<string, RuleAction>> {
   for (const line of content.split('\n')) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) continue;
-    const [ruleId, action] = trimmed.split('\t');
+    const [ruleId, action, , siteName] = trimmed.split('\t');
     if (ruleId && (action === 'IGNORE' || action === 'WARN' || action === 'FAIL')) {
-      rules.set(ruleId.trim(), action);
+      rules.set(ruleKey(ruleId.trim(), siteName?.trim()), action);
     }
   }
   return rules;
 }
 
-function resolveAction(alert: ZapAlert, rules: Map<string, RuleAction>): RuleAction {
-  const configured = rules.get(alert.pluginid);
+function resolveAction(alert: ZapAlert, siteName: string, rules: Map<string, RuleAction>): RuleAction {
+  const configured = rules.get(ruleKey(alert.pluginid, siteName)) ?? rules.get(alert.pluginid);
   if (configured) return configured;
   // Unclassified High-risk (riskcode 3) defaults to FAIL, else WARN — High
   // is the least noisy risk tier, the safest bar for a new, unproven gate.
@@ -125,7 +125,7 @@ function summariseSite(site: SiteAlerts, rules: Map<string, RuleAction>, message
     counts[label] += Number(alert.count ?? 1);
     // Gated per alert type, not per instance — an 81-instance finding that
     // fails the gate is one thing to fix, not 81.
-    if (resolveAction(alert, rules) === 'FAIL') failCount += 1;
+    if (resolveAction(alert, site.siteName, rules) === 'FAIL') failCount += 1;
   }
   return { siteName: site.siteName, counts, failCount, messageCount };
 }
@@ -419,7 +419,7 @@ async function main(): Promise<void> {
 
   for (const site of sites) {
     for (const alert of site.alerts) {
-      if (resolveAction(alert, rules) === 'FAIL') {
+      if (resolveAction(alert, site.siteName, rules) === 'FAIL') {
         const description = alert.alert ?? alert.name ?? 'unknown alert';
         failures.push(`[${site.siteName}] ${alert.pluginid} ${description} (${alert.riskdesc ?? alert.riskcode})`);
       }

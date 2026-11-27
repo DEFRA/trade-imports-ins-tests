@@ -79,6 +79,6 @@ Ports are the compose stack's; on CDP each service is a per-service subdomain. D
 
 `utils/zap/run-and-gate.ts` fails a run on any of three conditions:
 
-- **A FAIL-rated alert.** `zap/rules.tsv` maps ZAP plugin ids to `IGNORE`/`WARN`/`FAIL`; anything unlisted defaults to FAIL if High risk and WARN otherwise.
+- **A FAIL-rated alert.** `zap/rules.tsv` maps ZAP plugin ids to `IGNORE`/`WARN`/`FAIL`; anything unlisted defaults to FAIL if High risk and WARN otherwise. A rule with a site in its fourth column applies to that site only, so a false positive on one service is not ignored on every other.
 - **A truncated scan.** Each context is capped at 60 minutes (`maxScanDurationInMins`), and `ACTIVE_SCAN_CAP_MINS` must match that number exactly. A scan that finishes at the ceiling was cut short, and an incomplete scan reporting no findings is a false clean.
 - **A context with no traffic.** Declared but undriven means its activeScan job scanned nothing and reported clean. Active profile only. Per-domain active (`ZAP_SCOPE`) gates only that domain's contexts; the report callout marks the run as scoped.
