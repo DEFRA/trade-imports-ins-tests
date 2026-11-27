@@ -30,6 +30,7 @@
     "_browserstack_clean": "rm -rf browserstackSetupConfig.json playwright-browserstack-sdk.config.temp.json playwright-browserstack-sdk.config.ts log local.log",
     "_browserstack_clean_and_test": "npm run _clean && npm run _browserstack_clean && tsx bin/run-browserstack.ts",
     "test": "npm run _clean_and_test -- --grep-invert '@compose|@a11y|@active|@dynamics'",
+    "test:unit": "tsx --test 'utils/**/*.test.ts'",
     "test:a11y": "npm run _clean_and_test -- --grep '@a11y'",
     "test:dynamics": "npm run _clean_and_test -- --grep '@dynamics'",
     "test:cross-browser": "npm run _clean_and_test -- --grep '@cross-browser' --grep-invert '@compose' --project=chrome --project=firefox --project=webkit --project=mobile-webkit --project=mobile-chromium",

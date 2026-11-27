@@ -22,6 +22,15 @@ export default tseslint.config(
     },
   },
   {
+    files: ['**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-floating-promises': [
+        'error',
+        { allowForKnownSafeCalls: [{ from: 'package', name: ['describe', 'it'], package: 'node:test' }] },
+      ],
+    },
+  },
+  {
     files: ['**/shared/**/*.ts'],
     rules: {
       'no-restricted-imports': [

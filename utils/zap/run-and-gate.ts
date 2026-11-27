@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { planContexts } from '@utils/zap/check-context-sync';
 import { createZapClient, runAutomationPlan, type ZapClient } from '@utils/zap/client';
+import { groupAlertsBySite, parseRules, resolveAction, type Rule, type SiteAlerts, type ZapReport } from '@utils/zap/gate';
 import { resolveZapScope, zapAutomationPlan, zapProfile, type ZapScope } from '@config/zap';
 
 const pathFromHere = (relativePath: string): string => fileURLToPath(new URL(relativePath, import.meta.url));
@@ -27,87 +28,30 @@ const REPORT_NAME = 'security-scan';
 const ZAP_LOG_ARTEFACT = 'zap-log.html';
 const JSON_REPORT_ARTEFACT = `${REPORT_NAME}-json.html`;
 
-type RuleAction = 'IGNORE' | 'WARN' | 'FAIL';
-
-interface ZapAlert {
-  pluginid: string;
-  alert?: string;
-  name?: string;
-  riskcode: string;
-  riskdesc?: string;
-  // ZAP's own occurrence count for this alert type — how many pages/
-  // requests it was found on, not how many distinct alert types exist.
-  count?: string;
-}
-
-interface ZapReport {
-  site?: Array<{ '@name'?: string; alerts?: ZapAlert[] }>;
-}
-
-const ruleKey = (ruleId: string, siteName?: string): string => (siteName ? `${ruleId}@${siteName}` : ruleId);
-
-async function loadRules(): Promise<Map<string, RuleAction>> {
-  const rules = new Map<string, RuleAction>();
+// zap/rules.tsv — OWASP's own convention (from zap-baseline.py/
+// zap-full-scan.py): <ruleId>\t<IGNORE|WARN|FAIL>\t(comment), then two
+// optional columns of ours, a site and a confidence.
+async function loadRules(): Promise<Rule[]> {
   let content: string;
   try {
     content = await fs.readFile(RULES_FILE, 'utf8');
   } catch {
-    return rules;
+    return [];
   }
-
-  for (const line of content.split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-    const [ruleId, action, , siteName] = trimmed.split('\t');
-    if (ruleId && (action === 'IGNORE' || action === 'WARN' || action === 'FAIL')) {
-      rules.set(ruleKey(ruleId.trim(), siteName?.trim()), action);
-    }
-  }
-  return rules;
-}
-
-function resolveAction(alert: ZapAlert, siteName: string, rules: Map<string, RuleAction>): RuleAction {
-  const configured = rules.get(ruleKey(alert.pluginid, siteName)) ?? rules.get(alert.pluginid);
-  if (configured) return configured;
-  // Unclassified High-risk (riskcode 3) defaults to FAIL, else WARN — High
-  // is the least noisy risk tier, the safest bar for a new, unproven gate.
-  // Escalate individual Medium findings via rules.tsv as they're triaged.
-  return Number(alert.riskcode) === 3 ? 'FAIL' : 'WARN';
-}
-
-interface SiteAlerts {
-  siteName: string;
-  alerts: ZapAlert[];
+  return parseRules(content);
 }
 
 // ZAP's site tree can split the same host into more than one <site> node
-// (seen locally: two entries both named http://localhost:8085) — group by
-// name and dedupe by pluginid within each group so a finding recorded
-// under both nodes isn't double-counted, while the same pluginid on two
-// genuinely different hosts still counts separately. Both the site names
-// and the alerts come entirely from the report itself — nothing here is
-// cross-referenced against the ZAP_TRADE_IMPORTS_*_URL env vars.
+// (seen locally: two entries both named http://localhost:8085). Both the
+// site names and the alerts come entirely from the report itself — nothing
+// here is cross-referenced against the ZAP_TRADE_IMPORTS_*_URL env vars.
 async function loadReportSites(): Promise<SiteAlerts[]> {
   const reportPath = path.join(REPORT_DIR, `${REPORT_NAME}.json`);
   const content = await fs.readFile(reportPath, 'utf8');
-  const report = JSON.parse(content) as ZapReport;
-
-  const groups = new Map<string, Map<string, ZapAlert>>();
-  for (const site of report.site ?? []) {
-    const siteName = site['@name'] ?? 'unknown';
-    const group = groups.get(siteName) ?? new Map<string, ZapAlert>();
-    groups.set(siteName, group);
-    for (const alert of site.alerts ?? []) {
-      if (!group.has(alert.pluginid)) group.set(alert.pluginid, alert);
-    }
-  }
-
-  return [...groups.entries()]
-    .map(([siteName, alertMap]) => ({ siteName, alerts: [...alertMap.values()] }))
-    .sort((a, b) => a.siteName.localeCompare(b.siteName));
+  return groupAlertsBySite(JSON.parse(content) as ZapReport);
 }
 
-// ZAP's own riskcode convention (see resolveAction's High-risk check below).
+// ZAP's own riskcode convention.
 const RISK_LABELS: Record<string, string> = { '3': 'High', '2': 'Medium', '1': 'Low', '0': 'Informational' };
 
 interface SiteSummary {
@@ -117,7 +61,7 @@ interface SiteSummary {
   messageCount: number;
 }
 
-function summariseSite(site: SiteAlerts, rules: Map<string, RuleAction>, messageCount: number): SiteSummary {
+function summariseSite(site: SiteAlerts, rules: readonly Rule[], messageCount: number): SiteSummary {
   const counts: Record<string, number> = { High: 0, Medium: 0, Low: 0, Informational: 0 };
   let failCount = 0;
   for (const alert of site.alerts) {

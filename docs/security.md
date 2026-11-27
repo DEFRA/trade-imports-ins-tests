@@ -79,6 +79,10 @@ Ports are the compose stack's; on CDP each service is a per-service subdomain. D
 
 `utils/zap/run-and-gate.ts` fails a run on any of three conditions:
 
-- **A FAIL-rated alert.** `zap/rules.tsv` maps ZAP plugin ids to `IGNORE`/`WARN`/`FAIL`; anything unlisted defaults to FAIL if High risk and WARN otherwise. A rule with a site in its fourth column applies to that site only, so a false positive on one service is not ignored on every other.
+- **A FAIL-rated alert.** `zap/rules.tsv` maps ZAP plugin ids to `IGNORE`/`WARN`/`FAIL`; anything unlisted defaults to FAIL if High risk and WARN otherwise. Two optional columns narrow a rule, and a three-column rule still applies everywhere:
+  - **Site** (fourth column), such as `http://localhost:3000`: the rule applies to that site only, so a false positive on one service is not ignored on every other. Leave it empty to give a confidence for every site.
+  - **Confidence** (fifth column), one of ZAP's levels `Low`, `Medium`, `High` or `Confirmed`: the rule applies to alerts at that confidence only. An `IGNORE` triaged at Low confidence then still fails the same plugin on the same site at a higher confidence. Any other value stops the gate, so a typo cannot widen a rule.
+  - When several rules match an alert, the one that names the most wins: site and confidence, then site, then confidence, then neither.
+  - The report lists one plugin at two confidences as two alerts, and the gate keeps them apart. `npm run test:unit` tests this matching.
 - **A truncated scan.** Each context is capped at 60 minutes (`maxScanDurationInMins`), and `ACTIVE_SCAN_CAP_MINS` must match that number exactly. A scan that finishes at the ceiling was cut short, and an incomplete scan reporting no findings is a false clean.
 - **A context with no traffic.** Declared but undriven means its activeScan job scanned nothing and reported clean. Active profile only. Per-domain active (`ZAP_SCOPE`) gates only that domain's contexts; the report callout marks the run as scoped.
