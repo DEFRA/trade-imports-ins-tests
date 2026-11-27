@@ -12,7 +12,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await animalsJourney.submitNotification();
     const { referenceNumber } = journeyContext;
 
-    await test.step('Cancel this amendment?', async () => {
+    await test.step('Amending: Overview, the notification view and the cancel-amendment confirmation', async () => {
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
       await animalsPages.dashboard.amend(referenceNumber).click();
@@ -30,7 +30,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await pages.page.waitForURL(/\/notification-view\?cancelled=1$/);
     });
 
-    await test.step('Amendment cancelled (success banner)', async () => {
+    await test.step('Notification restored to submitted after cancelling', async () => {
       await runA11yScan();
     });
 

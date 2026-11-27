@@ -7,7 +7,10 @@ export class PlantsNotificationCancelAmendPage extends PlantsNotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Cancel this amendment?' });
+    return this.page.getByRole('heading', {
+      level: 1,
+      name: 'Are you sure you want to cancel this amendment?',
+    });
   }
 
   get confirm(): Locator {

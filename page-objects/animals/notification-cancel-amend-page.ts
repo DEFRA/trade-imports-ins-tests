@@ -7,14 +7,17 @@ export class AnimalsNotificationCancelAmendPage extends NotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Cancel this amendment?' });
+    return this.page.getByRole('heading', {
+      level: 1,
+      name: 'Are you sure you want to cancel this amendment?',
+    });
   }
 
   get confirm(): Locator {
     return this.page.getByRole('button', { name: 'Yes, cancel amendment' });
   }
 
-  get reject(): Locator {
-    return this.page.getByRole('button', { name: /No/ });
+  get goBack(): Locator {
+    return this.page.getByRole('link', { name: 'Go back' });
   }
 }

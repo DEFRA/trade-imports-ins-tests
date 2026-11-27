@@ -451,11 +451,11 @@ test.describe('High-risk plants check and submit section', () => {
         await expect(plantsPages.identificationNumbers.statusTag).toHaveText('Amend');
         await plantsPages.identificationNumbers.stripCancelAmend.click();
       }
-      await expect(pages.page.getByRole('heading', { name: 'Cancel this amendment?', level: 1 })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: 'Are you sure you want to cancel this amendment?', level: 1 })).toBeVisible();
       await pages.page.getByRole('button', { name: 'Yes, cancel amendment', exact: true }).click();
       await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
       await assertReadOnly(plantsPages, reference);
-      await expect(pages.page.getByRole('alert')).toContainText(/amendment.*cancelled/i);
+      await expect(plantsPages.notificationView.viewHeader.reference.locator('xpath=preceding-sibling::*')).toHaveCount(0);
       await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('P123');
       await expect(plantsPages.notificationView.card('Identification numbers')).not.toContainText('DiscardMe99');
       await pages.page.reload();
@@ -491,6 +491,24 @@ test.describe('High-risk plants check and submit section', () => {
     await assertReadOnly(plantsPages, reference);
     await plantsPages.notificationView.linkBack.click();
     await expect(plantsPages.dashboard.heading).toBeVisible();
+  });
+
+  test('opening the cancel-amendment address for a submitted notification changes nothing and opens the notification list', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
+    await plantsJourney.submitFromReview();
+
+    await plantsPages.notificationCancelAmend.open(reference);
+
+    await expect(pages.page).toHaveURL(plantsPages.dashboard.expectedUrl);
+    await expect(plantsPages.dashboard.heading).toBeVisible();
+
+    await plantsPages.notificationView.open(reference);
+    await assertReadOnly(plantsPages, reference);
   });
 
   test('Back from an amendment review opens the overview', async ({
