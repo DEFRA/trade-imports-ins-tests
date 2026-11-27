@@ -462,27 +462,22 @@ See [`docs/cross-browser.md`](docs/cross-browser.md) for the strategy and how it
 
 Visual regression tests (tagged `@visual`) guard rendered composition — layout, spacing, colour, and typography as the user sees the page. They compare screenshots against committed baseline images and fail if any pixels differ outside the masked regions.
 
-Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. Each platform requires its own baseline — update both when visual changes are intentional.
-
-Visual specs import `test` from `@fixtures/visual`. On macOS it launches Playwright's headless shell with legacy scroll bars (`-AppleShowScrollBars Always`) and connects to it over CDP. Chromium sizes a native `<select>` arrow box from the macOS scroll bar style, and with the default "Show scroll bars: Automatically" setting that style follows whether a mouse is connected: overlay scroll bars on a trackpad alone, legacy ones with a mouse. Overlay scroll bars draw every native select 4px narrower, so a `*-darwin.png` baseline made on a laptop's trackpad failed with a mouse plugged in (704 pixels on the no-JavaScript import reason page), and the other way round. Playwright's own launch refuses an argument that does not start with `-`, so the fixture starts the browser itself. On Linux the fixture is the shared one, unchanged.
+Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. They are Linux-only (`*-linux.png`). Visual specs import `test` from `@fixtures/visual`, which skips them on any other platform, so they run only in the e2e suite on GitHub Actions and on CDP, and in the Linux update script below. Run locally on macOS, they are reported as skipped.
 
 Visual specs run headless whatever the project setting, because headed mode uses OS font rendering, which produces pixel differences against a headless baseline.
 
 The declaration specs set the date of declaration to a fixed string before the screenshot instead of masking it, because the server writes today's date into the page text and a mask is as wide as that text, which changes with the day and month. `freezeDatePickersAt` does not reach that text: it stops the browser clock and moves each date picker's served bounds, and changes nothing the server has already written. The date's strong emphasis is proved by the declaration e2e specs.
 
-Run against the stack with `npm run test:docker-compose:visual` (or
+On Linux, run against the stack with `npm run test:docker-compose:visual` (or
 `test:docker-compose:animals:visual` for `animals` alone, `test:docker-compose:plants:visual` for `plants` alone). `animals` and `plants` have `@visual` specs.
 
-Regenerate the E2E baseline against the stack frontend with
-`npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
-`npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
-used by CI. Both commands run every `@visual` spec and write the
-updated snapshot into the working tree for commit. Narrow to one spec (or title via
-`--grep`) by passing Playwright args after the command, and add
-`--update-snapshots=missing` to write only new baselines:
+Regenerate the baselines against the stack frontend with
+`npm run test:visual:update:linux`, which renders them in a Linux container. It runs
+every `@visual` spec and writes the updated snapshots into the working tree for commit.
+Narrow to one spec (or title via `--grep`) by passing Playwright args after the command,
+and add `--update-snapshots=missing` to write only new baselines:
 
 ```bash
-npm run test:visual:update:macos -- tests/animals/e2e/visual/origin-of-import.visual.spec.ts
 ./bin/update-visual-baselines-linux.sh tests/animals/e2e/visual/origin-of-import.visual.spec.ts
 ```
 
