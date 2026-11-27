@@ -67,19 +67,34 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     ]);
   });
 
-  test('saves only the pressed card, shows no error for another species, and leaves that species empty', async ({
-    pages,
+  test("saves every card's typed animal when one card's Save and add another is pressed", async ({ pages, animalsPages }) => {
+    const bosTaurus = animalsPages.animalIdentification.speciesCard(commodityLines.cattle);
+    const bisonBison = animalsPages.animalIdentification.speciesCard(commodityLines.bison);
+    await bosTaurus.getByLabel('Ear tag', { exact: true }).fill('UK000000000001');
+    await bisonBison.getByLabel('Ear tag', { exact: true }).fill('UK000000000002');
+    await bosTaurus.getByRole('button', { name: 'Save and add another' }).click();
+
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 1)).toContainText('UK000000000001');
+    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.bison, 1)).toContainText('UK000000000002');
+    await expect(bosTaurus.getByLabel('Ear tag', { exact: true })).toHaveValue('');
+    await expect(bisonBison.getByLabel('Ear tag', { exact: true })).toHaveValue('');
+  });
+
+  test("refuses another card's over-long ear tag on Save and add another, saving neither card and keeping both typed values", async ({
     animalsPages,
   }) => {
     const bosTaurus = animalsPages.animalIdentification.speciesCard(commodityLines.cattle);
     const bisonBison = animalsPages.animalIdentification.speciesCard(commodityLines.bison);
-    await bisonBison.getByLabel('Ear tag', { exact: true }).fill(EAR_TAG_ONE_OVER_LIMIT);
-    await bosTaurus.getByLabel('Ear tag', { exact: true }).fill('UK000000000001');
-    await bosTaurus.getByRole('button', { name: 'Save and add another' }).click();
+    await bosTaurus.getByLabel('Ear tag', { exact: true }).fill(EAR_TAG_ONE_OVER_LIMIT);
+    await bisonBison.getByLabel('Ear tag', { exact: true }).fill('UK000000000002');
+    await bisonBison.getByRole('button', { name: 'Save and add another' }).click();
 
-    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
-    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 1)).toBeVisible();
-    await expect(bisonBison.getByLabel('Ear tag', { exact: true })).toHaveValue('');
+    await expect(animalsPages.animalIdentification.errorSummaryLinks).toHaveText(['Ear tag must be 58 characters or less']);
+    await expect(bosTaurus.getByLabel('Ear tag', { exact: true })).toHaveValue(EAR_TAG_ONE_OVER_LIMIT);
+    await expect(bisonBison.getByLabel('Ear tag', { exact: true })).toHaveValue('UK000000000002');
+    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.cattle, 1)).toHaveCount(0);
+    await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.bison, 1)).toHaveCount(0);
   });
 
   test('refuses a blank card on its own Save and add another beside a filled sibling, and focuses that card on the error link', async ({
@@ -96,6 +111,7 @@ test.describe('Animal identification sections and species cards', { tag: '@dupli
     await animalsPages.animalIdentification.errorSummaryLinks.click();
     await expect(bisonBison.getByLabel('Ear tag', { exact: true })).toBeFocused();
     await expect(animalsPages.animalIdentification.savedAnimalRow(commodityLines.bison, 1)).toHaveCount(0);
+    await expect(bosTaurus.getByLabel('Ear tag', { exact: true })).toHaveValue('UK000000000001');
   });
 
   test('saves no animal and shows no error when Save and return to overview is pressed with every identifier blank', async ({
