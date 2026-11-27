@@ -38,6 +38,7 @@ export const zapProfile: 'active' | 'passive' = isActiveProfile ? 'active' : 'pa
 const ZAP_SCOPE_CONTEXTS: Record<string, readonly string[]> = {
   animals: ['frontend', 'animals-backend'],
   'animals-admin': ['admin'],
+  'animals-dlq': ['admin'],
   ins: ['ins', 'address-book'],
   plants: ['plants-backend'],
 };

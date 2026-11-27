@@ -9,6 +9,7 @@ applyDomainBaseUrls(
   {
     animals: 'http://localhost:3000',
     'animals-admin': 'http://localhost:3001',
+    'animals-dlq': 'http://localhost:3001',
     ins: 'http://localhost:3002',
     plants: 'http://localhost:3003',
   },

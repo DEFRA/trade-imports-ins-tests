@@ -1,13 +1,20 @@
 import { relative, sep } from 'node:path';
 
-/** One domain per deployable app; each owns every spec under tests/<domain>/. */
-export const DOMAINS = ['animals', 'animals-admin', 'ins', 'plants'] as const;
+/**
+ * Each domain owns every spec under tests/<domain>/. One per deployable app,
+ * plus one where some of an app's specs reach a service the rest do not, so
+ * the workspace stack can start without it: animals-dlq is the admin app's
+ * DLQ specs, which call the dynamics gateway. Two domains may therefore share
+ * an app, and so a base URL.
+ */
+export const DOMAINS = ['animals', 'animals-admin', 'animals-dlq', 'ins', 'plants'] as const;
 
 export type Domain = (typeof DOMAINS)[number];
 
 const DOMAIN_ENV_VARS: Record<Domain, string> = {
   animals: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL',
   'animals-admin': 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL',
+  'animals-dlq': 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL',
   ins: 'TRADE_IMPORTS_INS_FRONTEND_BASE_URL',
   plants: 'TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL',
 };

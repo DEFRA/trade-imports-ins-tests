@@ -13,6 +13,7 @@ applyDomainBaseUrls(
   {
     animals: `https://trade-imports-animals-frontend.${environment}.cdp-int.defra.cloud`,
     'animals-admin': `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`,
+    'animals-dlq': `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`,
     ins: `https://trade-imports-ins-frontend.${environment}.cdp-int.defra.cloud`,
     plants: `https://trade-imports-plants-frontend.${environment}.cdp-int.defra.cloud`,
   },
