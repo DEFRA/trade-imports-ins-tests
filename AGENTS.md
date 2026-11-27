@@ -48,4 +48,4 @@ Canonical text: `.claude/rules/code-quality.md` in the trade-imports-workspace r
 
 ## Before you commit
 
-Run `npm run lint`, `npm run format:check` and `npm run typecheck`.
+Run `npm run lint`, `npm run format:check`, `npm run typecheck` and `npm run test:unit`. The unit tests cover the helpers under `utils/` with Node's own test runner, and need no stack.
