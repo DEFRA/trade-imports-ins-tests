@@ -236,9 +236,17 @@ test.describe('High-risk plants check and submit section', () => {
       await expect(btnDelete).toHaveClass(/govuk-button--warning/);
     });
 
-    test('Amend this notification starts the amendment', async ({ pages, plantsPages }) => {
+    test('Amend this notification opens the amend confirmation page with the notification still Submitted, and confirming there shows it being amended', async ({
+      pages,
+      plantsPages,
+    }) => {
       const reference = plantsPages.notificationView.referenceNumberFromUrl();
       await plantsPages.notificationView.viewHeader.btnAmend.click();
+
+      await expect(plantsPages.notificationAmend.heading).toBeVisible();
+      await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');
+
+      await plantsPages.notificationAmend.confirmAmend.click();
 
       await expectAmending(pages, plantsPages, reference);
     });

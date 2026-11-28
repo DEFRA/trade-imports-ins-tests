@@ -175,8 +175,15 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
       await expect(btnCancelAmend).toHaveCount(0);
     });
 
-    test('Amend this notification starts the amendment', async ({ animalsPages }) => {
+    test('Amend this notification opens the amend confirmation page with the notification still Submitted, and confirming there shows it being amended', async ({
+      animalsPages,
+    }) => {
       await animalsPages.notificationView.viewHeader.btnAmend.click();
+
+      await expect(animalsPages.notificationAmend.heading).toBeVisible();
+      await expect(animalsPages.notificationView.statusTag).toHaveText('Submitted');
+
+      await animalsPages.notificationAmend.confirmAmend.click();
 
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
     });

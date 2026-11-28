@@ -46,6 +46,8 @@ test.describe('Back on the review page', () => {
     const reference = await animalsSeededJourney.createSubmittedNotification();
     await animalsPages.dashboard.openAndSearchFor(reference);
     await animalsPages.dashboard.amend(reference).click();
+    await animalsPages.notificationAmend.heading.waitFor();
+    await animalsPages.notificationAmend.confirmAmend.click();
     await expect(animalsPages.notificationView.heading).toHaveText(reviewHeadingText);
 
     await animalsPages.notificationView.changeLink('Change origin of import').click();

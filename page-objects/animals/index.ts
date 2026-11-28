@@ -13,6 +13,7 @@ import { AnimalsDashboardPage } from '@page-objects/animals/dashboard-page';
 import { AnimalsDeclarationPage } from '@page-objects/animals/declaration-page';
 import { AnimalsDeleteNotificationPage } from '@page-objects/animals/delete-notification-page';
 import { AnimalsImportReasonPage } from '@page-objects/animals/import-reason-page';
+import { AnimalsNotificationAmendPage } from '@page-objects/animals/notification-amend-page';
 import { AnimalsNotificationCancelAmendPage } from '@page-objects/animals/notification-cancel-amend-page';
 import { AnimalsNotificationViewPage } from '@page-objects/animals/notification-view-page';
 import { AnimalsOriginOfImportPage } from '@page-objects/animals/origin-of-import-page';
@@ -59,6 +60,7 @@ export function createAnimalsPages(page: Page) {
     declaration: new AnimalsDeclarationPage(page),
     confirmation: new AnimalsConfirmationPage(page),
     deleteNotification: new AnimalsDeleteNotificationPage(page),
+    notificationAmend: new AnimalsNotificationAmendPage(page),
     notificationCancelAmend: new AnimalsNotificationCancelAmendPage(page),
   };
 }

@@ -42,6 +42,8 @@ export class AnimalsNotificationActions {
     await this.animalsPages.dashboard.open();
     await this.animalsPages.dashboard.searchForReference(referenceNumber);
     await this.animalsPages.dashboard.amend(referenceNumber).click();
+    await this.animalsPages.notificationAmend.heading.waitFor(pageLoadWait);
+    await this.animalsPages.notificationAmend.confirmAmend.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
