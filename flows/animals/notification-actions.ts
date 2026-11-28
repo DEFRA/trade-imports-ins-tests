@@ -65,6 +65,14 @@ export class AnimalsNotificationActions {
     this.context.recordReferenceNumber(this.animalsPages.overview.referenceNumberFromUrl());
   }
 
+  /** Copies a notification from its own view header, landing on the copy's overview. */
+  async copyFromNotificationView(referenceNumber: string): Promise<void> {
+    await this.toNotificationView(referenceNumber);
+    await this.animalsPages.notificationView.viewHeader.btnCopy.click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    this.context.recordReferenceNumber(this.animalsPages.overview.referenceNumberFromUrl());
+  }
+
   async cancelAmend(referenceNumber: string): Promise<void> {
     await this.toNotificationView(referenceNumber);
     await this.animalsPages.notificationView.btnCancelAmend.click();

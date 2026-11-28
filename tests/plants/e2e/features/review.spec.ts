@@ -182,11 +182,11 @@ test.describe('High-risk plants check and submit section', () => {
       );
     });
 
-    test('offers only a warning Delete notification in its header, with no Copy as new and no Amend this notification', async ({
+    test('offers Copy as new then a warning Delete notification in its header, with no Amend this notification', async ({
       plantsPages,
     }) => {
       const { viewHeader, btnDelete } = plantsPages.notificationView;
-      await expect(viewHeader.actions).toHaveText(['Delete notification']);
+      await expect(viewHeader.actions).toHaveText(['Copy as new', 'Delete notification']);
       await expect(btnDelete).toHaveClass(/govuk-button--warning/);
     });
 
@@ -227,11 +227,11 @@ test.describe('High-risk plants check and submit section', () => {
       );
     });
 
-    test('offers Amend this notification and a warning Delete notification in its header, and no Delete notification at the foot', async ({
+    test('offers Amend this notification, Copy as new and a warning Delete notification in its header, and no Delete notification at the foot', async ({
       plantsPages,
     }) => {
       const { viewHeader, btnDelete } = plantsPages.notificationView;
-      await expect(viewHeader.actions).toHaveText(['Amend this notification', 'Delete notification']);
+      await expect(viewHeader.actions).toHaveText(['Amend this notification', 'Copy as new', 'Delete notification']);
       await expect(btnDelete).toHaveCount(1);
       await expect(btnDelete).toHaveClass(/govuk-button--warning/);
     });

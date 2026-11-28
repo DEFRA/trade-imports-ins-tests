@@ -1,12 +1,11 @@
 import { notificationStatuses } from '@domain/animals/models/api/notification-status';
+import { NOTIFICATION_CREATED, NOTIFICATION_EDITED } from '@domain/animals/models/db/outbox-event-document';
 import { test, expect } from '@fixtures';
 import { actorWithNullableFields, EXPECTED_ACTOR, withOutbox } from '@flows/animals/outbox';
 import { consignorFixture } from '@flows/shared/address-book-seed';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
-
-const NOTIFICATION_CREATED = 'uk.gov.defra.imports.notification.NotificationCreated';
 
 test.describe('Notification created outbox event', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {
@@ -36,7 +35,7 @@ test.describe('Notification created outbox event', { tag: '@mongodb' }, () => {
     expect(doc.statusChanges?.[0].dateChanged).toEqual(expect.any(Date));
   });
 
-  test('writes a NotificationCreated event with consignor name when a submitted notification is copied', async ({
+  test('writes a draft NotificationCreated event with no copied detail, then a NotificationEdited event carrying the source consignor, when a submitted notification is copied', async ({
     animalsSeededJourney,
     animalsNotificationActions,
     animalsPages,
@@ -46,16 +45,19 @@ test.describe('Notification created outbox event', { tag: '@mongodb' }, () => {
     await animalsSeededJourney.createSubmittedNotification();
     const sourceReferenceNumber = journeyContext.referenceNumber;
     await animalsNotificationActions.toNotificationView(sourceReferenceNumber);
-    await animalsPages.notificationView.btnCopyAsNew.click();
+    await animalsPages.notificationView.viewHeader.btnCopy.click();
     await animalsPages.overview.heading.waitFor();
 
     const copiedReferenceNumber = (await animalsPages.notificationView.journeyStrip.textContent())?.match(REFERENCE_NUMBER_PATTERN)?.[0];
     expect(copiedReferenceNumber).toBeDefined();
     expect(copiedReferenceNumber).not.toEqual(sourceReferenceNumber);
 
-    const doc = await withOutbox((outbox) => outbox.singleEventOf(copiedReferenceNumber, NOTIFICATION_CREATED));
+    const created = await withOutbox((outbox) => outbox.singleEventOf(copiedReferenceNumber, NOTIFICATION_CREATED));
+    expect(created.data.exchangedDocument.notificationStatusCode).toBe(notificationStatuses.draft);
+    expect(created.data.specifiedConsignment?.consignorParty).toBeNull();
 
-    expect(doc.data.specifiedConsignment.consignorParty).toMatchObject({
+    const edited = await withOutbox((outbox) => outbox.singleEventOf(copiedReferenceNumber, NOTIFICATION_EDITED));
+    expect(edited.data.specifiedConsignment.consignorParty).toMatchObject({
       name: consignorFixture.name,
       postalAddress: {
         lineOne: consignorFixture.addressLine1,

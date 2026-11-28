@@ -54,4 +54,12 @@ export class PlantsNotificationActions {
     await this.plantsPages.deleteNotification.confirmDelete.click();
     await this.plantsPages.dashboard.deletedBanner.waitFor(pageLoadWait);
   }
+
+  /** Copies a notification from its own view header, landing on the copy's overview. */
+  async copyFromNotificationView(referenceNumber: string): Promise<string> {
+    await this.toNotificationView(referenceNumber);
+    await this.plantsPages.notificationView.viewHeader.btnCopy.click();
+    await this.plantsPages.overview.heading.waitFor(pageLoadWait);
+    return this.plantsPages.overview.referenceNumberFromUrl();
+  }
 }

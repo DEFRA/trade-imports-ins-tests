@@ -1,10 +1,7 @@
+import { NOTIFICATION_CREATED, NOTIFICATION_DELETED, NOTIFICATION_EDITED } from '@domain/animals/models/db/outbox-event-document';
 import { test, expect } from '@fixtures';
 import { withOutbox } from '@flows/animals/outbox';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
-
-const NOTIFICATION_CREATED = 'uk.gov.defra.imports.notification.NotificationCreated';
-const NOTIFICATION_EDITED = 'uk.gov.defra.imports.notification.NotificationEdited';
-const NOTIFICATION_DELETED = 'uk.gov.defra.imports.notification.NotificationDeleted';
 
 test.describe('Notification withdrawal outbox event', { tag: '@mongodb' }, () => {
   test.beforeEach(() => {

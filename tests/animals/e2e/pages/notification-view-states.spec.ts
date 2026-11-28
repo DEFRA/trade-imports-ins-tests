@@ -63,9 +63,9 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('offers a primary Copy as new then a warning Delete in its header, with no Amend this notification', async ({ animalsPages }) => {
-      const { viewHeader, btnCopyAsNew, btnDelete } = animalsPages.notificationView;
+      const { viewHeader, btnDelete } = animalsPages.notificationView;
       await expect(viewHeader.actions).toHaveText(['Copy as new', 'Delete']);
-      await expect(btnCopyAsNew).not.toHaveClass(/govuk-button--secondary/);
+      await expect(viewHeader.btnCopy).not.toHaveClass(/govuk-button--secondary/);
       await expect(btnDelete).toHaveClass(/govuk-button--warning/);
       await expect(viewHeader.btnAmend).toHaveCount(0);
     });
@@ -168,9 +168,9 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
     });
 
     test('styles Amend this notification as primary, Copy as new as secondary and Delete as warning', async ({ animalsPages }) => {
-      const { viewHeader, btnCopyAsNew, btnDelete, btnCancelAmend } = animalsPages.notificationView;
+      const { viewHeader, btnDelete, btnCancelAmend } = animalsPages.notificationView;
       await expect(viewHeader.btnAmend).not.toHaveClass(/govuk-button--secondary/);
-      await expect(btnCopyAsNew).toHaveClass(/govuk-button--secondary/);
+      await expect(viewHeader.btnCopy).toHaveClass(/govuk-button--secondary/);
       await expect(btnDelete).toHaveClass(/govuk-button--warning/);
       await expect(btnCancelAmend).toHaveCount(0);
     });
@@ -194,7 +194,7 @@ test.describe('Notification view states', { tag: '@duplicated-in-frontend' }, ()
 
     test('copies the submitted notification to a new draft', async ({ animalsPages, journeyContext }) => {
       const originalReferenceNumber = journeyContext.referenceNumber;
-      await animalsPages.notificationView.btnCopyAsNew.click();
+      await animalsPages.notificationView.viewHeader.btnCopy.click();
 
       await animalsPages.overview.heading.waitFor();
       const copiedReferenceNumber = (await animalsPages.notificationView.journeyStrip.textContent())?.match(REFERENCE_NUMBER_PATTERN)?.[0];
