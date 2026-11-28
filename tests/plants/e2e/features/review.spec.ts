@@ -182,11 +182,11 @@ test.describe('High-risk plants check and submit section', () => {
       );
     });
 
-    test('offers only a warning Delete notification in its header, with no Copy as new and no Amend this notification', async ({
+    test('offers Copy as new then a warning Delete notification in its header, with no Amend this notification', async ({
       plantsPages,
     }) => {
       const { viewHeader, btnDelete } = plantsPages.notificationView;
-      await expect(viewHeader.actions).toHaveText(['Delete notification']);
+      await expect(viewHeader.actions).toHaveText(['Copy as new', 'Delete notification']);
       await expect(btnDelete).toHaveClass(/govuk-button--warning/);
     });
 
@@ -227,18 +227,26 @@ test.describe('High-risk plants check and submit section', () => {
       );
     });
 
-    test('offers Amend this notification and a warning Delete notification in its header, and no Delete notification at the foot', async ({
+    test('offers Amend this notification, Copy as new and a warning Delete notification in its header, and no Delete notification at the foot', async ({
       plantsPages,
     }) => {
       const { viewHeader, btnDelete } = plantsPages.notificationView;
-      await expect(viewHeader.actions).toHaveText(['Amend this notification', 'Delete notification']);
+      await expect(viewHeader.actions).toHaveText(['Amend this notification', 'Copy as new', 'Delete notification']);
       await expect(btnDelete).toHaveCount(1);
       await expect(btnDelete).toHaveClass(/govuk-button--warning/);
     });
 
-    test('Amend this notification starts the amendment', async ({ pages, plantsPages }) => {
+    test('Amend this notification opens the amend confirmation page with the notification still Submitted, and confirming there shows it being amended', async ({
+      pages,
+      plantsPages,
+    }) => {
       const reference = plantsPages.notificationView.referenceNumberFromUrl();
       await plantsPages.notificationView.viewHeader.btnAmend.click();
+
+      await expect(plantsPages.notificationAmend.heading).toBeVisible();
+      await expect(plantsPages.notificationView.statusTag).toHaveText('Submitted');
+
+      await plantsPages.notificationAmend.confirmAmend.click();
 
       await expectAmending(pages, plantsPages, reference);
     });
@@ -451,11 +459,11 @@ test.describe('High-risk plants check and submit section', () => {
         await expect(plantsPages.identificationNumbers.statusTag).toHaveText('Amend');
         await plantsPages.identificationNumbers.stripCancelAmend.click();
       }
-      await expect(pages.page.getByRole('heading', { name: 'Cancel this amendment?', level: 1 })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: 'Are you sure you want to cancel this amendment?', level: 1 })).toBeVisible();
       await pages.page.getByRole('button', { name: 'Yes, cancel amendment', exact: true }).click();
       await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
       await assertReadOnly(plantsPages, reference);
-      await expect(pages.page.getByRole('alert')).toContainText(/amendment.*cancelled/i);
+      await expect(plantsPages.notificationView.viewHeader.reference.locator('xpath=preceding-sibling::*')).toHaveCount(0);
       await expect(plantsPages.notificationView.card('Identification numbers')).toContainText('P123');
       await expect(plantsPages.notificationView.card('Identification numbers')).not.toContainText('DiscardMe99');
       await pages.page.reload();
@@ -491,6 +499,24 @@ test.describe('High-risk plants check and submit section', () => {
     await assertReadOnly(plantsPages, reference);
     await plantsPages.notificationView.linkBack.click();
     await expect(plantsPages.dashboard.heading).toBeVisible();
+  });
+
+  test('opening the cancel-amendment address for a submitted notification changes nothing and opens the notification list', async ({
+    pages,
+    plantsPages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference } = await plantsJourney.completeNotification(addressBookApi);
+    await plantsJourney.submitFromReview();
+
+    await plantsPages.notificationCancelAmend.open(reference);
+
+    await expect(pages.page).toHaveURL(plantsPages.dashboard.expectedUrl);
+    await expect(plantsPages.dashboard.heading).toBeVisible();
+
+    await plantsPages.notificationView.open(reference);
+    await assertReadOnly(plantsPages, reference);
   });
 
   test('Back from an amendment review opens the overview', async ({

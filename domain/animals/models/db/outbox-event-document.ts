@@ -153,5 +153,8 @@ export type GbnAgSpecifiedConsignment = {
 };
 
 export const NOTIFICATION_SUBMITTED = 'uk.gov.defra.imports.notification.NotificationSubmitted';
+export const NOTIFICATION_CREATED = 'uk.gov.defra.imports.notification.NotificationCreated';
+export const NOTIFICATION_EDITED = 'uk.gov.defra.imports.notification.NotificationEdited';
+export const NOTIFICATION_DELETED = 'uk.gov.defra.imports.notification.NotificationDeleted';
 
 export const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;

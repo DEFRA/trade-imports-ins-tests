@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { SET_BASES } from '@page-objects/shared/sets';
 
 test.describe('Cancel amendment through the UI', () => {
   test.describe('from an amending notification', () => {
@@ -48,23 +49,28 @@ test.describe('Cancel amendment through the UI', () => {
       },
     );
 
-    test('opens the confirmation page when Cancel amend is selected', async ({ pages, animalsPages, journeyContext }) => {
+    test('opens the confirmation page with the question, the confirm button and Go back, and no status strip or Back link', async ({
+      pages,
+      animalsPages,
+      journeyContext,
+    }) => {
       await animalsPages.notificationView.btnCancelAmend.click();
 
       await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(journeyContext.referenceNumber));
       await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
-      await expect(
-        pages.page.getByText('Your changes since you started amending will be discarded and the submitted version restored.'),
-      ).toBeVisible();
       await expect(animalsPages.notificationCancelAmend.confirm).toBeVisible();
-      await expect(animalsPages.notificationCancelAmend.reject).toBeVisible();
-      await expect(animalsPages.notificationCancelAmend.statusTag).toHaveText('Amend');
-      await expect(animalsPages.notificationCancelAmend.stripCancelAmend).toHaveCount(0);
+      await expect(animalsPages.notificationCancelAmend.goBack).toBeVisible();
+      await expect(animalsPages.notificationCancelAmend.journeyStrip).toHaveCount(0);
+      await expect(animalsPages.notificationCancelAmend.linkBack).toHaveCount(0);
     });
 
-    test('No returns to the notification view with the amendment still in progress', async ({ pages, animalsPages, journeyContext }) => {
+    test('Go back returns to the notification view with the amendment still in progress', async ({
+      pages,
+      animalsPages,
+      journeyContext,
+    }) => {
       await animalsPages.notificationView.btnCancelAmend.click();
-      await animalsPages.notificationCancelAmend.reject.click();
+      await animalsPages.notificationCancelAmend.goBack.click();
 
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(journeyContext.referenceNumber));
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
@@ -85,7 +91,7 @@ test.describe('Cancel amendment through the UI', () => {
       await expect(pages.page).toHaveURL(animalsPages.notificationCancelAmend.expectedUrlPattern(reference));
       await expect(animalsPages.notificationCancelAmend.heading).toBeVisible();
 
-      await animalsPages.notificationCancelAmend.reject.click();
+      await animalsPages.notificationCancelAmend.goBack.click();
 
       await expect(pages.page).toHaveURL(animalsPages.notificationView.expectedUrlPattern(reference));
       await expect(animalsPages.notificationView.statusTag).toHaveText('Amend');
@@ -110,13 +116,36 @@ test.describe('Cancel amendment through the UI', () => {
       await animalsPages.notificationCancelAmend.confirm.click();
 
       await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
-      await expect(pages.page.getByRole('alert')).toContainText('The amendment has been cancelled and the submitted version restored.');
+      await expect(animalsPages.notificationView.viewHeader.reference).toBeVisible();
+      await expect(animalsPages.notificationView.viewHeader.reference.locator('xpath=preceding-sibling::*')).toHaveCount(0);
       await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted');
       await expect(animalsPages.notificationView.btnCancelAmend).toHaveCount(0);
       await expect(pages.page.getByRole('link', { name: /^Change/ })).toHaveCount(0);
       await expect(countryRow).toContainText('France');
     },
   );
+});
+
+test.describe('cancel-amend guard', () => {
+  test('opening or posting the cancel-amendment address for a submitted notification changes nothing and opens the notification list', async ({
+    pages,
+    animalsPages,
+    frontendForms,
+    animalsSeededJourney,
+  }) => {
+    const referenceNumber = await animalsSeededJourney.createSubmittedNotification();
+    const cancelAmendPath = animalsPages.notificationCancelAmend.expectedUrl(referenceNumber);
+
+    await animalsPages.notificationCancelAmend.open(referenceNumber);
+
+    await expect(pages.page).toHaveURL(SET_BASES.liveAnimals);
+    await expect(animalsPages.dashboard.heading).toBeVisible();
+
+    await frontendForms.postForm(cancelAmendPath, {}, { redirectsTo: new RegExp(`^${SET_BASES.liveAnimals}$`) });
+
+    await animalsPages.notificationView.open(referenceNumber);
+    await expect(animalsPages.notificationView.viewHeader.statusTag).toHaveText('Submitted');
+  });
 });
 
 test.describe('Cancel amend without JavaScript', { tag: '@duplicated-in-frontend' }, () => {

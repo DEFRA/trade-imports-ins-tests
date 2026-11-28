@@ -1,7 +1,6 @@
 import { type Locator } from '@playwright/test';
 import type { SortByValue } from '@domain/animals/constants/sort-by-values';
 import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
-import { AMEND_REFUSED_MESSAGE } from '@page-objects/shared/dashboard-copy';
 import { SET_BASES } from '@page-objects/shared/sets';
 
 export type ResultsRange = {
@@ -52,8 +51,6 @@ export class AnimalsDashboardPage extends BasePage {
   get deletedBanner(): Locator {
     return this.page.getByText('The notification has been deleted.');
   }
-
-  readonly amendRefusedMessage = AMEND_REFUSED_MESSAGE;
 
   get notificationCards(): Locator {
     return this.page.locator('.govuk-summary-card');
@@ -183,18 +180,10 @@ export class AnimalsDashboardPage extends BasePage {
     });
   }
 
-  btnCopyAsNew(reference: string): Locator {
-    return this.copyAsNew(reference);
-  }
-
   amend(reference: string): Locator {
-    return this.notificationCard(reference).getByRole('button', {
+    return this.notificationCard(reference).getByRole('link', {
       name: `Amend notification ${reference}`,
     });
-  }
-
-  btnAmend(reference: string): Locator {
-    return this.amend(reference);
   }
 
   view(reference: string): Locator {

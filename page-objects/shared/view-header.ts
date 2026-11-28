@@ -31,6 +31,10 @@ export class ViewHeader {
     return this.page.getByRole('button', { name: 'Amend this notification', exact: true });
   }
 
+  get btnCopy(): Locator {
+    return this.page.getByRole('button', { name: 'Copy as new', exact: true });
+  }
+
   get importReferences(): Locator {
     return this.page.getByRole('region', { name: 'Import reference numbers', exact: true });
   }

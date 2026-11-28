@@ -1,6 +1,5 @@
 import { Locator } from '@playwright/test';
 import { BasePage, type OpenOptions } from '@page-objects/shared/base-page';
-import { AMEND_REFUSED_MESSAGE } from '@page-objects/shared/dashboard-copy';
 import { SET_BASES } from '@page-objects/shared/sets';
 
 export class PlantsDashboardPage extends BasePage {
@@ -63,14 +62,12 @@ export class PlantsDashboardPage extends BasePage {
   }
 
   amend(reference: string): Locator {
-    return this.notificationCard(reference).getByRole('button', { name: `Amend notification ${reference}`, exact: true });
+    return this.cardAction(reference, 'Amend');
   }
 
   get deletedBanner(): Locator {
     return this.page.getByRole('alert', { name: 'Notification deleted' });
   }
-
-  readonly amendRefusedMessage = AMEND_REFUSED_MESSAGE;
 
   get emptyState(): Locator {
     return this.page.getByText('You have not started any notifications in this session.');

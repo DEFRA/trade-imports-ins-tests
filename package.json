@@ -58,6 +58,8 @@
     "test:docker-compose:animals-admin:a11y": "npm run test:docker-compose:a11y -- tests/animals-admin/",
     "test:docker-compose:animals-admin:security": "export PROFILE=security && npm run _test_docker_compose_security -- tests/animals-admin/ && npm run _zap_run_and_gate",
     "test:docker-compose:animals-admin:security:active": "export PROFILE=security:active ZAP_SCOPE=animals-admin && npm run _test_docker_compose_security_active -- tests/animals-admin/ && npm run _zap_run_and_gate",
+    "test:docker-compose:animals-dlq": "npm run test:docker-compose -- tests/animals-dlq/",
+    "test:docker-compose:animals-dlq:security:active": "export PROFILE=security:active ZAP_SCOPE=animals-dlq && npm run _test_docker_compose_security_active -- tests/animals-dlq/ && npm run _zap_run_and_gate",
     "test:docker-compose:ins": "npm run test:docker-compose -- tests/ins/",
     "test:docker-compose:ins:cross-browser": "npm run test:docker-compose:cross-browser -- tests/ins/",
     "test:docker-compose:ins:browserstack": "npm run test:docker-compose:browserstack -- tests/ins/",

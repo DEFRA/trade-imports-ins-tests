@@ -1,7 +1,7 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test('the cancel-amendment and delete confirmation pages have no accessibility violations', async ({
+  test('the amend confirmation, Overview, the notification view, the cancel-amendment confirmation, the delete confirmation and the dashboard after deleting have no accessibility violations', async ({
     animalsJourney,
     journeyContext,
     pages,
@@ -12,10 +12,13 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await animalsJourney.submitNotification();
     const { referenceNumber } = journeyContext;
 
-    await test.step('Cancel this amendment?', async () => {
+    await test.step('Amending: the amend confirmation, Overview, the notification view and the cancel-amendment confirmation', async () => {
       await animalsPages.dashboard.open();
       await animalsPages.dashboard.searchForReference(referenceNumber);
       await animalsPages.dashboard.amend(referenceNumber).click();
+      await animalsPages.notificationAmend.heading.waitFor();
+      await runA11yScan();
+      await animalsPages.notificationAmend.confirmAmend.click();
       await animalsPages.notificationView.heading.waitFor();
       await animalsPages.overview.open(referenceNumber);
       await animalsPages.overview.heading.waitFor();
@@ -30,7 +33,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await pages.page.waitForURL(/\/notification-view\?cancelled=1$/);
     });
 
-    await test.step('Amendment cancelled (success banner)', async () => {
+    await test.step('Notification restored to submitted after cancelling', async () => {
       await runA11yScan();
     });
 

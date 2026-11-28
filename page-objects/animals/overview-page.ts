@@ -14,6 +14,14 @@ export class AnimalsOverviewPage extends NotificationPage {
     return this.region('Your commodities');
   }
 
+  get animalsTotalRegion(): Locator {
+    return this.region('Animals summary');
+  }
+
+  get packagesTotalRegion(): Locator {
+    return this.region('Packages summary');
+  }
+
   get sectionRegions(): Locator {
     return this.taskListRegion.getByRole('region');
   }

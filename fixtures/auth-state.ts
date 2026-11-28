@@ -64,6 +64,7 @@ export type AuthTarget = {
 export const AUTH_TARGETS: Record<string, AuthTarget> = {
   animals: { landingPath: '/', landingHeading: (page) => new AnimalsDashboardPage(page).heading },
   'animals-admin': { landingPath: '/', landingHeading: (page) => new AnimalsAdminDashboardPage(page).heading },
+  'animals-dlq': { landingPath: '/', landingHeading: (page) => new AnimalsAdminDashboardPage(page).heading },
   ins: {
     landingPath: '/address-book',
     landingHeading: (page) => new InsAddressBookListPage(page).heading,

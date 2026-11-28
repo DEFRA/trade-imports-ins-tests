@@ -42,6 +42,8 @@ export class AnimalsNotificationActions {
     await this.animalsPages.dashboard.open();
     await this.animalsPages.dashboard.searchForReference(referenceNumber);
     await this.animalsPages.dashboard.amend(referenceNumber).click();
+    await this.animalsPages.notificationAmend.heading.waitFor(pageLoadWait);
+    await this.animalsPages.notificationAmend.confirmAmend.click();
     await this.animalsPages.notificationView.heading.waitFor(pageLoadWait);
   }
 
@@ -61,6 +63,14 @@ export class AnimalsNotificationActions {
     await this.animalsPages.dashboard.open();
     await this.animalsPages.dashboard.searchForReference(referenceNumber);
     await this.animalsPages.dashboard.copyAsNew(referenceNumber).click();
+    await this.animalsPages.overview.heading.waitFor(pageLoadWait);
+    this.context.recordReferenceNumber(this.animalsPages.overview.referenceNumberFromUrl());
+  }
+
+  /** Copies a notification from its own view header, landing on the copy's overview. */
+  async copyFromNotificationView(referenceNumber: string): Promise<void> {
+    await this.toNotificationView(referenceNumber);
+    await this.animalsPages.notificationView.viewHeader.btnCopy.click();
     await this.animalsPages.overview.heading.waitFor(pageLoadWait);
     this.context.recordReferenceNumber(this.animalsPages.overview.referenceNumberFromUrl());
   }

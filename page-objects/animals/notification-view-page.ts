@@ -29,10 +29,6 @@ export class AnimalsNotificationViewPage extends NotificationPage {
     return this.page.getByRole('main').getByRole('heading', { level: 1, name: new RegExp(`^(${reviewHeadings})$`) });
   }
 
-  get btnCopyAsNew(): Locator {
-    return this.page.getByRole('button', { name: 'Copy as new' });
-  }
-
   get btnDelete(): Locator {
     return this.page.getByRole('button', { name: 'Delete', exact: true });
   }

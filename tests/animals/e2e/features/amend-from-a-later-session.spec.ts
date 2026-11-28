@@ -34,7 +34,7 @@ test.describe('Dashboard actions in a later browser session', () => {
     await expect(freshPages.dashboard.cardStatusTag(reference)).toHaveText('Submitted');
   });
 
-  test('tells the user a deleted notification could not be amended', async ({
+  test('choosing Amend on a card whose notification has since been deleted opens the notification list, with no notification banner and the notification no longer listed', async ({
     submitAnimalsNotificationThenOpenFreshSession,
     animalsNotificationActions,
   }) => {
@@ -47,6 +47,9 @@ test.describe('Dashboard actions in a later browser session', () => {
 
     await freshPages.dashboard.amend(reference).click();
 
-    await expect(freshPages.dashboard.importantBanner).toContainText(freshPages.dashboard.amendRefusedMessage);
+    await expect(freshPages.dashboard.heading).toBeVisible();
+    await expect(freshPages.dashboard.importantBanner).toHaveCount(0);
+    await freshPages.dashboard.searchForReference(reference);
+    await expect(freshPages.dashboard.notificationCard(reference)).toHaveCount(0);
   });
 });
